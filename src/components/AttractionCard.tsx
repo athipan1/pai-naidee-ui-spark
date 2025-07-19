@@ -2,6 +2,40 @@ import { useState } from 'react';
 import { Heart, MapPin, Star, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Translation helpers
+const getCategoryNameTh = (category: string): string => {
+  const categories: { [key: string]: string } = {
+    'Beach': 'ชายหาด',
+    'Culture': 'วัฒนธรรม',
+    'Nature': 'ธรรมชาติ',
+    'Food': 'อาหาร',
+    'Mountain': 'ภูเขา',
+    'Temple': 'วัด'
+  };
+  return categories[category] || category;
+};
+
+const getTagNameTh = (tag: string): string => {
+  const tags: { [key: string]: string } = {
+    'Beach': 'ชายหาด',
+    'Snorkeling': 'ดำน้ำดูปะการัง',
+    'Island': 'เกาะ',
+    'Photography': 'ถ่ายรูป',
+    'Temple': 'วัด',
+    'Culture': 'วัฒนธรรม',
+    'Buddhism': 'พุทธศาสนา',
+    'History': 'ประวัติศาสตร์',
+    'Mountain': 'ภูเขา',
+    'Nature': 'ธรรมชาติ',
+    'Hiking': 'เดินป่า',
+    'Waterfalls': 'น้ำตก',
+    'Food': 'อาหาร',
+    'Traditional': 'แบบดั้งเดิม',
+    'Market': 'ตลาด'
+  };
+  return tags[tag] || tag;
+};
+
 interface AttractionCardProps {
   id: string;
   name: string;
@@ -57,7 +91,7 @@ const AttractionCard = ({
         {/* Category badge */}
         <div className="absolute top-3 left-3">
           <span className="px-3 py-1 bg-card/90 backdrop-blur-sm rounded-full text-xs font-medium text-primary border border-border/50">
-            {category}
+            {currentLanguage === 'th' ? getCategoryNameTh(category) : category}
           </span>
         </div>
         
@@ -124,7 +158,7 @@ const AttractionCard = ({
               key={index}
               className="px-2 py-1 bg-accent/50 text-accent-foreground rounded-md text-xs font-medium"
             >
-              {tag}
+              {currentLanguage === 'th' ? getTagNameTh(tag) : tag}
             </span>
           ))}
           {tags.length > 3 && (

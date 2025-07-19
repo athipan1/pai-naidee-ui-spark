@@ -21,48 +21,56 @@ const Index = () => {
       id: '1',
       name: 'Phi Phi Islands',
       nameLocal: 'หมู่เกาะพีพี',
-      province: 'Krabi',
+      province: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
       category: 'Beach',
       rating: 4.8,
       reviewCount: 2547,
       image: heroBeachImage,
-      description: 'Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.',
+      description: currentLanguage === 'th' 
+        ? 'น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง'
+        : 'Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.',
       tags: ['Beach', 'Snorkeling', 'Island', 'Photography']
     },
     {
       id: '2',
       name: 'Wat Phra Kaew',
       nameLocal: 'วัดพระแก้ว',
-      province: 'Bangkok',
+      province: currentLanguage === 'th' ? 'กรุงเทพฯ' : 'Bangkok',
       category: 'Culture',
       rating: 4.9,
       reviewCount: 5243,
       image: templeImage,
-      description: 'The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.',
+      description: currentLanguage === 'th'
+        ? 'วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต'
+        : 'The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.',
       tags: ['Temple', 'Culture', 'Buddhism', 'History']
     },
     {
       id: '3',
       name: 'Doi Inthanon',
       nameLocal: 'ดอยอินทนนท์',
-      province: 'Chiang Mai',
+      province: currentLanguage === 'th' ? 'เชียงใหม่' : 'Chiang Mai',
       category: 'Nature',
       rating: 4.7,
       reviewCount: 1876,
       image: mountainImage,
-      description: 'The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.',
+      description: currentLanguage === 'th'
+        ? 'ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย'
+        : 'The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.',
       tags: ['Mountain', 'Nature', 'Hiking', 'Waterfalls']
     },
     {
       id: '4',
       name: 'Floating Market',
       nameLocal: 'ตลาดน้ำ',
-      province: 'Bangkok',
+      province: currentLanguage === 'th' ? 'กรุงเทพฯ' : 'Bangkok',
       category: 'Food',
       rating: 4.5,
       reviewCount: 3156,
       image: floatingMarketImage,
-      description: 'Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.',
+      description: currentLanguage === 'th'
+        ? 'สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ'
+        : 'Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.',
       tags: ['Food', 'Culture', 'Traditional', 'Market']
     }
   ];
