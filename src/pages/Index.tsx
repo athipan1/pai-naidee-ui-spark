@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import SearchSection from '@/components/SearchSection';
