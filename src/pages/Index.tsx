@@ -94,6 +94,13 @@ const Index = () => {
     );
   };
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === 'explore') {
+      window.location.href = '/explore';
+    }
+  };
+
   const handleCardClick = (id: string) => {
     console.log('Viewing attraction:', id);
     // Navigate to attraction details page
@@ -158,7 +165,7 @@ const Index = () => {
       <BottomNavigation 
         currentLanguage={currentLanguage}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
       />
     </div>
   );
