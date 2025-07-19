@@ -26,7 +26,7 @@ const BottomNavigation = ({ currentLanguage, activeTab, onTabChange }: BottomNav
     {
       id: 'profile',
       label: { th: 'โปรไฟล์', en: 'Profile' },
-      icon: User
+      onTabChange(tab);
     }
   ];
 

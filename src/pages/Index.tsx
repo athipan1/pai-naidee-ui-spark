@@ -1,20 +1,24 @@
 import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import SearchSection from '@/components/SearchSection';
 import CategoryFilter from '@/components/CategoryFilter';
 import AttractionCard from '@/components/AttractionCard';
 import BottomNavigation from '@/components/BottomNavigation';
+import { useNavigate } from 'react-router-dom';
 import templeImage from '@/assets/temple-culture.jpg';
 import mountainImage from '@/assets/mountain-nature.jpg';
 import floatingMarketImage from '@/assets/floating-market.jpg';
 import heroBeachImage from '@/assets/hero-beach.jpg';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [currentLanguage, setCurrentLanguage] = useState<'th' | 'en'>('en');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('home');
   const [favorites, setFavorites] = useState<string[]>([]);
 
+  // Listen for navigation events from BottomNavigation
   // Mock attraction data
   const attractions = [
     {
@@ -97,7 +101,7 @@ const Index = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     if (tab === 'explore') {
-      window.location.href = '/explore';
+      navigate('/explore');
     }
   };
 
