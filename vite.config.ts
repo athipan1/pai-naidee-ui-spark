@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     server: {
-      host: "::",
+      host: "0.0.0.0",
       port: 8080,
     },
     define: {
