@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import heroBeach from '@/assets/hero-beach.jpg';
+import heroBeach from '@/shared/assets/hero-beach.jpg';
 
 interface SearchSectionProps {
   currentLanguage: 'th' | 'en';

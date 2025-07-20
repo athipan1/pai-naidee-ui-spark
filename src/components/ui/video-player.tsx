@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
