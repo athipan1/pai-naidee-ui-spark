@@ -26,15 +26,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "@/components": path.resolve(__dirname, "./src/components"),
-        "@/app": path.resolve(__dirname, "./src/app"),
-        "@/pages": path.resolve(__dirname, "./src/app/pages"),
-        "@/shared": path.resolve(__dirname, "./src/shared"),
-        "@/hooks": path.resolve(__dirname, "./src/shared/hooks"),
-        "@/utils": path.resolve(__dirname, "./src/shared/utils"),
-        "@/assets": path.resolve(__dirname, "./src/shared/assets"),
-        "@/lib": path.resolve(__dirname, "./src/shared/lib"),
-        "@/types": path.resolve(__dirname, "./src/types"),
       },
     },
   }
