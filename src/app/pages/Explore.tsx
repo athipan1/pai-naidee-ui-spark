@@ -30,7 +30,6 @@ interface ExploreProps {
 }
 
 const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [videoPosts, setVideoPosts] = useState<VideoPost[]>([]);
   const [loading, setLoading] = useState(true);
