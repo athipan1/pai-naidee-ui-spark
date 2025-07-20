@@ -1,10 +1,10 @@
 import { createRoot } from 'react-dom/client'
 import { StrictMode, Suspense, lazy } from 'react'
-import LoadingSpinner from './components/LoadingSpinner'
-import './index.css'
+import LoadingSpinner from './components/common/LoadingSpinner'
+import './app/styles/index.css'
 
 // Lazy load the App component for better performance
-const App = lazy(() => import('./App.tsx'))
+const App = lazy(() => import('./app/App.tsx'))
 
 // Get the root element with proper error handling
 const rootElement = document.getElementById('root')

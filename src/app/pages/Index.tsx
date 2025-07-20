@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import Header from '@/components/Header';
-import SearchSection from '@/components/SearchSection';
-import CategoryFilter from '@/components/CategoryFilter';
-import AttractionCard from '@/components/AttractionCard';
-import BottomNavigation from '@/components/BottomNavigation';
+import Header from '@/components/common/Header';
+import SearchSection from '@/components/common/SearchSection';
+import CategoryFilter from '@/components/common/CategoryFilter';
+import AttractionCard from '@/components/common/AttractionCard';
+import BottomNavigation from '@/components/common/BottomNavigation';
 import { useNavigate } from 'react-router-dom';
-import templeImage from '@/assets/temple-culture.jpg';
-import mountainImage from '@/assets/mountain-nature.jpg';
-import floatingMarketImage from '@/assets/floating-market.jpg';
-import heroBeachImage from '@/assets/hero-beach.jpg';
+import templeImage from '@/shared/assets/temple-culture.jpg';
+import mountainImage from '@/shared/assets/mountain-nature.jpg';
+import floatingMarketImage from '@/shared/assets/floating-market.jpg';
+import heroBeachImage from '@/shared/assets/hero-beach.jpg';
 
 const Index = () => {
   const navigate = useNavigate();

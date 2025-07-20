@@ -79,7 +79,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
       {
         id: '1',
         videoUrl: '/placeholder-video.mp4', // In real app, this would be actual video URLs
-        thumbnail: '/src/assets/hero-beach.jpg',
+        thumbnail: '/src/shared/assets/hero-beach.jpg',
         title: 'เกาะสวยน้ำใสที่เกาะพีพี',
         location: 'เกาะพีพี',
         province: 'กระบี่',
@@ -100,7 +100,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
       {
         id: '2',
         videoUrl: '/placeholder-video2.mp4',
-        thumbnail: '/src/assets/temple-culture.jpg',
+        thumbnail: '/src/shared/assets/temple-culture.jpg',
         title: 'วัดสวยๆ ในเชียงใหม่',
         location: 'วัดพระธาตุดอยสุเทพ',
         province: 'เชียงใหม่',
@@ -121,7 +121,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
       {
         id: '3',
         videoUrl: '/placeholder-video3.mp4',
-        thumbnail: '/src/assets/mountain-nature.jpg',
+        thumbnail: '/src/shared/assets/mountain-nature.jpg',
         title: 'ทะเลหมอกสวยๆ ที่ภูทับเบิก',
         location: 'ภูทับเบิก',
         province: 'เพชรบูรณ์',

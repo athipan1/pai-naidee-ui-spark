@@ -7,7 +7,16 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/pages/*": ["./src/app/pages/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/hooks/*": ["./src/shared/hooks/*"],
+      "@/utils/*": ["./src/shared/utils/*"],
+      "@/assets/*": ["./src/shared/assets/*"],
+      "@/lib/*": ["./src/shared/lib/*"],
+      "@/types/*": ["./src/types/*"]
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,
