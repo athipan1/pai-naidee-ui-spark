@@ -126,8 +126,8 @@ export const exploreAPI = {
 };
 
 // Error handling utility
-export const handleAPIError = (error: any): string => {
-  if (error.response?.status === 401) {
+export const handleAPIError = (error: Error): string => {
+  if (error.message.includes("401")) {
     // Redirect to login if unauthorized
     window.location.href = '/login';
     return 'กรุณาเข้าสู่ระบบใหม่';
