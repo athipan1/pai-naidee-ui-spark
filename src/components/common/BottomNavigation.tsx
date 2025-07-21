@@ -1,30 +1,36 @@
 import { Home, Compass, Heart, User } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface BottomNavigationProps {
   currentLanguage: 'th' | 'en';
-  activeTab: string;
-  onTabChange: (tab: string) => void;
 }
 
-const BottomNavigation = ({ currentLanguage, activeTab, onTabChange }: BottomNavigationProps) => {
+const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
+  const location = useLocation();
+  const activeTab = location.pathname;
+
   const tabs = [
     {
       id: 'home',
+      path: '/',
       label: { th: 'หน้าแรก', en: 'Home' },
       icon: Home
     },
     {
       id: 'explore',
+      path: '/explore',
       label: { th: 'สำรวจ', en: 'Explore' },
       icon: Compass
     },
     {
       id: 'favorites',
+      path: '/favorites',
       label: { th: 'รายการโปรด', en: 'Favorites' },
       icon: Heart
     },
     {
       id: 'profile',
+      path: '/profile',
       label: { th: 'โปรไฟล์', en: 'Profile' },
       icon: User
     }
@@ -36,12 +42,12 @@ const BottomNavigation = ({ currentLanguage, activeTab, onTabChange }: BottomNav
         <div className="flex items-center justify-around py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+            const isActive = activeTab === tab.path;
             
             return (
-              <button
+              <Link
                 key={tab.id}
-                onClick={() => onTabChange(tab.id)}
+                to={tab.path}
                 className={`
                   flex flex-col items-center space-y-1 p-2 rounded-xl transition-all duration-300 min-w-[60px]
                   ${isActive 
@@ -61,7 +67,7 @@ const BottomNavigation = ({ currentLanguage, activeTab, onTabChange }: BottomNav
                 {isActive && (
                   <div className="w-1 h-1 bg-primary rounded-full animate-scale-in" />
                 )}
-              </button>
+              </Link>
             );
           })}
         </div>
