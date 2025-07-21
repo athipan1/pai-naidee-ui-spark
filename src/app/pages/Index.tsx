@@ -101,6 +101,8 @@ const Index = () => {
     setActiveTab(tab);
     if (tab === 'explore') {
       navigate('/explore');
+    } else if (tab === 'favorites') {
+      navigate('/favorites');
     }
   };
 
