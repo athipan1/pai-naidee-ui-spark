@@ -3,22 +3,29 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+
   return {
     server: {
       host: "0.0.0.0",
       port: 8080,
+      proxy: {
+        "/api": {
+          target: env.VITE_API_BASE_URL || "http://localhost:5000",
+          changeOrigin: true,
+          secure: false,
+        }
+      }
     },
     define: {
-      'process.env.VITE_API_BASE_URL': JSON.stringify(env.VITE_API_BASE_URL)
+      'process.env': {
+        VITE_API_BASE_URL: JSON.stringify(env.VITE_API_BASE_URL)
+      }
     },
     plugins: [
       react(),
-      // Remove the componentTagger in production builds
-      // mode === 'development' &&
-      // componentTagger(),
+      mode === 'development' && componentTagger(),
     ].filter(Boolean),
     build: {
       outDir: './build'
@@ -28,5 +35,5 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
-  }
+  };
 });
