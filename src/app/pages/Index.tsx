@@ -4,6 +4,8 @@ import SearchSection from '@/components/common/SearchSection';
 import CategoryFilter from '@/components/common/CategoryFilter';
 import AttractionCard from '@/components/common/AttractionCard';
 import BottomNavigation from '@/components/common/BottomNavigation';
+import Explore from './Explore';
+import Favorites from './Favorites';
 import { useNavigate } from 'react-router-dom';
 import templeImage from '@/shared/assets/temple-culture.jpg';
 import mountainImage from '@/shared/assets/mountain-nature.jpg';
@@ -16,6 +18,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('home');
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [currentView, setCurrentView] = useState<'home' | 'explore' | 'favorites'>('home');
 
   // Listen for navigation events from BottomNavigation
   // Mock attraction data
@@ -100,9 +103,11 @@ const Index = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     if (tab === 'explore') {
-      navigate('/explore');
+      setCurrentView('explore');
     } else if (tab === 'favorites') {
-      navigate('/favorites');
+      setCurrentView('favorites');
+    } else if (tab === 'home') {
+      setCurrentView('home');
     }
   };
 
@@ -110,6 +115,31 @@ const Index = () => {
     console.log('Viewing attraction:', id);
     // Navigate to attraction details page
   };
+
+  // Render different views based on currentView state
+  if (currentView === 'explore') {
+    return (
+      <Explore 
+        currentLanguage={currentLanguage} 
+        onBack={() => {
+          setCurrentView('home');
+          setActiveTab('home');
+        }} 
+      />
+    );
+  }
+
+  if (currentView === 'favorites') {
+    return (
+      <Favorites 
+        currentLanguage={currentLanguage} 
+        onBack={() => {
+          setCurrentView('home');
+          setActiveTab('home');
+        }} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
