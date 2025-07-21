@@ -22,10 +22,9 @@ interface FavoriteItem {
 
 interface FavoritesProps {
   currentLanguage: 'th' | 'en';
-  onBack: () => void;
 }
 
-const Favorites = ({ currentLanguage, onBack }: FavoritesProps) => {
+const Favorites = ({ currentLanguage }: FavoritesProps) => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
@@ -359,7 +358,7 @@ const Favorites = ({ currentLanguage, onBack }: FavoritesProps) => {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="icon" onClick={onBack}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className="text-xl font-bold text-foreground">
