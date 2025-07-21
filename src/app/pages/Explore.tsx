@@ -77,7 +77,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
     const mockPosts: VideoPost[] = [
       {
         id: '1',
-        videoUrl: '/placeholder-video.mp4', // In real app, this would be actual video URLs
+        videoUrl: 'https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4', // In real app, this would be actual video URLs
         thumbnail: '/src/shared/assets/hero-beach.jpg',
         title: 'เกาะสวยน้ำใสที่เกาะพีพี',
         location: 'เกาะพีพี',
@@ -98,7 +98,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
       },
       {
         id: '2',
-        videoUrl: '/placeholder-video2.mp4',
+        videoUrl: 'https://videos.pexels.com/video-files/5490235/5490235-hd_1280_720_25fps.mp4',
         thumbnail: '/src/shared/assets/temple-culture.jpg',
         title: 'วัดสวยๆ ในเชียงใหม่',
         location: 'วัดพระธาตุดอยสุเทพ',
@@ -119,7 +119,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
       },
       {
         id: '3',
-        videoUrl: '/placeholder-video3.mp4',
+        videoUrl: 'https://videos.pexels.com/video-files/5898740/5898740-hd_1280_720_25fps.mp4',
         thumbnail: '/src/shared/assets/mountain-nature.jpg',
         title: 'ทะเลหมอกสวยๆ ที่ภูทับเบิก',
         location: 'ภูทับเบิก',
