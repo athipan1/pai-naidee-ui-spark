@@ -181,35 +181,35 @@ const SmartSearchBar = ({
 
   // Mock suggestions for demonstration
   const setMockSuggestions = (searchQuery: string) => {
-    const mockSuggestions: SearchSuggestion[] = [
-      {
-        id: '1',
-        type: 'place',
-        text: currentLanguage === 'th' ? 'เกาะพีพี' : 'Phi Phi Islands',
-        description: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
-        province: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
-        category: 'Beach',
-        confidence: 0.95,
-        image: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=100'
-      },
-      {
-        id: '2',
-        type: 'category',
-        text: currentLanguage === 'th' ? 'ชายหาด' : 'Beach',
-        description: currentLanguage === 'th' ? 'สถานที่ท่องเที่ยวริมทะเล' : 'Coastal destinations',
-        confidence: 0.85
-      },
-      {
-        id: '3',
-        type: 'province',
-        text: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
-        description: currentLanguage === 'th' ? 'จังหวัดในภาคใต้' : 'Southern province',
-        confidence: 0.80
-      }
-    ].filter(s => 
-      s.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+      const mockSuggestions: SearchSuggestion[] = [
+        {
+          id: '1',
+          type: 'place' as const,
+          text: currentLanguage === 'th' ? 'เกาะพีพี' : 'Phi Phi Islands',
+          description: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
+          province: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
+          category: 'Beach',
+          confidence: 0.95,
+          image: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=100'
+        },
+        {
+          id: '2',
+          type: 'category' as const,
+          text: currentLanguage === 'th' ? 'ชายหาด' : 'Beach',
+          description: currentLanguage === 'th' ? 'สถานที่ท่องเที่ยวริมทะเล' : 'Coastal destinations',
+          confidence: 0.85
+        },
+        {
+          id: '3',
+          type: 'province' as const,
+          text: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
+          description: currentLanguage === 'th' ? 'จังหวัดในภาคใต้' : 'Southern province',
+          confidence: 0.80
+        }
+      ].filter(s => 
+        s.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
 
     setSuggestions(mockSuggestions);
   };

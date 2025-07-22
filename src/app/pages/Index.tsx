@@ -132,7 +132,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
 
   const handleCardClick = (id: string) => {
     console.log('Viewing attraction:', id);
-    // Navigate to attraction details page
+    navigate(`/attraction/${id}`);
   };
 
   // Render different views based on currentView state
@@ -152,10 +152,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
     return (
       <Favorites 
         currentLanguage={currentLanguage} 
-        onBack={() => {
-          setCurrentView('home');
-          setActiveTab('home');
-        }} 
       />
     );
   }
@@ -218,8 +214,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
 
       <BottomNavigation 
         currentLanguage={currentLanguage}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
       />
     </div>
   );
