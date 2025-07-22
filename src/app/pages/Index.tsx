@@ -92,6 +92,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       );
 
   const handleSearch = (query: string, results?: any[]) => {
+    // Handle search functionality and navigation
     console.log('Searching for:', query);
     
     // If we have search results from SmartSearchBar, navigate to first result
