@@ -12,9 +12,13 @@ import mountainImage from '@/shared/assets/mountain-nature.jpg';
 import floatingMarketImage from '@/shared/assets/floating-market.jpg';
 import heroBeachImage from '@/shared/assets/hero-beach.jpg';
 
-const Index = () => {
+interface IndexProps {
+  currentLanguage: 'th' | 'en';
+  onLanguageChange: (language: 'th' | 'en') => void;
+}
+
+const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   const navigate = useNavigate();
-  const [currentLanguage, setCurrentLanguage] = useState<'th' | 'en'>('en');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('home');
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -145,7 +149,7 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-20">
       <Header 
         currentLanguage={currentLanguage}
-        onLanguageChange={setCurrentLanguage}
+        onLanguageChange={onLanguageChange}
       />
       
       <SearchSection 
