@@ -24,6 +24,7 @@ const App = () => {
             <Route path="/" element={<Index currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />} />
             <Route path="/explore" element={<Explore currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
             <Route path="/favorites" element={<Favorites currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
+            <Route path="/profile" element={<Index currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
