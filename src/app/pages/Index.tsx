@@ -93,7 +93,22 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
 
   const handleSearch = (query: string) => {
     console.log('Searching for:', query);
-    // Implement search logic here
+    // Filter attractions based on search query
+    const filtered = attractions.filter(attraction => {
+      const searchTerm = query.toLowerCase();
+      const name = (currentLanguage === 'th' && attraction.nameLocal ? attraction.nameLocal : attraction.name).toLowerCase();
+      const province = attraction.province.toLowerCase();
+      const description = attraction.description.toLowerCase();
+      const tags = attraction.tags.join(' ').toLowerCase();
+      
+      return name.includes(searchTerm) || 
+             province.includes(searchTerm) || 
+             description.includes(searchTerm) || 
+             tags.includes(searchTerm);
+    });
+    
+    // Update filtered attractions (you can add state for this)
+    console.log('Filtered results:', filtered);
   };
 
   const handleFavoriteToggle = (id: string) => {

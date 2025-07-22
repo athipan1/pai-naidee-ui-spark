@@ -1,19 +1,17 @@
 import { useState } from 'react';
-import { Search, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SmartSearchBar from './SmartSearchBar';
 import heroBeach from '@/shared/assets/hero-beach.jpg';
 
 interface SearchSectionProps {
   currentLanguage: 'th' | 'en';
-  onSearch: (query: string) => void;
+  onSearch: (query: string, results?: any[]) => void;
 }
 
 const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(searchQuery);
+  const handleSearch = (query: string, results?: any[]) => {
+    onSearch(query, results);
   };
 
   return (
@@ -45,31 +43,17 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
           </p>
 
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="animate-fade-in">
-            <div className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={
-                    currentLanguage === 'th' 
-                      ? 'คุณอยากไปไหน?' 
-                      : 'Where do you want to go?'
-                  }
-                  className="search-input pl-12 h-12 text-base"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="btn-secondary h-12 px-8 whitespace-nowrap"
-              >
-                <MapPin className="w-5 h-5 mr-2" />
-                {currentLanguage === 'th' ? 'ค้นหา' : 'Search'}
-              </Button>
-            </div>
-          </form>
+          <div className="animate-fade-in max-w-2xl mx-auto">
+            <SmartSearchBar
+              currentLanguage={currentLanguage}
+              onSearch={handleSearch}
+              placeholder={
+                currentLanguage === 'th' 
+                  ? 'คุณอยากไปไหน?' 
+                  : 'Where do you want to go?'
+              }
+            />
+          </div>
 
           {/* Quick Search Suggestions */}
           <div className="flex flex-wrap justify-center gap-2 mt-6 animate-fade-in">
@@ -82,7 +66,7 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
             ].map((item, index) => (
               <button
                 key={index}
-                onClick={() => setSearchQuery(currentLanguage === 'th' ? item.th : item.en)}
+                onClick={() => handleSearch(currentLanguage === 'th' ? item.th : item.en)}
                 className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white text-sm font-medium transition-all duration-300 hover:scale-105"
               >
                 {currentLanguage === 'th' ? item.th : item.en}
