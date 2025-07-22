@@ -91,9 +91,17 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         attraction.category.toLowerCase() === selectedCategory.toLowerCase()
       );
 
-  const handleSearch = (query: string) => {
+  const handleSearch = (query: string, results?: any[]) => {
     console.log('Searching for:', query);
-    // Filter attractions based on search query
+    
+    // If we have search results from SmartSearchBar, navigate to first result
+    if (results && results.length > 0) {
+      console.log('Search results found, navigating to:', results[0].id);
+      navigate(`/attraction/${results[0].id}`);
+      return;
+    }
+    
+    // Fallback: Filter local attractions based on search query
     const filtered = attractions.filter(attraction => {
       const searchTerm = query.toLowerCase();
       const name = (currentLanguage === 'th' && attraction.nameLocal ? attraction.nameLocal : attraction.name).toLowerCase();
@@ -107,8 +115,12 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
              tags.includes(searchTerm);
     });
     
-    // Update filtered attractions (you can add state for this)
     console.log('Filtered results:', filtered);
+    
+    // If we found local attractions, navigate to the first one
+    if (filtered.length > 0) {
+      navigate(`/attraction/${filtered[0].id}`);
+    }
   };
 
   const handleFavoriteToggle = (id: string) => {
