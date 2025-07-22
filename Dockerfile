@@ -10,6 +10,10 @@ RUN npm run build
 FROM nginx:1.25-alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+HEALTHCHECK --interval=30s --timeout=5s \
+  CMD wget -q --spider http://localhost || exit 1
+
 USER nginx
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
