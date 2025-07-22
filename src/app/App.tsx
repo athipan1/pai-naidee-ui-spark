@@ -7,6 +7,7 @@ import { useState } from "react";
 import Index from "./pages/Index";
 import Explore from "../app/pages/Explore";
 import Favorites from "../app/pages/Favorites";
+import Profile from "../app/pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,7 +25,7 @@ const App = () => {
             <Route path="/" element={<Index currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />} />
             <Route path="/explore" element={<Explore currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
             <Route path="/favorites" element={<Favorites currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
-            <Route path="/profile" element={<Index currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />} />
+            <Route path="/profile" element={<Profile currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} onBack={() => window.history.back()} />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
