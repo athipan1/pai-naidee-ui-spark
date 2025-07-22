@@ -8,7 +8,8 @@
     "build": "vite build",
     "start": "vite preview --host 0.0.0.0 --port 8080",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:dev": "vite build --mode development"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
