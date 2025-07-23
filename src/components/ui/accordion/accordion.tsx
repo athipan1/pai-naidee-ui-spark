@@ -118,6 +118,7 @@ const Accordion = React.forwardRef<
 >(({ 
   className,
   type = "single",
+  collapsible,
   variant = "default",
   size = "md",
   theme = "light",
@@ -131,6 +132,8 @@ const Accordion = React.forwardRef<
   customIcon,
   iconPosition = "right",
   hideIcon = false,
+  value,
+  defaultValue,
   ...props 
 }, ref) => {
   const [openItems, setOpenItems] = React.useState<string[]>([]);
@@ -180,46 +183,99 @@ const Accordion = React.forwardRef<
 
   // If items are provided, render them dynamically
   if (items && items.length > 0) {
+    if (type === "single") {
+      return (
+        <AccordionPrimitive.Root
+          ref={ref}
+          type="single"
+          collapsible={collapsible}
+          value={value as string}
+          defaultValue={defaultValue as string}
+          className={accordionClasses}
+          onValueChange={handleValueChange}
+          {...props}
+        >
+          {items.map((item) => (
+            <AccordionItem key={item.id} value={item.id} disabled={item.disabled} className={item.className}>
+              <AccordionTrigger
+                customIcon={customIcon}
+                iconPosition={iconPosition}
+                hideIcon={hideIcon}
+                size={size}
+                variant={variant}
+              >
+                {item.title}
+              </AccordionTrigger>
+              <AccordionContent animationType={animationType} animationDuration={animationDuration}>
+                {item.content}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </AccordionPrimitive.Root>
+      );
+    } else {
+      return (
+        <AccordionPrimitive.Root
+          ref={ref}
+          type="multiple"
+          value={value as string[]}
+          defaultValue={defaultValue as string[]}
+          className={accordionClasses}
+          onValueChange={handleValueChange}
+          {...props}
+        >
+          {items.map((item) => (
+            <AccordionItem key={item.id} value={item.id} disabled={item.disabled} className={item.className}>
+              <AccordionTrigger
+                customIcon={customIcon}
+                iconPosition={iconPosition}
+                hideIcon={hideIcon}
+                size={size}
+                variant={variant}
+              >
+                {item.title}
+              </AccordionTrigger>
+              <AccordionContent animationType={animationType} animationDuration={animationDuration}>
+                {item.content}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </AccordionPrimitive.Root>
+      );
+    }
+  }
+
+  // Default children rendering
+  if (type === "single") {
     return (
       <AccordionPrimitive.Root
         ref={ref}
-        type={type === "single" ? "single" : "multiple"}
+        type="single"
+        collapsible={collapsible}
+        value={value as string}
+        defaultValue={defaultValue as string}
         className={accordionClasses}
         onValueChange={handleValueChange}
         {...props}
       >
-        {items.map((item) => (
-          <AccordionItem key={item.id} value={item.id} disabled={item.disabled} className={item.className}>
-            <AccordionTrigger
-              customIcon={customIcon}
-              iconPosition={iconPosition}
-              hideIcon={hideIcon}
-              size={size}
-              variant={variant}
-            >
-              {item.title}
-            </AccordionTrigger>
-            <AccordionContent animationType={animationType} animationDuration={animationDuration}>
-              {item.content}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+        {children}
+      </AccordionPrimitive.Root>
+    );
+  } else {
+    return (
+      <AccordionPrimitive.Root
+        ref={ref}
+        type="multiple"
+        value={value as string[]}
+        defaultValue={defaultValue as string[]}
+        className={accordionClasses}
+        onValueChange={handleValueChange}
+        {...props}
+      >
+        {children}
       </AccordionPrimitive.Root>
     );
   }
-
-  // Default children rendering
-  return (
-    <AccordionPrimitive.Root
-      ref={ref}
-      type={type === "single" ? "single" : "multiple"}
-      className={accordionClasses}
-      onValueChange={handleValueChange}
-      {...props}
-    >
-      {children}
-    </AccordionPrimitive.Root>
-  );
 });
 
 Accordion.displayName = "Accordion";

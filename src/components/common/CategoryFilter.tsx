@@ -1,4 +1,5 @@
 import { Waves, Mountain, Building, Trees, Camera, Utensils } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CategoryFilterProps {
   currentLanguage: 'th' | 'en';
@@ -7,44 +8,64 @@ interface CategoryFilterProps {
 }
 
 const CategoryFilter = ({ currentLanguage, selectedCategory, onCategoryChange }: CategoryFilterProps) => {
+  const navigate = useNavigate();
   const categories = [
     {
       id: 'all',
-      label: { th: 'ทั้งหมด', en: 'All' },
+      labelTh: 'ทั้งหมด',
+      labelEn: 'All',
       icon: Camera,
       color: 'text-accent-purple'
     },
     {
       id: 'beach',
-      label: { th: 'ชายหาด', en: 'Beach' },
+      labelTh: 'ชายหาด',
+      labelEn: 'Beach',
       icon: Waves,
       color: 'text-accent-sky'
     },
     {
       id: 'nature',
-      label: { th: 'ธรรมชาติ', en: 'Nature' },
+      labelTh: 'ธรรมชาติ',
+      labelEn: 'Nature',
       icon: Trees,
       color: 'text-accent-green'
     },
     {
       id: 'culture',
-      label: { th: 'วัฒนธรรม', en: 'Culture' },
+      labelTh: 'วัฒนธรรม',
+      labelEn: 'Culture',
       icon: Building,
       color: 'text-accent-yellow'
     },
     {
       id: 'mountain',
-      label: { th: 'ภูเขา', en: 'Mountain' },
+      labelTh: 'ภูเขา',
+      labelEn: 'Mountain',
       icon: Mountain,
       color: 'text-muted-foreground'
     },
     {
       id: 'food',
-      label: { th: 'อาหาร', en: 'Food' },
+      labelTh: 'อาหาร',
+      labelEn: 'Food',
       icon: Utensils,
       color: 'text-secondary'
     }
   ];
+
+  const handleCategoryClick = (categoryId: string) => {
+    if (categoryId === 'all') {
+      onCategoryChange(categoryId);
+    } else {
+      // Navigate to category page for specific categories
+      const category = categories.find(cat => cat.id === categoryId);
+      if (category) {
+        const categoryName = currentLanguage === 'th' ? category.labelTh : category.labelEn;
+        navigate(`/category/${encodeURIComponent(categoryName)}`);
+      }
+    }
+  };
 
   return (
     <section className="py-8 bg-background">
@@ -61,7 +82,7 @@ const CategoryFilter = ({ currentLanguage, selectedCategory, onCategoryChange }:
             return (
               <button
                 key={category.id}
-                onClick={() => onCategoryChange(category.id)}
+                onClick={() => handleCategoryClick(category.id)}
                 className={`
                   flex-shrink-0 flex flex-col items-center p-4 rounded-2xl min-w-[100px] 
                   transition-all duration-300 hover:scale-105 active:scale-95
@@ -81,7 +102,7 @@ const CategoryFilter = ({ currentLanguage, selectedCategory, onCategoryChange }:
                   <Icon className={`w-6 h-6 ${isActive ? 'text-white' : category.color}`} />
                 </div>
                 <span className="text-sm font-medium text-center">
-                  {category.label[currentLanguage]}
+                  {currentLanguage === 'th' ? category.labelTh : category.labelEn}
                 </span>
               </button>
             );

@@ -17,6 +17,7 @@ export interface AccordionItemData {
 
 export interface AccordionProps {
   type?: AccordionType;
+  collapsible?: boolean;
   variant?: AccordionVariant;
   size?: AccordionSize;
   theme?: AccordionTheme;

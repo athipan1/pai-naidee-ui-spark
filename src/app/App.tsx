@@ -10,6 +10,7 @@ import Explore from "../app/pages/Explore";
 import Favorites from "../app/pages/Favorites";
 import Profile from "../app/pages/Profile";
 import AttractionDetail from "./pages/AttractionDetail";
+import CategoryPage from "./pages/CategoryPage";
 import AccordionExamples from "./pages/AccordionExamples";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => {
               <Route path="/favorites" element={<Favorites currentLanguage={currentLanguage} />} />
               <Route path="/profile" element={<Profile currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} onBack={() => window.history.back()} />} />
               <Route path="/attraction/:id" element={<AttractionDetail currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
+              <Route path="/category/:categoryName" element={<CategoryPage currentLanguage={currentLanguage} />} />
               <Route path="/accordion-examples" element={<AccordionExamples />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
