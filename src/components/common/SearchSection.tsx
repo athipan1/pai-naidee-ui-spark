@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SmartSearchBar from './SmartSearchBar';
+import { SearchResult } from '@/shared/utils/searchAPI';
 import heroBeach from '@/shared/assets/hero-beach.jpg';
 
 interface SearchSectionProps {
   currentLanguage: 'th' | 'en';
-  onSearch: (query: string, results?: any[]) => void;
+  onSearch: (query: string, results?: SearchResult[]) => void;
 }
 
 const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
-  const handleSearch = (query: string, results?: any[]) => {
+  const handleSearch = (query: string, results?: SearchResult[]) => {
     onSearch(query, results);
   };
 
