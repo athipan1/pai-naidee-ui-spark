@@ -44,7 +44,7 @@ const createAuthHeaders = (): HeadersInit => {
 };
 
 // Generic API call with auto-refresh token
-const apiCall = async (endpoint: string, options: RequestInit = {}, retry = true): Promise<any> => {
+const apiCall = async <T = unknown>(endpoint: string, options: RequestInit = {}, retry = true): Promise<T> => {
   let token = getAuthToken();
   if (token && isTokenExpired(token)) {
     // Try to refresh token

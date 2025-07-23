@@ -7,10 +7,24 @@ import BottomNavigation from '@/components/common/BottomNavigation';
 import Explore from './Explore';
 import Favorites from './Favorites';
 import { useNavigate } from 'react-router-dom';
+import { SearchResult } from '@/shared/utils/searchAPI';
 import templeImage from '@/shared/assets/temple-culture.jpg';
 import mountainImage from '@/shared/assets/mountain-nature.jpg';
 import floatingMarketImage from '@/shared/assets/floating-market.jpg';
 import heroBeachImage from '@/shared/assets/hero-beach.jpg';
+
+interface Attraction {
+  id: string;
+  name: string;
+  nameLocal: string;
+  province: string;
+  category: string;
+  rating: number;
+  reviewCount: number;
+  image: string;
+  description: string;
+  tags: string[];
+}
 
 interface IndexProps {
   currentLanguage: 'th' | 'en';
@@ -91,7 +105,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         attraction.category.toLowerCase() === selectedCategory.toLowerCase()
       );
 
-  const handleSearch = (query: string, results?: any[]) => {
+  const handleSearch = (query: string, results?: SearchResult[]) => {
     // Handle search functionality and navigation
     console.log('Searching for:', query);
     
