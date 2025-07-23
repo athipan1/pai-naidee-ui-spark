@@ -102,7 +102,7 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
 
   const t = content[currentLanguage];
 
-  // Fetch attraction details
+  // Load attraction details with mock data (fixed)
   useEffect(() => {
     const fetchAttractionDetail = async () => {
       if (!id) return;
@@ -126,7 +126,7 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
             '/src/shared/assets/mountain-nature.jpg'
           ],
           description: currentLanguage === 'th' 
-            ? 'น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการั' 
+            ? 'น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง'
             : 'Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.',
           tags: ['Beach', 'Snorkeling', 'Island', 'Photography'],
           rooms: [
