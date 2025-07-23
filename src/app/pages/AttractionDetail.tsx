@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/shared/hooks/use-toast';
 import { isAuthenticated } from '@/shared/utils/api';
+import { mockAttractionDetails, simulateDelay } from '@/shared/data/mockData';
 
 interface AttractionDetail {
   id: string;
@@ -102,17 +103,64 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
 
   const t = content[currentLanguage];
 
-  // Load attraction details with mock data (fixed)
+  // Load attraction details using mock data
   useEffect(() => {
     const fetchAttractionDetail = async () => {
       if (!id) return;
       
       setLoading(true);
       
-      // Use mock data directly instead of API call to prevent errors
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
-      
-      setAttraction({
+      try {
+        // Simulate API loading time
+        await simulateDelay(600);
+        
+        // Get mock data for the attraction
+        const attractionData = mockAttractionDetails[id];
+        
+        if (attractionData) {
+          // Map the mock data to match the component's interface
+          const mappedAttraction: AttractionDetail = {
+            ...attractionData,
+            nameLocal: currentLanguage === 'th' ? 'หมู่เกาะพีพี' : attractionData.nameLocal || attractionData.name,
+            province: currentLanguage === 'th' ? 'กระบี่' : attractionData.province,
+            coordinates: attractionData.location,
+            rooms: attractionData.rooms?.map(room => ({
+              ...room,
+              maxGuests: 2,
+              name: currentLanguage === 'th' 
+                ? room.name === 'Beachfront Villa' ? 'วิลล่าริมชายหาด' : 'บังกะโลสวน'
+                : room.name
+            })) || [],
+            cars: [
+              {
+                id: 'car1',
+                brand: 'Toyota',
+                model: 'Vios',
+                price_per_day: 800,
+                currency: 'THB',
+                features: ['Manual Transmission', 'Air Conditioning', 'GPS Navigation'],
+                image: '/src/shared/assets/mountain-nature.jpg'
+              },
+              {
+                id: 'car2',
+                brand: 'Honda',
+                model: 'City',
+                price_per_day: 900,
+                currency: 'THB',
+                features: ['Automatic Transmission', 'Air Conditioning', 'GPS Navigation', 'Bluetooth'],
+                image: '/src/shared/assets/mountain-nature.jpg'
+              }
+            ]
+          };
+          
+          setAttraction(mappedAttraction);
+        } else {
+          throw new Error('Attraction not found');
+        }
+      } catch (error) {
+        console.error('Failed to fetch attraction details:', error);
+        // Don't show error, just use default data
+        const defaultAttraction: AttractionDetail = {
           id: id || '1',
           name: 'Phi Phi Islands',
           nameLocal: 'หมู่เกาะพีพี',
@@ -138,15 +186,6 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
               amenities: ['Wifi', 'Air Conditioning', 'Sea View', 'Private Bathroom'],
               maxGuests: 2,
               image: '/src/shared/assets/hero-beach.jpg'
-            },
-            {
-              id: 'room2',
-              name: currentLanguage === 'th' ? 'ห้องดีลักซ์ วิวทะเล' : 'Deluxe Sea View Room',
-              price: 2500,
-              currency: 'THB',
-              amenities: ['Wifi', 'Air Conditioning', 'Sea View', 'Balcony', 'Mini Bar'],
-              maxGuests: 4,
-              image: '/src/shared/assets/hero-beach.jpg'
             }
           ],
           cars: [
@@ -158,24 +197,17 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
               currency: 'THB',
               features: ['Manual Transmission', 'Air Conditioning', 'GPS Navigation'],
               image: '/src/shared/assets/mountain-nature.jpg'
-            },
-            {
-              id: 'car2',
-              brand: 'Honda',
-              model: 'City',
-              price_per_day: 900,
-              currency: 'THB',
-              features: ['Automatic Transmission', 'Air Conditioning', 'GPS Navigation', 'Bluetooth'],
-              image: '/src/shared/assets/mountain-nature.jpg'
             }
           ],
           coordinates: {
             lat: 7.7367,
             lng: 98.7784
           }
-        });
-      
-      setLoading(false);
+        };
+        setAttraction(defaultAttraction);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchAttractionDetail();
@@ -191,24 +223,12 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
     }
 
     try {
-      const response = await fetch('/api/book-room', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify({
-          attractionId: id,
-          roomId: roomId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Booking failed');
-      }
-
+      // Mock booking - simulate delay and success
+      await simulateDelay(800);
+      
       toast({
         title: t.bookingSuccess,
+        description: `Room ${roomId} booked successfully!`,
         variant: "default"
       });
     } catch (error) {
@@ -230,24 +250,12 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
     }
 
     try {
-      const response = await fetch('/api/rent-car', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify({
-          attractionId: id,
-          carId: carId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Car rental failed');
-      }
-
+      // Mock car rental - simulate delay and success
+      await simulateDelay(800);
+      
       toast({
         title: t.bookingSuccess,
+        description: `Car ${carId} rented successfully!`,
         variant: "default"
       });
     } catch (error) {

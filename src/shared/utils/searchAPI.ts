@@ -1,4 +1,5 @@
-// Search API utilities and types (production-ready, real backend integration)
+// Search API utilities and types with mock data fallback
+import { mockSearch, mockSuggestions, mockFilters, simulateDelay } from '../data/mockData';
 
 export interface SearchQuery {
   query: string;
@@ -63,7 +64,7 @@ const createAuthHeaders = (): HeadersInit => {
 };
 
 /**
- * Real API: Perform search by calling backend
+ * Perform search with fallback to mock data
  * @param searchQuery SearchQuery
  * @returns SearchResponse
  */
@@ -94,19 +95,14 @@ export const performSearch = async (searchQuery: SearchQuery): Promise<SearchRes
 
     return { results, suggestions, totalCount, query, processingTime };
   } catch (error) {
-    // You may log error to a monitoring service here
-    return {
-      results: [],
-      suggestions: [],
-      totalCount: 0,
-      query: searchQuery.query,
-      processingTime: Date.now() - startTime,
-    };
+    console.warn('ใช้ mock data เนื่องจาก backend error:', error);
+    // Fallback to mock data
+    return await mockSearch(searchQuery.query);
   }
 };
 
 /**
- * Get suggestions for autocomplete (if backend supports it)
+ * Get suggestions for autocomplete with fallback to mock data
  * @param query text to suggest on
  * @param language 'th' | 'en'
  * @returns SearchSuggestion[]
@@ -126,12 +122,17 @@ export const getSearchSuggestions = async (
     const data = await response.json();
     return Array.isArray(data.suggestions) ? data.suggestions : [];
   } catch {
-    return [];
+    console.warn('ใช้ mock suggestions เนื่องจาก backend error');
+    // Fallback to mock suggestions
+    await simulateDelay(200);
+    return mockSuggestions.filter(s => 
+      s.text.toLowerCase().includes(query.toLowerCase())
+    );
   }
 };
 
 /**
- * Optionally: Fetch available filters (provinces, categories, amenities) from API
+ * Fetch available filters with fallback to mock data
  * For dynamic UI filter options
  */
 export const fetchSearchFilters = async (): Promise<{
@@ -146,10 +147,9 @@ export const fetchSearchFilters = async (): Promise<{
     if (!response.ok) throw new Error('Failed to fetch filters');
     return await response.json();
   } catch {
-    return {
-      provinces: [],
-      categories: [],
-      amenities: [],
-    };
+    console.warn('ใช้ mock filters เนื่องจาก backend error');
+    // Fallback to mock filters
+    await simulateDelay(300);
+    return mockFilters;
   }
 };

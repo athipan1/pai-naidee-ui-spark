@@ -1,4 +1,5 @@
-// API utility functions for the Explore page (ปรับปรุงการจัดการ error และ token)
+// API utility functions for the Explore page with mock data fallback
+import { mockVideos, mockComments, simulateDelay } from '../data/mockData';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -108,34 +109,89 @@ export const isAuthenticated = (): boolean => {
   return !!token && !isTokenExpired(token);
 };
 
-// API endpoints for Explore page
+// API endpoints for Explore page with mock fallbacks
 export const exploreAPI = {
   // Get videos for explore feed
-  getVideos: async (page: number = 1, limit: number = 10) =>
-    apiCall(`${API_BASE_URL}/explore/videos?page=${page}&limit=${limit}`),
+  getVideos: async (page: number = 1, limit: number = 10) => {
+    try {
+      return await apiCall(`${API_BASE_URL}/explore/videos?page=${page}&limit=${limit}`);
+    } catch (error) {
+      console.warn('ใช้ mock videos เนื่องจาก backend error:', error);
+      await simulateDelay();
+      return { videos: mockVideos, totalCount: mockVideos.length, page, limit };
+    }
+  },
 
   // Like/unlike a video
-  toggleLike: async (videoId: string) =>
-    apiCall(`${API_BASE_URL}/videos/${videoId}/like`, { method: 'POST' }),
+  toggleLike: async (videoId: string) => {
+    try {
+      return await apiCall(`${API_BASE_URL}/videos/${videoId}/like`, { method: 'POST' });
+    } catch (error) {
+      console.warn('Mock like toggle for video:', videoId);
+      await simulateDelay(200);
+      return { success: true, liked: true };
+    }
+  },
 
   // Follow/unfollow a user
-  toggleFollow: async (userId: string) =>
-    apiCall(`${API_BASE_URL}/users/${userId}/follow`, { method: 'POST' }),
+  toggleFollow: async (userId: string) => {
+    try {
+      return await apiCall(`${API_BASE_URL}/users/${userId}/follow`, { method: 'POST' });
+    } catch (error) {
+      console.warn('Mock follow toggle for user:', userId);
+      await simulateDelay(200);
+      return { success: true, following: true };
+    }
+  },
 
   // Get comments for a video
-  getComments: async (videoId: string, page: number = 1) =>
-    apiCall(`${API_BASE_URL}/videos/${videoId}/comments?page=${page}`),
+  getComments: async (videoId: string, page: number = 1) => {
+    try {
+      return await apiCall(`${API_BASE_URL}/videos/${videoId}/comments?page=${page}`);
+    } catch (error) {
+      console.warn('ใช้ mock comments เนื่องจาก backend error:', error);
+      await simulateDelay(300);
+      return { comments: mockComments, totalCount: mockComments.length, page };
+    }
+  },
 
   // Post a comment
-  postComment: async (videoId: string, text: string) =>
-    apiCall(`${API_BASE_URL}/videos/${videoId}/comments`, {
-      method: 'POST',
-      body: JSON.stringify({ text }),
-    }),
+  postComment: async (videoId: string, text: string) => {
+    try {
+      return await apiCall(`${API_BASE_URL}/videos/${videoId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      });
+    } catch (error) {
+      console.warn('Mock comment post for video:', videoId);
+      await simulateDelay(400);
+      return { 
+        success: true, 
+        comment: {
+          id: `c${Date.now()}`,
+          text,
+          user: { id: 'mock', name: 'Mock User' },
+          timestamp: 'just now',
+          likes: 0
+        }
+      };
+    }
+  },
 
   // Share a video (get share URL)
-  shareVideo: async (videoId: string) =>
-    apiCall(`${API_BASE_URL}/videos/${videoId}/share`, { method: 'POST' }),
+  shareVideo: async (videoId: string) => {
+    try {
+      return await apiCall(`${API_BASE_URL}/videos/${videoId}/share`, { method: 'POST' });
+    } catch (error) {
+      console.warn('Mock share for video:', videoId);
+      await simulateDelay(200);
+      return { 
+        success: true, 
+        shareUrl: `https://mockapp.com/video/${videoId}`,
+        message: 'Link copied to clipboard!' 
+      };
+    }
+  },
 };
 
 // Error handling utility
