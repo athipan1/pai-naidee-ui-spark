@@ -44,7 +44,7 @@ export const mockAttractions: SearchResult[] = [
     rating: 4.7,
     reviewCount: 1856,
     image: '/src/shared/assets/mountain-nature.jpg',
-    description: 'Thailand\'s highest peak offering stunning mountain views, waterfalls, and diverse wildlife.',
+    description: "Thailand's highest peak offering stunning mountain views, waterfalls, and diverse wildlife.",
     confidence: 0.92,
     matchedTerms: ['mountain', 'nature', 'doi inthanon'],
     amenities: ['Hiking Trails', 'Visitor Center', 'Parking', 'Restrooms'],
