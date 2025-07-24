@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import Explore from "../app/pages/Explore";
 import Favorites from "../app/pages/Favorites";
 import Profile from "../app/pages/Profile";
-import AttractionDetail from "./pages/AttractionDetail";
+import AttractionDetail from "./pages/AttractionDetailSimple";
 import CategoryPage from "./pages/CategoryPage";
 import AccordionExamples from "./pages/AccordionExamples";
 import NotFound from "./pages/NotFound";
