@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BackButton } from '@/components/attraction/BackButton';
-import { ImageGallery } from '@/components/attraction/ImageGallery';
 import { PlaceDetails } from '@/components/attraction/PlaceDetails';
 import { ActionButtons } from '@/components/attraction/ActionButtons';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -142,12 +141,16 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
       />
 
       <div className="container mx-auto px-4 py-6 space-y-8 max-w-4xl">
-        {/* Image Gallery */}
-        <ImageGallery
-          images={attraction.images}
-          title={attraction.name}
-          className="mt-16 md:mt-20"
-        />
+        {/* Simple Image Display */}
+        <div className="mt-16 md:mt-20">
+          <div className="relative aspect-[16/10] overflow-hidden rounded-lg">
+            <img
+              src={`https://images.unsplash.com/${attraction.images[0]}?w=800&h=500&fit=crop`}
+              alt={attraction.name}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </div>
 
         {/* Place Details */}
         <PlaceDetails

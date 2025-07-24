@@ -1,7 +1,6 @@
 import { Star, Clock, MapPin, Phone, Globe, Camera } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 interface PlaceDetailsProps {
   name: string;

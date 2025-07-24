@@ -1,6 +1,5 @@
 import { Navigation, Plus, Share2, Heart, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/shared/hooks/use-toast";
 import { useState } from "react";
 
 interface ActionButtonsProps {
@@ -12,7 +11,6 @@ interface ActionButtonsProps {
 
 export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: ActionButtonsProps) {
   const [isFavorited, setIsFavorited] = useState(false);
-  const { toast } = useToast();
 
   const handleNavigate = () => {
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
@@ -28,27 +26,15 @@ export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: A
           url: window.location.href,
         });
       } catch (error) {
-        // Fallback to clipboard
-        fallbackShare();
+        console.log('Share failed, falling back to clipboard');
       }
     } else {
-      fallbackShare();
-    }
-  };
-
-  const fallbackShare = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      toast({
-        title: "คัดลอกลิงก์แล้ว!",
-        description: "ลิงก์ถูกคัดลอกไปยังคลิปบอร์ดแล้ว",
-      });
-    } catch (error) {
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถแชร์ได้ในขณะนี้",
-        variant: "destructive",
-      });
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('คัดลอกลิงก์แล้ว!');
+      } catch (error) {
+        alert('ไม่สามารถแชร์ได้ในขณะนี้');
+      }
     }
   };
 
@@ -56,20 +42,12 @@ export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: A
     if (onAddToPlan) {
       onAddToPlan();
     }
-    toast({
-      title: "เพิ่มลงแผนการเดินทางแล้ว!",
-      description: `${placeName} ถูกเพิ่มลงในแผนการเดินทางของคุณ`,
-    });
+    alert(`เพิ่ม ${placeName} ลงในแผนการเดินทางแล้ว!`);
   };
 
   const handleToggleFavorite = () => {
     setIsFavorited(!isFavorited);
-    toast({
-      title: isFavorited ? "ลบออกจากรายการโปรด" : "เพิ่มลงรายการโปรด",
-      description: isFavorited 
-        ? `ลบ ${placeName} ออกจากรายการโปรดแล้ว`
-        : `เพิ่ม ${placeName} ลงในรายการโปรดแล้ว`,
-    });
+    alert(isFavorited ? `ลบ ${placeName} ออกจากรายการโปรดแล้ว` : `เพิ่ม ${placeName} ลงในรายการโปรดแล้ว`);
   };
 
   const handleViewMap = () => {
