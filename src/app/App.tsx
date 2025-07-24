@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import Explore from "../app/pages/Explore";
 import Favorites from "../app/pages/Favorites";
 import Profile from "../app/pages/Profile";
-
+import AttractionDetailNew from "./pages/AttractionDetailNew";
 import CategoryPage from "./pages/CategoryPage";
 import AccordionExamples from "./pages/AccordionExamples";
 import NotFound from "./pages/NotFound";
@@ -31,18 +31,7 @@ const App = () => {
               <Route path="/explore" element={<Explore currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
               <Route path="/favorites" element={<Favorites currentLanguage={currentLanguage} />} />
               <Route path="/profile" element={<Profile currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} onBack={() => window.history.back()} />} />
-              <Route path="/attraction/:id" element={
-                <div style={{ padding: '20px' }}>
-                  <h1>หมู่เกาะพีพี</h1>
-                  <p>สถานที่ท่องเที่ยวที่สวยงาม</p>
-                  <button 
-                    onClick={() => window.location.href = '/'} 
-                    style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px' }}
-                  >
-                    กลับหน้าหลัก
-                  </button>
-                </div>
-              } />
+              <Route path="/attraction/:id" element={<AttractionDetailNew currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
               <Route path="/category/:categoryName" element={<CategoryPage currentLanguage={currentLanguage} />} />
               <Route path="/accordion-examples" element={<AccordionExamples />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
