@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/shared/lib/utils';
-// import { apiClient } from '@/shared/utils/apiClient';
+
 import type { SearchSuggestion, SearchResult } from '@/shared/utils/searchAPI';
 
 interface SmartSearchBarProps {
