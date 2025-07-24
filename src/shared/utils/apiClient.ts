@@ -2,6 +2,7 @@
 // API Client with Mock/Real API switching capability
 import { mockAttractions, mockSuggestions, mockFilters, mockVideos, mockComments, mockAttractionDetails, simulateDelay, mockSearch } from '../data/mockData';
 import type { SearchQuery, SearchResult, SearchSuggestion, SearchResponse } from './searchAPI';
+import heroBeachImage from '../assets/hero-beach.jpg';
 
 // Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -224,7 +225,7 @@ class ApiClient {
         comment: {
           id: `c${Date.now()}`,
           text,
-          user: { id: 'mock', name: 'Mock User', avatar: '/src/shared/assets/hero-beach.jpg' },
+          user: { id: 'mock', name: 'Mock User', avatar: heroBeachImage },
           timestamp: 'just now',
           likes: 0
         }
@@ -248,7 +249,7 @@ class ApiClient {
         comment: {
           id: `c${Date.now()}`,
           text,
-          user: { id: 'mock', name: 'Mock User', avatar: '/src/shared/assets/hero-beach.jpg' },
+          user: { id: 'mock', name: 'Mock User', avatar: heroBeachImage },
           timestamp: 'just now',
           likes: 0
         }
