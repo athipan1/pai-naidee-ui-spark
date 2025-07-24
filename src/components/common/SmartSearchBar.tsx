@@ -1,38 +1,14 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, Tag, Filter, X, Clock, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/shared/lib/utils';
-
-interface SearchSuggestion {
-  id: string;
-  type: 'place' | 'province' | 'category' | 'tag' | 'phrase';
-  text: string;
-  description?: string;
-  province?: string;
-  category?: string;
-  confidence: number;
-  image?: string;
-}
-
-interface SearchResult {
-  id: string;
-  name: string;
-  nameLocal?: string;
-  province: string;
-  category: string;
-  tags: string[];
-  rating: number;
-  reviewCount: number;
-  image: string;
-  description: string;
-  confidence: number;
-  matchedTerms: string[];
-}
+import { apiClient } from '@/shared/utils/apiClient';
+import type { SearchSuggestion, SearchResult } from '@/shared/utils/searchAPI';
 
 interface SmartSearchBarProps {
   currentLanguage: 'th' | 'en';
@@ -103,7 +79,7 @@ const SmartSearchBar = ({
 
   const t = content[currentLanguage];
 
-  // Mock data for demonstration
+  // Mock trending searches
   const mockTrendingSearches = [
     currentLanguage === 'th' ? 'เกาะพีพี' : 'Phi Phi Islands',
     currentLanguage === 'th' ? 'วัดพระแก้ว' : 'Wat Phra Kaew',
@@ -138,9 +114,8 @@ const SmartSearchBar = ({
     [selectedFilters]
   );
 
-  // Fetch suggestions from API
+  // Fetch suggestions using API client
   const fetchSuggestions = async (searchQuery: string) => {
-    // Cancel previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -149,95 +124,28 @@ const SmartSearchBar = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/search/suggestions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: searchQuery,
-          language: currentLanguage,
-          filters: selectedFilters
-        }),
-        signal: abortControllerRef.current.signal
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch suggestions');
-      }
-
-      const data = await response.json();
-      setSuggestions(data.suggestions || []);
+      const suggestions = await apiClient.getSearchSuggestions(searchQuery, currentLanguage);
+      setSuggestions(suggestions);
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.error('Error fetching suggestions:', error);
-        // Fallback to mock suggestions
-        setMockSuggestions(searchQuery);
-      }
+      console.error('Error fetching suggestions:', error);
+      setSuggestions([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Mock suggestions for demonstration
-  const setMockSuggestions = (searchQuery: string) => {
-      const mockSuggestions: SearchSuggestion[] = [
-        {
-          id: '1',
-          type: 'place' as const,
-          text: currentLanguage === 'th' ? 'เกาะพีพี' : 'Phi Phi Islands',
-          description: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
-          province: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
-          category: 'Beach',
-          confidence: 0.95,
-          image: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=100'
-        },
-        {
-          id: '2',
-          type: 'category' as const,
-          text: currentLanguage === 'th' ? 'ชายหาด' : 'Beach',
-          description: currentLanguage === 'th' ? 'สถานที่ท่องเที่ยวริมทะเล' : 'Coastal destinations',
-          confidence: 0.85
-        },
-        {
-          id: '3',
-          type: 'province' as const,
-          text: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
-          description: currentLanguage === 'th' ? 'จังหวัดในภาคใต้' : 'Southern province',
-          confidence: 0.80
-        }
-      ].filter(s => 
-        s.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-
-    setSuggestions(mockSuggestions);
-  };
-
-  // Perform full search
+  // Perform full search using API client
   const performSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
     
     try {
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: searchQuery,
-          language: currentLanguage,
-          filters: selectedFilters
-        })
+      const response = await apiClient.performSearch({
+        query: searchQuery,
+        language: currentLanguage,
+        filters: selectedFilters
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to perform search');
-      }
-
-      const data = await response.json();
       
       // Save to recent searches
       const updatedRecentSearches = [
@@ -248,29 +156,10 @@ const SmartSearchBar = ({
       setRecentSearches(updatedRecentSearches);
       localStorage.setItem('recentSearches', JSON.stringify(updatedRecentSearches));
       
-      onSearch(searchQuery, data.results || []);
+      onSearch(searchQuery, response.results);
     } catch (error) {
       console.error('Error performing search:', error);
-      // Fallback to mock results
-      const mockResults: SearchResult[] = [
-        {
-          id: '1',
-          name: 'Phi Phi Islands',
-          nameLocal: 'เกาะพีพี',
-          province: currentLanguage === 'th' ? 'กระบี่' : 'Krabi',
-          category: 'Beach',
-          tags: ['Beach', 'Snorkeling', 'Island'],
-          rating: 4.8,
-          reviewCount: 2547,
-          image: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400',
-          description: currentLanguage === 'th' 
-            ? 'น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม'
-            : 'Crystal clear waters and stunning limestone cliffs',
-          confidence: 0.95,
-          matchedTerms: [searchQuery]
-        }
-      ];
-      onSearch(searchQuery, mockResults);
+      onSearch(searchQuery, []);
     } finally {
       setIsLoading(false);
       setShowSuggestions(false);
@@ -343,12 +232,6 @@ const SmartSearchBar = ({
       case 'tag': return <Tag className="w-4 h-4" />;
       default: return <Search className="w-4 h-4" />;
     }
-  };
-
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.9) return 'text-green-600';
-    if (confidence >= 0.7) return 'text-yellow-600';
-    return 'text-red-600';
   };
 
   return (
@@ -523,11 +406,6 @@ const SmartSearchBar = ({
                   <Search className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">{t.noSuggestions}</p>
                 </div>
-              )}
-
-              {/* Separator */}
-              {((recentSearches.length > 0 && !query) || (query && suggestions.length > 0)) && (
-                <Separator />
               )}
             </ScrollArea>
           </CardContent>

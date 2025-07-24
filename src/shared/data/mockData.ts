@@ -1,3 +1,4 @@
+
 // Mock data for development and fallback scenarios
 import type { SearchResult, SearchSuggestion, SearchResponse } from '../utils/searchAPI';
 
@@ -175,7 +176,7 @@ export const mockComments = [
   },
   {
     id: 'c2',
-    text: 'Amazing place! Can\'t wait to visit',
+    text: 'Amazing place! Cannot wait to visit',
     user: {
       id: 'u4',
       name: 'Adventure Seeker',
