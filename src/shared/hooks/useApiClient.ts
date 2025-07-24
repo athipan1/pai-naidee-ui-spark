@@ -1,18 +1,40 @@
 
-import { useState, useCallback } from 'react';
-import { apiClient, switchToMockApi, switchToRealApi, getCurrentApiMode } from '../utils/apiClient';
+import { useState, useCallback, useEffect } from 'react';
 
 export const useApiClient = () => {
-  const [currentMode, setCurrentMode] = useState<string>(getCurrentApiMode());
+  const [currentMode, setCurrentMode] = useState<string>('Mock API');
 
-  const switchToMock = useCallback(() => {
-    switchToMockApi();
-    setCurrentMode('Mock API');
+  useEffect(() => {
+    // Delay the import to avoid circular dependencies
+    const initializeMode = async () => {
+      try {
+        const { getCurrentApiMode } = await import('../utils/apiClient');
+        setCurrentMode(getCurrentApiMode());
+      } catch (error) {
+        console.error('Failed to initialize API mode:', error);
+      }
+    };
+    initializeMode();
   }, []);
 
-  const switchToReal = useCallback(() => {
-    switchToRealApi();
-    setCurrentMode('Real API');
+  const switchToMock = useCallback(async () => {
+    try {
+      const { switchToMockApi } = await import('../utils/apiClient');
+      switchToMockApi();
+      setCurrentMode('Mock API');
+    } catch (error) {
+      console.error('Failed to switch to mock API:', error);
+    }
+  }, []);
+
+  const switchToReal = useCallback(async () => {
+    try {
+      const { switchToRealApi } = await import('../utils/apiClient');
+      switchToRealApi();
+      setCurrentMode('Real API');
+    } catch (error) {
+      console.error('Failed to switch to real API:', error);
+    }
   }, []);
 
   const toggleApiMode = useCallback(() => {
@@ -24,7 +46,6 @@ export const useApiClient = () => {
   }, [currentMode, switchToMock, switchToReal]);
 
   return {
-    apiClient,
     currentMode,
     switchToMock,
     switchToReal,
