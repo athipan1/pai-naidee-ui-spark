@@ -224,7 +224,7 @@ class ApiClient {
         comment: {
           id: `c${Date.now()}`,
           text,
-          user: { id: 'mock', name: 'Mock User' },
+          user: { id: 'mock', name: 'Mock User', avatar: '/src/shared/assets/hero-beach.jpg' },
           timestamp: 'just now',
           likes: 0
         }
@@ -248,7 +248,7 @@ class ApiClient {
         comment: {
           id: `c${Date.now()}`,
           text,
-          user: { id: 'mock', name: 'Mock User' },
+          user: { id: 'mock', name: 'Mock User', avatar: '/src/shared/assets/hero-beach.jpg' },
           timestamp: 'just now',
           likes: 0
         }
