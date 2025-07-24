@@ -64,9 +64,7 @@ class ApiClient {
   private useMock: boolean;
 
   constructor() {
-    console.log('🔧 Initializing ApiClient...');
     this.useMock = USE_MOCK_API;
-    console.log(`✅ ApiClient initialized with mode: ${this.useMock ? 'Mock' : 'Real'}`);
   }
 
   // Method to switch between mock and real API
@@ -398,9 +396,7 @@ class ApiClient {
 }
 
 // Export singleton instance
-console.log('🔧 Creating ApiClient instance...');
 export const apiClient = new ApiClient();
-console.log('✅ ApiClient instance created successfully');
 
 // Export utility functions
 export const switchToMockApi = () => {
