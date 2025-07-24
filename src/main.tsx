@@ -4,7 +4,7 @@ import LoadingSpinner from './components/common/LoadingSpinner'
 import './app/styles/index.css'
 
 // Lazy load the App component for better performance
-const App = lazy(() => import('./app/App.tsx'))
+const App = lazy(() => import('./app/AppMinimal.tsx'))
 
 // Get the root element with proper error handling
 const rootElement = document.getElementById('root')
