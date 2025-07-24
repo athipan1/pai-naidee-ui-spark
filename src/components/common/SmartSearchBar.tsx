@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/shared/lib/utils';
-import { apiClient } from '@/shared/utils/apiClient';
+// import { apiClient } from '@/shared/utils/apiClient';
 import type { SearchSuggestion, SearchResult } from '@/shared/utils/searchAPI';
 
 interface SmartSearchBarProps {
@@ -124,7 +124,8 @@ const SmartSearchBar = ({
     setIsLoading(true);
 
     try {
-      const suggestions = await apiClient.getSearchSuggestions(searchQuery, currentLanguage);
+      // const suggestions = await apiClient.getSearchSuggestions(searchQuery, currentLanguage);
+      const suggestions = [];
       setSuggestions(suggestions);
     } catch (error) {
       console.error('Error fetching suggestions:', error);
@@ -141,11 +142,12 @@ const SmartSearchBar = ({
     setIsLoading(true);
     
     try {
-      const response = await apiClient.performSearch({
-        query: searchQuery,
-        language: currentLanguage,
-        filters: selectedFilters
-      });
+      // const response = await apiClient.performSearch({
+      //   query: searchQuery,
+      //   language: currentLanguage,
+      //   filters: selectedFilters
+      // });
+      const response = { results: [], totalCount: 0 };
       
       // Save to recent searches
       const updatedRecentSearches = [
