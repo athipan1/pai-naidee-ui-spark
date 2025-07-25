@@ -153,8 +153,32 @@ docker system prune -a
 3. **Dependencies ไม่อัปเดต**
    ```bash
    # Rebuild โดยไม่ใช้ cache
-   docker-compose build --no-cache dev
+   docker compose build --no-cache dev
    ```
+
+4. **"vite: not found" error**
+   ```bash
+   # ใช้ npx แทน npm run dev ใน docker-compose.yml
+   # เปลี่ยน command เป็น: npx vite --host 0.0.0.0
+   
+   # หรือใช้การพัฒนาแบบ local (แนะนำ)
+   npm install
+   npm run dev
+   ```
+
+### การพัฒนาแบบ Hybrid (แนะนำ)
+
+สำหรับการพัฒนาที่มีประสิทธิภาพสูงสุด:
+
+```bash
+# ใช้ Docker สำหรับ production build และ testing
+docker compose build app
+docker run -p 80:80 pai-naidee-ui-spark-app
+
+# ใช้ local development สำหรับการพัฒนาปกติ
+npm install
+npm run dev
+```
 
 ## 📚 เพิ่มเติม
 

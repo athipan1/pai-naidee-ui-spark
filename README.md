@@ -45,6 +45,16 @@ TypeScript
 React
 shadcn-ui
 Tailwind CSS
+
+## 🐳 Docker Development
+สำหรับการพัฒนาด้วย Docker ดูรายละเอียดที่ [DOCKER_README.md](./DOCKER_README.md)
+
+**Quick Start with Docker:**
+```bash
+# การพัฒนาด้วย volume mounting (ไม่ต้อง rebuild เมื่อเปลี่ยนโค้ด)
+docker compose up dev
+```
+
 วิธี Deploy โปรเจกต์นี้
 เปิด Lovable แล้วคลิกที่ Share -> Publish
 
