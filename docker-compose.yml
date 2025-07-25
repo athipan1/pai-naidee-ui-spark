@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Development service with volume mounting for live code changes
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount source code for live reloading - no rebuild needed for code changes
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tailwind.config.ts:/app/tailwind.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      - ./tsconfig.node.json:/app/tsconfig.node.json
+      - ./postcss.config.js:/app/postcss.config.js
+      - ./eslint.config.js:/app/eslint.config.js
+      - ./components.json:/app/components.json
+      # Exclude node_modules to avoid conflicts
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_ENABLE_DEBUG=true
+    # Note: If vite command issues occur, use: npx vite --host 0.0.0.0
+    command: npm run dev
+    networks:
+      - pai-naidee-net
+
+  # Production build service using existing Dockerfile
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - pai-naidee-net
+
+networks:
+  pai-naidee-net:
+    driver: bridge
