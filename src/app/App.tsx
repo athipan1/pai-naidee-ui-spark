@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
+import DevTools from "@/components/dev/DevTools";
 import Index from "./pages/Index";
 import Explore from "../app/pages/Explore";
 import Favorites from "../app/pages/Favorites";
@@ -172,6 +173,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          <DevTools />
         </TooltipProvider>
       </MediaProvider>
     </QueryClientProvider>
