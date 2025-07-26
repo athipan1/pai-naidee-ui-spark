@@ -9,6 +9,8 @@ import {
   Bed,
   Calendar,
   Users,
+  Map,
+  Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/shared/hooks/use-toast";
 import { isAuthenticated } from "@/shared/utils/api";
 import { mockAttractionDetails, simulateDelay } from "@/shared/data/mockData";
+import MapModal from "@/components/attraction/MapModal";
 
 interface AttractionDetail {
   id: string;
@@ -68,6 +71,7 @@ const AttractionDetail = ({
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   const content = {
     th: {
@@ -89,6 +93,8 @@ const AttractionDetail = ({
       bookingSuccess: "จองเรียบร้อยแล้ว!",
       bookingError: "เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่",
       notFound: "ไม่พบสถานที่ท่องเที่ยวนี้",
+      mapView: "🗺️ แผนที่",
+      navigateToMap: "🧭 นำทาง",
     },
     en: {
       loading: "Loading...",
@@ -109,6 +115,8 @@ const AttractionDetail = ({
       bookingSuccess: "Booking successful!",
       bookingError: "Booking error. Please try again",
       notFound: "Attraction not found",
+      mapView: "🗺️ Map",
+      navigateToMap: "🧭 Navigate",
     },
   };
 
@@ -356,16 +364,35 @@ const AttractionDetail = ({
               <ArrowLeft className="w-4 h-4" />
               {t.backToSearch}
             </Button>
-            <Button
-              variant={isFavorite ? "default" : "outline"}
-              onClick={toggleFavorite}
-              className="flex items-center gap-2"
-            >
-              <Heart
-                className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`}
-              />
-              {isFavorite ? t.removeFromFavorites : t.addToFavorites}
-            </Button>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowMapModal(true)}
+                className="flex items-center gap-2"
+              >
+                <Map className="w-4 h-4" />
+                {t.mapView}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/map/${attraction.id}`)}
+                className="flex items-center gap-2"
+              >
+                <Navigation className="w-4 h-4" />
+                {t.navigateToMap}
+              </Button>
+              <Button
+                variant={isFavorite ? "default" : "outline"}
+                onClick={toggleFavorite}
+                className="flex items-center gap-2"
+              >
+                <Heart
+                  className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`}
+                />
+                {isFavorite ? t.removeFromFavorites : t.addToFavorites}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -559,6 +586,19 @@ const AttractionDetail = ({
           </CardContent>
         </Card>
       </div>
+
+      {/* Map Modal */}
+      <MapModal
+        isOpen={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        location={{
+          lat: attraction.coordinates.lat,
+          lng: attraction.coordinates.lng,
+          name: attraction.name,
+          nameLocal: attraction.nameLocal
+        }}
+        currentLanguage={currentLanguage}
+      />
     </div>
   );
 };
