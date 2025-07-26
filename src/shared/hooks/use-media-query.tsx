@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from "react";
 
 /**
  * Custom hook for media query matching with SSR safety
@@ -6,32 +6,32 @@ import * as React from "react"
  * @returns boolean indicating if the media query matches
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = React.useState<boolean>(false)
+  const [matches, setMatches] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     // Check if we're in a browser environment
-    if (typeof window === 'undefined') {
-      return
+    if (typeof window === "undefined") {
+      return;
     }
 
-    const mediaQuery = window.matchMedia(query)
-    
+    const mediaQuery = window.matchMedia(query);
+
     // Set initial value
-    setMatches(mediaQuery.matches)
+    setMatches(mediaQuery.matches);
 
     // Create event listener function
     const handler = (event: MediaQueryListEvent) => {
-      setMatches(event.matches)
-    }
+      setMatches(event.matches);
+    };
 
     // Add event listener
-    mediaQuery.addEventListener('change', handler)
+    mediaQuery.addEventListener("change", handler);
 
     // Cleanup function
     return () => {
-      mediaQuery.removeEventListener('change', handler)
-    }
-  }, [query])
+      mediaQuery.removeEventListener("change", handler);
+    };
+  }, [query]);
 
-  return matches
+  return matches;
 }

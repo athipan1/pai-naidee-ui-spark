@@ -9,12 +9,17 @@ interface ActionButtonsProps {
   onAddToPlan?: () => void;
 }
 
-export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: ActionButtonsProps) {
+export function ActionButtons({
+  latitude,
+  longitude,
+  placeName,
+  onAddToPlan,
+}: ActionButtonsProps) {
   const [isFavorited, setIsFavorited] = useState(false);
 
   const handleNavigate = () => {
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-    window.open(googleMapsUrl, '_blank');
+    window.open(googleMapsUrl, "_blank");
   };
 
   const handleShare = async () => {
@@ -25,15 +30,15 @@ export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: A
           text: `มาดู ${placeName} กันเถอะ!`,
           url: window.location.href,
         });
-      } catch (error) {
-        console.log('Share failed, falling back to clipboard');
+      } catch {
+        console.log("Share failed, falling back to clipboard");
       }
     } else {
       try {
         await navigator.clipboard.writeText(window.location.href);
-        alert('คัดลอกลิงก์แล้ว!');
-      } catch (error) {
-        alert('ไม่สามารถแชร์ได้ในขณะนี้');
+        alert("คัดลอกลิงก์แล้ว!");
+      } catch {
+        alert("ไม่สามารถแชร์ได้ในขณะนี้");
       }
     }
   };
@@ -47,12 +52,16 @@ export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: A
 
   const handleToggleFavorite = () => {
     setIsFavorited(!isFavorited);
-    alert(isFavorited ? `ลบ ${placeName} ออกจากรายการโปรดแล้ว` : `เพิ่ม ${placeName} ลงในรายการโปรดแล้ว`);
+    alert(
+      isFavorited
+        ? `ลบ ${placeName} ออกจากรายการโปรดแล้ว`
+        : `เพิ่ม ${placeName} ลงในรายการโปรดแล้ว`
+    );
   };
 
   const handleViewMap = () => {
     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    window.open(googleMapsUrl, '_blank');
+    window.open(googleMapsUrl, "_blank");
   };
 
   return (
@@ -63,7 +72,12 @@ export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: A
           <Navigation className="h-5 w-5" />
           นำทางไปที่นี่
         </Button>
-        <Button onClick={handleAddToPlan} variant="outline" size="lg" className="gap-2">
+        <Button
+          onClick={handleAddToPlan}
+          variant="outline"
+          size="lg"
+          className="gap-2"
+        >
           <Plus className="h-5 w-5" />
           เพิ่มลงแผน
         </Button>
@@ -71,11 +85,13 @@ export function ActionButtons({ latitude, longitude, placeName, onAddToPlan }: A
 
       {/* Secondary Actions */}
       <div className="flex gap-3">
-        <Button 
-          onClick={handleToggleFavorite} 
-          variant="outline" 
+        <Button
+          onClick={handleToggleFavorite}
+          variant="outline"
           size="icon"
-          className={isFavorited ? "text-red-500 border-red-200 hover:bg-red-50" : ""}
+          className={
+            isFavorited ? "text-red-500 border-red-200 hover:bg-red-50" : ""
+          }
         >
           <Heart className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`} />
         </Button>

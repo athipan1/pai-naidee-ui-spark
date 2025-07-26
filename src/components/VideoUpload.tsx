@@ -1,17 +1,17 @@
-import { useState, useRef } from 'react';
-import { Upload, X, Plus, Video } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
+import { useState, useRef } from "react";
+import { Upload, X, Plus, Video } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 interface VideoUploadProps {
   open: boolean;
@@ -24,80 +24,85 @@ interface VideoUploadProps {
     location: string;
     province: string;
   }) => void;
-  currentLanguage: 'th' | 'en';
+  currentLanguage: "th" | "en";
 }
 
-const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: VideoUploadProps) => {
+const VideoUpload = ({
+  open,
+  onOpenChange,
+  onVideoUpload,
+  currentLanguage,
+}: VideoUploadProps) => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoPreview, setVideoPreview] = useState<string>('');
-  const [caption, setCaption] = useState('');
-  const [title, setTitle] = useState('');
-  const [location, setLocation] = useState('');
-  const [province, setProvince] = useState('');
-  const [tagInput, setTagInput] = useState('');
+  const [videoPreview, setVideoPreview] = useState<string>("");
+  const [caption, setCaption] = useState("");
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
+  const [province, setProvince] = useState("");
+  const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const content = {
     th: {
-      uploadVideo: 'อัปโหลดวิดีโอ',
-      selectVideo: 'เลือกวิดีโอ',
-      uploadVideoFile: 'อัปโหลดไฟล์วิดีโอ',
-      chooseFile: 'เลือกไฟล์',
-      dragDrop: 'หรือลากไฟล์มาวางที่นี่',
-      supportedFormats: 'รองรับ MP4, AVI, MOV (สูงสุด 100MB)',
-      videoPreview: 'ตัวอย่างวิดีโอ',
-      videoTitle: 'หัวข้อวิดีโอ',
+      uploadVideo: "อัปโหลดวิดีโอ",
+      selectVideo: "เลือกวิดีโอ",
+      uploadVideoFile: "อัปโหลดไฟล์วิดีโอ",
+      chooseFile: "เลือกไฟล์",
+      dragDrop: "หรือลากไฟล์มาวางที่นี่",
+      supportedFormats: "รองรับ MP4, AVI, MOV (สูงสุด 100MB)",
+      videoPreview: "ตัวอย่างวิดีโอ",
+      videoTitle: "หัวข้อวิดีโอ",
       videoTitlePlaceholder: 'เช่น "ทะเลใสสวยที่เกาะพีพี"',
-      caption: 'คำบรรยาย',
-      captionPlaceholder: 'เขียนคำบรรยายเกี่ยวกับวิดีโอของคุณ...',
-      location: 'สถานที่',
+      caption: "คำบรรยาย",
+      captionPlaceholder: "เขียนคำบรรยายเกี่ยวกับวิดีโอของคุณ...",
+      location: "สถานที่",
       locationPlaceholder: 'เช่น "เกาะพีพี"',
-      province: 'จังหวัด',
+      province: "จังหวัด",
       provincePlaceholder: 'เช่น "กระบี่"',
-      tags: 'แท็ก',
-      addTag: 'เพิ่มแท็ก',
-      tagPlaceholder: 'พิมพ์แท็กและกด Enter',
-      tagHint: 'เพิ่มแท็กที่เกี่ยวข้องเพื่อให้ผู้อื่นค้นหาได้ง่าย',
-      cancel: 'ยกเลิก',
-      upload: 'อัปโหลด',
-      uploading: 'กำลังอัปโหลด...',
-      fillRequired: 'กรุณากรอกข้อมูลที่จำเป็น',
-      maxTags: 'สามารถเพิ่มได้สูงสุด 10 แท็ก'
+      tags: "แท็ก",
+      addTag: "เพิ่มแท็ก",
+      tagPlaceholder: "พิมพ์แท็กและกด Enter",
+      tagHint: "เพิ่มแท็กที่เกี่ยวข้องเพื่อให้ผู้อื่นค้นหาได้ง่าย",
+      cancel: "ยกเลิก",
+      upload: "อัปโหลด",
+      uploading: "กำลังอัปโหลด...",
+      fillRequired: "กรุณากรอกข้อมูลที่จำเป็น",
+      maxTags: "สามารถเพิ่มได้สูงสุด 10 แท็ก",
     },
     en: {
-      uploadVideo: 'Upload Video',
-      selectVideo: 'Select Video',
-      uploadVideoFile: 'Upload Video File',
-      chooseFile: 'Choose File',
-      dragDrop: 'or drag and drop here',
-      supportedFormats: 'Supports MP4, AVI, MOV (max 100MB)',
-      videoPreview: 'Video Preview',
-      videoTitle: 'Video Title',
+      uploadVideo: "Upload Video",
+      selectVideo: "Select Video",
+      uploadVideoFile: "Upload Video File",
+      chooseFile: "Choose File",
+      dragDrop: "or drag and drop here",
+      supportedFormats: "Supports MP4, AVI, MOV (max 100MB)",
+      videoPreview: "Video Preview",
+      videoTitle: "Video Title",
       videoTitlePlaceholder: 'e.g. "Beautiful clear sea at Phi Phi Island"',
-      caption: 'Caption',
-      captionPlaceholder: 'Write a caption about your video...',
-      location: 'Location',
+      caption: "Caption",
+      captionPlaceholder: "Write a caption about your video...",
+      location: "Location",
       locationPlaceholder: 'e.g. "Phi Phi Island"',
-      province: 'Province',
+      province: "Province",
       provincePlaceholder: 'e.g. "Krabi"',
-      tags: 'Tags',
-      addTag: 'Add Tag',
-      tagPlaceholder: 'Type tag and press Enter',
-      tagHint: 'Add relevant tags to help others find your video',
-      cancel: 'Cancel',
-      upload: 'Upload',
-      uploading: 'Uploading...',
-      fillRequired: 'Please fill in required fields',
-      maxTags: 'Maximum 10 tags allowed'
-    }
+      tags: "Tags",
+      addTag: "Add Tag",
+      tagPlaceholder: "Type tag and press Enter",
+      tagHint: "Add relevant tags to help others find your video",
+      cancel: "Cancel",
+      upload: "Upload",
+      uploading: "Uploading...",
+      fillRequired: "Please fill in required fields",
+      maxTags: "Maximum 10 tags allowed",
+    },
   };
 
   const t = content[currentLanguage];
 
   const handleFileSelect = (file: File) => {
-    if (file && file.type.startsWith('video/')) {
+    if (file && file.type.startsWith("video/")) {
       setVideoFile(file);
       const url = URL.createObjectURL(file);
       setVideoPreview(url);
@@ -127,40 +132,46 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
     const newTag = tagInput.trim();
     if (newTag && !tags.includes(newTag) && tags.length < 10) {
       setTags([...tags, newTag]);
-      setTagInput('');
+      setTagInput("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleTagKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addTag();
     }
   };
 
   const handleUpload = async () => {
-    if (!videoFile || !title.trim() || !caption.trim() || !location.trim() || !province.trim()) {
+    if (
+      !videoFile ||
+      !title.trim() ||
+      !caption.trim() ||
+      !location.trim() ||
+      !province.trim()
+    ) {
       alert(t.fillRequired);
       return;
     }
 
     setIsUploading(true);
-    
+
     try {
       // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       onVideoUpload({
         videoFile,
         caption: caption.trim(),
         tags,
         title: title.trim(),
         location: location.trim(),
-        province: province.trim()
+        province: province.trim(),
       });
 
       // Reset form
@@ -173,13 +184,13 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
 
   const resetForm = () => {
     setVideoFile(null);
-    setVideoPreview('');
-    setCaption('');
-    setTitle('');
-    setLocation('');
-    setProvince('');
+    setVideoPreview("");
+    setCaption("");
+    setTitle("");
+    setLocation("");
+    setProvince("");
     setTags([]);
-    setTagInput('');
+    setTagInput("");
   };
 
   const handleClose = () => {
@@ -191,14 +202,16 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{t.uploadVideo}</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            {t.uploadVideo}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Video Upload Section */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">{t.uploadVideoFile}</Label>
-            
+
             {!videoFile ? (
               <div
                 className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer"
@@ -213,7 +226,9 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
                     {t.chooseFile}
                   </Button>
                   <p className="text-sm text-muted-foreground">{t.dragDrop}</p>
-                  <p className="text-xs text-muted-foreground">{t.supportedFormats}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.supportedFormats}
+                  </p>
                 </div>
               </div>
             ) : (
@@ -230,13 +245,15 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
                     className="absolute top-2 right-2"
                     onClick={() => {
                       setVideoFile(null);
-                      setVideoPreview('');
+                      setVideoPreview("");
                     }}
                   >
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">{t.videoPreview}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t.videoPreview}
+                </p>
               </div>
             )}
 
@@ -253,7 +270,9 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
           <div className="space-y-4">
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">{t.videoTitle} *</Label>
+              <Label htmlFor="title" className="text-sm font-medium">
+                {t.videoTitle} *
+              </Label>
               <Input
                 id="title"
                 value={title}
@@ -265,7 +284,9 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
 
             {/* Caption */}
             <div className="space-y-2">
-              <Label htmlFor="caption" className="text-sm font-medium">{t.caption} *</Label>
+              <Label htmlFor="caption" className="text-sm font-medium">
+                {t.caption} *
+              </Label>
               <Textarea
                 id="caption"
                 value={caption}
@@ -274,13 +295,17 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
                 rows={3}
                 maxLength={500}
               />
-              <p className="text-xs text-muted-foreground">{caption.length}/500</p>
+              <p className="text-xs text-muted-foreground">
+                {caption.length}/500
+              </p>
             </div>
 
             {/* Location & Province */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="location" className="text-sm font-medium">{t.location} *</Label>
+                <Label htmlFor="location" className="text-sm font-medium">
+                  {t.location} *
+                </Label>
                 <Input
                   id="location"
                   value={location}
@@ -290,7 +315,9 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="province" className="text-sm font-medium">{t.province} *</Label>
+                <Label htmlFor="province" className="text-sm font-medium">
+                  {t.province} *
+                </Label>
                 <Input
                   id="province"
                   value={province}
@@ -321,7 +348,7 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
-              
+
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag, index) => (
@@ -339,7 +366,7 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
                   ))}
                 </div>
               )}
-              
+
               <p className="text-xs text-muted-foreground">
                 {t.tagHint} ({tags.length}/10)
               </p>
@@ -348,7 +375,11 @@ const VideoUpload = ({ open, onOpenChange, onVideoUpload, currentLanguage }: Vid
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={isUploading}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isUploading}
+          >
             {t.cancel}
           </Button>
           <Button onClick={handleUpload} disabled={isUploading || !videoFile}>

@@ -10,6 +10,8 @@
     "start": "vite preview --host 0.0.0.0 --port 8080",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
     "preview": "vite preview",
     "build:dev": "vite build --mode development",
     "type-check": "tsc --noEmit"

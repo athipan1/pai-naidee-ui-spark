@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Star, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Heart, Star, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface AttractionDetailProps {
-  currentLanguage: 'th' | 'en';
+  currentLanguage: "th" | "en";
   onBack: () => void;
 }
 
-const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) => {
-  const { id } = useParams<{ id: string }>();
+const AttractionDetail = ({
+  currentLanguage,
+  onBack,
+}: AttractionDetailProps) => {
+  const { id: _id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -33,17 +36,19 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
 
   const content = {
     th: {
-      title: 'หมู่เกาะพีพี',
-      province: 'จังหวัดกระบี่',
-      description: 'เกาะที่มีธรรมชาติสวยงาม น้ำใสเขียวมรกต และหาดทรายขาว เหมาะสำหรับการพักผ่อนและดำน้ำ',
-      back: 'กลับ'
+      title: "หมู่เกาะพีพี",
+      province: "จังหวัดกระบี่",
+      description:
+        "เกาะที่มีธรรมชาติสวยงาม น้ำใสเขียวมรกต และหาดทรายขาว เหมาะสำหรับการพักผ่อนและดำน้ำ",
+      back: "กลับ",
     },
     en: {
-      title: 'Phi Phi Islands',
-      province: 'Krabi Province',
-      description: 'Beautiful natural island with emerald waters and white sandy beaches, perfect for relaxation and diving',
-      back: 'Back'
-    }
+      title: "Phi Phi Islands",
+      province: "Krabi Province",
+      description:
+        "Beautiful natural island with emerald waters and white sandy beaches, perfect for relaxation and diving",
+      back: "Back",
+    },
   };
 
   const t = content[currentLanguage];
@@ -107,7 +112,7 @@ const AttractionDetail = ({ currentLanguage, onBack }: AttractionDetailProps) =>
             <Heart className="w-4 h-4 mr-2" />
             Add to Favorites
           </Button>
-          <Button variant="outline" onClick={() => navigate('/')}>
+          <Button variant="outline" onClick={() => navigate("/")}>
             View More Places
           </Button>
         </div>

@@ -1,9 +1,14 @@
 // Search API utilities and types with mock data fallback
-import { mockSearch, mockSuggestions, mockFilters, simulateDelay } from '../data/mockData';
+import {
+  mockSearch,
+  mockSuggestions,
+  mockFilters,
+  simulateDelay,
+} from "../data/mockData";
 
 export interface SearchQuery {
   query: string;
-  language: 'th' | 'en';
+  language: "th" | "en";
   filters: {
     provinces: string[];
     categories: string[];
@@ -13,7 +18,7 @@ export interface SearchQuery {
 
 export interface SearchSuggestion {
   id: string;
-  type: 'place' | 'province' | 'category' | 'tag' | 'phrase';
+  type: "place" | "province" | "category" | "tag" | "phrase";
   text: string;
   description?: string;
   province?: string;
@@ -50,16 +55,17 @@ export interface SearchResponse {
   processingTime: number;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 // Util: Get auth token if needed
-const getAuthToken = (): string | null => localStorage.getItem('authToken');
+const getAuthToken = (): string | null => localStorage.getItem("authToken");
 
 const createAuthHeaders = (): HeadersInit => {
   const token = getAuthToken();
   return {
-    'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 
@@ -68,34 +74,44 @@ const createAuthHeaders = (): HeadersInit => {
  * @param searchQuery SearchQuery
  * @returns SearchResponse
  */
-export const performSearch = async (searchQuery: SearchQuery): Promise<SearchResponse> => {
+export const performSearch = async (
+  searchQuery: SearchQuery
+): Promise<SearchResponse> => {
   const startTime = Date.now();
   try {
     const response = await fetch(`${API_BASE_URL}/search`, {
-      method: 'POST',
+      method: "POST",
       headers: createAuthHeaders(),
       body: JSON.stringify(searchQuery),
     });
 
     if (!response.ok) {
-      throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Search failed: ${response.status} ${response.statusText}`
+      );
     }
 
     const data = await response.json();
 
     // Defensive: ensure expected types
-    const results: SearchResult[] = Array.isArray(data.results) ? data.results : [];
-    const suggestions: SearchSuggestion[] = Array.isArray(data.suggestions) ? data.suggestions : [];
-    const totalCount: number = typeof data.totalCount === 'number' ? data.totalCount : results.length;
-    const query: string = typeof data.query === 'string' ? data.query : searchQuery.query;
+    const results: SearchResult[] = Array.isArray(data.results)
+      ? data.results
+      : [];
+    const suggestions: SearchSuggestion[] = Array.isArray(data.suggestions)
+      ? data.suggestions
+      : [];
+    const totalCount: number =
+      typeof data.totalCount === "number" ? data.totalCount : results.length;
+    const query: string =
+      typeof data.query === "string" ? data.query : searchQuery.query;
     const processingTime: number =
-      typeof data.processingTime === 'number'
+      typeof data.processingTime === "number"
         ? data.processingTime
         : Date.now() - startTime;
 
     return { results, suggestions, totalCount, query, processingTime };
   } catch (error) {
-    console.warn('ใช้ mock data เนื่องจาก backend error:', error);
+    console.warn("ใช้ mock data เนื่องจาก backend error:", error);
     // Fallback to mock data
     return await mockSearch(searchQuery.query);
   }
@@ -109,7 +125,7 @@ export const performSearch = async (searchQuery: SearchQuery): Promise<SearchRes
  */
 export const getSearchSuggestions = async (
   query: string,
-  language: 'th' | 'en' = 'th'
+  language: "th" | "en" = "th"
 ): Promise<SearchSuggestion[]> => {
   try {
     const response = await fetch(
@@ -118,14 +134,14 @@ export const getSearchSuggestions = async (
         headers: createAuthHeaders(),
       }
     );
-    if (!response.ok) throw new Error('Failed to fetch suggestions');
+    if (!response.ok) throw new Error("Failed to fetch suggestions");
     const data = await response.json();
     return Array.isArray(data.suggestions) ? data.suggestions : [];
   } catch {
-    console.warn('ใช้ mock suggestions เนื่องจาก backend error');
+    console.warn("ใช้ mock suggestions เนื่องจาก backend error");
     // Fallback to mock suggestions
     await simulateDelay(200);
-    return mockSuggestions.filter(s => 
+    return mockSuggestions.filter((s) =>
       s.text.toLowerCase().includes(query.toLowerCase())
     );
   }
@@ -144,10 +160,10 @@ export const fetchSearchFilters = async (): Promise<{
     const response = await fetch(`${API_BASE_URL}/search/filters`, {
       headers: createAuthHeaders(),
     });
-    if (!response.ok) throw new Error('Failed to fetch filters');
+    if (!response.ok) throw new Error("Failed to fetch filters");
     return await response.json();
   } catch {
-    console.warn('ใช้ mock filters เนื่องจาก backend error');
+    console.warn("ใช้ mock filters เนื่องจาก backend error");
     // Fallback to mock filters
     await simulateDelay(300);
     return mockFilters;

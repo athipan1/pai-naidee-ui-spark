@@ -1,11 +1,11 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
-export type AccordionType = 'single' | 'multiple';
-export type AccordionVariant = 'default' | 'outlined' | 'ghost';
-export type AccordionSize = 'sm' | 'md' | 'lg';
-export type AccordionTheme = 'light' | 'dark';
-export type AccordionAnimationType = 'slide' | 'fade' | 'bounce';
-export type IconPosition = 'left' | 'right';
+export type AccordionType = "single" | "multiple";
+export type AccordionVariant = "default" | "outlined" | "ghost";
+export type AccordionSize = "sm" | "md" | "lg";
+export type AccordionTheme = "light" | "dark";
+export type AccordionAnimationType = "slide" | "fade" | "bounce";
+export type IconPosition = "left" | "right";
 
 export interface AccordionItemData {
   id: string;
@@ -37,8 +37,8 @@ export interface AccordionProps {
   iconPosition?: IconPosition;
   hideIcon?: boolean;
   // Accessibility
-  'aria-label'?: string;
-  'aria-labelledby'?: string;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
 }
 
 export interface AccordionItemProps {

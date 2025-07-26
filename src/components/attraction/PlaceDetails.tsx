@@ -25,7 +25,7 @@ export function PlaceDetails({
   phone,
   website,
   activities,
-  highlights
+  highlights,
 }: PlaceDetailsProps) {
   const renderStars = (rating: number) => {
     const stars = [];
@@ -33,16 +33,25 @@ export function PlaceDetails({
     const hasHalfStar = rating % 1 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
+      stars.push(
+        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+      );
     }
 
     if (hasHalfStar) {
-      stars.push(<Star key="half" className="h-4 w-4 fill-yellow-400/50 text-yellow-400" />);
+      stars.push(
+        <Star
+          key="half"
+          className="h-4 w-4 fill-yellow-400/50 text-yellow-400"
+        />
+      );
     }
 
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="h-4 w-4 text-muted-foreground" />);
+      stars.push(
+        <Star key={`empty-${i}`} className="h-4 w-4 text-muted-foreground" />
+      );
     }
 
     return stars;
@@ -54,11 +63,11 @@ export function PlaceDetails({
       <div className="space-y-3">
         <h1 className="text-3xl font-bold text-foreground">{name}</h1>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            {renderStars(rating)}
-          </div>
+          <div className="flex items-center gap-1">{renderStars(rating)}</div>
           <span className="text-lg font-semibold">{rating}</span>
-          <span className="text-muted-foreground">({reviewCount.toLocaleString()} รีวิว)</span>
+          <span className="text-muted-foreground">
+            ({reviewCount.toLocaleString()} รีวิว)
+          </span>
         </div>
       </div>
 
@@ -133,7 +142,9 @@ export function PlaceDetails({
                 <Globe className="h-5 w-5 text-primary" />
                 <div>
                   <p className="font-medium">เว็บไซต์</p>
-                  <p className="text-sm text-muted-foreground truncate">{website}</p>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {website}
+                  </p>
                 </div>
               </div>
             </CardContent>

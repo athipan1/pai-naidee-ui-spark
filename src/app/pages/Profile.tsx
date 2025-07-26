@@ -1,21 +1,64 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Edit, Settings, LogOut, User, Link as LinkIcon, Play, MessageSquare, Calendar, CreditCard, Shield, Globe, Trash2, Camera, Facebook, Instagram, Youtube, MapPin, Star, Eye, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Edit,
+  Settings,
+  LogOut,
+  User,
+  Play,
+  MessageSquare,
+  Calendar,
+  CreditCard,
+  Globe,
+  Trash2,
+  Camera,
+  Facebook,
+  Instagram,
+  Youtube,
+  MapPin,
+  Star,
+  Eye,
+  Heart,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProfileProps {
-  currentLanguage: 'th' | 'en';
-  onLanguageChange: (lang: 'th' | 'en') => void;
+  currentLanguage: "th" | "en";
+  onLanguageChange: (lang: "th" | "en") => void;
   onBack: () => void;
 }
 
@@ -62,113 +105,119 @@ interface UserReview {
 
 interface UserBooking {
   id: string;
-  type: 'hotel' | 'activity';
+  type: "hotel" | "activity";
   name: string;
   image: string;
   date: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: "confirmed" | "pending" | "cancelled";
   amount: number;
 }
 
-const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) => {
+const Profile = ({
+  currentLanguage,
+  onLanguageChange,
+  onBack,
+}: ProfileProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userVideos, setUserVideos] = useState<UserVideo[]>([]);
   const [userReviews, setUserReviews] = useState<UserReview[]>([]);
   const [userBookings, setUserBookings] = useState<UserBooking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('videos');
+  const [activeTab, setActiveTab] = useState("videos");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const content = {
     th: {
-      profile: 'โปรไฟล์',
-      editProfile: 'แก้ไขโปรไฟล์',
-      accountSettings: 'ตั้งค่าบัญชี',
-      logout: 'ออกจากระบบ',
-      myVideos: 'วิดีโอของฉัน',
-      myReviews: 'รีวิวของฉัน',
-      myBookings: 'รายการจองของฉัน',
-      paymentInfo: 'ข้อมูลการชำระเงิน',
-      privacy: 'ความเป็นส่วนตัว',
-      language: 'ภาษา',
-      paymentManagement: 'จัดการการชำระเงิน',
-      deleteAccount: 'ลบบัญชี',
-      memberSince: 'สมาชิกตั้งแต่',
-      followers: 'ผู้ติดตาม',
-      videos: 'วิดีโอ',
-      reviews: 'รีวิว',
-      bookings: 'การจอง',
-      noVideos: 'ยังไม่มีวิดีโอ',
-      noReviews: 'ยังไม่มีรีวิว',
-      noBookings: 'ยังไม่มีการจอง',
-      uploadVideo: 'อัปโหลดวิดีโอ',
-      writeReview: 'เขียนรีวิว',
-      bookNow: 'จองเลย',
-      views: 'ครั้ง',
-      likes: 'ถูกใจ',
-      confirmed: 'ยืนยันแล้ว',
-      pending: 'รอดำเนินการ',
-      cancelled: 'ยกเลิกแล้ว',
-      name: 'ชื่อ',
-      email: 'อีเมล',
-      bio: 'แนะนำตัว',
-      location: 'ที่อยู่',
-      socialLinks: 'ลิงก์โซเชียล',
-      save: 'บันทึก',
-      cancel: 'ยกเลิก',
-      publicProfile: 'โปรไฟล์สาธารณะ',
-      privateProfile: 'โปรไฟล์ส่วนตัว',
-      deleteAccountWarning: 'คุณแน่ใจหรือไม่ที่จะลบบัญชี?',
-      deleteAccountDesc: 'การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูลทั้งหมดจะถูกลบอย่างถาวร',
-      delete: 'ลบ',
-      logoutConfirm: 'คุณต้องการออกจากระบบหรือไม่?',
-      baht: 'บาท'
+      profile: "โปรไฟล์",
+      editProfile: "แก้ไขโปรไฟล์",
+      accountSettings: "ตั้งค่าบัญชี",
+      logout: "ออกจากระบบ",
+      myVideos: "วิดีโอของฉัน",
+      myReviews: "รีวิวของฉัน",
+      myBookings: "รายการจองของฉัน",
+      paymentInfo: "ข้อมูลการชำระเงิน",
+      privacy: "ความเป็นส่วนตัว",
+      language: "ภาษา",
+      paymentManagement: "จัดการการชำระเงิน",
+      deleteAccount: "ลบบัญชี",
+      memberSince: "สมาชิกตั้งแต่",
+      followers: "ผู้ติดตาม",
+      videos: "วิดีโอ",
+      reviews: "รีวิว",
+      bookings: "การจอง",
+      noVideos: "ยังไม่มีวิดีโอ",
+      noReviews: "ยังไม่มีรีวิว",
+      noBookings: "ยังไม่มีการจอง",
+      uploadVideo: "อัปโหลดวิดีโอ",
+      writeReview: "เขียนรีวิว",
+      bookNow: "จองเลย",
+      views: "ครั้ง",
+      likes: "ถูกใจ",
+      confirmed: "ยืนยันแล้ว",
+      pending: "รอดำเนินการ",
+      cancelled: "ยกเลิกแล้ว",
+      name: "ชื่อ",
+      email: "อีเมล",
+      bio: "แนะนำตัว",
+      location: "ที่อยู่",
+      socialLinks: "ลิงก์โซเชียล",
+      save: "บันทึก",
+      cancel: "ยกเลิก",
+      publicProfile: "โปรไฟล์สาธารณะ",
+      privateProfile: "โปรไฟล์ส่วนตัว",
+      deleteAccountWarning: "คุณแน่ใจหรือไม่ที่จะลบบัญชี?",
+      deleteAccountDesc:
+        "การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูลทั้งหมดจะถูกลบอย่างถาวร",
+      delete: "ลบ",
+      logoutConfirm: "คุณต้องการออกจากระบบหรือไม่?",
+      baht: "บาท",
     },
     en: {
-      profile: 'Profile',
-      editProfile: 'Edit Profile',
-      accountSettings: 'Account Settings',
-      logout: 'Logout',
-      myVideos: 'My Videos',
-      myReviews: 'My Reviews',
-      myBookings: 'My Bookings',
-      paymentInfo: 'Payment Information',
-      privacy: 'Privacy',
-      language: 'Language',
-      paymentManagement: 'Payment Management',
-      deleteAccount: 'Delete Account',
-      memberSince: 'Member since',
-      followers: 'Followers',
-      videos: 'Videos',
-      reviews: 'Reviews',
-      bookings: 'Bookings',
-      noVideos: 'No videos yet',
-      noReviews: 'No reviews yet',
-      noBookings: 'No bookings yet',
-      uploadVideo: 'Upload Video',
-      writeReview: 'Write Review',
-      bookNow: 'Book Now',
-      views: 'views',
-      likes: 'likes',
-      confirmed: 'Confirmed',
-      pending: 'Pending',
-      cancelled: 'Cancelled',
-      name: 'Name',
-      email: 'Email',
-      bio: 'Bio',
-      location: 'Location',
-      socialLinks: 'Social Links',
-      save: 'Save',
-      cancel: 'Cancel',
-      publicProfile: 'Public Profile',
-      privateProfile: 'Private Profile',
-      deleteAccountWarning: 'Are you sure you want to delete your account?',
-      deleteAccountDesc: 'This action cannot be undone. All your data will be permanently deleted.',
-      delete: 'Delete',
-      logoutConfirm: 'Do you want to logout?',
-      baht: 'THB'
-    }
+      profile: "Profile",
+      editProfile: "Edit Profile",
+      accountSettings: "Account Settings",
+      logout: "Logout",
+      myVideos: "My Videos",
+      myReviews: "My Reviews",
+      myBookings: "My Bookings",
+      paymentInfo: "Payment Information",
+      privacy: "Privacy",
+      language: "Language",
+      paymentManagement: "Payment Management",
+      deleteAccount: "Delete Account",
+      memberSince: "Member since",
+      followers: "Followers",
+      videos: "Videos",
+      reviews: "Reviews",
+      bookings: "Bookings",
+      noVideos: "No videos yet",
+      noReviews: "No reviews yet",
+      noBookings: "No bookings yet",
+      uploadVideo: "Upload Video",
+      writeReview: "Write Review",
+      bookNow: "Book Now",
+      views: "views",
+      likes: "likes",
+      confirmed: "Confirmed",
+      pending: "Pending",
+      cancelled: "Cancelled",
+      name: "Name",
+      email: "Email",
+      bio: "Bio",
+      location: "Location",
+      socialLinks: "Social Links",
+      save: "Save",
+      cancel: "Cancel",
+      publicProfile: "Public Profile",
+      privateProfile: "Private Profile",
+      deleteAccountWarning: "Are you sure you want to delete your account?",
+      deleteAccountDesc:
+        "This action cannot be undone. All your data will be permanently deleted.",
+      delete: "Delete",
+      logoutConfirm: "Do you want to logout?",
+      baht: "THB",
+    },
   };
 
   const t = content[currentLanguage];
@@ -176,93 +225,114 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
   // Mock data - ในการใช้งานจริงจะดึงจาก API
   useEffect(() => {
     const mockProfile: UserProfile = {
-      id: '1',
-      name: currentLanguage === 'th' ? 'สมชาย ใจดี' : 'John Doe',
-      email: 'john.doe@example.com',
-      avatar: '/placeholder-avatar.jpg',
-      bio: currentLanguage === 'th' 
-        ? 'รักการเที่ยว ชอบถ่ายรูป และแชร์ประสบการณ์ดีๆ ให้เพื่อนๆ'
-        : 'Love traveling, photography, and sharing great experiences with friends',
-      location: currentLanguage === 'th' ? 'กรุงเทพฯ, ประเทศไทย' : 'Bangkok, Thailand',
-      joinDate: '2023-01-15',
+      id: "1",
+      name: currentLanguage === "th" ? "สมชาย ใจดี" : "John Doe",
+      email: "john.doe@example.com",
+      avatar: "/placeholder-avatar.jpg",
+      bio:
+        currentLanguage === "th"
+          ? "รักการเที่ยว ชอบถ่ายรูป และแชร์ประสบการณ์ดีๆ ให้เพื่อนๆ"
+          : "Love traveling, photography, and sharing great experiences with friends",
+      location:
+        currentLanguage === "th" ? "กรุงเทพฯ, ประเทศไทย" : "Bangkok, Thailand",
+      joinDate: "2023-01-15",
       socialLinks: {
-        facebook: 'https://facebook.com/johndoe',
-        instagram: 'https://instagram.com/johndoe',
-        youtube: 'https://youtube.com/@johndoe'
+        facebook: "https://facebook.com/johndoe",
+        instagram: "https://instagram.com/johndoe",
+        youtube: "https://youtube.com/@johndoe",
       },
       stats: {
         videos: 12,
         reviews: 28,
         bookings: 5,
-        followers: 1247
-      }
+        followers: 1247,
+      },
     };
 
     const mockVideos: UserVideo[] = [
       {
-        id: '1',
-        title: currentLanguage === 'th' ? 'เที่ยวเกาะพีพี สวยงาม' : 'Beautiful Phi Phi Islands',
-        thumbnail: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400',
+        id: "1",
+        title:
+          currentLanguage === "th"
+            ? "เที่ยวเกาะพีพี สวยงาม"
+            : "Beautiful Phi Phi Islands",
+        thumbnail:
+          "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400",
         views: 15420,
         likes: 892,
-        duration: '5:32',
-        uploadDate: '2024-01-10'
+        duration: "5:32",
+        uploadDate: "2024-01-10",
       },
       {
-        id: '2',
-        title: currentLanguage === 'th' ? 'วัดพระแก้ว ความงดงาม' : 'Wat Phra Kaew Beauty',
-        thumbnail: 'https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=400',
+        id: "2",
+        title:
+          currentLanguage === "th"
+            ? "วัดพระแก้ว ความงดงาม"
+            : "Wat Phra Kaew Beauty",
+        thumbnail:
+          "https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=400",
         views: 8765,
         likes: 543,
-        duration: '3:45',
-        uploadDate: '2024-01-05'
-      }
+        duration: "3:45",
+        uploadDate: "2024-01-05",
+      },
     ];
 
     const mockReviews: UserReview[] = [
       {
-        id: '1',
-        placeName: currentLanguage === 'th' ? 'หมู่เกาะพีพี' : 'Phi Phi Islands',
-        placeImage: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400',
+        id: "1",
+        placeName:
+          currentLanguage === "th" ? "หมู่เกาะพีพี" : "Phi Phi Islands",
+        placeImage:
+          "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400",
         rating: 5,
-        comment: currentLanguage === 'th' 
-          ? 'สวยมากจริงๆ น้ำใสมาก แนะนำให้ไปช่วงเช้าจะได้ถ่ายรูปสวยๆ'
-          : 'Absolutely beautiful! Crystal clear water. Recommend going in the morning for great photos.',
-        date: '2024-01-12',
-        likes: 23
+        comment:
+          currentLanguage === "th"
+            ? "สวยมากจริงๆ น้ำใสมาก แนะนำให้ไปช่วงเช้าจะได้ถ่ายรูปสวยๆ"
+            : "Absolutely beautiful! Crystal clear water. Recommend going in the morning for great photos.",
+        date: "2024-01-12",
+        likes: 23,
       },
       {
-        id: '2',
-        placeName: currentLanguage === 'th' ? 'วัดพระแก้ว' : 'Wat Phra Kaew',
-        placeImage: 'https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=400',
+        id: "2",
+        placeName: currentLanguage === "th" ? "วัดพระแก้ว" : "Wat Phra Kaew",
+        placeImage:
+          "https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=400",
         rating: 4,
-        comment: currentLanguage === 'th'
-          ? 'สถานที่ศักดิ์สิทธิ์ สถาปัตยกรรมสวยงาม แต่คนเยอะมาก'
-          : 'Sacred place with beautiful architecture, but very crowded.',
-        date: '2024-01-08',
-        likes: 15
-      }
+        comment:
+          currentLanguage === "th"
+            ? "สถานที่ศักดิ์สิทธิ์ สถาปัตยกรรมสวยงาม แต่คนเยอะมาก"
+            : "Sacred place with beautiful architecture, but very crowded.",
+        date: "2024-01-08",
+        likes: 15,
+      },
     ];
 
     const mockBookings: UserBooking[] = [
       {
-        id: '1',
-        type: 'hotel',
-        name: currentLanguage === 'th' ? 'โรงแรมวิวทะเล กระบี่' : 'Sea View Hotel Krabi',
-        image: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400',
-        date: '2024-02-15',
-        status: 'confirmed',
-        amount: 3500
+        id: "1",
+        type: "hotel",
+        name:
+          currentLanguage === "th"
+            ? "โรงแรมวิวทะเล กระบี่"
+            : "Sea View Hotel Krabi",
+        image:
+          "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400",
+        date: "2024-02-15",
+        status: "confirmed",
+        amount: 3500,
       },
       {
-        id: '2',
-        type: 'activity',
-        name: currentLanguage === 'th' ? 'ทัวร์ดำน้ำดูปะการัง' : 'Snorkeling Tour',
-        image: 'https://images.pexels.com/photos/1450361/pexels-photo-1450361.jpeg?auto=compress&cs=tinysrgb&w=400',
-        date: '2024-02-16',
-        status: 'pending',
-        amount: 1200
-      }
+        id: "2",
+        type: "activity",
+        name:
+          currentLanguage === "th" ? "ทัวร์ดำน้ำดูปะการัง" : "Snorkeling Tour",
+        image:
+          "https://images.pexels.com/photos/1450361/pexels-photo-1450361.jpeg?auto=compress&cs=tinysrgb&w=400",
+        date: "2024-02-16",
+        status: "pending",
+        amount: 1200,
+      },
     ];
 
     setTimeout(() => {
@@ -276,10 +346,10 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
 
   const handleLogout = () => {
     // Clear JWT/localStorage
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userProfile');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userProfile");
     // Redirect to login or home
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   const handleDeleteAccount = async () => {
@@ -287,40 +357,48 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
       // API call to delete account
       // await fetch(`/api/users/${userProfile?.id}/delete`, { method: 'POST' });
       localStorage.clear();
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
-      console.error('Failed to delete account:', error);
+      console.error("Failed to delete account:", error);
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return currentLanguage === 'th' 
-      ? date.toLocaleDateString('th-TH')
-      : date.toLocaleDateString('en-US');
+    return currentLanguage === "th"
+      ? date.toLocaleDateString("th-TH")
+      : date.toLocaleDateString("en-US");
   };
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
     return num.toString();
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return t.confirmed;
-      case 'pending': return t.pending;
-      case 'cancelled': return t.cancelled;
-      default: return status;
+      case "confirmed":
+        return t.confirmed;
+      case "pending":
+        return t.pending;
+      case "cancelled":
+        return t.cancelled;
+      default:
+        return status;
     }
   };
 
@@ -361,7 +439,10 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
               {/* Avatar */}
               <div className="relative">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
+                  <AvatarImage
+                    src={userProfile.avatar}
+                    alt={userProfile.name}
+                  />
                   <AvatarFallback>
                     <User className="w-12 h-12" />
                   </AvatarFallback>
@@ -378,9 +459,13 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
               {/* User Details */}
               <div className="flex-1 text-center md:text-left">
                 <h2 className="text-2xl font-bold mb-2">{userProfile.name}</h2>
-                <p className="text-muted-foreground mb-2">{userProfile.email}</p>
-                <p className="text-sm text-muted-foreground mb-3">{userProfile.bio}</p>
-                
+                <p className="text-muted-foreground mb-2">
+                  {userProfile.email}
+                </p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {userProfile.bio}
+                </p>
+
                 <div className="flex items-center justify-center md:justify-start space-x-4 text-sm text-muted-foreground mb-4">
                   <div className="flex items-center space-x-1">
                     <MapPin className="w-4 h-4" />
@@ -388,28 +473,42 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                   </div>
                   <div className="flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
-                    <span>{t.memberSince} {formatDate(userProfile.joinDate)}</span>
+                    <span>
+                      {t.memberSince} {formatDate(userProfile.joinDate)}
+                    </span>
                   </div>
                 </div>
 
                 {/* Social Links */}
                 <div className="flex items-center justify-center md:justify-start space-x-3 mb-4">
                   {userProfile.socialLinks.facebook && (
-                    <a href={userProfile.socialLinks.facebook} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={userProfile.socialLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Button variant="outline" size="icon" className="w-8 h-8">
                         <Facebook className="w-4 h-4" />
                       </Button>
                     </a>
                   )}
                   {userProfile.socialLinks.instagram && (
-                    <a href={userProfile.socialLinks.instagram} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={userProfile.socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Button variant="outline" size="icon" className="w-8 h-8">
                         <Instagram className="w-4 h-4" />
                       </Button>
                     </a>
                   )}
                   {userProfile.socialLinks.youtube && (
-                    <a href={userProfile.socialLinks.youtube} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={userProfile.socialLinks.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Button variant="outline" size="icon" className="w-8 h-8">
                         <Youtube className="w-4 h-4" />
                       </Button>
@@ -420,20 +519,36 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                 {/* Stats */}
                 <div className="grid grid-cols-4 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-primary">{formatNumber(userProfile.stats.followers)}</div>
-                    <div className="text-xs text-muted-foreground">{t.followers}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {formatNumber(userProfile.stats.followers)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t.followers}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-primary">{userProfile.stats.videos}</div>
-                    <div className="text-xs text-muted-foreground">{t.videos}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {userProfile.stats.videos}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t.videos}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-primary">{userProfile.stats.reviews}</div>
-                    <div className="text-xs text-muted-foreground">{t.reviews}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {userProfile.stats.reviews}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t.reviews}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-primary">{userProfile.stats.bookings}</div>
-                    <div className="text-xs text-muted-foreground">{t.bookings}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {userProfile.stats.bookings}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t.bookings}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -443,7 +558,10 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
             <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
               <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    className="flex items-center space-x-2"
+                  >
                     <Edit className="w-4 h-4" />
                     <span>{t.editProfile}</span>
                   </Button>
@@ -462,7 +580,11 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                     </div>
                     <div>
                       <Label htmlFor="email">{t.email}</Label>
-                      <Input id="email" type="email" defaultValue={userProfile.email} />
+                      <Input
+                        id="email"
+                        type="email"
+                        defaultValue={userProfile.email}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="bio">{t.bio}</Label>
@@ -470,10 +592,16 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                     </div>
                     <div>
                       <Label htmlFor="location">{t.location}</Label>
-                      <Input id="location" defaultValue={userProfile.location} />
+                      <Input
+                        id="location"
+                        defaultValue={userProfile.location}
+                      />
                     </div>
                     <div className="flex justify-end space-x-2">
-                      <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditModalOpen(false)}
+                      >
                         {t.cancel}
                       </Button>
                       <Button onClick={() => setIsEditModalOpen(false)}>
@@ -486,7 +614,10 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
 
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    className="flex items-center space-x-2"
+                  >
                     <Settings className="w-4 h-4" />
                     <span>{t.accountSettings}</span>
                   </Button>
@@ -505,21 +636,25 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                       </div>
                       <Switch />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label>{t.language}</Label>
                         <p className="text-sm text-muted-foreground">
-                          {currentLanguage === 'th' ? 'ไทย' : 'English'}
+                          {currentLanguage === "th" ? "ไทย" : "English"}
                         </p>
                       </div>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onLanguageChange(currentLanguage === 'th' ? 'en' : 'th')}
+                        onClick={() =>
+                          onLanguageChange(
+                            currentLanguage === "th" ? "en" : "th"
+                          )
+                        }
                       >
                         <Globe className="w-4 h-4 mr-2" />
-                        {currentLanguage === 'th' ? 'EN' : 'TH'}
+                        {currentLanguage === "th" ? "EN" : "TH"}
                       </Button>
                     </div>
 
@@ -534,7 +669,9 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>{t.deleteAccountWarning}</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            {t.deleteAccountWarning}
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
                             {t.deleteAccountDesc}
                           </AlertDialogDescription>
@@ -553,7 +690,10 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center space-x-2 text-destructive hover:text-destructive">
+                  <Button
+                    variant="outline"
+                    className="flex items-center space-x-2 text-destructive hover:text-destructive"
+                  >
                     <LogOut className="w-4 h-4" />
                     <span>{t.logout}</span>
                   </Button>
@@ -581,15 +721,24 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
               <Play className="w-4 h-4" />
               <span>{t.myVideos}</span>
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="reviews"
+              className="flex items-center space-x-2"
+            >
               <MessageSquare className="w-4 h-4" />
               <span>{t.myReviews}</span>
             </TabsTrigger>
-            <TabsTrigger value="bookings" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="bookings"
+              className="flex items-center space-x-2"
+            >
               <Calendar className="w-4 h-4" />
               <span>{t.myBookings}</span>
             </TabsTrigger>
-            <TabsTrigger value="payment" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="payment"
+              className="flex items-center space-x-2"
+            >
               <CreditCard className="w-4 h-4" />
               <span>{t.paymentInfo}</span>
             </TabsTrigger>
@@ -611,10 +760,13 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {userVideos.map((video) => (
-                  <Card key={video.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <Card
+                    key={video.id}
+                    className="overflow-hidden hover:shadow-lg transition-shadow"
+                  >
                     <div className="relative">
-                      <img 
-                        src={video.thumbnail} 
+                      <img
+                        src={video.thumbnail}
                         alt={video.title}
                         className="w-full h-48 object-cover"
                       />
@@ -623,7 +775,9 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                       </div>
                     </div>
                     <CardContent className="p-4">
-                      <h3 className="font-semibold line-clamp-2 mb-2">{video.title}</h3>
+                      <h3 className="font-semibold line-clamp-2 mb-2">
+                        {video.title}
+                      </h3>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center space-x-1">
@@ -663,24 +817,28 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                   <Card key={review.id}>
                     <CardContent className="p-4">
                       <div className="flex space-x-4">
-                        <img 
-                          src={review.placeImage} 
+                        <img
+                          src={review.placeImage}
                           alt={review.placeName}
                           className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                         />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold">{review.placeName}</h3>
+                            <h3 className="font-semibold">
+                              {review.placeName}
+                            </h3>
                             <div className="flex items-center space-x-1">
                               {[...Array(5)].map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
                                 />
                               ))}
                             </div>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">{review.comment}</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {review.comment}
+                          </p>
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>{formatDate(review.date)}</span>
                             <div className="flex items-center space-x-1">
@@ -716,8 +874,8 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
                   <Card key={booking.id}>
                     <CardContent className="p-4">
                       <div className="flex space-x-4">
-                        <img 
-                          src={booking.image} 
+                        <img
+                          src={booking.image}
                           alt={booking.name}
                           className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                         />
@@ -758,7 +916,9 @@ const Profile = ({ currentLanguage, onLanguageChange, onBack }: ProfileProps) =>
               <CardContent>
                 <div className="text-center py-8">
                   <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">ฟีเจอร์นี้จะเชื่อมต่อกับระบบ Payment Gateway</p>
+                  <p className="text-muted-foreground">
+                    ฟีเจอร์นี้จะเชื่อมต่อกับระบบ Payment Gateway
+                  </p>
                   <p className="text-sm text-muted-foreground mt-2">
                     (Stripe, QR Code, PromptPay, etc.)
                   </p>

@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 interface UseVideoIntersectionProps {
   threshold?: number;
   rootMargin?: string;
 }
 
-export const useVideoIntersection = ({ 
-  threshold = 0.5, 
-  rootMargin = '0px' 
+export const useVideoIntersection = ({
+  threshold = 0.5,
+  rootMargin = "0px",
 }: UseVideoIntersectionProps = {}) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
@@ -19,7 +19,7 @@ export const useVideoIntersection = ({
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsIntersecting(entry.isIntersecting);
-        
+
         if (entry.isIntersecting) {
           video.play().catch(console.error);
         } else {
