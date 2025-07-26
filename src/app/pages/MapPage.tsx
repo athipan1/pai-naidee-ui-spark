@@ -189,25 +189,68 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
     }
   }, []);
 
-  // Generate nearby POIs based on radius
+  // Generate nearby POIs based on radius with realistic data
   const generateNearbyPOIs = (center: { lat: number; lng: number }, radiusKm: number) => {
     const pois: POI[] = [];
-    const count = Math.floor(radiusKm / 2); // More POIs for larger radius
     
-    for (let i = 0; i < count; i++) {
-      // Generate random points within radius
-      const angle = Math.random() * 2 * Math.PI;
-      const distance = Math.random() * radiusKm;
+    // More POIs for larger radius, with realistic distribution
+    const gasStationCount = Math.max(1, Math.floor(radiusKm / 5));
+    const restaurantCount = Math.max(2, Math.floor(radiusKm / 3));
+    const attractionCount = Math.max(1, Math.floor(radiusKm / 8));
+    
+    const gasStationNames = [
+      "Shell Station", "PTT Station", "Bangchak Station", "Esso Station", "Caltex Station"
+    ];
+    const restaurantNames = [
+      "Local Thai Restaurant", "Street Food Corner", "Seafood Paradise", "Coffee House", "Night Market Food"
+    ];
+    const attractionNames = [
+      "Local Temple", "Scenic Viewpoint", "Cultural Center", "Art Gallery", "Local Park"
+    ];
+    
+    // Generate gas stations
+    for (let i = 0; i < gasStationCount; i++) {
+      const angle = (Math.PI * 2 * i) / gasStationCount + Math.random() * 0.5;
+      const distance = Math.random() * radiusKm * 0.8 + radiusKm * 0.2;
       const lat = center.lat + (distance / 111) * Math.cos(angle);
       const lng = center.lng + (distance / (111 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
       
-      const types: ("gas_station" | "restaurant" | "attraction")[] = ["gas_station", "restaurant", "attraction"];
-      const type = types[Math.floor(Math.random() * types.length)];
+      pois.push({
+        id: `gas-${i}`,
+        name: gasStationNames[i % gasStationNames.length],
+        type: "gas_station",
+        coordinates: { lat, lng },
+        distance: Math.round(distance * 10) / 10
+      });
+    }
+    
+    // Generate restaurants
+    for (let i = 0; i < restaurantCount; i++) {
+      const angle = (Math.PI * 2 * i) / restaurantCount + Math.random() * 0.8;
+      const distance = Math.random() * radiusKm * 0.7 + radiusKm * 0.1;
+      const lat = center.lat + (distance / 111) * Math.cos(angle);
+      const lng = center.lng + (distance / (111 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
       
       pois.push({
-        id: `poi-${i}`,
-        name: `${type === "gas_station" ? "ปั๊ม" : type === "restaurant" ? "ร้าน" : "สถานที่"} ${i + 1}`,
-        type,
+        id: `restaurant-${i}`,
+        name: restaurantNames[i % restaurantNames.length],
+        type: "restaurant",
+        coordinates: { lat, lng },
+        distance: Math.round(distance * 10) / 10
+      });
+    }
+    
+    // Generate attractions
+    for (let i = 0; i < attractionCount; i++) {
+      const angle = (Math.PI * 2 * i) / attractionCount + Math.random() * 1.2;
+      const distance = Math.random() * radiusKm * 0.9 + radiusKm * 0.3;
+      const lat = center.lat + (distance / 111) * Math.cos(angle);
+      const lng = center.lng + (distance / (111 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
+      
+      pois.push({
+        id: `attraction-${i}`,
+        name: attractionNames[i % attractionNames.length],
+        type: "attraction",
         coordinates: { lat, lng },
         distance: Math.round(distance * 10) / 10
       });
@@ -481,23 +524,34 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
             <div className="absolute bottom-4 left-4 right-4">
               <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
                 <div className="text-xs font-medium mb-2">
-                  {showNearbyPOIs ? `Found ${nearbyPOIs.length} POIs` : `${filteredAttractions.length} Attractions`}
+                  {showNearbyPOIs ? (
+                    <>
+                      <span>Found {nearbyPOIs.length} POIs nearby </span>
+                      {selectedPOIType !== "all" && <span>({selectedPOIType.replace('_', ' ')} only)</span>}
+                      <span className="text-gray-500"> • {userLocation ? 'Your location' : 'Default location'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{filteredAttractions.length} Attractions</span>
+                      <span className="text-gray-500"> • Category: {selectedCategory}</span>
+                    </>
+                  )}
                 </div>
                 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
                   {showNearbyPOIs ? (
                     nearbyPOIs
                       .filter(poi => selectedPOIType === "all" || poi.type === selectedPOIType)
-                      .slice(0, 5)
+                      .slice(0, 8)
                       .map((poi) => (
                         <button
                           key={poi.id}
                           onClick={() => handleExternalNavigation(poi.coordinates.lat, poi.coordinates.lng)}
-                          className="bg-white rounded-full px-3 py-1 text-xs border hover:bg-gray-50 transition-colors flex items-center gap-1"
+                          className="bg-white rounded-full px-3 py-1 text-xs border hover:bg-gray-50 transition-colors flex items-center gap-1 min-w-0"
                         >
                           <span>{getMarkerIcon(poi.type)}</span>
-                          <span>{poi.name}</span>
-                          {poi.distance && <span className="text-gray-500">({poi.distance}km)</span>}
+                          <span className="truncate">{poi.name}</span>
+                          {poi.distance && <span className="text-gray-500 flex-shrink-0">({poi.distance}km)</span>}
                         </button>
                       ))
                   ) : (
@@ -505,14 +559,26 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
                       <button
                         key={attraction.id}
                         onClick={() => handleExternalNavigation(attraction.coordinates.lat, attraction.coordinates.lng)}
-                        className="bg-white rounded-full px-3 py-1 text-xs border hover:bg-gray-50 transition-colors flex items-center gap-1"
+                        className="bg-white rounded-full px-3 py-1 text-xs border hover:bg-gray-50 transition-colors flex items-center gap-1 min-w-0"
                       >
                         <span>🏞️</span>
-                        <span>{currentLanguage === "th" ? attraction.nameLocal : attraction.name}</span>
-                        <span className="text-yellow-500">★{attraction.rating}</span>
+                        <span className="truncate">{currentLanguage === "th" ? attraction.nameLocal : attraction.name}</span>
+                        <span className="text-yellow-500 flex-shrink-0">★{attraction.rating}</span>
                       </button>
                     ))
                   )}
+                  
+                  {/* Show preview of hidden items */}
+                  {showNearbyPOIs && nearbyPOIs.filter(poi => selectedPOIType === "all" || poi.type === selectedPOIType).length > 8 && (
+                    <div className="bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-600 flex items-center">
+                      +{nearbyPOIs.filter(poi => selectedPOIType === "all" || poi.type === selectedPOIType).length - 8} more
+                    </div>
+                  )}
+                </div>
+                
+                {/* Quick action hint */}
+                <div className="text-xs text-gray-500 mt-2 text-center">
+                  Click any location to navigate • Use filters to refine results
                 </div>
               </div>
             </div>
