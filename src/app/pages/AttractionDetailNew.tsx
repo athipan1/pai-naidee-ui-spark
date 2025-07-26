@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { ArrowLeft, Star, Navigation, Plus, Share2, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { ArrowLeft, Star, Navigation, Plus, Share2, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface AttractionData {
   id: string;
@@ -23,28 +23,40 @@ interface AttractionData {
 
 // Mock data
 const mockAttractionData: Record<string, AttractionData> = {
-  '1': {
-    id: '1',
-    name: 'หมู่เกาะพีพี',
-    images: ['photo-1500375592092-40eb2168fd21', 'photo-1482938289607-e9573fc25ebb'],
+  "1": {
+    id: "1",
+    name: "หมู่เกาะพีพี",
+    images: [
+      "photo-1500375592092-40eb2168fd21",
+      "photo-1482938289607-e9573fc25ebb",
+    ],
     rating: 4.8,
     reviewCount: 2450,
-    description: 'หมู่เกาะพีพีเป็นหมู่เกาะที่มีความงามตามธรรมชาติ ตั้งอยู่ในจังหวัดกระบี่ มีน้ำทะเลใสสีเขียวมรกต หาดทรายขาวสะอาด และภูเขาหินปูนที่สวยงาม',
-    openingHours: 'เปิดตลอด 24 ชั่วโมง',
-    location: 'อำเภอเมือง จังหวัดกระบี่ 81000',
-    activities: ['ดำน้ำดูปะการัง', 'สนอร์คเกลิ้ง', 'นั่งเรือชมวิว', 'อาบแดดชายหาด'],
-    highlights: ['มรดกโลก', 'ธรรมชาติ', 'ทะเล', 'ดำน้ำ'],
+    description:
+      "หมู่เกาะพีพีเป็นหมู่เกาะที่มีความงามตามธรรมชาติ ตั้งอยู่ในจังหวัดกระบี่ มีน้ำทะเลใสสีเขียวมรกต หาดทรายขาวสะอาด และภูเขาหินปูนที่สวยงาม",
+    openingHours: "เปิดตลอด 24 ชั่วโมง",
+    location: "อำเภอเมือง จังหวัดกระบี่ 81000",
+    activities: [
+      "ดำน้ำดูปะการัง",
+      "สนอร์คเกลิ้ง",
+      "นั่งเรือชมวิว",
+      "อาบแดดชายหาด",
+    ],
+    highlights: ["มรดกโลก", "ธรรมชาติ", "ทะเล", "ดำน้ำ"],
     latitude: 7.7407,
-    longitude: 98.7784
-  }
+    longitude: 98.7784,
+  },
 };
 
 interface AttractionDetailProps {
-  currentLanguage?: 'th' | 'en';
+  _currentLanguage?: "th" | "en";
   onBack?: () => void;
 }
 
-function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetailProps) {
+function AttractionDetailNew({
+  _currentLanguage = "th",
+  onBack,
+}: AttractionDetailProps) {
   const { id } = useParams<{ id: string }>();
   const [attraction, setAttraction] = useState<AttractionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,16 +65,16 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
   useEffect(() => {
     const loadAttraction = async () => {
       setIsLoading(true);
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       if (id && mockAttractionData[id]) {
         setAttraction(mockAttractionData[id]);
       } else {
         setAttraction(null);
       }
-      
+
       setIsLoading(false);
     };
 
@@ -80,32 +92,36 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
   const handleNavigate = () => {
     if (attraction) {
       const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${attraction.latitude},${attraction.longitude}`;
-      window.open(googleMapsUrl, '_blank');
+      window.open(googleMapsUrl, "_blank");
     }
   };
 
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      alert('คัดลอกลิงก์แล้ว!');
-    } catch (error) {
-      alert('ไม่สามารถแชร์ได้ในขณะนี้');
+      alert("คัดลอกลิงก์แล้ว!");
+    } catch {
+      alert("ไม่สามารถแชร์ได้ในขณะนี้");
     }
   };
 
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
-    
+
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
+      stars.push(
+        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+      );
     }
-    
+
     const emptyStars = 5 - fullStars;
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="h-4 w-4 text-muted-foreground" />);
+      stars.push(
+        <Star key={`empty-${i}`} className="h-4 w-4 text-muted-foreground" />
+      );
     }
-    
+
     return stars;
   };
 
@@ -122,7 +138,9 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
       <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold">ไม่พบข้อมูลสถานที่ท่องเที่ยว</h1>
-          <p className="text-muted-foreground">สถานที่ที่คุณกำลังมองหาอาจไม่มีอยู่ในระบบ</p>
+          <p className="text-muted-foreground">
+            สถานที่ที่คุณกำลังมองหาอาจไม่มีอยู่ในระบบ
+          </p>
         </div>
         <Button onClick={handleBack} variant="ghost" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
@@ -161,13 +179,17 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
         <div className="space-y-6">
           {/* Header */}
           <div className="space-y-3">
-            <h1 className="text-3xl font-bold text-foreground">{attraction.name}</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {attraction.name}
+            </h1>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 {renderStars(attraction.rating)}
               </div>
               <span className="text-lg font-semibold">{attraction.rating}</span>
-              <span className="text-muted-foreground">({attraction.reviewCount.toLocaleString()} รีวิว)</span>
+              <span className="text-muted-foreground">
+                ({attraction.reviewCount.toLocaleString()} รีวิว)
+              </span>
             </div>
           </div>
 
@@ -184,7 +206,9 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-3">📝 รายละเอียด</h3>
-              <p className="text-muted-foreground leading-relaxed">{attraction.description}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {attraction.description}
+              </p>
             </CardContent>
           </Card>
 
@@ -196,7 +220,9 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
                   <div className="h-5 w-5 text-primary">🕒</div>
                   <div>
                     <p className="font-medium">เวลาเปิด-ปิด</p>
-                    <p className="text-sm text-muted-foreground">{attraction.openingHours}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {attraction.openingHours}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -208,7 +234,9 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
                   <div className="h-5 w-5 text-primary">📍</div>
                   <div>
                     <p className="font-medium">ที่อยู่</p>
-                    <p className="text-sm text-muted-foreground">{attraction.location}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {attraction.location}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -221,7 +249,10 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
               <h3 className="text-lg font-semibold mb-4">🎯 กิจกรรมที่ทำได้</h3>
               <div className="grid gap-2 sm:grid-cols-2">
                 {attraction.activities.map((activity) => (
-                  <div key={activity} className="flex items-center gap-2 text-sm">
+                  <div
+                    key={activity}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     {activity}
                   </div>
@@ -245,13 +276,15 @@ function AttractionDetailNew({ currentLanguage = 'th', onBack }: AttractionDetai
           </div>
 
           <div className="flex gap-3">
-            <Button 
-              onClick={() => setIsFavorited(!isFavorited)} 
-              variant="outline" 
+            <Button
+              onClick={() => setIsFavorited(!isFavorited)}
+              variant="outline"
               size="icon"
               className={isFavorited ? "text-red-500 border-red-200" : ""}
             >
-              <Heart className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`} />
+              <Heart
+                className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`}
+              />
             </Button>
             <Button onClick={handleShare} variant="outline" size="icon">
               <Share2 className="h-4 w-4" />

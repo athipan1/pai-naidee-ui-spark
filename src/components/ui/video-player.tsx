@@ -14,16 +14,19 @@ interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
 }
 
 const VideoPlayer = React.forwardRef<HTMLVideoElement, VideoPlayerProps>(
-  ({ 
-    src, 
-    poster, 
-    showControls = false, 
-    autoPlay = true, 
-    muted = true, 
-    loop = true, 
-    className,
-    ...props 
-  }, ref) => {
+  (
+    {
+      src,
+      poster,
+      showControls = false,
+      autoPlay = true,
+      muted = true,
+      loop = true,
+      className,
+      ...props
+    },
+    ref
+  ) => {
     const [isPlaying, setIsPlaying] = React.useState(autoPlay);
     const [isMuted, setIsMuted] = React.useState(muted);
     const videoRef = React.useRef<HTMLVideoElement>(null);
@@ -54,12 +57,12 @@ const VideoPlayer = React.forwardRef<HTMLVideoElement, VideoPlayerProps>(
         const handlePlay = () => setIsPlaying(true);
         const handlePause = () => setIsPlaying(false);
 
-        video.addEventListener('play', handlePlay);
-        video.addEventListener('pause', handlePause);
+        video.addEventListener("play", handlePlay);
+        video.addEventListener("pause", handlePause);
 
         return () => {
-          video.removeEventListener('play', handlePlay);
-          video.removeEventListener('pause', handlePause);
+          video.removeEventListener("play", handlePlay);
+          video.removeEventListener("pause", handlePause);
         };
       }
     }, []);
@@ -77,7 +80,7 @@ const VideoPlayer = React.forwardRef<HTMLVideoElement, VideoPlayerProps>(
           className="w-full h-full object-cover"
           {...props}
         />
-        
+
         {showControls && (
           <div className="absolute bottom-4 left-4 flex items-center space-x-2">
             <Button
@@ -92,7 +95,7 @@ const VideoPlayer = React.forwardRef<HTMLVideoElement, VideoPlayerProps>(
                 <Play className="w-4 h-4" />
               )}
             </Button>
-            
+
             <Button
               variant="ghost"
               size="icon"

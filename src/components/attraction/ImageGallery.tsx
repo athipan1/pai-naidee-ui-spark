@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/shared/lib/utils";
 
@@ -31,7 +37,7 @@ export function ImageGallery({ images, title, className }: ImageGalleryProps) {
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index} className="basis-1/3">
-              <Card 
+              <Card
                 className={cn(
                   "cursor-pointer overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-primary",
                   selectedIndex === index && "ring-2 ring-primary"

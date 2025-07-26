@@ -8,7 +8,11 @@ interface BackButtonProps {
   variant?: "header" | "floating";
 }
 
-export function BackButton({ onClick, className, variant = "header" }: BackButtonProps) {
+export function BackButton({
+  onClick,
+  className,
+  variant = "header",
+}: BackButtonProps) {
   if (variant === "floating") {
     return (
       <Button
@@ -28,7 +32,10 @@ export function BackButton({ onClick, className, variant = "header" }: BackButto
     <Button
       onClick={onClick}
       variant="ghost"
-      className={cn("gap-2 text-muted-foreground hover:text-foreground", className)}
+      className={cn(
+        "gap-2 text-muted-foreground hover:text-foreground",
+        className
+      )}
     >
       <ArrowLeft className="h-4 w-4" />
       กลับหน้าหลัก

@@ -25,8 +25,11 @@ export default [
   },
   {
     rules: {
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-unused-expressions": "off"
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-unused-expressions": "off",
+      "no-console": "warn",
+      "no-debugger": "error",
+      "prefer-const": "error"
     }
   }
 ];

@@ -1,17 +1,24 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  Search,
+  MapPin,
+  Tag,
+  Filter,
+  X,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/shared/lib/utils";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, MapPin, Tag, Filter, X, Clock, TrendingUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/shared/lib/utils';
-
-import type { SearchSuggestion, SearchResult } from '@/shared/utils/searchAPI';
+import type { SearchSuggestion, SearchResult } from "@/shared/utils/searchAPI";
 
 interface SmartSearchBarProps {
-  currentLanguage: 'th' | 'en';
+  currentLanguage: "th" | "en";
   onSearch: (query: string, results: SearchResult[]) => void;
   onSuggestionSelect?: (suggestion: SearchSuggestion) => void;
   placeholder?: string;
@@ -23,22 +30,22 @@ const SmartSearchBar = ({
   onSearch,
   onSuggestionSelect,
   placeholder,
-  className
+  className,
 }: SmartSearchBarProps) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState<{
+  const [selectedFilters, _setSelectedFilters] = useState<{
     provinces: string[];
     categories: string[];
     amenities: string[];
   }>({
     provinces: [],
     categories: [],
-    amenities: []
+    amenities: [],
   });
 
   const searchRef = useRef<HTMLDivElement>(null);
@@ -48,48 +55,48 @@ const SmartSearchBar = ({
 
   const content = {
     th: {
-      searchPlaceholder: 'ค้นหาสถานที่ท่องเที่ยว...',
-      recentSearches: 'การค้นหาล่าสุด',
-      trendingSearches: 'ยอดนิยม',
-      suggestions: 'คำแนะนำ',
-      noSuggestions: 'ไม่พบคำแนะนำ',
-      searchResults: 'ผลการค้นหา',
-      clearAll: 'ล้างทั้งหมด',
-      filters: 'ตัวกรอง',
-      provinces: 'จังหวัด',
-      categories: 'หมวดหมู่',
-      amenities: 'สิ่งอำนวยความสะดวก',
-      confidence: 'ความเชื่อมั่น'
+      searchPlaceholder: "ค้นหาสถานที่ท่องเที่ยว...",
+      recentSearches: "การค้นหาล่าสุด",
+      trendingSearches: "ยอดนิยม",
+      suggestions: "คำแนะนำ",
+      noSuggestions: "ไม่พบคำแนะนำ",
+      searchResults: "ผลการค้นหา",
+      clearAll: "ล้างทั้งหมด",
+      filters: "ตัวกรอง",
+      provinces: "จังหวัด",
+      categories: "หมวดหมู่",
+      amenities: "สิ่งอำนวยความสะดวก",
+      confidence: "ความเชื่อมั่น",
     },
     en: {
-      searchPlaceholder: 'Search destinations...',
-      recentSearches: 'Recent Searches',
-      trendingSearches: 'Trending',
-      suggestions: 'Suggestions',
-      noSuggestions: 'No suggestions found',
-      searchResults: 'Search Results',
-      clearAll: 'Clear All',
-      filters: 'Filters',
-      provinces: 'Provinces',
-      categories: 'Categories',
-      amenities: 'Amenities',
-      confidence: 'Confidence'
-    }
+      searchPlaceholder: "Search destinations...",
+      recentSearches: "Recent Searches",
+      trendingSearches: "Trending",
+      suggestions: "Suggestions",
+      noSuggestions: "No suggestions found",
+      searchResults: "Search Results",
+      clearAll: "Clear All",
+      filters: "Filters",
+      provinces: "Provinces",
+      categories: "Categories",
+      amenities: "Amenities",
+      confidence: "Confidence",
+    },
   };
 
   const t = content[currentLanguage];
 
   // Mock trending searches
   const mockTrendingSearches = [
-    currentLanguage === 'th' ? 'เกาะพีพี' : 'Phi Phi Islands',
-    currentLanguage === 'th' ? 'วัดพระแก้ว' : 'Wat Phra Kaew',
-    currentLanguage === 'th' ? 'ดอยอินทนนท์' : 'Doi Inthanon',
-    currentLanguage === 'th' ? 'ตลาดน้ำ' : 'Floating Market'
+    currentLanguage === "th" ? "เกาะพีพี" : "Phi Phi Islands",
+    currentLanguage === "th" ? "วัดพระแก้ว" : "Wat Phra Kaew",
+    currentLanguage === "th" ? "ดอยอินทนนท์" : "Doi Inthanon",
+    currentLanguage === "th" ? "ตลาดน้ำ" : "Floating Market",
   ];
 
   // Initialize data
   useEffect(() => {
-    const savedRecentSearches = localStorage.getItem('recentSearches');
+    const savedRecentSearches = localStorage.getItem("recentSearches");
     if (savedRecentSearches) {
       setRecentSearches(JSON.parse(savedRecentSearches));
     }
@@ -98,7 +105,7 @@ const SmartSearchBar = ({
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    (searchQuery: string) => {
+    (_searchQuery: string) => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
@@ -115,7 +122,7 @@ const SmartSearchBar = ({
   );
 
   // Fetch suggestions using API client
-  const fetchSuggestions = async (searchQuery: string) => {
+  const fetchSuggestions = async (_searchQuery: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -128,7 +135,7 @@ const SmartSearchBar = ({
       const suggestions = [];
       setSuggestions(suggestions);
     } catch (error) {
-      console.error('Error fetching suggestions:', error);
+      console.error("Error fetching suggestions:", error);
       setSuggestions([]);
     } finally {
       setIsLoading(false);
@@ -136,11 +143,11 @@ const SmartSearchBar = ({
   };
 
   // Perform full search using API client
-  const performSearch = async (searchQuery: string) => {
+  const performSearch = async (_searchQuery: string) => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
-    
+
     try {
       // const response = await apiClient.performSearch({
       //   query: searchQuery,
@@ -148,19 +155,22 @@ const SmartSearchBar = ({
       //   filters: selectedFilters
       // });
       const response = { results: [], totalCount: 0 };
-      
+
       // Save to recent searches
       const updatedRecentSearches = [
         searchQuery,
-        ...recentSearches.filter(s => s !== searchQuery)
+        ...recentSearches.filter((s) => s !== searchQuery),
       ].slice(0, 5);
-      
+
       setRecentSearches(updatedRecentSearches);
-      localStorage.setItem('recentSearches', JSON.stringify(updatedRecentSearches));
-      
+      localStorage.setItem(
+        "recentSearches",
+        JSON.stringify(updatedRecentSearches)
+      );
+
       onSearch(searchQuery, response.results);
     } catch (error) {
-      console.error('Error performing search:', error);
+      console.error("Error performing search:", error);
       onSearch(searchQuery, []);
     } finally {
       setIsLoading(false);
@@ -199,19 +209,22 @@ const SmartSearchBar = ({
   // Clear recent searches
   const clearRecentSearches = () => {
     setRecentSearches([]);
-    localStorage.removeItem('recentSearches');
+    localStorage.removeItem("recentSearches");
   };
 
   // Handle click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Cleanup on unmount
@@ -228,11 +241,16 @@ const SmartSearchBar = ({
 
   const getSuggestionIcon = (type: string) => {
     switch (type) {
-      case 'place': return <MapPin className="w-4 h-4" />;
-      case 'province': return <MapPin className="w-4 h-4" />;
-      case 'category': return <Tag className="w-4 h-4" />;
-      case 'tag': return <Tag className="w-4 h-4" />;
-      default: return <Search className="w-4 h-4" />;
+      case "place":
+        return <MapPin className="w-4 h-4" />;
+      case "province":
+        return <MapPin className="w-4 h-4" />;
+      case "category":
+        return <Tag className="w-4 h-4" />;
+      case "tag":
+        return <Tag className="w-4 h-4" />;
+      default:
+        return <Search className="w-4 h-4" />;
     }
   };
 
@@ -258,7 +276,7 @@ const SmartSearchBar = ({
               size="icon"
               className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8"
               onClick={() => {
-                setQuery('');
+                setQuery("");
                 setSuggestions([]);
                 inputRef.current?.focus();
               }}
@@ -274,7 +292,9 @@ const SmartSearchBar = ({
           variant="outline"
           size="sm"
           className="absolute right-14 top-1/2 transform -translate-y-1/2"
-          onClick={() => {/* Open filter modal */}}
+          onClick={() => {
+            /* Open filter modal */
+          }}
         >
           <Filter className="w-4 h-4 mr-1" />
           {t.filters}
@@ -384,7 +404,9 @@ const SmartSearchBar = ({
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-2">
-                              <span className="font-medium truncate">{suggestion.text}</span>
+                              <span className="font-medium truncate">
+                                {suggestion.text}
+                              </span>
                               <Badge variant="outline" className="text-xs">
                                 {Math.round(suggestion.confidence * 100)}%
                               </Badge>
@@ -406,7 +428,9 @@ const SmartSearchBar = ({
               {query && !isLoading && suggestions.length === 0 && (
                 <div className="p-4 text-center">
                   <Search className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">{t.noSuggestions}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t.noSuggestions}
+                  </p>
                 </div>
               )}
             </ScrollArea>

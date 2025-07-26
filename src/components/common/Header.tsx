@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { Menu, X, Globe2, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Menu, X, Globe2, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
-  currentLanguage: 'th' | 'en';
-  onLanguageChange: (lang: 'th' | 'en') => void;
+  currentLanguage: "th" | "en";
+  onLanguageChange: (lang: "th" | "en") => void;
 }
 
 const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
-    { label: currentLanguage === 'th' ? 'หน้าแรก' : 'Home', href: '#' },
-    { label: currentLanguage === 'th' ? 'สำรวจ' : 'Explore', href: '#' },
-    { label: currentLanguage === 'th' ? 'รายการโปรด' : 'Favorites', href: '#' },
-    { label: currentLanguage === 'th' ? 'โปรไฟล์' : 'Profile', href: '#' },
+    { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "#" },
+    { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "#" },
+    { label: currentLanguage === "th" ? "รายการโปรด" : "Favorites", href: "#" },
+    { label: currentLanguage === "th" ? "โปรไฟล์" : "Profile", href: "#" },
   ];
 
   return (
@@ -26,7 +26,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             <MapPin className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl font-bold text-gradient font-noto-thai">
-            {currentLanguage === 'th' ? 'ไปไหนดี' : 'PaiNaiDee'}
+            {currentLanguage === "th" ? "ไปไหนดี" : "PaiNaiDee"}
           </h1>
         </div>
 
@@ -48,7 +48,9 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onLanguageChange(currentLanguage === 'th' ? 'en' : 'th')}
+            onClick={() =>
+              onLanguageChange(currentLanguage === "th" ? "en" : "th")
+            }
             className="hidden sm:flex items-center space-x-1 rounded-xl"
           >
             <Globe2 className="w-4 h-4" />
@@ -62,7 +64,11 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden rounded-xl"
           >
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </Button>
         </div>
       </div>
@@ -85,14 +91,14 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
               variant="outline"
               size="sm"
               onClick={() => {
-                onLanguageChange(currentLanguage === 'th' ? 'en' : 'th');
+                onLanguageChange(currentLanguage === "th" ? "en" : "th");
                 setIsMenuOpen(false);
               }}
               className="flex items-center space-x-1 rounded-xl sm:hidden w-full justify-center"
             >
               <Globe2 className="w-4 h-4" />
               <span className="font-medium">
-                {currentLanguage === 'th' ? 'English' : 'ไทย'}
+                {currentLanguage === "th" ? "English" : "ไทย"}
               </span>
             </Button>
           </nav>

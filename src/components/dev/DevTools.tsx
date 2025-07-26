@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { getEnvironmentInfo, isFeatureEnabled } from '@/shared/utils/devUtils';
+import { useState } from "react";
+import { getEnvironmentInfo, isFeatureEnabled } from "@/shared/utils/devUtils";
 
 interface DevToolsProps {
   isVisible?: boolean;
@@ -8,9 +8,9 @@ interface DevToolsProps {
 const DevTools = ({ isVisible = false }: DevToolsProps) => {
   const [showDevTools, setShowDevTools] = useState(isVisible);
   const [showInfo, setShowInfo] = useState(false);
-  
+
   // Only show in development mode
-  if (!isFeatureEnabled('debug')) {
+  if (!isFeatureEnabled("debug")) {
     return null;
   }
 
@@ -37,25 +37,36 @@ const DevTools = ({ isVisible = false }: DevToolsProps) => {
               ✕
             </button>
           </div>
-          
+
           <div className="space-y-2 text-xs">
             <button
               onClick={() => setShowInfo(!showInfo)}
               className="w-full text-left p-2 bg-gray-100 rounded hover:bg-gray-200"
             >
-              Environment Info {showInfo ? '▼' : '▶'}
+              Environment Info {showInfo ? "▼" : "▶"}
             </button>
-            
+
             {showInfo && (
               <div className="pl-2 space-y-1 text-xs text-gray-600">
-                <p><strong>Mode:</strong> {envInfo.mode}</p>
-                <p><strong>Version:</strong> {envInfo.version}</p>
-                <p><strong>API:</strong> {envInfo.apiUrl}</p>
-                <p><strong>Debug:</strong> {envInfo.features.debug ? '✅' : '❌'}</p>
-                <p><strong>Analytics:</strong> {envInfo.features.analytics ? '✅' : '❌'}</p>
+                <p>
+                  <strong>Mode:</strong> {envInfo.mode}
+                </p>
+                <p>
+                  <strong>Version:</strong> {envInfo.version}
+                </p>
+                <p>
+                  <strong>API:</strong> {envInfo.apiUrl}
+                </p>
+                <p>
+                  <strong>Debug:</strong> {envInfo.features.debug ? "✅" : "❌"}
+                </p>
+                <p>
+                  <strong>Analytics:</strong>{" "}
+                  {envInfo.features.analytics ? "✅" : "❌"}
+                </p>
               </div>
             )}
-            
+
             <button
               onClick={() => {
                 localStorage.clear();
@@ -65,14 +76,14 @@ const DevTools = ({ isVisible = false }: DevToolsProps) => {
             >
               Clear Storage & Reload
             </button>
-            
+
             <button
               onClick={() => {
-                console.log('App State:', {
-                  favorites: localStorage.getItem('painaidee_favorites'),
-                  language: localStorage.getItem('painaidee_language'),
+                console.log("App State:", {
+                  favorites: localStorage.getItem("painaidee_favorites"),
+                  language: localStorage.getItem("painaidee_language"),
                   url: window.location.href,
-                  timestamp: new Date().toISOString()
+                  timestamp: new Date().toISOString(),
                 });
               }}
               className="w-full text-left p-2 bg-green-100 text-green-700 rounded hover:bg-green-200"

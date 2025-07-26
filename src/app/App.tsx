@@ -22,8 +22,8 @@ const AttractionDetailPage = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       {/* Back Button */}
-      <button 
-        onClick={() => navigate('/')}
+      <button
+        onClick={() => navigate("/")}
         className="fixed top-4 left-4 z-50 flex items-center justify-center h-12 w-12 rounded-full shadow-lg bg-white border hover:bg-gray-50 transition-colors"
       >
         ←
@@ -57,17 +57,29 @@ const AttractionDetailPage = () => {
 
           {/* Highlights */}
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">มรดกโลก</span>
-            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">ธรรมชาติ</span>
-            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">ทะเล</span>
-            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">ดำน้ำ</span>
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+              มรดกโลก
+            </span>
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+              ธรรมชาติ
+            </span>
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+              ทะเล
+            </span>
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+              ดำน้ำ
+            </span>
           </div>
 
           {/* Description */}
           <div className="rounded-lg border bg-white shadow-sm p-6">
             <h3 className="text-lg font-semibold mb-3">📝 รายละเอียด</h3>
             <p className="text-gray-600 leading-relaxed">
-              หมู่เกาะพีพีเป็นหมู่เกาะที่มีความงามตามธรรมชาติ ตั้งอยู่ในจังหวัดกระบี่ มีน้ำทะเลใสสีเขียวมรกต หาดทรายขาวสะอาด และภูเขาหินปูนที่สวยงาม เหมาะสำหรับการพักผ่อนและทำกิจกรรมทางน้ำต่างๆ เช่น ดำน้ำดูปะการัง สนอร์คเกลิ้ง และนั่งเรือชมวิวรอบเกาะ
+              หมู่เกาะพีพีเป็นหมู่เกาะที่มีความงามตามธรรมชาติ
+              ตั้งอยู่ในจังหวัดกระบี่ มีน้ำทะเลใสสีเขียวมรกต หาดทรายขาวสะอาด
+              และภูเขาหินปูนที่สวยงาม
+              เหมาะสำหรับการพักผ่อนและทำกิจกรรมทางน้ำต่างๆ เช่น ดำน้ำดูปะการัง
+              สนอร์คเกลิ้ง และนั่งเรือชมวิวรอบเกาะ
             </p>
           </div>
 
@@ -88,7 +100,9 @@ const AttractionDetailPage = () => {
                 <div className="text-blue-600">📍</div>
                 <div>
                   <p className="font-medium">ที่อยู่</p>
-                  <p className="text-sm text-gray-600">อำเภอเมือง จังหวัดกระบี่ 81000</p>
+                  <p className="text-sm text-gray-600">
+                    อำเภอเมือง จังหวัดกระบี่ 81000
+                  </p>
                 </div>
               </div>
             </div>
@@ -121,9 +135,14 @@ const AttractionDetailPage = () => {
         {/* Action Buttons */}
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <button 
+            <button
               className="flex items-center justify-center gap-2 h-11 px-8 py-2 text-base bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=7.7407,98.7784', '_blank')}
+              onClick={() =>
+                window.open(
+                  "https://www.google.com/maps/search/?api=1&query=7.7407,98.7784",
+                  "_blank"
+                )
+              }
             >
               🧭 นำทางไปที่นี่
             </button>
@@ -136,11 +155,11 @@ const AttractionDetailPage = () => {
             <button className="flex items-center justify-center h-10 w-10 border border-gray-300 bg-white rounded-md hover:bg-gray-50 transition-colors">
               ❤️
             </button>
-            <button 
+            <button
               className="flex items-center justify-center h-10 w-10 border border-gray-300 bg-white rounded-md hover:bg-gray-50 transition-colors"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
-                alert('คัดลอกลิงก์แล้ว!');
+                alert("คัดลอกลิงก์แล้ว!");
               }}
             >
               🔗
@@ -153,7 +172,7 @@ const AttractionDetailPage = () => {
 };
 
 const App = () => {
-  const [currentLanguage, setCurrentLanguage] = useState<'th' | 'en'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -163,13 +182,50 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />} />
-              <Route path="/explore" element={<Explore currentLanguage={currentLanguage} onBack={() => window.history.back()} />} />
-              <Route path="/favorites" element={<Favorites currentLanguage={currentLanguage} />} />
-              <Route path="/profile" element={<Profile currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} onBack={() => window.history.back()} />} />
-              <Route path="/attraction/:id" element={<AttractionDetailPage />} />
-              <Route path="/category/:categoryName" element={<CategoryPage currentLanguage={currentLanguage} />} />
-              <Route path="/accordion-examples" element={<AccordionExamples />} />
+              <Route
+                path="/"
+                element={
+                  <Index
+                    currentLanguage={currentLanguage}
+                    onLanguageChange={setCurrentLanguage}
+                  />
+                }
+              />
+              <Route
+                path="/explore"
+                element={
+                  <Explore
+                    currentLanguage={currentLanguage}
+                    onBack={() => window.history.back()}
+                  />
+                }
+              />
+              <Route
+                path="/favorites"
+                element={<Favorites currentLanguage={currentLanguage} />}
+              />
+              <Route
+                path="/profile"
+                element={
+                  <Profile
+                    currentLanguage={currentLanguage}
+                    onLanguageChange={setCurrentLanguage}
+                    onBack={() => window.history.back()}
+                  />
+                }
+              />
+              <Route
+                path="/attraction/:id"
+                element={<AttractionDetailPage />}
+              />
+              <Route
+                path="/category/:categoryName"
+                element={<CategoryPage currentLanguage={currentLanguage} />}
+              />
+              <Route
+                path="/accordion-examples"
+                element={<AccordionExamples />}
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
