@@ -19,6 +19,7 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { isAuthenticated } from "@/shared/utils/api";
 import { mockAttractionDetails, simulateDelay } from "@/shared/data/mockData";
 import MapModal from "@/components/attraction/MapModal";
+import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 
 interface AttractionDetail {
   id: string;
@@ -396,6 +397,16 @@ const AttractionDetail = ({
           </div>
         </div>
       </div>
+
+      {/* Breadcrumb Navigation */}
+      <BreadcrumbNavigation 
+        currentLanguage={currentLanguage} 
+        items={[
+          { label: currentLanguage === 'th' ? 'หน้าแรก' : 'Home', path: '/' },
+          { label: currentLanguage === 'th' ? 'สถานที่ท่องเที่ยว' : 'Attractions', path: '/' },
+          { label: displayName }
+        ]}
+      />
 
       {/* Hero Section */}
       <div className="relative h-96 overflow-hidden">

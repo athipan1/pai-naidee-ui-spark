@@ -69,13 +69,10 @@ const CategoryFilter = ({
     if (categoryId === "all") {
       onCategoryChange(categoryId);
     } else {
-      // Navigate to category page for specific categories
-      const category = categories.find((cat) => cat.id === categoryId);
-      if (category) {
-        const categoryName =
-          currentLanguage === "th" ? category.labelTh : category.labelEn;
-        navigate(`/category/${encodeURIComponent(categoryName)}`);
-      }
+      // Navigate to search results with category filter
+      const searchParams = new URLSearchParams();
+      searchParams.set('category', categoryId);
+      navigate(`/search?${searchParams.toString()}`);
     }
   };
 
