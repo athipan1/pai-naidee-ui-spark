@@ -14,6 +14,7 @@ import CategoryPage from "./pages/CategoryPage";
 import AccordionExamples from "./pages/AccordionExamples";
 import NotFound from "./pages/NotFound";
 import AttractionDetail from "./pages/AttractionDetail";
+import MapPage from "./pages/MapPage";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,15 @@ const App = () => {
                 path="/attraction/:id"
                 element={
                   <AttractionDetail
+                    currentLanguage={currentLanguage}
+                    onBack={() => window.history.back()}
+                  />
+                }
+              />
+              <Route
+                path="/map/:id?"
+                element={
+                  <MapPage
                     currentLanguage={currentLanguage}
                     onBack={() => window.history.back()}
                   />
