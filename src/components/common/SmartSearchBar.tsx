@@ -122,7 +122,7 @@ const SmartSearchBar = ({
   );
 
   // Fetch suggestions using API client
-  const fetchSuggestions = async (_searchQuery: string) => {
+  const fetchSuggestions = async (searchQuery: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -143,7 +143,7 @@ const SmartSearchBar = ({
   };
 
   // Perform full search using API client
-  const performSearch = async (_searchQuery: string) => {
+  const performSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);

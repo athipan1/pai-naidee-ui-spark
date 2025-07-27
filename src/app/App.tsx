@@ -15,6 +15,7 @@ import AccordionExamples from "./pages/AccordionExamples";
 import NotFound from "./pages/NotFound";
 import AttractionDetail from "./pages/AttractionDetail";
 import MapPage from "./pages/MapPage";
+import SearchResults from "./pages/SearchResults";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,12 @@ const App = () => {
                     currentLanguage={currentLanguage}
                     onBack={() => window.history.back()}
                   />
+                }
+              />
+              <Route
+                path="/search"
+                element={
+                  <SearchResults currentLanguage={currentLanguage} />
                 }
               />
               <Route

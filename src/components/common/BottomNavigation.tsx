@@ -7,7 +7,14 @@ interface BottomNavigationProps {
 
 const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   const location = useLocation();
-  const activeTab = location.pathname;
+  
+  // Helper function to determine if a tab is active
+  const isTabActive = (tabPath: string) => {
+    if (tabPath === "/") {
+      return location.pathname === "/" || location.pathname.startsWith("/category");
+    }
+    return location.pathname.startsWith(tabPath);
+  };
 
   const tabs = [
     {
@@ -42,7 +49,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
         <div className="flex items-center justify-around py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const isActive = activeTab === tab.path;
+            const isActive = isTabActive(tab.path);
 
             return (
               <Link
