@@ -8,6 +8,7 @@ import {
   Map,
   Navigation,
   ChevronDown,
+  Hotel,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +20,9 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { mockAttractionDetails, simulateDelay } from "@/shared/data/mockData";
+import { accommodationAPI } from "@/shared/utils/api";
 import MapModal from "@/components/attraction/MapModal";
+import AccommodationModal from "@/components/attraction/AccommodationModal";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 
 interface AttractionDetail {
@@ -55,6 +58,10 @@ const AttractionDetail = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [showAccommodationModal, setShowAccommodationModal] = useState(false);
+  const [accommodations, setAccommodations] = useState<any[]>([]);
+  const [accommodationLoading, setAccommodationLoading] = useState(false);
+  const [accommodationError, setAccommodationError] = useState<string | null>(null);
 
   const content = {
     th: {
@@ -68,6 +75,7 @@ const AttractionDetail = ({
       mapAndNavigate: "🗺️ แผนที่ & นำทาง",
       viewMap: "ดูแผนที่",
       getDirections: "เส้นทาง",
+      bookAccommodation: "🏨 จองที่พักใกล้เคียง",
     },
     en: {
       loading: "Loading...",
@@ -80,6 +88,7 @@ const AttractionDetail = ({
       mapAndNavigate: "🗺️ Map & Navigate",
       viewMap: "View Map",
       getDirections: "Get Directions",
+      bookAccommodation: "🏨 Book Nearby Accommodation",
     },
   };
 
@@ -161,6 +170,24 @@ const AttractionDetail = ({
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
     // Here you would typically call an API to update favorites
+  };
+
+  const handleBookingClick = async () => {
+    if (!attraction) return;
+
+    setShowAccommodationModal(true);
+    setAccommodationLoading(true);
+    setAccommodationError(null);
+
+    try {
+      const accommodationData = await accommodationAPI.fetchNearbyAccommodations(attraction.id);
+      setAccommodations(accommodationData);
+    } catch (error) {
+      console.error("Failed to fetch accommodations:", error);
+      setAccommodationError(error instanceof Error ? error.message : "Failed to load accommodations");
+    } finally {
+      setAccommodationLoading(false);
+    }
   };
 
   if (loading) {
@@ -319,6 +346,33 @@ const AttractionDetail = ({
             </p>
           </CardContent>
         </Card>
+
+        {/* Accommodation Booking Section */}
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <Hotel className="h-5 w-5 text-primary" />
+                  {t.bookAccommodation}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {currentLanguage === "th" 
+                    ? "ค้นหาและจองที่พักใกล้เคียงกับสถานที่ท่องเที่ยวนี้" 
+                    : "Find and book accommodations near this attraction"}
+                </p>
+              </div>
+              <Button
+                onClick={handleBookingClick}
+                className="flex items-center gap-2"
+                size="lg"
+              >
+                <Hotel className="h-4 w-4" />
+                {t.bookAccommodation}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Map Modal */}
@@ -332,6 +386,17 @@ const AttractionDetail = ({
           nameLocal: attraction.nameLocal
         }}
         currentLanguage={currentLanguage}
+      />
+
+      {/* Accommodation Modal */}
+      <AccommodationModal
+        isOpen={showAccommodationModal}
+        onClose={() => setShowAccommodationModal(false)}
+        accommodations={accommodations}
+        loading={accommodationLoading}
+        error={accommodationError}
+        currentLanguage={currentLanguage}
+        attractionName={displayName}
       />
     </div>
   );
