@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MapPin, Star, Navigation } from "lucide-react";
+import { Heart, MapPin, Star, Navigation, Share, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Translation helpers
@@ -73,13 +73,30 @@ const AttractionCard = ({
 
   const displayName = currentLanguage === "th" && nameLocal ? nameLocal : name;
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({
+        title: displayName,
+        text: description,
+        url: window.location.origin + `/attraction/${id}`,
+      }).catch(() => {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(window.location.origin + `/attraction/${id}`);
+      });
+    } else {
+      // Fallback to clipboard
+      navigator.clipboard.writeText(window.location.origin + `/attraction/${id}`);
+    }
+  };
+
   return (
-    <div
-      className="attraction-card group cursor-pointer"
-      onClick={() => onCardClick(id)}
-    >
+    <div className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-border/50">
       {/* Image Container */}
-      <div className="relative overflow-hidden rounded-t-2xl">
+      <div 
+        className="relative overflow-hidden cursor-pointer"
+        onClick={() => onCardClick(id)}
+      >
         <div
           className={`w-full h-48 bg-muted animate-pulse ${imageLoaded ? "hidden" : "block"}`}
         />
@@ -100,22 +117,33 @@ const AttractionCard = ({
           </span>
         </div>
 
-        {/* Favorite button */}
-        <button
-          className={`heart-btn absolute top-3 right-3 ${isFavorite ? "bg-destructive text-destructive-foreground" : ""}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onFavoriteToggle(id);
-          }}
-        >
-          <Heart className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`} />
-        </button>
+        {/* Action buttons */}
+        <div className="absolute top-3 right-3 flex space-x-2">
+          <button
+            className={`w-9 h-9 rounded-full bg-card/90 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-all duration-300 touch-manipulation ${
+              isFavorite ? "bg-destructive text-destructive-foreground" : "hover:bg-accent"
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle(id);
+            }}
+          >
+            <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`} />
+          </button>
+          
+          <button
+            className="w-9 h-9 rounded-full bg-card/90 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-accent transition-all duration-300 touch-manipulation"
+            onClick={handleShare}
+          >
+            <Share className="w-4 h-4" />
+          </button>
+        </div>
 
-        {/* Quick action button */}
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+        {/* Quick action overlay */}
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <Button
             size="sm"
-            className="btn-primary"
+            className="btn-primary transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
             onClick={(e) => {
               e.stopPropagation();
               onCardClick(id);
@@ -127,7 +155,7 @@ const AttractionCard = ({
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content - Not clickable to avoid confusion */}
       <div className="p-4 space-y-3">
         {/* Title and Rating */}
         <div className="space-y-2">
@@ -168,11 +196,53 @@ const AttractionCard = ({
             </span>
           ))}
           {tags.length > 3 && (
-            <span className="px-2 py-1 text-xs text-muted-foreground">
+            <button 
+              className="px-2 py-1 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+              onClick={() => onCardClick(id)}
+            >
               +{tags.length - 3}{" "}
               {currentLanguage === "th" ? "เพิ่มเติม" : "more"}
-            </span>
+            </button>
           )}
+        </div>
+
+        {/* Bottom action bar */}
+        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onCardClick(id)}
+              className="text-xs h-8"
+            >
+              <Navigation className="w-3 h-3 mr-1" />
+              {currentLanguage === "th" ? "รายละเอียด" : "Details"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Navigate to map
+                window.open(`/map/${id}`, '_blank');
+              }}
+              className="text-xs h-8"
+            >
+              <MapPin className="w-3 h-3 mr-1" />
+              {currentLanguage === "th" ? "แผนที่" : "Map"}
+            </Button>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle(id);
+            }}
+            className="text-xs h-8"
+          >
+            <Bookmark className={`w-3 h-3 ${isFavorite ? "fill-current" : ""}`} />
+          </Button>
         </div>
       </div>
     </div>

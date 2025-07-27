@@ -234,4 +234,53 @@
     @apply absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent;
     @apply rounded-t-2xl;
   }
+
+  /* Mobile UX Improvements */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Improved scrollbar hiding */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Loading animations */
+  .loading-shimmer {
+    @apply animate-pulse bg-gradient-to-r from-muted via-muted/50 to-muted;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Pull to refresh animation */
+  .pull-to-refresh {
+    @apply transition-transform duration-300 ease-out;
+  }
+
+  /* Safe area support */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
 }
