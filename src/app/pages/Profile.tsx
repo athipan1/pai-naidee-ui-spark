@@ -30,7 +30,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -78,7 +77,6 @@ interface UserProfile {
   stats: {
     videos: number;
     reviews: number;
-    bookings: number;
     followers: number;
   };
 }
@@ -103,16 +101,6 @@ interface UserReview {
   likes: number;
 }
 
-interface UserBooking {
-  id: string;
-  type: "hotel" | "activity";
-  name: string;
-  image: string;
-  date: string;
-  status: "confirmed" | "pending" | "cancelled";
-  amount: number;
-}
-
 const Profile = ({
   currentLanguage,
   onLanguageChange,
@@ -121,7 +109,6 @@ const Profile = ({
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userVideos, setUserVideos] = useState<UserVideo[]>([]);
   const [userReviews, setUserReviews] = useState<UserReview[]>([]);
-  const [userBookings, setUserBookings] = useState<UserBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("videos");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -135,7 +122,6 @@ const Profile = ({
       logout: "ออกจากระบบ",
       myVideos: "วิดีโอของฉัน",
       myReviews: "รีวิวของฉัน",
-      myBookings: "รายการจองของฉัน",
       paymentInfo: "ข้อมูลการชำระเงิน",
       privacy: "ความเป็นส่วนตัว",
       language: "ภาษา",
@@ -145,18 +131,12 @@ const Profile = ({
       followers: "ผู้ติดตาม",
       videos: "วิดีโอ",
       reviews: "รีวิว",
-      bookings: "การจอง",
       noVideos: "ยังไม่มีวิดีโอ",
       noReviews: "ยังไม่มีรีวิว",
-      noBookings: "ยังไม่มีการจอง",
       uploadVideo: "อัปโหลดวิดีโอ",
       writeReview: "เขียนรีวิว",
-      bookNow: "จองเลย",
       views: "ครั้ง",
       likes: "ถูกใจ",
-      confirmed: "ยืนยันแล้ว",
-      pending: "รอดำเนินการ",
-      cancelled: "ยกเลิกแล้ว",
       name: "ชื่อ",
       email: "อีเมล",
       bio: "แนะนำตัว",
@@ -171,7 +151,6 @@ const Profile = ({
         "การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูลทั้งหมดจะถูกลบอย่างถาวร",
       delete: "ลบ",
       logoutConfirm: "คุณต้องการออกจากระบบหรือไม่?",
-      baht: "บาท",
     },
     en: {
       profile: "Profile",
@@ -180,7 +159,6 @@ const Profile = ({
       logout: "Logout",
       myVideos: "My Videos",
       myReviews: "My Reviews",
-      myBookings: "My Bookings",
       paymentInfo: "Payment Information",
       privacy: "Privacy",
       language: "Language",
@@ -190,18 +168,12 @@ const Profile = ({
       followers: "Followers",
       videos: "Videos",
       reviews: "Reviews",
-      bookings: "Bookings",
       noVideos: "No videos yet",
       noReviews: "No reviews yet",
-      noBookings: "No bookings yet",
       uploadVideo: "Upload Video",
       writeReview: "Write Review",
-      bookNow: "Book Now",
       views: "views",
       likes: "likes",
-      confirmed: "Confirmed",
-      pending: "Pending",
-      cancelled: "Cancelled",
       name: "Name",
       email: "Email",
       bio: "Bio",
@@ -216,7 +188,6 @@ const Profile = ({
         "This action cannot be undone. All your data will be permanently deleted.",
       delete: "Delete",
       logoutConfirm: "Do you want to logout?",
-      baht: "THB",
     },
   };
 
@@ -244,7 +215,6 @@ const Profile = ({
       stats: {
         videos: 12,
         reviews: 28,
-        bookings: 5,
         followers: 1247,
       },
     };
@@ -308,38 +278,10 @@ const Profile = ({
       },
     ];
 
-    const mockBookings: UserBooking[] = [
-      {
-        id: "1",
-        type: "hotel",
-        name:
-          currentLanguage === "th"
-            ? "โรงแรมวิวทะเล กระบี่"
-            : "Sea View Hotel Krabi",
-        image:
-          "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400",
-        date: "2024-02-15",
-        status: "confirmed",
-        amount: 3500,
-      },
-      {
-        id: "2",
-        type: "activity",
-        name:
-          currentLanguage === "th" ? "ทัวร์ดำน้ำดูปะการัง" : "Snorkeling Tour",
-        image:
-          "https://images.pexels.com/photos/1450361/pexels-photo-1450361.jpeg?auto=compress&cs=tinysrgb&w=400",
-        date: "2024-02-16",
-        status: "pending",
-        amount: 1200,
-      },
-    ];
-
     setTimeout(() => {
       setUserProfile(mockProfile);
       setUserVideos(mockVideos);
       setUserReviews(mockReviews);
-      setUserBookings(mockBookings);
       setLoading(false);
     }, 1000);
   }, [currentLanguage]);
@@ -374,32 +316,6 @@ const Profile = ({
     if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
     if (num >= 1000) return (num / 1000).toFixed(1) + "K";
     return num.toString();
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return t.confirmed;
-      case "pending":
-        return t.pending;
-      case "cancelled":
-        return t.cancelled;
-      default:
-        return status;
-    }
   };
 
   if (loading) {
@@ -540,14 +456,6 @@ const Profile = ({
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {t.reviews}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {userProfile.stats.bookings}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t.bookings}
                     </div>
                   </div>
                 </div>
@@ -729,13 +637,6 @@ const Profile = ({
               <span>{t.myReviews}</span>
             </TabsTrigger>
             <TabsTrigger
-              value="bookings"
-              className="flex items-center space-x-2"
-            >
-              <Calendar className="w-4 h-4" />
-              <span>{t.myBookings}</span>
-            </TabsTrigger>
-            <TabsTrigger
               value="payment"
               className="flex items-center space-x-2"
             >
@@ -845,52 +746,6 @@ const Profile = ({
                               <Heart className="w-3 h-3" />
                               <span>{review.likes}</span>
                             </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* My Bookings Tab */}
-          <TabsContent value="bookings" className="space-y-4">
-            {userBookings.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Calendar className="w-12 h-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">{t.noBookings}</h3>
-                  <Button>
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {t.bookNow}
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {userBookings.map((booking) => (
-                  <Card key={booking.id}>
-                    <CardContent className="p-4">
-                      <div className="flex space-x-4">
-                        <img
-                          src={booking.image}
-                          alt={booking.name}
-                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold">{booking.name}</h3>
-                            <Badge className={getStatusColor(booking.status)}>
-                              {getStatusText(booking.status)}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between text-sm text-muted-foreground">
-                            <span>{formatDate(booking.date)}</span>
-                            <span className="font-semibold text-primary">
-                              ฿{booking.amount.toLocaleString()} {t.baht}
-                            </span>
                           </div>
                         </div>
                       </div>

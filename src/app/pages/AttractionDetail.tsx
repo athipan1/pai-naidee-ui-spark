@@ -5,10 +5,6 @@ import {
   Heart,
   Star,
   MapPin,
-  Car,
-  Bed,
-  Calendar,
-  Users,
   Map,
   Navigation,
   ChevronDown,
@@ -20,10 +16,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/shared/hooks/use-toast";
-import { isAuthenticated } from "@/shared/utils/api";
 import { mockAttractionDetails, simulateDelay } from "@/shared/data/mockData";
 import MapModal from "@/components/attraction/MapModal";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
@@ -39,25 +33,6 @@ interface AttractionDetail {
   images: string[];
   description: string;
   tags: string[];
-  rooms: {
-    id: string;
-    name: string;
-    price: number;
-    currency: string;
-    amenities: string[];
-    maxGuests: number;
-    image: string;
-    externalUrl?: string;
-  }[];
-  cars: {
-    id: string;
-    brand: string;
-    model: string;
-    price_per_day: number;
-    currency: string;
-    features: string[];
-    image: string;
-  }[];
   coordinates: {
     lat: number;
     lng: number;
@@ -75,7 +50,6 @@ const AttractionDetail = ({
 }: AttractionDetailProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [attraction, setAttraction] = useState<AttractionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -88,52 +62,24 @@ const AttractionDetail = ({
       backToSearch: "กลับ",
       addToFavorites: "เพิ่มรายการโปรด",
       removeFromFavorites: "ลบออกจากรายการโปรด",
-      accommodation: "ที่พัก",
-      carRental: "เช่ารถ",
-      bookRoom: "จองห้องนี้",
-      rentCar: "เช่าคันนี้",
-      perNight: "ต่อคืน",
-      perDay: "ต่อวัน",
-      maxGuests: "ผู้เข้าพักสูงสุด",
-      people: "คน",
-      amenities: "สิ่งอำนวยความสะดวก",
-      features: "คุณสมบัติ",
-      loginRequired: "กรุณาเข้าสู่ระบบเพื่อจอง",
-      bookingSuccess: "จองเรียบร้อยแล้ว!",
-      bookingError: "เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่",
       notFound: "ไม่พบสถานที่ท่องเที่ยวนี้",
       mapView: "🗺️ แผนที่",
       navigateToMap: "🧭 นำทาง",
       mapAndNavigate: "🗺️ แผนที่ & นำทาง",
       viewMap: "ดูแผนที่",
       getDirections: "เส้นทาง",
-      noBookingUrl: "ลิงก์การจองไม่พร้อมใช้งาน",
     },
     en: {
       loading: "Loading...",
       backToSearch: "Back",
       addToFavorites: "Add to Favorites",
       removeFromFavorites: "Remove from Favorites",
-      accommodation: "Accommodation",
-      carRental: "Car Rental",
-      bookRoom: "Book This Room",
-      rentCar: "Rent This Car",
-      perNight: "per night",
-      perDay: "per day",
-      maxGuests: "Max Guests",
-      people: "people",
-      amenities: "Amenities",
-      features: "Features",
-      loginRequired: "Please login to book",
-      bookingSuccess: "Booking successful!",
-      bookingError: "Booking error. Please try again",
       notFound: "Attraction not found",
       mapView: "🗺️ Map",
       navigateToMap: "🧭 Navigate",
       mapAndNavigate: "🗺️ Map & Navigate",
       viewMap: "View Map",
       getDirections: "Get Directions",
-      noBookingUrl: "Booking link not available",
     },
   };
 
@@ -156,59 +102,21 @@ const AttractionDetail = ({
         if (attractionData) {
           // Map the mock data to match the component's interface
           const mappedAttraction: AttractionDetail = {
-            ...attractionData,
+            id: attractionData.id,
+            name: attractionData.name,
             nameLocal:
               currentLanguage === "th"
-                ? "หมู่เกาะพีพี"
+                ? attractionData.nameLocal || attractionData.name
                 : attractionData.nameLocal || attractionData.name,
             province:
-              currentLanguage === "th" ? "กระบี่" : attractionData.province,
+              currentLanguage === "th" ? attractionData.province : attractionData.province,
+            category: attractionData.category,
+            rating: attractionData.rating,
+            reviewCount: attractionData.reviewCount,
+            images: attractionData.images,
+            description: attractionData.description,
+            tags: attractionData.tags,
             coordinates: attractionData.location,
-            rooms:
-              attractionData.rooms?.map((room, index) => ({
-                ...room,
-                maxGuests: 2,
-                name:
-                  currentLanguage === "th"
-                    ? room.name === "Beachfront Villa"
-                      ? "วิลล่าริมชายหาด"
-                      : "บังกะโลสวน"
-                    : room.name,
-                externalUrl: index === 0 
-                  ? "https://www.agoda.com/search?city=20173&checkIn=2024-12-15&checkOut=2024-12-16"
-                  : index === 1
-                  ? "https://www.booking.com/searchresults.html?ss=Phi+Phi+Islands&checkin=2024-12-15&checkout=2024-12-16"
-                  : undefined, // Some rooms may not have booking URLs
-              })) || [],
-            cars: [
-              {
-                id: "car1",
-                brand: "Toyota",
-                model: "Vios",
-                price_per_day: 800,
-                currency: "THB",
-                features: [
-                  "Manual Transmission",
-                  "Air Conditioning",
-                  "GPS Navigation",
-                ],
-                image: "/src/shared/assets/mountain-nature.jpg",
-              },
-              {
-                id: "car2",
-                brand: "Honda",
-                model: "City",
-                price_per_day: 900,
-                currency: "THB",
-                features: [
-                  "Automatic Transmission",
-                  "Air Conditioning",
-                  "GPS Navigation",
-                  "Bluetooth",
-                ],
-                image: "/src/shared/assets/mountain-nature.jpg",
-              },
-            ],
           };
 
           setAttraction(mappedAttraction);
@@ -236,79 +144,6 @@ const AttractionDetail = ({
               ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
               : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
           tags: ["Beach", "Snorkeling", "Island", "Photography"],
-          rooms: [
-            {
-              id: "room1",
-              name:
-                currentLanguage === "th"
-                  ? "ห้องมาตรฐาน วิวทะเล"
-                  : "Standard Sea View Room",
-              price: 1200,
-              currency: "THB",
-              amenities: [
-                "Wifi",
-                "Air Conditioning",
-                "Sea View",
-                "Private Bathroom",
-              ],
-              maxGuests: 2,
-              image: "/src/shared/assets/hero-beach.jpg",
-              externalUrl: "https://www.agoda.com/search?city=20173&checkIn=2024-12-15&checkOut=2024-12-16",
-            },
-            {
-              id: "room2",
-              name:
-                currentLanguage === "th"
-                  ? "ห้องซุพีเรียร์ วิวสวน"
-                  : "Superior Garden View Room",
-              price: 1500,
-              currency: "THB",
-              amenities: [
-                "Wifi",
-                "Air Conditioning",
-                "Garden View",
-                "Private Bathroom",
-                "Mini Bar",
-              ],
-              maxGuests: 3,
-              image: "/src/shared/assets/mountain-nature.jpg",
-              externalUrl: "https://www.booking.com/searchresults.html?ss=Phi+Phi+Islands&checkin=2024-12-15&checkout=2024-12-16",
-            },
-            {
-              id: "room3",
-              name:
-                currentLanguage === "th"
-                  ? "ห้องดีลักซ์ (ไม่พร้อมจอง)"
-                  : "Deluxe Room (Booking Unavailable)",
-              price: 2000,
-              currency: "THB",
-              amenities: [
-                "Wifi",
-                "Air Conditioning",
-                "Ocean View",
-                "Private Bathroom",
-                "Balcony",
-              ],
-              maxGuests: 2,
-              image: "/src/shared/assets/floating-market.jpg",
-              // No externalUrl - this will test the disabled state
-            },
-          ],
-          cars: [
-            {
-              id: "car1",
-              brand: "Toyota",
-              model: "Vios",
-              price_per_day: 800,
-              currency: "THB",
-              features: [
-                "Manual Transmission",
-                "Air Conditioning",
-                "GPS Navigation",
-              ],
-              image: "/src/shared/assets/mountain-nature.jpg",
-            },
-          ],
           coordinates: {
             lat: 7.7367,
             lng: 98.7784,
@@ -322,67 +157,6 @@ const AttractionDetail = ({
 
     fetchAttractionDetail();
   }, [id, currentLanguage]);
-
-  const handleBookRoom = async (room: { id: string; externalUrl?: string }) => {
-    if (room.externalUrl) {
-      // Open external booking URL in new tab
-      window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Fallback to old mock behavior if no external URL
-    if (!isAuthenticated()) {
-      toast({
-        title: t.loginRequired,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Mock booking - simulate delay and success
-      await simulateDelay(800);
-
-      toast({
-        title: t.bookingSuccess,
-        description: `Room ${room.id} booked successfully!`,
-        variant: "default",
-      });
-    } catch (error) {
-      console.error("Booking error:", error);
-      toast({
-        title: t.bookingError,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRentCar = async (carId: string) => {
-    if (!isAuthenticated()) {
-      toast({
-        title: t.loginRequired,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Mock car rental - simulate delay and success
-      await simulateDelay(800);
-
-      toast({
-        title: t.bookingSuccess,
-        description: `Car ${carId} rented successfully!`,
-        variant: "default",
-      });
-    } catch (error) {
-      console.error("Car rental error:", error);
-      toast({
-        title: t.bookingError,
-        variant: "destructive",
-      });
-    }
-  };
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
@@ -543,132 +317,6 @@ const AttractionDetail = ({
             <p className="text-muted-foreground leading-relaxed">
               {attraction.description}
             </p>
-          </CardContent>
-        </Card>
-
-        {/* Accommodation Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bed className="w-5 h-5" />
-              {t.accommodation}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {attraction.rooms.map((room) => (
-              <div
-                key={room.id}
-                className="flex flex-col md:flex-row gap-4 p-4 border rounded-lg"
-              >
-                <img
-                  src={room.image}
-                  alt={room.name}
-                  className="w-full md:w-48 h-32 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-2">{room.name}</h3>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span>
-                        {t.maxGuests}: {room.maxGuests} {t.people}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <p className="text-sm font-medium mb-2">{t.amenities}:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {room.amenities.map((amenity, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {amenity}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col justify-between items-end">
-                  <div className="text-right mb-4">
-                    <p className="text-2xl font-bold text-primary">
-                      ฿{room.price.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {t.perNight}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleBookRoom(room)}
-                    disabled={!room.externalUrl}
-                    className="w-full md:w-auto"
-                    title={!room.externalUrl ? t.noBookingUrl : undefined}
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {t.bookRoom}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Car Rental Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Car className="w-5 h-5" />
-              {t.carRental}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {attraction.cars.map((car) => (
-              <div
-                key={car.id}
-                className="flex flex-col md:flex-row gap-4 p-4 border rounded-lg"
-              >
-                <img
-                  src={car.image}
-                  alt={`${car.brand} ${car.model}`}
-                  className="w-full md:w-48 h-32 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-2">
-                    {car.brand} {car.model}
-                  </h3>
-                  <div className="mb-3">
-                    <p className="text-sm font-medium mb-2">{t.features}:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {car.features.map((feature, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col justify-between items-end">
-                  <div className="text-right mb-4">
-                    <p className="text-2xl font-bold text-primary">
-                      ฿{car.price_per_day.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{t.perDay}</p>
-                  </div>
-                  <Button
-                    onClick={() => handleRentCar(car.id)}
-                    className="w-full md:w-auto"
-                  >
-                    <Car className="w-4 h-4 mr-2" />
-                    {t.rentCar}
-                  </Button>
-                </div>
-              </div>
-            ))}
           </CardContent>
         </Card>
       </div>
