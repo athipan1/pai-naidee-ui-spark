@@ -3,7 +3,6 @@ import {
   Search,
   MapPin,
   Tag,
-  Filter,
   X,
   Clock,
   TrendingUp,
@@ -38,15 +37,6 @@ const SmartSearchBar = ({
   const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedFilters, _setSelectedFilters] = useState<{
-    provinces: string[];
-    categories: string[];
-    amenities: string[];
-  }>({
-    provinces: [],
-    categories: [],
-    amenities: [],
-  });
 
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,10 +52,6 @@ const SmartSearchBar = ({
       noSuggestions: "ไม่พบคำแนะนำ",
       searchResults: "ผลการค้นหา",
       clearAll: "ล้างทั้งหมด",
-      filters: "ตัวกรอง",
-      provinces: "จังหวัด",
-      categories: "หมวดหมู่",
-      amenities: "สิ่งอำนวยความสะดวก",
       confidence: "ความเชื่อมั่น",
     },
     en: {
@@ -76,10 +62,6 @@ const SmartSearchBar = ({
       noSuggestions: "No suggestions found",
       searchResults: "Search Results",
       clearAll: "Clear All",
-      filters: "Filters",
-      provinces: "Provinces",
-      categories: "Categories",
-      amenities: "Amenities",
       confidence: "Confidence",
     },
   };
@@ -118,7 +100,7 @@ const SmartSearchBar = ({
         }
       }, 300);
     },
-    [selectedFilters]
+    []
   );
 
   // Fetch suggestions using API client
@@ -134,7 +116,7 @@ const SmartSearchBar = ({
       // const suggestions = await apiClient.getSearchSuggestions(searchQuery, currentLanguage);
       const suggestions = [];
       setSuggestions(suggestions);
-    } catch (_error) {
+    } catch {
       // Handle error silently for now
       setSuggestions([]);
     } finally {
@@ -151,8 +133,7 @@ const SmartSearchBar = ({
     try {
       // const response = await apiClient.performSearch({
       //   query: searchQuery,
-      //   language: currentLanguage,
-      //   filters: selectedFilters
+      //   language: currentLanguage
       // });
       const response = { results: [], totalCount: 0 };
 
@@ -169,7 +150,7 @@ const SmartSearchBar = ({
       );
 
       onSearch(searchQuery, response.results);
-    } catch (_error) {
+    } catch {
       // Handle error silently for now
       onSearch(searchQuery, []);
     } finally {
@@ -299,19 +280,7 @@ const SmartSearchBar = ({
           )}
         </div>
 
-        {/* Filter Button */}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="absolute right-14 top-1/2 transform -translate-y-1/2"
-          onClick={() => {
-            /* Open filter modal */
-          }}
-        >
-          <Filter className="w-4 h-4 mr-1" />
-          {t.filters}
-        </Button>
+
       </form>
 
       {/* Suggestions Dropdown */}
