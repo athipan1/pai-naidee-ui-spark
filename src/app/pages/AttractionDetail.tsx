@@ -47,6 +47,7 @@ interface AttractionDetail {
     amenities: string[];
     maxGuests: number;
     image: string;
+    externalUrl?: string;
   }[];
   cars: {
     id: string;
@@ -106,6 +107,7 @@ const AttractionDetail = ({
       mapAndNavigate: "🗺️ แผนที่ & นำทาง",
       viewMap: "ดูแผนที่",
       getDirections: "เส้นทาง",
+      noBookingUrl: "ลิงก์การจองไม่พร้อมใช้งาน",
     },
     en: {
       loading: "Loading...",
@@ -131,6 +133,7 @@ const AttractionDetail = ({
       mapAndNavigate: "🗺️ Map & Navigate",
       viewMap: "View Map",
       getDirections: "Get Directions",
+      noBookingUrl: "Booking link not available",
     },
   };
 
@@ -162,7 +165,7 @@ const AttractionDetail = ({
               currentLanguage === "th" ? "กระบี่" : attractionData.province,
             coordinates: attractionData.location,
             rooms:
-              attractionData.rooms?.map((room) => ({
+              attractionData.rooms?.map((room, index) => ({
                 ...room,
                 maxGuests: 2,
                 name:
@@ -171,6 +174,11 @@ const AttractionDetail = ({
                       ? "วิลล่าริมชายหาด"
                       : "บังกะโลสวน"
                     : room.name,
+                externalUrl: index === 0 
+                  ? "https://www.agoda.com/search?city=20173&checkIn=2024-12-15&checkOut=2024-12-16"
+                  : index === 1
+                  ? "https://www.booking.com/searchresults.html?ss=Phi+Phi+Islands&checkin=2024-12-15&checkout=2024-12-16"
+                  : undefined, // Some rooms may not have booking URLs
               })) || [],
             cars: [
               {
@@ -245,6 +253,45 @@ const AttractionDetail = ({
               ],
               maxGuests: 2,
               image: "/src/shared/assets/hero-beach.jpg",
+              externalUrl: "https://www.agoda.com/search?city=20173&checkIn=2024-12-15&checkOut=2024-12-16",
+            },
+            {
+              id: "room2",
+              name:
+                currentLanguage === "th"
+                  ? "ห้องซุพีเรียร์ วิวสวน"
+                  : "Superior Garden View Room",
+              price: 1500,
+              currency: "THB",
+              amenities: [
+                "Wifi",
+                "Air Conditioning",
+                "Garden View",
+                "Private Bathroom",
+                "Mini Bar",
+              ],
+              maxGuests: 3,
+              image: "/src/shared/assets/mountain-nature.jpg",
+              externalUrl: "https://www.booking.com/searchresults.html?ss=Phi+Phi+Islands&checkin=2024-12-15&checkout=2024-12-16",
+            },
+            {
+              id: "room3",
+              name:
+                currentLanguage === "th"
+                  ? "ห้องดีลักซ์ (ไม่พร้อมจอง)"
+                  : "Deluxe Room (Booking Unavailable)",
+              price: 2000,
+              currency: "THB",
+              amenities: [
+                "Wifi",
+                "Air Conditioning",
+                "Ocean View",
+                "Private Bathroom",
+                "Balcony",
+              ],
+              maxGuests: 2,
+              image: "/src/shared/assets/floating-market.jpg",
+              // No externalUrl - this will test the disabled state
             },
           ],
           cars: [
@@ -276,7 +323,14 @@ const AttractionDetail = ({
     fetchAttractionDetail();
   }, [id, currentLanguage]);
 
-  const handleBookRoom = async (roomId: string) => {
+  const handleBookRoom = async (room: { id: string; externalUrl?: string }) => {
+    if (room.externalUrl) {
+      // Open external booking URL in new tab
+      window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Fallback to old mock behavior if no external URL
     if (!isAuthenticated()) {
       toast({
         title: t.loginRequired,
@@ -291,7 +345,7 @@ const AttractionDetail = ({
 
       toast({
         title: t.bookingSuccess,
-        description: `Room ${roomId} booked successfully!`,
+        description: `Room ${room.id} booked successfully!`,
         variant: "default",
       });
     } catch (error) {
@@ -546,8 +600,10 @@ const AttractionDetail = ({
                     </p>
                   </div>
                   <Button
-                    onClick={() => handleBookRoom(room.id)}
+                    onClick={() => handleBookRoom(room)}
+                    disabled={!room.externalUrl}
                     className="w-full md:w-auto"
+                    title={!room.externalUrl ? t.noBookingUrl : undefined}
                   >
                     <Calendar className="w-4 h-4 mr-2" />
                     {t.bookRoom}
