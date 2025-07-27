@@ -12,15 +12,25 @@ interface Room {
   amenities: string[];
   maxGuests: number;
   image: string;
+  externalUrl?: string;
 }
 
 interface AccommodationSectionProps {
   rooms: Room[];
   currentLanguage: "th" | "en";
-  onBookRoom: (roomId: string) => void;
+  onBookRoom?: (roomId: string) => void; // Made optional since we'll use external links
 }
 
 const AccommodationSection = ({ rooms, currentLanguage, onBookRoom }: AccommodationSectionProps) => {
+  const handleBookRoom = (room: Room) => {
+    if (room.externalUrl) {
+      // Open external booking URL in new tab
+      window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      // Fallback to old behavior if no external URL
+      onBookRoom?.(room.id);
+    }
+  };
   const getAmenityIcon = (amenity: string) => {
     const amenityLower = amenity.toLowerCase();
     if (amenityLower.includes('wifi')) return <Wifi className="w-4 h-4" />;
@@ -36,7 +46,8 @@ const AccommodationSection = ({ rooms, currentLanguage, onBookRoom }: Accommodat
     amenities: { th: "สิ่งอำนวยความสะดวก", en: "Amenities" },
     perNight: { th: "ต่อคืน", en: "per night" },
     people: { th: "คน", en: "people" },
-    noRooms: { th: "ไม่มีห้องพักในขณะนี้", en: "No rooms available at this time" }
+    noRooms: { th: "ไม่มีห้องพักในขณะนี้", en: "No rooms available at this time" },
+    noBookingUrl: { th: "ลิงก์การจองไม่พร้อมใช้งาน", en: "Booking link not available" }
   };
 
   if (!rooms || rooms.length === 0) {
@@ -120,8 +131,10 @@ const AccommodationSection = ({ rooms, currentLanguage, onBookRoom }: Accommodat
               </div>
               
               <Button 
-                onClick={() => onBookRoom(room.id)}
+                onClick={() => handleBookRoom(room)}
+                disabled={!room.externalUrl}
                 className="w-full md:w-auto min-w-[120px]"
+                title={!room.externalUrl ? content.noBookingUrl[currentLanguage] : undefined}
               >
                 <Bed className="w-4 h-4 mr-2" />
                 {content.book[currentLanguage]}
