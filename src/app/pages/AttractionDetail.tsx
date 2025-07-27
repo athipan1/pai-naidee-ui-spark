@@ -11,8 +11,15 @@ import {
   Users,
   Map,
   Navigation,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -96,6 +103,9 @@ const AttractionDetail = ({
       notFound: "ไม่พบสถานที่ท่องเที่ยวนี้",
       mapView: "🗺️ แผนที่",
       navigateToMap: "🧭 นำทาง",
+      mapAndNavigate: "🗺️ แผนที่ & นำทาง",
+      viewMap: "ดูแผนที่",
+      getDirections: "เส้นทาง",
     },
     en: {
       loading: "Loading...",
@@ -118,6 +128,9 @@ const AttractionDetail = ({
       notFound: "Attraction not found",
       mapView: "🗺️ Map",
       navigateToMap: "🧭 Navigate",
+      mapAndNavigate: "🗺️ Map & Navigate",
+      viewMap: "View Map",
+      getDirections: "Get Directions",
     },
   };
 
@@ -367,22 +380,28 @@ const AttractionDetail = ({
             </Button>
             
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowMapModal(true)}
-                className="flex items-center gap-2"
-              >
-                <Map className="w-4 h-4" />
-                {t.mapView}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/map/${attraction.id}`)}
-                className="flex items-center gap-2"
-              >
-                <Navigation className="w-4 h-4" />
-                {t.navigateToMap}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Map className="w-4 h-4" />
+                    {t.mapAndNavigate}
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setShowMapModal(true)}>
+                    <Map className="w-4 h-4 mr-2" />
+                    {t.viewMap}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/map/${attraction.id}`)}>
+                    <Navigation className="w-4 h-4 mr-2" />
+                    {t.getDirections}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant={isFavorite ? "default" : "outline"}
                 onClick={toggleFavorite}

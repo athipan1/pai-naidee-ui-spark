@@ -1,5 +1,11 @@
-import { Navigation, Plus, Share2, Heart, ExternalLink } from "lucide-react";
+import { Navigation, Plus, Share2, Heart, Map, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 
 interface ActionButtonsProps {
@@ -68,10 +74,25 @@ export function ActionButtons({
     <div className="space-y-4">
       {/* Primary Actions */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <Button onClick={handleNavigate} size="lg" className="gap-2">
-          <Navigation className="h-5 w-5" />
-          นำทางไปที่นี่
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="lg" className="gap-2">
+              <Map className="h-5 w-5" />
+              แผนที่ & นำทาง
+              <ChevronDown className="h-3 w-3 ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuItem onClick={handleViewMap}>
+              <Map className="h-4 w-4 mr-2" />
+              ดูแผนที่
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNavigate}>
+              <Navigation className="h-4 w-4 mr-2" />
+              เส้นทาง
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
           onClick={handleAddToPlan}
           variant="outline"
@@ -97,9 +118,6 @@ export function ActionButtons({
         </Button>
         <Button onClick={handleShare} variant="outline" size="icon">
           <Share2 className="h-4 w-4" />
-        </Button>
-        <Button onClick={handleViewMap} variant="outline" size="icon">
-          <ExternalLink className="h-4 w-4" />
         </Button>
       </div>
     </div>
