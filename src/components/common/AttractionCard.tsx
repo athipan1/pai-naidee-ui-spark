@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { Heart, MapPin, Star, Navigation, Share, Bookmark } from "lucide-react";
+import { Heart, MapPin, Star, Navigation, Share, Bookmark, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Translation helpers
 const getCategoryNameTh = (category: string): string => {
@@ -209,28 +215,34 @@ const AttractionCard = ({
         {/* Bottom action bar */}
         <div className="flex items-center justify-between pt-2 border-t border-border/50">
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onCardClick(id)}
-              className="text-xs h-8"
-            >
-              <Navigation className="w-3 h-3 mr-1" />
-              {currentLanguage === "th" ? "รายละเอียด" : "Details"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Navigate to map
-                window.open(`/map/${id}`, '_blank');
-              }}
-              className="text-xs h-8"
-            >
-              <MapPin className="w-3 h-3 mr-1" />
-              {currentLanguage === "th" ? "แผนที่" : "Map"}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-8"
+                >
+                  <Navigation className="w-3 h-3 mr-1" />
+                  {currentLanguage === "th" ? "ดู & นำทาง" : "View & Navigate"}
+                  <ChevronDown className="w-2 h-2 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-40">
+                <DropdownMenuItem onClick={() => onCardClick(id)}>
+                  <Navigation className="w-3 h-3 mr-2" />
+                  {currentLanguage === "th" ? "รายละเอียด" : "Details"}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`/map/${id}`, '_blank');
+                  }}
+                >
+                  <MapPin className="w-3 h-3 mr-2" />
+                  {currentLanguage === "th" ? "แผนที่" : "Map"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <Button
             variant="ghost"
