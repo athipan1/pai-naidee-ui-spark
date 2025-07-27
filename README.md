@@ -1,78 +1,78 @@
-# PaiNaiDee - Thailand Tourism Discovery App
+# PaiNaiDee - แอปพลิเคชันค้นหาสถานที่ท่องเที่ยวในประเทศไทย
 
 <div align="center">
   <img src="public/favicon.ico" alt="PaiNaiDee Logo" width="80" height="80">
   
-  **Discover Amazing Places in Thailand** 🇹🇭
+  **ค้นพบสถานที่ท่องเที่ยวที่น่าทึ่งในประเทศไทย** 🇹🇭
   
-  A modern, responsive web application for exploring Thailand's beautiful attractions, culture, and experiences.
+  เว็บแอปพลิเคชันที่ทันสมัยและตอบสนองการใช้งานบนอุปกรณ์ต่างๆ สำหรับการสำรวจสถานที่ท่องเที่ยว วัฒนธรรม และประสบการณ์ที่สวยงามของประเทศไทย
 </div>
 
-## 🌟 Features
+## 🌟 คุณสมบัติเด่น
 
-- **🗺️ Interactive Maps** - Explore attractions with integrated Leaflet maps
-- **🔍 Smart Search** - Find places by name, category, or location
-- **❤️ Favorites System** - Save and organize your favorite destinations
-- **🏷️ Category Filtering** - Browse by temples, beaches, markets, mountains, and more
-- **📱 Mobile-First Design** - Optimized for all devices and screen sizes
-- **🌍 Multi-Language Support** - Available in Thai and English
-- **🎨 Modern UI** - Beautiful interface built with shadcn-ui and Tailwind CSS
-- **⚡ Fast Performance** - Built with Vite for optimal loading speed
+- **🗺️ แผนที่แบบโต้ตอบ** - สำรวจสถานที่ท่องเที่ยวด้วยแผนที่ Leaflet ที่ผสานรวมเข้าด้วยกัน
+- **🔍 ระบบค้นหาอัจฉริยะ** - ค้นหาสถานที่ด้วยชื่อ หมวดหมู่ หรือตำแหน่งที่ตั้ง
+- **❤️ ระบบรายการโปรด** - บันทึกและจัดระเบียบสถานที่ท่องเที่ยวที่คุณชื่นชอบ
+- **🏷️ การกรองตามหมวดหมู่** - เรียกดูตามวัด ชายหาด ตลาด ภูเขา และอื่นๆ อีกมากมาย
+- **📱 การออกแบบที่เน้นมือถือเป็นหลัก** - ปรับให้เหมาะสมกับทุกอุปกรณ์และขนาดหน้าจอ
+- **🌍 รองรับหลายภาษา** - พร้อมใช้งานในภาษาไทยและอังกฤษ
+- **🎨 ส่วนติดต่อผู้ใช้ที่ทันสมัย** - อินเทอร์เฟซที่สวยงามสร้างด้วย shadcn-ui และ Tailwind CSS
+- **⚡ ประสิทธิภาพที่รวดเร็ว** - สร้างด้วย Vite เพื่อความเร็วในการโหลดที่เหมาะสม
 
-## 🚀 Quick Start
+## 🚀 เริ่มต้นใช้งานอย่างรวดเร็ว
 
-### Prerequisites
+### ข้อกำหนดเบื้องต้น
 
-- **Node.js** (version 18 or higher)
-- **npm** or **yarn** package manager
+- **Node.js** (เวอร์ชั่น 18 หรือสูงกว่า)
+- **npm** หรือ **yarn** package manager
 - **Git**
 
-### Installation
+### การติดตั้ง
 
 ```bash
-# 1. Clone the repository
+# 1. Clone repository
 git clone https://github.com/athipan1/pai-naidee-ui-spark.git
 
-# 2. Navigate to project directory
+# 2. ไปยังโฟลเดอร์โปรเจค
 cd pai-naidee-ui-spark
 
-# 3. Install dependencies
+# 3. ติดตั้ง dependencies
 npm install
 
-# 4. Start development server
+# 4. เริ่ม development server
 npm run dev
 
-# 5. Open your browser and visit http://localhost:8080
+# 5. เปิดเว็บเบราว์เซอร์และไปที่ http://localhost:8080
 ```
 
-The application will be available at `http://localhost:8080` with hot reload enabled.
+แอปพลิเคชันจะพร้อมใช้งานที่ `http://localhost:8080` พร้อมกับการ hot reload
 
-## 🛠️ Development
+## 🛠️ การพัฒนา
 
-### Available Scripts
+### คำสั่งที่มีให้ใช้งาน
 
-| Command | Description |
+| คำสั่ง | คำอธิบาย |
 |---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run dev:debug` | Start server with debug tools enabled |
-| `npm run build` | Build for production |
-| `npm run build:dev` | Build for development |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Fix ESLint errors automatically |
-| `npm run type-check` | Run TypeScript type checking |
-| `npm run preview` | Preview production build |
+| `npm run dev` | เริ่ม development server |
+| `npm run dev:debug` | เริ่ม server พร้อมเครื่องมือ debug |
+| `npm run build` | Build สำหรับ production |
+| `npm run build:dev` | Build สำหรับ development |
+| `npm run lint` | รัน ESLint |
+| `npm run lint:fix` | แก้ไข ESLint errors อัตโนมัติ |
+| `npm run type-check` | รัน TypeScript type checking |
+| `npm run preview` | ดูตัวอย่าง production build |
 
-### Development Tools
+### เครื่องมือการพัฒนา
 
-When running in debug mode (`npm run dev:debug`), you'll have access to:
-- **🛠️ Dev Tools Panel** - Click the wrench icon in the bottom-right corner
-- **Environment Information** - View current settings and configuration
-- **Storage Management** - Clear localStorage and application state
-- **Console Logging** - Enhanced debugging output
+เมื่อรันในโหมด debug (`npm run dev:debug`) คุณจะสามารถเข้าถึง:
+- **🛠️ Dev Tools Panel** - คลิกไอคอนประแจในมุมล่างขวา
+- **ข้อมูลสภาพแวดล้อม** - ดูการตั้งค่าและการกำหนดค่าปัจจุบัน
+- **การจัดการ Storage** - ล้าง localStorage และสถานะแอปพลิเคชัน
+- **Console Logging** - เอาต์พุตการ debug ที่ปรับปรุงแล้ว
 
-### Environment Configuration
+### การกำหนดค่าสภาพแวดล้อม
 
-Create a `.env.development` file for local development:
+สร้างไฟล์ `.env.development` สำหรับการพัฒนาในเครื่อง:
 
 ```bash
 VITE_API_BASE_URL=http://localhost:5000/api
@@ -81,103 +81,103 @@ VITE_ENABLE_DEBUG=true
 VITE_ENABLE_ANALYTICS=false
 ```
 
-## 📁 Project Structure
+## 📁 โครงสร้างโปรเจค
 
 ```
 pai-naidee-ui-spark/
 ├── src/
-│   ├── app/                    # Main application
-│   │   ├── pages/             # Route components
-│   │   │   ├── Index.tsx      # Home page
-│   │   │   ├── Explore.tsx    # Exploration page
-│   │   │   ├── Favorites.tsx  # Favorites management
-│   │   │   ├── MapPage.tsx    # Interactive map view
-│   │   │   └── ...           # Other pages
-│   │   └── App.tsx            # Main app component
-│   ├── components/            # Reusable components
-│   │   ├── common/           # Common UI components
-│   │   ├── attraction/       # Attraction-specific components
-│   │   ├── ui/               # shadcn-ui components
-│   │   └── dev/              # Development tools
-│   ├── shared/               # Shared utilities
+│   ├── app/                    # แอปพลิเคชันหลัก
+│   │   ├── pages/             # คอมโพเนนท์เส้นทาง
+│   │   │   ├── Index.tsx      # หน้าหลัก
+│   │   │   ├── Explore.tsx    # หน้าสำรวจ
+│   │   │   ├── Favorites.tsx  # จัดการรายการโปรด
+│   │   │   ├── MapPage.tsx    # มุมมองแผนที่แบบโต้ตอบ
+│   │   │   └── ...           # หน้าอื่นๆ
+│   │   └── App.tsx            # คอมโพเนนท์แอปหลัก
+│   ├── components/            # คอมโพเนนท์ที่ใช้ซ้ำได้
+│   │   ├── common/           # คอมโพเนนท์ UI ทั่วไป
+│   │   ├── attraction/       # คอมโพเนนท์เฉพาะสถานที่ท่องเที่ยว
+│   │   ├── ui/               # คอมโพเนนท์ shadcn-ui
+│   │   └── dev/              # เครื่องมือการพัฒนา
+│   ├── shared/               # ยูทิลิตี้ที่ใช้ร่วมกัน
 │   │   ├── contexts/         # React contexts
 │   │   ├── hooks/            # Custom hooks
-│   │   ├── utils/            # Utility functions
-│   │   └── assets/           # Static assets
-│   └── main.tsx              # Application entry point
-├── public/                   # Static assets
-├── docs/                     # Documentation
-├── build/                    # Production build output
-└── package.json              # Project dependencies
+│   │   ├── utils/            # ฟังก์ชันยูทิลิตี้
+│   │   └── assets/           # ไฟล์ static
+│   └── main.tsx              # จุดเริ่มต้นแอปพลิเคชัน
+├── public/                   # ไฟล์ static
+├── docs/                     # เอกสารประกอบ
+├── build/                    # เอาต์พุต production build
+└── package.json              # Dependencies ของโปรเจค
 ```
 
-## 🏗️ Technology Stack
+## 🏗️ เทคโนโลยีที่ใช้
 
-### Core Technologies
-- **[React 18](https://react.dev/)** - Modern React with hooks and concurrent features
-- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript development
-- **[Vite](https://vitejs.dev/)** - Fast build tool and development server
+### เทคโนโลยีหลัก
+- **[React 18](https://react.dev/)** - React สมัยใหม่พร้อม hooks และคุณสมบัติ concurrent
+- **[TypeScript](https://www.typescriptlang.org/)** - การพัฒนา JavaScript ที่ปลอดภัยด้วยระบบ type
+- **[Vite](https://vitejs.dev/)** - เครื่องมือ build ที่เร็วและ development server
 
-### UI & Styling
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[shadcn/ui](https://ui.shadcn.com/)** - Beautiful and accessible component library
-- **[Radix UI](https://www.radix-ui.com/)** - Low-level UI primitives
-- **[Lucide React](https://lucide.dev/)** - Beautiful icon library
+### UI และการจัดแต่ง
+- **[Tailwind CSS](https://tailwindcss.com/)** - CSS framework แบบ utility-first
+- **[shadcn/ui](https://ui.shadcn.com/)** - ไลบรารีคอมโพเนนท์ที่สวยงามและเข้าถึงได้
+- **[Radix UI](https://www.radix-ui.com/)** - UI primitives ระดับต่ำ
+- **[Lucide React](https://lucide.dev/)** - ไลบรารีไอคอนที่สวยงาม
 
-### Functionality
-- **[React Router v6](https://reactrouter.com/)** - Client-side routing
-- **[TanStack Query](https://tanstack.com/query/)** - Data fetching and caching
-- **[React Leaflet](https://react-leaflet.js.org/)** - Interactive maps
-- **[React Hook Form](https://react-hook-form.com/)** - Form management
-- **[Zod](https://zod.dev/)** - Schema validation
+### ฟังก์ชันการทำงาน
+- **[React Router v6](https://reactrouter.com/)** - การจัดการเส้นทางฝั่งไคลเอ็นต์
+- **[TanStack Query](https://tanstack.com/query/)** - การดึงข้อมูลและแคชชิ่ง
+- **[React Leaflet](https://react-leaflet.js.org/)** - แผนที่แบบโต้ตอบ
+- **[React Hook Form](https://react-hook-form.com/)** - การจัดการฟอร์ม
+- **[Zod](https://zod.dev/)** - การตรวจสอบ schema
 
-### Development Tools
-- **[ESLint](https://eslint.org/)** - Code linting and quality
-- **[Prettier](https://prettier.io/)** - Code formatting
-- **[TypeScript](https://www.typescriptlang.org/)** - Static type checking
+### เครื่องมือการพัฒนา
+- **[ESLint](https://eslint.org/)** - การตรวจสอบและคุณภาพโค้ด
+- **[Prettier](https://prettier.io/)** - การจัดรูปแบบโค้ด
+- **[TypeScript](https://www.typescriptlang.org/)** - การตรวจสอบ type แบบ static
 
-## 🐳 Docker Development
+## 🐳 การพัฒนาด้วย Docker
 
-PaiNaiDee supports Docker for both development and production environments. See [DOCKER_README.md](./DOCKER_README.md) for detailed Docker usage instructions.
+PaiNaiDee รองรับ Docker สำหรับทั้งสภาพแวดล้อมการพัฒนาและ production ดูรายละเอียดการใช้งาน Docker ได้ที่ [DOCKER_README.md](./DOCKER_README.md)
 
-**Quick Start with Docker:**
+**เริ่มต้นอย่างรวดเร็วด้วย Docker:**
 
 ```bash
-# Development with hot reload
+# Development พร้อม hot reload
 docker compose up dev
 
 # Production build
 docker compose up app
 ```
 
-## 🌍 Internationalization
+## 🌍 การรองรับหลายภาษา
 
-The application supports multiple languages:
+แอปพลิเคชันรองรับหลายภาษา:
 
-- **English (en)** - Primary language
-- **Thai (th)** - Native language support
+- **ภาษาอังกฤษ (en)** - ภาษาหลัก
+- **ภาษาไทย (th)** - การรองรับภาษาท้องถิ่น
 
-Language switching is available in the user interface, and the application automatically detects user preferences.
+การเปลี่ยนภาษาสามารถทำได้ในส่วนติดต่อผู้ใช้ และแอปพลิเคชันจะตรวจจับการตั้งค่าของผู้ใช้โดยอัตโนมัติ
 
-## 🚀 Deployment
+## 🚀 การ Deploy
 
 ### Production Build
 
 ```bash
-# Create optimized production build
+# สร้าง production build ที่ปรับแต่งแล้ว
 npm run build
 
-# Preview production build locally
+# ดูตัวอย่าง production build ในเครื่อง
 npm run preview
 ```
 
-### Deployment Options
+### ตัวเลือกการ Deploy
 
-1. **Static Hosting** - Deploy the `build/` folder to any static hosting service
-2. **Docker** - Use the provided Dockerfile for containerized deployment
-3. **Lovable Platform** - Direct deployment through Lovable (see original setup)
+1. **Static Hosting** - Deploy โฟลเดอร์ `build/` ไปยังบริการ static hosting ใดๆ
+2. **Docker** - ใช้ Dockerfile ที่มีให้สำหรับ deployment แบบ containerized
+3. **Lovable Platform** - Deploy โดยตรงผ่าน Lovable (ดูการตั้งค่าเดิม)
 
-### Environment Variables for Production
+### ตัวแปรสภาพแวดล้อมสำหรับ Production
 
 ```bash
 VITE_API_BASE_URL=https://your-api-domain.com/api
@@ -186,116 +186,116 @@ VITE_ENABLE_DEBUG=false
 VITE_ENABLE_ANALYTICS=true
 ```
 
-## 🤝 Contributing
+## 🤝 การร่วมพัฒนา
 
-We welcome contributions to PaiNaiDee! Here's how you can help:
+เรายินดีรับการมีส่วนร่วมในการพัฒนา PaiNaiDee! คุณสามารถช่วยได้ดังนี้:
 
-### Getting Started
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes following our coding standards
-4. Run tests and linting: `npm run lint && npm run type-check`
-5. Commit your changes: `git commit -m 'Add amazing feature'`
-6. Push to your branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
+### เริ่มต้น
+1. Fork repository
+2. สร้าง feature branch: `git checkout -b feature/amazing-feature`
+3. ทำการเปลี่ยนแปลงตามมาตรฐานการเขียนโค้ดของเรา
+4. รันการทดสอบและ linting: `npm run lint && npm run type-check`
+5. Commit การเปลี่ยนแปลง: `git commit -m 'Add amazing feature'`
+6. Push ไปยัง branch ของคุณ: `git push origin feature/amazing-feature`
+7. เปิด Pull Request
 
-### Development Guidelines
-- Follow the existing code style and patterns
-- Write meaningful commit messages
-- Add TypeScript types for new code
-- Test your changes on different screen sizes
-- Update documentation if needed
+### แนวทางการพัฒนา
+- ปฏิบัติตามรูปแบบและแพทเทิร์นโค้ดที่มีอยู่
+- เขียนข้อความ commit ที่มีความหมาย
+- เพิ่ม TypeScript types สำหรับโค้ดใหม่
+- ทดสอบการเปลี่ยนแปลงของคุณในขนาดหน้าจอต่างๆ
+- อัพเดตเอกสารหากจำเป็น
 
-### Code Style
-- Use TypeScript for all new code
-- Follow the existing component structure
-- Use Tailwind CSS for styling
-- Keep components small and focused
-- Write descriptive variable and function names
+### รูปแบบโค้ด
+- ใช้ TypeScript สำหรับโค้ดใหม่ทั้งหมด
+- ปฏิบัติตามโครงสร้างคอมโพเนนท์ที่มีอยู่
+- ใช้ Tailwind CSS สำหรับการจัดแต่ง
+- ทำให้คอมโพเนนท์มีขนาดเล็กและมีจุดเน้นชัดเจน
+- เขียนชื่อตัวแปรและฟังก์ชันที่อธิบายได้
 
-## 📋 Roadmap
+## 📋 แผนงาน
 
-### Completed ✅
-- Responsive design (mobile-first)
-- Multi-language support (Thai/English)
-- Tourism attraction discovery
-- Category-based filtering
-- Search functionality
-- Favorites system
-- Interactive maps integration
-- Modern UI with shadcn-ui
+### เสร็จสิ้นแล้ว ✅
+- การออกแบบที่ตอบสนอง (เน้นมือถือเป็นหลัก)
+- การรองรับหลายภาษา (ไทย/อังกฤษ)
+- การค้นหาสถานที่ท่องเที่ยว
+- การกรองตามหมวดหมู่
+- ฟังก์ชันการค้นหา
+- ระบบรายการโปรด
+- การผสานรวมแผนที่แบบโต้ตอบ
+- UI ที่ทันสมัยด้วย shadcn-ui
 
-### In Progress 🚧
-- Enhanced search with advanced filters
-- Performance optimizations
-- Accessibility improvements
+### กำลังดำเนินการ 🚧
+- การค้นหาที่ปรับปรุงแล้วพร้อมตัวกรองขั้นสูง
+- การปรับปรุงประสิทธิภาพ
+- การปรับปรุงการเข้าถึง
 
-### Planned 📅
-- User authentication system
-- Booking and planning features
-- Offline support (PWA)
-- Social sharing capabilities
-- Admin dashboard
-- API integration for real-time data
-- Mobile app (React Native)
+### ที่วางแผนไว้ 📅
+- ระบบการยืนยันตัวตนผู้ใช้
+- คุณสมบัติการจองและการวางแผน
+- การรองรับออฟไลน์ (PWA)
+- ความสามารถในการแชร์ทางสังคม
+- แดชบอร์ดผู้ดูแลระบบ
+- การผสานรวม API สำหรับข้อมูลแบบเรียลไทม์
+- แอปมือถือ (React Native)
 
-## 🔧 Troubleshooting
+## 🔧 การแก้ปัญหา
 
-### Common Issues
+### ปัญหาทั่วไป
 
-**Port already in use**
+**Port ถูกใช้งานอยู่แล้ว**
 ```bash
-# Kill process using port 8080
+# ฆ่าโปรเซสที่ใช้ port 8080
 lsof -ti:8080 | xargs kill -9
-# Or use a different port
+# หรือใช้ port อื่น
 npm run dev -- --port 3000
 ```
 
-**Build errors**
+**ข้อผิดพลาดการ Build**
 ```bash
-# Clear node_modules and reinstall
+# ล้าง node_modules และติดตั้งใหม่
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-**TypeScript errors**
+**ข้อผิดพลาด TypeScript**
 ```bash
-# Run type checking
+# รันการตรวจสอบ type
 npm run type-check
 ```
 
-**Linting issues**
+**ปัญหา Linting**
 ```bash
-# Auto-fix linting errors
+# แก้ไข linting errors อัตโนมัติ
 npm run lint:fix
 ```
 
-### Getting Help
+### การขอความช่วยเหลือ
 
-- 📖 Check the [DEV_README.md](./DEV_README.md) for detailed development guide
-- 🐳 See [DOCKER_README.md](./DOCKER_README.md) for Docker-specific help
-- 🐛 Open an issue for bugs or feature requests
-- 💡 Start a discussion for questions and ideas
+- 📖 ตรวจสอบ [DEV_README.md](./DEV_README.md) สำหรับคู่มือการพัฒนาโดยละเอียด
+- 🐳 ดู [DOCKER_README.md](./DOCKER_README.md) สำหรับความช่วยเหลือเฉพาะ Docker
+- 🐛 เปิด issue สำหรับรายงานบั๊กหรือขอคุณสมบัติใหม่
+- 💡 เริ่มการสนทนาสำหรับคำถามและไอเดีย
 
-## 📄 License
+## 📄 ใบอนุญาต
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+โปรเจคนี้อยู่ภายใต้ใบอนุญาต MIT License - ดูรายละเอียดในไฟล์ [LICENSE](LICENSE)
 
-## 🙏 Acknowledgments
+## 🙏 กิตติกรรมประกาศ
 
-- **[Lovable](https://lovable.dev/)** - Initial project scaffolding and deployment platform
-- **[shadcn/ui](https://ui.shadcn.com/)** - Beautiful component library
-- **[Radix UI](https://www.radix-ui.com/)** - Accessible UI primitives
-- **Thailand Tourism Authority** - Inspiration for promoting Thai tourism
+- **[Lovable](https://lovable.dev/)** - การสร้างโครงสร้างโปรเจคเริ่มต้นและแพลตฟอร์ม deployment
+- **[shadcn/ui](https://ui.shadcn.com/)** - ไลบรารีคอมโพเนนท์ที่สวยงาม
+- **[Radix UI](https://www.radix-ui.com/)** - UI primitives ที่เข้าถึงได้
+- **การท่องเที่ยวแห่งประเทศไทย** - แรงบันดาลใจในการส่งเสริมการท่องเที่ยวไทย
 
 ---
 
 <div align="center">
-  <p>Made with ❤️ for Thailand Tourism</p>
+  <p>สร้างด้วย ❤️ เพื่อการท่องเที่ยวไทย</p>
   <p>
-    <a href="#-features">Features</a> •
-    <a href="#-quick-start">Quick Start</a> •
-    <a href="#-development">Development</a> •
-    <a href="#-contributing">Contributing</a>
+    <a href="#-คุณสมบัติเด่น">คุณสมบัติเด่น</a> •
+    <a href="#-เริ่มต้นใช้งานอย่างรวดเร็ว">เริ่มต้นใช้งาน</a> •
+    <a href="#-การพัฒนา">การพัฒนา</a> •
+    <a href="#-การร่วมพัฒนา">การร่วมพัฒนา</a>
   </p>
 </div>
