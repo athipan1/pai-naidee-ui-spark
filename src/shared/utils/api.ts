@@ -209,6 +209,39 @@ export const exploreAPI = {
   },
 };
 
+// Accommodation booking API
+export const accommodationAPI = {
+  // Fetch nearby accommodations for an attraction
+  fetchNearbyAccommodations: async (attractionId: string) => {
+    try {
+      const response = await apiCall<{
+        id: string;
+        name: string;
+        nameLocal?: string;
+        rating: number;
+        distance: number;
+        image: string;
+        price: number;
+        currency: string;
+        amenities: string[];
+        booking_url?: string;
+      }[]>(`/accommodations/nearby/${attractionId}`);
+      
+      return response;
+    } catch {
+      // Fallback to mock data
+      console.warn("Using mock accommodation data for attraction:", attractionId);
+      const { mockAccommodations, simulateDelay } = await import("../data/mockData");
+      
+      await simulateDelay(800); // Simulate realistic API delay
+      
+      const accommodations = mockAccommodations[attractionId as keyof typeof mockAccommodations] || [];
+      
+      return accommodations;
+    }
+  },
+};
+
 // Error handling utility
 export const handleAPIError = (error: Error): string => {
   if (

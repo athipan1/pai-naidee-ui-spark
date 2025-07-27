@@ -346,6 +346,138 @@ export const mockAttractionDetails = {
   },
 };
 
+// Mock accommodations data for nearby hotel booking
+export const mockAccommodations = {
+  "1": [ // Phi Phi Islands
+    {
+      id: "h1",
+      name: "Phi Phi Island Resort",
+      nameLocal: "รีสอร์ทหมู่เกาะพีพี",
+      rating: 4.5,
+      distance: 0.8,
+      image: "/src/shared/assets/hero-beach.jpg",
+      price: 3500,
+      currency: "THB",
+      amenities: ["Sea View", "Private Beach", "Pool", "Spa"],
+      booking_url: "https://booking.com/hotel/phi-phi-island-resort"
+    },
+    {
+      id: "h2", 
+      name: "Maya Bay Boutique Hotel",
+      nameLocal: "โรงแรมบูติกอ่าวมาหยา",
+      rating: 4.3,
+      distance: 1.2,
+      image: "/src/shared/assets/hero-beach.jpg", 
+      price: 2800,
+      currency: "THB",
+      amenities: ["Beach Access", "Restaurant", "WiFi", "AC"],
+      booking_url: "https://booking.com/hotel/maya-bay-boutique"
+    },
+    {
+      id: "h3",
+      name: "Tropical Paradise Lodge",
+      nameLocal: "ลอดจ์เขตร้อนสวรรค์",
+      rating: 4.0,
+      distance: 2.1,
+      image: "/src/shared/assets/mountain-nature.jpg",
+      price: 1800,
+      currency: "THB", 
+      amenities: ["Garden View", "Pool", "Breakfast", "Tours"],
+      booking_url: "https://booking.com/hotel/tropical-paradise-lodge"
+    }
+  ],
+  "2": [ // Temple of the Emerald Buddha
+    {
+      id: "h4",
+      name: "Grand Palace Heritage Hotel",
+      nameLocal: "โรงแรมมรดกพระบรมมหาราชวัง",
+      rating: 4.7,
+      distance: 0.3,
+      image: "/src/shared/assets/temple-culture.jpg",
+      price: 4200,
+      currency: "THB",
+      amenities: ["Temple View", "Cultural Tours", "Spa", "Fine Dining"],
+      booking_url: "https://booking.com/hotel/grand-palace-heritage"
+    },
+    {
+      id: "h5",
+      name: "Bangkok Royal Inn",
+      nameLocal: "บางกอกรอยัลอินน์",
+      rating: 4.2,
+      distance: 0.7,
+      image: "/src/shared/assets/temple-culture.jpg",
+      price: 2500,
+      currency: "THB",
+      amenities: ["City View", "Pool", "Gym", "Business Center"],
+      booking_url: "https://booking.com/hotel/bangkok-royal-inn"
+    },
+    {
+      id: "h6",
+      name: "Old City Boutique",
+      nameLocal: "บูติกเมืองเก่า",
+      rating: 4.1,
+      distance: 1.0,
+      image: "/src/shared/assets/temple-culture.jpg",
+      price: 1900,
+      currency: "THB",
+      amenities: ["Historic Area", "Traditional Decor", "WiFi", "Breakfast"],
+      booking_url: "https://booking.com/hotel/old-city-boutique"
+    }
+  ],
+  "3": [ // Doi Inthanon National Park
+    {
+      id: "h7",
+      name: "Mountain Peak Resort", 
+      nameLocal: "รีสอร์ทยอดเขา",
+      rating: 4.4,
+      distance: 1.5,
+      image: "/src/shared/assets/mountain-nature.jpg",
+      price: 2200,
+      currency: "THB",
+      amenities: ["Mountain View", "Hiking", "Fireplace", "Restaurant"],
+      booking_url: "https://booking.com/hotel/mountain-peak-resort"
+    },
+    {
+      id: "h8",
+      name: "Highland Eco Lodge",
+      nameLocal: "อีโค่ลอดจ์ที่สูง",
+      rating: 4.6,
+      distance: 2.3,
+      image: "/src/shared/assets/mountain-nature.jpg",
+      price: 1600,
+      currency: "THB",
+      amenities: ["Eco-friendly", "Nature Tours", "Local Food", "Stargazing"],
+      booking_url: "https://booking.com/hotel/highland-eco-lodge"
+    }
+  ],
+  "4": [ // Floating Market
+    {
+      id: "h9",
+      name: "River View Hotel",
+      nameLocal: "โรงแรมริเวอร์วิว",
+      rating: 4.3,
+      distance: 0.5,
+      image: "/src/shared/assets/floating-market.jpg",
+      price: 2600,
+      currency: "THB",
+      amenities: ["River View", "Boat Tours", "Restaurant", "Market Access"],
+      booking_url: "https://booking.com/hotel/river-view-hotel"
+    },
+    {
+      id: "h10",
+      name: "Traditional Thai Homestay",
+      nameLocal: "โฮมสเตย์ไทยดั้งเดิม",
+      rating: 4.0,
+      distance: 0.8,
+      image: "/src/shared/assets/floating-market.jpg",
+      price: 1200,
+      currency: "THB",
+      amenities: ["Authentic Experience", "Home Cooking", "Family Friendly", "Cultural"],
+      booking_url: "https://booking.com/hotel/traditional-thai-homestay"
+    }
+  ]
+};
+
 // Simulate network delay for realistic mock responses
 export const simulateDelay = (ms: number = 500) =>
   new Promise((resolve) => setTimeout(resolve, ms));
