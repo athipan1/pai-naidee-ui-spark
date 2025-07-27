@@ -105,7 +105,7 @@ const SmartSearchBar = ({
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    (_searchQuery: string) => {
+    (searchQuery: string) => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
@@ -122,7 +122,7 @@ const SmartSearchBar = ({
   );
 
   // Fetch suggestions using API client
-  const fetchSuggestions = async (searchQuery: string) => {
+  const fetchSuggestions = async (_searchQuery: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -134,8 +134,8 @@ const SmartSearchBar = ({
       // const suggestions = await apiClient.getSearchSuggestions(searchQuery, currentLanguage);
       const suggestions = [];
       setSuggestions(suggestions);
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
+    } catch (_error) {
+      // Handle error silently for now
       setSuggestions([]);
     } finally {
       setIsLoading(false);
@@ -169,8 +169,8 @@ const SmartSearchBar = ({
       );
 
       onSearch(searchQuery, response.results);
-    } catch (error) {
-      console.error("Error performing search:", error);
+    } catch (_error) {
+      // Handle error silently for now
       onSearch(searchQuery, []);
     } finally {
       setIsLoading(false);
@@ -184,6 +184,14 @@ const SmartSearchBar = ({
     setQuery(value);
     setShowSuggestions(true);
     debouncedSearch(value);
+  };
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      inputRef.current?.blur();
+    }
   };
 
   // Handle suggestion click
@@ -265,9 +273,14 @@ const SmartSearchBar = ({
             type="text"
             value={query}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             onFocus={() => setShowSuggestions(true)}
             placeholder={placeholder || t.searchPlaceholder}
-            className="pl-12 pr-12 h-12 text-base rounded-xl border-2 focus:border-primary"
+            className="pl-12 pr-12 h-12 text-base rounded-xl border-2 focus:border-primary touch-manipulation"
+            aria-label={placeholder || t.searchPlaceholder}
+            aria-expanded={showSuggestions}
+            aria-haspopup="listbox"
+            role="combobox"
           />
           {query && (
             <Button

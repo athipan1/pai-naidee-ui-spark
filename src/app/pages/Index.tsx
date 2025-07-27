@@ -8,6 +8,7 @@ import Explore from "./Explore";
 import Favorites from "./Favorites";
 import { useNavigate } from "react-router-dom";
 import { SearchResult } from "@/shared/utils/searchAPI";
+import { MapPin, Star } from "lucide-react";
 import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
@@ -100,7 +101,15 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
             attraction.category.toLowerCase() === selectedCategory.toLowerCase()
         );
 
-  const handleSearch = (query: string, results?: SearchResult[]) => {
+  // Calculate category counts
+  const attractionCounts = attractions.reduce((counts, attraction) => {
+    const category = attraction.category.toLowerCase();
+    counts[category] = (counts[category] || 0) + 1;
+    counts.all = attractions.length;
+    return counts;
+  }, {} as { [key: string]: number });
+
+  const handleSearch = (query: string, _results?: SearchResult[]) => {
     // Navigate to search results page with query parameter
     const searchParams = new URLSearchParams();
     searchParams.set('q', query);
@@ -125,7 +134,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   };
 
   const handleCardClick = (id: string) => {
-    console.log("Viewing attraction:", id);
     navigate(`/attraction/${id}`);
   };
 
@@ -162,7 +170,56 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         currentLanguage={currentLanguage}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
+        attractionCounts={attractionCounts}
       />
+
+      {/* Trending Destinations Section */}
+      {selectedCategory === "all" && (
+        <section className="py-6 bg-accent/20">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <span className="mr-2">🔥</span>
+                {currentLanguage === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
+              </h2>
+            </div>
+            
+            <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
+              {attractions.slice(0, 2).map((attraction) => (
+                <div
+                  key={`trending-${attraction.id}`}
+                  className="flex-shrink-0 w-64 md:w-72 bg-card rounded-xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                  onClick={() => handleCardClick(attraction.id)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={attraction.image}
+                      alt={attraction.name}
+                      className="w-16 h-16 rounded-lg object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium truncate">
+                        {currentLanguage === "th" && attraction.nameLocal ? attraction.nameLocal : attraction.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {attraction.province}
+                      </p>
+                      <div className="flex items-center mt-1">
+                        <Star className="w-3 h-3 fill-accent-yellow text-accent-yellow mr-1" />
+                        <span className="text-sm font-medium">{attraction.rating}</span>
+                        <span className="text-xs text-muted-foreground ml-1">
+                          ({attraction.reviewCount})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Attractions Grid */}
       <section className="py-8">

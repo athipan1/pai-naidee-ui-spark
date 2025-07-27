@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Filter, Grid3X3, List, MapPin, Star, Heart } from 'lucide-react';
+import { Filter, Grid3X3, List, MapPin, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BreadcrumbNavigation from '@/components/common/BreadcrumbNavigation';
 import AttractionCard from '@/components/common/AttractionCard';
-import { SearchResult } from '@/shared/utils/searchAPI';
 import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
@@ -20,10 +19,10 @@ type ViewMode = 'grid' | 'list';
 const SearchResults = ({ currentLanguage }: SearchResultsProps) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>('relevance');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [showFilters, setShowFilters] = useState(false);
+  const [favorites, setFavorites] = React.useState<string[]>([]);
+  const [sortBy, setSortBy] = React.useState<SortOption>('relevance');
+  const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
+  const [showFilters, setShowFilters] = React.useState(false);
 
   const query = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';

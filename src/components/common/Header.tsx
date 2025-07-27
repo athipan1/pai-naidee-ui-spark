@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, X, Globe2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "react-router-dom";
 
 interface HeaderProps {
   currentLanguage: "th" | "en";
@@ -9,37 +10,48 @@ interface HeaderProps {
 
 const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const menuItems = [
-    { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "#" },
-    { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "#" },
-    { label: currentLanguage === "th" ? "รายการโปรด" : "Favorites", href: "#" },
-    { label: currentLanguage === "th" ? "โปรไฟล์" : "Profile", href: "#" },
+    { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
+    { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "/explore" },
+    { label: currentLanguage === "th" ? "รายการโปรด" : "Favorites", href: "/favorites" },
+    { label: currentLanguage === "th" ? "โปรไฟล์" : "Profile", href: "/profile" },
   ];
+
+  // Helper function to check if route is active
+  const isActiveRoute = (href: string) => {
+    if (href === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(href);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-md border-b border-border/50 shadow-sm">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2">
           <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-md">
             <MapPin className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl font-bold text-gradient font-noto-thai">
             {currentLanguage === "th" ? "ไปไหนดี" : "PaiNaiDee"}
           </h1>
-        </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           {menuItems.map((item, index) => (
-            <a
+            <Link
               key={index}
-              href={item.href}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              to={item.href}
+              className={`text-muted-foreground hover:text-primary transition-colors duration-300 font-medium ${
+                isActiveRoute(item.href) ? "text-primary font-semibold" : ""
+              }`}
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -78,14 +90,16 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
         <div className="md:hidden absolute top-16 left-0 right-0 bg-card/95 backdrop-blur-md border-b border-border/50 shadow-lg animate-fade-in">
           <nav className="container mx-auto px-4 py-4 space-y-4">
             {menuItems.map((item, index) => (
-              <a
+              <Link
                 key={index}
-                href={item.href}
-                className="block py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+                to={item.href}
+                className={`block py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium ${
+                  isActiveRoute(item.href) ? "text-primary font-semibold" : ""
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
             <Button
               variant="outline"

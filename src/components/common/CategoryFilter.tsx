@@ -12,12 +12,14 @@ interface CategoryFilterProps {
   currentLanguage: "th" | "en";
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
+  attractionCounts?: { [key: string]: number };
 }
 
 const CategoryFilter = ({
   currentLanguage,
   selectedCategory,
   onCategoryChange,
+  attractionCounts = {},
 }: CategoryFilterProps) => {
   const navigate = useNavigate();
   const categories = [
@@ -85,40 +87,48 @@ const CategoryFilter = ({
             : "Explore Categories"}
         </h2>
 
-        <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
+        <div className="flex overflow-x-auto pb-4 space-x-3 md:space-x-4 scrollbar-hide">
           {categories.map((category) => {
             const Icon = category.icon;
             const isActive = selectedCategory === category.id;
+            const count = attractionCounts[category.id] || 0;
 
             return (
               <button
                 key={category.id}
                 onClick={() => handleCategoryClick(category.id)}
                 className={`
-                  flex-shrink-0 flex flex-col items-center p-4 rounded-2xl min-w-[100px] 
-                  transition-all duration-300 hover:scale-105 active:scale-95
+                  flex-shrink-0 flex flex-col items-center p-3 md:p-4 rounded-2xl min-w-[90px] md:min-w-[100px] min-h-[80px] md:min-h-[90px]
+                  transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation
                   ${
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-lg"
+                      ? "bg-primary text-primary-foreground shadow-lg scale-105"
                       : "bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md"
                   }
                 `}
               >
                 <div
                   className={`
-                  w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors duration-300
+                  w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-2 transition-colors duration-300
                   ${isActive ? "bg-white/20" : "bg-accent/50"}
                 `}
                 >
                   <Icon
-                    className={`w-6 h-6 ${isActive ? "text-white" : category.color}`}
+                    className={`w-5 h-5 md:w-6 md:h-6 ${isActive ? "text-white" : category.color}`}
                   />
                 </div>
-                <span className="text-sm font-medium text-center">
+                <span className="text-xs md:text-sm font-medium text-center leading-tight">
                   {currentLanguage === "th"
                     ? category.labelTh
                     : category.labelEn}
                 </span>
+                {count > 0 && (
+                  <span className={`text-xs mt-1 px-1.5 py-0.5 rounded-full ${
+                    isActive ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                  }`}>
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
