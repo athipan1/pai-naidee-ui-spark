@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import AttractionDetail from "./pages/AttractionDetail";
 import MapPage from "./pages/MapPage";
 import SearchResults from "./pages/SearchResults";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,15 @@ const App = () => {
                 path="/search"
                 element={
                   <SearchResults currentLanguage={currentLanguage} />
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <Dashboard
+                    currentLanguage={currentLanguage}
+                    onBack={() => window.history.back()}
+                  />
                 }
               />
               <Route
