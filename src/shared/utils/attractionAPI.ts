@@ -74,8 +74,6 @@ export const attractionAPI = {
       );
       return response;
     } catch (error) {
-      console.warn(`API failed for attraction ${id}, using mock data:`, error);
-      
       // Fallback to mock data with proper simulation
       await simulateDelay(300);
       
@@ -132,8 +130,6 @@ export const attractionAPI = {
       
       return response;
     } catch (error) {
-      console.warn('API failed for attractions list, using mock data:', error);
-      
       await simulateDelay(500);
       
       // Convert mock data to list format
@@ -170,8 +166,6 @@ export const attractionAPI = {
       
       return response;
     } catch (error) {
-      console.warn('API refresh failed, simulating cache clear:', error);
-      
       // Simulate cache refresh for mock data
       await simulateDelay(200);
       

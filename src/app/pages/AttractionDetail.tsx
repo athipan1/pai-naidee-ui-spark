@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -30,8 +30,7 @@ import AccommodationModal from "@/components/attraction/AccommodationModal";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import { 
   useAttractionDetail, 
-  useRefreshAttraction, 
-  useInvalidateAttraction,
+  useRefreshAttraction,
   getAttractionErrorMessage 
 } from "@/shared/hooks/useAttractionQueries";
 import type { AttractionDetail } from "@/shared/utils/attractionAPI";
@@ -57,13 +56,12 @@ const AttractionDetail = ({
   } = useAttractionDetail(id);
   
   const refreshMutation = useRefreshAttraction();
-  const { invalidateAttraction, refetchAttraction: forceRefetch } = useInvalidateAttraction();
   
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMapModal, setShowMapModal] = useState(false);
   const [showAccommodationModal, setShowAccommodationModal] = useState(false);
-  const [accommodations, setAccommodations] = useState<any[]>([]);
+  const [accommodations, setAccommodations] = useState<unknown[]>([]);
   const [accommodationLoading, setAccommodationLoading] = useState(false);
   const [accommodationError, setAccommodationError] = useState<string | null>(null);
 
@@ -126,17 +124,7 @@ const AttractionDetail = ({
       await refreshMutation.mutateAsync(id);
       // The query will automatically refetch due to invalidation
     } catch (error) {
-      console.error('Failed to refresh attraction data:', error);
-    }
-  };
-
-  const handleForceRefresh = async () => {
-    if (!id) return;
-    
-    try {
-      await forceRefetch(id);
-    } catch (error) {
-      console.error('Failed to force refresh attraction data:', error);
+      // Error handled by mutation
     }
   };
 
@@ -156,7 +144,6 @@ const AttractionDetail = ({
       const accommodationData = await accommodationAPI.fetchNearbyAccommodations(attraction.id);
       setAccommodations(accommodationData);
     } catch (error) {
-      console.error("Failed to fetch accommodations:", error);
       setAccommodationError(error instanceof Error ? error.message : "Failed to load accommodations");
     } finally {
       setAccommodationLoading(false);

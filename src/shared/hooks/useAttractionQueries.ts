@@ -90,11 +90,11 @@ export const useRefreshAttraction = () => {
       
       return result;
     },
-    onSuccess: (data, id) => {
-      console.log(`Attraction data refreshed: ${data.message}`);
+    onSuccess: (data) => {
+      // Success handled by component
     },
     onError: (error: Error) => {
-      console.error('Failed to refresh attraction data:', error);
+      // Error handled by component  
     },
     meta: {
       errorMessage: 'Failed to refresh attraction data'
