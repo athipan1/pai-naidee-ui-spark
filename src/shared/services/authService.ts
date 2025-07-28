@@ -1,12 +1,12 @@
 // Authentication and Authorization Service
-import type { 
-  User, 
+import { 
   UserRole, 
   Permission, 
-  AuthenticationResult, 
-  DEFAULT_ROLE_PERMISSIONS 
+  DEFAULT_ROLE_PERMISSIONS,
+  type User, 
+  type AuthenticationResult
 } from '../types/auth';
-import type { SecurityAuditLog, SecurityAction, RiskLevel } from '../types/security';
+import { SecurityAction, RiskLevel, type SecurityAuditLog } from '../types/security';
 
 class AuthService {
   private currentUser: User | null = null;

@@ -18,6 +18,7 @@ import MapPage from "./pages/MapPage";
 import SearchResults from "./pages/SearchResults";
 import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
+import EnhancedAdminPanel from "@/components/admin/EnhancedAdminPanel";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -118,6 +119,12 @@ const App = () => {
                 path="/admin"
                 element={
                   <AdminPanel currentLanguage={currentLanguage} />
+                }
+              />
+              <Route
+                path="/admin/enhanced"
+                element={
+                  <EnhancedAdminPanel currentLanguage={currentLanguage} />
                 }
               />
               <Route
