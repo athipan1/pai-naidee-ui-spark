@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Globe2, MapPin } from "lucide-react";
+import { Menu, X, Globe2, MapPin, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 
@@ -57,6 +57,20 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
 
         {/* Language Toggle & Mobile Menu */}
         <div className="flex items-center space-x-3">
+          {/* Developer Dashboard Link - Only in development */}
+          {import.meta.env.DEV && (
+            <Link to="/dashboard">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-xl text-muted-foreground hover:text-primary"
+                title="Developer Dashboard"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
+          
           <Button
             variant="outline"
             size="sm"
@@ -101,6 +115,20 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
                 {item.label}
               </Link>
             ))}
+            
+            {/* Developer Dashboard Link - Only in development */}
+            {import.meta.env.DEV && (
+              <Link
+                to="/dashboard"
+                className={`block py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium border-t border-border/30 pt-4 ${
+                  isActiveRoute("/dashboard") ? "text-primary font-semibold" : ""
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                🔧 {currentLanguage === "th" ? "แดชบอร์ดนักพัฒนา" : "Developer Dashboard"}
+              </Link>
+            )}
+            
             <Button
               variant="outline"
               size="sm"
