@@ -25,14 +25,14 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
       <div className="relative container mx-auto px-4 py-12 md:py-28 flex flex-col items-center justify-center text-center">
         <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
           {/* Title */}
-          <h1 className="text-3xl md:text-6xl font-bold text-white mb-3 md:mb-4 animate-fade-in">
+          <h1 className="text-3xl md:text-6xl font-bold text-white mb-3 md:mb-4 animate-fade-in text-shadow-strong">
             {currentLanguage === "th"
               ? "ค้นหาสถานที่ท่องเที่ยวในฝัน"
               : "Discover Your Dream Destination"}
           </h1>
 
           {/* Subtitle */}
-          <p className="text-base md:text-xl text-white/90 mb-6 md:mb-8 font-light animate-fade-in">
+          <p className="text-base md:text-xl text-white/90 mb-6 md:mb-8 font-light animate-fade-in text-shadow">
             {currentLanguage === "th"
               ? "เที่ยวไทยและทั่วโลกไปกับเรา พบสถานที่น่าทึ่งที่รอคุณอยู่"
               : "Explore Thailand and beyond with us. Find amazing places waiting for you."}
@@ -65,9 +65,12 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
                 onClick={() =>
                   handleSearch(currentLanguage === "th" ? item.th : item.en)
                 }
-                className="px-3 py-1.5 md:px-4 md:py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white text-sm font-medium transition-all duration-300 hover:scale-105 touch-manipulation"
+                className="px-3 py-1.5 md:px-4 md:py-2 glass-effect hover:bg-white/30 backdrop-blur-sm rounded-full text-white text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation relative overflow-hidden group"
               >
-                {currentLanguage === "th" ? item.th : item.en}
+                <span className="relative z-10">
+                  {currentLanguage === "th" ? item.th : item.en}
+                </span>
+                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-out" />
               </button>
             ))}
           </div>

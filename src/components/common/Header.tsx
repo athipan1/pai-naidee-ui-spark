@@ -28,29 +28,31 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-md border-b border-border/50 shadow-sm">
+    <header className="sticky top-0 z-50 w-full glass-effect border-b border-white/20 shadow-lg safe-area-top">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-md">
-            <MapPin className="w-6 h-6 text-white" />
+        {/* Enhanced Logo */}
+        <Link to="/" className="flex items-center space-x-2 interactive-scale">
+          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg neon-glow">
+            <MapPin className="w-6 h-6 text-white animate-float" />
           </div>
-          <h1 className="text-xl font-bold text-gradient font-noto-thai">
+          <h1 className="text-xl font-bold text-gradient-tropical font-noto-thai">
             {currentLanguage === "th" ? "ไปไหนดี" : "PaiNaiDee"}
           </h1>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Enhanced Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           {menuItems.map((item, index) => (
             <Link
               key={index}
               to={item.href}
-              className={`text-muted-foreground hover:text-primary transition-colors duration-300 font-medium ${
-                isActiveRoute(item.href) ? "text-primary font-semibold" : ""
+              className={`text-muted-foreground hover:text-primary transition-all duration-300 font-medium px-3 py-2 rounded-lg relative overflow-hidden ${
+                isActiveRoute(item.href) ? "text-primary font-semibold bg-primary/10" : ""
               }`}
             >
-              {item.label}
+              <span className="relative z-10">{item.label}</span>
+              {/* Hover effect background */}
+              <div className="absolute inset-0 bg-primary/10 scale-0 hover:scale-100 transition-transform duration-300 rounded-lg" />
             </Link>
           ))}
         </nav>

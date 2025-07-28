@@ -44,7 +44,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-md border-t border-border/50 safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-effect border-t border-white/20 safe-area-bottom">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-around py-2">
           {tabs.map((tab) => {
@@ -56,25 +56,32 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
                 key={tab.id}
                 to={tab.path}
                 className={`
-                  flex flex-col items-center space-y-1 p-2 rounded-xl transition-all duration-300 min-w-[60px]
+                  flex flex-col items-center space-y-1 p-3 rounded-xl transition-all duration-500 min-w-[70px] relative overflow-hidden interactive-scale
                   ${
                     isActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-primary hover:bg-accent/50"
+                      ? "text-primary bg-primary/20 shadow-lg"
+                      : "text-muted-foreground hover:text-primary hover:bg-accent/30"
                   }
                 `}
               >
-                <div className={`nav-icon ${isActive ? "scale-110" : ""}`}>
-                  <Icon className="w-6 h-6" />
+                <div className={`nav-icon transition-all duration-300 ${isActive ? "scale-110 animate-bounce" : ""}`}>
+                  <Icon className={`w-6 h-6 ${isActive ? "drop-shadow-md" : ""}`} />
                 </div>
-                <span className="text-xs font-medium">
+                <span className={`text-xs font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""}`}>
                   {tab.label[currentLanguage]}
                 </span>
 
-                {/* Active indicator */}
+                {/* Enhanced active indicator */}
                 {isActive && (
-                  <div className="w-1 h-1 bg-primary rounded-full animate-scale-in" />
+                  <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg" />
+                  </div>
                 )}
+
+                {/* Ripple effect background */}
+                <div className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl" />
+                </div>
               </Link>
             );
           })}

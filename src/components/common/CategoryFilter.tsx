@@ -98,37 +98,44 @@ const CategoryFilter = ({
                 key={category.id}
                 onClick={() => handleCategoryClick(category.id)}
                 className={`
-                  flex-shrink-0 flex flex-col items-center p-3 md:p-4 rounded-2xl min-w-[90px] md:min-w-[100px] min-h-[80px] md:min-h-[90px]
-                  transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation
+                  category-btn flex-shrink-0 flex flex-col items-center p-3 md:p-4 rounded-2xl min-w-[90px] md:min-w-[100px] min-h-[80px] md:min-h-[90px]
+                  transition-all duration-500 hover:scale-105 active:scale-95 touch-manipulation relative overflow-hidden
                   ${
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                      ? "category-btn-active bg-primary text-primary-foreground shadow-xl scale-105"
                       : "bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md"
                   }
                 `}
               >
                 <div
                   className={`
-                  w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-2 transition-colors duration-300
-                  ${isActive ? "bg-white/20" : "bg-accent/50"}
+                  w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 relative z-10
+                  ${isActive ? "bg-white/20 animate-float" : "bg-accent/50 group-hover:bg-primary/20"}
                 `}
                 >
                   <Icon
-                    className={`w-5 h-5 md:w-6 md:h-6 ${isActive ? "text-white" : category.color}`}
+                    className={`w-5 h-5 md:w-6 md:h-6 transition-all duration-300 ${
+                      isActive ? "text-white animate-glow" : `${category.color} group-hover:scale-110`
+                    }`}
                   />
                 </div>
-                <span className="text-xs md:text-sm font-medium text-center leading-tight">
+                <span className="text-xs md:text-sm font-medium text-center leading-tight relative z-10">
                   {currentLanguage === "th"
                     ? category.labelTh
                     : category.labelEn}
                 </span>
                 {count > 0 && (
-                  <span className={`text-xs mt-1 px-1.5 py-0.5 rounded-full ${
-                    isActive ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                  <span className={`text-xs mt-1 px-1.5 py-0.5 rounded-full transition-all duration-300 relative z-10 ${
+                    isActive ? "bg-white/20 text-white animate-pulse" : "bg-primary/10 text-primary hover:bg-primary/20"
                   }`}>
                     {count}
                   </span>
                 )}
+                
+                {/* Enhanced ripple effect */}
+                <div className="absolute inset-0 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl" />
+                </div>
               </button>
             );
           })}

@@ -257,7 +257,7 @@ const SmartSearchBar = ({
             onKeyDown={handleKeyDown}
             onFocus={() => setShowSuggestions(true)}
             placeholder={placeholder || t.searchPlaceholder}
-            className="pl-12 pr-12 h-12 text-base rounded-xl border-2 focus:border-primary touch-manipulation"
+            className="search-input pl-12 pr-12 h-12 text-base border-2 focus:border-primary touch-manipulation transition-all duration-300"
             aria-label={placeholder || t.searchPlaceholder}
             aria-expanded={showSuggestions}
             aria-haspopup="listbox"
@@ -285,14 +285,14 @@ const SmartSearchBar = ({
 
       {/* Suggestions Dropdown */}
       {showSuggestions && (
-        <Card className="absolute top-full left-0 right-0 mt-2 z-50 shadow-lg border-2">
+        <Card className="absolute top-full left-0 right-0 mt-2 z-50 shadow-xl border-2 glass-effect animate-slide-down">
           <CardContent className="p-0">
             <ScrollArea className="max-h-96">
               {/* Loading State */}
               {isLoading && (
                 <div className="p-4 text-center">
-                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">กำลังค้นหา...</p>
+                  <div className="loading-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground animate-pulse">กำลังค้นหา...</p>
                 </div>
               )}
 
