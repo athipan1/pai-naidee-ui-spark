@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Server, Activity, FileText, BarChart3, Folder } from "lucide-react";
+import { ArrowLeft, Server, Activity, FileText, BarChart3, Folder, TrendingUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +8,8 @@ import ProcessControl from "@/components/dashboard/ProcessControl";
 import LogsViewer from "@/components/dashboard/LogsViewer";
 import SystemMetrics from "@/components/dashboard/SystemMetrics";
 import ContentManagement from "@/components/dashboard/ContentManagement";
+import UsageAnalytics from "@/components/dashboard/UsageAnalytics";
+import ImpactAnalytics from "@/components/dashboard/ImpactAnalytics";
 
 interface DashboardProps {
   currentLanguage: "th" | "en";
@@ -26,6 +28,8 @@ const Dashboard = ({ currentLanguage, onBack }: DashboardProps) => {
       logs: "Logs",
       metrics: "System Metrics",
       content: "Content Management",
+      usageAnalytics: "Usage Analytics",
+      impactAnalytics: "Impact Analytics",
       welcome: "Welcome to the Developer Dashboard",
       description: "Use this dashboard to monitor backend services, initiate processes, and view system logs and metrics."
     },
@@ -37,6 +41,8 @@ const Dashboard = ({ currentLanguage, onBack }: DashboardProps) => {
       logs: "บันทึกระบบ",
       metrics: "เมตริกซ์ระบบ",
       content: "การจัดการเนื้อหา",
+      usageAnalytics: "สถิติการใช้งาน",
+      impactAnalytics: "การวิเคราะห์ผลกระทบ",
       welcome: "ยินดีต้อนรับสู่แดชบอร์ดสำหรับนักพัฒนา",
       description: "ใช้แดชบอร์ดนี้เพื่อตรวจสอบบริการฝั่งเซิร์ฟเวอร์ เริ่มกระบวนการต่างๆ และดูบันทึกและเมตริกซ์ของระบบ"
     }
@@ -84,7 +90,7 @@ const Dashboard = ({ currentLanguage, onBack }: DashboardProps) => {
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-flex">
+          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-flex">
             <TabsTrigger value="status" className="flex items-center gap-2">
               <Server className="h-4 w-4" />
               <span className="hidden sm:inline">{t.status}</span>
@@ -104,6 +110,14 @@ const Dashboard = ({ currentLanguage, onBack }: DashboardProps) => {
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Folder className="h-4 w-4" />
               <span className="hidden sm:inline">{t.content}</span>
+            </TabsTrigger>
+            <TabsTrigger value="usage" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.usageAnalytics}</span>
+            </TabsTrigger>
+            <TabsTrigger value="impact" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.impactAnalytics}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -125,6 +139,14 @@ const Dashboard = ({ currentLanguage, onBack }: DashboardProps) => {
 
           <TabsContent value="content" className="space-y-6">
             <ContentManagement currentLanguage={currentLanguage} />
+          </TabsContent>
+
+          <TabsContent value="usage" className="space-y-6">
+            <UsageAnalytics currentLanguage={currentLanguage} />
+          </TabsContent>
+
+          <TabsContent value="impact" className="space-y-6">
+            <ImpactAnalytics currentLanguage={currentLanguage} />
           </TabsContent>
         </Tabs>
       </div>
