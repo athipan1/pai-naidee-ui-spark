@@ -395,7 +395,7 @@ const AttractionDetail = ({
                     </div>
                   </Button>
                 )}
-                {attraction.externalLinks.googleMaps && (
+                {attraction.externalLinks.googleMaps && attraction.category !== "Attraction" && (
                   <Button
                     variant="outline"
                     className="flex items-center gap-2 h-auto p-4 text-left justify-start"
