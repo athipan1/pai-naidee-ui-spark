@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Globe,
   BookOpen,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -276,6 +277,14 @@ const AttractionDetail = ({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/admin')}
+                className="flex items-center gap-2"
+                title={currentLanguage === 'th' ? 'แผงควบคุมผู้ดูแลระบบ' : 'Admin Panel'}
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
               <Button
                 variant={isFavorite ? "default" : "outline"}
                 onClick={toggleFavorite}

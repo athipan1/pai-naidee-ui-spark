@@ -17,6 +17,7 @@ import AttractionDetail from "./pages/AttractionDetail";
 import MapPage from "./pages/MapPage";
 import SearchResults from "./pages/SearchResults";
 import Dashboard from "./pages/Dashboard";
+import AdminPanel from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -94,6 +95,12 @@ const App = () => {
                     currentLanguage={currentLanguage}
                     onBack={() => window.history.back()}
                   />
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <AdminPanel currentLanguage={currentLanguage} />
                 }
               />
               <Route
