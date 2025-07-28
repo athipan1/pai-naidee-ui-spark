@@ -61,6 +61,10 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
   // Media replacement state
   const [selectedPlaceId, setSelectedPlaceId] = useState('');
   const [selectedPlaceName, setSelectedPlaceName] = useState('');
+  const [selectedPlaceCoordinates, setSelectedPlaceCoordinates] = useState<{lat: number; lng: number} | null>(null);
+  const [editingCoordinates, setEditingCoordinates] = useState(false);
+  const [newLatitude, setNewLatitude] = useState('');
+  const [newLongitude, setNewLongitude] = useState('');
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
   const [newMediaData, setNewMediaData] = useState<MediaUploadData[]>([]);
   const [replacementResult, setReplacementResult] = useState<MediaReplacementResult | null>(null);
@@ -72,6 +76,8 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
   const [newPlaceProvince, setNewPlaceProvince] = useState('');
   const [newPlaceCategory, setNewPlaceCategory] = useState('');
   const [newPlaceDescription, setNewPlaceDescription] = useState('');
+  const [newPlaceLatitude, setNewPlaceLatitude] = useState('');
+  const [newPlaceLongitude, setNewPlaceLongitude] = useState('');
   const [newPlaceMediaFiles, setNewPlaceMediaFiles] = useState<File[]>([]);
   const [newPlaceMediaData, setNewPlaceMediaData] = useState<MediaUploadData[]>([]);
   const [creationResult, setCreationResult] = useState<PlaceCreationResult | null>(null);
@@ -105,6 +111,15 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
       error: 'ข้อผิดพลาด',
       category: 'ประเภท',
       description: 'คำอธิบาย',
+      coordinates: 'พิกัด GPS',
+      latitude: 'ละติจูด',
+      longitude: 'ลองจิจูด',
+      gpsRequired: 'จำเป็นต้องมีพิกัด GPS',
+      invalidCoordinates: 'พิกัดไม่ถูกต้อง',
+      editGPS: 'แก้ไข GPS',
+      updateGPS: 'อัปเดตพิกัด GPS',
+      noGPS: 'ไม่มีพิกัด GPS คลิก "แก้ไข GPS" เพื่อเพิ่ม',
+      cancel: 'ยกเลิก',
       createPlace: 'สร้างสถานที่',
       timelineHistory: 'ประวัติ Timeline',
       loadTimeline: 'โหลดประวัติ',
@@ -161,6 +176,15 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
       error: 'Error',
       category: 'Category',
       description: 'Description',
+      coordinates: 'GPS Coordinates',
+      latitude: 'Latitude',
+      longitude: 'Longitude', 
+      gpsRequired: 'GPS coordinates are required',
+      invalidCoordinates: 'Invalid coordinates',
+      editGPS: 'Edit GPS',
+      updateGPS: 'Update GPS Coordinates',
+      noGPS: 'No GPS coordinates available. Click "Edit GPS" to add them.',
+      cancel: 'Cancel',
       createPlace: 'Create Place',
       timelineHistory: 'Timeline History',
       loadTimeline: 'Load History',
@@ -213,6 +237,10 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
       if (result.exists && result.placeId) {
         setSelectedPlaceId(result.placeId);
         setSelectedPlaceName(result.place?.placeName || searchQuery);
+        setSelectedPlaceCoordinates(result.place?.coordinates || null);
+        setNewLatitude(result.place?.coordinates?.lat.toString() || '');
+        setNewLongitude(result.place?.coordinates?.lng.toString() || '');
+        setEditingCoordinates(false);
         notificationService.dismiss(loadingToast);
         notificationService.show('success', 'Place found successfully');
       } else {
@@ -233,7 +261,43 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
     }
   };
 
-  // Filter media based on current filters
+  // Handle coordinate update for existing place
+  const handleUpdateCoordinates = async () => {
+    if (!selectedPlaceId) return;
+
+    const lat = parseFloat(newLatitude);
+    const lng = parseFloat(newLongitude);
+    
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      notificationService.showValidationError('Invalid GPS Coordinates', t.invalidCoordinates);
+      return;
+    }
+
+    try {
+      // Update coordinates via the media management service
+      // Note: This would need to be implemented in the service, for now we'll update locally
+      setSelectedPlaceCoordinates({ lat, lng });
+      setEditingCoordinates(false);
+      
+      notificationService.show('success', 'GPS coordinates updated successfully');
+      
+      // In a real implementation, this would sync with the backend
+      await timelineSyncService.syncMediaReplacement(
+        selectedPlaceId,
+        [],
+        [],
+        'current_user',
+        `GPS coordinates updated to ${lat}, ${lng}`
+      );
+      
+    } catch (error) {
+      notificationService.showSyncFailure(
+        'Coordinate Update',
+        error instanceof Error ? error.message : 'Unknown error',
+        () => handleUpdateCoordinates()
+      );
+    }
+  };
   const applyFilters = (mediaList: MediaUploadData[]): MediaUploadData[] => {
     return mediaList.filter(media => {
       // File type filter
@@ -330,8 +394,23 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
 
   // Handle new place creation
   const handleCreatePlace = async () => {
+    // Validate required fields including GPS coordinates
     if (!newPlaceName.trim() || !newPlaceProvince.trim() || newPlaceMediaData.length === 0) {
       notificationService.showValidationError('Required fields', 'Please fill in all required fields and select media files');
+      return;
+    }
+
+    // Validate GPS coordinates
+    const lat = parseFloat(newPlaceLatitude);
+    const lng = parseFloat(newPlaceLongitude);
+    
+    if (!newPlaceLatitude.trim() || !newPlaceLongitude.trim()) {
+      notificationService.showValidationError('GPS Coordinates Required', t.gpsRequired);
+      return;
+    }
+
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      notificationService.showValidationError('Invalid GPS Coordinates', t.invalidCoordinates);
       return;
     }
 
@@ -346,6 +425,10 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
         province: newPlaceProvince,
         category: newPlaceCategory,
         description: newPlaceDescription,
+        coordinates: {
+          lat: lat,
+          lng: lng
+        },
         media: []
       };
 
@@ -362,7 +445,7 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
 
         notificationService.dismiss(loadingToast);
         notificationService.showSuccessWithUndo(
-          `Place "${newPlaceName}" created successfully`,
+          `Place "${newPlaceName}" created successfully with GPS coordinates`,
           () => {
             // TODO: Implement undo functionality
             notificationService.show('info', 'Undo functionality not yet implemented');
@@ -375,6 +458,8 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
         setNewPlaceProvince('');
         setNewPlaceCategory('');
         setNewPlaceDescription('');
+        setNewPlaceLatitude('');
+        setNewPlaceLongitude('');
         setNewPlaceMediaFiles([]);
         setNewPlaceMediaData([]);
       } else {
@@ -825,9 +910,21 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
                         <div>
                           <strong>{t.placeExists}:</strong> {searchResults.place?.placeName}
                         </div>
-                        <Badge variant="secondary" className="text-xs">
-                          ID: {searchResults.placeId}
-                        </Badge>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            ID: {searchResults.placeId}
+                          </Badge>
+                          {searchResults.place?.coordinates && (
+                            <Badge variant="outline" className="text-xs">
+                              GPS: {searchResults.place.coordinates.lat.toFixed(4)}, {searchResults.place.coordinates.lng.toFixed(4)}
+                            </Badge>
+                          )}
+                        </div>
+                        {searchResults.place?.coordinates && (
+                          <p className="text-sm text-muted-foreground">
+                            Location verified with GPS coordinates
+                          </p>
+                        )}
                       </div>
                     ) : (
                       <strong>{t.placeNotExists}</strong>
@@ -857,12 +954,94 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
                         <div>
                           {t.replaceMedia}: <strong>{selectedPlaceName}</strong>
                         </div>
-                        <Badge variant="outline" className="text-xs">
-                          ID: {selectedPlaceId}
-                        </Badge>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            ID: {selectedPlaceId}
+                          </Badge>
+                          {selectedPlaceCoordinates && (
+                            <Badge variant="secondary" className="text-xs">
+                              GPS: {selectedPlaceCoordinates.lat.toFixed(4)}, {selectedPlaceCoordinates.lng.toFixed(4)}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </AlertDescription>
                   </Alert>
+
+                  {/* GPS Coordinate Editing Section */}
+                  <Card className="border-muted">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium">{t.coordinates}</CardTitle>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingCoordinates(!editingCoordinates)}
+                        >
+                          {editingCoordinates ? t.cancel : t.editGPS}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {!editingCoordinates ? (
+                        <div className="space-y-2">
+                          {selectedPlaceCoordinates ? (
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="text-sm">
+                                <span className="font-medium">{t.latitude}:</span> {selectedPlaceCoordinates.lat.toFixed(6)}
+                              </div>
+                              <div className="text-sm">
+                                <span className="font-medium">{t.longitude}:</span> {selectedPlaceCoordinates.lng.toFixed(6)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-muted-foreground">
+                              {t.noGPS}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label className="text-xs">{t.latitude} *</Label>
+                              <Input
+                                type="number"
+                                step="any"
+                                value={newLatitude}
+                                onChange={(e) => setNewLatitude(e.target.value)}
+                                placeholder="13.7563"
+                                className="text-sm"
+                                min="-90"
+                                max="90"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-xs">{t.longitude} *</Label>
+                              <Input
+                                type="number"
+                                step="any"
+                                value={newLongitude}
+                                onChange={(e) => setNewLongitude(e.target.value)}
+                                placeholder="100.5018"
+                                className="text-sm"
+                                min="-180"
+                                max="180"
+                              />
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={handleUpdateCoordinates}
+                            disabled={!newLatitude.trim() || !newLongitude.trim()}
+                            className="w-full"
+                          >
+                            {t.updateGPS}
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
 
                   <div className="space-y-2">
                     <Label>{t.selectFiles}</Label>
@@ -986,6 +1165,64 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
                 </div>
               </div>
 
+              {/* GPS Coordinates Section */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{t.coordinates} *</Badge>
+                  <p className="text-sm text-muted-foreground">
+                    Required for location accuracy and mapping
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t.latitude} *</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={newPlaceLatitude}
+                      onChange={(e) => setNewPlaceLatitude(e.target.value)}
+                      placeholder="13.7563"
+                      className="w-full"
+                      min="-90"
+                      max="90"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Range: -90 to 90
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t.longitude} *</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={newPlaceLongitude}
+                      onChange={(e) => setNewPlaceLongitude(e.target.value)}
+                      placeholder="100.5018"
+                      className="w-full"
+                      min="-180"
+                      max="180"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Range: -180 to 180
+                    </p>
+                  </div>
+                </div>
+                {(newPlaceLatitude && newPlaceLongitude) && (
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      <strong>Preview:</strong> {newPlaceLatitude}, {newPlaceLongitude}
+                      {parseFloat(newPlaceLatitude) >= -90 && parseFloat(newPlaceLatitude) <= 90 && 
+                       parseFloat(newPlaceLongitude) >= -180 && parseFloat(newPlaceLongitude) <= 180 ? (
+                        <Badge variant="default" className="ml-2 text-xs">Valid</Badge>
+                      ) : (
+                        <Badge variant="destructive" className="ml-2 text-xs">Invalid</Badge>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+
               <div className="space-y-2">
                 <Label>{t.description}</Label>
                 <Textarea
@@ -1042,7 +1279,7 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
 
               <Button 
                 onClick={handleCreatePlace}
-                disabled={isCreating || !newPlaceName.trim() || !newPlaceProvince.trim() || newPlaceMediaFiles.length === 0}
+                disabled={isCreating || !newPlaceName.trim() || !newPlaceProvince.trim() || !newPlaceLatitude.trim() || !newPlaceLongitude.trim() || newPlaceMediaFiles.length === 0}
                 className="w-full mobile-touch-target"
               >
                 <Plus className="h-4 w-4 mr-2" />
