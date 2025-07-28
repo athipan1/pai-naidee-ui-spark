@@ -24,7 +24,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { mockAttractionDetails } from "@/shared/data/mockData";
+import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
 
 interface Attraction {
   id: string;
