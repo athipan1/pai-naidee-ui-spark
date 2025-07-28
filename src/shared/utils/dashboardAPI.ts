@@ -46,9 +46,71 @@ interface SystemMetricsResponse {
 // Base API configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
-// Generic API request function with error handling
+// Debug mode detection
+const IS_DEBUG = import.meta.env.VITE_ENABLE_DEBUG === 'true' || import.meta.env.MODE === 'development';
+
+// Enhanced error categorization and logging
+function logApiError(endpoint: string, url: string, error: unknown) {
+  const errorDetails = {
+    endpoint,
+    url,
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    baseUrl: API_BASE_URL,
+  };
+
+  if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+    console.error('❌ Network Error - Failed to fetch:', {
+      ...errorDetails,
+      errorType: 'NETWORK_ERROR',
+      possibleCauses: [
+        'Backend server not running',
+        'CORS configuration issue',
+        'Network connectivity problem',
+        'Invalid URL or port'
+      ],
+      error: error.message
+    });
+  } else if (error instanceof TypeError) {
+    console.error('❌ Type Error:', {
+      ...errorDetails,
+      errorType: 'TYPE_ERROR',
+      error: error.message
+    });
+  } else if (error instanceof Error && error.message.includes('HTTP error')) {
+    console.error('❌ HTTP Error:', {
+      ...errorDetails,
+      errorType: 'HTTP_ERROR',
+      error: error.message
+    });
+  } else {
+    console.error('❌ Unknown API Error:', {
+      ...errorDetails,
+      errorType: 'UNKNOWN_ERROR',
+      error: error
+    });
+  }
+}
+
+// Generic API request function with enhanced error handling and debugging
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  
+  // Validate base URL configuration
+  if (!API_BASE_URL) {
+    console.error('❌ API_BASE_URL is not configured. Check VITE_API_BASE_URL environment variable.');
+    throw new Error('API base URL not configured');
+  }
+
+  if (IS_DEBUG) {
+    console.log('🔍 API Request Debug:', {
+      endpoint,
+      url,
+      method: options.method || 'GET',
+      baseUrl: API_BASE_URL,
+      headers: options.headers
+    });
+  }
   
   const defaultOptions: RequestInit = {
     headers: {
@@ -59,15 +121,33 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   };
 
   try {
-    const response = await fetch(url, defaultOptions);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (IS_DEBUG) {
+      console.log('🚀 Fetching:', url);
     }
     
-    return await response.json();
+    const response = await fetch(url, defaultOptions);
+    
+    if (IS_DEBUG) {
+      console.log('📥 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+    }
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (IS_DEBUG) {
+      console.log('✅ Data parsed successfully:', data);
+    }
+    
+    return data;
   } catch (error) {
-    console.error(`API request failed for ${endpoint}:`, error);
+    logApiError(endpoint, url, error);
     throw error;
   }
 }
@@ -78,9 +158,9 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 export async function getServiceStatus(): Promise<ServiceStatus[]> {
   try {
     return await apiRequest<ServiceStatus[]>('/dashboard/services/status');
-  } catch (_error) {
+  } catch (error) {
     // Return mock data if API fails (for demo purposes)
-    console.warn('Using mock service status data');
+    console.warn('⚠️ getServiceStatus failed, using mock data:', error);
     return [
       {
         id: "api-gateway",
@@ -121,8 +201,8 @@ export async function startBackendProcess(processId: string): Promise<{ success:
     return await apiRequest<{ success: boolean; message: string }>(`/dashboard/processes/${processId}/start`, {
       method: 'POST'
     });
-  } catch (_error) {
-    console.warn('Using mock process start response');
+  } catch (error) {
+    console.warn('⚠️ startBackendProcess failed, using mock response:', error);
     return { success: true, message: `Process ${processId} started successfully` };
   }
 }
@@ -135,8 +215,8 @@ export async function stopBackendProcess(processId: string): Promise<{ success: 
     return await apiRequest<{ success: boolean; message: string }>(`/dashboard/processes/${processId}/stop`, {
       method: 'POST'
     });
-  } catch (_error) {
-    console.warn('Using mock process stop response');
+  } catch (error) {
+    console.warn('⚠️ stopBackendProcess failed, using mock response:', error);
     return { success: true, message: `Process ${processId} stopped successfully` };
   }
 }
@@ -149,8 +229,8 @@ export async function restartBackendProcess(processId: string): Promise<{ succes
     return await apiRequest<{ success: boolean; message: string }>(`/dashboard/processes/${processId}/restart`, {
       method: 'POST'
     });
-  } catch (_error) {
-    console.warn('Using mock process restart response');
+  } catch (error) {
+    console.warn('⚠️ restartBackendProcess failed, using mock response:', error);
     return { success: true, message: `Process ${processId} restarted successfully` };
   }
 }
@@ -161,8 +241,8 @@ export async function restartBackendProcess(processId: string): Promise<{ succes
 export async function getRunningProcesses(): Promise<unknown[]> {
   try {
     return await apiRequest<unknown[]>('/dashboard/processes');
-  } catch (_error) {
-    console.warn('Using mock processes data');
+  } catch (error) {
+    console.warn('⚠️ getRunningProcesses failed, using mock data:', error);
     return [];
   }
 }
@@ -181,9 +261,20 @@ export async function getSystemLogs(
     if (source) params.append('source', source);
     params.append('limit', limit.toString());
     
-    return await apiRequest<LogEntry[]>(`/dashboard/logs?${params.toString()}`);
-  } catch (_error) {
-    console.warn('Using mock logs data');
+    const endpoint = `/dashboard/logs?${params.toString()}`;
+    
+    if (IS_DEBUG) {
+      console.log('🔍 getSystemLogs called with:', { level, source, limit, endpoint });
+    }
+    
+    return await apiRequest<LogEntry[]>(endpoint);
+  } catch (error) {
+    console.warn('⚠️ getSystemLogs failed, using mock data:', error);
+    
+    if (IS_DEBUG) {
+      console.log('📋 Mock logs data being returned due to API failure');
+    }
+    
     return [
       {
         id: "1",
@@ -219,8 +310,8 @@ export async function getSystemLogs(
 export async function getSystemMetrics(): Promise<SystemMetricsResponse> {
   try {
     return await apiRequest<SystemMetricsResponse>('/dashboard/metrics');
-  } catch (_error) {
-    console.warn('Using mock metrics data');
+  } catch (error) {
+    console.warn('⚠️ getSystemMetrics failed, using mock data:', error);
     
     const mockMetrics: MetricData[] = Array.from({ length: 24 }, (_, i) => ({
       timestamp: new Date(Date.now() - (23 - i) * 60 * 60 * 1000).toISOString(),
@@ -254,8 +345,8 @@ export async function triggerMaintenanceTask(taskType: string): Promise<{ succes
       method: 'POST',
       body: JSON.stringify({ taskType })
     });
-  } catch (_error) {
-    console.warn('Using mock maintenance response');
+  } catch (error) {
+    console.warn('⚠️ triggerMaintenanceTask failed, using mock response:', error);
     return { 
       success: true, 
       message: `Maintenance task ${taskType} started successfully`,
@@ -270,8 +361,8 @@ export async function triggerMaintenanceTask(taskType: string): Promise<{ succes
 export async function getApplicationHealth(): Promise<{ status: string; components: Record<string, string> }> {
   try {
     return await apiRequest<{ status: string; components: Record<string, string> }>('/dashboard/health');
-  } catch (_error) {
-    console.warn('Using mock health check data');
+  } catch (error) {
+    console.warn('⚠️ getApplicationHealth failed, using mock data:', error);
     return {
       status: "healthy",
       components: {
@@ -313,8 +404,8 @@ export async function exportLogs(format: 'json' | 'csv' = 'json', filters?: {
     }
 
     return await response.blob();
-  } catch (_error) {
-    console.warn('Using mock export data');
+  } catch (error) {
+    console.warn('⚠️ exportLogs failed, using mock data:', error);
     const mockData = format === 'json' ? 
       JSON.stringify([{ timestamp: new Date().toISOString(), level: "info", message: "Mock log entry" }], null, 2) :
       "timestamp,level,message\n" + new Date().toISOString() + ",info,Mock log entry";

@@ -108,15 +108,25 @@ const LogsViewer = ({ currentLanguage }: LogsViewerProps) => {
         });
       }
     } catch (error) {
-      console.error('Failed to load logs:', error);
+      console.error('❌ Failed to load logs in LogsViewer:', error);
+      
+      // Enhanced error message based on error type
+      let errorMessage = "Please try again later";
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        errorMessage = "Cannot connect to server. Please check if the backend is running.";
+      } else if (error instanceof Error && error.message.includes('HTTP error')) {
+        errorMessage = `Server error: ${error.message}`;
+      }
+      
       if (!autoRefresh) {
         toast({
           title: t.refreshError,
-          description: "Please try again later",
+          description: errorMessage,
           variant: "destructive",
         });
       }
-      // Load mock data for demo
+      
+      // Load mock data for demo - this ensures the UI still works
       const mockLogs: LogEntry[] = [
         {
           id: "1",
