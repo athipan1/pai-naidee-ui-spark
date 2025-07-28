@@ -9,6 +9,9 @@ import {
   Navigation,
   ChevronDown,
   Hotel,
+  ExternalLink,
+  Globe,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +42,11 @@ interface AttractionDetail {
   coordinates: {
     lat: number;
     lng: number;
+  };
+  externalLinks?: {
+    officialWebsite?: string;
+    googleMaps?: string;
+    wikipediaUrl?: string;
   };
 }
 
@@ -76,6 +84,11 @@ const AttractionDetail = ({
       viewMap: "ดูแผนที่",
       getDirections: "เส้นทาง",
       bookAccommodation: "🏨 จองที่พักใกล้เคียง",
+      externalLinks: "🔗 ลิงก์ที่เกี่ยวข้อง",
+      externalLinksDescription: "เข้าถึงข้อมูลเพิ่มเติมและแหล่งข้อมูลอย่างเป็นทางการ",
+      officialWebsite: "🌐 เว็บไซต์อย่างเป็นทางการ",
+      googleMaps: "📍 Google Maps",
+      wikipediaInfo: "📖 ข้อมูลเพิ่มเติม",
     },
     en: {
       loading: "Loading...",
@@ -89,6 +102,11 @@ const AttractionDetail = ({
       viewMap: "View Map",
       getDirections: "Get Directions",
       bookAccommodation: "🏨 Book Nearby Accommodation",
+      externalLinks: "🔗 Related Links",
+      externalLinksDescription: "Access additional information and official resources",
+      officialWebsite: "🌐 Official Website", 
+      googleMaps: "📍 Google Maps",
+      wikipediaInfo: "📖 More Information",
     },
   };
 
@@ -126,6 +144,7 @@ const AttractionDetail = ({
             description: attractionData.description,
             tags: attractionData.tags,
             coordinates: attractionData.location,
+            externalLinks: attractionData.externalLinks,
           };
 
           setAttraction(mappedAttraction);
@@ -346,6 +365,70 @@ const AttractionDetail = ({
             </p>
           </CardContent>
         </Card>
+
+        {/* External Links Section */}
+        {attraction.externalLinks && (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <ExternalLink className="h-5 w-5 text-primary" />
+                  {t.externalLinks}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {t.externalLinksDescription}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {attraction.externalLinks.officialWebsite && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 h-auto p-4 text-left justify-start"
+                    onClick={() => window.open(attraction.externalLinks!.officialWebsite, '_blank')}
+                  >
+                    <Globe className="h-4 w-4 text-primary flex-shrink-0" />
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{t.officialWebsite}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {currentLanguage === "th" ? "เว็บไซต์หลัก" : "Official information"}
+                      </span>
+                    </div>
+                  </Button>
+                )}
+                {attraction.externalLinks.googleMaps && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 h-auto p-4 text-left justify-start"
+                    onClick={() => window.open(attraction.externalLinks!.googleMaps, '_blank')}
+                  >
+                    <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{t.googleMaps}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {currentLanguage === "th" ? "แผนที่และเส้นทาง" : "Maps & directions"}
+                      </span>
+                    </div>
+                  </Button>
+                )}
+                {attraction.externalLinks.wikipediaUrl && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 h-auto p-4 text-left justify-start"
+                    onClick={() => window.open(attraction.externalLinks!.wikipediaUrl, '_blank')}
+                  >
+                    <BookOpen className="h-4 w-4 text-primary flex-shrink-0" />
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{t.wikipediaInfo}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {currentLanguage === "th" ? "ข้อมูลเชิงลึก" : "Detailed information"}
+                      </span>
+                    </div>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Accommodation Booking Section */}
         <Card className="mb-8">

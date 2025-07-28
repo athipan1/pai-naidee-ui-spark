@@ -232,6 +232,11 @@ export const mockAttractionDetails = {
     ],
     location: { lat: 7.7407, lng: 98.7784 },
     amenities: ["Restaurant", "Snorkeling", "Beach Access", "Boat Tours"],
+    externalLinks: {
+      officialWebsite: "https://www.thailand.travel/en/destinations/krabi/phi-phi-islands",
+      googleMaps: "https://maps.google.com/?q=Phi+Phi+Islands,+Krabi,+Thailand",
+      wikipediaUrl: "https://en.wikipedia.org/wiki/Phi_Phi_Islands"
+    },
   },
   "2": {
     id: "2",
@@ -269,6 +274,11 @@ export const mockAttractionDetails = {
     ],
     location: { lat: 13.7515, lng: 100.4917 },
     amenities: ["Audio Guide", "Gift Shop", "Prayer Area", "Cultural Tours"],
+    externalLinks: {
+      officialWebsite: "https://www.palaces.thai.net/grandpalace/",
+      googleMaps: "https://maps.google.com/?q=Temple+of+the+Emerald+Buddha,+Bangkok,+Thailand",
+      wikipediaUrl: "https://en.wikipedia.org/wiki/Wat_Phra_Kaew"
+    },
   },
   "3": {
     id: "3",
@@ -306,6 +316,11 @@ export const mockAttractionDetails = {
     ],
     location: { lat: 18.5885, lng: 98.4867 },
     amenities: ["Hiking Trails", "Visitor Center", "Parking", "Restrooms"],
+    externalLinks: {
+      officialWebsite: "https://portal.dnp.go.th/doiinthanonnp/en/",
+      googleMaps: "https://maps.google.com/?q=Doi+Inthanon+National+Park,+Chiang+Mai,+Thailand",
+      wikipediaUrl: "https://en.wikipedia.org/wiki/Doi_Inthanon_National_Park"
+    },
   },
   "4": {
     id: "4",
@@ -343,6 +358,11 @@ export const mockAttractionDetails = {
     ],
     location: { lat: 13.5167, lng: 100.1167 },
     amenities: ["Boat Tours", "Food Stalls", "Souvenirs", "Photography"],
+    externalLinks: {
+      officialWebsite: "https://www.thailand.travel/en/destinations/bangkok/floating-markets",
+      googleMaps: "https://maps.google.com/?q=Floating+Market,+Bangkok,+Thailand",
+      wikipediaUrl: "https://en.wikipedia.org/wiki/Floating_market"
+    },
   },
 };
 
