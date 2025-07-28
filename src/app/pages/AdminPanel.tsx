@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,15 +36,15 @@ const AdminPanel = ({ currentLanguage }: AdminPanelProps) => {
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 mobile-touch-target"
             >
               <ArrowLeft className="w-4 h-4" />
-              {t.backToHome}
+              <span className="hidden sm:inline">{t.backToHome}</span>
             </Button>
             
             <div className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground hidden md:inline">
                 {t.adminAccess}
               </span>
             </div>
@@ -54,13 +53,13 @@ const AdminPanel = ({ currentLanguage }: AdminPanelProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Settings className="h-10 w-10 text-primary" />
-            <h1 className="text-4xl font-bold">{t.title}</h1>
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+            <Settings className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">{t.title}</h1>
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
             {t.subtitle}
           </p>
         </div>
