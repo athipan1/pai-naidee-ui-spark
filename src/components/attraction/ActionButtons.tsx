@@ -24,8 +24,8 @@ export function ActionButtons({
   const [isFavorited, setIsFavorited] = useState(false);
 
   const handleNavigate = () => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-    window.open(googleMapsUrl, "_blank");
+    const mapUrl = `https://www.openstreetmap.org/directions?from=&to=${latitude}%2C${longitude}#map=15/${latitude}/${longitude}`;
+    window.open(mapUrl, "_blank");
   };
 
   const handleShare = async () => {
@@ -66,8 +66,8 @@ export function ActionButtons({
   };
 
   const handleViewMap = () => {
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    window.open(googleMapsUrl, "_blank");
+    const mapUrl = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
+    window.open(mapUrl, "_blank");
   };
 
   return (

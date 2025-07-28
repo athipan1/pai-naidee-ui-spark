@@ -276,8 +276,8 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
 
   // Handle external navigation
   const handleExternalNavigation = (lat: number, lng: number) => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-    window.open(googleMapsUrl, "_blank");
+    const mapUrl = `https://www.openstreetmap.org/directions?from=&to=${lat}%2C${lng}#map=15/${lat}/${lng}`;
+    window.open(mapUrl, "_blank");
   };
 
   // Custom marker icons for different POI types
@@ -294,10 +294,10 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
     }
   };
 
-  const openGoogleMaps = (lat: number, lng: number, placeName?: string) => {
+  const openExternalMap = (lat: number, lng: number, placeName?: string) => {
     const url = placeName 
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`
-      : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+      ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(placeName)}`
+      : `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
     window.open(url, "_blank");
   };
 
@@ -500,11 +500,11 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
                 <div className="grid gap-2">
                   <Button
                     size="sm"
-                    onClick={() => openGoogleMaps(currentAttraction.coordinates.lat, currentAttraction.coordinates.lng, displayName)}
+                    onClick={() => openExternalMap(currentAttraction.coordinates.lat, currentAttraction.coordinates.lng, displayName)}
                     className="flex items-center gap-2"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    View in Google Maps
+                    View in External Map
                   </Button>
                   
                   <Button

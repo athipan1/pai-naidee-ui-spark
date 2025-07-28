@@ -91,8 +91,8 @@ function AttractionDetailNew({
 
   const handleNavigate = () => {
     if (attraction) {
-      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${attraction.latitude},${attraction.longitude}`;
-      window.open(googleMapsUrl, "_blank");
+      const mapUrl = `https://www.openstreetmap.org/directions?from=&to=${attraction.latitude}%2C${attraction.longitude}#map=15/${attraction.latitude}/${attraction.longitude}`;
+      window.open(mapUrl, "_blank");
     }
   };
 

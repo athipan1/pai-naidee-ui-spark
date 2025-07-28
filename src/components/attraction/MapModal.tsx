@@ -20,13 +20,13 @@ const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps)
     th: {
       mapTitle: "ตำแหน่งบนแผนที่",
       navigateExternal: "นำทางด้วยแอปแผนที่ภายนอก",
-      viewOnGoogleMaps: "ดูใน Google Maps",
+      viewOnMap: "ดูในแผนที่",
       close: "ปิด"
     },
     en: {
       mapTitle: "Location on Map",
       navigateExternal: "Navigate with External Map App",
-      viewOnGoogleMaps: "View on Google Maps",
+      viewOnMap: "View on Map",
       close: "Close"
     },
   };
@@ -34,13 +34,13 @@ const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps)
   const t = content[currentLanguage];
 
   const handleExternalNavigation = () => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
-    window.open(googleMapsUrl, "_blank");
+    const mapUrl = `https://www.openstreetmap.org/directions?from=&to=${location.lat}%2C${location.lng}#map=15/${location.lat}/${location.lng}`;
+    window.open(mapUrl, "_blank");
   };
 
-  const handleViewOnGoogleMaps = () => {
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lng}`;
-    window.open(googleMapsUrl, "_blank");
+  const handleViewOnMap = () => {
+    const mapUrl = `https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}#map=15/${location.lat}/${location.lng}`;
+    window.open(mapUrl, "_blank");
   };
 
   const displayName = currentLanguage === "th" && location.nameLocal 
@@ -74,12 +74,12 @@ const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps)
               </div>
               <div className="space-y-2">
                 <Button
-                  onClick={handleViewOnGoogleMaps}
+                  onClick={handleViewOnMap}
                   variant="outline"
                   className="flex items-center gap-2"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  {t.viewOnGoogleMaps}
+                  {t.viewOnMap}
                 </Button>
                 <p className="text-xs text-muted-foreground">
                   Interactive map will load here
