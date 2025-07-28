@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Menu, X, Globe2, MapPin, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
+import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
 
 interface HeaderProps {
   currentLanguage: "th" | "en";
@@ -72,6 +73,9 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
               </Button>
             </Link>
           )}
+
+          {/* Dark Mode Toggle */}
+          <DarkModeToggle className="hidden sm:flex" />
           
           <Button
             variant="outline"
@@ -145,6 +149,11 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
                 {currentLanguage === "th" ? "English" : "ไทย"}
               </span>
             </Button>
+            
+            {/* Dark Mode Toggle for Mobile */}
+            <div className="flex justify-center sm:hidden">
+              <DarkModeToggle size="sm" />
+            </div>
           </nav>
         </div>
       )}
