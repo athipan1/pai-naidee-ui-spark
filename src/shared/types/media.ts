@@ -13,6 +13,26 @@ export interface MediaItem {
   approvedBy?: string;
   approvedAt?: Date;
   rejectionReason?: string;
+  
+  // Version control
+  version: number;
+  versionHistory?: string[]; // Version IDs
+  parentVersionId?: string;
+  isCurrentVersion: boolean;
+  
+  // Security
+  hash?: string;
+  encrypted?: boolean;
+  encryptionKeyId?: string;
+  securityLevel: SecurityLevel;
+  
+  // Access control
+  createdBy: string;
+  lastModifiedBy?: string;
+  accessPermissions: MediaPermission[];
+  
+  // Audit trail
+  auditLog?: string[]; // Audit log entry IDs
 }
 
 export interface MediaUploadData {
@@ -20,6 +40,33 @@ export interface MediaUploadData {
   description: string;
   type: 'image' | 'video' | 'text';
   file?: File;
+  
+  // Security options
+  requireEncryption?: boolean;
+  securityLevel?: SecurityLevel;
+  additionalValidation?: boolean;
+  
+  // Version control
+  parentVersionId?: string;
+  changeReason?: string;
+  
+  // Access control
+  permissions?: MediaPermission[];
+}
+
+export enum SecurityLevel {
+  PUBLIC = 'public',
+  INTERNAL = 'internal', 
+  CONFIDENTIAL = 'confidential',
+  RESTRICTED = 'restricted'
+}
+
+export interface MediaPermission {
+  userId: string;
+  permission: 'read' | 'write' | 'delete' | 'approve';
+  grantedBy: string;
+  grantedAt: Date;
+  expiresAt?: Date;
 }
 
 export const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
