@@ -19,7 +19,24 @@ import SearchResults from "./pages/SearchResults";
 import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime in v5)
+      retry: (failureCount, error) => {
+        // Don't retry for 404 errors
+        if (error?.message?.includes('not found')) return false;
+        return failureCount < 3;
+      },
+      refetchOnWindowFocus: true, // Refetch when window gains focus
+      refetchOnReconnect: true, // Refetch when internet connection is restored
+    },
+    mutations: {
+      retry: 2,
+    },
+  },
+});
 
 const App = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");

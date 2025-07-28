@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,6 +13,7 @@ import {
   Globe,
   BookOpen,
   Settings,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,33 +24,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { mockAttractionDetails, simulateDelay } from "@/shared/data/mockData";
 import { accommodationAPI } from "@/shared/utils/api";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
-
-interface AttractionDetail {
-  id: string;
-  name: string;
-  nameLocal: string;
-  province: string;
-  category: string;
-  rating: number;
-  reviewCount: number;
-  images: string[];
-  description: string;
-  tags: string[];
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  externalLinks?: {
-    officialWebsite?: string;
-    googleMaps?: string;
-    wikipediaUrl?: string;
-  };
-}
+import { 
+  useAttractionDetail, 
+  useRefreshAttraction,
+  getAttractionErrorMessage 
+} from "@/shared/hooks/useAttractionQueries";
+import type { AttractionDetail } from "@/shared/utils/attractionAPI";
 
 interface AttractionDetailProps {
   currentLanguage: "th" | "en";
@@ -62,13 +46,22 @@ const AttractionDetail = ({
 }: AttractionDetailProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [attraction, setAttraction] = useState<AttractionDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  
+  // Use React Query for data fetching
+  const { 
+    data: attraction, 
+    isLoading, 
+    error, 
+    refetch: refetchAttraction 
+  } = useAttractionDetail(id);
+  
+  const refreshMutation = useRefreshAttraction();
+  
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMapModal, setShowMapModal] = useState(false);
   const [showAccommodationModal, setShowAccommodationModal] = useState(false);
-  const [accommodations, setAccommodations] = useState<any[]>([]);
+  const [accommodations, setAccommodations] = useState<unknown[]>([]);
   const [accommodationLoading, setAccommodationLoading] = useState(false);
   const [accommodationError, setAccommodationError] = useState<string | null>(null);
 
@@ -90,6 +83,11 @@ const AttractionDetail = ({
       officialWebsite: "🌐 เว็บไซต์อย่างเป็นทางการ",
       googleMaps: "📍 Google Maps",
       wikipediaInfo: "📖 ข้อมูลเพิ่มเติม",
+      refreshData: "🔄 รีเฟรชข้อมูล",
+      refreshing: "กำลังรีเฟรช...",
+      refreshSuccess: "รีเฟรชข้อมูลสำเร็จ",
+      refreshError: "เกิดข้อผิดพลาดในการรีเฟรช",
+      dataUpdated: "ข้อมูลได้รับการอัปเดตแล้ว",
     },
     en: {
       loading: "Loading...",
@@ -108,84 +106,27 @@ const AttractionDetail = ({
       officialWebsite: "🌐 Official Website", 
       googleMaps: "📍 Google Maps",
       wikipediaInfo: "📖 More Information",
+      refreshData: "🔄 Refresh Data",
+      refreshing: "Refreshing...",
+      refreshSuccess: "Data refreshed successfully",
+      refreshError: "Failed to refresh data",
+      dataUpdated: "Data has been updated",
     },
   };
 
   const t = content[currentLanguage];
 
-  // Load attraction details using mock data
-  useEffect(() => {
-    const fetchAttractionDetail = async () => {
-      if (!id) return;
-
-      setLoading(true);
-
-      try {
-        // Simulate API loading time
-        await simulateDelay(600);
-
-        // Get mock data for the attraction
-        const attractionData = mockAttractionDetails[id];
-
-        if (attractionData) {
-          // Map the mock data to match the component's interface
-          const mappedAttraction: AttractionDetail = {
-            id: attractionData.id,
-            name: attractionData.name,
-            nameLocal:
-              currentLanguage === "th"
-                ? attractionData.nameLocal || attractionData.name
-                : attractionData.nameLocal || attractionData.name,
-            province:
-              currentLanguage === "th" ? attractionData.province : attractionData.province,
-            category: attractionData.category,
-            rating: attractionData.rating,
-            reviewCount: attractionData.reviewCount,
-            images: attractionData.images,
-            description: attractionData.description,
-            tags: attractionData.tags,
-            coordinates: attractionData.location,
-            externalLinks: attractionData.externalLinks,
-          };
-
-          setAttraction(mappedAttraction);
-        } else {
-          throw new Error("Attraction not found");
-        }
-      } catch (error) {
-        console.error("Failed to fetch attraction details:", error);
-        // Don't show error, just use default data
-        const defaultAttraction: AttractionDetail = {
-          id: id || "1",
-          name: "Phi Phi Islands",
-          nameLocal: "หมู่เกาะพีพี",
-          province: currentLanguage === "th" ? "กระบี่" : "Krabi",
-          category: "Beach",
-          rating: 4.8,
-          reviewCount: 2547,
-          images: [
-            "/src/shared/assets/hero-beach.jpg",
-            "/src/shared/assets/floating-market.jpg",
-            "/src/shared/assets/mountain-nature.jpg",
-          ],
-          description:
-            currentLanguage === "th"
-              ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
-              : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
-          tags: ["Beach", "Snorkeling", "Island", "Photography"],
-          coordinates: {
-            lat: 7.7367,
-            lng: 98.7784,
-          },
-        };
-        setAttraction(defaultAttraction);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAttractionDetail();
-  }, [id, currentLanguage]);
+  // Handle refresh functionality
+  const handleRefresh = async () => {
+    if (!id) return;
+    
+    try {
+      await refreshMutation.mutateAsync(id);
+      // The query will automatically refetch due to invalidation
+    } catch (error) {
+      // Error handled by mutation
+    }
+  };
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
@@ -203,19 +144,39 @@ const AttractionDetail = ({
       const accommodationData = await accommodationAPI.fetchNearbyAccommodations(attraction.id);
       setAccommodations(accommodationData);
     } catch (error) {
-      console.error("Failed to fetch accommodations:", error);
       setAccommodationError(error instanceof Error ? error.message : "Failed to load accommodations");
     } finally {
       setAccommodationLoading(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">{t.loading}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-muted-foreground mb-4">
+            {getAttractionErrorMessage(error, t.notFound)}
+          </p>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={() => navigate("/")} variant="outline">
+              {t.backToSearch}
+            </Button>
+            <Button onClick={() => refetchAttraction()} className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" />
+              {t.refreshData}
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -255,6 +216,16 @@ const AttractionDetail = ({
             </Button>
             
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={handleRefresh}
+                disabled={refreshMutation.isPending}
+                className="flex items-center gap-2"
+                title={t.refreshData}
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+                {refreshMutation.isPending ? t.refreshing : t.refreshData}
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
