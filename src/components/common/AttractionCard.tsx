@@ -97,59 +97,61 @@ const AttractionCard = ({
   };
 
   return (
-    <div className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-border/50">
+    <div className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-border/50 relative">
       {/* Image Container */}
       <div 
         className="relative overflow-hidden cursor-pointer"
         onClick={() => onCardClick(id)}
       >
         <div
-          className={`w-full h-48 bg-muted animate-pulse ${imageLoaded ? "hidden" : "block"}`}
+          className={`w-full h-48 bg-muted loading-shimmer ${imageLoaded ? "hidden" : "block"}`}
         />
         <img
           src={image}
           alt={displayName}
-          className={`hero-image transition-transform duration-500 group-hover:scale-110 ${imageLoaded ? "block" : "hidden"}`}
+          className={`hero-image transition-all duration-700 group-hover:scale-110 ${imageLoaded ? "block" : "hidden"}`}
           onLoad={() => setImageLoaded(true)}
         />
 
-        {/* Overlay gradient */}
-        <div className="hero-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Enhanced overlay gradient */}
+        <div className="hero-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Category badge */}
+        {/* Category badge with glow effect */}
         <div className="absolute top-3 left-3">
-          <span className="px-3 py-1 bg-card/90 backdrop-blur-sm rounded-full text-xs font-medium text-primary border border-border/50">
+          <span className="px-3 py-1 glass-effect rounded-full text-xs font-medium text-white border border-white/20 backdrop-blur-md">
             {currentLanguage === "th" ? getCategoryNameTh(category) : category}
           </span>
         </div>
 
-        {/* Action buttons */}
+        {/* Enhanced action buttons */}
         <div className="absolute top-3 right-3 flex space-x-2">
           <button
-            className={`w-9 h-9 rounded-full bg-card/90 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-all duration-300 touch-manipulation ${
-              isFavorite ? "bg-destructive text-destructive-foreground" : "hover:bg-accent"
+            className={`heart-btn transition-all duration-300 ${
+              isFavorite 
+                ? "bg-destructive text-destructive-foreground shadow-lg neon-glow" 
+                : "glass-effect text-white hover:bg-white/20"
             }`}
             onClick={(e) => {
               e.stopPropagation();
               onFavoriteToggle(id);
             }}
           >
-            <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`} />
+            <Heart className={`w-4 h-4 transition-all duration-300 ${isFavorite ? "fill-current scale-110" : ""}`} />
           </button>
           
           <button
-            className="w-9 h-9 rounded-full bg-card/90 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-accent transition-all duration-300 touch-manipulation"
+            className="w-9 h-9 rounded-full glass-effect text-white hover:bg-white/20 flex items-center justify-center transition-all duration-300 touch-manipulation interactive-scale"
             onClick={handleShare}
           >
             <Share className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Quick action overlay */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+        {/* Enhanced quick action overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center">
           <Button
             size="sm"
-            className="btn-primary transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
+            className="btn-primary transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg"
             onClick={(e) => {
               e.stopPropagation();
               onCardClick(id);
@@ -163,20 +165,20 @@ const AttractionCard = ({
 
       {/* Content - Not clickable to avoid confusion */}
       <div className="p-4 space-y-3">
-        {/* Title and Rating */}
+        {/* Enhanced title and rating */}
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors duration-300">
+          <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-all duration-300 text-shadow">
             {displayName}
           </h3>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1 text-muted-foreground">
-              <MapPin className="w-4 h-4" />
+              <MapPin className="w-4 h-4 transition-colors duration-300 group-hover:text-primary" />
               <span className="text-sm">{province}</span>
             </div>
 
-            <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow" />
+            <div className="flex items-center space-x-1 bg-accent/30 px-2 py-1 rounded-full">
+              <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow animate-glow" />
               <span className="text-sm font-medium">{rating}</span>
               <span className="text-xs text-muted-foreground">
                 ({reviewCount}
@@ -186,17 +188,17 @@ const AttractionCard = ({
           </div>
         </div>
 
-        {/* Description */}
-        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+        {/* Enhanced description */}
+        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed group-hover:text-foreground transition-colors duration-300">
           {description}
         </p>
 
-        {/* Tags */}
+        {/* Enhanced tags */}
         <div className="flex flex-wrap gap-1">
           {tags.slice(0, 3).map((tag, index) => (
             <span
               key={index}
-              className="px-2 py-1 bg-accent/50 text-accent-foreground rounded-md text-xs font-medium"
+              className="px-2 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary rounded-md text-xs font-medium border border-primary/20 hover:border-primary/40 transition-all duration-300"
             >
               {currentLanguage === "th" ? getTagNameTh(tag) : tag}
             </span>
