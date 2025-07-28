@@ -74,6 +74,23 @@ export const mockAttractions: SearchResult[] = [
     amenities: ["Boat Tours", "Food Stalls", "Souvenirs", "Photography"],
     location: { lat: 13.5167, lng: 100.1167 },
   },
+  {
+    id: "5",
+    name: "Grand Palace",
+    nameLocal: "พระบรมมหาราชวัง",
+    province: "Bangkok",
+    category: "Attraction",
+    tags: ["Palace", "Culture", "History", "Architecture"],
+    rating: 4.9,
+    reviewCount: 8765,
+    image: "/src/shared/assets/temple-culture.jpg",
+    description:
+      "The Grand Palace is a complex of buildings at the heart of Bangkok, Thailand. It was the official residence of the Kings of Siam.",
+    confidence: 0.97,
+    matchedTerms: ["palace", "grand", "attraction"],
+    amenities: ["Audio Guide", "Gift Shop", "Cultural Tours", "Photography"],
+    location: { lat: 13.7500, lng: 100.4917 },
+  },
 ];
 
 export const mockSuggestions: SearchSuggestion[] = [
@@ -364,6 +381,48 @@ export const mockAttractionDetails = {
       wikipediaUrl: "https://en.wikipedia.org/wiki/Floating_market"
     },
   },
+  "5": {
+    id: "5",
+    name: "Grand Palace",
+    nameLocal: "พระบรมมหาราชวัง",
+    province: "Bangkok",
+    category: "Attraction",
+    rating: 4.9,
+    reviewCount: 8765,
+    images: [
+      "/src/shared/assets/temple-culture.jpg",
+      "/src/shared/assets/hero-beach.jpg",
+      "/src/shared/assets/mountain-nature.jpg",
+    ],
+    description:
+      "The Grand Palace is a complex of buildings at the heart of Bangkok, Thailand. It was the official residence of the Kings of Siam and is now used for official events. One of the most famous tourist attractions in Thailand.",
+    tags: ["Palace", "Culture", "History", "Architecture"],
+    rooms: [
+      {
+        id: "r9",
+        name: "Heritage Palace Suite",
+        price: 5200,
+        currency: "THB",
+        image: "/src/shared/assets/temple-culture.jpg",
+        amenities: ["Palace View", "Cultural Tours", "Luxury Amenities", "Traditional Décor"],
+      },
+      {
+        id: "r10",
+        name: "Royal Garden Room",
+        price: 3800,
+        currency: "THB",
+        image: "/src/shared/assets/temple-culture.jpg",
+        amenities: ["Garden View", "WiFi", "Air Conditioning", "Fine Dining"],
+      },
+    ],
+    location: { lat: 13.7500, lng: 100.4917 },
+    amenities: ["Audio Guide", "Gift Shop", "Cultural Tours", "Photography"],
+    externalLinks: {
+      officialWebsite: "https://www.palaces.thai.net/grandpalace/",
+      googleMaps: "https://maps.google.com/?q=Grand+Palace,+Bangkok,+Thailand",
+      wikipediaUrl: "https://en.wikipedia.org/wiki/Grand_Palace"
+    },
+  },
 };
 
 // Mock accommodations data for nearby hotel booking
@@ -494,6 +553,32 @@ export const mockAccommodations = {
       currency: "THB",
       amenities: ["Authentic Experience", "Home Cooking", "Family Friendly", "Cultural"],
       booking_url: "https://booking.com/hotel/traditional-thai-homestay"
+    }
+  ],
+  "5": [ // Grand Palace
+    {
+      id: "h11",
+      name: "Grand Palace Heritage Hotel",
+      nameLocal: "โรงแรมมรดกพระบรมมหาราชวัง",
+      rating: 4.8,
+      distance: 0.2,
+      image: "/src/shared/assets/temple-culture.jpg",
+      price: 4800,
+      currency: "THB",
+      amenities: ["Palace View", "Cultural Tours", "Luxury Spa", "Fine Dining"],
+      booking_url: "https://booking.com/hotel/grand-palace-heritage"
+    },
+    {
+      id: "h12",
+      name: "Royal Bangkok Hotel",
+      nameLocal: "โรงแรมรอยัลกรุงเทพ",
+      rating: 4.5,
+      distance: 0.6,
+      image: "/src/shared/assets/temple-culture.jpg",
+      price: 3200,
+      currency: "THB",
+      amenities: ["Historic Area", "Pool", "Restaurant", "Cultural Activities"],
+      booking_url: "https://booking.com/hotel/royal-bangkok"
     }
   ]
 };
