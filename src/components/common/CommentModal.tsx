@@ -21,14 +21,14 @@ interface Comment {
 interface CommentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  _videoId: string;
+  videoId: string;
   currentLanguage: "th" | "en";
 }
 
 const CommentModal = ({
   isOpen,
   onClose,
-  videoId: _videoId,
+  videoId,
   currentLanguage,
 }: CommentModalProps) => {
   const [comments, setComments] = useState<Comment[]>([

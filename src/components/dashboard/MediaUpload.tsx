@@ -82,8 +82,8 @@ const MediaUpload = ({ currentLanguage, onUpload }: MediaUploadProps) => {
   const t = texts[currentLanguage];
 
   const validateFile = useCallback((file: File): boolean => {
-    const isImageType = SUPPORTED_IMAGE_TYPES.includes(file.type as SupportedImageType);
-    const isVideoType = SUPPORTED_VIDEO_TYPES.includes(file.type as SupportedVideoType);
+    const isImageType = SUPPORTED_IMAGE_TYPES.includes(file.type as any);
+    const isVideoType = SUPPORTED_VIDEO_TYPES.includes(file.type as any);
     
     if (formData.type === 'image' && !isImageType) {
       toast({

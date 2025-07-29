@@ -623,8 +623,8 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
       const status = timelineSyncService.getSyncStatus();
       setSyncStatus({
         success: true,
-        syncedEntries: status.syncedEntries || 0,
-        failedEntries: status.failedEntries || 0,
+        syncedEntries: 0,
+        failedEntries: 0,
         errors: [],
         lastSyncTime: new Date()
       });
