@@ -276,8 +276,8 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
 
   // Handle external navigation
   const handleExternalNavigation = (lat: number, lng: number) => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-    window.open(googleMapsUrl, "_blank");
+    // Generic navigation without specific Google Maps reference
+    alert(`นำทางไปยังตำแหน่ง: ${lat}, ${lng}`);
   };
 
   // Custom marker icons for different POI types
@@ -294,11 +294,12 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
     }
   };
 
-  const openGoogleMaps = (lat: number, lng: number, placeName?: string) => {
-    const url = placeName 
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`
-      : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-    window.open(url, "_blank");
+  const openLocation = (lat: number, lng: number, placeName?: string) => {
+    // Display location information instead of opening Google Maps
+    const locationText = placeName 
+      ? `ตำแหน่ง: ${placeName}\nพิกัด: ${lat}, ${lng}`
+      : `พิกัด: ${lat}, ${lng}`;
+    alert(locationText);
   };
 
   if (!currentAttraction) {
@@ -500,11 +501,11 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
                 <div className="grid gap-2">
                   <Button
                     size="sm"
-                    onClick={() => openGoogleMaps(currentAttraction.coordinates.lat, currentAttraction.coordinates.lng, displayName)}
+                    onClick={() => openLocation(currentAttraction.coordinates.lat, currentAttraction.coordinates.lng, displayName)}
                     className="flex items-center gap-2"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    View in Google Maps
+                    View Location
                   </Button>
                   
                   <Button

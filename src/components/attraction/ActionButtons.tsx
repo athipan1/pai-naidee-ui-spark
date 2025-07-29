@@ -24,8 +24,8 @@ export function ActionButtons({
   const [isFavorited, setIsFavorited] = useState(false);
 
   const handleNavigate = () => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-    window.open(googleMapsUrl, "_blank");
+    // Generic external navigation without specific Google Maps reference
+    alert(`นำทางไปยัง ${placeName} - พิกัด: ${latitude}, ${longitude}`);
   };
 
   const handleShare = async () => {
@@ -66,8 +66,8 @@ export function ActionButtons({
   };
 
   const handleViewMap = () => {
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    window.open(googleMapsUrl, "_blank");
+    // Display location information instead of opening Google Maps
+    alert(`ตำแหน่ง ${placeName}\nพิกัด: ${latitude}, ${longitude}`);
   };
 
   return (
