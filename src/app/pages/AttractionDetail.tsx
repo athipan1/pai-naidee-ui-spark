@@ -81,7 +81,6 @@ const AttractionDetail = ({
       externalLinks: "🔗 ลิงก์ที่เกี่ยวข้อง",
       externalLinksDescription: "เข้าถึงข้อมูลเพิ่มเติมและแหล่งข้อมูลอย่างเป็นทางการ",
       officialWebsite: "🌐 เว็บไซต์อย่างเป็นทางการ",
-      googleMaps: "📍 Google Maps",
       wikipediaInfo: "📖 ข้อมูลเพิ่มเติม",
       refreshData: "🔄 รีเฟรชข้อมูล",
       refreshing: "กำลังรีเฟรช...",
@@ -104,7 +103,6 @@ const AttractionDetail = ({
       externalLinks: "🔗 Related Links",
       externalLinksDescription: "Access additional information and official resources",
       officialWebsite: "🌐 Official Website", 
-      googleMaps: "📍 Google Maps",
       wikipediaInfo: "📖 More Information",
       refreshData: "🔄 Refresh Data",
       refreshing: "Refreshing...",
@@ -371,21 +369,6 @@ const AttractionDetail = ({
                       <span className="font-medium">{t.officialWebsite}</span>
                       <span className="text-xs text-muted-foreground">
                         {currentLanguage === "th" ? "เว็บไซต์หลัก" : "Official information"}
-                      </span>
-                    </div>
-                  </Button>
-                )}
-                {attraction.externalLinks.googleMaps && attraction.category !== "Attraction" && (
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2 h-auto p-4 text-left justify-start"
-                    onClick={() => window.open(attraction.externalLinks!.googleMaps, '_blank')}
-                  >
-                    <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{t.googleMaps}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {currentLanguage === "th" ? "แผนที่และเส้นทาง" : "Maps & directions"}
                       </span>
                     </div>
                   </Button>

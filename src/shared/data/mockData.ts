@@ -251,7 +251,6 @@ export const mockAttractionDetails = {
     amenities: ["Restaurant", "Snorkeling", "Beach Access", "Boat Tours"],
     externalLinks: {
       officialWebsite: "https://www.thailand.travel/en/destinations/krabi/phi-phi-islands",
-      googleMaps: "https://maps.google.com/?q=Phi+Phi+Islands,+Krabi,+Thailand",
       wikipediaUrl: "https://en.wikipedia.org/wiki/Phi_Phi_Islands"
     },
   },
@@ -293,7 +292,6 @@ export const mockAttractionDetails = {
     amenities: ["Audio Guide", "Gift Shop", "Prayer Area", "Cultural Tours"],
     externalLinks: {
       officialWebsite: "https://www.palaces.thai.net/grandpalace/",
-      googleMaps: "https://maps.google.com/?q=Temple+of+the+Emerald+Buddha,+Bangkok,+Thailand",
       wikipediaUrl: "https://en.wikipedia.org/wiki/Wat_Phra_Kaew"
     },
   },
@@ -335,7 +333,6 @@ export const mockAttractionDetails = {
     amenities: ["Hiking Trails", "Visitor Center", "Parking", "Restrooms"],
     externalLinks: {
       officialWebsite: "https://portal.dnp.go.th/doiinthanonnp/en/",
-      googleMaps: "https://maps.google.com/?q=Doi+Inthanon+National+Park,+Chiang+Mai,+Thailand",
       wikipediaUrl: "https://en.wikipedia.org/wiki/Doi_Inthanon_National_Park"
     },
   },
@@ -377,7 +374,6 @@ export const mockAttractionDetails = {
     amenities: ["Boat Tours", "Food Stalls", "Souvenirs", "Photography"],
     externalLinks: {
       officialWebsite: "https://www.thailand.travel/en/destinations/bangkok/floating-markets",
-      googleMaps: "https://maps.google.com/?q=Floating+Market,+Bangkok,+Thailand",
       wikipediaUrl: "https://en.wikipedia.org/wiki/Floating_market"
     },
   },
@@ -419,7 +415,6 @@ export const mockAttractionDetails = {
     amenities: ["Audio Guide", "Gift Shop", "Cultural Tours", "Photography"],
     externalLinks: {
       officialWebsite: "https://www.palaces.thai.net/grandpalace/",
-      googleMaps: "https://maps.google.com/?q=Grand+Palace,+Bangkok,+Thailand",
       wikipediaUrl: "https://en.wikipedia.org/wiki/Grand_Palace"
     },
   },

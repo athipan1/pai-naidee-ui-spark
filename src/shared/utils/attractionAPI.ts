@@ -57,7 +57,6 @@ export interface AttractionDetail {
   };
   externalLinks?: {
     officialWebsite?: string;
-    googleMaps?: string;
     wikipediaUrl?: string;
   };
   lastUpdated?: string;

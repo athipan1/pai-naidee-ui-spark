@@ -20,13 +20,13 @@ const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps)
     th: {
       mapTitle: "ตำแหน่งบนแผนที่",
       navigateExternal: "นำทางด้วยแอปแผนที่ภายนอก",
-      viewOnGoogleMaps: "ดูใน Google Maps",
+      viewLocation: "ดูตำแหน่ง",
       close: "ปิด"
     },
     en: {
       mapTitle: "Location on Map",
       navigateExternal: "Navigate with External Map App",
-      viewOnGoogleMaps: "View on Google Maps",
+      viewLocation: "View Location",
       close: "Close"
     },
   };
@@ -34,13 +34,13 @@ const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps)
   const t = content[currentLanguage];
 
   const handleExternalNavigation = () => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
-    window.open(googleMapsUrl, "_blank");
+    // Generic navigation without specific Google Maps reference
+    alert(`นำทางไปยัง ${displayName} - พิกัด: ${location.lat}, ${location.lng}`);
   };
 
-  const handleViewOnGoogleMaps = () => {
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lng}`;
-    window.open(googleMapsUrl, "_blank");
+  const handleViewLocation = () => {
+    // Display location information instead of opening Google Maps
+    alert(`ตำแหน่ง ${displayName}\nพิกัด: ${location.lat}, ${location.lng}`);
   };
 
   const displayName = currentLanguage === "th" && location.nameLocal 
@@ -74,12 +74,12 @@ const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps)
               </div>
               <div className="space-y-2">
                 <Button
-                  onClick={handleViewOnGoogleMaps}
+                  onClick={handleViewLocation}
                   variant="outline"
                   className="flex items-center gap-2"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  {t.viewOnGoogleMaps}
+                  {t.viewLocation}
                 </Button>
                 <p className="text-xs text-muted-foreground">
                   Interactive map will load here

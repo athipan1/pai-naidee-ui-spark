@@ -91,8 +91,8 @@ function AttractionDetailNew({
 
   const handleNavigate = () => {
     if (attraction) {
-      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${attraction.latitude},${attraction.longitude}`;
-      window.open(googleMapsUrl, "_blank");
+      // Display location information instead of opening Google Maps
+      alert(`นำทางไปยัง ${attraction.name}\nพิกัด: ${attraction.latitude}, ${attraction.longitude}`);
     }
   };
 
