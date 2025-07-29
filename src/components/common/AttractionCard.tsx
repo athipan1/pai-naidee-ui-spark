@@ -97,7 +97,19 @@ const AttractionCard = ({
   };
 
   return (
-    <div className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-border/50 relative z-10">
+    <article 
+      className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-border/50 relative z-10"
+      role="button"
+      tabIndex={0}
+      aria-label={`${displayName}, ${province} - ${currentLanguage === "th" ? getCategoryNameTh(category) : category}`}
+      onClick={() => onCardClick(id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onCardClick(id);
+        }
+      }}
+    >
       {/* Image Container */}
       <div 
         className="relative overflow-hidden cursor-pointer z-10"
@@ -109,8 +121,11 @@ const AttractionCard = ({
         <img
           src={image}
           alt={displayName}
+          loading="lazy"
           className={`hero-image transition-all duration-700 group-hover:scale-110 ${imageLoaded ? "block" : "hidden"}`}
           onLoad={() => setImageLoaded(true)}
+          width="400"
+          height="192"
         />
 
         {/* Enhanced overlay gradient */}
@@ -135,6 +150,13 @@ const AttractionCard = ({
               e.stopPropagation();
               onFavoriteToggle(id);
             }}
+            aria-label={
+              currentLanguage === "th" 
+                ? (isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มในรายการโปรด")
+                : (isFavorite ? "Remove from favorites" : "Add to favorites")
+            }
+            role="button"
+            tabIndex={0}
           >
             <Heart className={`w-4 h-4 transition-all duration-300 ${isFavorite ? "fill-current scale-110" : ""}`} />
           </button>
@@ -142,6 +164,13 @@ const AttractionCard = ({
           <button
             className="w-9 h-9 rounded-full glass-effect text-white hover:bg-white/20 flex items-center justify-center transition-all duration-300 touch-manipulation interactive-scale"
             onClick={handleShare}
+            aria-label={
+              currentLanguage === "th" 
+                ? "แชร์สถานที่นี้"
+                : "Share this place"
+            }
+            role="button"
+            tabIndex={0}
           >
             <Share className="w-4 h-4" />
           </button>
@@ -260,7 +289,7 @@ const AttractionCard = ({
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

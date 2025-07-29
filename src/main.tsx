@@ -3,6 +3,19 @@ import { createRoot } from "react-dom/client";
 import App from "./app/App";
 import "./app/styles/index.css";
 
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('SW registered: ', registration);
+      })
+      .catch((registrationError) => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
+
 // Get the root element with proper error handling
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -11,7 +24,7 @@ if (!rootElement) {
   );
 }
 
-// Render the application directly without lazy loading
+// Render the application with lazy loading
 createRoot(rootElement).render(
   <React.StrictMode>
     <App />
