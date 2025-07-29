@@ -3,22 +3,25 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import DevTools from "@/components/dev/DevTools";
-import Index from "./pages/Index";
-import Explore from "../app/pages/Explore";
-import Favorites from "../app/pages/Favorites";
-import Profile from "../app/pages/Profile";
-import CategoryPage from "./pages/CategoryPage";
-import AccordionExamples from "./pages/AccordionExamples";
-import NotFound from "./pages/NotFound";
-import AttractionDetail from "./pages/AttractionDetail";
-import MapPage from "./pages/MapPage";
-import SearchResults from "./pages/SearchResults";
-import Dashboard from "./pages/Dashboard";
-import AdminPanel from "./pages/AdminPanel";
-import EnhancedAdminPanel from "@/components/admin/EnhancedAdminPanel";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+
+// Lazy load pages for better performance
+const Index = lazy(() => import("./pages/Index"));
+const Explore = lazy(() => import("./pages/Explore"));
+const Favorites = lazy(() => import("./pages/Favorites"));
+const Profile = lazy(() => import("./pages/Profile"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const AccordionExamples = lazy(() => import("./pages/AccordionExamples"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
+const MapPage = lazy(() => import("./pages/MapPage"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const EnhancedAdminPanel = lazy(() => import("@/components/admin/EnhancedAdminPanel"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,94 +52,96 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <Index
-                    currentLanguage={currentLanguage}
-                    onLanguageChange={setCurrentLanguage}
-                  />
-                }
-              />
-              <Route
-                path="/explore"
-                element={
-                  <Explore
-                    currentLanguage={currentLanguage}
-                    onBack={() => window.history.back()}
-                  />
-                }
-              />
-              <Route
-                path="/favorites"
-                element={<Favorites currentLanguage={currentLanguage} />}
-              />
-              <Route
-                path="/profile"
-                element={
-                  <Profile
-                    currentLanguage={currentLanguage}
-                    onLanguageChange={setCurrentLanguage}
-                    onBack={() => window.history.back()}
-                  />
-                }
-              />
-              <Route
-                path="/attraction/:id"
-                element={
-                  <AttractionDetail
-                    currentLanguage={currentLanguage}
-                    onBack={() => window.history.back()}
-                  />
-                }
-              />
-              <Route
-                path="/map/:id?"
-                element={
-                  <MapPage
-                    currentLanguage={currentLanguage}
-                    onBack={() => window.history.back()}
-                  />
-                }
-              />
-              <Route
-                path="/search"
-                element={
-                  <SearchResults currentLanguage={currentLanguage} />
-                }
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  <Dashboard
-                    currentLanguage={currentLanguage}
-                    onBack={() => window.history.back()}
-                  />
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <AdminPanel currentLanguage={currentLanguage} />
-                }
-              />
-              <Route
-                path="/admin/enhanced"
-                element={
-                  <EnhancedAdminPanel currentLanguage={currentLanguage} />
-                }
-              />
-              <Route
-                path="/category/:categoryName"
-                element={<CategoryPage currentLanguage={currentLanguage} />}
-              />
-              <Route
-                path="/accordion-examples"
-                element={<AccordionExamples />}
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <Index
+                      currentLanguage={currentLanguage}
+                      onLanguageChange={setCurrentLanguage}
+                    />
+                  }
+                />
+                <Route
+                  path="/explore"
+                  element={
+                    <Explore
+                      currentLanguage={currentLanguage}
+                      onBack={() => window.history.back()}
+                    />
+                  }
+                />
+                <Route
+                  path="/favorites"
+                  element={<Favorites currentLanguage={currentLanguage} />}
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <Profile
+                      currentLanguage={currentLanguage}
+                      onLanguageChange={setCurrentLanguage}
+                      onBack={() => window.history.back()}
+                    />
+                  }
+                />
+                <Route
+                  path="/attraction/:id"
+                  element={
+                    <AttractionDetail
+                      currentLanguage={currentLanguage}
+                      onBack={() => window.history.back()}
+                    />
+                  }
+                />
+                <Route
+                  path="/map/:id?"
+                  element={
+                    <MapPage
+                      currentLanguage={currentLanguage}
+                      onBack={() => window.history.back()}
+                    />
+                  }
+                />
+                <Route
+                  path="/search"
+                  element={
+                    <SearchResults currentLanguage={currentLanguage} />
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <Dashboard
+                      currentLanguage={currentLanguage}
+                      onBack={() => window.history.back()}
+                    />
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminPanel currentLanguage={currentLanguage} />
+                  }
+                />
+                <Route
+                  path="/admin/enhanced"
+                  element={
+                    <EnhancedAdminPanel currentLanguage={currentLanguage} />
+                  }
+                />
+                <Route
+                  path="/category/:categoryName"
+                  element={<CategoryPage currentLanguage={currentLanguage} />}
+                />
+                <Route
+                  path="/accordion-examples"
+                  element={<AccordionExamples />}
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
           <DevTools />
         </TooltipProvider>

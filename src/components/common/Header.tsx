@@ -32,7 +32,11 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
     <header className="sticky top-0 z-50 w-full glass-effect border-b border-white/20 shadow-lg safe-area-top">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Enhanced Logo */}
-        <Link to="/" className="flex items-center space-x-2 interactive-scale">
+        <Link 
+          to="/" 
+          className="flex items-center space-x-2 interactive-scale"
+          aria-label={currentLanguage === "th" ? "ไปไหนดี - หน้าแรก" : "PaiNaiDee - Home"}
+        >
           <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg neon-glow">
             <MapPin className="w-6 h-6 text-white animate-float" />
           </div>
@@ -42,7 +46,10 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
         </Link>
 
         {/* Enhanced Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav 
+          className="hidden md:flex items-center space-x-6"
+          aria-label={currentLanguage === "th" ? "เมนูหลัก" : "Main navigation"}
+        >
           {menuItems.map((item, index) => (
             <Link
               key={index}

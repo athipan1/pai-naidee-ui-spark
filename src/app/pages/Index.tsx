@@ -161,103 +161,125 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         onLanguageChange={onLanguageChange}
       />
 
-      <SearchSection
-        currentLanguage={currentLanguage}
-        onSearch={handleSearch}
-      />
+      <main role="main">
+        <SearchSection
+          currentLanguage={currentLanguage}
+          onSearch={handleSearch}
+        />
 
-      <CategoryFilter
-        currentLanguage={currentLanguage}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        attractionCounts={attractionCounts}
-      />
+        <CategoryFilter
+          currentLanguage={currentLanguage}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          attractionCounts={attractionCounts}
+        />
 
-      {/* Trending Destinations Section */}
-      {selectedCategory === "all" && (
-        <section className="py-6 bg-accent/20">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold flex items-center">
-                <span className="mr-2">🔥</span>
-                {currentLanguage === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
-              </h2>
-            </div>
-            
-            <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
-              {attractions.slice(0, 2).map((attraction) => (
-                <div
-                  key={`trending-${attraction.id}`}
-                  className="flex-shrink-0 w-64 md:w-72 bg-card rounded-xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                  onClick={() => handleCardClick(attraction.id)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={attraction.image}
-                      alt={attraction.name}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate">
-                        {currentLanguage === "th" && attraction.nameLocal ? attraction.nameLocal : attraction.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground flex items-center">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        {attraction.province}
-                      </p>
-                      <div className="flex items-center mt-1">
-                        <Star className="w-3 h-3 fill-accent-yellow text-accent-yellow mr-1" />
-                        <span className="text-sm font-medium">{attraction.rating}</span>
-                        <span className="text-xs text-muted-foreground ml-1">
-                          ({attraction.reviewCount})
-                        </span>
+        {/* Trending Destinations Section */}
+        {selectedCategory === "all" && (
+          <section className="py-6 bg-accent/20" aria-label={currentLanguage === "th" ? "สถานที่ยอดนิยม" : "Trending destinations"}>
+            <div className="container mx-auto px-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold flex items-center">
+                  <span className="mr-2" role="img" aria-label="fire">🔥</span>
+                  {currentLanguage === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
+                </h2>
+              </div>
+              
+              <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide" role="list">
+                {attractions.slice(0, 2).map((attraction) => (
+                  <article
+                    key={`trending-${attraction.id}`}
+                    className="flex-shrink-0 w-64 md:w-72 bg-card rounded-xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                    onClick={() => handleCardClick(attraction.id)}
+                    role="listitem"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleCardClick(attraction.id);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={attraction.image}
+                        alt={attraction.name}
+                        loading="lazy"
+                        className="w-16 h-16 rounded-lg object-cover"
+                        width="64"
+                        height="64"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium truncate">
+                          {currentLanguage === "th" && attraction.nameLocal ? attraction.nameLocal : attraction.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground flex items-center">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          {attraction.province}
+                        </p>
+                        <div className="flex items-center mt-1">
+                          <Star className="w-3 h-3 fill-accent-yellow text-accent-yellow mr-1" />
+                          <span className="text-sm font-medium">{attraction.rating}</span>
+                          <span className="text-xs text-muted-foreground ml-1">
+                            ({attraction.reviewCount})
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </article>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* Attractions Grid */}
-      <section className="py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">
-              {currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended Places"}
-            </h2>
-            <span className="text-sm text-muted-foreground">
-              {filteredAttractions.length}{" "}
-              {currentLanguage === "th" ? "สถานที่" : "places"}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredAttractions.map((attraction) => (
-              <AttractionCard
-                key={attraction.id}
-                {...attraction}
-                currentLanguage={currentLanguage}
-                isFavorite={favorites.includes(attraction.id)}
-                onFavoriteToggle={handleFavoriteToggle}
-                onCardClick={handleCardClick}
-              />
-            ))}
-          </div>
-
-          {filteredAttractions.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
-                {currentLanguage === "th"
-                  ? "ไม่พบสถานที่ในหมวดหมู่นี้"
-                  : "No places found in this category"}
-              </p>
+        {/* Attractions Grid */}
+        <section className="py-8" aria-label={currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended places"}>
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">
+                {currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended Places"}
+              </h2>
+              <span className="text-sm text-muted-foreground" aria-live="polite">
+                {filteredAttractions.length}{" "}
+                {currentLanguage === "th" ? "สถานที่" : "places"}
+              </span>
             </div>
-          )}
-        </div>
-      </section>
+
+            <div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              role="list"
+              aria-label={
+                currentLanguage === "th" 
+                  ? `รายการสถานที่ท่องเที่ยว ${filteredAttractions.length} แห่ง`
+                  : `Tourist attractions list ${filteredAttractions.length} places`
+              }
+            >
+              {filteredAttractions.map((attraction) => (
+                <div key={attraction.id} role="listitem">
+                  <AttractionCard
+                    {...attraction}
+                    currentLanguage={currentLanguage}
+                    isFavorite={favorites.includes(attraction.id)}
+                    onFavoriteToggle={handleFavoriteToggle}
+                    onCardClick={handleCardClick}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {filteredAttractions.length === 0 && (
+              <div className="text-center py-12" role="status" aria-live="polite">
+                <p className="text-muted-foreground text-lg">
+                  {currentLanguage === "th"
+                    ? "ไม่พบสถานที่ในหมวดหมู่นี้"
+                    : "No places found in this category"}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
 
       <BottomNavigation currentLanguage={currentLanguage} />
     </div>
