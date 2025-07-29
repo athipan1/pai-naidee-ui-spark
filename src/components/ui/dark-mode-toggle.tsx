@@ -51,7 +51,7 @@ export const DarkModeToggle = ({
   return (
     <Button
       variant={variant}
-      size={size}
+      size={size === "md" ? "default" : size}
       onClick={toggleDarkMode}
       className={`interactive-scale transition-all duration-300 ${className}`}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}

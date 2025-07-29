@@ -27,6 +27,19 @@ import { Badge } from "@/components/ui/badge";
 import { accommodationAPI } from "@/shared/utils/api";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
+
+interface Accommodation {
+  id: string;
+  name: string;
+  nameLocal?: string;
+  rating: number;
+  distance: number;
+  image: string;
+  price: number;
+  currency: string;
+  amenities: string[];
+  booking_url?: string;
+}
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import { 
   useAttractionDetail, 
@@ -61,7 +74,7 @@ const AttractionDetail = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMapModal, setShowMapModal] = useState(false);
   const [showAccommodationModal, setShowAccommodationModal] = useState(false);
-  const [accommodations, setAccommodations] = useState<unknown[]>([]);
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [accommodationLoading, setAccommodationLoading] = useState(false);
   const [accommodationError, setAccommodationError] = useState<string | null>(null);
 
