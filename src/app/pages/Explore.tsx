@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Search,
@@ -41,6 +42,7 @@ interface ExploreProps {
 }
 
 const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(true);
   const [videoPosts, setVideoPosts] = useState<VideoPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -381,6 +383,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
                 <Button
                   variant="outline"
                   className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+                  onClick={() => navigate(`/attraction/${post.id}`)}
                 >
                   {t.viewDetails}
                 </Button>
