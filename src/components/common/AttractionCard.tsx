@@ -97,10 +97,10 @@ const AttractionCard = ({
   };
 
   return (
-    <div className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-border/50 relative">
+    <div className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-border/50 relative z-10">
       {/* Image Container */}
       <div 
-        className="relative overflow-hidden cursor-pointer"
+        className="relative overflow-hidden cursor-pointer z-10"
         onClick={() => onCardClick(id)}
       >
         <div
@@ -148,11 +148,12 @@ const AttractionCard = ({
         </div>
 
         {/* Enhanced quick action overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center z-20 pointer-events-none group-hover:pointer-events-auto">
           <Button
             size="sm"
-            className="btn-primary transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg"
+            className="btn-primary transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg z-30 relative pointer-events-auto"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onCardClick(id);
             }}

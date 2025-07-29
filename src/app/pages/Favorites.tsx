@@ -243,19 +243,23 @@ const Favorites = ({ currentLanguage }: FavoritesProps) => {
   const renderItemCard = (item: FavoriteItem) => {
     if (viewMode === "grid") {
       return (
-        <div key={item.id} className="attraction-card group">
+        <div key={item.id} className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-border/50 relative">
           <div className="relative overflow-hidden rounded-t-2xl">
             <img
               src={item.image}
               alt={item.name}
               className="hero-image transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute top-3 right-3 flex space-x-2">
+            <div className="absolute top-3 right-3 flex space-x-2 z-20">
               <Button
                 variant="ghost"
                 size="icon"
-                className="heart-btn bg-white/90 hover:bg-destructive hover:text-destructive-foreground"
-                onClick={() => handleRemoveFromFavorites(item.id)}
+                className="heart-btn bg-white/90 hover:bg-destructive hover:text-destructive-foreground z-30"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleRemoveFromFavorites(item.id);
+                }}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -297,8 +301,12 @@ const Favorites = ({ currentLanguage }: FavoritesProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleViewDetails(item.id)}
-                className="text-primary hover:text-primary/80"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleViewDetails(item.id);
+                }}
+                className="text-primary hover:text-primary/80 z-20 relative"
               >
                 <Eye className="w-4 h-4 mr-1" />
                 {t.viewDetails}
