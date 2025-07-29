@@ -114,6 +114,17 @@ const AttractionDetail = ({
 
   const t = content[currentLanguage];
 
+  // Handle Google Maps navigation
+  const handleGoogleMapsNavigation = () => {
+    if (!attraction?.coordinates) return;
+    
+    const { lat, lng } = attraction.coordinates;
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    
+    // Open Google Maps in a new tab
+    window.open(googleMapsUrl, '_blank', 'noopener,noreferrer');
+  };
+
   // Handle refresh functionality
   const handleRefresh = async () => {
     if (!id) return;
@@ -240,7 +251,7 @@ const AttractionDetail = ({
                     <Map className="w-4 h-4 mr-2" />
                     {t.viewMap}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate(`/map/${attraction.id}`)}>
+                  <DropdownMenuItem onClick={handleGoogleMapsNavigation}>
                     <Navigation className="w-4 h-4 mr-2" />
                     {t.getDirections}
                   </DropdownMenuItem>
