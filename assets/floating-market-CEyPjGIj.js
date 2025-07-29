@@ -1,0 +1,1 @@
+const s="/assets/hero-beach-D78hXTNA.jpg",a="/assets/temple-culture-C6cggLNG.jpg",t="/assets/mountain-nature-D7UruqB3.jpg",e="/assets/floating-market-B0O32Kg4.jpg";export{e as f,s as h,t as m,a as t};
