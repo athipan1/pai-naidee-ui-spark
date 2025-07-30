@@ -145,7 +145,7 @@ const AttractionDetail = ({
     try {
       await refreshMutation.mutateAsync(id);
       // The query will automatically refetch due to invalidation
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };
@@ -223,40 +223,42 @@ const AttractionDetail = ({
       : attraction.name;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 max-w-full overflow-hidden">
+          <div className="flex items-center justify-between gap-2">
             <Button
               variant="ghost"
               onClick={onBack}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
-              {t.backToSearch}
+              <span className="hidden sm:inline">{t.backToSearch}</span>
+              <span className="sm:hidden">Back</span>
             </Button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
               <Button
                 variant="ghost"
                 onClick={handleRefresh}
                 disabled={refreshMutation.isPending}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
                 title={t.refreshData}
               >
                 <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-                {refreshMutation.isPending ? t.refreshing : t.refreshData}
+                <span className="hidden lg:inline">{refreshMutation.isPending ? t.refreshing : t.refreshData}</span>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
                   >
                     <Map className="w-4 h-4" />
-                    {t.mapAndNavigate}
-                    <ChevronDown className="w-3 h-3 ml-1" />
+                    <span className="hidden md:inline">{t.mapAndNavigate}</span>
+                    <span className="md:hidden">Map</span>
+                    <ChevronDown className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -273,7 +275,7 @@ const AttractionDetail = ({
               <Button
                 variant="ghost"
                 onClick={() => navigate('/admin')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hidden sm:flex"
                 title={currentLanguage === 'th' ? 'แผงควบคุมผู้ดูแลระบบ' : 'Admin Panel'}
               >
                 <Settings className="w-4 h-4" />
@@ -281,12 +283,12 @@ const AttractionDetail = ({
               <Button
                 variant={isFavorite ? "default" : "outline"}
                 onClick={toggleFavorite}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
               >
                 <Heart
                   className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`}
                 />
-                {isFavorite ? t.removeFromFavorites : t.addToFavorites}
+                <span className="hidden lg:inline">{isFavorite ? t.removeFromFavorites : t.addToFavorites}</span>
               </Button>
             </div>
           </div>
@@ -358,7 +360,7 @@ const AttractionDetail = ({
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 max-w-full overflow-hidden">
         {/* Description */}
         <Card className="mb-8">
           <CardContent className="p-6">
