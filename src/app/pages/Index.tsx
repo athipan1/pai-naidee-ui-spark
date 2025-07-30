@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/common/Header";
 import SearchSection from "@/components/common/SearchSection";
 import CategoryFilter from "@/components/common/CategoryFilter";
 import AttractionCard from "@/components/common/AttractionCard";
 import BottomNavigation from "@/components/common/BottomNavigation";
+import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import Explore from "./Explore";
 import Favorites from "./Favorites";
 import { useNavigate } from "react-router-dom";
 import { SearchResult } from "@/shared/utils/searchAPI";
+import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { MapPin, Star } from "lucide-react";
 import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
@@ -27,9 +29,85 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   const [currentView, setCurrentView] = useState<
     "home" | "explore" | "favorites"
   >("home");
+  const [usingMockData, setUsingMockData] = useState(false);
 
-  // Listen for navigation events from BottomNavigation
-  // Mock attraction data
+  // Mock attractions data (defined first so it can be used in the API data fallback)
+  const mockAttractions = [
+    {
+      id: "1",
+      name: "Phi Phi Islands",
+      nameLocal: "หมู่เกาะพีพี",
+      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
+      category: "Beach",
+      rating: 4.8,
+      reviewCount: 2547,
+      image: heroBeachImage,
+      description:
+        currentLanguage === "th"
+          ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
+          : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
+      tags: ["Beach", "Snorkeling", "Island", "Photography"],
+    },
+    {
+      id: "2",
+      name: "Wat Phra Kaew",
+      nameLocal: "วัดพระแก้ว",
+      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      category: "Culture",
+      rating: 4.9,
+      reviewCount: 5243,
+      image: templeImage,
+      description:
+        currentLanguage === "th"
+          ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
+          : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
+      tags: ["Temple", "Culture", "Buddhism", "History"],
+    },
+    {
+      id: "3",
+      name: "Doi Inthanon",
+      nameLocal: "ดอยอินทนนท์",
+      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
+      category: "Nature",
+      rating: 4.7,
+      reviewCount: 1876,
+      image: mountainImage,
+      description:
+        currentLanguage === "th"
+          ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
+          : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
+      tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
+    },
+    {
+      id: "4",
+      name: "Floating Market",
+      nameLocal: "ตลาดน้ำ",
+      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      category: "Food",
+      rating: 4.5,
+      reviewCount: 3156,
+      image: floatingMarketImage,
+      description:
+        currentLanguage === "th"
+          ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
+          : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
+      tags: ["Food", "Culture", "Traditional", "Market"],
+    },
+  ];
+
+  // Try to fetch real data first, fallback to mock data
+  const { 
+    data: apiData, 
+    error: apiError, 
+    isLoading: apiLoading,
+    refetch: refetchAttractions 
+  } = useAttractions({
+    page: 1,
+    limit: 10,
+    category: selectedCategory === "all" ? undefined : selectedCategory
+  });
+
+  // Mock attraction data as fallback
   const attractions = [
     {
       id: "1",
@@ -93,19 +171,38 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
     },
   ];
 
+  // Use API data if available, otherwise use mock data
+  const displayAttractions = apiData?.attractions ? apiData.attractions.map(attraction => ({
+    id: attraction.id,
+    name: attraction.name,
+    nameLocal: attraction.nameLocal || attraction.name,
+    province: "",
+    category: attraction.category,
+    rating: attraction.rating,
+    reviewCount: Math.floor(Math.random() * 5000) + 1000, // Mock review count for API data
+    image: attraction.images?.[0] || heroBeachImage,
+    description: `Discover the beauty of ${attraction.name}`,
+    tags: [attraction.category]
+  })) : mockAttractions;
+
+  // Track if we're using mock data
+  useEffect(() => {
+    setUsingMockData(!apiData?.attractions && !apiLoading);
+  }, [apiData, apiLoading]);
+
   const filteredAttractions =
     selectedCategory === "all"
-      ? attractions
-      : attractions.filter(
+      ? displayAttractions
+      : displayAttractions.filter(
           (attraction) =>
             attraction.category.toLowerCase() === selectedCategory.toLowerCase()
         );
 
   // Calculate category counts
-  const attractionCounts = attractions.reduce((counts, attraction) => {
+  const attractionCounts = displayAttractions.reduce((counts, attraction) => {
     const category = attraction.category.toLowerCase();
     counts[category] = (counts[category] || 0) + 1;
-    counts.all = attractions.length;
+    counts.all = displayAttractions.length;
     return counts;
   }, {} as { [key: string]: number });
 
@@ -162,6 +259,26 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       />
 
       <main role="main">
+        {/* API Status Display */}
+        {(apiError || usingMockData) && (
+          <div className="container mx-auto px-4 pt-4">
+            <APIErrorDisplay
+              error={apiError}
+              isLoading={apiLoading}
+              onRetry={refetchAttractions}
+              showRetryButton={!!apiError}
+              fallbackMessage={
+                usingMockData
+                  ? currentLanguage === "th"
+                    ? "เซิร์ฟเวอร์ไม่พร้อมใช้งาน กำลังแสดงข้อมูลตัวอย่าง"
+                    : "Server unavailable. Showing sample data instead."
+                  : undefined
+              }
+              currentLanguage={currentLanguage}
+            />
+          </div>
+        )}
+
         <SearchSection
           currentLanguage={currentLanguage}
           onSearch={handleSearch}
@@ -186,7 +303,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               </div>
               
               <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide" role="list">
-                {attractions.slice(0, 2).map((attraction) => (
+                {displayAttractions.slice(0, 2).map((attraction) => (
                   <article
                     key={`trending-${attraction.id}`}
                     className="flex-shrink-0 w-64 md:w-72 bg-card rounded-xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"

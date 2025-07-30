@@ -27,6 +27,15 @@ import { Badge } from "@/components/ui/badge";
 import { accommodationAPI } from "@/shared/utils/api";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
+import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
+import APIErrorDisplay from "@/components/common/APIErrorDisplay";
+import OptimizedImage from "@/components/common/OptimizedImage";
+import { 
+  useAttractionDetail, 
+  useRefreshAttraction,
+  getAttractionErrorMessage 
+} from "@/shared/hooks/useAttractionQueries";
+import type { AttractionDetail } from "@/shared/utils/attractionAPI";
 
 interface Accommodation {
   id: string;
@@ -307,10 +316,13 @@ const AttractionDetail = ({
 
       {/* Hero Section */}
       <div className="relative h-96 overflow-hidden">
-        <img
+        <OptimizedImage
           src={attraction.images[currentImageIndex]}
           alt={displayName}
           className="w-full h-full object-cover"
+          width="100%"
+          height="384"
+          fallbackSrc={attraction.images[0] !== attraction.images[currentImageIndex] ? attraction.images[0] : undefined}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
