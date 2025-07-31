@@ -49,13 +49,6 @@ interface Accommodation {
   amenities: string[];
   booking_url?: string;
 }
-import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
-import { 
-  useAttractionDetail, 
-  useRefreshAttraction,
-  getAttractionErrorMessage 
-} from "@/shared/hooks/useAttractionQueries";
-import type { AttractionDetail } from "@/shared/utils/attractionAPI";
 
 interface AttractionDetailProps {
   currentLanguage: "th" | "en";
@@ -451,36 +444,29 @@ const AttractionDetail = ({
                 className="flex items-center gap-2"
                 size="lg"
               >
-                <Hotel className="h-4 w-4" />
-                {t.bookAccommodation}
+                <Hotel className="w-5 h-5" />
+                {currentLanguage === "th" ? "ค้นหาที่พัก" : "Find Hotels"}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Map Modal */}
+      {/* Modals */}
       <MapModal
-        isOpen={showMapModal}
+        open={showMapModal}
         onClose={() => setShowMapModal(false)}
-        location={{
-          lat: attraction.coordinates.lat,
-          lng: attraction.coordinates.lng,
-          name: attraction.name,
-          nameLocal: attraction.nameLocal
-        }}
+        attraction={attraction}
         currentLanguage={currentLanguage}
       />
 
-      {/* Accommodation Modal */}
       <AccommodationModal
-        isOpen={showAccommodationModal}
+        open={showAccommodationModal}
         onClose={() => setShowAccommodationModal(false)}
         accommodations={accommodations}
         loading={accommodationLoading}
         error={accommodationError}
         currentLanguage={currentLanguage}
-        attractionName={displayName}
       />
     </div>
   );

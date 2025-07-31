@@ -18,11 +18,12 @@ import {
   Pause,
   Volume2,
   VolumeX,
+  RotateCcw,
   Check,
   AlertCircle
 } from "lucide-react";
 
-interface VideoUploadProps {
+interface VideoUploadEnhancedProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onVideoUpload: (videoData: {
@@ -36,7 +37,7 @@ interface VideoUploadProps {
   currentLanguage: "th" | "en";
 }
 
-const VideoUpload: React.FC<VideoUploadProps> = ({
+const VideoUploadEnhanced: React.FC<VideoUploadEnhancedProps> = ({
   open,
   onOpenChange,
   onVideoUpload,
@@ -89,6 +90,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
       removeVideo: "Remove Video",
       playPause: "Play/Pause",
       muteUnmute: "Mute/Unmute",
+      reset: "Reset",
       fileSize: "File Size",
       duration: "Duration"
     },
@@ -120,6 +122,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
       removeVideo: "ลบวิดีโอ",
       playPause: "เล่น/หยุด",
       muteUnmute: "เปิด/ปิดเสียง",
+      reset: "รีเซ็ต",
       fileSize: "ขนาดไฟล์",
       duration: "ความยาว"
     }
@@ -586,4 +589,4 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
   );
 };
 
-export default VideoUpload;
+export default VideoUploadEnhanced;

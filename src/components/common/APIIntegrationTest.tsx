@@ -159,9 +159,9 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       
       // Test if image URL is accessible
       const img = new Image();
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Image failed to load"));
         img.src = imageUrl;
       });
 

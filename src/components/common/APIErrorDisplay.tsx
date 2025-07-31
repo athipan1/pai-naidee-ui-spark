@@ -113,10 +113,10 @@ export const APIErrorDisplay: React.FC<APIErrorDisplayProps> = ({
         <div className="flex-1">
           <AlertDescription className="mb-3">
             <div className="font-medium text-orange-800 dark:text-orange-200 mb-1">
-              {error ? messages.title : (currentLanguage === "th" ? "ใช้ข้อมูลตัวอย่าง" : "Using Sample Data")}
+              {error ? messages[currentLanguage].title : (currentLanguage === "th" ? "ใช้ข้อมูลตัวอย่าง" : "Using Sample Data")}
             </div>
             <div className="text-sm text-orange-700 dark:text-orange-300">
-              {error ? messages.description : (fallbackMessage || messages.fallback)}
+              {error ? messages[currentLanguage].description : (fallbackMessage || messages[currentLanguage].fallback)}
             </div>
           </AlertDescription>
           
