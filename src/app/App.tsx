@@ -22,6 +22,7 @@ const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const EnhancedAdminPanel = lazy(() => import("@/components/admin/EnhancedAdminPanel"));
+const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -129,6 +130,15 @@ const App = () => {
                   path="/admin/enhanced"
                   element={
                     <EnhancedAdminPanel currentLanguage={currentLanguage} />
+                  }
+                />
+                <Route
+                  path="/video-upload"
+                  element={
+                    <VideoUploadPage 
+                      currentLanguage={currentLanguage}
+                      onBack={() => window.history.back()}
+                    />
                   }
                 />
                 <Route
