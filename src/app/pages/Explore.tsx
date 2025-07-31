@@ -12,7 +12,7 @@ import {
   Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import VideoUpload from "@/components/VideoUpload";
+import EnhancedVideoUpload from "@/components/EnhancedVideoUpload";
 
 interface VideoPost {
   id: string;
@@ -464,8 +464,8 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
         ))}
       </div>
 
-      {/* Video Upload Modal */}
-      <VideoUpload
+      {/* Enhanced Video Upload Modal */}
+      <EnhancedVideoUpload
         open={showUploadModal}
         onOpenChange={setShowUploadModal}
         onVideoUpload={handleVideoUpload}
