@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Globe2, MapPin, Settings } from "lucide-react";
+import { Menu, X, Globe2, MapPin, Settings, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
@@ -17,6 +17,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
     { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
     { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "/explore" },
     { label: currentLanguage === "th" ? "รายการโปรด" : "Favorites", href: "/favorites" },
+    { label: currentLanguage === "th" ? "อัปโหลดวิดีโอ" : "Video Upload", href: "/video-upload" },
     { label: currentLanguage === "th" ? "โปรไฟล์" : "Profile", href: "/profile" },
   ];
 
@@ -64,6 +65,19 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             </Link>
           ))}
         </nav>
+
+        {/* Video Upload Button - Desktop */}
+        <div className="hidden md:flex">
+          <Link to="/video-upload">
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-primary to-accent-yellow hover:from-primary/90 hover:to-accent-yellow/90 text-white font-medium px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            >
+              <Video className="w-4 h-4 mr-2" />
+              {currentLanguage === "th" ? "อัปโหลด" : "Upload"}
+            </Button>
+          </Link>
+        </div>
 
         {/* Language Toggle & Mobile Menu */}
         <div className="flex items-center space-x-3">

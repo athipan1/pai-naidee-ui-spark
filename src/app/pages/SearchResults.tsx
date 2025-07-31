@@ -104,7 +104,7 @@ const SearchResults = ({ currentLanguage }: SearchResultsProps) => {
 
   // Filter and sort results based on filters
   const applyFilters = (items: typeof mockResults) => {
-    let filtered = items.filter(item => {
+    const filtered = items.filter(item => {
       const matchesQuery = !query || 
         item.name.toLowerCase().includes(query.toLowerCase()) ||
         item.nameLocal?.toLowerCase().includes(query.toLowerCase()) ||
