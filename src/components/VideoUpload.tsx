@@ -13,13 +13,16 @@ import {
   X, 
   MapPin, 
   Tag, 
-  FileVideo, 
   Play, 
   Pause,
   Volume2,
   VolumeX,
   Check,
-  AlertCircle
+  AlertCircle,
+  Info,
+  Sparkles,
+  Video,
+  Camera
 } from "lucide-react";
 
 interface VideoUploadProps {
@@ -62,66 +65,84 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
 
   const texts = {
     en: {
-      title: "Upload Video",
-      subtitle: "Share your travel experience",
+      title: "Create Your Travel Story",
+      subtitle: "Share your amazing journey with the world! ✨",
       videoTitle: "Video Title",
       videoCaption: "Video Caption",
       location: "Location",
       province: "Province",
       tags: "Tags",
       addTag: "Add Tag",
-      upload: "Upload Video",
+      upload: "Share My Story",
       cancel: "Cancel",
-      dragDropText: "Drag and drop your video here or click to browse",
-      supportedFormats: "Supported formats: MP4, MOV, AVI (max 100MB)",
-      titlePlaceholder: "Enter video title...",
-      captionPlaceholder: "Describe your video...",
-      locationPlaceholder: "Where was this taken?",
-      provincePlaceholder: "Select province...",
-      tagPlaceholder: "Add tags (press Enter)",
-      uploading: "Uploading...",
-      uploadSuccess: "Video uploaded successfully!",
-      uploadError: "Failed to upload video",
-      invalidFile: "Please select a valid video file",
-      fileTooLarge: "File size must be less than 100MB",
-      fillRequired: "Please fill in all required fields",
-      videoPreview: "Video Preview",
-      removeVideo: "Remove Video",
+      dragDropText: "Drop your video here or tap to select",
+      supportedFormats: "MP4, MOV, AVI • Max 100MB • Best quality for amazing views!",
+      titlePlaceholder: "Give your adventure a catchy title...",
+      captionPlaceholder: "Tell everyone about this amazing place...",
+      locationPlaceholder: "Where did you capture this moment?",
+      provincePlaceholder: "Which province?",
+      tagPlaceholder: "Add hashtags (press Enter)",
+      uploading: "Creating your story...",
+      uploadSuccess: "Your story is now live! 🎉",
+      uploadError: "Oops! Something went wrong",
+      invalidFile: "Please choose a video file (MP4, MOV, or AVI)",
+      fileTooLarge: "Video too large! Please keep it under 100MB",
+      fillRequired: "Please fill in the required details to share your story",
+      videoPreview: "Preview Your Story",
+      removeVideo: "Choose Different Video",
       playPause: "Play/Pause",
       muteUnmute: "Mute/Unmute",
       fileSize: "File Size",
-      duration: "Duration"
+      duration: "Duration",
+      step1: "Step 1: Choose your video",
+      step2: "Step 2: Add details",
+      step3: "Step 3: Share with the world",
+      tips: "💡 Tips for better reach:",
+      tip1: "• Use eye-catching titles",
+      tip2: "• Add relevant hashtags",
+      tip3: "• Include location details",
+      selectVideo: "Select Video",
+      chooseFromDevice: "Choose from your device"
     },
     th: {
-      title: "อัปโหลดวิดีโอ",
-      subtitle: "แบ่งปันประสบการณ์การท่องเที่ยวของคุณ",
+      title: "สร้างเรื่องราวการเดินทางของคุณ",
+      subtitle: "แบ่งปันการผจญภัยสุดพิเศษกับทุกคน! ✨",
       videoTitle: "ชื่อวิดีโอ",
       videoCaption: "คำบรรยายวิดีโอ",
       location: "สถานที่",
       province: "จังหวัด",
       tags: "แท็ก",
       addTag: "เพิ่มแท็ก",
-      upload: "อัปโหลดวิดีโอ",
+      upload: "แชร์เรื่องราวของฉัน",
       cancel: "ยกเลิก",
-      dragDropText: "ลากและวางวิดีโอที่นี่ หรือคลิกเพื่อเลือกไฟล์",
-      supportedFormats: "รูปแบบที่รองรับ: MP4, MOV, AVI (ไม่เกิน 100MB)",
-      titlePlaceholder: "ใส่ชื่อวิดีโอ...",
-      captionPlaceholder: "อธิบายเกี่ยวกับวิดีโอของคุณ...",
-      locationPlaceholder: "วิดีโอนี้ถ่ายที่ไหน?",
-      provincePlaceholder: "เลือกจังหวัด...",
-      tagPlaceholder: "เพิ่มแท็ก (กด Enter)",
-      uploading: "กำลังอัปโหลด...",
-      uploadSuccess: "อัปโหลดวิดีโอสำเร็จ!",
-      uploadError: "ไม่สามารถอัปโหลดวิดีโอได้",
-      invalidFile: "กรุณาเลือกไฟล์วิดีโอที่ถูกต้อง",
-      fileTooLarge: "ขนาดไฟล์ต้องไม่เกิน 100MB",
-      fillRequired: "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน",
-      videoPreview: "ตัวอย่างวิดีโอ",
-      removeVideo: "ลบวิดีโอ",
+      dragDropText: "วางวิดีโอที่นี่ หรือแตะเพื่อเลือก",
+      supportedFormats: "MP4, MOV, AVI • สูงสุด 100MB • คุณภาพดีที่สุดสำหรับมุมมองสุดงาม!",
+      titlePlaceholder: "ตั้งชื่อการผจญภัยของคุณให้น่าสนใจ...",
+      captionPlaceholder: "เล่าให้ทุกคนฟังเกี่ยวกับสถานที่สุดพิเศษนี้...",
+      locationPlaceholder: "คุณถ่ายช่วงเวลานี้ที่ไหน?",
+      provincePlaceholder: "จังหวัดไหน?",
+      tagPlaceholder: "เพิ่มแฮชแท็ก (กด Enter)",
+      uploading: "กำลังสร้างเรื่องราวของคุณ...",
+      uploadSuccess: "เรื่องราวของคุณออนไลน์แล้ว! 🎉",
+      uploadError: "อุ๊ปส์! มีอะไรผิดพลาด",
+      invalidFile: "กรุณาเลือกไฟล์วิดีโอ (MP4, MOV หรือ AVI)",
+      fileTooLarge: "วิดีโอใหญ่เกินไป! กรุณาใช้ไฟล์ไม่เกิน 100MB",
+      fillRequired: "กรุณากรอกรายละเอียดที่จำเป็นเพื่อแชร์เรื่องราวของคุณ",
+      videoPreview: "ดูตัวอย่างเรื่องราวของคุณ",
+      removeVideo: "เลือกวิดีโออื่น",
       playPause: "เล่น/หยุด",
       muteUnmute: "เปิด/ปิดเสียง",
       fileSize: "ขนาดไฟล์",
-      duration: "ความยาว"
+      duration: "ความยาว",
+      step1: "ขั้นตอน 1: เลือกวิดีโอของคุณ",
+      step2: "ขั้นตอน 2: เพิ่มรายละเอียด",
+      step3: "ขั้นตอน 3: แชร์กับโลก",
+      tips: "💡 เคล็ดลับเพื่อการเข้าถึงที่ดีขึ้น:",
+      tip1: "• ใช้ชื่อที่สะดุดตา",
+      tip2: "• เพิ่มแฮชแท็กที่เกี่ยวข้อง",
+      tip3: "• ระบุรายละเอียดสถานที่",
+      selectVideo: "เลือกวิดีโอ",
+      chooseFromDevice: "เลือกจากอุปกรณ์ของคุณ"
     }
   };
 
@@ -294,7 +315,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
 
       resetForm();
       onOpenChange(false);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: t.uploadError,
@@ -315,98 +336,154 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileVideo className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-background via-background to-primary/5">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="flex items-center gap-3 text-xl">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent-yellow">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
             {t.title}
           </DialogTitle>
-          <DialogDescription>{t.subtitle}</DialogDescription>
+          <DialogDescription className="text-base text-muted-foreground">
+            {t.subtitle}
+          </DialogDescription>
+          
+          {/* Step indicator */}
+          <div className="flex items-center gap-4 mt-4 p-3 bg-muted/30 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${!videoFile ? 'bg-primary' : 'bg-green-500'}`} />
+                <span className={!videoFile ? 'text-primary font-medium' : 'text-green-600'}>{t.step1}</span>
+              </div>
+              <span>→</span>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${videoFile && !isUploading ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                <span className={videoFile && !isUploading ? 'text-primary font-medium' : ''}>{t.step2}</span>
+              </div>
+              <span>→</span>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${isUploading ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                <span className={isUploading ? 'text-primary font-medium' : ''}>{t.step3}</span>
+              </div>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Upload Area */}
           <div className="space-y-4">
             {/* File Upload Area */}
-            <div
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 ${
-                dragActive
-                  ? 'border-primary bg-primary/5 scale-105'
-                  : videoFile
-                  ? 'border-green-500 bg-green-50 dark:bg-green-950'
-                  : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50'
-              }`}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-            >
-              {!videoFile ? (
-                <div className="space-y-4">
-                  <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-primary" />
+            <div className="space-y-4">
+              <div
+                className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${
+                  dragActive
+                    ? 'border-primary bg-gradient-to-b from-primary/10 to-primary/5 scale-[1.02] shadow-lg shadow-primary/20'
+                    : videoFile
+                    ? 'border-green-500 bg-gradient-to-b from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 shadow-md'
+                    : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-gradient-to-b hover:from-muted/30 hover:to-muted/10 hover:shadow-md'
+                }`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+              >
+                {!videoFile ? (
+                  <div className="space-y-6">
+                    <div className="relative mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary via-primary to-accent-yellow flex items-center justify-center shadow-lg">
+                      <Video className="h-10 w-10 text-white" />
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-accent-yellow rounded-full flex items-center justify-center">
+                        <Upload className="h-3 w-3 text-white" />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-foreground">{t.dragDropText}</h3>
+                      <p className="text-sm text-muted-foreground max-w-md mx-auto">{t.supportedFormats}</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+                      <Button
+                        type="button"
+                        size="lg"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-gradient-to-r from-primary to-accent-yellow hover:from-primary/90 hover:to-accent-yellow/90 text-white font-medium px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                      >
+                        <Camera className="h-5 w-5 mr-2" />
+                        {t.selectVideo}
+                      </Button>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Info className="h-4 w-4" />
+                        <span>{t.chooseFromDevice}</span>
+                      </div>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="video/mp4,video/mov,video/quicktime,video/avi"
+                      onChange={handleFileInputChange}
+                      className="hidden"
+                    />
                   </div>
-                  <div>
-                    <p className="font-medium">{t.dragDropText}</p>
-                    <p className="text-sm text-muted-foreground mt-2">{t.supportedFormats}</p>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-3 text-green-600">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900">
+                        <Check className="h-6 w-6" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-lg">{videoFile.name}</p>
+                        <p className="text-sm text-muted-foreground">{t.fileSize}: {formatFileSize(videoFile.size)}</p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setVideoFile(null);
+                        setVideoPreview("");
+                        setVideoError("");
+                      }}
+                      className="flex items-center gap-2 hover:bg-muted"
+                    >
+                      <X className="h-4 w-4" />
+                      {t.removeVideo}
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="mt-4"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Browse Files
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="video/mp4,video/mov,video/quicktime,video/avi"
-                    onChange={handleFileInputChange}
-                    className="hidden"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-2 text-green-600">
-                    <Check className="h-5 w-5" />
-                    <span className="font-medium">{videoFile.name}</span>
+                )}
+              </div>
+
+              {/* Tips section */}
+              {!videoFile && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">{t.tips}</h4>
+                  <div className="space-y-1 text-sm text-blue-700 dark:text-blue-200">
+                    <p>{t.tip1}</p>
+                    <p>{t.tip2}</p>
+                    <p>{t.tip3}</p>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    <p>{t.fileSize}: {formatFileSize(videoFile.size)}</p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setVideoFile(null);
-                      setVideoPreview("");
-                      setVideoError("");
-                    }}
-                    className="flex items-center gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    {t.removeVideo}
-                  </Button>
                 </div>
               )}
             </div>
 
             {videoError && (
-              <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <AlertCircle className="h-4 w-4 text-destructive" />
-                <span className="text-sm text-destructive">{videoError}</span>
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950 dark:to-pink-950 border border-red-200 dark:border-red-800 rounded-xl">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-900">
+                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                </div>
+                <span className="text-sm text-red-700 dark:text-red-300 font-medium">{videoError}</span>
               </div>
             )}
 
             {/* Video Preview */}
             {videoPreview && (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <h3 className="font-medium">{t.videoPreview}</h3>
-                    <div className="relative bg-black rounded-lg overflow-hidden">
+              <Card className="border-0 shadow-lg bg-gradient-to-b from-card to-muted/20">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
+                        <Play className="h-4 w-4 text-white" />
+                      </div>
+                      <h3 className="font-semibold text-lg">{t.videoPreview}</h3>
+                    </div>
+                    <div className="relative bg-black rounded-xl overflow-hidden shadow-lg">
                       <video
                         ref={videoRef}
                         src={videoPreview}
@@ -414,27 +491,26 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
                         muted={isMuted}
                         onLoadedMetadata={() => {
                           if (videoRef.current) {
-                            console.log("Duration:", formatDuration(videoRef.current.duration));
+                            // Duration logging for debugging
+                            // console.log("Duration:", formatDuration(videoRef.current.duration));
                           }
                         }}
                       />
-                      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
                           <Button
                             size="sm"
-                            variant="secondary"
+                            className="h-10 w-10 p-0 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0"
                             onClick={togglePlayPause}
-                            className="h-8 w-8 p-0"
                           >
-                            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            {isPlaying ? <Pause className="h-4 w-4 text-white" /> : <Play className="h-4 w-4 text-white" />}
                           </Button>
                           <Button
                             size="sm"
-                            variant="secondary"
+                            className="h-10 w-10 p-0 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0"
                             onClick={toggleMute}
-                            className="h-8 w-8 p-0"
                           >
-                            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                            {isMuted ? <VolumeX className="h-4 w-4 text-white" /> : <Volume2 className="h-4 w-4 text-white" />}
                           </Button>
                         </div>
                       </div>
@@ -446,10 +522,11 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
           </div>
 
           {/* Right Column - Form Fields */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">
+            <div className="space-y-3">
+              <Label htmlFor="title" className="text-sm font-semibold flex items-center gap-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
                 {t.videoTitle} *
               </Label>
               <Input
@@ -457,13 +534,14 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
                 placeholder={t.titlePlaceholder}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="transition-all duration-200 focus:scale-[1.02]"
+                className="border-2 focus:border-primary transition-all duration-200 focus:scale-[1.01] py-3 text-base rounded-xl"
               />
             </div>
 
             {/* Caption */}
-            <div className="space-y-2">
-              <Label htmlFor="caption" className="text-sm font-medium">
+            <div className="space-y-3">
+              <Label htmlFor="caption" className="text-sm font-semibold flex items-center gap-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
                 {t.videoCaption} *
               </Label>
               <Textarea
@@ -471,15 +549,15 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
                 placeholder={t.captionPlaceholder}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                rows={3}
-                className="transition-all duration-200 focus:scale-[1.02]"
+                rows={4}
+                className="border-2 focus:border-primary transition-all duration-200 focus:scale-[1.01] text-base rounded-xl resize-none"
               />
             </div>
 
             {/* Location */}
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+            <div className="space-y-3">
+              <Label htmlFor="location" className="text-sm font-semibold flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-red-500" />
                 {t.location} *
               </Label>
               <Input
@@ -487,13 +565,13 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
                 placeholder={t.locationPlaceholder}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="transition-all duration-200 focus:scale-[1.02]"
+                className="border-2 focus:border-primary transition-all duration-200 focus:scale-[1.01] py-3 text-base rounded-xl"
               />
             </div>
 
             {/* Province */}
-            <div className="space-y-2">
-              <Label htmlFor="province" className="text-sm font-medium">
+            <div className="space-y-3">
+              <Label htmlFor="province" className="text-sm font-semibold">
                 {t.province}
               </Label>
               <Input
@@ -501,14 +579,14 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
                 placeholder={t.provincePlaceholder}
                 value={province}
                 onChange={(e) => setProvince(e.target.value)}
-                className="transition-all duration-200 focus:scale-[1.02]"
+                className="border-2 focus:border-primary transition-all duration-200 focus:scale-[1.01] py-3 text-base rounded-xl"
               />
             </div>
 
             {/* Tags */}
-            <div className="space-y-2">
-              <Label htmlFor="tags" className="text-sm font-medium flex items-center gap-2">
-                <Tag className="h-4 w-4" />
+            <div className="space-y-3">
+              <Label htmlFor="tags" className="text-sm font-semibold flex items-center gap-2">
+                <Tag className="h-4 w-4 text-primary" />
                 {t.tags}
               </Label>
               <div className="flex gap-2">
@@ -518,23 +596,29 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyPress={handleTagKeyPress}
-                  className="flex-1"
+                  className="flex-1 border-2 focus:border-primary py-3 text-base rounded-xl"
                 />
-                <Button type="button" onClick={addTag} size="sm" variant="outline">
+                <Button 
+                  type="button" 
+                  onClick={addTag} 
+                  size="lg" 
+                  variant="outline"
+                  className="px-6 rounded-xl border-2 hover:border-primary hover:bg-primary/5"
+                >
                   {t.addTag}
                 </Button>
               </div>
               {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-3">
                   {tags.map((tag, index) => (
                     <Badge
                       key={index}
                       variant="secondary"
-                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors px-3 py-1 text-sm rounded-full bg-gradient-to-r from-primary/10 to-accent-yellow/10 text-primary hover:from-red-500 hover:to-red-600 hover:text-white"
                       onClick={() => removeTag(tag)}
                     >
-                      {tag}
-                      <X className="h-3 w-3 ml-1" />
+                      #{tag}
+                      <X className="h-3 w-3 ml-2" />
                     </Badge>
                   ))}
                 </div>
@@ -543,39 +627,48 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
 
             {/* Upload Progress */}
             {isUploading && (
-              <div className="space-y-2">
+              <div className="space-y-4 p-4 bg-gradient-to-r from-primary/5 to-accent-yellow/5 rounded-xl border border-primary/20">
                 <div className="flex items-center justify-between text-sm">
-                  <span>{t.uploading}</span>
-                  <span>{uploadProgress}%</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <span className="font-medium text-primary">{t.uploading}</span>
+                  </div>
+                  <span className="font-bold text-primary">{uploadProgress}%</span>
                 </div>
-                <Progress value={uploadProgress} className="h-2" />
+                <Progress 
+                  value={uploadProgress} 
+                  className="h-3 bg-muted rounded-full overflow-hidden"
+                />
               </div>
             )}
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2">
+        <DialogFooter className="flex gap-3 pt-6">
           <Button
             type="button"
             variant="outline"
             onClick={handleClose}
             disabled={isUploading}
+            size="lg"
+            className="px-8 py-3 rounded-full border-2 hover:border-muted-foreground/50"
           >
             {t.cancel}
           </Button>
           <Button
             onClick={handleUpload}
             disabled={!videoFile || !title.trim() || !caption.trim() || !location.trim() || isUploading}
-            className="min-w-[120px]"
+            size="lg"
+            className="min-w-[160px] px-8 py-3 rounded-full bg-gradient-to-r from-primary to-accent-yellow hover:from-primary/90 hover:to-accent-yellow/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:hover:scale-100"
           >
             {isUploading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 {t.uploading}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-5 w-5" />
                 {t.upload}
               </div>
             )}
