@@ -101,7 +101,8 @@ export default defineConfig(({ mode }) => {
             ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover'],
             query: ['@tanstack/react-query'],
             icons: ['lucide-react'],
-            leaflet: ['leaflet', 'react-leaflet']
+            leaflet: ['leaflet', 'react-leaflet'],
+            three: ['three', '@react-three/fiber', '@react-three/drei']
           }
         }
       },
