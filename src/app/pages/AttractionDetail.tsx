@@ -454,19 +454,25 @@ const AttractionDetail = ({
 
       {/* Modals */}
       <MapModal
-        open={showMapModal}
+        isOpen={showMapModal}
         onClose={() => setShowMapModal(false)}
-        attraction={attraction}
+        location={{
+          lat: attraction.coordinates?.lat || 0,
+          lng: attraction.coordinates?.lng || 0,
+          name: attraction.name,
+          nameLocal: attraction.nameLocal
+        }}
         currentLanguage={currentLanguage}
       />
 
       <AccommodationModal
-        open={showAccommodationModal}
+        isOpen={showAccommodationModal}
         onClose={() => setShowAccommodationModal(false)}
         accommodations={accommodations}
         loading={accommodationLoading}
         error={accommodationError}
         currentLanguage={currentLanguage}
+        attractionName={attraction.name}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 // Queue Management Service for improved sync performance
-import type {
+import {
   QueueItem,
   QueueItemType,
   QueuePriority,

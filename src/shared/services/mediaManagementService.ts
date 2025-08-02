@@ -1,5 +1,6 @@
 // Media Management Service for handling place media operations
 import type { MediaItem, MediaUploadData } from '../types/media';
+import { SecurityLevel } from '../types/media';
 
 export interface PlaceMediaData {
   placeId: string;
@@ -278,7 +279,12 @@ class MediaManagementService {
             url: '/src/shared/assets/hero-beach.jpg',
             uploadedAt: new Date(),
             updatedAt: new Date(),
-            status: 'approved'
+            status: 'approved',
+            version: 1,
+            isCurrentVersion: true,
+            securityLevel: SecurityLevel.PUBLIC,
+            createdBy: 'system',
+            accessPermissions: []
           }
         ]
       };

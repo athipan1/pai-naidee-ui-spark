@@ -1,5 +1,5 @@
 // Security Service for file encryption and validation
-import type {
+import {
   EncryptionConfig,
   EncryptedFile,
   FileValidationResult,

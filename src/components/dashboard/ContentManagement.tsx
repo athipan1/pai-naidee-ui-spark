@@ -4,7 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Folder, Upload } from "lucide-react";
 import MediaUpload from "./MediaUpload";
 import MediaGallery from "./MediaGallery";
-import { MediaItem, MediaUploadData } from "@/shared/types/media";
+import { MediaItem, MediaUploadData, SecurityLevel } from "@/shared/types/media";
 
 interface ContentManagementProps {
   currentLanguage: "th" | "en";
@@ -23,7 +23,12 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       size: 245760,
       uploadedAt: new Date("2024-01-15T10:30:00Z"),
       updatedAt: new Date("2024-01-15T10:30:00Z"),
-      status: "pending"
+      status: "pending",
+      version: 1,
+      isCurrentVersion: true,
+      securityLevel: SecurityLevel.PUBLIC,
+      createdBy: 'user-1',
+      accessPermissions: []
     },
     {
       id: "2", 
@@ -37,7 +42,12 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       updatedAt: new Date("2024-01-14T15:45:00Z"),
       status: "approved",
       approvedBy: "admin@example.com",
-      approvedAt: new Date("2024-01-14T16:00:00Z")
+      approvedAt: new Date("2024-01-14T16:00:00Z"),
+      version: 1,
+      isCurrentVersion: true,
+      securityLevel: SecurityLevel.PUBLIC,
+      createdBy: 'user-2',
+      accessPermissions: []
     },
     {
       id: "3",
@@ -48,7 +58,12 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       updatedAt: new Date("2024-01-13T14:30:00Z"),
       status: "approved",
       approvedBy: "editor@example.com",
-      approvedAt: new Date("2024-01-13T15:00:00Z")
+      approvedAt: new Date("2024-01-13T15:00:00Z"),
+      version: 1,
+      isCurrentVersion: true,
+      securityLevel: SecurityLevel.PUBLIC,
+      createdBy: 'user-3',
+      accessPermissions: []
     },
     {
       id: "4",
@@ -61,7 +76,12 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       uploadedAt: new Date("2024-01-12T11:15:00Z"),
       updatedAt: new Date("2024-01-12T11:15:00Z"),
       status: "rejected",
-      rejectionReason: "Image quality is too low for publication standards"
+      rejectionReason: "Image quality is too low for publication standards",
+      version: 1,
+      isCurrentVersion: true,
+      securityLevel: SecurityLevel.PUBLIC,
+      createdBy: 'user-4',
+      accessPermissions: []
     },
     {
       id: "5",
@@ -73,7 +93,12 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       size: 25165824,
       uploadedAt: new Date("2024-01-10T08:00:00Z"),
       updatedAt: new Date("2024-01-10T08:00:00Z"),
-      status: "draft"
+      status: "draft",
+      version: 1,
+      isCurrentVersion: true,
+      securityLevel: SecurityLevel.PUBLIC,
+      createdBy: 'user-5',
+      accessPermissions: []
     }
   ]);
 
@@ -110,7 +135,12 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       url: data.file ? URL.createObjectURL(data.file) : undefined,
       uploadedAt: new Date(),
       updatedAt: new Date(),
-      status: "pending"
+      status: "pending",
+      version: 1,
+      isCurrentVersion: true,
+      securityLevel: data.securityLevel || SecurityLevel.PUBLIC,
+      createdBy: 'current-user',
+      accessPermissions: data.permissions || []
     };
 
     setMediaItems(prev => [newItem, ...prev]);
