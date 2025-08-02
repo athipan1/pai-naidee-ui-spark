@@ -67,16 +67,19 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
         </nav>
 
         {/* Video Upload Button - Desktop */}
+        {/* Language Toggle - Desktop */}
         <div className="hidden md:flex">
-          <Link to="/video-upload">
-            <Button
-              size="sm"
-              className="bg-gradient-to-r from-primary to-accent-yellow hover:from-primary/90 hover:to-accent-yellow/90 text-white font-medium px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-            >
-              <Video className="w-4 h-4 mr-2" />
-              {currentLanguage === "th" ? "อัปโหลด" : "Upload"}
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              onLanguageChange(currentLanguage === "th" ? "en" : "th")
+            }
+            className="flex items-center space-x-1 rounded-xl"
+          >
+            <Globe2 className="w-4 h-4" />
+            <span className="font-medium">{currentLanguage.toUpperCase()}</span>
+          </Button>
         </div>
 
         {/* Language Toggle & Mobile Menu */}
@@ -98,18 +101,6 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
           {/* Dark Mode Toggle */}
           <DarkModeToggle className="hidden sm:flex" />
           
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onLanguageChange(currentLanguage === "th" ? "en" : "th")
-            }
-            className="hidden sm:flex items-center space-x-1 rounded-xl"
-          >
-            <Globe2 className="w-4 h-4" />
-            <span className="font-medium">{currentLanguage.toUpperCase()}</span>
-          </Button>
-
           {/* Mobile Menu Button */}
           <Button
             variant="ghost"
@@ -163,7 +154,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
                 onLanguageChange(currentLanguage === "th" ? "en" : "th");
                 setIsMenuOpen(false);
               }}
-              className="flex items-center space-x-1 rounded-xl sm:hidden w-full justify-center"
+              className="flex items-center space-x-1 rounded-xl w-full justify-center"
             >
               <Globe2 className="w-4 h-4" />
               <span className="font-medium">
@@ -172,7 +163,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             </Button>
             
             {/* Dark Mode Toggle for Mobile */}
-            <div className="flex justify-center sm:hidden">
+            <div className="flex justify-center">
               <DarkModeToggle size="sm" />
             </div>
           </nav>
