@@ -1,5 +1,5 @@
 // Testing and Simulation Service
-import type {
+import {
   TestSuite,
   TestCase,
   TestType,

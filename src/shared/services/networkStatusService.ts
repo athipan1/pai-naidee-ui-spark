@@ -164,10 +164,10 @@ class NetworkStatusService {
     
     return {
       isOnline: this.isOnline,
-      connectionType: connection?.type,
-      effectiveType: connection?.effectiveType,
-      downlink: connection?.downlink,
-      rtt: connection?.rtt
+      connectionType: (connection as any)?.type,
+      effectiveType: (connection as any)?.effectiveType,
+      downlink: (connection as any)?.downlink,
+      rtt: (connection as any)?.rtt
     };
   }
 

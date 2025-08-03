@@ -1,5 +1,5 @@
 // Version Control Service for media and places
-import type {
+import {
   MediaVersion,
   PlaceVersion,
   VersionHistory,
@@ -305,7 +305,8 @@ class VersionControlService {
         return {
           success: false,
           targetId: request.targetId,
-          message: 'Target version not found'
+          message: 'Target version not found',
+          rollbackedToVersion: null
         };
       }
 
@@ -357,7 +358,8 @@ class VersionControlService {
       return {
         success: false,
         targetId: request.targetId,
-        message: `Rollback failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Rollback failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        rollbackedToVersion: null
       };
     }
   }
@@ -434,7 +436,7 @@ class VersionControlService {
    */
   async getCurrentMediaVersion(mediaId: string): Promise<MediaVersion | null> {
     const history = await this.getMediaVersionHistory(mediaId);
-    return history.versions.find(v => v.isActive) || null;
+    return (history.versions.find(v => v.isActive) as MediaVersion) || null;
   }
 
   /**
@@ -442,7 +444,7 @@ class VersionControlService {
    */
   async getCurrentPlaceVersion(placeId: string): Promise<PlaceVersion | null> {
     const history = await this.getPlaceVersionHistory(placeId);
-    return history.versions.find(v => v.isActive) || null;
+    return (history.versions.find(v => v.isActive) as PlaceVersion) || null;
   }
 }
 

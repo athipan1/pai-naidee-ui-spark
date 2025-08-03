@@ -378,7 +378,7 @@ const VideoQualityComparison: React.FC<VideoQualityComparisonProps> = ({
                 <div className="text-sm text-muted-foreground">
                   {metrics.compressionRatio > 1 ? 
                     `${Math.round((metrics.compressionRatio - 1) * 100)}% ${t.stats.sizeSaved}` :
-                    `${Math.round((1 - metrics.compressionRatio) * 100)}% ${t.stats.largerSize}`
+                    `${Math.round((1 - metrics.compressionRatio) * 100)}% larger size`
                   }
                 </div>
               </div>

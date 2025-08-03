@@ -123,7 +123,7 @@ export const exploreAPI = {
         `${API_BASE_URL}/explore/videos?page=${page}&limit=${limit}`
       );
     } catch {
-      console.warn("ใช้ mock videos เนื่องจาก backend error:", error);
+      console.warn("ใช้ mock videos เนื่องจาก backend error");
       await simulateDelay();
       return { videos: mockVideos, totalCount: mockVideos.length, page, limit };
     }
@@ -162,7 +162,7 @@ export const exploreAPI = {
         `${API_BASE_URL}/videos/${videoId}/comments?page=${page}`
       );
     } catch {
-      console.warn("ใช้ mock comments เนื่องจาก backend error:", error);
+      console.warn("ใช้ mock comments เนื่องจาก backend error");
       await simulateDelay(300);
       return { comments: mockComments, totalCount: mockComments.length, page };
     }

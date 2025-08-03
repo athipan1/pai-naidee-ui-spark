@@ -157,9 +157,9 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       const attractionData = await attractionAPI.getAttractionDetail("1");
       const imageUrl = attractionData.images[0];
       
-      // Test if image URL is accessible
-      const img = new Image();
+      // Test if image URL is accessible  
       await new Promise<void>((resolve, reject) => {
+        const img = document.createElement('img');
         img.onload = () => resolve();
         img.onerror = () => reject(new Error("Image failed to load"));
         img.src = imageUrl;

@@ -436,8 +436,12 @@ const EnhancedVideoUpload: React.FC<EnhancedVideoUploadProps> = ({
   }, [isUploading, isProcessing, resetForm, onOpenChange]);
 
   const applyRecommendedSettings = () => {
-    const recommended = videoProcessingService.constructor.getRecommendedOptions();
-    setProcessingOptions(recommended);
+    setProcessingOptions(prev => ({
+      ...prev,
+      compressionQuality: 'medium',
+      enableCompression: true,
+      targetResolution: 'auto'
+    }));
   };
 
   const getStepTitle = () => {
