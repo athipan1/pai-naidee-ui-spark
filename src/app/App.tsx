@@ -24,6 +24,7 @@ const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const EnhancedAdminPanel = lazy(() => import("@/components/admin/EnhancedAdminPanel"));
 const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
 const AIAssistantPage = lazy(() => import("./pages/AIAssistantPage"));
+const CommunityFeed = lazy(() => import("./pages/Community"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,6 +132,16 @@ const App = () => {
                   path="/admin/enhanced"
                   element={
                     <EnhancedAdminPanel currentLanguage={currentLanguage} />
+                  }
+                />
+                <Route
+                  path="/community"
+                  element={
+                    <CommunityFeed
+                      currentLanguage={currentLanguage}
+                      onLanguageChange={setCurrentLanguage}
+                      onBack={() => window.history.back()}
+                    />
                   }
                 />
                 <Route

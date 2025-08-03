@@ -1,4 +1,4 @@
-import { Home, Compass, Heart, User } from "lucide-react";
+import { Home, Compass, Heart, User, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface BottomNavigationProps {
@@ -30,9 +30,15 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
       icon: Compass,
     },
     {
+      id: "community",
+      path: "/community",
+      label: { th: "ชุมชน", en: "Community" },
+      icon: Users,
+    },
+    {
       id: "favorites",
       path: "/favorites",
-      label: { th: "รายการโปรด", en: "Favorites" },
+      label: { th: "โปรด", en: "Favorites" },
       icon: Heart,
     },
     {

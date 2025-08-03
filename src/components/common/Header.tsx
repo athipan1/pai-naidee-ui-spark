@@ -16,8 +16,8 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const menuItems = [
     { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
     { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "/explore" },
+    { label: currentLanguage === "th" ? "ชุมชนนักเดินทาง" : "Community", href: "/community" },
     { label: currentLanguage === "th" ? "รายการโปรด" : "Favorites", href: "/favorites" },
-    { label: currentLanguage === "th" ? "อัปโหลดวิดีโอ" : "Video Upload", href: "/video-upload" },
     { label: currentLanguage === "th" ? "โปรไฟล์" : "Profile", href: "/profile" },
   ];
 
