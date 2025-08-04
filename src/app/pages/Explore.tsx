@@ -12,7 +12,7 @@ import {
   Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import EnhancedVideoUpload from "@/components/EnhancedVideoUpload";
+
 
 interface VideoPost {
   id: string;
@@ -46,7 +46,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [videoPosts, setVideoPosts] = useState<VideoPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const content = {
@@ -217,40 +217,6 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
     return num.toString();
   };
 
-  const handleVideoUpload = (videoData: {
-    videoFile: File;
-    caption: string;
-    tags: string[];
-    title: string;
-    location: string;
-    province: string;
-  }) => {
-    // Create a new video post
-    const newPost: VideoPost = {
-      id: `user_${Date.now()}`,
-      videoUrl: URL.createObjectURL(videoData.videoFile), // In a real app, this would be uploaded to a server
-      thumbnail: URL.createObjectURL(videoData.videoFile), // Would generate thumbnail on server
-      title: videoData.title,
-      location: videoData.location,
-      province: videoData.province,
-      hashtags: videoData.tags.map((tag) => `#${tag}`),
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      isLiked: false,
-      isSaved: false,
-      user: {
-        id: "current_user",
-        name: currentLanguage === "th" ? "คุณ" : "You",
-        avatar: "/placeholder-avatar.jpg",
-        isFollowing: false,
-      },
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-
-    // Add the new post to the beginning of the list
-    setVideoPosts((posts) => [newPost, ...posts]);
-  };
 
   if (loading) {
     return (
@@ -297,13 +263,6 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon">
               <Search className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowUploadModal(true)}
-            >
-              <Plus className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -464,13 +423,6 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
         ))}
       </div>
 
-      {/* Enhanced Video Upload Modal */}
-      <EnhancedVideoUpload
-        open={showUploadModal}
-        onOpenChange={setShowUploadModal}
-        onVideoUpload={handleVideoUpload}
-        currentLanguage={currentLanguage}
-      />
     </div>
   );
 };
