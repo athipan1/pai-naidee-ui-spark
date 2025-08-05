@@ -1,1 +1,0 @@
-var a=(a=>(a.PUBLIC="public",a.INTERNAL="internal",a.CONFIDENTIAL="confidential",a.RESTRICTED="restricted",a))(a||{});const e=["image/jpeg","image/jpg","image/png"],i=["video/mp4"],g=52428800;export{g as M,e as S,i as a,a as b};
