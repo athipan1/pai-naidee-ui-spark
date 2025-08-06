@@ -271,6 +271,31 @@ npm run preview
 1. **Static Hosting** - Deploy โฟลเดอร์ `build/` ไปยังบริการ static hosting ใดๆ
 2. **Docker** - ใช้ Dockerfile ที่มีให้สำหรับ deployment แบบ containerized
 3. **Lovable Platform** - Deploy โดยตรงผ่าน Lovable (ดูการตั้งค่าเดิม)
+4. **Vercel** - Deploy บน Vercel Platform พร้อมการตั้งค่าที่เหมาะสม
+
+### Deploy บน Vercel 🚀
+
+Deploy โปรเจคนี้บน Vercel ได้อย่างง่ายดายด้วยปุ่มด้านล่าง:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A//github.com/athipan1/pai-naidee-ui-spark)
+
+#### การตั้งค่า Environment Variables
+
+หลังจาก deploy แล้ว ให้ตั้งค่า environment variables ต่อไปนี้ใน Vercel dashboard:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
+DATABASE_URL=your_database_connection_string
+VERCEL_PROJECT_NAME=pai-naidee-ui-spark
+```
+
+#### การรันเทส
+
+เพื่อรันการทดสอบทั้งหมด ให้ใช้คำสั่ง:
+
+```bash
+python tests/run_all_tests.py
+```
 
 ### ตัวแปรสภาพแวดล้อมสำหรับ Production
 
