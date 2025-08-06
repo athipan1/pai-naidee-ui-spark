@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Mic, MicOff, Send, MessageCircle, Trash2, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Send, MessageCircle, Trash2, Loader2, Lightbulb } from 'lucide-react';
 import useSmartAI, { AIMessage } from '@/shared/hooks/useSmartAI';
 import useVoiceInput from '@/shared/hooks/useVoiceInput';
 import useAIAnimation from '@/shared/hooks/useAIAnimation';
@@ -52,6 +52,7 @@ const AIAssistant3D: React.FC = () => {
   const { 
     messages, 
     status, 
+    sessionId,
     isLoading, 
     error, 
     sendMessage, 
@@ -78,6 +79,24 @@ const AIAssistant3D: React.FC = () => {
     statusColor,
     animationMultipliers
   } = useAIAnimation(status);
+
+  // Suggested questions for better UX
+  const suggestedQuestions = {
+    th: [
+      'แนะนำสถานที่ท่องเที่ยวในภาคเหนือ',
+      'อาหารท้องถิ่นแนะนำในกรุงเทพ',
+      'วางแผนการเดินทาง 3 วัน 2 คืน',
+      'ค่าใช้จ่ายเที่ยวไทยสำหรับต่างชาติ'
+    ],
+    en: [
+      'Recommend places to visit in Northern Thailand',
+      'Local food recommendations in Bangkok',
+      'Plan a 3-day 2-night trip',
+      'Travel budget for tourists in Thailand'
+    ]
+  };
+
+  const currentSuggestions = language === 'th' ? suggestedQuestions.th : suggestedQuestions.en;
 
   // Handle voice input result
   useEffect(() => {
@@ -120,6 +139,10 @@ const AIAssistant3D: React.FC = () => {
     }
   };
 
+  const handleSuggestedQuestion = (question: string) => {
+    setInputText(question);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Header */}
@@ -133,6 +156,11 @@ const AIAssistant3D: React.FC = () => {
             <Badge variant={status === 'idle' ? 'secondary' : 'default'}>
               {status === 'thinking' ? 'Processing...' : status.charAt(0).toUpperCase() + status.slice(1)}
             </Badge>
+            {sessionId && (
+              <Badge variant="outline" className="text-xs">
+                Session: {sessionId.slice(-8)}
+              </Badge>
+            )}
             <select 
               value={language} 
               onChange={(e) => setLanguage(e.target.value as 'th' | 'en' | 'auto')}
@@ -190,7 +218,29 @@ const AIAssistant3D: React.FC = () => {
                 <div className="text-center text-gray-500 mt-8">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Start a conversation with your AI assistant!</p>
-                  <p className="text-sm mt-2">You can type or use voice input</p>
+                  <p className="text-sm mt-2">You can type, use voice input, or try suggested questions below</p>
+                  
+                  {/* Suggested Questions */}
+                  <div className="mt-6 space-y-2">
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <Lightbulb className="h-4 w-4 text-yellow-500" />
+                      <span className="text-sm font-medium">Suggested questions:</span>
+                    </div>
+                    <div className="grid gap-2">
+                      {currentSuggestions.map((question, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSuggestedQuestion(question)}
+                          className="text-left text-sm h-auto p-3 whitespace-normal"
+                          disabled={isLoading || isListening}
+                        >
+                          {question}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 messages.map((message, index) => (

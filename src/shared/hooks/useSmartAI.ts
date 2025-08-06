@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 export interface AIMessage {
@@ -10,58 +10,116 @@ export interface AIMessage {
 }
 
 export interface AIResponse {
-  message: string;
-  language: string;
+  response: string;
+  session_id?: string;
+  language?: string;
   confidence?: number;
   intent?: string;
-  source: string;
 }
 
 export interface AIRequest {
   message: string;
-  lang: 'th' | 'en' | 'auto';
-  source: '3d-assistant';
+  session_id?: string;
+  language?: 'th' | 'en' | 'auto';
 }
 
 export type AIStatus = 'idle' | 'listening' | 'thinking' | 'talking' | 'error';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 const useSmartAI = () => {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [status, setStatus] = useState<AIStatus>('idle');
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-  // Mock API call - replace with actual endpoint when backend is available
-  const callAIAPI = async (request: AIRequest): Promise<AIResponse> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+  // Load session from localStorage on mount
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem('ai_session_id');
+    const savedMessages = localStorage.getItem('ai_messages');
     
-    // Mock response based on input
-    const responses = {
-      th: [
-        'สวัสดีครับ! ยินดีต้อนรับสู่ PaiNaiDee',
-        'ขอบคุณที่ใช้บริการของเราครับ',
-        'มีอะไรให้ช่วยเหลือไหมครับ?',
-        'ผมพร้อมช่วยแนะนำสถานที่ท่องเที่ยวให้ครับ'
-      ],
-      en: [
-        'Hello! Welcome to PaiNaiDee',
-        'Thank you for using our service',
-        'How can I help you today?',
-        'I\'m ready to recommend amazing places to visit'
-      ]
-    };
+    if (savedSessionId) {
+      setSessionId(savedSessionId);
+    }
+    
+    if (savedMessages) {
+      try {
+        const parsed = JSON.parse(savedMessages);
+        const messagesWithDates = parsed.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setMessages(messagesWithDates);
+      } catch (error) {
+        console.warn('Failed to load saved messages:', error);
+      }
+    }
+  }, []);
 
-    const isThaiInput = /[\u0E00-\u0E7F]/.test(request.message);
-    const responseLanguage = request.lang === 'auto' ? (isThaiInput ? 'th' : 'en') : request.lang;
-    const responseOptions = responses[responseLanguage];
-    const randomResponse = responseOptions[Math.floor(Math.random() * responseOptions.length)];
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('ai_messages', JSON.stringify(messages));
+    }
+  }, [messages]);
 
-    return {
-      message: randomResponse,
-      language: responseLanguage,
-      confidence: 0.85 + Math.random() * 0.15,
-      intent: 'greeting',
-      source: '3d-assistant'
-    };
+  // Save session ID to localStorage whenever it changes
+  useEffect(() => {
+    if (sessionId) {
+      localStorage.setItem('ai_session_id', sessionId);
+    }
+  }, [sessionId]);
+
+  // API call to /api/talk endpoint
+  const callAIAPI = async (request: AIRequest): Promise<AIResponse> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/talk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.warn('API call failed, using fallback response:', error);
+      
+      // Fallback to mock response when API is not available
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      
+      const responses = {
+        th: [
+          'สวัสดีครับ! ยินดีต้อนรับสู่ PaiNaiDee ครับ',
+          'ขอบคุณที่ใช้บริการของเราครับ มีอะไรให้ช่วยเหลือไหมครับ?',
+          'ผมพร้อมช่วยแนะนำสถานที่ท่องเที่ยวในประเทศไทยให้ครับ',
+          'หากต้องการข้อมูลเกี่ยวกับการท่องเที่ยว กรุณาสอบถามได้เลยครับ'
+        ],
+        en: [
+          'Hello! Welcome to PaiNaiDee, your travel companion!',
+          'Thank you for using our service. How can I help you today?',
+          'I\'m ready to recommend amazing places to visit in Thailand',
+          'Feel free to ask me anything about travel destinations!'
+        ]
+      };
+
+      const isThaiInput = /[\u0E00-\u0E7F]/.test(request.message);
+      const responseLanguage = request.language === 'auto' ? (isThaiInput ? 'th' : 'en') : (request.language || 'en');
+      const responseOptions = responses[responseLanguage as keyof typeof responses] || responses.en;
+      const randomResponse = responseOptions[Math.floor(Math.random() * responseOptions.length)];
+
+      return {
+        response: randomResponse,
+        session_id: sessionId || `session_${Date.now()}`,
+        language: responseLanguage,
+        confidence: 0.85 + Math.random() * 0.15,
+        intent: 'greeting'
+      };
+    }
   };
 
   const mutation = useMutation({
@@ -70,9 +128,14 @@ const useSmartAI = () => {
       setStatus('thinking');
     },
     onSuccess: (response: AIResponse) => {
+      // Update session ID if provided
+      if (response.session_id && response.session_id !== sessionId) {
+        setSessionId(response.session_id);
+      }
+
       const aiMessage: AIMessage = {
         id: Date.now().toString(),
-        text: response.message,
+        text: response.response,
         sender: 'ai',
         timestamp: new Date(),
         language: response.language as 'th' | 'en'
@@ -81,13 +144,28 @@ const useSmartAI = () => {
       setMessages(prev => [...prev, aiMessage]);
       setStatus('talking');
       
-      // Simulate talking duration based on message length
-      const talkingDuration = Math.max(2000, response.message.length * 50);
-      setTimeout(() => {
-        setStatus('idle');
-      }, talkingDuration);
+      // Use Speech Synthesis to speak the response
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(response.response);
+        utterance.lang = response.language === 'th' ? 'th-TH' : 'en-US';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        
+        utterance.onend = () => {
+          setStatus('idle');
+        };
+        
+        speechSynthesis.speak(utterance);
+      } else {
+        // Fallback: simulate talking duration based on message length
+        const talkingDuration = Math.max(2000, response.response.length * 50);
+        setTimeout(() => {
+          setStatus('idle');
+        }, talkingDuration);
+      }
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('AI API Error:', error);
       setStatus('error');
       setTimeout(() => setStatus('idle'), 3000);
     }
@@ -107,17 +185,21 @@ const useSmartAI = () => {
 
     setMessages(prev => [...prev, userMessage]);
 
-    // Send to AI
+    // Send to AI with session ID
     mutation.mutate({
       message: text.trim(),
-      lang: language,
-      source: '3d-assistant'
+      session_id: sessionId || undefined,
+      language: language
     });
-  }, [mutation]);
+  }, [mutation, sessionId]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     setStatus('idle');
+    // Clear session data
+    setSessionId(null);
+    localStorage.removeItem('ai_session_id');
+    localStorage.removeItem('ai_messages');
   }, []);
 
   const startListening = useCallback(() => {
@@ -131,6 +213,7 @@ const useSmartAI = () => {
   return {
     messages,
     status,
+    sessionId,
     isLoading: mutation.isPending,
     error: mutation.error,
     sendMessage,
