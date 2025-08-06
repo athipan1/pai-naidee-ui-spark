@@ -111,6 +111,14 @@ export default {
 						transform: 'translateY(0)'
 					}
 				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0px)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
+				},
 				'fade-out': {
 					'0%': {
 						opacity: '1',

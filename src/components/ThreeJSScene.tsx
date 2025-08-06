@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Sphere, Box } from '@react-three/drei';
-import { Mesh, Color } from 'three';
+import { OrbitControls, Text, Html } from '@react-three/drei';
+import * as THREE from 'three';
 
 interface AnimationMultipliers {
   rotationSpeed: number;
@@ -19,10 +19,10 @@ const Avatar3D: React.FC<{
   animationMultipliers, 
   statusColor 
 }) => {
-  const meshRef = useRef<Mesh>(null);
-  const eyeLeftRef = useRef<Mesh>(null);
-  const eyeRightRef = useRef<Mesh>(null);
-  const mouthRef = useRef<Mesh>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const eyeLeftRef = useRef<THREE.Mesh>(null);
+  const eyeRightRef = useRef<THREE.Mesh>(null);
+  const mouthRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
@@ -52,38 +52,42 @@ const Avatar3D: React.FC<{
   return (
     <group ref={meshRef}>
       {/* Main head */}
-      <Sphere args={[1, 32, 32]} position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial 
-          {...{
-            color: new Color(statusColor),
-            transparent: true,
-            opacity: 0.8,
-            emissive: new Color(statusColor),
-            emissiveIntensity: animationMultipliers.glowIntensity * 0.2
-          }}
+          color={new THREE.Color(statusColor)}
+          transparent
+          opacity={0.8}
+          emissive={new THREE.Color(statusColor)}
+          emissiveIntensity={animationMultipliers.glowIntensity * 0.2}
         />
-      </Sphere>
+      </mesh>
       
       {/* Eyes */}
-      <Sphere ref={eyeLeftRef} args={[0.15, 16, 16]} position={[-0.3, 0.2, 0.8]}>
+      <mesh ref={eyeLeftRef} position={[-0.3, 0.2, 0.8]}>
+        <sphereGeometry args={[0.15, 16, 16]} />
         <meshStandardMaterial color="#ffffff" />
-      </Sphere>
-      <Sphere ref={eyeRightRef} args={[0.15, 16, 16]} position={[0.3, 0.2, 0.8]}>
+      </mesh>
+      <mesh ref={eyeRightRef} position={[0.3, 0.2, 0.8]}>
+        <sphereGeometry args={[0.15, 16, 16]} />
         <meshStandardMaterial color="#ffffff" />
-      </Sphere>
+      </mesh>
       
       {/* Eye pupils */}
-      <Sphere args={[0.08, 16, 16]} position={[-0.3, 0.2, 0.9]}>
+      <mesh position={[-0.3, 0.2, 0.9]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
         <meshStandardMaterial color="#000000" />
-      </Sphere>
-      <Sphere args={[0.08, 16, 16]} position={[0.3, 0.2, 0.9]}>
+      </mesh>
+      <mesh position={[0.3, 0.2, 0.9]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
         <meshStandardMaterial color="#000000" />
-      </Sphere>
+      </mesh>
       
       {/* Mouth */}
-      <Box ref={mouthRef} args={[0.3, 0.1, 0.1]} position={[0, -0.3, 0.8]}>
+      <mesh ref={mouthRef} position={[0, -0.3, 0.8]}>
+        <boxGeometry args={[0.3, 0.1, 0.1]} />
         <meshStandardMaterial color="#ff4444" />
-      </Box>
+      </mesh>
       
       {/* Status indicator */}
       <Text
@@ -111,16 +115,18 @@ const ThreeJSScene: React.FC<ThreeJSSceneProps> = ({
   statusColor 
 }) => {
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-      <ambientLight {...{ intensity: 0.5 }} />
-      <pointLight {...{ position: [10, 10, 10] }} />
-      <Avatar3D 
-        status={status}
-        animationMultipliers={animationMultipliers}
-        statusColor={statusColor}
-      />
-      <OrbitControls enableZoom={false} enablePan={false} />
-    </Canvas>
+    <div className="w-full h-full">
+      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} />
+        <Avatar3D 
+          status={status}
+          animationMultipliers={animationMultipliers}
+          statusColor={statusColor}
+        />
+        <OrbitControls enableZoom={false} enablePan={false} />
+      </Canvas>
+    </div>
   );
 };
 

@@ -8,21 +8,7 @@ import useSmartAI, { AIMessage } from '@/shared/hooks/useSmartAI';
 import useVoiceInput from '@/shared/hooks/useVoiceInput';
 import useAIAnimation from '@/shared/hooks/useAIAnimation';
 
-// Lazy load Three.js components to prevent SSR issues
-const ThreeJSScene = React.lazy(() => 
-  import('./ThreeJSScene').catch(() => ({
-    default: () => (
-      <div className="flex items-center justify-center h-full bg-gray-900 text-white">
-        <div className="text-center">
-          <div className="w-32 h-32 mx-auto mb-4 bg-blue-500 rounded-full flex items-center justify-center">
-            <MessageCircle className="w-16 h-16" />
-          </div>
-          <p>3D Avatar Loading...</p>
-        </div>
-      </div>
-    )
-  }))
-);
+import CSS3DAvatar from './CSS3DAvatar';
 
 // Chat message component
 const ChatMessage: React.FC<{ message: AIMessage; isLast: boolean }> = ({ message, isLast: _isLast }) => {
@@ -177,20 +163,11 @@ const AIAssistant3D: React.FC = () => {
       <div className="flex-1 flex">
         {/* 3D Avatar Section */}
         <div className="w-1/2 bg-gray-900 relative">
-          <Suspense fallback={
-            <div className="flex items-center justify-center h-full text-white">
-              <div className="text-center">
-                <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin" />
-                <p>Loading 3D Avatar...</p>
-              </div>
-            </div>
-          }>
-            <ThreeJSScene 
-              status={status}
-              animationMultipliers={animationMultipliers}
-              statusColor={statusColor}
-            />
-          </Suspense>
+          <CSS3DAvatar 
+            status={status}
+            statusColor={statusColor}
+            messages={messages}
+          />
           
           {/* Status overlay */}
           <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-2 rounded-lg">
