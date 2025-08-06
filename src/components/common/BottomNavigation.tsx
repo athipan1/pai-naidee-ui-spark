@@ -1,4 +1,4 @@
-import { Home, Compass, Heart, User, Users } from "lucide-react";
+import { Home, Compass, Heart, User, Users, Bot } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface BottomNavigationProps {
@@ -28,6 +28,12 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
       path: "/explore",
       label: { th: "สำรวจ", en: "Explore" },
       icon: Compass,
+    },
+    {
+      id: "ai-assistant",
+      path: "/ai-assistant",
+      label: { th: "AI ผู้ช่วย", en: "AI Chat" },
+      icon: Bot,
     },
     {
       id: "community",
