@@ -266,13 +266,6 @@ npm run build
 npm run preview
 ```
 
-### ตัวเลือกการ Deploy
-
-1. **Static Hosting** - Deploy โฟลเดอร์ `build/` ไปยังบริการ static hosting ใดๆ
-2. **Docker** - ใช้ Dockerfile ที่มีให้สำหรับ deployment แบบ containerized
-3. **Lovable Platform** - Deploy โดยตรงผ่าน Lovable (ดูการตั้งค่าเดิม)
-4. **Vercel** - Deploy บน Vercel Platform พร้อมการตั้งค่าที่เหมาะสม
-
 ### Deploy บน Vercel 🚀
 
 Deploy โปรเจคนี้บน Vercel ได้อย่างง่ายดายด้วยปุ่มด้านล่าง:
@@ -283,28 +276,129 @@ Deploy โปรเจคนี้บน Vercel ได้อย่างง่�
 
 หลังจาก deploy แล้ว ให้ตั้งค่า environment variables ต่อไปนี้ใน Vercel dashboard:
 
+**ตัวแปรที่จำเป็น / Required Variables:**
 ```bash
 OPENAI_API_KEY=your_openai_api_key_here
 DATABASE_URL=your_database_connection_string
-VERCEL_PROJECT_NAME=pai-naidee-ui-spark
-```
-
-#### การรันเทส
-
-เพื่อรันการทดสอบทั้งหมด ให้ใช้คำสั่ง:
-
-```bash
-python tests/run_all_tests.py
-```
-
-### ตัวแปรสภาพแวดล้อมสำหรับ Production
-
-```bash
 VITE_API_BASE_URL=https://your-api-domain.com/api
+```
+
+**ตัวแปรเสริม / Optional Variables:**
+```bash
 VITE_APP_TITLE=PaiNaiDee
 VITE_ENABLE_DEBUG=false
 VITE_ENABLE_ANALYTICS=true
+VERCEL_PROJECT_NAME=pai-naidee-ui-spark
 ```
+
+#### ขั้นตอนการ Deploy
+
+1. คลิกปุ่ม "Deploy with Vercel" ด้านบน
+2. เชื่อมต่อ GitHub account และเลือก repository
+3. ตั้งค่า environment variables ในหน้า settings
+4. รอ build process เสร็จสิ้น
+5. เข้าถึงแอปผ่าน URL ที่ Vercel สร้างให้
+
+### Deploy บน Hugging Face Spaces 🤗
+
+Deploy แอปพลิเคชันบน Hugging Face Spaces สำหรับการใช้งานและสาธิต:
+
+[![Deploy on HF Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/deploy-on-spaces-md.svg)](https://huggingface.co/spaces/new?template=https://github.com/athipan1/pai-naidee-ui-spark)
+
+#### การตั้งค่าสำหรับ Hugging Face Spaces
+
+1. **สร้างไฟล์ `requirements.txt`** (หากต้องการ Python backend):
+```txt
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+requests==2.31.0
+```
+
+2. **สร้างไฟล์ `app.py`** (สำหรับ demo backend):
+```python
+import gradio as gr
+import requests
+
+def predict(message):
+    # ใส่ logic สำหรับ API calls ที่นี่
+    return f"Response: {message}"
+
+iface = gr.Interface(fn=predict, inputs="text", outputs="text")
+iface.launch()
+```
+
+3. **โครงสร้างสำหรับ Spaces**:
+```
+pai-naidee-ui-spark/
+├── app.py              # Gradio/Streamlit app (ถ้าต้องการ)
+├── requirements.txt    # Python dependencies
+├── README.md          # จะแสดงใน Spaces
+├── src/               # Frontend code
+└── package.json       # Node.js dependencies
+```
+
+#### หมายเหตุสำหรับ Hugging Face Spaces
+
+- **Framework**: รองรับ Gradio, Streamlit หรือ Static HTML
+- **API Demo**: สามารถใช้ Gradio สร้าง interactive demo
+- **Frontend**: Static files จะถูกให้บริการ automatically
+- **Python Backend**: เหมาะสำหรับ AI/ML features
+
+### ทดลองใช้งานบน Google Colab ⚗️
+
+#### 🧪 ทดลอง API ทั้งหมดใน Google Colab
+
+ทดสอบการทำงานของ API ทั้งหมดได้ทันทีผ่าน Google Colab โดยไม่ต้องติดตั้งอะไรเพิ่มเติม
+
+Test all API functionality instantly through Google Colab without any additional installation required
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/athipan1/pai-naidee-ui-spark/blob/main/tests/test_all_apis.ipynb)
+
+#### รายการ API ที่ทดสอบ / Tested API Endpoints:
+
+- ✅ `/api/talk` - AI Chat API สำหรับสนทนากับ AI
+- ✅ `/api/attractions` - ค้นหาและแสดงสถานที่ท่องเที่ยว
+- ✅ `/api/attractions/<id>` - รายละเอียดของสถานที่ท่องเที่ยวเฉพาะ
+- ✅ `/api/videos` - จัดการและแสดงวิดีโอ
+- ✅ `/api/videos/upload` - อัปโหลดวิดีโอใหม่
+- ✅ `/api/user/profile` - จัดการโปรไฟล์ผู้ใช้
+- ✅ `/api/user/favorites` - จัดการรายการโปรดของผู้ใช้
+
+#### การตั้งค่าใน Google Colab:
+
+1. **ติดตั้ง dependencies**:
+```python
+!pip install requests pandas json5 tabulate
+```
+
+2. **ตั้งค่า API endpoint URL**:
+```python
+API_BASE_URL = "https://your-vercel-app.vercel.app/api"  # เปลี่ยนเป็น URL ของคุณ
+```
+
+3. **ใช้ helper function สำหรับเรียก API**:
+```python
+def call_api(method, url, payload=None, headers=None):
+    # ฟังก์ชันสำหรับเรียก API แบบง่ายๆ
+    # Simple function to call API endpoints
+    pass
+```
+
+#### คุณสมบัติของ Notebook:
+
+- 🐍 **ใช้ Python** สำหรับการทดสอบที่ยืดหยุ่น
+- 🌏 **แสดงผลเป็นภาษาไทย/อังกฤษ** เพื่อความชัดเจน
+- 📊 **แสดงผลแบบตาราง** สำหรับข้อมูลที่อ่านง่าย
+- 🔧 **ฟังก์ชันช่วยเหลือ** สำหรับการเรียก API
+- ✅ **ทดสอบครบถ้วน** ทุก endpoint ที่สำคัญ
+
+### ตัวเลือกการ Deploy อื่นๆ
+
+1. **Static Hosting** - Deploy โฟลเดอร์ `build/` ไปยังบริการ static hosting ใดๆ
+2. **Docker** - ใช้ Dockerfile ที่มีให้สำหรับ deployment แบบ containerized  
+3. **Lovable Platform** - Deploy โดยตรงผ่าน Lovable (ดูการตั้งค่าเดิม)
+4. **GitHub Pages** - ใช้ GitHub Actions workflow ที่มีอยู่แล้ว
 
 ## 🤝 การร่วมพัฒนา
 
