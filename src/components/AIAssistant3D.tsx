@@ -113,28 +113,55 @@ const AIAssistant3D: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-travel-blue-50 via-white to-travel-green-100 relative">
-      {/* Enhanced 3D AI Assistant - positioned in bottom right */}
+      {/* Compact 3D AI Assistant - small floating helper */}
       {useEnhanced3D && (
         <div 
-          className="fixed bottom-5 right-5 w-64 h-80 bg-gradient-to-br from-blue-50 to-green-50 rounded-lg shadow-lg border border-gray-200 z-50"
+          className={`fixed transition-all duration-300 z-50 ${
+            messages.length > 0 ? 'bottom-20 right-5' : 'bottom-5 right-5'
+          }`}
         >
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-2 animate-pulse"></div>
-              <p className="text-sm text-gray-600">Enhanced 3D Assistant</p>
-              <p className="text-xs text-gray-500">Under Development</p>
+          {/* Main assistant avatar */}
+          <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full shadow-lg border border-primary/30 backdrop-blur-sm cursor-pointer hover:scale-110 transition-transform duration-200">
+            <div className="w-full h-full flex items-center justify-center relative">
+              {/* Avatar face */}
+              <div 
+                className={`w-10 h-10 rounded-full transition-all duration-300 ${
+                  status === 'listening' ? 'animate-pulse bg-green-400' :
+                  status === 'thinking' ? 'animate-spin bg-yellow-400' :
+                  status === 'talking' ? 'animate-bounce bg-blue-400' :
+                  'bg-primary'
+                }`}
+              >
+                {/* Eyes */}
+                <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-white rounded-full"></div>
+                {/* Mouth */}
+                <div className={`absolute bottom-1.5 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-white rounded transition-all duration-200 ${
+                  status === 'talking' ? 'animate-ping' : ''
+                }`}></div>
+              </div>
+              
+              {/* Status indicator */}
+              <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
+                status === 'idle' ? 'bg-gray-400' :
+                status === 'listening' ? 'bg-green-500 animate-pulse' :
+                status === 'thinking' ? 'bg-yellow-500' :
+                status === 'talking' ? 'bg-blue-500' : 'bg-red-500'
+              }`}></div>
+              
+              {/* Message count badge */}
+              {messages.length > 0 && (
+                <div className="absolute -bottom-1 -right-1 bg-primary text-white text-xs w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold">
+                  {messages.length > 9 ? '9+' : messages.length}
+                </div>
+              )}
             </div>
           </div>
           
-          {/* Status indicators */}
-          <div className="absolute top-2 left-2 bg-black/20 backdrop-blur-sm text-white px-2 py-1 rounded text-xs">
-            <span className="capitalize">{status}</span>
-          </div>
-          
-          {/* Message count */}
-          {messages.length > 0 && (
-            <div className="absolute bottom-2 right-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs">
-              {messages.length}
+          {/* Quick action tooltip */}
+          {status === 'idle' && (
+            <div className="absolute bottom-full right-0 mb-2 bg-background/90 backdrop-blur-sm text-foreground px-3 py-1 rounded-lg text-xs shadow-lg border animate-fade-in">
+              คลิกเพื่อถาม
             </div>
           )}
         </div>

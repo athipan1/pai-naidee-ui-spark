@@ -22,11 +22,14 @@ const AIAssistantAdmin: React.FC<AIAssistantAdminProps> = ({
   const [localConfig, setLocalConfig] = useState<AIAssistantConfig>(config);
 
   const updateConfig = (section: keyof AIAssistantConfig, updates: any) => {
-    const newConfig = {
-      ...localConfig,
-      [section]: { ...localConfig[section], ...updates }
-    };
-    setLocalConfig(newConfig);
+    const currentSection = localConfig[section];
+    if (typeof currentSection === 'object' && currentSection !== null) {
+      const newConfig = {
+        ...localConfig,
+        [section]: { ...currentSection, ...updates }
+      };
+      setLocalConfig(newConfig);
+    }
   };
 
   const applyConfig = () => {
@@ -36,7 +39,7 @@ const AIAssistantAdmin: React.FC<AIAssistantAdminProps> = ({
 
   const loadPreset = (presetName: keyof typeof configPresets) => {
     const preset = configPresets[presetName];
-    setLocalConfig(preset);
+    setLocalConfig(preset as AIAssistantConfig);
   };
 
   const resetToDefault = () => {
@@ -250,10 +253,10 @@ const AIAssistantAdmin: React.FC<AIAssistantAdminProps> = ({
 
                 <div className="space-y-2">
                   <Label>Texture Size</Label>
-                  <Select 
-                    value={localConfig.performance.textureSize.toString()} 
-                    onValueChange={(value) => updateConfig('performance', { textureSize: parseInt(value) })}
-                  >
+                   <Select 
+                     value={localConfig.performance.textureSize.toString()} 
+                     onValueChange={(value) => updateConfig('performance', { textureSize: parseInt(value) as 256 | 512 | 1024 })}
+                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

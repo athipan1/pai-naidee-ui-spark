@@ -17,7 +17,7 @@ const LoadingBar: React.FC<LoadingBarProps> = ({ isVisible, progress = 0 }) => {
           animation: progress === 0 ? 'loading-pulse 1.5s ease-in-out infinite' : undefined
         }}
       />
-      <style jsx>{`
+      <style>{`
         @keyframes loading-pulse {
           0% { width: 0%; }
           50% { width: 70%; }
