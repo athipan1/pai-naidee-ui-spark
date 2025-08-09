@@ -7,6 +7,8 @@ import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -48,15 +50,25 @@ const queryClient = new QueryClient({
 const App = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
 
+  // Apply responsive text sizing for better accessibility
+  useResponsiveTextSize();
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <MediaProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
+    <ErrorBoundary showDetails={import.meta.env.DEV}>
+      <QueryClientProvider client={queryClient}>
+        <MediaProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SkipLink />
+              <Suspense fallback={
+                <LoadingSpinner 
+                  useSkeletonLoader={false}
+                  text={currentLanguage === "th" ? "กำลังโหลด..." : "Loading..."}
+                />
+              }>
+                <Routes>
                 <Route
                   path="/"
                   element={
@@ -173,11 +185,12 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            <DevTools />
           </BrowserRouter>
-          <DevTools />
         </TooltipProvider>
       </MediaProvider>
     </QueryClientProvider>
+  </ErrorBoundary>
   );
 };
 

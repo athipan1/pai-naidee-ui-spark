@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { showToast } from "./EnhancedToast";
 
 // Translation helpers
 const getCategoryNameTh = (category: string): string => {
@@ -79,20 +80,47 @@ const AttractionCard = ({
 
   const displayName = currentLanguage === "th" && nameLocal ? nameLocal : name;
 
-  const handleShare = (e: React.MouseEvent) => {
+  const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (navigator.share) {
-      navigator.share({
-        title: displayName,
-        text: description,
-        url: window.location.origin + `/attraction/${id}`,
-      }).catch(() => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: displayName,
+          text: description,
+          url: window.location.origin + `/attraction/${id}`,
+        });
+        showToast.shared(displayName);
+      } else {
         // Fallback to clipboard
-        navigator.clipboard.writeText(window.location.origin + `/attraction/${id}`);
-      });
+        await navigator.clipboard.writeText(window.location.origin + `/attraction/${id}`);
+        showToast.success(
+          currentLanguage === "th" 
+            ? "คัดลอกลิงก์แล้ว" 
+            : "Link copied to clipboard"
+        );
+      }
+    } catch (error) {
+      // User cancelled share or clipboard failed
+      if (error instanceof Error && error.name !== 'AbortError') {
+        showToast.error(
+          currentLanguage === "th" 
+            ? "ไม่สามารถแชร์ได้" 
+            : "Failed to share"
+        );
+      }
+    }
+  };
+
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newFavoriteState = !isFavorite;
+    onFavoriteToggle(id);
+    
+    // Show appropriate toast with undo functionality
+    if (newFavoriteState) {
+      showToast.addedToFavorites(displayName, () => onFavoriteToggle(id));
     } else {
-      // Fallback to clipboard
-      navigator.clipboard.writeText(window.location.origin + `/attraction/${id}`);
+      showToast.removedFromFavorites(displayName, () => onFavoriteToggle(id));
     }
   };
 
@@ -146,15 +174,13 @@ const AttractionCard = ({
                 ? "bg-destructive text-destructive-foreground shadow-lg neon-glow" 
                 : "glass-effect text-white hover:bg-white/20"
             }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavoriteToggle(id);
-            }}
+            onClick={handleFavoriteToggle}
             aria-label={
               currentLanguage === "th" 
                 ? (isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มในรายการโปรด")
                 : (isFavorite ? "Remove from favorites" : "Add to favorites")
             }
+            aria-pressed={isFavorite}
             role="button"
             tabIndex={0}
           >
@@ -279,11 +305,14 @@ const AttractionCard = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavoriteToggle(id);
-            }}
+            onClick={handleFavoriteToggle}
             className="text-xs h-8"
+            aria-label={
+              currentLanguage === "th" 
+                ? (isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มในรายการโปรด")
+                : (isFavorite ? "Remove from favorites" : "Add to favorites")
+            }
+            aria-pressed={isFavorite}
           >
             <Bookmark className={`w-3 h-3 ${isFavorite ? "fill-current" : ""}`} />
           </Button>
