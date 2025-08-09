@@ -1,30 +1,27 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Mic, MicOff, Send, MessageCircle, Trash2, Loader2, Lightbulb } from 'lucide-react';
-import useSmartAI, { AIMessage } from '@/shared/hooks/useSmartAI';
+import { Trash2 } from 'lucide-react';
+import useSmartAI from '@/shared/hooks/useSmartAI';
 import useVoiceInput from '@/shared/hooks/useVoiceInput';
 import useAIAnimation from '@/shared/hooks/useAIAnimation';
 
-import CSS3DAvatar from './CSS3DAvatar';
+// New component imports
+import ChatInterface from './AIAssistant/ChatInterface';
+import InputArea from './AIAssistant/InputArea';
+import LanguageSwitcher from './AIAssistant/LanguageSwitcher';
+import LoadingBar from './UI/LoadingBar';
+import NavigationModel from './CSS3DAvatar';
 
-// Chat message component
-const ChatMessage: React.FC<{ message: AIMessage; isLast: boolean }> = ({ message, isLast: _isLast }) => {
+// Chat message component - keeping for backward compatibility but will be replaced
+const ChatMessage: React.FC<{ message: any; isLast: boolean }> = ({ message, isLast }) => {
   return (
     <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-3`}>
-      <div className={`max-w-[80%] ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg px-4 py-2`}>
+      <div className={`max-w-[80%] ${message.sender === 'user' ? 'bg-travel-blue-500 text-white' : 'bg-white border border-travel-neutral-500/20 text-travel-neutral-800'} rounded-lg px-4 py-2 shadow-sm`}>
         <p className="text-sm">{message.text}</p>
         <div className="flex items-center justify-between mt-1">
           <span className="text-xs opacity-70">
             {message.timestamp.toLocaleTimeString()}
           </span>
-          {message.language && (
-            <Badge variant="secondary" className="text-xs">
-              {message.language.toUpperCase()}
-            </Badge>
-          )}
         </div>
       </div>
     </div>
@@ -62,27 +59,8 @@ const AIAssistant3D: React.FC = () => {
   });
 
   const {
-    statusColor,
-    animationMultipliers
+    statusColor
   } = useAIAnimation(status);
-
-  // Suggested questions for better UX
-  const suggestedQuestions = {
-    th: [
-      'แนะนำสถานที่ท่องเที่ยวในภาคเหนือ',
-      'อาหารท้องถิ่นแนะนำในกรุงเทพ',
-      'วางแผนการเดินทาง 3 วัน 2 คืน',
-      'ค่าใช้จ่ายเที่ยวไทยสำหรับต่างชาติ'
-    ],
-    en: [
-      'Recommend places to visit in Northern Thailand',
-      'Local food recommendations in Bangkok',
-      'Plan a 3-day 2-night trip',
-      'Travel budget for tourists in Thailand'
-    ]
-  };
-
-  const currentSuggestions = language === 'th' ? suggestedQuestions.th : suggestedQuestions.en;
 
   // Handle voice input result
   useEffect(() => {
@@ -118,192 +96,124 @@ const AIAssistant3D: React.FC = () => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   const handleSuggestedQuestion = (question: string) => {
     setInputText(question);
+    sendMessage(question, language);
+  };
+
+  const handleQuickAction = (action: string, query: string) => {
+    sendMessage(query, language);
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-travel-blue-50 via-white to-travel-green-100">
       {/* Header */}
-      <div className="bg-white shadow-sm p-4 border-b">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">PaiNaiDee AI Assistant</h1>
-            <p className="text-sm text-gray-600">Your 3D travel companion</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant={status === 'idle' ? 'secondary' : 'default'}>
-              {status === 'thinking' ? 'Processing...' : status.charAt(0).toUpperCase() + status.slice(1)}
-            </Badge>
-            {sessionId && (
-              <Badge variant="outline" className="text-xs">
-                Session: {sessionId.slice(-8)}
-              </Badge>
-            )}
-            <select 
-              value={language} 
-              onChange={(e) => setLanguage(e.target.value as 'th' | 'en' | 'auto')}
-              className="px-3 py-1 border rounded-md text-sm"
-            >
-              <option value="auto">Auto Detect</option>
-              <option value="th">ไทย</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 flex">
-        {/* 3D Avatar Section */}
-        <div className="w-1/2 bg-gray-900 relative">
-          <CSS3DAvatar 
-            status={status}
-            statusColor={statusColor}
-            messages={messages}
-          />
-          
-          {/* Status overlay */}
-          <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-2 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <div 
-                className={`w-3 h-3 rounded-full ${
-                  status === 'idle' ? 'bg-blue-500' :
-                  status === 'listening' ? 'bg-green-500 animate-pulse' :
-                  status === 'thinking' ? 'bg-yellow-500 animate-spin' :
-                  status === 'talking' ? 'bg-purple-500 animate-bounce' :
-                  'bg-red-500'
-                }`}
+      <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-travel-neutral-500/10 sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-travel-neutral-800 font-poppins">
+                PaiNaiDee AI Assistant
+              </h1>
+              <p className="text-sm text-travel-neutral-500">
+                Your intelligent travel companion powered by AI
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {/* Loading bar */}
+              <div className="hidden sm:block w-20">
+                <LoadingBar isVisible={isLoading} />
+              </div>
+              
+              {/* Language switcher */}
+              <LanguageSwitcher 
+                language={language} 
+                onLanguageChange={setLanguage} 
               />
-              <span className="text-sm capitalize">{status}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Chat Section */}
-        <div className="w-1/2 flex flex-col">
-          {/* Messages */}
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.length === 0 ? (
-                <div className="text-center text-gray-500 mt-8">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Start a conversation with your AI assistant!</p>
-                  <p className="text-sm mt-2">You can type, use voice input, or try suggested questions below</p>
-                  
-                  {/* Suggested Questions */}
-                  <div className="mt-6 space-y-2">
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      <Lightbulb className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-medium">Suggested questions:</span>
-                    </div>
-                    <div className="grid gap-2">
-                      {currentSuggestions.map((question, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSuggestedQuestion(question)}
-                          className="text-left text-sm h-auto p-3 whitespace-normal"
-                          disabled={isLoading || isListening}
-                        >
-                          {question}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                messages.map((message, index) => (
-                  <ChatMessage 
-                    key={message.id} 
-                    message={message} 
-                    isLast={index === messages.length - 1}
-                  />
-                ))
-              )}
-              {isLoading && (
-                <div className="flex justify-start mb-3">
-                  <div className="bg-gray-100 rounded-lg px-4 py-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                      <span className="text-sm text-gray-600">AI is thinking...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-
-          {/* Input Area */}
-          <div className="border-t bg-white p-4 space-y-3">
-            {/* Voice feedback */}
-            {isListening && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <div className="animate-pulse h-3 w-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-green-700">Listening...</span>
-                </div>
-                {transcript && (
-                  <p className="text-sm text-green-600 mt-1">&ldquo;{transcript}&rdquo;</p>
-                )}
-              </div>
-            )}
-
-            {/* Error display */}
-            {(error || voiceError) && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm text-red-600">
-                  {error?.message || voiceError || 'An error occurred'}
-                </p>
-              </div>
-            )}
-
-            {/* Input controls */}
-            <div className="flex items-center space-x-2">
-              <div className="flex-1 flex items-center space-x-2">
-                <Input
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder={language === 'th' ? 'พิมพ์ข้อความ...' : 'Type your message...'}
-                  disabled={isLoading || isListening}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputText.trim() || isLoading || isListening}
-                  size="sm"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
               
-              {isVoiceSupported && (
-                <Button
-                  onClick={handleVoiceToggle}
-                  variant={isListening ? "destructive" : "outline"}
-                  size="sm"
-                  disabled={isLoading}
-                >
-                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                </Button>
+              {/* Session info */}
+              {sessionId && (
+                <div className="hidden md:block text-xs text-travel-neutral-500 bg-travel-neutral-50 px-2 py-1 rounded">
+                  Session: {sessionId.slice(-8)}
+                </div>
               )}
               
+              {/* Clear button */}
               <Button
                 onClick={clearMessages}
                 variant="outline"
                 size="sm"
                 disabled={messages.length === 0}
+                className="text-travel-neutral-500 border-travel-neutral-500/20 hover:bg-travel-neutral-50"
               >
                 <Trash2 className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">Clear</span>
               </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile loading bar */}
+      <div className="sm:hidden px-4">
+        <LoadingBar isVisible={isLoading} />
+      </div>
+
+      {/* Main content area */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-12rem)]">
+          
+          {/* 3D Model Section */}
+          <div className="order-2 lg:order-1">
+            <div className="h-full min-h-[300px] lg:min-h-[500px]">
+              <NavigationModel 
+                status={status}
+                statusColor={statusColor}
+                messages={messages}
+              />
+            </div>
+          </div>
+
+          {/* Chat Section */}
+          <div className="order-1 lg:order-2 flex flex-col">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-travel-neutral-500/10 h-full flex flex-col">
+              
+              {/* Chat Interface */}
+              <div className="flex-1">
+                <ChatInterface
+                  messages={messages}
+                  isLoading={isLoading}
+                  language={language}
+                  onSuggestedQuestion={handleSuggestedQuestion}
+                  onQuickAction={handleQuickAction}
+                  disabled={isLoading || isListening}
+                />
+              </div>
+
+              {/* Error display */}
+              {(error || voiceError) && (
+                <div className="mx-4 mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-600">
+                    {error?.message || voiceError || 'An error occurred'}
+                  </p>
+                </div>
+              )}
+
+              {/* Input Area */}
+              <div className="p-4 border-t border-travel-neutral-500/10">
+                <InputArea
+                  inputText={inputText}
+                  setInputText={setInputText}
+                  onSendMessage={handleSendMessage}
+                  onVoiceToggle={handleVoiceToggle}
+                  isListening={isListening}
+                  isVoiceSupported={isVoiceSupported}
+                  isLoading={isLoading}
+                  transcript={transcript}
+                  language={language}
+                />
+              </div>
             </div>
           </div>
         </div>
