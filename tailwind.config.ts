@@ -48,6 +48,22 @@ export default {
 				'accent-purple': 'hsl(var(--accent-purple))',
 				'accent-pink': 'hsl(var(--accent-pink))',
 				'accent-orange': 'hsl(var(--accent-orange))',
+				// Travel-themed color palette
+				'travel-blue': {
+					50: '#E0F2FE',
+					300: '#7DD3FC', 
+					500: '#0EA5E9'
+				},
+				'travel-green': {
+					100: '#DCFCE7',
+					300: '#86EFAC',
+					500: '#10B981'
+				},
+				'travel-neutral': {
+					50: '#F8FAFC',
+					500: '#64748B',
+					800: '#1E293B'
+				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))'

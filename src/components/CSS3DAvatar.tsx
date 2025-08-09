@@ -36,7 +36,7 @@ const CSS3DAvatar: React.FC<CSS3DAvatarProps> = ({ status, statusColor, messages
   const shouldShowBubble = latestMessage && latestMessage.sender === 'ai';
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+    <div className="w-full h-full min-h-[400px] bg-gradient-to-br from-travel-blue-50 to-travel-green-100 rounded-lg overflow-hidden relative flex items-center justify-center">
       {/* 3D-style avatar using CSS */}
       <div className="relative">
         {/* Main head */}
@@ -80,8 +80,8 @@ const CSS3DAvatar: React.FC<CSS3DAvatarProps> = ({ status, statusColor, messages
               <div className="absolute left-0 top-1/2 transform -translate-x-2 -translate-y-1/2">
                 <div className="w-0 h-0 border-r-8 border-r-white border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
               </div>
-              <p className="text-gray-800 text-sm">{latestMessage.text}</p>
-              <div className="text-xs text-gray-500 mt-1">
+              <p className="text-travel-neutral-800 text-sm">{latestMessage.text}</p>
+              <div className="text-xs text-travel-neutral-500 mt-1">
                 {latestMessage.timestamp.toLocaleTimeString()}
               </div>
             </div>
@@ -104,6 +104,29 @@ const CSS3DAvatar: React.FC<CSS3DAvatarProps> = ({ status, statusColor, messages
           ></div>
         ))}
       </div>
+
+      {/* Status overlay */}
+      <div className="absolute top-4 left-4 bg-black/20 backdrop-blur-sm text-white px-3 py-2 rounded-lg">
+        <div className="flex items-center space-x-2">
+          <div 
+            className={`w-3 h-3 rounded-full ${
+              status === 'idle' ? 'bg-blue-500' :
+              status === 'listening' ? 'bg-green-500 animate-pulse' :
+              status === 'thinking' ? 'bg-yellow-500 animate-spin' :
+              status === 'talking' ? 'bg-purple-500 animate-bounce' :
+              'bg-red-500'
+            }`}
+          />
+          <span className="text-sm capitalize">{status}</span>
+        </div>
+      </div>
+
+      {/* Message count indicator */}
+      {messages.length > 0 && (
+        <div className="absolute bottom-4 right-4 bg-travel-blue-500 text-white px-3 py-2 rounded-full text-sm">
+          {messages.length} {messages.length === 1 ? 'message' : 'messages'}
+        </div>
+      )}
 
       {/* Additional visual effects based on status */}
       {status === 'listening' && (
