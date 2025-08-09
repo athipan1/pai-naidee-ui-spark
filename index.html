@@ -3,18 +3,64 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pai-naidee-ui-spark</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>PaiNaiDee - Discover Thailand's Hidden Gems</title>
+    <meta name="description" content="Explore Thailand's most beautiful destinations with PaiNaiDee. Find beaches, temples, mountains, and cultural sites with detailed guides and reviews." />
+    <meta name="author" content="PaiNaiDee Team" />
+    <meta name="keywords" content="Thailand travel, tourism, attractions, beaches, temples, mountains, travel guide" />
+    <meta name="theme-color" content="#3b82f6" />
 
-    <meta property="og:title" content="pai-naidee-ui-spark" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- Accessibility and SEO improvements -->
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="en,th" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="PaiNaiDee - Discover Thailand's Hidden Gems" />
+    <meta property="og:description" content="Explore Thailand's most beautiful destinations with detailed guides, reviews, and interactive maps." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://painaidee.com" />
+    <meta property="og:site_name" content="PaiNaiDee" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="th_TH" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:title" content="PaiNaiDee - Discover Thailand's Hidden Gems" />
+    <meta name="twitter:description" content="Explore Thailand's most beautiful destinations with detailed guides and reviews." />
+
+    <!-- Favicon and app icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Accessibility: Reduced motion support -->
+    <style>
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      
+      /* Skip link styling */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 6px;
+        background: #000;
+        color: #fff;
+        padding: 8px;
+        text-decoration: none;
+        z-index: 1000;
+      }
+      
+      .skip-link:focus {
+        top: 6px;
+      }
+    </style>
   </head>
 
   <body>

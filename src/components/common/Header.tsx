@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Menu, X, Globe2, MapPin, Settings, Video } from "lucide-react";
+import { Menu, X, MapPin, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
+import EnhancedLanguageToggle from "./EnhancedLanguageToggle";
 
 interface HeaderProps {
   currentLanguage: "th" | "en";
@@ -66,24 +67,15 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
           ))}
         </nav>
 
-        {/* Video Upload Button - Desktop */}
-        {/* Language Toggle - Desktop */}
-        <div className="hidden md:flex">
-          <Button
-            variant="outline"
+        {/* Enhanced Language Toggle - Desktop */}
+        <div className="hidden md:flex items-center space-x-3">
+          <EnhancedLanguageToggle
+            currentLanguage={currentLanguage}
+            onLanguageChange={onLanguageChange}
+            variant="dropdown"
             size="sm"
-            onClick={() =>
-              onLanguageChange(currentLanguage === "th" ? "en" : "th")
-            }
-            className="flex items-center space-x-1 rounded-xl"
-          >
-            <Globe2 className="w-4 h-4" />
-            <span className="font-medium">{currentLanguage.toUpperCase()}</span>
-          </Button>
-        </div>
-
-        {/* Language Toggle & Mobile Menu */}
-        <div className="flex items-center space-x-3">
+          />
+          
           {/* Developer Dashboard Link - Only in development */}
           {import.meta.env.DEV && (
             <Link to="/dashboard">
@@ -99,6 +91,12 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
           )}
 
           {/* Dark Mode Toggle */}
+          <DarkModeToggle />
+        </div>
+
+        {/* Language Toggle & Mobile Menu */}
+        <div className="flex items-center space-x-3 md:hidden">
+          {/* Dark Mode Toggle */}
           <DarkModeToggle className="hidden sm:flex" />
           
           {/* Mobile Menu Button */}
@@ -106,7 +104,9 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             variant="ghost"
             size="sm"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden rounded-xl"
+            className="rounded-xl"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? (
               <X className="w-5 h-5" />
@@ -147,20 +147,19 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
               </Link>
             )}
             
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                onLanguageChange(currentLanguage === "th" ? "en" : "th");
-                setIsMenuOpen(false);
-              }}
-              className="flex items-center space-x-1 rounded-xl w-full justify-center"
-            >
-              <Globe2 className="w-4 h-4" />
-              <span className="font-medium">
-                {currentLanguage === "th" ? "English" : "ไทย"}
-              </span>
-            </Button>
+            {/* Enhanced Language Toggle for Mobile */}
+            <div className="pt-4 border-t border-border/30">
+              <EnhancedLanguageToggle
+                currentLanguage={currentLanguage}
+                onLanguageChange={(lang) => {
+                  onLanguageChange(lang);
+                  setIsMenuOpen(false);
+                }}
+                variant="dropdown"
+                size="sm"
+                className="w-full justify-center"
+              />
+            </div>
             
             {/* Dark Mode Toggle for Mobile */}
             <div className="flex justify-center">
