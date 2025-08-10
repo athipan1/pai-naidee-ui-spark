@@ -258,7 +258,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         onLanguageChange={onLanguageChange}
       />
 
-      <main role="main">
+      <main id="main-content" role="main" className="focus:outline-none" tabIndex={-1}>
         {/* API Status Display */}
         {(apiError || usingMockData) && (
           <div className="container mx-auto px-4 pt-4">

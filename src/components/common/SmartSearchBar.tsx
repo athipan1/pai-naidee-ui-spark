@@ -173,6 +173,12 @@ const SmartSearchBar = ({
       setShowSuggestions(false);
       inputRef.current?.blur();
     }
+    
+    // Add Enter key handling for better accessibility
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      performSearch(query);
+    }
   };
 
   // Handle suggestion click
