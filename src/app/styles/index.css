@@ -548,4 +548,146 @@
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
   }
+
+  /* Instagram-style animations */
+  .like-animation {
+    animation: likeAnimation 1s ease-out;
+  }
+
+  @keyframes likeAnimation {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    15% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+    30% {
+      transform: scale(0.95);
+    }
+    45% {
+      transform: scale(1.1);
+    }
+    80% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  /* Instagram post card animations */
+  .instagram-post-card {
+    @apply transform transition-all duration-300 ease-out;
+  }
+
+  .instagram-post-card:hover {
+    @apply scale-[1.02];
+  }
+
+  /* Story ring gradient animations */
+  .story-ring {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    animation: rotate 3s linear infinite;
+  }
+
+  .story-ring.viewed {
+    background: linear-gradient(45deg, #c7c7c7 0%, #9e9e9e 100%);
+    animation: none;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Scroll indicator for stories */
+  .story-scroll-fade {
+    @apply bg-gradient-to-r from-white via-transparent to-white;
+  }
+
+  .dark .story-scroll-fade {
+    @apply bg-gradient-to-r from-black via-transparent to-black;
+  }
+
+  /* Double tap effect */
+  .double-tap-heart {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    color: white;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
+    animation: doubleTapHeart 1.2s ease-out forwards;
+  }
+
+  @keyframes doubleTapHeart {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+    15% {
+      transform: translate(-50%, -50%) scale(1.3);
+      opacity: 1;
+    }
+    30% {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    80% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0;
+    }
+  }
+
+  /* Instagram bottom nav animations */
+  .instagram-nav-icon {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .instagram-nav-icon:active {
+    @apply scale-90;
+  }
+
+  /* Instagram loading skeleton */
+  .instagram-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: instagramSkeleton 1.5s infinite;
+  }
+
+  .dark .instagram-skeleton {
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+  }
+
+  @keyframes instagramSkeleton {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Hide scrollbar for story section */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

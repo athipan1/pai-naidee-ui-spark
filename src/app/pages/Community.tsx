@@ -1,7 +1,5 @@
 import React from 'react';
-import { CommunityFeed } from './CommunityFeed';
-import Header from '@/components/common/Header';
-import BottomNavigation from '@/components/common/BottomNavigation';
+import { InstagramCommunityFeed } from '@/components/community/InstagramCommunityFeed';
 
 interface CommunityProps {
   currentLanguage: 'th' | 'en';
@@ -12,21 +10,14 @@ interface CommunityProps {
 const Community: React.FC<CommunityProps> = ({ 
   currentLanguage, 
   onLanguageChange,
-  onBack: _onBack 
+  onBack
 }) => {
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <Header
-        currentLanguage={currentLanguage}
-        onLanguageChange={onLanguageChange}
-      />
-      
-      <main className="container mx-auto px-4 py-6">
-        <CommunityFeed currentLanguage={currentLanguage} />
-      </main>
-
-      <BottomNavigation currentLanguage={currentLanguage} />
-    </div>
+    <InstagramCommunityFeed 
+      currentLanguage={currentLanguage}
+      onLanguageChange={onLanguageChange}
+      onBack={onBack}
+    />
   );
 };
 
