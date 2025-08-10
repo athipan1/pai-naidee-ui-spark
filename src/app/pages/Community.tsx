@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommunityFeed } from './CommunityFeed';
+import { TravelCommunityFeed } from '@/components/community/TravelCommunityFeed';
 import Header from '@/components/common/Header';
 import BottomNavigation from '@/components/common/BottomNavigation';
 
@@ -22,7 +22,7 @@ const Community: React.FC<CommunityProps> = ({
       />
       
       <main className="container mx-auto px-4 py-6">
-        <CommunityFeed currentLanguage={currentLanguage} />
+        <TravelCommunityFeed currentLanguage={currentLanguage} />
       </main>
 
       <BottomNavigation currentLanguage={currentLanguage} />
