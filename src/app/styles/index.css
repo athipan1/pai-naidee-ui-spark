@@ -128,6 +128,13 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Seasonal Theme Variables */
+    --seasonal-primary: 174 75% 58%;
+    --seasonal-secondary: 16 88% 67%;
+    --seasonal-accent: 200 92% 72%;
+    --seasonal-background: 0 0% 98%;
+    --seasonal-gradient: linear-gradient(135deg, hsl(174 75% 58%) 0%, hsl(16 88% 67%) 100%);
   }
 
   .dark {
@@ -190,6 +197,13 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 174 75% 65%;
+
+    /* Seasonal Theme Variables for Dark Mode */
+    --seasonal-primary: 174 75% 65%;
+    --seasonal-secondary: 16 88% 70%;
+    --seasonal-accent: 200 92% 75%;
+    --seasonal-background: 220 13% 9%;
+    --seasonal-gradient: linear-gradient(135deg, hsl(174 75% 65%) 0%, hsl(16 88% 70%) 100%);
   }
 }
 
@@ -547,5 +561,160 @@
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
+  }
+
+  /* Seasonal Theme Components */
+  .seasonal-gradient {
+    background: var(--seasonal-gradient);
+  }
+
+  .seasonal-card {
+    @apply card-travel relative overflow-hidden;
+    background: linear-gradient(135deg, 
+      hsl(var(--seasonal-background)) 0%, 
+      hsl(var(--seasonal-primary) / 0.05) 100%
+    );
+  }
+
+  .seasonal-card::before {
+    content: '';
+    @apply absolute top-0 right-0 w-32 h-32 opacity-10;
+    background: radial-gradient(circle, 
+      hsl(var(--seasonal-accent)) 0%, 
+      transparent 70%
+    );
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Travel Zone Styles */
+  .travel-zone-adventure {
+    @apply bg-red-500 hover:bg-red-600 text-white;
+  }
+
+  .travel-zone-chill {
+    @apply bg-blue-500 hover:bg-blue-600 text-white;
+  }
+
+  .travel-zone-family {
+    @apply bg-green-500 hover:bg-green-600 text-white;
+  }
+
+  .travel-zone-solo {
+    @apply bg-purple-500 hover:bg-purple-600 text-white;
+  }
+
+  .travel-zone-foodie {
+    @apply bg-orange-500 hover:bg-orange-600 text-white;
+  }
+
+  .travel-zone-culture {
+    @apply bg-yellow-500 hover:bg-yellow-600 text-white;
+  }
+
+  .travel-zone-nature {
+    @apply bg-emerald-500 hover:bg-emerald-600 text-white;
+  }
+
+  .travel-zone-budget {
+    @apply bg-pink-500 hover:bg-pink-600 text-white;
+  }
+
+  /* Inspiration Rating Styles */
+  .inspiration-star {
+    @apply transition-all duration-200 cursor-pointer;
+  }
+
+  .inspiration-star:hover {
+    @apply scale-110;
+    filter: drop-shadow(0 0 8px hsl(var(--accent-yellow)));
+  }
+
+  .inspiration-star.filled {
+    @apply text-yellow-400;
+    filter: drop-shadow(0 0 4px hsl(var(--accent-yellow)));
+  }
+
+  /* Floating Action Button */
+  .fab-container {
+    @apply fixed bottom-6 right-6 z-50;
+  }
+
+  .fab-main {
+    @apply w-14 h-14 rounded-full shadow-2xl relative overflow-hidden;
+    background: linear-gradient(135deg, hsl(var(--accent-orange)) 0%, hsl(var(--secondary)) 100%);
+    transition: var(--transition-spring);
+  }
+
+  .fab-main:hover {
+    @apply scale-110;
+    box-shadow: var(--shadow-floating), var(--shadow-glow);
+  }
+
+  .fab-main::before {
+    content: '';
+    @apply absolute inset-0 rounded-full animate-ping;
+    background: linear-gradient(135deg, hsl(var(--accent-orange)) 0%, hsl(var(--secondary)) 100%);
+    opacity: 0.3;
+  }
+
+  /* Map View Modal */
+  .map-container {
+    @apply relative rounded-xl overflow-hidden bg-muted;
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, hsl(var(--secondary) / 0.1) 0%, transparent 50%);
+  }
+
+  .map-pin {
+    @apply absolute transform -translate-x-1/2 -translate-y-1/2;
+    animation: mapPinBounce 2s ease-in-out infinite;
+  }
+
+  @keyframes mapPinBounce {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+  }
+
+  /* Travel Story Card */
+  .travel-story-card {
+    @apply card-travel relative overflow-hidden;
+    background: linear-gradient(145deg, 
+      hsl(var(--card)) 0%, 
+      hsl(var(--primary) / 0.02) 100%
+    );
+  }
+
+  .travel-story-card::after {
+    content: '';
+    @apply absolute top-0 left-0 w-1 h-full opacity-0;
+    background: var(--gradient-primary);
+    transition: opacity 0.3s ease-out;
+  }
+
+  .travel-story-card:hover::after {
+    @apply opacity-100;
+  }
+
+  /* Enhanced route badge */
+  .route-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, 
+      hsl(var(--accent-sky) / 0.2) 0%, 
+      hsl(var(--accent-green) / 0.2) 100%
+    );
+    border: 1px solid hsl(var(--accent-sky) / 0.3);
+  }
+
+  /* Difficulty indicators */
+  .difficulty-easy {
+    @apply bg-green-500 text-white;
+  }
+
+  .difficulty-medium {
+    @apply bg-yellow-500 text-white;
+  }
+
+  .difficulty-hard {
+    @apply bg-red-500 text-white;
   }
 }

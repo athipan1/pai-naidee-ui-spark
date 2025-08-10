@@ -117,6 +117,47 @@ export const useCommunity = () => {
     }
   });
 
+  // Inspiration rating mutation
+  const ratePostMutation = useMutation({
+    mutationFn: ({ postId, rating }: { postId: string; rating: number }) => 
+      communityService.ratePost(postId, rating),
+    onMutate: async ({ postId, rating }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['feed'] });
+      
+      const previousPosts = queryClient.getQueryData<Post[]>(['feed', feedFilter]);
+      
+      if (previousPosts) {
+        const updatedPosts = previousPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                userInspiration: rating,
+                // Optimistically update average (will be corrected by server)
+                inspirationScore: post.inspirationCount > 0 
+                  ? ((post.inspirationScore * post.inspirationCount) + rating) / (post.inspirationCount + (post.userInspiration ? 0 : 1))
+                  : rating,
+                inspirationCount: post.userInspiration ? post.inspirationCount : post.inspirationCount + 1
+              }
+            : post
+        );
+        queryClient.setQueryData(['feed', feedFilter], updatedPosts);
+      }
+      
+      return { previousPosts };
+    },
+    onError: (err, { postId }, context) => {
+      // Rollback on error
+      if (context?.previousPosts) {
+        queryClient.setQueryData(['feed', feedFilter], context.previousPosts);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['userPoints'] });
+    }
+  });
+
   // Group mutations
   const joinGroupMutation = useMutation({
     mutationFn: (groupId: string) => communityService.joinGroup(groupId),
@@ -178,6 +219,8 @@ export const useCommunity = () => {
     likePost: likePostMutation.mutate,
     savePost: savePostMutation.mutate,
     sharePost: sharePostMutation.mutate,
+    ratePost: (postId: string, rating: number) => ratePostMutation.mutate({ postId, rating }),
+    isRatingPost: ratePostMutation.isPending,
 
     // Group actions
     joinGroup: joinGroupMutation.mutate,

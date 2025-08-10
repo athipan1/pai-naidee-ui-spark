@@ -16,17 +16,23 @@ export interface Post {
   id: string;
   userId: string;
   user: User;
+  title?: string; // Travel story title
   content: string;
   images: string[];
   videos: string[];
   location?: LocationTag;
   accommodation?: AccommodationTag;
+  route?: TravelRoute; // Travel route information
   tags: string[];
   likes: number;
   comments: number;
   shares: number;
+  inspirationScore: number; // Average 1-5 star rating
+  inspirationCount: number; // Number of inspiration votes
   isLiked: boolean;
   isSaved: boolean;
+  userInspiration?: number; // Current user's inspiration rating
+  travelZone?: TravelZone; // Travel zone category
   createdAt: Date;
   updatedAt: Date;
   privacy: 'public' | 'friends' | 'private';
@@ -69,6 +75,36 @@ export interface LocationTag {
     lng: number;
   };
 }
+
+export interface TravelRoute {
+  id: string;
+  name: string;
+  summary: string;
+  waypoints: LocationTag[];
+  duration: string; // e.g., "3 วัน 2 คืน"
+  budget?: string; // e.g., "5,000-10,000 บาท"
+  difficulty: 'easy' | 'medium' | 'hard';
+  highlights: string[];
+}
+
+export type TravelZone = 
+  | 'adventure' // สายผจญภัย
+  | 'chill'     // สายชิล  
+  | 'family'    // ครอบครัว
+  | 'solo'      // เที่ยวคนเดียว
+  | 'foodie'    // สายกิน
+  | 'culture'   // วัฒนธรรม
+  | 'nature'    // ธรรมชาติ
+  | 'budget';   // ประหยัด
+
+export type SeasonalTheme = 
+  | 'spring'    // ฤดูใบไม้ผลิ
+  | 'summer'    // ฤดูร้อน
+  | 'autumn'    // ฤดูใบไม้ร่วง  
+  | 'winter'    // ฤดูหนาว
+  | 'songkran'  // สงกรานต์
+  | 'newyear'   // ปีใหม่
+  | 'loy-krathong'; // ลอยกระทง
 
 export interface AccommodationTag {
   id: string;
@@ -133,21 +169,25 @@ export type GroupCategory =
   | 'general';
 
 export interface CreatePostData {
+  title?: string; // Travel story title
   content: string;
   images?: File[];
   videos?: File[];
   location?: LocationTag;
   accommodation?: AccommodationTag;
+  route?: TravelRoute;
   tags: string[];
+  travelZone?: TravelZone;
   privacy: 'public' | 'friends' | 'private';
   groupId?: string;
 }
 
 export interface FeedFilter {
   type: 'all' | 'following' | 'groups' | 'saved';
+  travelZone?: TravelZone; // Filter by travel zone
   groupId?: string;
   location?: string;
-  sortBy: 'latest' | 'popular' | 'trending';
+  sortBy: 'latest' | 'popular' | 'trending' | 'inspiration'; // Added inspiration sort
 }
 
 export interface AIRecommendation {
