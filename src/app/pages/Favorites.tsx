@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AttractionCard from "@/components/common/AttractionCard";
+import OptimizedImage from "@/components/common/OptimizedImage";
 import { useNavigate } from "react-router-dom";
 
 interface FavoriteItem {
@@ -245,10 +246,12 @@ const Favorites = ({ currentLanguage }: FavoritesProps) => {
       return (
         <div key={item.id} className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-border/50 relative">
           <div className="relative overflow-hidden rounded-t-2xl">
-            <img
+            <OptimizedImage
               src={item.image}
               alt={item.name}
               className="hero-image transition-transform duration-500 group-hover:scale-110"
+              width="100%"
+              height="200"
             />
             <div className="absolute top-3 right-3 flex space-x-2 z-20">
               <Button
@@ -321,10 +324,12 @@ const Favorites = ({ currentLanguage }: FavoritesProps) => {
           key={item.id}
           className="flex items-center space-x-4 p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all duration-300"
         >
-          <img
+          <OptimizedImage
             src={item.image}
             alt={item.name}
             className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+            width={80}
+            height={80}
           />
 
           <div className="flex-1 min-w-0">

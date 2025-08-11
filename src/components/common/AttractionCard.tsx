@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Heart, MapPin, Star, Navigation, Share, Bookmark, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import OptimizedImage from "@/components/common/OptimizedImage";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -146,14 +147,14 @@ const AttractionCard = ({
         <div
           className={`w-full h-48 bg-muted loading-shimmer ${imageLoaded ? "hidden" : "block"}`}
         />
-        <img
+        <OptimizedImage
           src={image}
           alt={displayName}
           loading="lazy"
           className={`hero-image transition-all duration-700 group-hover:scale-110 ${imageLoaded ? "block" : "hidden"}`}
           onLoad={() => setImageLoaded(true)}
-          width="400"
-          height="192"
+          width={400}
+          height={192}
         />
 
         {/* Enhanced overlay gradient */}
