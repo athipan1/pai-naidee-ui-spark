@@ -2,15 +2,12 @@ import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Edit,
-  Settings,
   LogOut,
   User,
   Play,
   MessageSquare,
   Calendar,
   CreditCard,
-  Globe,
-  Trash2,
   Camera,
   Facebook,
   Instagram,
@@ -112,7 +109,6 @@ const Profile = ({
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("videos");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const content = {
     th: {
@@ -520,81 +516,6 @@ const Profile = ({
                 </DialogContent>
               </Dialog>
 
-              <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>{t.accountSettings}</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>{t.accountSettings}</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label>{t.privacy}</Label>
-                        <p className="text-sm text-muted-foreground">
-                          {t.publicProfile}
-                        </p>
-                      </div>
-                      <Switch />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label>{t.language}</Label>
-                        <p className="text-sm text-muted-foreground">
-                          {currentLanguage === "th" ? "ไทย" : "English"}
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          onLanguageChange(
-                            currentLanguage === "th" ? "en" : "th"
-                          )
-                        }
-                      >
-                        <Globe className="w-4 h-4 mr-2" />
-                        {currentLanguage === "th" ? "EN" : "TH"}
-                      </Button>
-                    </div>
-
-                    <Separator />
-
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" className="w-full">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          {t.deleteAccount}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t.deleteAccountWarning}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t.deleteAccountDesc}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleDeleteAccount}>
-                            {t.delete}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </DialogContent>
-              </Dialog>
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
