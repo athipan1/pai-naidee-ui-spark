@@ -25,6 +25,9 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [position, setPosition] = useState({ x: 24, y: 24 }); // right-6 bottom-6 in pixels
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, initialX: 0, initialY: 0 });
   const location = useLocation();
 
   const { 
@@ -154,13 +157,104 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     }
   };
 
+  // Drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return; // Only left click
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX,
+      y: e.clientY,
+      initialX: position.x,
+      initialY: position.y
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    const newX = Math.max(16, Math.min(window.innerWidth - 80, dragStart.initialX - deltaX));
+    const newY = Math.max(16, Math.min(window.innerHeight - 80, dragStart.initialY - deltaY));
+    
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add mouse event listeners
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart]);
+
+  // Touch handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({
+      x: touch.clientX,
+      y: touch.clientY,
+      initialX: position.x,
+      initialY: position.y
+    });
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging || e.touches.length === 0) return;
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+    
+    const newX = Math.max(16, Math.min(window.innerWidth - 80, dragStart.initialX - deltaX));
+    const newY = Math.max(16, Math.min(window.innerHeight - 80, dragStart.initialY - deltaY));
+    
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Add touch event listeners
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
+      return () => {
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+  }, [isDragging, dragStart]);
+
   // Don't show on AI Assistant page to avoid duplication
   if (location.pathname === '/ai-assistant') {
     return null;
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 transition-all duration-300">
+    <div 
+      className="fixed z-50 transition-all duration-300"
+      style={{ 
+        bottom: `${position.y}px`, 
+        right: `${position.x}px`,
+        cursor: isDragging ? 'grabbing' : 'grab'
+      }}
+    >
       {/* Action Menu */}
       {isMenuOpen && (
         <div className="absolute bottom-20 right-0 w-72 bg-background/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-border p-4 animate-scale-in">
@@ -247,6 +341,8 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
       <div 
         className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full shadow-lg border border-primary/30 backdrop-blur-sm cursor-pointer hover:scale-110 transition-all duration-200 relative"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
       >
         {/* 3D-like Avatar */}
         <div className="w-full h-full flex items-center justify-center relative">
