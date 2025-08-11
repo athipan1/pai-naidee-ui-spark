@@ -9,6 +9,7 @@ interface OptimizedImageProps {
   width?: string | number;
   height?: string | number;
   loading?: "lazy" | "eager";
+  decoding?: "async" | "auto" | "sync";
   onLoad?: () => void;
   onError?: () => void;
 }
@@ -53,6 +54,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   width,
   height,
   loading = "lazy",
+  decoding = "async",
   onLoad,
   onError,
 }) => {
@@ -115,6 +117,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         src={currentSrc}
         alt={alt}
         loading={loading}
+        decoding={decoding}
         className={`${className} ${imageState === 'loaded' ? 'block' : 'hidden'}`}
         onLoad={handleImageLoad}
         onError={handleImageError}

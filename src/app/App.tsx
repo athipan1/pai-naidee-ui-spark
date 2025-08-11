@@ -9,7 +9,10 @@ import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
-import GlobalAIAssistant from "@/components/3D/GlobalAIAssistant";
+import AIAssistantTrigger from "@/components/common/AIAssistantTrigger";
+
+// Lazy load the GlobalAIAssistant 3D module
+const GlobalAIAssistant = lazy(() => import("@/components/3D/GlobalAIAssistant"));
 
 // Lazy load new consolidated routes
 const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
@@ -63,6 +66,7 @@ const queryClient = new QueryClient({
 
 const App = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
+  const [isAIAssistantLoaded, setIsAIAssistantLoaded] = useState(false);
 
   // Apply responsive text sizing for better accessibility
   useResponsiveTextSize();
@@ -200,8 +204,21 @@ const App = () => {
               </Routes>
             </Suspense>
             
-            {/* Global AI Assistant - appears on all pages */}
-            <GlobalAIAssistant language={currentLanguage} />
+            {/* Conditional AI Assistant - lazy loaded on demand */}
+            {isAIAssistantLoaded ? (
+              <Suspense fallback={
+                <div className="fixed bottom-6 right-6 z-50">
+                  <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
+                </div>
+              }>
+                <GlobalAIAssistant language={currentLanguage} />
+              </Suspense>
+            ) : (
+              <AIAssistantTrigger 
+                onClick={() => setIsAIAssistantLoaded(true)}
+                language={currentLanguage}
+              />
+            )}
             
             <DevTools />
           </BrowserRouter>

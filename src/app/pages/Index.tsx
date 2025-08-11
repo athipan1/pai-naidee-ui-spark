@@ -6,6 +6,7 @@ import CategoryFilter from "@/components/common/CategoryFilter";
 import AttractionCard from "@/components/common/AttractionCard";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
+import OptimizedImage from "@/components/common/OptimizedImage";
 import { SearchResult } from "@/shared/utils/searchAPI";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { MapPin, Star, ArrowRight } from "lucide-react";
@@ -302,13 +303,13 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                     }}
                   >
                     <div className="flex items-center space-x-3">
-                      <img
+                      <OptimizedImage
                         src={attraction.image}
                         alt={attraction.name}
                         loading="lazy"
                         className="w-16 h-16 rounded-lg object-cover"
-                        width="64"
-                        height="64"
+                        width={64}
+                        height={64}
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium truncate">

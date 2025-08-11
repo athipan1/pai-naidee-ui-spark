@@ -40,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import OptimizedImage from "@/components/common/OptimizedImage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -587,10 +588,12 @@ const Profile = ({
                     className="overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <div className="relative">
-                      <img
+                      <OptimizedImage
                         src={video.thumbnail}
                         alt={video.title}
                         className="w-full h-48 object-cover"
+                        width="100%"
+                        height="192"
                       />
                       <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
                         {video.duration}
@@ -639,10 +642,12 @@ const Profile = ({
                   <Card key={review.id}>
                     <CardContent className="p-4">
                       <div className="flex space-x-4">
-                        <img
+                        <OptimizedImage
                           src={review.placeImage}
                           alt={review.placeName}
                           className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                          width={64}
+                          height={64}
                         />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">

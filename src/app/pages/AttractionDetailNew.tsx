@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import OptimizedImage from "@/components/common/OptimizedImage";
 
 interface AttractionData {
   id: string;
@@ -167,10 +168,12 @@ function AttractionDetailNew({
         {/* Hero Image */}
         <div className="mt-16">
           <div className="relative aspect-[16/10] overflow-hidden rounded-lg">
-            <img
+            <OptimizedImage
               src={`https://images.unsplash.com/${attraction.images[0]}?w=800&h=500&fit=crop`}
               alt={attraction.name}
               className="h-full w-full object-cover"
+              width={800}
+              height={500}
             />
           </div>
         </div>
