@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import OptimizedImage from '@/components/common/OptimizedImage';
 import { 
   PlusCircle, 
   TrendingUp, 
@@ -236,10 +237,12 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                         key={group.id}
                         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
                       >
-                        <img 
+                        <OptimizedImage 
                           src={group.coverImage} 
                           alt={group.name}
                           className="h-10 w-10 rounded object-cover"
+                          width={40}
+                          height={40}
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{group.name}</p>
