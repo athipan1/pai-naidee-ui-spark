@@ -74,7 +74,7 @@ const EnhancedLanguageToggle = ({
     return (
       <Button
         variant="outline"
-        size={size}
+        size={size === "md" ? "default" : size}
         onClick={() => handleLanguageChange(otherLang?.code || "en")}
         className={`flex items-center gap-2 ${sizeClasses[size]} ${className}`}
         aria-label={`Switch to ${otherLang?.nativeName}`}
@@ -92,7 +92,7 @@ const EnhancedLanguageToggle = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          size={size}
+          size={size === "md" ? "default" : size}
           className={`flex items-center gap-2 ${sizeClasses[size]} ${className}`}
           aria-label="Change language"
           aria-haspopup="menu"

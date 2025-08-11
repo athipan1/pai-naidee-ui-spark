@@ -76,19 +76,6 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             size="sm"
           />
           
-          {/* Developer Dashboard Link - Only in development */}
-          {import.meta.env.DEV && (
-            <Link to="/dashboard">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-xl text-muted-foreground hover:text-primary"
-                title="Developer Dashboard"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-            </Link>
-          )}
 
           {/* Dark Mode Toggle */}
           <DarkModeToggle />

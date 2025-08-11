@@ -70,6 +70,7 @@ export interface LocationTag {
   id: string;
   name: string;
   province: string;
+  region?: string;
   coordinates?: {
     lat: number;
     lng: number;

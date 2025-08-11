@@ -267,7 +267,7 @@ export const LiveRegion = ({
   children: React.ReactNode;
   level?: 'off' | 'polite' | 'assertive';
   atomic?: boolean;
-  relevant?: string;
+  relevant?: 'text' | 'additions' | 'additions removals' | 'additions text' | 'all' | 'removals' | 'removals additions' | 'removals text' | 'text additions' | 'text removals';
 }) => (
   <div
     aria-live={level}
