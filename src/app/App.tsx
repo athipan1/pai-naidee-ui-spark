@@ -11,23 +11,36 @@ import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
 import GlobalAIAssistant from "@/components/3D/GlobalAIAssistant";
 
-// Lazy load pages for better performance
+// Lazy load new consolidated routes
+const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
+const SavedPage = lazy(() => import("./routes/Saved/SavedPage"));
+const AdminLayout = lazy(() => import("./routes/Admin/AdminLayout"));
+const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
+
+// Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
-const Explore = lazy(() => import("./pages/Explore"));
-const Favorites = lazy(() => import("./pages/Favorites"));
-const Profile = lazy(() => import("./pages/Profile"));
-const CategoryPage = lazy(() => import("./pages/CategoryPage"));
-const AccordionExamples = lazy(() => import("./pages/AccordionExamples"));
-const NotFound = lazy(() => import("./pages/NotFound"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
-const MapPage = lazy(() => import("./pages/MapPage"));
-const SearchResults = lazy(() => import("./pages/SearchResults"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const AdminPanel = lazy(() => import("./pages/AdminPanel"));
-const EnhancedAdminPanel = lazy(() => import("@/components/admin/EnhancedAdminPanel"));
-const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
-const AIAssistantPage = lazy(() => import("./pages/AIAssistantPage"));
 const CommunityFeed = lazy(() => import("./pages/Community"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
+
+// Redirect components for backward compatibility
+import {
+  ExploreRedirect,
+  FavoritesRedirect,
+  SearchRedirect,
+  MapRedirect,
+  AIAssistantRedirect,
+  AdminPanelRedirect,
+  EnhancedAdminRedirect,
+  DashboardRedirect,
+  ProfileRedirect
+} from "./routes/Redirects";
+
+// Conditionally load AccordionExamples only in development
+const AccordionExamples = import.meta.env.DEV 
+  ? lazy(() => import("./pages/AccordionExamples"))
+  : null;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +83,19 @@ const App = () => {
                 />
               }>
                 <Routes>
+                {/* 
+                  Route Consolidation Summary:
+                  - / -> Home (lightweight, redirects to /discover for main content)
+                  - /discover -> Unified discovery interface (mode=feed|category|search|map|trending)
+                  - /saved -> Consolidated favorites/saved content
+                  - /community -> Community feed (unchanged)
+                  - /me -> Profile with language toggle and settings
+                  - /admin -> Consolidated admin console (role-gated)
+                  
+                  Legacy routes redirect to new canonical paths for backward compatibility
+                */}
+                
+                {/* Main Routes */}
                 <Route
                   path="/"
                   element={
@@ -79,29 +105,40 @@ const App = () => {
                     />
                   }
                 />
+                
+                {/* New Consolidated Routes */}
                 <Route
-                  path="/explore"
+                  path="/discover"
                   element={
-                    <Explore
-                      currentLanguage={currentLanguage}
-                      onBack={() => window.history.back()}
-                    />
+                    <DiscoverLayout currentLanguage={currentLanguage} />
                   }
                 />
+                
                 <Route
-                  path="/favorites"
-                  element={<Favorites currentLanguage={currentLanguage} />}
-                />
-                <Route
-                  path="/profile"
+                  path="/saved"
                   element={
-                    <Profile
+                    <SavedPage currentLanguage={currentLanguage} />
+                  }
+                />
+                
+                <Route
+                  path="/me"
+                  element={
+                    <ProfilePage
                       currentLanguage={currentLanguage}
                       onLanguageChange={setCurrentLanguage}
-                      onBack={() => window.history.back()}
                     />
                   }
                 />
+                
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminLayout currentLanguage={currentLanguage} />
+                  }
+                />
+
+                {/* Existing Essential Routes */}
                 <Route
                   path="/attraction/:id"
                   element={
@@ -111,42 +148,7 @@ const App = () => {
                     />
                   }
                 />
-                <Route
-                  path="/map/:id?"
-                  element={
-                    <MapPage
-                      currentLanguage={currentLanguage}
-                      onBack={() => window.history.back()}
-                    />
-                  }
-                />
-                <Route
-                  path="/search"
-                  element={
-                    <SearchResults currentLanguage={currentLanguage} />
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <Dashboard
-                      currentLanguage={currentLanguage}
-                      onBack={() => window.history.back()}
-                    />
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminPanel currentLanguage={currentLanguage} />
-                  }
-                />
-                <Route
-                  path="/admin/enhanced"
-                  element={
-                    <EnhancedAdminPanel currentLanguage={currentLanguage} />
-                  }
-                />
+                
                 <Route
                   path="/community"
                   element={
@@ -157,6 +159,7 @@ const App = () => {
                     />
                   }
                 />
+                
                 <Route
                   path="/video-upload"
                   element={
@@ -166,23 +169,33 @@ const App = () => {
                     />
                   }
                 />
-                <Route
-                  path="/ai-assistant"
-                  element={
-                    <AIAssistantPage 
-                      currentLanguage={currentLanguage}
-                      onBack={() => window.history.back()}
-                    />
-                  }
-                />
+
+                {/* Legacy Route Redirects for Backward Compatibility */}
+                <Route path="/explore" element={<ExploreRedirect />} />
+                <Route path="/favorites" element={<FavoritesRedirect />} />
+                <Route path="/search" element={<SearchRedirect />} />
+                <Route path="/map/:id?" element={<MapRedirect />} />
+                <Route path="/ai-assistant" element={<AIAssistantRedirect />} />
+                <Route path="/admin-panel" element={<AdminPanelRedirect />} />
+                <Route path="/admin/enhanced" element={<EnhancedAdminRedirect />} />
+                <Route path="/dashboard" element={<DashboardRedirect />} />
+                <Route path="/profile" element={<ProfileRedirect />} />
+                
+                {/* Legacy category route - redirect to discover with category mode */}
                 <Route
                   path="/category/:categoryName"
-                  element={<CategoryPage currentLanguage={currentLanguage} />}
+                  element={<ExploreRedirect />} // Will be handled by DiscoverLayout
                 />
-                <Route
-                  path="/accordion-examples"
-                  element={<AccordionExamples />}
-                />
+
+                {/* Development-only routes */}
+                {AccordionExamples && import.meta.env.DEV && (
+                  <Route
+                    path="/accordion-examples"
+                    element={<AccordionExamples />}
+                  />
+                )}
+
+                {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

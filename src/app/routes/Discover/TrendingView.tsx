@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, Fire, Star, MapPin } from "lucide-react";
+import { TrendingUp, Flame, Star, MapPin } from "lucide-react";
 import AttractionCard from "@/components/common/AttractionCard";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import templeImage from "@/shared/assets/temple-culture.jpg";
@@ -190,7 +190,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         <div className="p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center">
-              <Fire className="w-4 h-4 text-white" />
+              <Flame className="w-4 h-4 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -210,7 +210,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
             {/* Top Trending */}
             <section>
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Fire className="w-5 h-5 text-red-500" />
+                <Flame className="w-5 h-5 text-red-500" />
                 {t.trendingNow}
               </h3>
               
@@ -306,7 +306,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
                       />
                       {/* Trending Badge */}
                       <div className="absolute top-2 left-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                        <Fire className="w-3 h-3" />
+                        <Flame className="w-3 h-3" />
                         <span>+{attraction.weeklyGrowth}%</span>
                       </div>
                     </div>

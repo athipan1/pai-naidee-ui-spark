@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchSection from "@/components/common/SearchSection";
 import CategoryFilter from "@/components/common/CategoryFilter";
 import AttractionCard from "@/components/common/AttractionCard";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
-import Explore from "./Explore";
-import Favorites from "./Favorites";
-import { useNavigate } from "react-router-dom";
 import { SearchResult } from "@/shared/utils/searchAPI";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
@@ -24,11 +23,7 @@ interface IndexProps {
 const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [_activeTab, setActiveTab] = useState("home");
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [currentView, setCurrentView] = useState<
-    "home" | "explore" | "favorites"
-  >("home");
   const [usingMockData, setUsingMockData] = useState(false);
 
   // Mock attractions data (defined first so it can be used in the API data fallback)
@@ -207,10 +202,11 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   }, {} as { [key: string]: number });
 
   const handleSearch = (query: string, _results?: SearchResult[]) => {
-    // Navigate to search results page with query parameter
+    // Navigate to discover page with search mode
     const searchParams = new URLSearchParams();
+    searchParams.set('mode', 'search');
     searchParams.set('q', query);
-    navigate(`/search?${searchParams.toString()}`);
+    navigate(`/discover?${searchParams.toString()}`);
   };
 
   const handleFavoriteToggle = (id: string) => {
@@ -219,38 +215,26 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
     );
   };
 
-  const _handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === "explore") {
-      setCurrentView("explore");
-    } else if (tab === "favorites") {
-      setCurrentView("favorites");
-    } else if (tab === "home") {
-      setCurrentView("home");
-    }
-  };
-
   const handleCardClick = (id: string) => {
     navigate(`/attraction/${id}`);
   };
 
-  // Render different views based on currentView state
-  if (currentView === "explore") {
-    return (
-      <Explore
-        currentLanguage={currentLanguage}
-        onBack={() => {
-          setCurrentView("home");
-          setActiveTab("home");
-        }}
-      />
-    );
-  }
+  const handleCategoryChange = (category: string) => {
+    if (category === "all") {
+      navigate("/discover");
+    } else {
+      const searchParams = new URLSearchParams();
+      searchParams.set('mode', 'category');
+      searchParams.set('cat', category);
+      navigate(`/discover?${searchParams.toString()}`);
+    }
+  };
 
-  if (currentView === "favorites") {
-    return <Favorites currentLanguage={currentLanguage} />;
-  }
+  const handleViewMore = () => {
+    navigate("/discover");
+  };
 
+  // Remove the view switching logic and just render the home page
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header
@@ -287,7 +271,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         <CategoryFilter
           currentLanguage={currentLanguage}
           selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          onCategoryChange={handleCategoryChange}
           attractionCounts={attractionCounts}
         />
 
@@ -357,10 +341,16 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               <h2 className="text-2xl font-semibold">
                 {currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended Places"}
               </h2>
-              <span className="text-sm text-muted-foreground" aria-live="polite">
-                {filteredAttractions.length}{" "}
-                {currentLanguage === "th" ? "สถานที่" : "places"}
-              </span>
+              <Button 
+                variant="outline" 
+                onClick={handleViewMore}
+                className="flex items-center gap-2"
+              >
+                <span className="text-sm">
+                  {currentLanguage === "th" ? "ดูทั้งหมด" : "View All"}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
             </div>
 
             <div 
@@ -368,11 +358,12 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               role="list"
               aria-label={
                 currentLanguage === "th" 
-                  ? `รายการสถานที่ท่องเที่ยว ${filteredAttractions.length} แห่ง`
-                  : `Tourist attractions list ${filteredAttractions.length} places`
+                  ? `รายการสถานที่ท่องเที่ยว ${Math.min(filteredAttractions.length, 8)} แห่ง`
+                  : `Tourist attractions list ${Math.min(filteredAttractions.length, 8)} places`
               }
             >
-              {filteredAttractions.map((attraction) => (
+              {/* Show only first 8 items on home page */}
+              {filteredAttractions.slice(0, 8).map((attraction) => (
                 <div key={attraction.id} role="listitem">
                   <AttractionCard
                     {...attraction}
@@ -392,6 +383,12 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                     ? "ไม่พบสถานที่ในหมวดหมู่นี้"
                     : "No places found in this category"}
                 </p>
+                <Button 
+                  onClick={handleViewMore}
+                  className="mt-4"
+                >
+                  {currentLanguage === "th" ? "สำรวจเพิ่มเติม" : "Explore More"}
+                </Button>
               </div>
             )}
           </div>
