@@ -9,6 +9,7 @@ import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
+import GlobalAIAssistant from "@/components/3D/GlobalAIAssistant";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -185,6 +186,10 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            
+            {/* Global AI Assistant - appears on all pages */}
+            <GlobalAIAssistant language={currentLanguage} />
+            
             <DevTools />
           </BrowserRouter>
         </TooltipProvider>
