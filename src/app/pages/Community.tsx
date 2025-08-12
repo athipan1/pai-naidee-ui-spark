@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TravelCommunityFeed } from '@/components/community/TravelCommunityFeed';
 import Header from '@/components/common/Header';
 import BottomNavigation from '@/components/common/BottomNavigation';
+import { BackButton } from '@/components/attraction/BackButton';
 
 interface CommunityProps {
   currentLanguage: 'th' | 'en';
@@ -14,6 +16,12 @@ const Community: React.FC<CommunityProps> = ({
   onLanguageChange,
   onBack: _onBack 
 }) => {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header
@@ -22,6 +30,9 @@ const Community: React.FC<CommunityProps> = ({
       />
       
       <main className="container mx-auto px-4 py-6">
+        <div className="mb-6">
+          <BackButton onClick={handleBack} />
+        </div>
         <TravelCommunityFeed currentLanguage={currentLanguage} />
       </main>
 
