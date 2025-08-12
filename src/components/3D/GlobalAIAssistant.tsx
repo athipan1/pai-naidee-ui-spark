@@ -10,7 +10,8 @@ import {
   Utensils, 
   Map,
   Volume2,
-  VolumeX
+  VolumeX,
+  EyeOff
 } from 'lucide-react';
 import useSmartAI, { AIStatus } from '@/shared/hooks/useSmartAI';
 import useVoiceInput from '@/shared/hooks/useVoiceInput';
@@ -28,6 +29,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   const [position, setPosition] = useState({ x: 24, y: 24 }); // right-6 bottom-6 in pixels
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, initialX: 0, initialY: 0 });
+  const [isHidden, setIsHidden] = useState(false);
   const location = useLocation();
 
   const { 
@@ -51,6 +53,14 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+
+  // Check localStorage on mount for hidden state
+  useEffect(() => {
+    const hidden = localStorage.getItem('aiAssistantHidden');
+    if (hidden === 'true') {
+      setIsHidden(true);
+    }
+  }, []);
 
   // Quick actions based on language
   const quickActions = {
@@ -119,8 +129,19 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   const currentActions = language === 'th' ? quickActions.th : quickActions.en;
 
   const handleQuickAction = (query: string) => {
+    if (query === 'hide') {
+      setIsHidden(true);
+      localStorage.setItem('aiAssistantHidden', 'true');
+      setIsMenuOpen(false);
+      return;
+    }
     sendMessage(query, language);
     setIsMenuOpen(false);
+  };
+
+  const handleShow = () => {
+    setIsHidden(false);
+    localStorage.removeItem('aiAssistantHidden');
   };
 
   const handleVoiceToggle = () => {
@@ -246,6 +267,22 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     return null;
   }
 
+  // Show restore button when hidden
+  if (isHidden) {
+    return (
+      <div className="fixed bottom-4 left-4 z-50">
+        <Button
+          onClick={handleShow}
+          size="sm"
+          variant="outline"
+          className="bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent/50 text-xs shadow-lg"
+        >
+          {language === 'th' ? 'แสดง AI' : 'Show AI'}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div 
       className="fixed z-50 transition-all duration-300"
@@ -316,6 +353,19 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
                 </Button>
               );
             })}
+          </div>
+
+          {/* Hide Assistant Button */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleQuickAction('hide')}
+              className="w-full justify-start text-muted-foreground hover:text-foreground"
+            >
+              <EyeOff className="h-4 w-4 mr-2" />
+              {language === 'th' ? 'ซ่อนผู้ช่วย' : 'Hide Assistant'}
+            </Button>
           </div>
 
           {/* Status Display */}
