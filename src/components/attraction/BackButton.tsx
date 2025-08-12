@@ -32,13 +32,13 @@ export function BackButton({
     <Button
       onClick={onClick}
       variant="ghost"
+      size="icon"
       className={cn(
-        "gap-2 text-muted-foreground hover:text-foreground",
+        "text-muted-foreground hover:text-foreground",
         className
       )}
     >
       <ArrowLeft className="h-4 w-4" />
-      กลับหน้าหลัก
     </Button>
   );
 }
