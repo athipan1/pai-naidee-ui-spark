@@ -8,6 +8,7 @@ import BottomNavigation from "@/components/common/BottomNavigation";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import { SearchResult } from "@/shared/utils/searchAPI";
+import { PostSearchResult } from "@/shared/types/posts";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { MapPin, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -202,12 +203,11 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
     return counts;
   }, {} as { [key: string]: number });
 
-  const handleSearch = (query: string, _results?: SearchResult[]) => {
-    // Navigate to discover page with search mode
+  const handleSearch = (query: string, _results?: SearchResult[] | PostSearchResult[]) => {
+    // Navigate to our new contextual search results page
     const searchParams = new URLSearchParams();
-    searchParams.set('mode', 'search');
     searchParams.set('q', query);
-    navigate(`/discover?${searchParams.toString()}`);
+    navigate(`/search?${searchParams.toString()}`);
   };
 
   const handleFavoriteToggle = (id: string) => {
