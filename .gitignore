@@ -24,3 +24,6 @@ build
 *.sln
 *.sw?
 .env
+
+# Semantic search index
+semanticIndex.json
