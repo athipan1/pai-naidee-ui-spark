@@ -67,13 +67,47 @@ const TravelCommunityFeedContent: React.FC<TravelCommunityFeedProps> = ({
     handleFilterChange({ travelZone: zone });
   };
 
-  const filteredPosts = posts.filter(post => 
-    searchQuery === '' || 
-    post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    post.location?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter posts by search query (focusing on location-based posts with images/videos)
+  const filteredPosts = posts.filter(post => {
+    if (searchQuery === '') return true;
+    
+    const query = searchQuery.toLowerCase();
+    const hasMediaContent = post.images.length > 0 || post.videos.length > 0;
+    
+    // Check if post has location and media content
+    const matchesLocation = post.location?.name.toLowerCase().includes(query) ||
+                           post.location?.province.toLowerCase().includes(query);
+    
+    // Also check content, title, and tags
+    const matchesContent = post.content.toLowerCase().includes(query) ||
+                          post.title?.toLowerCase().includes(query) ||
+                          post.tags.some(tag => tag.toLowerCase().includes(query));
+    
+    // For location searches, prioritize posts with media content
+    if (matchesLocation && hasMediaContent) return true;
+    if (matchesContent) return true;
+    
+    return false;
+  }).sort((a, b) => {
+    // If searching for a location, sort by engagement (likes + comments)
+    if (searchQuery !== '') {
+      const engagementA = a.likes + a.comments;
+      const engagementB = b.likes + b.comments;
+      return engagementB - engagementA;
+    }
+    
+    // Default sorting based on feed filter
+    switch (feedFilter.sortBy) {
+      case 'popular':
+        return (b.likes + b.comments) - (a.likes + a.comments);
+      case 'trending':
+        return b.shares - a.shares;
+      case 'inspiration':
+        return b.inspirationScore - a.inspirationScore;
+      default:
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+  });
 
   const filteredGroups = groups.filter(group =>
     searchQuery === '' ||
@@ -186,7 +220,8 @@ const TravelCommunityFeedContent: React.FC<TravelCommunityFeedProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === 'Enter' && searchQuery.trim()) {
-                  window.location.href = `/discover?mode=search&query=${encodeURIComponent(searchQuery.trim())}`;
+                  // Keep search within community to show location-based posts
+                  setActiveTab('feed');
                 }
               }}
               className="pl-12 pr-4 py-4 text-base rounded-xl border-2 focus:border-primary/50 transition-colors bg-white/80 backdrop-blur-sm"
@@ -217,7 +252,8 @@ const TravelCommunityFeedContent: React.FC<TravelCommunityFeedProps> = ({
                   variant="secondary" 
                   className="text-xs cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
-                    window.location.href = `/discover?mode=search&query=${encodeURIComponent(suggestion)}`;
+                    setSearchQuery(suggestion);
+                    setActiveTab('feed');
                   }}
                 >
                   {suggestion}
