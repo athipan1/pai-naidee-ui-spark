@@ -186,7 +186,7 @@ const TravelCommunityFeedContent: React.FC<TravelCommunityFeedProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === 'Enter' && searchQuery.trim()) {
-                  window.location.href = `/search-results?q=${encodeURIComponent(searchQuery.trim())}`;
+                  window.location.href = `/discover?mode=search&query=${encodeURIComponent(searchQuery.trim())}`;
                 }
               }}
               className="pl-12 pr-4 py-4 text-base rounded-xl border-2 focus:border-primary/50 transition-colors bg-white/80 backdrop-blur-sm"
@@ -217,7 +217,7 @@ const TravelCommunityFeedContent: React.FC<TravelCommunityFeedProps> = ({
                   variant="secondary" 
                   className="text-xs cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
-                    window.location.href = `/search-results?q=${encodeURIComponent(suggestion)}`;
+                    window.location.href = `/discover?mode=search&query=${encodeURIComponent(suggestion)}`;
                   }}
                 >
                   {suggestion}
