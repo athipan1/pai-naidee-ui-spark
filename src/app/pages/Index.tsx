@@ -24,7 +24,7 @@ interface IndexProps {
 
 const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [_selectedCategory, setSelectedCategory] = useState("all");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [usingMockData, setUsingMockData] = useState(false);
 
@@ -105,7 +105,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   });
 
   // Mock attraction data as fallback
-  const attractions = [
+  const _attractions = [
     {
       id: "1",
       name: "Phi Phi Islands",

@@ -20,7 +20,7 @@ function detectLanguage(text) {
 }
 
 // Helper function to generate travel-related responses
-function generateTravelResponse(message, language, sessionId) {
+function generateTravelResponse(message, language, _sessionId) {
   const responses = {
     th: {
       greetings: [

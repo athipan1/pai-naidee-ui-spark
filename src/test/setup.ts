@@ -15,7 +15,7 @@ global.mockConsole = () => {
     log: vi.fn()
   };
   
-  global.console = mockConsole as any;
+  global.console = mockConsole as typeof console;
   
   return {
     restore: () => {
