@@ -26,6 +26,7 @@ const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 const CommunityFeed = lazy(() => import("./pages/Community"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
+const ContextualSearchResults = lazy(() => import("./pages/ContextualSearchResults"));
 
 // Redirect components for backward compatibility
 import {
@@ -160,6 +161,16 @@ const App = () => {
                       currentLanguage={currentLanguage}
                       onLanguageChange={setCurrentLanguage}
                       onBack={() => window.history.back()}
+                    />
+                  }
+                />
+                
+                <Route
+                  path="/search"
+                  element={
+                    <ContextualSearchResults
+                      currentLanguage={currentLanguage}
+                      onLanguageChange={setCurrentLanguage}
                     />
                   }
                 />

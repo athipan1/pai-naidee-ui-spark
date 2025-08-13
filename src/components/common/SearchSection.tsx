@@ -1,14 +1,15 @@
 import SmartSearchBar from "./SmartSearchBar";
 import { SearchResult } from "@/shared/utils/searchAPI";
+import { PostSearchResult } from "@/shared/types/posts";
 import heroBeach from "@/shared/assets/hero-beach.jpg";
 
 interface SearchSectionProps {
   currentLanguage: "th" | "en";
-  onSearch: (query: string, results?: SearchResult[]) => void;
+  onSearch: (query: string, results?: SearchResult[] | PostSearchResult[]) => void;
 }
 
 const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
-  const handleSearch = (query: string, results?: SearchResult[]) => {
+  const handleSearch = (query: string, results?: SearchResult[] | PostSearchResult[]) => {
     onSearch(query, results);
   };
 
@@ -43,6 +44,7 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
             <SmartSearchBar
               currentLanguage={currentLanguage}
               onSearch={handleSearch}
+              searchType="all"
               placeholder={
                 currentLanguage === "th"
                   ? "คุณอยากไปไหน?"

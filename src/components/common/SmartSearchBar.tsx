@@ -6,6 +6,7 @@ import {
   X,
   Clock,
   TrendingUp,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,13 +16,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/shared/lib/utils";
 
 import type { SearchSuggestion, SearchResult } from "@/shared/utils/searchAPI";
+import type { PostSearchResult } from "@/shared/types/posts";
+import { searchPosts, getTrendingSearches } from "@/shared/utils/contextualSearchAPI";
 
 interface SmartSearchBarProps {
   currentLanguage: "th" | "en";
-  onSearch: (query: string, results: SearchResult[]) => void;
+  onSearch: (query: string, results: SearchResult[] | PostSearchResult[]) => void;
   onSuggestionSelect?: (suggestion: SearchSuggestion) => void;
   placeholder?: string;
   className?: string;
+  searchType?: "attractions" | "posts" | "all"; // New prop for search type
 }
 
 const SmartSearchBar = ({
@@ -30,6 +34,7 @@ const SmartSearchBar = ({
   onSuggestionSelect,
   placeholder,
   className,
+  searchType = "all",
 }: SmartSearchBarProps) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -37,6 +42,7 @@ const SmartSearchBar = ({
   const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [expandedTerms, setExpandedTerms] = useState<string[]>([]);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,6 +52,7 @@ const SmartSearchBar = ({
   const content = {
     th: {
       searchPlaceholder: "ค้นหาสถานที่ท่องเที่ยว...",
+      searchPostsPlaceholder: "ค้นหาโพสต์และสถานที่...",
       recentSearches: "การค้นหาล่าสุด",
       trendingSearches: "ยอดนิยม",
       suggestions: "คำแนะนำ",
@@ -53,9 +60,13 @@ const SmartSearchBar = ({
       searchResults: "ผลการค้นหา",
       clearAll: "ล้างทั้งหมด",
       confidence: "ความเชื่อมั่น",
+      expandedTerms: "คำที่ขยาย",
+      posts: "โพสต์",
+      places: "สถานที่",
     },
     en: {
       searchPlaceholder: "Search destinations...",
+      searchPostsPlaceholder: "Search posts and places...",
       recentSearches: "Recent Searches",
       trendingSearches: "Trending",
       suggestions: "Suggestions",
@@ -63,6 +74,9 @@ const SmartSearchBar = ({
       searchResults: "Search Results",
       clearAll: "Clear All",
       confidence: "Confidence",
+      expandedTerms: "Expanded Terms",
+      posts: "Posts",
+      places: "Places",
     },
   };
 
@@ -82,7 +96,11 @@ const SmartSearchBar = ({
     if (savedRecentSearches) {
       setRecentSearches(JSON.parse(savedRecentSearches));
     }
-    setTrendingSearches(mockTrendingSearches);
+    
+    // Load trending searches
+    getTrendingSearches(currentLanguage).then(trending => {
+      setTrendingSearches(trending);
+    });
   }, [currentLanguage]);
 
   // Debounced search function
@@ -124,18 +142,27 @@ const SmartSearchBar = ({
     }
   };
 
-  // Perform full search using API client
+  // Perform full search using enhanced contextual search
   const performSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
 
     try {
-      // const response = await apiClient.performSearch({
-      //   query: searchQuery,
-      //   language: currentLanguage
-      // });
-      const response = { results: [], totalCount: 0 };
+      if (searchType === "posts" || searchType === "all") {
+        // Use enhanced contextual search for posts
+        const response = await searchPosts(searchQuery, {
+          language: currentLanguage,
+          limit: 20
+        });
+        
+        setExpandedTerms(response.expandedTerms);
+        onSearch(searchQuery, response.results);
+      } else {
+        // Fallback to original search for attractions only
+        const response = { results: [], totalCount: 0 };
+        onSearch(searchQuery, response.results);
+      }
 
       // Save to recent searches
       const updatedRecentSearches = [
@@ -149,13 +176,13 @@ const SmartSearchBar = ({
         JSON.stringify(updatedRecentSearches)
       );
 
-      onSearch(searchQuery, response.results);
-    } catch {
-      // Handle error silently for now
+      setShowSuggestions(false);
+    } catch (error) {
+      console.error("Search failed:", error);
+      // Handle error gracefully
       onSearch(searchQuery, []);
     } finally {
       setIsLoading(false);
-      setShowSuggestions(false);
     }
   };
 
@@ -262,7 +289,10 @@ const SmartSearchBar = ({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setShowSuggestions(true)}
-            placeholder={placeholder || t.searchPlaceholder}
+            placeholder={
+              placeholder || 
+              (searchType === "posts" ? t.searchPostsPlaceholder : t.searchPlaceholder)
+            }
             className="search-input pl-12 pr-12 h-12 text-base border-2 focus:border-primary touch-manipulation transition-all duration-300"
             aria-label={placeholder || t.searchPlaceholder}
             aria-expanded={showSuggestions}
@@ -284,9 +314,27 @@ const SmartSearchBar = ({
               <X className="w-4 h-4" />
             </Button>
           )}
+          {isLoading && (
+            <Loader2 className="absolute right-10 top-1/2 transform -translate-y-1/2 w-5 h-5 animate-spin text-primary" />
+          )}
         </div>
 
-
+        {/* Expanded Terms Display */}
+        {expandedTerms.length > 1 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            <span className="text-xs text-muted-foreground mr-2">{t.expandedTerms}:</span>
+            {expandedTerms.slice(0, 5).map((term, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {term}
+              </Badge>
+            ))}
+            {expandedTerms.length > 5 && (
+              <Badge variant="secondary" className="text-xs">
+                +{expandedTerms.length - 5}
+              </Badge>
+            )}
+          </div>
+        )}
       </form>
 
       {/* Suggestions Dropdown */}
@@ -297,7 +345,7 @@ const SmartSearchBar = ({
               {/* Loading State */}
               {isLoading && (
                 <div className="p-4 text-center">
-                  <div className="loading-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
                   <p className="text-sm text-muted-foreground animate-pulse">กำลังค้นหา...</p>
                 </div>
               )}
