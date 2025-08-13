@@ -1,4 +1,4 @@
-// Enhanced contextual search service with fuzzy matching and semantic ranking
+// Enhanced contextual search service with fuzzy matching and hybrid ranking (Phase 2)
 import Fuse from 'fuse.js';
 import type {
   Post,
@@ -13,6 +13,17 @@ import {
   locationExpansionMap,
   simulateDelay
 } from '../data/mockData';
+
+// Phase 2 imports
+import { getSearchConfig } from '../../../config/searchConfig';
+import { computeHybridScore, createRankingConfig } from '../../search/ranking/hybridRanker';
+import type { HybridRankingScores } from '../../search/ranking/hybridRanker';
+import { createEmbeddingClient } from '../../search/semantic/embeddingsClient';
+import { loadSemanticIndex, semanticSearch } from '../../search/semantic/embeddingSearch';
+import { applyAdvancedFilters } from '../../search/filters/advancedFilters';
+import type { AdvancedSearchFilters } from '../../search/filters/advancedFilters';
+import { recordQuery } from '../../metrics/searchMetrics';
+import { log } from './logger';
 
 // Search configuration for different entity types
 const fuseOptions = {
@@ -46,13 +57,37 @@ const fuseOptions = {
   }
 };
 
-// Ranking weights configuration (can be moved to environment variables)
-const RANKING_WEIGHTS = {
+// Ranking weights configuration (now uses Phase 2 configuration system)
+// This is kept for backward compatibility but will be overridden by the new config
+const LEGACY_RANKING_WEIGHTS = {
   semantic: 0.4,      // w_semantic
   popularity: 0.3,    // w_pop  
   recency: 0.2,       // w_recency
   relevance: 0.1      // w_relevance (fuzzy match score)
 };
+
+// Phase 2 configuration
+let searchConfig = getSearchConfig();
+let embeddingClient: any = null;
+let semanticIndex: any = null;
+
+// Initialize Phase 2 components
+async function initializePhase2Components() {
+  if (searchConfig.features.ENABLE_SEMANTIC && !embeddingClient) {
+    try {
+      embeddingClient = createEmbeddingClient({ provider: 'mock' });
+      semanticIndex = await loadSemanticIndex();
+      log.semantic.info('Phase 2 semantic search initialized', { 
+        clientReady: embeddingClient.isReady(),
+        indexLoaded: !!semanticIndex 
+      });
+    } catch (error) {
+      log.semantic.error('Failed to initialize semantic search', error);
+      embeddingClient = null;
+      semanticIndex = null;
+    }
+  }
+}
 
 // Initialize Fuse instances
 const postsFuse = new Fuse(mockPosts, fuseOptions.posts);
@@ -102,10 +137,52 @@ function calculateRecencyScore(post: Post): number {
 }
 
 /**
- * Calculate semantic similarity score (placeholder for now)
- * In Phase 2, this will use actual embeddings
+ * Calculate semantic similarity score using Phase 2 embeddings (if enabled)
+ * Falls back to keyword matching if semantic search is disabled or fails
  */
-function calculateSemanticScore(post: Post, query: string, expandedTerms: string[]): number {
+async function calculateSemanticScore(post: Post, query: string, expandedTerms: string[]): Promise<number> {
+  // Check if semantic search is enabled and available
+  if (!searchConfig.features.ENABLE_SEMANTIC || !embeddingClient || !semanticIndex) {
+    // Fallback to legacy keyword matching
+    return calculateLegacySemanticScore(post, query, expandedTerms);
+  }
+
+  try {
+    // Generate query embedding
+    const queryEmbedding = await embeddingClient.generateEmbedding(query);
+    
+    // Find post in semantic index
+    const postDocument = semanticIndex.documents.find(
+      (doc: any) => doc.id === post.id && doc.type === 'post'
+    );
+    
+    if (!postDocument) {
+      log.semantic.debug('Post not found in semantic index, using fallback', { postId: post.id });
+      return calculateLegacySemanticScore(post, query, expandedTerms);
+    }
+    
+    // Calculate cosine similarity
+    const similarity = cosineSimilarity(queryEmbedding, postDocument.embedding);
+    
+    log.semantic.debug('Calculated semantic similarity', { 
+      postId: post.id, 
+      similarity,
+      method: 'embedding'
+    });
+    
+    return Math.max(0, Math.min(1, similarity));
+    
+  } catch (error) {
+    log.semantic.warn('Semantic scoring failed, using fallback', error, { postId: post.id });
+    return calculateLegacySemanticScore(post, query, expandedTerms);
+  }
+}
+
+/**
+ * Legacy semantic score calculation (keyword matching)
+ * Maintained for backward compatibility and fallback scenarios
+ */
+function calculateLegacySemanticScore(post: Post, query: string, expandedTerms: string[]): number {
   // Simple keyword matching for now - will be replaced with embedding similarity
   const content = `${post.caption} ${post.tags.join(' ')} ${post.location?.name || ''}`.toLowerCase();
   
@@ -120,20 +197,72 @@ function calculateSemanticScore(post: Post, query: string, expandedTerms: string
 }
 
 /**
- * Calculate final ranking score using weighted formula
- * score = w_semantic * semanticScore + w_pop * popularityNorm + w_recency * recencyDecay + w_relevance * relevanceScore
+ * Simple cosine similarity calculation
+ */
+function cosineSimilarity(vectorA: number[], vectorB: number[]): number {
+  if (vectorA.length !== vectorB.length) {
+    log.semantic.warn('Vector length mismatch in cosine similarity', { 
+      lengthA: vectorA.length, 
+      lengthB: vectorB.length 
+    });
+    return 0;
+  }
+
+  if (vectorA.length === 0) return 0;
+
+  let dotProduct = 0;
+  let magnitudeA = 0;
+  let magnitudeB = 0;
+
+  for (let i = 0; i < vectorA.length; i++) {
+    dotProduct += vectorA[i] * vectorB[i];
+    magnitudeA += vectorA[i] * vectorA[i];
+    magnitudeB += vectorB[i] * vectorB[i];
+  }
+
+  const magnitude = Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB);
+  return magnitude === 0 ? 0 : dotProduct / magnitude;
+}
+
+/**
+ * Calculate final ranking score using Phase 2 hybrid ranking
+ * Falls back to legacy calculation if Phase 2 is disabled
  */
 function calculateFinalScore(
   semanticScore: number,
   popularityScore: number, 
   recencyScore: number,
-  relevanceScore: number
+  relevanceScore: number,
+  personalizationScore: number = 0
 ): number {
+  // Use Phase 2 hybrid ranking if available
+  if (searchConfig && searchConfig.weights) {
+    const hybridScores: HybridRankingScores = {
+      lexicalScore: relevanceScore,
+      semanticScore,
+      popularityScore,
+      recencyScore,
+      personalizationScore
+    };
+    
+    const rankingConfig = createRankingConfig(searchConfig.weights);
+    const finalScore = computeHybridScore(hybridScores, rankingConfig);
+    
+    log.ranking.debug('Computed hybrid score', {
+      scores: hybridScores,
+      finalScore,
+      method: 'phase2'
+    });
+    
+    return finalScore;
+  }
+  
+  // Fallback to legacy calculation
   return (
-    RANKING_WEIGHTS.semantic * semanticScore +
-    RANKING_WEIGHTS.popularity * popularityScore +
-    RANKING_WEIGHTS.recency * recencyScore +
-    RANKING_WEIGHTS.relevance * relevanceScore
+    LEGACY_RANKING_WEIGHTS.relevance * relevanceScore +
+    LEGACY_RANKING_WEIGHTS.semantic * semanticScore +
+    LEGACY_RANKING_WEIGHTS.popularity * popularityScore +
+    LEGACY_RANKING_WEIGHTS.recency * recencyScore
   );
 }
 
@@ -171,7 +300,7 @@ function highlightMatches(caption: string, matchedTerms: string[]): string {
 }
 
 /**
- * Enhanced contextual search for posts
+ * Enhanced contextual search for posts with Phase 2 capabilities
  */
 export async function searchPosts(
   query: string,
@@ -179,6 +308,7 @@ export async function searchPosts(
     limit?: number;
     language?: 'th' | 'en' | 'auto';
     includeRelated?: boolean;
+    filters?: AdvancedSearchFilters;
   } = {}
 ): Promise<{
   results: PostSearchResult[];
@@ -189,7 +319,20 @@ export async function searchPosts(
   const startTime = Date.now();
   await simulateDelay(200); // Simulate network delay
   
-  const { limit = 20, language = 'auto' } = options;
+  const { limit = 20, language = 'auto', filters } = options;
+  
+  // Initialize Phase 2 components if not already done
+  await initializePhase2Components();
+  
+  // Refresh config in case environment variables changed
+  searchConfig = getSearchConfig();
+  
+  log.info('search', 'Starting contextual search', { 
+    query, 
+    language, 
+    semanticEnabled: searchConfig.features.ENABLE_SEMANTIC,
+    filtersEnabled: !!filters
+  });
   
   // Expand search query
   const expandedTerms = expandSearchQuery(query);
@@ -198,39 +341,81 @@ export async function searchPosts(
   const fuseResults = postsFuse.search(expandedTerms.join(' '));
   
   // Calculate enhanced search results with metrics
-  const results: PostSearchResult[] = fuseResults
-    .slice(0, limit)
-    .map(fuseResult => {
-      const post = fuseResult.item;
-      const relevanceScore = 1 - (fuseResult.score || 0); // Invert Fuse score (lower is better)
-      const popularityScore = calculatePopularityScore(post);
-      const recencyScore = calculateRecencyScore(post);
-      const semanticScore = calculateSemanticScore(post, query, expandedTerms);
-      
-      const searchMetrics: SearchMetrics = {
-        relevanceScore,
-        popularityScore,
-        recencyScore,
-        semanticScore,
-        finalScore: calculateFinalScore(semanticScore, popularityScore, recencyScore, relevanceScore)
-      };
-      
-      const matchedTerms = extractMatchedTerms(fuseResult);
-      const highlightedCaption = highlightMatches(post.caption, matchedTerms);
-      
-      return {
-        ...post,
-        searchMetrics,
-        matchedTerms,
-        highlightedCaption
-      };
-    })
-    .sort((a, b) => b.searchMetrics.finalScore - a.searchMetrics.finalScore); // Sort by final score
+  const results: PostSearchResult[] = [];
+  
+  for (const fuseResult of fuseResults.slice(0, Math.min(limit * 2, 50))) { // Pre-filter for performance
+    const post = fuseResult.item;
+    const relevanceScore = 1 - (fuseResult.score || 0); // Invert Fuse score (lower is better)
+    const popularityScore = calculatePopularityScore(post);
+    const recencyScore = calculateRecencyScore(post);
+    
+    // Calculate semantic score (with Phase 2 enhancement)
+    const semanticScore = await calculateSemanticScore(post, query, expandedTerms);
+    
+    // Personalization score (placeholder for now)
+    const personalizationScore = searchConfig.features.ENABLE_PERSONALIZATION ? 0.5 : 0;
+    
+    const searchMetrics: SearchMetrics = {
+      relevanceScore,
+      popularityScore,
+      recencyScore,
+      semanticScore,
+      finalScore: calculateFinalScore(semanticScore, popularityScore, recencyScore, relevanceScore, personalizationScore)
+    };
+    
+    const matchedTerms = extractMatchedTerms(fuseResult);
+    const highlightedCaption = highlightMatches(post.caption, matchedTerms);
+    
+    results.push({
+      ...post,
+      searchMetrics,
+      matchedTerms,
+      highlightedCaption
+    });
+  }
+  
+  // Sort by final score
+  results.sort((a, b) => b.searchMetrics.finalScore - a.searchMetrics.finalScore);
+  
+  // Apply advanced filters if provided
+  let finalResults = results;
+  if (filters && searchConfig.features.ENABLE_ADV_FILTERS) {
+    const filteredResults = applyAdvancedFilters(results, filters);
+    finalResults = filteredResults.results;
+    
+    log.filters.info('Applied advanced filters', {
+      originalCount: results.length,
+      filteredCount: filteredResults.filteredCount,
+      appliedFilters: filteredResults.appliedFilters
+    });
+  }
+  
+  // Apply final limit
+  finalResults = finalResults.slice(0, limit);
   
   const processingTime = Date.now() - startTime;
   
+  // Record metrics
+  recordQuery({
+    query,
+    durationMs: processingTime,
+    resultCount: finalResults.length,
+    cacheHit: false,
+    usedSemantic: searchConfig.features.ENABLE_SEMANTIC && !!embeddingClient && !!semanticIndex,
+    usedFilters: !!filters && searchConfig.features.ENABLE_ADV_FILTERS,
+    language,
+    source: 'web'
+  });
+  
+  log.info('search', 'Contextual search completed', {
+    query,
+    resultCount: finalResults.length,
+    processingTime,
+    usedSemantic: searchConfig.features.ENABLE_SEMANTIC
+  });
+  
   return {
-    results,
+    results: finalResults,
     totalCount: fuseResults.length,
     processingTime,
     expandedTerms
