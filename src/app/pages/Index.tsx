@@ -101,7 +101,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   } = useAttractions({
     page: 1,
     limit: 10,
-    category: selectedCategory === "all" ? undefined : selectedCategory
+    category: _selectedCategory === "all" ? undefined : _selectedCategory
   });
 
   // Mock attraction data as fallback
@@ -188,11 +188,11 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   }, [apiData, apiLoading]);
 
   const filteredAttractions =
-    selectedCategory === "all"
+    _selectedCategory === "all"
       ? displayAttractions
       : displayAttractions.filter(
           (attraction) =>
-            attraction.category.toLowerCase() === selectedCategory.toLowerCase()
+            attraction.category.toLowerCase() === _selectedCategory.toLowerCase()
         );
 
   // Calculate category counts
@@ -220,7 +220,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
     navigate(`/attraction/${id}`);
   };
 
-  const handleCategoryChange = (category: string) => {
+  const _handleCategoryChange = (category: string) => {
     if (category === "all") {
       navigate("/discover");
     } else {
@@ -271,13 +271,13 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
 
         <CategoryFilter
           currentLanguage={currentLanguage}
-          selectedCategory={selectedCategory}
-          onCategoryChange={handleCategoryChange}
+          selectedCategory={_selectedCategory}
+          onCategoryChange={_handleCategoryChange}
           attractionCounts={attractionCounts}
         />
 
         {/* Trending Destinations Section */}
-        {selectedCategory === "all" && (
+        {_selectedCategory === "all" && (
           <section className="py-6 bg-accent/20" aria-label={currentLanguage === "th" ? "สถานที่ยอดนิยม" : "Trending destinations"}>
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between mb-4">
