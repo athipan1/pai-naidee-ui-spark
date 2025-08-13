@@ -184,6 +184,11 @@ const TravelCommunityFeedContent: React.FC<TravelCommunityFeedProps> = ({
               placeholder="พิมพ์ชื่อสถานที่, ประเภทการเดินทาง, หรือคำค้นหาอื่นๆ..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  window.location.href = `/search-results?q=${encodeURIComponent(searchQuery.trim())}`;
+                }
+              }}
               className="pl-12 pr-4 py-4 text-base rounded-xl border-2 focus:border-primary/50 transition-colors bg-white/80 backdrop-blur-sm"
             />
             {searchQuery && (
@@ -211,7 +216,9 @@ const TravelCommunityFeedContent: React.FC<TravelCommunityFeedProps> = ({
                   key={suggestion}
                   variant="secondary" 
                   className="text-xs cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
-                  onClick={() => setSearchQuery(suggestion)}
+                  onClick={() => {
+                    window.location.href = `/search-results?q=${encodeURIComponent(suggestion)}`;
+                  }}
                 >
                   {suggestion}
                 </Badge>
