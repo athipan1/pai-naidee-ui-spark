@@ -24,7 +24,7 @@ interface IndexProps {
 
 const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   const navigate = useNavigate();
-  const [_selectedCategory, setSelectedCategory] = useState("all");
+  const [_selectedCategory, _setSelectedCategory] = useState("all");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [usingMockData, setUsingMockData] = useState(false);
 
