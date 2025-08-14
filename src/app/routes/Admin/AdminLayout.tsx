@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Settings, User, Shield, Activity, FileText, BarChart3, Video, Database, TestTube } from "lucide-react";
+import { ArrowLeft, User, Shield, Activity, BarChart3, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";

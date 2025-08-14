@@ -19,7 +19,7 @@ import { getSearchConfig } from '../../../config/searchConfig';
 import { computeHybridScore, createRankingConfig } from '../../search/ranking/hybridRanker';
 import type { HybridRankingScores } from '../../search/ranking/hybridRanker';
 import { createEmbeddingClient } from '../../search/semantic/embeddingsClient';
-import { loadSemanticIndex, semanticSearch } from '../../search/semantic/embeddingSearch';
+import { loadSemanticIndex, semanticSearch as _semanticSearch } from '../../search/semantic/embeddingSearch';
 import { applyAdvancedFilters } from '../../search/filters/advancedFilters';
 import type { AdvancedSearchFilters } from '../../search/filters/advancedFilters';
 import { recordQuery } from '../../metrics/searchMetrics';
@@ -68,8 +68,8 @@ const LEGACY_RANKING_WEIGHTS = {
 
 // Phase 2 configuration
 let searchConfig = getSearchConfig();
-let embeddingClient: any = null;
-let semanticIndex: any = null;
+let embeddingClient: ReturnType<typeof createEmbeddingClient> | null = null;
+let semanticIndex: Awaited<ReturnType<typeof loadSemanticIndex>> | null = null;
 
 // Initialize Phase 2 components
 async function initializePhase2Components() {
@@ -153,7 +153,7 @@ async function calculateSemanticScore(post: Post, query: string, expandedTerms: 
     
     // Find post in semantic index
     const postDocument = semanticIndex.documents.find(
-      (doc: any) => doc.id === post.id && doc.type === 'post'
+      (doc: { id: string; type: string; embedding?: number[] }) => doc.id === post.id && doc.type === 'post'
     );
     
     if (!postDocument) {
@@ -269,13 +269,13 @@ function calculateFinalScore(
 /**
  * Extract matched terms from Fuse.js search results
  */
-function extractMatchedTerms(fuseResult: any): string[] {
+function extractMatchedTerms(fuseResult: { matches?: Array<{ indices?: Array<[number, number]>; value: string }> }): string[] {
   if (!fuseResult.matches) return [];
   
   const terms: string[] = [];
-  fuseResult.matches.forEach((match: any) => {
+  fuseResult.matches.forEach((match: { indices?: Array<[number, number]>; value: string }) => {
     if (match.indices) {
-      match.indices.forEach((index: any) => {
+      match.indices.forEach((index: [number, number]) => {
         const term = match.value.substring(index[0], index[1] + 1);
         terms.push(term);
       });

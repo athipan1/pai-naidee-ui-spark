@@ -72,7 +72,7 @@ export const attractionAPI = {
         `${API_BASE_URL}/attractions/${id}`
       );
       return response;
-    } catch (error) {
+    } catch (_error) {
       // Fallback to mock data with proper simulation
       await simulateDelay(300);
       
@@ -128,7 +128,7 @@ export const attractionAPI = {
       }>(`${API_BASE_URL}/attractions?${params.toString()}`);
       
       return response;
-    } catch (error) {
+    } catch (_error) {
       await simulateDelay(500);
       
       // Convert mock data to list format
@@ -164,7 +164,7 @@ export const attractionAPI = {
       );
       
       return response;
-    } catch (error) {
+    } catch (_error) {
       // Simulate cache refresh for mock data
       await simulateDelay(200);
       

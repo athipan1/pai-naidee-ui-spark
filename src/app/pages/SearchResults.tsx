@@ -14,7 +14,7 @@ interface SearchResultsProps {
   currentLanguage: "th" | "en";
 }
 
-type SortOption = 'relevance' | 'price-low' | 'price-high' | 'rating' | 'distance';
+type _SortOption = 'relevance' | 'price-low' | 'price-high' | 'rating' | 'distance';
 type ViewMode = 'grid' | 'list';
 
 const SearchResults = ({ currentLanguage }: SearchResultsProps) => {

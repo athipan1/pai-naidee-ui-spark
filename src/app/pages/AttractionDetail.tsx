@@ -28,7 +28,6 @@ import { accommodationAPI } from "@/shared/utils/api";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
-import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import { 
   useAttractionDetail, 

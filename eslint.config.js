@@ -31,5 +31,12 @@ export default [
       "no-debugger": "error",
       "prefer-const": "error"
     }
+  },
+  // Special rules for Node.js files
+  {
+    files: ["**/*.{js,cjs}"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off"
+    }
   }
 ];

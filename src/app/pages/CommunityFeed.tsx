@@ -8,12 +8,10 @@ import OptimizedImage from '@/components/common/OptimizedImage';
 import { 
   PlusCircle, 
   TrendingUp, 
-  Clock, 
   Users, 
   Star,
   Filter,
-  Search,
-  MapPin
+  Search
 } from 'lucide-react';
 import { PostCard } from '@/components/community/PostCard';
 import { CreatePost } from '@/components/community/CreatePost';
@@ -28,7 +26,7 @@ interface CommunityFeedProps {
 }
 
 export const CommunityFeed: React.FC<CommunityFeedProps> = ({
-  currentLanguage
+  currentLanguage: _currentLanguage
 }) => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [activeTab, setActiveTab] = useState('feed');
@@ -135,7 +133,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                       
                       <Select 
                         value={feedFilter.type} 
-                        onValueChange={(value: any) => handleFilterChange({ type: value })}
+                        onValueChange={(value: string) => handleFilterChange({ type: value })}
                       >
                         <SelectTrigger className="w-auto">
                           <SelectValue />
@@ -151,7 +149,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
                     <Select 
                       value={feedFilter.sortBy} 
-                      onValueChange={(value: any) => handleFilterChange({ sortBy: value })}
+                      onValueChange={(value: string) => handleFilterChange({ sortBy: value })}
                     >
                       <SelectTrigger className="w-auto">
                         <SelectValue />

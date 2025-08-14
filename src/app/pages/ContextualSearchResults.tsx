@@ -7,10 +7,7 @@ import { MapPin, Clock, TrendingUp, Filter, SortAsc } from "lucide-react";
 import Header from "@/components/common/Header";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import PostCard from "@/components/common/PostCard";
-import AttractionCard from "@/components/common/AttractionCard";
-import { cn } from "@/shared/lib/utils";
 import { searchPosts, searchLocations } from "@/shared/utils/contextualSearchAPI";
-import { SearchResult } from "@/shared/utils/searchAPI";
 import { PostSearchResult, Location } from "@/shared/types/posts";
 
 interface ContextualSearchResultsProps {
@@ -155,7 +152,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
         {/* Search Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            {t.searchResults}: "{query}"
+            {t.searchResults}: &quot;{query}&quot;
           </h1>
           
           {/* Search Stats */}

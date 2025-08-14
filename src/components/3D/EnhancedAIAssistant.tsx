@@ -157,7 +157,7 @@ const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const getPositionStyles = () => {
     const { position, size, offset, zIndex } = config.model;
     
-    let positionStyles: React.CSSProperties = {
+    const positionStyles: React.CSSProperties = {
       position: 'fixed',
       zIndex,
       pointerEvents: 'auto'

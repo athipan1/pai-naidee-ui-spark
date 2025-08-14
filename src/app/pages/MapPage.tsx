@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Navigation,
   MapPin,
-  Layers,
-  Search,
   Filter,
   Navigation2,
   Maximize,
   Minimize,
-  Car,
   UtensilsCrossed,
   Fuel,
   Target,
@@ -23,8 +20,6 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
 
 interface Attraction {
   id: string;
