@@ -4,8 +4,6 @@ import {
   Navigation,
   MapPin,
   Filter,
-  Navigation2,
-  Car,
   UtensilsCrossed,
   Fuel,
   Target,
@@ -42,7 +40,7 @@ interface MapViewProps {
 }
 
 const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
-  const navigate = useNavigate();
+  const _navigate = useNavigate(); // Keeping for future use
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showTraffic, setShowTraffic] = useState(false);

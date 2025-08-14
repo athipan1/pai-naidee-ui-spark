@@ -27,7 +27,7 @@ const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
     status, 
     isLoading, 
     sendMessage,
-    clearMessages
+    clearMessages: _clearMessages
   } = useSmartAI();
 
   const {

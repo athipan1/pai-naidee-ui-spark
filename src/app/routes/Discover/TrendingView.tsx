@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, Flame, Star, MapPin } from "lucide-react";
 import AttractionCard from "@/components/common/AttractionCard";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
 import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";

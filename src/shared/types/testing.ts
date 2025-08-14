@@ -15,8 +15,8 @@ export interface TestCase {
   description: string;
   type: TestType;
   config: TestConfig;
-  expectedResult: any;
-  actualResult?: any;
+  expectedResult: TestMetrics;
+  actualResult?: TestMetrics;
   status: TestStatus;
   duration?: number; // milliseconds
   error?: string;
@@ -157,8 +157,31 @@ export interface TestCaseResult {
   status: TestStatus;
   duration: number;
   error?: string;
-  metrics?: any;
+  metrics?: TestMetrics;
   logs: string[];
+}
+
+export interface TestMetrics {
+  [key: string]: number | string | boolean;
+  success?: boolean;
+  uploadTime?: number;
+  fileSize?: number;
+  queueId?: string;
+  attempts?: number;
+  successes?: number;
+  failures?: number;
+  retryCount?: number;
+  totalUsers?: number;
+  completedUsers?: number;
+  errorUsers?: number;
+  successRate?: number;
+  averageResponseTime?: number;
+  throughput?: number;
+  errorRate?: number;
+  totalRequests?: number;
+  successfulRequests?: number;
+  failedRequests?: number;
+  requestsPerSecond?: number;
 }
 
 export interface TestSummary {

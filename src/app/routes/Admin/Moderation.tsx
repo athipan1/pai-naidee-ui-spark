@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Shield, AlertTriangle, User, MessageSquare, Flag, CheckCircle, XCircle } from "lucide-react";
-import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

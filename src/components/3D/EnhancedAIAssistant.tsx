@@ -98,7 +98,7 @@ const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
     mapStatusToGesture,
     handleInteraction,
     updatePerformance,
-    updateConfig
+    updateConfig: _updateConfig
   } = useEnhancedAIAssistant(initialConfig);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);

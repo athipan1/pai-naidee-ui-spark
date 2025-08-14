@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 export type DiscoveryMode = 'feed' | 'category' | 'search' | 'map' | 'trending';
