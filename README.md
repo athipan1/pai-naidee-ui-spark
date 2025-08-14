@@ -66,6 +66,47 @@ npm run dev
 
 แอปพลิเคชันจะพร้อมใช้งานที่ `http://localhost:8080` พร้อมกับการ hot reload
 
+## 🐳 การติดตั้งด้วย Docker
+
+### ใช้งานบน Production ด้วย Docker
+
+```bash
+# 1. Build Docker image
+docker build -t pai-naidee-ui:latest .
+
+# 2. Run container
+docker run -d \
+  --name pai-naidee-ui \
+  -p 80:80 \
+  pai-naidee-ui:latest
+
+# 3. เข้าถึงแอปพลิเคชันได้ที่ http://localhost
+```
+
+### Development ด้วย Docker Compose
+
+```bash
+# 1. สร้างและรัน development environment
+docker-compose up -d
+
+# 2. ตรวจสอบ logs
+docker-compose logs -f
+
+# 3. หยุด services
+docker-compose down
+```
+
+### Environment Variables สำหรับ Docker
+
+สร้างไฟล์ `.env` โดยคัดลอกจาก `.env.example`:
+
+```bash
+cp .env.example .env
+# แก้ไขไฟล์ .env ตามความต้องการ
+```
+
+**สำคัญ**: ไม่ใส่ secrets หรือ sensitive data ใน Docker image
+
 ### ⚙️ การกำหนดค่า Phase 2 Search (ขั้นสูง)
 
 Phase 2 มาพร้อมกับระบบค้นหาที่ขั้นสูงที่สามารถปรับแต่งได้:
@@ -173,7 +214,40 @@ npm run test:ui
 | `npm run lint` | รัน ESLint |
 | `npm run lint:fix` | แก้ไข ESLint errors อัตโนมัติ |
 | `npm run type-check` | รัน TypeScript type checking |
+| `npm run test` | รัน tests ด้วย Vitest |
+| `npm run test:run` | รัน tests แบบ single run |
+| `npm run test:ui` | รัน tests พร้อม UI |
+| `npm run format` | จัดรูปแบบโค้ดด้วย Prettier |
+| `npm run format:check` | ตรวจสอบรูปแบบโค้ด |
 | `npm run preview` | ดูตัวอย่าง production build |
+
+### 🚀 CI/CD Pipeline
+
+โปรเจคมี GitHub Actions CI pipeline ที่ทำงาน:
+
+```yaml
+# Triggered บน push/PR ไปยัง main branch
+- Lint และ Type Check
+- รัน Tests 
+- Build Application
+- Security Audit
+- Docker Build Test
+```
+
+**การทดสอบ Local CI**:
+```bash
+# รันตามลำดับที่ CI ทำ
+npm run lint
+npm run type-check  
+npm run test:run
+npm run build
+
+# ตรวจสอบ security
+npm audit
+
+# ทดสอบ Docker build
+docker build -t pai-naidee-test .
+```
 
 ### เครื่องมือการพัฒนา
 

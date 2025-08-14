@@ -1,5 +1,6 @@
 // Test setup for Vitest
 import { vi } from 'vitest';
+import '@testing-library/jest-dom';
 
 // Mock environment variables for testing
 process.env.NODE_ENV = 'test';

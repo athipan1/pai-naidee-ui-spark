@@ -15,6 +15,17 @@ export interface VideoProcessingOptions {
   enableStabilization: boolean;
 }
 
+export interface VideoAnalysis {
+  resolution: {
+    width: number;
+    height: number;
+  };
+  duration: number;
+  fileSize: number;
+  bitrate?: number;
+  framerate?: number;
+}
+
 export interface ProcessingProgress {
   stage: 'analyzing' | 'compressing' | 'upscaling' | 'enhancing' | 'finalizing' | 'complete';
   percentage: number;
@@ -89,7 +100,7 @@ class VideoProcessingService {
   /**
    * Get optimal processing options based on video analysis
    */
-  getOptimalSettings(videoAnalysis: any): VideoProcessingOptions {
+  getOptimalSettings(videoAnalysis: VideoAnalysis): VideoProcessingOptions {
     const { resolution, duration } = videoAnalysis;
     
     // Auto-determine best settings based on input

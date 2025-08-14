@@ -72,8 +72,9 @@ export const attractionAPI = {
         `${API_BASE_URL}/attractions/${id}`
       );
       return response;
-    } catch (_error) {
+    } catch (error) {
       // Fallback to mock data with proper simulation
+      console.warn('API call failed, using mock data:', error);
       await simulateDelay(300);
       
       const mockData = mockAttractionDetails[id as keyof typeof mockAttractionDetails];
@@ -128,7 +129,8 @@ export const attractionAPI = {
       }>(`${API_BASE_URL}/attractions?${params.toString()}`);
       
       return response;
-    } catch (_error) {
+    } catch (error) {
+      console.warn('API call failed, using mock data:', error);
       await simulateDelay(500);
       
       // Convert mock data to list format
@@ -164,7 +166,8 @@ export const attractionAPI = {
       );
       
       return response;
-    } catch (_error) {
+    } catch (error) {
+      console.warn('Cache refresh failed, simulating mock refresh:', error);
       // Simulate cache refresh for mock data
       await simulateDelay(200);
       

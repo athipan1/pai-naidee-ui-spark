@@ -20,7 +20,8 @@ export default [
     rules: {
         ...pluginReact.configs.flat.recommended.rules,
         "react/react-in-jsx-scope": "off",
-        "react/prop-types": "off"
+        "react/prop-types": "off",
+        "react/no-unknown-property": ["error", { "ignore": ["position", "intensity", "args", "object", "emissive", "emissiveIntensity", "color", "distance", "decay", "angle", "penumbra", "castShadow", "receiveShadow", "geometry", "material", "rotation", "scale", "visible", "userData", "attach", "dispose", "raycast", "onClick", "onPointerOver", "onPointerOut", "onPointerDown", "onPointerUp", "onPointerMove", "ref", "transparent", "wireframe", "metalness", "roughness", "map", "fog", "far", "near", "fov", "aspect", "layers"] }]
     }
   },
   {

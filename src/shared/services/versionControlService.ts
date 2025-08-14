@@ -12,6 +12,22 @@ import {
 import type { MediaItem } from '../types/media';
 import { authService } from './authService';
 
+// Define Place interface based on PlaceVersion structure
+interface Place {
+  id: string;
+  name: string;
+  nameLocal?: string;
+  description?: string;
+  province: string;
+  category: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  tags?: string[];
+  mediaVersions?: string[];
+}
+
 class VersionControlService {
   private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
   private mediaVersions = new Map<string, MediaVersion[]>();
@@ -94,7 +110,7 @@ class VersionControlService {
    */
   async createPlaceVersion(
     placeId: string,
-    updatedPlace: any,
+    updatedPlace: Partial<Place>,
     changeType: ChangeType,
     changeReason?: string
   ): Promise<PlaceVersion> {
