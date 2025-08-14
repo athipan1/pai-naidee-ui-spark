@@ -195,12 +195,13 @@ export const isActionKey = (key: string): boolean => {
 };
 
 export const isArrowKey = (key: string): boolean => {
-  return [
+  const arrowKeys: string[] = [
     KEYBOARD_KEYS.ARROW_UP,
     KEYBOARD_KEYS.ARROW_DOWN,
     KEYBOARD_KEYS.ARROW_LEFT,
     KEYBOARD_KEYS.ARROW_RIGHT,
-  ].includes(key as any);
+  ];
+  return arrowKeys.includes(key);
 };
 
 // Accessible form components

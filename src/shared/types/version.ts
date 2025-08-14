@@ -66,8 +66,8 @@ export interface VersionComparison {
 
 export interface VersionDifference {
   field: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   changeType: 'added' | 'modified' | 'removed';
 }
 

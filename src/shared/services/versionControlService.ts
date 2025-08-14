@@ -381,8 +381,8 @@ class VersionControlService {
     }
 
     for (const field of commonFields) {
-      const oldValue = (oldVersion as any)[field];
-      const newValue = (newVersion as any)[field];
+      const oldValue = field in oldVersion ? (oldVersion as Record<string, unknown>)[field] : undefined;
+      const newValue = field in newVersion ? (newVersion as Record<string, unknown>)[field] : undefined;
 
       if (oldValue !== newValue) {
         differences.push({

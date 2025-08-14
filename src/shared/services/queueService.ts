@@ -1,6 +1,7 @@
 // Queue Management Service for improved sync performance
 import {
   QueueItem,
+  QueueItemData,
   QueueItemType,
   QueuePriority,
   QueueStatus,
@@ -101,7 +102,7 @@ class QueueService {
    */
   async addToQueue(
     type: QueueItemType,
-    data: any,
+    data: QueueItemData,
     priority: QueuePriority = QueuePriority.NORMAL,
     maxRetries: number = 3
   ): Promise<string> {

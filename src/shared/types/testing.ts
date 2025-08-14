@@ -72,7 +72,7 @@ export interface LoadTestEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   weight: number; // 0-100 percentage of requests
   headers?: Record<string, string>;
-  body?: any;
+  body?: string | Record<string, unknown>;
   expectedStatusCode: number;
 }
 
@@ -101,7 +101,7 @@ export interface VirtualUser {
 export interface UserAction {
   type: ActionType;
   delay: number; // milliseconds
-  data?: any;
+  data?: Record<string, string | number | boolean>;
   expectedDuration: number;
   weight: number; // probability 0-1
 }

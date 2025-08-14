@@ -1,9 +1,21 @@
 // Enhanced sync and queue types
+export interface QueueItemData {
+  file?: File;
+  mediaData?: {
+    title: string;
+    description: string;
+    tags?: string[];
+  };
+  attractionId?: string;
+  userId?: string;
+  [key: string]: unknown;
+}
+
 export interface QueueItem {
   id: string;
   type: QueueItemType;
   priority: QueuePriority;
-  data: any;
+  data: QueueItemData;
   status: QueueStatus;
   createdAt: Date;
   startedAt?: Date;
@@ -54,10 +66,29 @@ export interface QueueMetrics {
 }
 
 // WebSocket types for real-time updates
+export interface WebSocketPayload {
+  queueUpdate?: {
+    itemId: string;
+    status: QueueStatus;
+    progress?: number;
+  };
+  mediaUploadProgress?: {
+    uploadId: string;
+    progress: number;
+    bytesUploaded: number;
+    totalBytes: number;
+  };
+  placeUpdate?: {
+    placeId: string;
+    changes: Record<string, unknown>;
+  };
+  [key: string]: unknown;
+}
+
 export interface WebSocketMessage {
   id: string;
   type: WebSocketMessageType;
-  payload: any;
+  payload: WebSocketPayload;
   timestamp: Date;
   userId?: string;
 }

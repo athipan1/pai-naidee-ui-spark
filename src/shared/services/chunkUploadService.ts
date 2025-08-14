@@ -140,7 +140,7 @@ class ChunkUploadService {
     const session = sessions.find(s => s.fileId === fileId);
     if (session) {
       const progress = this.restoreProgress(
-        null as any, // We don't need the file for status update
+        null, // We don't need the file for status update
         session
       );
       progress.status = 'paused';
@@ -163,7 +163,7 @@ class ChunkUploadService {
     const session = this.getSession(fileId);
     if (!session) return null;
     
-    return this.restoreProgress(null as any, session);
+    return this.restoreProgress(null, session);
   }
 
   /**
