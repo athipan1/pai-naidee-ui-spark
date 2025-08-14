@@ -6,9 +6,6 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Add build tools for native dependencies
-RUN apk add --no-cache git python3 make g++
-
 # Copy package files for dependency caching
 COPY package*.json ./
 COPY .npmrc ./
@@ -26,9 +23,8 @@ RUN npm run build
 # Stage 2: Production runtime with nginx
 FROM nginx:1.25-alpine AS production
 
-# Create nginx user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nginx -u 1001
+# Create nodejs group for security
+RUN addgroup -g 1001 -S nodejs
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
