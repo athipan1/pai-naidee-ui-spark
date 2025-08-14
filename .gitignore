@@ -27,3 +27,4 @@ build
 
 # Semantic search index
 semanticIndex.json
+audit-report.json
