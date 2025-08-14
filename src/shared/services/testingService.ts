@@ -15,7 +15,8 @@ import {
   SimulationMetrics,
   TestReport,
   TestCaseResult,
-  TestSummary
+  TestSummary,
+  TestMetrics
 } from '../types/testing';
 import { authService } from './authService';
 import { queueService } from './queueService';
@@ -201,7 +202,7 @@ class TestingService {
     testCase.logs = [`Started at ${startTime.toISOString()}`];
 
     try {
-      let result: any;
+      let result: TestMetrics;
 
       switch (testCase.type) {
         case TestType.LARGE_FILE_UPLOAD:
@@ -265,7 +266,7 @@ class TestingService {
   /**
    * Run large file upload test
    */
-  private async runLargeFileUploadTest(testCase: TestCase, signal: AbortSignal): Promise<any> {
+  private async runLargeFileUploadTest(testCase: TestCase, signal: AbortSignal): Promise<TestMetrics> {
     const { fileSize } = testCase.config;
     
     // Create a mock large file
@@ -292,7 +293,7 @@ class TestingService {
       if (testCase.expectedResult.success) {
         // Add to queue for upload
         const queueId = await queueService.addToQueue(
-          'media_upload' as any,
+          'media_upload',
           { file: mockFile, mediaData: { title: 'Test upload', description: 'Test' } }
         );
 
@@ -300,7 +301,7 @@ class TestingService {
 
         // Wait for completion or timeout
         const timeout = testCase.config.timeout || 60000;
-        const uploadResult = await this.waitForQueueCompletion(queueId, timeout, signal);
+        const _uploadResult = await this.waitForQueueCompletion(queueId, timeout, signal);
         
         const uploadTime = Date.now() - startUpload;
         testCase.logs.push(`Upload completed in ${uploadTime}ms`);
@@ -337,7 +338,7 @@ class TestingService {
   /**
    * Run network failure test
    */
-  private async runNetworkFailureTest(testCase: TestCase, signal: AbortSignal): Promise<any> {
+  private async runNetworkFailureTest(testCase: TestCase, signal: AbortSignal): Promise<TestMetrics> {
     const { networkDelay, errorRate, retries } = testCase.config;
     
     testCase.logs.push(`Simulating network issues: delay=${networkDelay}ms, errorRate=${errorRate || 0}`);
@@ -393,7 +394,7 @@ class TestingService {
   /**
    * Run concurrent users test
    */
-  private async runConcurrentUsersTest(testCase: TestCase, signal: AbortSignal): Promise<any> {
+  private async runConcurrentUsersTest(testCase: TestCase, signal: AbortSignal): Promise<TestMetrics> {
     const { userCount, duration } = testCase.config;
     
     testCase.logs.push(`Starting simulation with ${userCount} concurrent users for ${duration}ms`);
@@ -417,14 +418,14 @@ class TestingService {
   /**
    * Run load test
    */
-  private async runLoadTest(testCase: TestCase, signal: AbortSignal): Promise<any> {
+  private async runLoadTest(testCase: TestCase, signal: AbortSignal): Promise<TestMetrics> {
     const config = testCase.config as LoadTestConfig;
     
     testCase.logs.push(`Starting load test: ${config.virtualUsers} users, ${config.requestsPerSecond} req/s`);
 
     // Simulate load test execution
-    const startTime = Date.now();
-    const results: any[] = [];
+    const _startTime = Date.now();
+    const results: Array<{success: boolean; responseTime: number; timestamp: Date; error?: string}> = [];
     
     const duration = config.sustainTime * 1000;
     const interval = 1000 / config.requestsPerSecond;
@@ -473,8 +474,8 @@ class TestingService {
   /**
    * Run security test
    */
-  private async runSecurityTest(testCase: TestCase, signal: AbortSignal): Promise<any> {
-    testCase.logs.push('Running security validation tests');
+  private async runSecurityTest(_testCase: TestCase, _signal: AbortSignal): Promise<TestMetrics> {
+    _testCase.logs.push('Running security validation tests');
 
     const results = {
       encryptionTest: false,
@@ -488,25 +489,25 @@ class TestingService {
       const testFile = new File(['test content'], 'test.txt', { type: 'text/plain' });
       const encryptedFile = await securityService.encryptFile(testFile);
       results.encryptionTest = !!encryptedFile.id;
-      testCase.logs.push(`Encryption test: ${results.encryptionTest ? 'passed' : 'failed'}`);
+      _testCase.logs.push(`Encryption test: ${results.encryptionTest ? 'passed' : 'failed'}`);
 
       // Test file validation
       const validationResult = await securityService.validateFile(testFile);
       results.fileValidationTest = validationResult.isValid;
-      testCase.logs.push(`File validation test: ${results.fileValidationTest ? 'passed' : 'failed'}`);
+      _testCase.logs.push(`File validation test: ${results.fileValidationTest ? 'passed' : 'failed'}`);
 
       // Test authentication
       const currentUser = authService.getCurrentUser();
       results.authenticationTest = !!currentUser;
-      testCase.logs.push(`Authentication test: ${results.authenticationTest ? 'passed' : 'failed'}`);
+      _testCase.logs.push(`Authentication test: ${results.authenticationTest ? 'passed' : 'failed'}`);
 
       // Test audit logging (assume it works if no errors)
       results.auditLoggingTest = true;
-      testCase.logs.push('Audit logging test: passed');
+      _testCase.logs.push('Audit logging test: passed');
 
       return results;
     } catch (error) {
-      testCase.logs.push(`Security test error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      _testCase.logs.push(`Security test error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -660,11 +661,11 @@ class TestingService {
   /**
    * Wait for queue completion
    */
-  private async waitForQueueCompletion(queueId: string, timeout: number, signal: AbortSignal): Promise<any> {
+  private async waitForQueueCompletion(queueId: string, timeout: number, signal: AbortSignal): Promise<{completed: boolean}> {
     const startTime = Date.now();
     
     while (Date.now() - startTime < timeout && !signal.aborted) {
-      const queueStatus = queueService.getQueueStatus();
+      const _queueStatus = queueService.getQueueStatus();
       
       // In a real implementation, you would check the specific queue item status
       // For simulation, we'll assume completion after some time

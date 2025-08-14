@@ -79,7 +79,7 @@ export interface SecurityAuditLog {
   ipAddress: string;
   userAgent: string;
   success: boolean;
-  details?: Record<string, any>;
+  details?: Record<string, string | number | boolean>;
   riskLevel: RiskLevel;
 }
 

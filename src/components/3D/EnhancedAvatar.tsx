@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Mesh, Group, Vector3 } from 'three';
-import { Sphere, Box, Cylinder, Cone } from '@react-three/drei';
+import { Mesh, Group } from 'three';
+import { Sphere, Box, Cylinder } from '@react-three/drei';
 import { GestureState } from './hooks/useEnhancedAIAssistant';
 import { smoothTransition, gestureTransitions, createOptimizedMaterial } from './utils/assistantUtils';
 
@@ -40,7 +40,7 @@ const EnhancedAvatar: React.FC<EnhancedAvatarProps> = ({
   
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
-  const [animationProgress, setAnimationProgress] = useState(0);
+  const [_animationProgress, setAnimationProgress] = useState(0);
   const [gestureStartTime, setGestureStartTime] = useState(0);
 
   // Start gesture animation when target changes

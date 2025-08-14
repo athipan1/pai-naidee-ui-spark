@@ -8,6 +8,19 @@ export interface NetworkStatus {
   rtt?: number;
 }
 
+interface NetworkConnection {
+  type?: string;
+  effectiveType?: string;
+  downlink?: number;
+  rtt?: number;
+}
+
+interface ExtendedNavigator extends Navigator {
+  connection?: NetworkConnection;
+  mozConnection?: NetworkConnection;
+  webkitConnection?: NetworkConnection;
+}
+
 class NetworkStatusService {
   private isOnline: boolean = navigator.onLine;
   private listeners: Set<(status: NetworkStatus) => void> = new Set();
@@ -141,33 +154,16 @@ class NetworkStatusService {
    * Get current network status
    */
   getNetworkStatus(): NetworkStatus {
-    const connection = (navigator as unknown as {
-      connection?: {
-        type?: string;
-        effectiveType?: string;
-        downlink?: number;
-        rtt?: number;
-      };
-      mozConnection?: {
-        type?: string;
-        effectiveType?: string;
-        downlink?: number;
-        rtt?: number;
-      };
-      webkitConnection?: {
-        type?: string;
-        effectiveType?: string;
-        downlink?: number;
-        rtt?: number;
-      };
-    }).connection || (navigator as unknown as { mozConnection?: unknown }).mozConnection || (navigator as unknown as { webkitConnection?: unknown }).webkitConnection;
+    const connection = (navigator as ExtendedNavigator).connection || 
+                      (navigator as ExtendedNavigator).mozConnection || 
+                      (navigator as ExtendedNavigator).webkitConnection;
     
     return {
       isOnline: this.isOnline,
-      connectionType: (connection as any)?.type,
-      effectiveType: (connection as any)?.effectiveType,
-      downlink: (connection as any)?.downlink,
-      rtt: (connection as any)?.rtt
+      connectionType: connection?.type,
+      effectiveType: connection?.effectiveType,
+      downlink: connection?.downlink,
+      rtt: connection?.rtt
     };
   }
 

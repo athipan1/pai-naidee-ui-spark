@@ -1,6 +1,7 @@
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Float, Text } from '@react-three/drei';
+import { Vector3 } from 'three';
 import { AIStatus } from '@/shared/hooks/useSmartAI';
 import { useEnhancedAIAssistant } from './hooks/useEnhancedAIAssistant';
 import EnhancedAvatar from './EnhancedAvatar';
@@ -98,7 +99,7 @@ const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
     mapStatusToGesture,
     handleInteraction,
     updatePerformance,
-    updateConfig
+    updateConfig: _updateConfig
   } = useEnhancedAIAssistant(initialConfig);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -299,7 +300,7 @@ const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
               autoRotateSpeed={0.3}
               onChange={(event) => {
                 if (event?.target?.object?.position) {
-                  const distance = event.target.object.position.distanceTo(new (window as any).THREE.Vector3(0, 0, 0));
+                  const distance = event.target.object.position.distanceTo(new Vector3(0, 0, 0));
                   setCameraDistance(distance);
                 }
               }}

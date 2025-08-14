@@ -7,15 +7,11 @@ import {
   Globe,
   Settings,
   MapPin,
-  Star,
-  Eye,
   Heart,
   Bell,
   Shield,
   HelpCircle,
-  CreditCard,
   Moon,
-  Sun,
   Check,
   Calendar,
   MessageSquare,
@@ -33,7 +29,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+
 import { useNavigate } from "react-router-dom";
 
 interface ProfilePageProps {
