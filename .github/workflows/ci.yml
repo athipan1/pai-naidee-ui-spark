@@ -37,8 +37,8 @@ jobs:
         run: npm ci
       - name: Run ESLint and save report
         run: |
-          npm run lint -- -f unix > lint-report.txt 2>/dev/null || true
-          npm run lint -- -f @microsoft/eslint-formatter-sarif > eslint.sarif 2>/dev/null || true
+          npx eslint . --format unix > lint-report.txt || true
+          npx eslint . --format @microsoft/eslint-formatter-sarif > eslint.sarif || true
       - name: Upload ESLint report
         uses: actions/upload-artifact@v4
         with:
@@ -63,7 +63,7 @@ jobs:
       - name: Install
         run: npm ci
       - name: Run npm audit and save report
-        run: npm audit --json > audit-report.json 2>/dev/null || true
+        run: npm audit --json > audit-report.json || true
       - name: Upload npm audit report
         uses: actions/upload-artifact@v4
         with:
