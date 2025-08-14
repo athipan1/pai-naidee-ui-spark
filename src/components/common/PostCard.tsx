@@ -120,7 +120,7 @@ const PostCard = ({
                   {post.user.name}
                 </p>
                 {post.user.verified && (
-                  <Verified className="h-4 w-4 text-blue-500 flex-shrink-0" title={t.verified} />
+                  <Verified className="h-4 w-4 text-blue-500 flex-shrink-0" />
                 )}
               </div>
               <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">

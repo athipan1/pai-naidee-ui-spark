@@ -133,7 +133,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                       
                       <Select 
                         value={feedFilter.type} 
-                        onValueChange={(value: string) => handleFilterChange({ type: value })}
+                        onValueChange={(value: 'all' | 'following' | 'groups' | 'saved') => handleFilterChange({ type: value })}
                       >
                         <SelectTrigger className="w-auto">
                           <SelectValue />
@@ -149,7 +149,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
                     <Select 
                       value={feedFilter.sortBy} 
-                      onValueChange={(value: string) => handleFilterChange({ sortBy: value })}
+                      onValueChange={(value: 'latest' | 'popular' | 'trending' | 'inspiration') => handleFilterChange({ sortBy: value })}
                     >
                       <SelectTrigger className="w-auto">
                         <SelectValue />

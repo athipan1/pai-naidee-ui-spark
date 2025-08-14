@@ -18,7 +18,8 @@ function base(level: LogLevel, ...args: unknown[]): void {
   const tag = `[${ts}][${level.toUpperCase()}]`;
   
   // Keep using console to ensure error/warn are visible in production
-  (console as Record<string, (...args: unknown[]) => void>)[level === 'debug' ? 'log' : level](tag, ...args);
+  const consoleMethod = level === 'debug' ? 'log' : level;
+  (console as any)[consoleMethod](tag, ...args);
 }
 
 export const logger = {

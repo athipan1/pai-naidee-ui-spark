@@ -15,10 +15,14 @@ import {
   Globe, 
   Users, 
   Lock,
-  Hash
+  Hash,
+  Camera,
+  Folder
 } from 'lucide-react';
 import { CreatePostData, LocationTag, AccommodationTag } from '@/shared/types/community';
 import { cn } from '@/shared/lib/utils';
+import { CameraCapture } from './CameraCapture';
+import { ImageFilters, ImageFilter } from './ImageFilters';
 
 interface CreatePostProps {
   open: boolean;
@@ -36,11 +40,14 @@ export const CreatePost: React.FC<CreatePostProps> = ({
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [videos, setVideos] = useState<File[]>([]);
+  const [imageFilters, setImageFilters] = useState<Record<number, ImageFilter>>({});
   const [location, setLocation] = useState<LocationTag | undefined>();
   const [accommodation, setAccommodation] = useState<AccommodationTag | undefined>();
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [privacy, setPrivacy] = useState<'public' | 'friends' | 'private'>('public');
+  const [showCamera, setShowCamera] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +57,10 @@ export const CreatePost: React.FC<CreatePostProps> = ({
     setImages(prev => [...prev, ...files].slice(0, 10)); // Max 10 images
   };
 
+  const handleCameraCapture = (file: File) => {
+    setImages(prev => [...prev, file].slice(0, 10));
+  };
+
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setVideos(prev => [...prev, ...files].slice(0, 3)); // Max 3 videos
@@ -57,6 +68,21 @@ export const CreatePost: React.FC<CreatePostProps> = ({
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    setImageFilters(prev => {
+      const newFilters = { ...prev };
+      delete newFilters[index];
+      // Reindex remaining filters
+      const reindexed: Record<number, ImageFilter> = {};
+      Object.entries(newFilters).forEach(([key, value]) => {
+        const numKey = parseInt(key);
+        if (numKey > index) {
+          reindexed[numKey - 1] = value;
+        } else {
+          reindexed[numKey] = value;
+        }
+      });
+      return reindexed;
+    });
   };
 
   const removeVideo = (index: number) => {
@@ -100,6 +126,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
     setContent('');
     setImages([]);
     setVideos([]);
+    setImageFilters({});
     setLocation(undefined);
     setAccommodation(undefined);
     setTags([]);
@@ -258,25 +285,63 @@ export const CreatePost: React.FC<CreatePostProps> = ({
 
           {/* Media Preview */}
           {(images.length > 0 || videos.length > 0) && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {/* Images */}
               {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
+                <div className="space-y-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    {images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg cursor-pointer"
+                          style={{
+                            filter: imageFilters[index]?.filter || 'none'
+                          }}
+                          onClick={() => setSelectedImageIndex(index)}
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        {imageFilters[index] && imageFilters[index].name !== 'none' && (
+                          <div className="absolute bottom-1 left-1 bg-black/50 text-white px-1 rounded text-xs">
+                            {imageFilters[index].label}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Image Filter Editor */}
+                  {selectedImageIndex !== null && images[selectedImageIndex] && (
+                    <div className="border rounded-lg p-4 bg-muted/50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">แก้ไขรูปภาพ</h4>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedImageIndex(null)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      <ImageFilters
+                        imageUrl={URL.createObjectURL(images[selectedImageIndex])}
+                        selectedFilter={imageFilters[selectedImageIndex]?.name || 'none'}
+                        onFilterChange={(filter) => {
+                          setImageFilters(prev => ({
+                            ...prev,
+                            [selectedImageIndex]: filter
+                          }));
+                        }}
                       />
-                      <button
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
 
@@ -284,7 +349,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
               {videos.length > 0 && (
                 <div className="grid grid-cols-2 gap-2">
                   {videos.map((video, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <video
                         src={URL.createObjectURL(video)}
                         className="w-full h-32 object-cover rounded-lg"
@@ -292,7 +357,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                       />
                       <button
                         onClick={() => removeVideo(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -304,26 +369,42 @@ export const CreatePost: React.FC<CreatePostProps> = ({
           )}
 
           {/* Media Upload Buttons */}
-          <div className="flex items-center space-x-3 pt-3 border-t">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => imageInputRef.current?.click()}
-              className="flex items-center space-x-2"
-            >
-              <ImagePlus className="h-4 w-4" />
-              <span>รูปภาพ</span>
-            </Button>
+          <div className="flex items-center justify-between pt-3 border-t">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCamera(true)}
+                className="flex items-center space-x-2"
+              >
+                <Camera className="h-4 w-4" />
+                <span>ถ่ายภาพ</span>
+              </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => videoInputRef.current?.click()}
-              className="flex items-center space-x-2"
-            >
-              <Video className="h-4 w-4" />
-              <span>วิดีโอ</span>
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => imageInputRef.current?.click()}
+                className="flex items-center space-x-2"
+              >
+                <Folder className="h-4 w-4" />
+                <span>แกลเลอรี</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => videoInputRef.current?.click()}
+                className="flex items-center space-x-2"
+              >
+                <Video className="h-4 w-4" />
+                <span>วิดีโอ</span>
+              </Button>
+            </div>
+
+            <div className="text-xs text-muted-foreground">
+              {images.length + videos.length}/10 ไฟล์
+            </div>
 
             <input
               ref={imageInputRef}
@@ -362,6 +443,13 @@ export const CreatePost: React.FC<CreatePostProps> = ({
           </div>
         </div>
       </DialogContent>
+
+      {/* Camera Capture Modal */}
+      <CameraCapture
+        open={showCamera}
+        onOpenChange={setShowCamera}
+        onCapture={handleCameraCapture}
+      />
     </Dialog>
   );
 };
