@@ -100,7 +100,7 @@ export default defineConfig(({ mode }) => {
       }),
     ].filter(Boolean),
     build: {
-      outDir: './build',
+      outDir: './dist',
       rollupOptions: {
         output: {
           manualChunks: {
