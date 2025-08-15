@@ -10,6 +10,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
 import AIAssistantTrigger from "@/components/common/AIAssistantTrigger";
+import { appConfig, env } from "@/lib/config";
 
 // Lazy load the GlobalAIAssistant 3D module
 const GlobalAIAssistant = lazy(() => import("@/components/3D/GlobalAIAssistant"));
@@ -42,7 +43,7 @@ import {
 } from "./routes/Redirects";
 
 // Conditionally load AccordionExamples only in development
-const AccordionExamples = import.meta.env.DEV 
+const AccordionExamples = env.isDevelopment() 
   ? lazy(() => import("./pages/AccordionExamples"))
   : null;
 
@@ -73,7 +74,7 @@ const App = () => {
   useResponsiveTextSize();
 
   return (
-    <ErrorBoundary showDetails={import.meta.env.DEV}>
+    <ErrorBoundary showDetails={appConfig.ENABLE_DEBUG}>
       <QueryClientProvider client={queryClient}>
         <MediaProvider>
           <TooltipProvider>
@@ -203,7 +204,7 @@ const App = () => {
                 />
 
                 {/* Development-only routes */}
-                {AccordionExamples && import.meta.env.DEV && (
+                {AccordionExamples && env.isDevelopment() && (
                   <Route
                     path="/accordion-examples"
                     element={<AccordionExamples />}

@@ -7,6 +7,14 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  
+  // Ensure environment variables have proper fallbacks
+  const isDev = mode === 'development';
+  const isProd = mode === 'production';
+  
+  // Set default API base URL based on environment
+  const defaultApiUrl = isProd ? '/api' : 'http://localhost:5000';
+  const apiBaseUrl = env.VITE_API_BASE_URL || defaultApiUrl;
 
   return {
     test: {
@@ -19,16 +27,21 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         "/api": {
-          target: env.VITE_API_BASE_URL || "http://localhost:5000",
+          target: apiBaseUrl,
           changeOrigin: true,
           secure: false,
         }
       }
     },
     define: {
-      'process.env': {
-        VITE_API_BASE_URL: JSON.stringify(env.VITE_API_BASE_URL)
-      }
+      // Ensure all environment variables are properly defined
+      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(apiBaseUrl),
+      'import.meta.env.VITE_APP_TITLE': JSON.stringify(env.VITE_APP_TITLE || 'PaiNaiDee'),
+      'import.meta.env.VITE_APP_VERSION': JSON.stringify(env.VITE_APP_VERSION || '1.0.0'),
+      'import.meta.env.VITE_ENVIRONMENT': JSON.stringify(mode),
+      'import.meta.env.VITE_ENABLE_DEBUG': JSON.stringify(env.VITE_ENABLE_DEBUG || String(isDev)),
+      'import.meta.env.VITE_ENABLE_ANALYTICS': JSON.stringify(env.VITE_ENABLE_ANALYTICS || String(isProd)),
+      'import.meta.env.VITE_ENABLE_PWA': JSON.stringify(env.VITE_ENABLE_PWA || String(isProd)),
     },
     plugins: [
       react(),
@@ -101,6 +114,9 @@ export default defineConfig(({ mode }) => {
     ].filter(Boolean),
     build: {
       outDir: './dist',
+      assetsDir: 'assets',
+      emptyOutDir: true,
+      sourcemap: !isProd, // Only generate sourcemaps in development
       rollupOptions: {
         output: {
           manualChunks: {
@@ -111,17 +127,25 @@ export default defineConfig(({ mode }) => {
             icons: ['lucide-react'],
             leaflet: ['leaflet', 'react-leaflet'],
             three: ['three', '@react-three/fiber', '@react-three/drei']
-          }
+          },
+          // Add asset file naming for better caching
+          assetFileNames: 'assets/[name]-[hash][extname]',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          entryFileNames: 'assets/[name]-[hash].js',
         }
       },
-      chunkSizeWarningLimit: 250,
-      minify: 'terser',
-      terserOptions: {
+      chunkSizeWarningLimit: 500,
+      minify: isProd ? 'terser' : false,
+      terserOptions: isProd ? {
         compress: {
           drop_console: true,
-          drop_debugger: true
+          drop_debugger: true,
+          pure_funcs: ['console.log', 'console.debug', 'console.info']
+        },
+        mangle: {
+          safari10: true
         }
-      }
+      } : undefined
     },
     resolve: {
       alias: {

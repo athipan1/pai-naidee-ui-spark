@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { appConfig } from '@/lib/config';
 
 export interface AIMessage {
   id: string;
@@ -25,7 +26,7 @@ export interface AIRequest {
 
 export type AIStatus = 'idle' | 'listening' | 'thinking' | 'talking' | 'error';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = appConfig.API_BASE_URL;
 
 const useSmartAI = () => {
   const [messages, setMessages] = useState<AIMessage[]>([]);

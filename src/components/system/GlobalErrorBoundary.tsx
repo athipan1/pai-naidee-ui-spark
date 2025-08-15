@@ -49,6 +49,13 @@ export class GlobalErrorBoundary extends Component<Props, State> {
       timestamp: new Date().toISOString()
     });
 
+    // Dispatch event for error detector
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('react-error-boundary', {
+        detail: { error, componentStack: errorInfo.componentStack, errorId }
+      }));
+    }
+
     // Update state with error info
     this.setState({
       error,

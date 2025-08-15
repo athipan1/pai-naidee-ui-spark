@@ -7,11 +7,12 @@ import {
   type AuthenticationResult
 } from '../types/auth';
 import { SecurityAction, RiskLevel, type SecurityAuditLog } from '../types/security';
+import { appConfig } from '@/lib/config';
 
 class AuthService {
   private currentUser: User | null = null;
   private authToken: string | null = null;
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = appConfig.API_BASE_URL;
 
   // Mock users for development - replace with real API calls
   private mockUsers: User[] = [
