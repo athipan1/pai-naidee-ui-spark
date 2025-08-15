@@ -51,8 +51,8 @@ function reportError(error, context = {}) {
       storedErrors.shift(); // Remove oldest error
     }
     sessionStorage.setItem('app_errors', JSON.stringify(storedErrors));
-  } catch (e) {
-    console.warn('Failed to store error in sessionStorage:', e);
+  } catch (_error) {
+    console.warn('Failed to store error in sessionStorage:', _error);
   }
   
   // Show user-friendly error if too many errors

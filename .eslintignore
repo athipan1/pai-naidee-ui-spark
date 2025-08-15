@@ -1,0 +1,14 @@
+# ESLint ignore patterns for debugging and development files
+
+# Error detection script (needs console for debugging)
+public/error-detector.js
+
+# Build scripts and server files
+api-server.js
+scripts/
+config/
+
+# Documentation and examples
+docs/
+*.md
+*.txt
