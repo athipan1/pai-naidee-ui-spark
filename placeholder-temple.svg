@@ -1,9 +1,0 @@
-<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100%" height="100%" fill="#f8f9fa"/>
-  <rect x="150" y="100" width="100" height="120" fill="#8b4513"/>
-  <polygon points="200,80 130,120 270,120" fill="#dc143c"/>
-  <rect x="180" y="170" width="40" height="50" fill="#654321"/>
-  <text x="200" y="250" font-family="Arial, sans-serif" font-size="14" fill="#8b4513" text-anchor="middle">
-    Temple Image Not Available
-  </text>
-</svg>
