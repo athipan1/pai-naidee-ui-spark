@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 /**
- * Redirect component for legacy /explore route to /discover
+ * Redirect component for legacy /explore route to /discover with category mode
  */
 const ExploreRedirect = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    navigate('/discover', { replace: true });
+    navigate('/discover?mode=category', { replace: true });
   }, [navigate]);
 
   return null;
@@ -148,6 +148,71 @@ const ProfileRedirect = () => {
   return null;
 };
 
+/**
+ * Redirect component for legacy /history route
+ */
+const HistoryRedirect = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    navigate('/history', { replace: true });
+  }, [navigate]);
+
+  return null;
+};
+
+/**
+ * Redirect component for legacy /settings route
+ */
+const SettingsRedirect = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    navigate('/settings', { replace: true });
+  }, [navigate]);
+
+  return null;
+};
+
+/**
+ * Redirect component for legacy /about route
+ */
+const AboutRedirect = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    navigate('/about', { replace: true });
+  }, [navigate]);
+
+  return null;
+};
+
+/**
+ * Redirect component for legacy /contact route
+ */
+const ContactRedirect = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    navigate('/contact', { replace: true });
+  }, [navigate]);
+
+  return null;
+};
+
+/**
+ * Redirect component for legacy /help route
+ */
+const HelpRedirect = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    navigate('/help', { replace: true });
+  }, [navigate]);
+
+  return null;
+};
+
 export {
   ExploreRedirect,
   FavoritesRedirect,
@@ -157,5 +222,10 @@ export {
   AdminPanelRedirect,
   EnhancedAdminRedirect,
   DashboardRedirect,
-  ProfileRedirect
+  ProfileRedirect,
+  HistoryRedirect,
+  SettingsRedirect,
+  AboutRedirect,
+  ContactRedirect,
+  HelpRedirect
 };
