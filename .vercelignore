@@ -1,0 +1,10 @@
+node_modules
+.git
+.vscode
+*.ipynb
+Dockerfile
+/.github
+/.idea
+*.log
+scripts/
+audit-report.json

@@ -220,7 +220,7 @@ pai-naidee-ui-spark/
 │   └── main.tsx              # จุดเริ่มต้นแอปพลิเคชัน
 ├── public/                   # ไฟล์ static
 ├── docs/                     # เอกสารประกอบ
-├── build/                    # เอาต์พุต production build
+├── dist/                     # เอาต์พุต production build
 └── package.json              # Dependencies ของโปรเจค
 ```
 
@@ -441,7 +441,7 @@ def call_api(method, url, payload=None, headers=None):
 
 ### ตัวเลือกการ Deploy อื่นๆ
 
-1. **Static Hosting** - Deploy โฟลเดอร์ `build/` ไปยังบริการ static hosting ใดๆ
+1. **Static Hosting** - Deploy โฟลเดอร์ `dist/` ไปยังบริการ static hosting ใดๆ
 2. **Docker** - ใช้ Dockerfile ที่มีให้สำหรับ deployment แบบ containerized  
 3. **Lovable Platform** - Deploy โดยตรงผ่าน Lovable (ดูการตั้งค่าเดิม)
 4. **GitHub Pages** - ใช้ GitHub Actions workflow ที่มีอยู่แล้ว
@@ -712,7 +712,7 @@ performance.getEntriesByType('resource')
 npm run build -- --mode analyze
 
 # ใช้ webpack-bundle-analyzer (หากต้องการ)
-npx webpack-bundle-analyzer build/static/js/*.js
+npx webpack-bundle-analyzer dist/static/js/*.js
 ```
 
 ## 📊 การปรับปรุงประสิทธิภาพ
