@@ -7,8 +7,10 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isProd = mode === 'production';
 
   return {
+    base: '/',
     test: {
       globals: true,
       environment: 'jsdom',
@@ -101,6 +103,8 @@ export default defineConfig(({ mode }) => {
     ].filter(Boolean),
     build: {
       outDir: './dist',
+      assetsDir: 'assets',
+      sourcemap: isProd ? true : true,
       rollupOptions: {
         output: {
           manualChunks: {
