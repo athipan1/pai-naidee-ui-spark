@@ -7,6 +7,34 @@
     }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/assets/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
+      "continue": true
+    },
+    {
+      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|svg|webp|gif))",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
+      "continue": true
+    },
+    {
+      "src": "/(api|_next).*",
+      "continue": true
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "cache-control",
+          "value": "s-maxage=0"
+        }
+      ]
+    }
   ]
 }
