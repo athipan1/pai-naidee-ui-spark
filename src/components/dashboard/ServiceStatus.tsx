@@ -73,59 +73,82 @@ const ServiceStatus = ({ currentLanguage }: ServiceStatusProps) => {
       });
     } catch (error) {
       console.error('Failed to load service status:', error);
+      
+      // Provide specific error messages based on the error
+      let errorMessage = "Please try again later";
+      if (error instanceof Error) {
+        if (error.message.includes('Authentication required')) {
+          errorMessage = "Please log in to view service status";
+        } else if (error.message.includes('Access forbidden')) {
+          errorMessage = "Admin privileges required";
+        } else if (error.message.includes('Unable to connect')) {
+          errorMessage = "Backend services unavailable";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: t.refreshError,
-        description: "Please try again later",
+        description: errorMessage,
         variant: "destructive",
       });
-      // Load mock data for demo
-      setServices([
-        {
-          id: "api-gateway",
-          name: "API Gateway",
-          status: "healthy",
-          lastCheck: new Date().toISOString(),
-          responseTime: 45,
-          uptime: "99.9%",
-          endpoint: "/api/health"
-        },
-        {
-          id: "database",
-          name: "Database Service",
-          status: "healthy",
-          lastCheck: new Date().toISOString(),
-          responseTime: 12,
-          uptime: "99.8%",
-          endpoint: "/db/health"
-        },
-        {
-          id: "auth-service",
-          name: "Authentication Service",
-          status: "warning",
-          lastCheck: new Date().toISOString(),
-          responseTime: 120,
-          uptime: "98.5%",
-          endpoint: "/auth/health"
-        },
-        {
-          id: "file-storage",
-          name: "File Storage Service",
-          status: "healthy",
-          lastCheck: new Date().toISOString(),
-          responseTime: 78,
-          uptime: "99.7%",
-          endpoint: "/storage/health"
-        },
-        {
-          id: "cache-service",
-          name: "Cache Service",
-          status: "error",
-          lastCheck: new Date().toISOString(),
-          responseTime: 0,
-          uptime: "95.2%",
-          endpoint: "/cache/health"
-        }
-      ]);
+      
+      // Only load mock data if it's a network error (backend unavailable)
+      if (error instanceof Error && (
+        error.message.includes('Unable to connect') || 
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError')
+      )) {
+        // Load mock data for demo when backend is unavailable
+        setServices([
+          {
+            id: "api-gateway",
+            name: "API Gateway",
+            status: "healthy",
+            lastCheck: new Date().toISOString(),
+            responseTime: 45,
+            uptime: "99.9%",
+            endpoint: "/api/health"
+          },
+          {
+            id: "database",
+            name: "Database Service",
+            status: "healthy",
+            lastCheck: new Date().toISOString(),
+            responseTime: 12,
+            uptime: "99.8%",
+            endpoint: "/db/health"
+          },
+          {
+            id: "auth-service",
+            name: "Authentication Service",
+            status: "warning",
+            lastCheck: new Date().toISOString(),
+            responseTime: 120,
+            uptime: "98.5%",
+            endpoint: "/auth/health"
+          },
+          {
+            id: "file-storage",
+            name: "File Storage Service",
+            status: "healthy",
+            lastCheck: new Date().toISOString(),
+            responseTime: 78,
+            uptime: "99.7%",
+            endpoint: "/storage/health"
+          },
+          {
+            id: "cache-service",
+            name: "Cache Service",
+            status: "error",
+            lastCheck: new Date().toISOString(),
+            responseTime: 0,
+            uptime: "95.2%",
+            endpoint: "/cache/health"
+          }
+        ]);
+      }
     } finally {
       setLoading(false);
     }
