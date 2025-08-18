@@ -157,9 +157,26 @@ const ProcessControl = ({ currentLanguage }: ProcessControlProps) => {
       });
     } catch (error) {
       console.error(`Failed to ${action} process:`, error);
+      
+      // Provide specific error messages based on the error
+      let errorMessage = `Action: ${action}`;
+      if (error instanceof Error) {
+        if (error.message.includes('Authentication required')) {
+          errorMessage = "Please log in to control processes";
+        } else if (error.message.includes('Access forbidden')) {
+          errorMessage = "Admin privileges required";
+        } else if (error.message.includes('not available') || error.message.includes('not exist')) {
+          errorMessage = `Process '${processId}' not found`;
+        } else if (error.message.includes('Server error')) {
+          errorMessage = "Server error occurred. Please try again";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: t.processError,
-        description: `Action: ${action}`,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
