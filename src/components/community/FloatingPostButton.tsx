@@ -10,6 +10,7 @@ import {
   X 
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
+import InstagramStylePostCreator from './InstagramStylePostCreator';
 
 interface FloatingPostButtonProps {
   onCreatePost: () => void;
@@ -29,33 +30,46 @@ export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
   className
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showInstagramCreator, setShowInstagramCreator] = useState(false);
 
   const quickActions = [
     {
       icon: <Camera className="h-4 w-4" />,
       label: 'ถ่ายรูป',
-      action: onPhotoPost || onCreatePost,
+      action: () => {
+        setShowInstagramCreator(true);
+        setIsExpanded(false);
+      },
       color: 'bg-blue-500 hover:bg-blue-600',
       delay: 0.1
     },
     {
       icon: <Video className="h-4 w-4" />,
       label: 'วิดีโอ',
-      action: onVideoPost || onCreatePost,
+      action: () => {
+        setShowInstagramCreator(true);
+        setIsExpanded(false);
+      },
       color: 'bg-purple-500 hover:bg-purple-600',
       delay: 0.15
     },
     {
       icon: <FileText className="h-4 w-4" />,
       label: 'เขียนเรื่องราว',
-      action: onStoryPost || onCreatePost,
+      action: () => {
+        setShowInstagramCreator(true);
+        setIsExpanded(false);
+      },
       color: 'bg-green-500 hover:bg-green-600',
       delay: 0.2
     },
     {
       icon: <MapPin className="h-4 w-4" />,
       label: 'แท็กสถานที่',
-      action: onLocationPost || onCreatePost,
+      action: () => {
+        setShowInstagramCreator(true);
+        setIsExpanded(false);
+      },
       color: 'bg-orange-500 hover:bg-orange-600',
       delay: 0.25
     }
@@ -64,6 +78,22 @@ export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
   const handleAction = (action: () => void) => {
     action();
     setIsExpanded(false);
+  };
+
+  const handleMainButtonClick = () => {
+    if (isExpanded) {
+      setIsExpanded(false);
+    } else {
+      // Direct action: open Instagram-style creator
+      setShowInstagramCreator(true);
+    }
+  };
+
+  const handlePostSubmit = (postData: any) => {
+    // Handle the post submission
+    console.log('Post data:', postData);
+    onCreatePost();
+    setShowInstagramCreator(false);
   };
 
   return (
@@ -138,7 +168,7 @@ export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
               if (isExpanded) {
                 setIsExpanded(false);
               } else {
-                setIsExpanded(true);
+                handleMainButtonClick();
               }
             }}
           >
@@ -206,6 +236,14 @@ export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
           สร้างโพสต์ใหม่
         </motion.div>
       )}
+
+      {/* Instagram Style Post Creator */}
+      <InstagramStylePostCreator
+        open={showInstagramCreator}
+        onOpenChange={setShowInstagramCreator}
+        onSubmit={handlePostSubmit}
+        currentLanguage="th"
+      />
     </div>
   );
 };
