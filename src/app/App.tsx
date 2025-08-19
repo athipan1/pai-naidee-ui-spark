@@ -24,6 +24,7 @@ const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
 const Index = lazy(() => import("./pages/Index"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 const CommunityFeed = lazy(() => import("./pages/Community"));
+const InstagramDemo = lazy(() => import("./pages/InstagramDemo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
 const ContextualSearchResults = lazy(() => import("./pages/ContextualSearchResults"));
@@ -162,6 +163,13 @@ const App = () => {
                       onLanguageChange={setCurrentLanguage}
                       onBack={() => window.history.back()}
                     />
+                  }
+                />
+                
+                <Route
+                  path="/community/instagram"
+                  element={
+                    <InstagramDemo />
                   }
                 />
                 
