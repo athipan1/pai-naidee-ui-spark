@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { 
-  Heart, 
   MessageCircle, 
   Share2, 
   Bookmark 
 } from 'lucide-react';
 import { Post } from '@/shared/types/community';
+import { LikeButton } from './LikeButton';
 import { cn } from '@/shared/lib/utils';
 
 interface InteractionBarProps {
@@ -15,6 +15,7 @@ interface InteractionBarProps {
   onSave: () => void;
   onShare: () => void;
   onComment: () => void;
+  isLoading?: boolean;
 }
 
 export const InteractionBar: React.FC<InteractionBarProps> = ({
@@ -22,7 +23,8 @@ export const InteractionBar: React.FC<InteractionBarProps> = ({
   onLike,
   onSave,
   onShare,
-  onComment
+  onComment,
+  isLoading = false
 }) => {
   const formatCount = (count: number) => {
     if (count >= 1000) {
@@ -54,29 +56,22 @@ export const InteractionBar: React.FC<InteractionBarProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-1">
           {/* Like Button */}
-          <Button
-            variant="ghost"
+          <LikeButton
+            isLiked={post.isLiked}
+            likeCount={post.likes}
+            onLike={onLike}
+            isLoading={isLoading}
             size="sm"
-            onClick={onLike}
-            className={cn(
-              "flex items-center space-x-2 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-950/20",
-              post.isLiked && "text-red-500"
-            )}
-          >
-            <Heart 
-              className={cn(
-                "h-4 w-4 transition-colors",
-                post.isLiked && "fill-current"
-              )} 
-            />
-            <span className="text-xs">ถูกใจ</span>
-          </Button>
+            showCount={false}
+            className="px-3 py-2"
+          />
 
           {/* Comment Button */}
           <Button
             variant="ghost"
             size="sm"
             onClick={onComment}
+            disabled={isLoading}
             className="flex items-center space-x-2 px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-950/20"
           >
             <MessageCircle className="h-4 w-4" />
@@ -88,6 +83,7 @@ export const InteractionBar: React.FC<InteractionBarProps> = ({
             variant="ghost"
             size="sm"
             onClick={onShare}
+            disabled={isLoading}
             className="flex items-center space-x-2 px-3 py-2 hover:bg-green-50 dark:hover:bg-green-950/20"
           >
             <Share2 className="h-4 w-4" />
@@ -100,6 +96,7 @@ export const InteractionBar: React.FC<InteractionBarProps> = ({
           variant="ghost"
           size="sm"
           onClick={onSave}
+          disabled={isLoading}
           className={cn(
             "flex items-center space-x-2 px-3 py-2 hover:bg-yellow-50 dark:hover:bg-yellow-950/20",
             post.isSaved && "text-yellow-600"

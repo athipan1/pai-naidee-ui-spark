@@ -24,6 +24,10 @@ interface PostCardProps {
   onSave: (postId: string) => void;
   onShare: (postId: string) => void;
   onComment: (postId: string, content: string) => void;
+  /** Callback when post detail should be opened */
+  onOpenDetail?: (post: Post) => void;
+  /** Whether interactions are loading */
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -33,6 +37,8 @@ export const PostCard: React.FC<PostCardProps> = ({
   onSave,
   onShare,
   onComment,
+  onOpenDetail,
+  isLoading = false,
   className
 }) => {
   const [showComments, setShowComments] = useState(false);
@@ -155,7 +161,8 @@ export const PostCard: React.FC<PostCardProps> = ({
               <img 
                 src={post.images[0]} 
                 alt="Post image"
-                className="w-full rounded-lg object-cover max-h-96"
+                className="w-full rounded-lg object-cover max-h-96 cursor-pointer hover:opacity-95 transition-opacity"
+                onClick={() => onOpenDetail?.(post)}
               />
             ) : (
               <div className="grid grid-cols-2 gap-1 rounded-lg overflow-hidden">
@@ -165,10 +172,13 @@ export const PostCard: React.FC<PostCardProps> = ({
                       src={image} 
                       alt={`Post image ${index + 1}`}
                       className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => setImageIndex(index)}
+                      onClick={() => onOpenDetail?.(post)}
                     />
                     {index === 3 && post.images.length > 4 && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <div 
+                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center cursor-pointer"
+                        onClick={() => onOpenDetail?.(post)}
+                      >
                         <span className="text-white font-semibold">
                           +{post.images.length - 4}
                         </span>
@@ -188,6 +198,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           onSave={() => onSave(post.id)}
           onShare={() => onShare(post.id)}
           onComment={() => setShowComments(!showComments)}
+          isLoading={isLoading}
         />
 
         {/* Comments Section */}
