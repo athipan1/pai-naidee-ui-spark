@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TravelCommunityFeed } from '@/components/community/TravelCommunityFeed';
-import { InstagramStyleFeed } from '@/components/community/InstagramStyleFeed';
+import { UnifiedTravelCommunityFeed } from '@/components/community/UnifiedTravelCommunityFeed';
 import Header from '@/components/common/Header';
 import BottomNavigation from '@/components/common/BottomNavigation';
 import { BackButton } from '@/components/attraction/BackButton';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Grid3X3, Users } from 'lucide-react';
 
 interface CommunityProps {
   currentLanguage: 'th' | 'en';
@@ -21,59 +17,34 @@ const Community: React.FC<CommunityProps> = ({
   onBack: _onBack 
 }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('traditional');
 
   const handleBack = () => {
     navigate('/');
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20">
       <Header
         currentLanguage={currentLanguage}
         onLanguageChange={onLanguageChange}
       />
       
-      <main className="container mx-auto px-4 py-6">
-        <div className="mb-6 flex items-center justify-between">
-          <BackButton onClick={handleBack} />
-          
-          {/* Quick access to Instagram feed */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/community/instagram')}
-            className="flex items-center space-x-2"
-          >
-            <Grid3X3 className="h-4 w-4" />
-            <span>Instagram Style</span>
-          </Button>
+      <main className="relative">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-4 w-32 h-32 bg-gradient-to-br from-amber-100/20 to-orange-100/20 rounded-full blur-3xl" />
+          <div className="absolute top-40 right-8 w-24 h-24 bg-gradient-to-br from-emerald-100/20 to-teal-100/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-1/2 w-28 h-28 bg-gradient-to-br from-rose-100/20 to-pink-100/20 rounded-full blur-3xl" />
         </div>
 
-        {/* Enhanced Community Feed with Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="traditional" className="flex items-center space-x-2">
-              <Users className="h-4 w-4" />
-              <span>Traditional Feed</span>
-            </TabsTrigger>
-            <TabsTrigger value="instagram" className="flex items-center space-x-2">
-              <Grid3X3 className="h-4 w-4" />
-              <span>Instagram Style</span>
-            </TabsTrigger>
-          </TabsList>
+        <div className="relative">
+          <div className="mb-4 px-4 pt-6 flex items-center justify-between">
+            <BackButton onClick={handleBack} />
+          </div>
 
-          <TabsContent value="traditional" className="space-y-6">
-            <TravelCommunityFeed currentLanguage={currentLanguage} />
-          </TabsContent>
-
-          <TabsContent value="instagram" className="space-y-6">
-            <InstagramStyleFeed 
-              initialFilter={{ type: 'all', sortBy: 'latest' }}
-              authToken="demo-token"
-            />
-          </TabsContent>
-        </Tabs>
+          {/* Unified Community Feed */}
+          <UnifiedTravelCommunityFeed currentLanguage={currentLanguage} />
+        </div>
       </main>
 
       <BottomNavigation currentLanguage={currentLanguage} />
