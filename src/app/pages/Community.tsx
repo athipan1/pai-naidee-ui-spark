@@ -4,6 +4,8 @@ import { UnifiedTravelCommunityFeed } from '@/components/community/UnifiedTravel
 import Header from '@/components/common/Header';
 import BottomNavigation from '@/components/common/BottomNavigation';
 import { BackButton } from '@/components/attraction/BackButton';
+import { CreatePostButton } from '@/components/community/CreatePostButton';
+import { CreatePostData } from '@/shared/types/community';
 
 interface CommunityProps {
   currentLanguage: 'th' | 'en';
@@ -20,6 +22,12 @@ const Community: React.FC<CommunityProps> = ({
 
   const handleBack = () => {
     navigate('/');
+  };
+
+  const handleCreatePost = (postData: CreatePostData) => {
+    console.log('New post created:', postData);
+    // In a real app, this would call an API to create the post
+    // and then refresh the feed
   };
 
   return (
@@ -40,6 +48,14 @@ const Community: React.FC<CommunityProps> = ({
         <div className="relative">
           <div className="mb-4 px-4 pt-6 flex items-center justify-between">
             <BackButton onClick={handleBack} />
+            
+            {/* Create Post Button - positioned at top right */}
+            <CreatePostButton
+              onCreatePost={handleCreatePost}
+              currentLanguage={currentLanguage}
+              variant="compact"
+              className="relative"
+            />
           </div>
 
           {/* Unified Community Feed */}
