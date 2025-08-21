@@ -106,6 +106,7 @@ export default defineConfig(({ mode }) => {
       assetsDir: 'assets',
       sourcemap: isProd ? true : true,
       rollupOptions: {
+        external: ["i18next-http-backend"],
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom'],
