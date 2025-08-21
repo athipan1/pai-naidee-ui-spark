@@ -544,10 +544,12 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
 };
 
 // Main export component with seasonal theme provider
-export const UnifiedTravelCommunityFeed: React.FC<UnifiedTravelCommunityFeedProps> = (props) => {
+const UnifiedTravelCommunityFeed: React.FC<UnifiedTravelCommunityFeedProps> = (props) => {
   return (
     <SeasonalThemeProvider>
       <UnifiedTravelCommunityFeedContent {...props} />
     </SeasonalThemeProvider>
   );
 };
+
+export default UnifiedTravelCommunityFeed;
