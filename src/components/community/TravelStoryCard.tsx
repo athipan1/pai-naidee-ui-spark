@@ -280,15 +280,3 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
 };
 
 export default TravelStoryCard;
-      <MapViewModal
-        isOpen={showMapModal}
-        onClose={() => setShowMapModal(false)}
-        route={post.route}
-        location={post.location}
-        title={post.title || post.content.substring(0, 50) + '...'}
-      />
-    </>
-  );
-};
-
-export default TravelStoryCard;
