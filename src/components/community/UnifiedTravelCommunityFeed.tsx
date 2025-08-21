@@ -397,12 +397,13 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
                         className="rounded-2xl shadow-lg border-border/50 overflow-hidden transition-shadow duration-300 hover:shadow-xl"
                       />
                     ) : (
-                      <GridPostCard
+                      {/* <GridPostCard
                         post={post}
                         layout={layout}
                         onSave={savePost}
                         onShare={sharePost}
-                      />
+                      /> */}
+                      <div>Grid Post Placeholder</div>
                     )}
                   </motion.div>
                 );
@@ -455,93 +456,93 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
 };
 
 // Grid Post Card Component for visual-first display
-interface GridPostCardProps {
-  post: Post;
-  layout: string;
-  onSave: (postId: string) => void;
-  onShare: (postId: string) => void;
-}
+// interface GridPostCardProps {
+//   post: Post;
+//   layout: string;
+//   onSave: (postId: string) => void;
+//   onShare: (postId: string) => void;
+// }
 
-const GridPostCard: React.FC<GridPostCardProps> = ({
-  post,
-  onSave,
-  onShare,
-}) => {
-  const [showMore, setShowMore] = useState(false);
-  const hasMedia = post.images.length > 0 || post.videos.length > 0;
-  const { themeConfig } = useSeasonalTheme();
-  const { t } = useTranslation();
+// const GridPostCard: React.FC<GridPostCardProps> = ({
+//   post,
+//   onSave,
+//   onShare,
+// }) => {
+//   const [showMore, setShowMore] = useState(false);
+//   const hasMedia = post.images.length > 0 || post.videos.length > 0;
+//   const { themeConfig } = useSeasonalTheme();
+//   const { t } = useTranslation();
 
-  return (
-    <Card className="overflow-hidden rounded-2xl shadow-md border-border/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card group">
-      {/* Media Preview */}
-      {hasMedia && (
-        <div className="relative aspect-square overflow-hidden">
-          <img
-            src={post.images[0] || '/placeholder-image.jpg'}
-            alt={post.title || 'Travel photo'}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          {post.images.length > 1 && (
-            <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium">
-              +{post.images.length}
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        </div>
-      )}
+//   return (
+//     <Card className="overflow-hidden rounded-2xl shadow-md border-border/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card group">
+//       {/* Media Preview */}
+//       {hasMedia && (
+//         <div className="relative aspect-square overflow-hidden">
+//           <img
+//             src={post.images[0] || '/placeholder-image.jpg'}
+//             alt={post.title || 'Travel photo'}
+//             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+//           />
+//           {post.images.length > 1 && (
+//             <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium">
+//               +{post.images.length}
+//             </div>
+//           )}
+//           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+//         </div>
+//       )}
 
-      <CardContent className="p-3 space-y-2">
-        {/* User Info & Title */}
-        <div>
-           {post.title && <h3 className="font-semibold text-sm text-foreground line-clamp-1">{post.title}</h3>}
-          <div className="flex items-center space-x-2 mt-1">
-            <img src={post.user.avatar} alt={post.user.displayName} className="w-5 h-5 rounded-full object-cover"/>
-            <p className="text-xs text-muted-foreground truncate">{post.user.displayName}</p>
-          </div>
-        </div>
+//       <CardContent className="p-3 space-y-2">
+//         {/* User Info & Title */}
+//         <div>
+//            {post.title && <h3 className="font-semibold text-sm text-foreground line-clamp-1">{post.title}</h3>}
+//           <div className="flex items-center space-x-2 mt-1">
+//             <img src={post.user.avatar} alt={post.user.displayName} className="w-5 h-5 rounded-full object-cover"/>
+//             <p className="text-xs text-muted-foreground truncate">{post.user.displayName}</p>
+//           </div>
+//         </div>
 
-        {/* Location */}
-        {post.location && (
-          <div className="flex items-center text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3 mr-1.5 flex-shrink-0" />
-            <span className="truncate">{post.location.name}, {post.location.province}</span>
-          </div>
-        )}
+//         {/* Location */}
+//         {post.location && (
+//           <div className="flex items-center text-xs text-muted-foreground">
+//             <MapPin className="h-3 w-3 mr-1.5 flex-shrink-0" />
+//             <span className="truncate">{post.location.name}, {post.location.province}</span>
+//           </div>
+//         )}
 
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/50">
-          <div className="flex items-center -ml-2">
-            <button type="button" aria-label={t('communityFeed.likePost')} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-destructive transition-colors p-2 rounded-md">
-              <Heart className="h-4 w-4" />
-              <span>{post.likes}</span>
-            </button>
-            <button type="button" aria-label={t('communityFeed.commentOnPost')} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-primary transition-colors p-2 rounded-md">
-              <MessageCircle className="h-4 w-4" />
-              <span>{post.comments}</span>
-            </button>
-            <button type="button" aria-label={t('communityFeed.sharePost')} onClick={() => onShare(post.id)} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-accent-green transition-colors p-2 rounded-md">
-              <Share2 className="h-4 w-4" />
-            </button>
-          </div>
-          <button 
-            type="button"
-            aria-label={t(post.isSaved ? 'communityFeed.unsavePost' : 'communityFeed.savePost')}
-            onClick={() => onSave(post.id)}
-            className={cn(
-              "p-2 rounded-full transition-colors",
-              post.isSaved
-                ? "text-primary bg-primary/10"
-                : "text-muted-foreground hover:text-primary hover:bg-primary/10"
-            )}
-          >
-            <Bookmark className={cn("h-4 w-4", post.isSaved && "fill-current")} />
-          </button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+//         {/* Actions */}
+//         <div className="flex items-center justify-between pt-2 border-t border-border/50">
+//           <div className="flex items-center -ml-2">
+//             <button type="button" aria-label={t('communityFeed.likePost')} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-destructive transition-colors p-2 rounded-md">
+//               <Heart className="h-4 w-4" />
+//               <span>{post.likes}</span>
+//             </button>
+//             <button type="button" aria-label={t('communityFeed.commentOnPost')} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-primary transition-colors p-2 rounded-md">
+//               <MessageCircle className="h-4 w-4" />
+//               <span>{post.comments}</span>
+//             </button>
+//             <button type="button" aria-label={t('communityFeed.sharePost')} onClick={() => onShare(post.id)} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-accent-green transition-colors p-2 rounded-md">
+//               <Share2 className="h-4 w-4" />
+//             </button>
+//           </div>
+//           <button
+//             type="button"
+//             aria-label={t(post.isSaved ? 'communityFeed.unsavePost' : 'communityFeed.savePost')}
+//             onClick={() => onSave(post.id)}
+//             className={cn(
+//               "p-2 rounded-full transition-colors",
+//               post.isSaved
+//                 ? "text-primary bg-primary/10"
+//                 : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+//             )}
+//           >
+//             <Bookmark className={cn("h-4 w-4", post.isSaved && "fill-current")} />
+//           </button>
+//         </div>
+//       </CardContent>
+//     </Card>
+//   );
+// };
 
 // Main export component with seasonal theme provider
 const UnifiedTravelCommunityFeed: React.FC<UnifiedTravelCommunityFeedProps> = (props) => {
