@@ -10,15 +10,16 @@ import {
   MessageCircle, 
   Share2, 
   Bookmark,
-  Building2,
   MoreHorizontal,
   Verified,
   Route,
   ChevronLeft,
   ChevronRight,
-  Play
+  Play,
+  Wallet,
+  CalendarDays
 } from 'lucide-react';
-import { Post } from '@/shared/types/community';
+import { Post, TravelZone } from '@/shared/types/community';
 import { InspirationRating } from './InspirationRating';
 import { MapViewModal } from './MapViewModal';
 import { CommentSection } from './CommentSection';
@@ -32,6 +33,7 @@ interface TravelStoryCardProps {
   onShare: (postId: string) => void;
   onComment: (postId: string, content: string) => void;
   className?: string;
+  currentLanguage: 'th' | 'en';
 }
 
 export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
@@ -40,7 +42,8 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
   onSave,
   onShare,
   onComment,
-  className
+  className,
+  currentLanguage
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -50,38 +53,30 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
     if (diffInMinutes < 1) return 'เพิ่งโพสต์';
     if (diffInMinutes < 60) return `${diffInMinutes} นาทีที่แล้ว`;
-    
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
-    
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays} วันที่แล้ว`;
   };
 
-  const getTravelZoneInfo = (zone: string) => {
-    const zones = {
-      adventure: { label: 'สายผจญภัย', color: 'bg-red-500' },
-      chill: { label: 'สายชิล', color: 'bg-blue-500' },
-      family: { label: 'ครอบครัว', color: 'bg-green-500' },
-      solo: { label: 'เที่ยวคนเดียว', color: 'bg-purple-500' },
-      foodie: { label: 'สายกิน', color: 'bg-orange-500' },
-      culture: { label: 'วัฒนธรรม', color: 'bg-yellow-500' },
-      nature: { label: 'ธรรมชาติ', color: 'bg-emerald-500' },
-      budget: { label: 'ประหยัด', color: 'bg-pink-500' }
+  const getTravelZoneInfo = (zone: TravelZone) => {
+    const zones: Record<TravelZone, { label: string; color: string; icon: React.ReactNode }> = {
+      adventure: { label: 'สายผจญภัย', color: 'bg-accent-orange/20 text-accent-orange border-accent-orange/30', icon: '🏔️' },
+      chill: { label: 'สายชิล', color: 'bg-accent-sky/20 text-accent-sky border-accent-sky/30', icon: '🌊' },
+      family: { label: 'ครอบครัว', color: 'bg-accent-green/20 text-accent-green border-accent-green/30', icon: '👨‍👩‍👧‍👦' },
+      solo: { label: 'เที่ยวคนเดียว', color: 'bg-accent-purple/20 text-accent-purple border-accent-purple/30', icon: '🎒' },
+      foodie: { label: 'สายกิน', color: 'bg-amber-500/20 text-amber-600 border-amber-500/30', icon: '🍜' },
+      culture: { label: 'วัฒนธรรม', color: 'bg-accent-yellow/20 text-accent-yellow border-accent-yellow/30', icon: '🏛️' },
+      nature: { label: 'ธรรมชาติ', color: 'bg-teal-500/20 text-teal-600 border-teal-500/30', icon: '🌿' },
+      budget: { label: 'ประหยัด', color: 'bg-accent-pink/20 text-accent-pink border-accent-pink/30', icon: '💰' },
     };
-    return zones[zone as keyof typeof zones] || { label: zone, color: 'bg-gray-500' };
+    return zones[zone] || { label: zone, color: 'bg-muted text-muted-foreground', icon: '✈️' };
   };
 
-  const nextImage = () => {
-    setImageIndex((prev) => (prev + 1) % post.images.length);
-  };
-
-  const prevImage = () => {
-    setImageIndex((prev) => (prev - 1 + post.images.length) % post.images.length);
-  };
+  const nextImage = () => setImageIndex((prev) => (prev + 1) % post.images.length);
+  const prevImage = () => setImageIndex((prev) => (prev - 1 + post.images.length) % post.images.length);
 
   return (
     <>
@@ -93,26 +88,23 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
         transition={{ duration: 0.3 }}
       >
         <Card className={cn(
-          "overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300",
-          "border-0 bg-gradient-to-br from-white via-white to-gray-50/50",
-          "dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/50",
+          "overflow-hidden shadow-md hover:shadow-xl transition-all duration-300",
+          "border border-border/50 bg-card",
           className
         )}>
           <CardContent className="p-0">
             {/* Header */}
             <div className="p-4 pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-12 w-12 ring-2 ring-primary/20">
                     <AvatarImage src={post.user.avatar} alt={post.user.displayName} />
                     <AvatarFallback>{post.user.displayName[0]}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
+                  <div>
                     <div className="flex items-center space-x-2">
-                      <h4 className="font-medium text-sm">{post.user.displayName}</h4>
-                      {post.user.isVerified && (
-                        <Verified className="h-4 w-4 text-blue-500" />
-                      )}
+                      <h4 className="font-semibold text-sm text-foreground">{post.user.displayName}</h4>
+                      {post.user.isVerified && <Verified className="h-4 w-4 text-primary" />}
                     </div>
                     <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                       <span>{formatTimeAgo(post.createdAt)}</span>
@@ -128,357 +120,147 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
                     </div>
                   </div>
                 </div>
-                
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
 
-              {/* Enhanced Travel Zone Badge */}
+            {/* Content Body */}
+            <div className="px-4 space-y-3">
+              {post.title && <h3 className="text-lg font-bold leading-tight text-foreground">{post.title}</h3>}
+              <p className="text-sm text-muted-foreground leading-relaxed">{post.content}</p>
+            </div>
+
+            {/* Tags and Travel Zone */}
+            <div className="px-4 pt-3 flex flex-wrap items-center gap-2">
               {post.travelZone && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mt-3"
-                >
-                  <div className="flex items-center space-x-2">
-                    <Badge 
-                      className={cn(
-                        "text-white text-xs px-3 py-1 font-medium shadow-sm",
-                        getTravelZoneInfo(post.travelZone).color
-                      )}
-                    >
-                      <span className="mr-1">
-                        {post.travelZone === 'adventure' && '🏔️'}
-                        {post.travelZone === 'chill' && '🌊'}
-                        {post.travelZone === 'family' && '👨‍👩‍👧‍👦'}
-                        {post.travelZone === 'solo' && '🎒'}
-                        {post.travelZone === 'foodie' && '🍜'}
-                        {post.travelZone === 'culture' && '🏛️'}
-                        {post.travelZone === 'nature' && '🌿'}
-                        {post.travelZone === 'budget' && '💰'}
-                      </span>
-                      {getTravelZoneInfo(post.travelZone).label}
-                    </Badge>
-                    
-                    {/* Enhanced Location Info */}
-                    {post.location && (
-                      <div className="flex items-center space-x-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
-                        <MapPin className="h-3 w-3" />
-                        <span>{post.location.name}</span>
-                        {post.location.region && (
-                          <>
-                            <span>•</span>
-                            <span>{post.location.region}</span>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
+                <Badge variant="outline" className={cn("text-xs font-medium", getTravelZoneInfo(post.travelZone).color)}>
+                  <span className="mr-1.5">{getTravelZoneInfo(post.travelZone).icon}</span>
+                  {getTravelZoneInfo(post.travelZone).label}
+                </Badge>
               )}
+              {post.tags.map((tag, index) => (
+                <Badge key={index} variant="outline" className="text-xs cursor-pointer hover:bg-muted">
+                  #{tag}
+                </Badge>
+              ))}
             </div>
 
-            {/* Title */}
-            {post.title && (
-              <div className="px-4 pb-3">
-                <h3 className="text-lg font-semibold leading-tight">{post.title}</h3>
-              </div>
-            )}
-
-            {/* Content */}
-            <div className="px-4 pb-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {post.content}
-              </p>
-            </div>
-
-            {/* Enhanced Route Summary */}
+            {/* Route Summary */}
             {post.route && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mx-4 mb-4 p-4 bg-gradient-to-br from-blue-50 via-green-50 to-amber-50 dark:from-blue-950/20 dark:via-green-950/20 dark:to-amber-950/20 rounded-xl border border-primary/20 shadow-sm"
-              >
-                <div className="flex items-center space-x-2 mb-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Route className="h-5 w-5 text-primary" />
-                  </div>
+              <div className="mx-4 mt-4 p-3 bg-muted/50 rounded-xl border border-border/50">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="p-2 bg-primary/10 rounded-lg"><Route className="h-5 w-5 text-primary" /></div>
                   <div>
                     <h4 className="text-sm font-semibold text-primary">เส้นทางการเดินทาง</h4>
                     <p className="text-xs text-muted-foreground">แผนการเดินทางที่แนะนำ</p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
-                  {post.route.summary}
-                </p>
-                
-                {/* Enhanced Route Details */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center space-x-2 p-2 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <Clock className="h-4 w-4 text-blue-600" />
+                <p className="text-sm text-foreground/80 mb-3 leading-relaxed">{post.route.summary}</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center space-x-2 p-2 bg-background/60 rounded-lg">
+                    <CalendarDays className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-xs text-muted-foreground">ระยะเวลา</p>
-                      <p className="text-sm font-medium">{post.route.duration}</p>
+                      <p className="text-muted-foreground">ระยะเวลา</p>
+                      <p className="font-medium text-foreground">{post.route.duration}</p>
                     </div>
                   </div>
                   {post.route.budget && (
-                    <div className="flex items-center space-x-2 p-2 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                      <span className="text-lg">💰</span>
+                    <div className="flex items-center space-x-2 p-2 bg-background/60 rounded-lg">
+                      <Wallet className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">งบประมาณ</p>
-                        <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                          {post.route.budget}
-                        </p>
+                        <p className="text-muted-foreground">งบประมาณ</p>
+                        <p className="font-medium text-accent-green">{post.route.budget}</p>
                       </div>
                     </div>
                   )}
                 </div>
-                
-                {/* Quick Action for Route */}
-                <div className="mt-3 pt-3 border-t border-primary/10">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary"
-                    onClick={() => setShowMapModal(true)}
-                  >
-                    <MapPin className="h-4 w-4 mr-2" />
-                    ดูเส้นทางบนแผนที่
-                  </Button>
-                </div>
-              </motion.div>
+              </div>
             )}
 
-            {/* Enhanced Media */}
+            {/* Media */}
             {(post.images.length > 0 || post.videos.length > 0) && (
-              <div className="relative bg-black rounded-lg mx-4 overflow-hidden shadow-lg">
+              <div className="relative mt-4 mx-2 rounded-lg overflow-hidden border border-border/50">
                 <AnimatePresence mode="wait">
                   {post.images.length > 0 && (
-                    <motion.div
-                      key={imageIndex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="relative group"
-                    >
-                      <img
-                        src={post.images[imageIndex]}
-                        alt={`Post image ${imageIndex + 1}`}
-                        className="w-full h-96 object-cover"
-                      />
-                      
-                      {/* Enhanced Image Navigation */}
+                    <motion.div key={imageIndex} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative group">
+                      <img src={post.images[imageIndex]} alt={`Post image ${imageIndex + 1}`} className="w-full max-h-[50vh] object-cover" />
                       {post.images.length > 1 && (
                         <>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 bg-black/70 hover:bg-black/90 text-white border-0 rounded-full opacity-0 group-hover:opacity-100 transition-all"
-                            onClick={prevImage}
-                          >
-                            <ChevronLeft className="h-5 w-5" />
+                          <Button variant="secondary" size="icon" className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-black/60 hover:bg-black/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all" onClick={prevImage}>
+                            <ChevronLeft className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 bg-black/70 hover:bg-black/90 text-white border-0 rounded-full opacity-0 group-hover:opacity-100 transition-all"
-                            onClick={nextImage}
-                          >
-                            <ChevronRight className="h-5 w-5" />
+                          <Button variant="secondary" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-black/60 hover:bg-black/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all" onClick={nextImage}>
+                            <ChevronRight className="h-4 w-4" />
                           </Button>
-
-                          {/* Enhanced Image Indicators */}
-                          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1.5">
                             {post.images.map((_, index) => (
-                              <button
-                                key={index}
-                                className={cn(
-                                  "w-2.5 h-2.5 rounded-full transition-all duration-300",
-                                  index === imageIndex 
-                                    ? "bg-white scale-125" 
-                                    : "bg-white/60 hover:bg-white/80"
-                                )}
-                                onClick={() => setImageIndex(index)}
-                              />
+                              <button key={index} className={cn("w-2 h-2 rounded-full transition-all duration-300", index === imageIndex ? "bg-white scale-110" : "bg-white/50 hover:bg-white/80")} onClick={() => setImageIndex(index)} />
                             ))}
                           </div>
-                          
-                          {/* Image Counter */}
-                          <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-medium">
+                          <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-0.5 rounded-full text-xs font-medium">
                             {imageIndex + 1} / {post.images.length}
                           </div>
                         </>
                       )}
-                      
-                      {/* Photo Credit/Caption Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                        <p className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                          📸 {post.location?.name || 'ภาพจากการเดินทาง'}
-                        </p>
-                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                {/* Enhanced Video Thumbnail */}
                 {post.videos.length > 0 && (
-                  <div className="relative group">
-                    <div className="w-full h-96 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-                      <div className="text-center">
-                        <Button
-                          variant="secondary"
-                          size="lg"
-                          className="bg-white/95 hover:bg-white text-gray-900 mb-4 rounded-full h-16 w-16 p-0 shadow-lg"
-                        >
-                          <Play className="h-8 w-8 ml-1" />
-                        </Button>
-                        <p className="text-white text-sm">
-                          🎥 วิดีโอจากการเดินทาง
-                        </p>
-                        <p className="text-white/70 text-xs mt-1">
-                          คลิกเพื่อเล่นวิดีโอ
-                        </p>
-                      </div>
-                    </div>
+                  <div className="w-full aspect-video bg-black flex items-center justify-center">
+                    <Button variant="secondary" size="lg" className="bg-white/90 hover:bg-white text-black rounded-full h-14 w-14 p-0 shadow-lg">
+                      <Play className="h-7 w-7 ml-1" />
+                    </Button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Tags */}
-            {post.tags.length > 0 && (
-              <div className="px-4 py-3">
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag, index) => (
-                    <motion.div
-                      key={tag}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <Badge 
-                        variant="outline" 
-                        className="text-xs cursor-pointer hover:bg-muted"
-                      >
-                        #{tag}
-                      </Badge>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Enhanced Interactions */}
-            <div className="p-4 pt-0 space-y-4">
-              {/* Enhanced Inspiration Rating */}
-              <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
+            {/* Interactions */}
+            <div className="p-4 space-y-4">
+              <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
                 <div className="flex items-center space-x-2 mb-2">
                   <span className="text-lg">✨</span>
-                  <h4 className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                    ให้คะแนนแรงบันดาลใจ
-                  </h4>
+                  <h4 className="text-sm font-medium text-amber-700 dark:text-amber-300">ให้คะแนนแรงบันดาลใจ</h4>
                 </div>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
-                  เรื่องราวนี้สร้างแรงบันดาลใจให้คุณแค่ไหน?
-                </p>
-                <InspirationRating
-                  postId={post.id}
-                  currentRating={post.userInspiration}
-                  averageRating={post.inspirationScore}
-                  totalVotes={post.inspirationCount}
-                  onRate={onInspire}
-                  showAverage={true}
-                  showVoteCount={true}
-                  className="justify-center"
-                />
+                <InspirationRating postId={post.id} currentRating={post.userInspiration} averageRating={post.inspirationScore} totalVotes={post.inspirationCount} onRate={onInspire} showAverage showVoteCount className="justify-center" />
               </div>
 
-              {/* Enhanced Action Buttons */}
+              {/* Action Buttons */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-0 h-auto text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setShowComments(!showComments)}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-1" />
+                <div className="flex items-center space-x-1">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => setShowComments(!showComments)}>
+                    <MessageCircle className="h-4 w-4 mr-1.5" />
                     <span className="text-xs font-medium">{post.comments}</span>
-                    <span className="text-xs ml-1 hidden sm:inline">ความคิดเห็น</span>
                   </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-0 h-auto text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => onShare(post.id)}
-                  >
-                    <Share2 className="h-4 w-4 mr-1" />
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => onShare(post.id)}>
+                    <Share2 className="h-4 w-4 mr-1.5" />
                     <span className="text-xs font-medium">{post.shares}</span>
-                    <span className="text-xs ml-1 hidden sm:inline">แชร์</span>
                   </Button>
-                  
-                  {/* Travel Journal Feature */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-0 h-auto text-muted-foreground hover:text-primary transition-colors hidden md:flex"
-                  >
-                    <span className="text-sm mr-1">📖</span>
-                    <span className="text-xs">เพิ่มในสมุดท่องเที่ยว</span>
-                  </Button>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  {/* Enhanced Map View Button */}
                   {(post.route || post.location) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-gradient-to-r from-green-50 to-blue-50 hover:from-green-100 hover:to-blue-100 border-green-200 text-green-700 dark:from-green-950/20 dark:to-blue-950/20 dark:border-green-800 dark:text-green-300"
-                      onClick={() => setShowMapModal(true)}
-                    >
-                      <MapPin className="h-4 w-4 mr-1" />
-                      <span className="text-xs font-medium">ดูแผนที่</span>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => setShowMapModal(true)}>
+                      <MapPin className="h-4 w-4 mr-1.5" />
+                      <span className="text-xs hidden sm:inline">แผนที่</span>
                     </Button>
                   )}
-
-                  {/* Enhanced Save Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "p-2 h-auto rounded-full transition-all",
-                      post.isSaved 
-                        ? "text-primary bg-primary/10 hover:bg-primary/20" 
-                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
-                    )}
-                    onClick={() => onSave(post.id)}
-                  >
-                    <Bookmark 
-                      className={cn(
-                        "h-4 w-4",
-                        post.isSaved && "fill-current"
-                      )} 
-                    />
-                  </Button>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={post.isSaved ? (currentLanguage === 'th' ? 'ยกเลิกการบันทึกโพสต์' : 'Unsave post') : (currentLanguage === 'th' ? 'บันทึกโพสต์' : 'Save post')}
+                  className={cn("rounded-full", post.isSaved ? "text-primary bg-primary/10" : "text-muted-foreground")}
+                  onClick={() => onSave(post.id)}
+                >
+                  <Bookmark className={cn("h-5 w-5", post.isSaved && "fill-current")} />
+                </Button>
               </div>
 
               {/* Comment Section */}
               <AnimatePresence>
                 {showComments && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <CommentSection
-                      postId={post.id}
-                      onAddComment={(content) => onComment(post.id, content)}
-                    />
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }}>
+                    <CommentSection postId={post.id} onAddComment={(content) => onComment(post.id, content)} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -486,8 +268,6 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
           </CardContent>
         </Card>
       </motion.div>
-
-      {/* Map Modal */}
       <MapViewModal
         isOpen={showMapModal}
         onClose={() => setShowMapModal(false)}

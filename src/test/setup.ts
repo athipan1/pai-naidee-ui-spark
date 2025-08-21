@@ -25,15 +25,13 @@ global.mockConsole = () => {
   };
 };
 
-// Mock localStorage if needed
-if (typeof window !== 'undefined') {
-  Object.defineProperty(window, 'localStorage', {
-    value: {
-      getItem: vi.fn(),
-      setItem: vi.fn(),
-      removeItem: vi.fn(),
-      clear: vi.fn(),
-    },
-    writable: true,
-  });
-}
+// Mock localStorage since we are in a JSDOM environment
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+  },
+  writable: true,
+});
