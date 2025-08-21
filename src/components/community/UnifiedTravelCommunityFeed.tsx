@@ -20,8 +20,10 @@ import {
   Bookmark,
   MapPin,
   Clock,
-  SlidersHorizontal
+  SlidersHorizontal,
+  PlusSquare
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { TravelStoryCard } from './TravelStoryCard';
 import { CreatePost } from './CreatePost';
 import { FloatingPostButton } from './FloatingPostButton';
@@ -32,7 +34,6 @@ import { cn } from '@/shared/lib/utils';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 
 interface UnifiedTravelCommunityFeedProps {
-  currentLanguage: 'th' | 'en';
   initialViewMode?: 'story' | 'grid';
 }
 
@@ -51,86 +52,86 @@ const travelZones: { value: TravelZone; label: string }[] = [
 
 // Sub-component for filter controls to be reused in desktop view and mobile sheet
 const FilterControls: React.FC<{
-  currentLanguage: 'th' | 'en';
   feedFilter: FeedFilter;
   handleFilterChange: (newFilter: Partial<FeedFilter>) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   className?: string;
-}> = ({ currentLanguage, feedFilter, handleFilterChange, searchQuery, setSearchQuery, className }) => (
-  <div className={cn("space-y-4", className)}>
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      <Input
-        placeholder={currentLanguage === 'th' ? 'ค้นหาสถานที่ เรื่องราว...' : 'Search places, stories...'}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="pl-10 bg-background/80 backdrop-blur-sm border-border/30 rounded-xl"
-      />
-    </div>
+}> = ({ feedFilter, handleFilterChange, searchQuery, setSearchQuery, className }) => {
+  const { t } = useTranslation();
+  return (
+    <div className={cn("space-y-4", className)}>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={t('communityFeed.searchPlaceholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 bg-background/80 backdrop-blur-sm border-border/30 rounded-xl"
+        />
+      </div>
 
-    <div className="grid grid-cols-2 gap-3">
-      <Select
-        value={feedFilter.sortBy}
-        onValueChange={(value) => handleFilterChange({ sortBy: value as 'latest' | 'popular' | 'trending' | 'inspiration' })}
-      >
-        <SelectTrigger className="bg-background/60 backdrop-blur-sm border-border/30 rounded-lg">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="latest">{currentLanguage === 'th' ? 'ล่าสุด' : 'Latest'}</SelectItem>
-          <SelectItem value="popular">{currentLanguage === 'th' ? 'ยอดนิยม' : 'Popular'}</SelectItem>
-          <SelectItem value="trending">{currentLanguage === 'th' ? 'กำลังมาแรง' : 'Trending'}</SelectItem>
-          <SelectItem value="inspiration">{currentLanguage === 'th' ? 'แรงบันดาลใจ' : 'Inspiring'}</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-2 gap-3">
+        <Select
+          value={feedFilter.sortBy}
+          onValueChange={(value) => handleFilterChange({ sortBy: value as 'latest' | 'popular' | 'trending' | 'inspiration' })}
+        >
+          <SelectTrigger className="bg-background/60 backdrop-blur-sm border-border/30 rounded-lg">
+            <SelectValue placeholder={t('communityFeed.sortBy')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="latest">{t('communityFeed.latest')}</SelectItem>
+            <SelectItem value="popular">{t('communityFeed.popular')}</SelectItem>
+            <SelectItem value="trending">{t('communityFeed.trending')}</SelectItem>
+            <SelectItem value="inspiration">{t('communityFeed.inspiring')}</SelectItem>
+          </SelectContent>
+        </Select>
 
-      <Select
-        value={feedFilter.travelZone || 'all'}
-        onValueChange={(value) => handleFilterChange({ travelZone: value === 'all' ? undefined : value as TravelZone })}
-      >
-        <SelectTrigger className="bg-background/60 backdrop-blur-sm border-border/30 rounded-lg">
-          <SelectValue placeholder={currentLanguage === 'th' ? 'ประเภท' : 'Category'} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{currentLanguage === 'th' ? 'ทุกประเภท' : 'All Types'}</SelectItem>
-          {travelZones.map((zone) => (
-            <SelectItem key={zone.value} value={zone.value}>{zone.label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          value={feedFilter.travelZone || 'all'}
+          onValueChange={(value) => handleFilterChange({ travelZone: value === 'all' ? undefined : value as TravelZone })}
+        >
+          <SelectTrigger className="bg-background/60 backdrop-blur-sm border-border/30 rounded-lg">
+            <SelectValue placeholder={t('communityFeed.category')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('communityFeed.allTypes')}</SelectItem>
+            {travelZones.map((zone) => (
+              <SelectItem key={zone.value} value={zone.value}>{zone.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Animated View Mode Toggle
 const ViewModeToggle: React.FC<{
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
-  currentLanguage: 'th' | 'en';
-}> = ({ viewMode, setViewMode, currentLanguage }) => (
-  <div className="relative flex items-center bg-muted/60 rounded-full p-1 border border-border/30" role="group">
-    {['story', 'grid'].map((mode) => (
-      <Button
-        key={mode}
-        variant="ghost"
-        size="sm"
-        onClick={() => setViewMode(mode as ViewMode)}
-        className={cn(
-          "relative z-10 w-full rounded-full transition-colors duration-200 px-4",
-          viewMode !== mode && "hover:bg-transparent"
-        )}
-        aria-label={mode === 'story'
-          ? (currentLanguage === 'th' ? 'มุมมองเรื่องราว' : 'Story view')
-          : (currentLanguage === 'th' ? 'มุมมองตาราง' : 'Grid view')
-        }
-      >
-        <span className="flex items-center">
-          {mode === 'story' ? <AlignLeft className="w-4 h-4 mr-1.5" /> : <Grid3X3 className="w-4 h-4 mr-1.5" />}
-          {mode === 'story' ? (currentLanguage === 'th' ? 'เรื่องราว' : 'Story') : (currentLanguage === 'th' ? 'ตาราง' : 'Grid')}
-        </span>
-      </Button>
-    ))}
+}> = ({ viewMode, setViewMode }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="relative flex items-center bg-muted/60 rounded-full p-1 border border-border/30" role="group">
+      {['story', 'grid'].map((mode) => (
+        <Button
+          key={mode}
+          variant="ghost"
+          size="sm"
+          onClick={() => setViewMode(mode as ViewMode)}
+          className={cn(
+            "relative z-10 w-full rounded-full transition-colors duration-200 px-4",
+            viewMode !== mode && "hover:bg-transparent"
+          )}
+          aria-label={t(mode === 'story' ? 'communityFeed.storyView' : 'communityFeed.gridView')}
+        >
+          <span className="flex items-center">
+            {mode === 'story' ? <AlignLeft className="w-4 h-4 mr-1.5" /> : <Grid3X3 className="w-4 h-4 mr-1.5" />}
+            {t(mode === 'story' ? 'communityFeed.story' : 'communityFeed.grid')}
+          </span>
+        </Button>
+      ))}
     <motion.div
       layoutId="view-mode-active-bg"
       className="absolute inset-0 z-0 bg-primary h-full rounded-full"
@@ -144,7 +145,6 @@ const ViewModeToggle: React.FC<{
 
 // Refactored Header Component
 const FeedHeader: React.FC<{
-  currentLanguage: 'th' | 'en';
   themeConfig: any;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
@@ -152,9 +152,11 @@ const FeedHeader: React.FC<{
   handleFilterChange: (newFilter: Partial<FeedFilter>) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-}> = ({ currentLanguage, themeConfig, viewMode, setViewMode, feedFilter, handleFilterChange, searchQuery, setSearchQuery }) => {
+  onShowCreatePost: () => void;
+}> = ({ themeConfig, viewMode, setViewMode, feedFilter, handleFilterChange, searchQuery, setSearchQuery, onShowCreatePost }) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isFilterSheetOpen, setFilterSheetOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <motion.div
@@ -166,37 +168,48 @@ const FeedHeader: React.FC<{
       }}
     >
       <div className="p-4 space-y-4">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <h1 className="text-xl font-bold text-foreground">
-              {currentLanguage === 'th' ? 'ชุมชนนักเดินทาง' : 'Travel Community'}
+              {t('communityFeed.headerTitle')}
             </h1>
             <Sparkles className="h-5 w-5 text-amber-500" />
           </div>
           {isMobile ? (
-            <Sheet open={isFilterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <SlidersHorizontal className="h-4 w-4 mr-2" />
-                  {currentLanguage === 'th' ? 'ตัวกรอง' : 'Filters'}
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>{currentLanguage === 'th' ? 'ตัวกรองและค้นหา' : 'Filter & Search'}</SheetTitle>
-                </SheetHeader>
-                <div className="py-4">
-                  <FilterControls {...{ currentLanguage, feedFilter, handleFilterChange, searchQuery, setSearchQuery }} />
-                </div>
-                <SheetFooter>
-                  <Button onClick={() => setFilterSheetOpen(false)} className="w-full">
-                    {currentLanguage === 'th' ? 'ดูผลลัพธ์' : 'View Results'}
+            <div className="flex items-center gap-2">
+              <Button variant="primary" size="sm" onClick={onShowCreatePost}>
+                <PlusSquare className="h-4 w-4 mr-2" />
+                {t('communityFeed.createPostButton')}
+              </Button>
+              <Sheet open={isFilterSheetOpen} onOpenChange={setFilterSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-9 w-9" aria-label={t('communityFeed.filters')}>
+                    <SlidersHorizontal className="h-4 w-4" />
                   </Button>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>{t('communityFeed.filterAndSearch')}</SheetTitle>
+                  </SheetHeader>
+                  <div className="py-4">
+                    <FilterControls {...{ feedFilter, handleFilterChange, searchQuery, setSearchQuery }} />
+                  </div>
+                  <SheetFooter>
+                    <Button onClick={() => setFilterSheetOpen(false)} className="w-full">
+                      {t('communityFeed.viewResults')}
+                    </Button>
+                  </SheetFooter>
+                </SheetContent>
+              </Sheet>
+            </div>
           ) : (
-             <ViewModeToggle {...{ viewMode, setViewMode, currentLanguage }} />
+            <div className="flex items-center gap-4">
+               <ViewModeToggle {...{ viewMode, setViewMode }} />
+               <Button variant="primary" onClick={onShowCreatePost}>
+                  <PlusSquare className="h-4 w-4 mr-2" />
+                  {t('communityFeed.createPostButton')}
+                </Button>
+            </div>
           )}
         </div>
 
@@ -206,24 +219,24 @@ const FeedHeader: React.FC<{
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-4 bg-background/60 backdrop-blur-sm border border-border/30">
-            <TabsTrigger value="all" className="text-xs">{currentLanguage === 'th' ? 'ทั้งหมด' : 'All'}</TabsTrigger>
-            <TabsTrigger value="following" className="text-xs">{currentLanguage === 'th' ? 'ติดตาม' : 'Following'}</TabsTrigger>
-            <TabsTrigger value="groups" className="text-xs">{currentLanguage === 'th' ? 'กลุ่ม' : 'Groups'}</TabsTrigger>
-            <TabsTrigger value="saved" className="text-xs">{currentLanguage === 'th' ? 'บันทึก' : 'Saved'}</TabsTrigger>
+            <TabsTrigger value="all" className="text-xs">{t('communityFeed.all')}</TabsTrigger>
+            <TabsTrigger value="following" className="text-xs">{t('communityFeed.following')}</TabsTrigger>
+            <TabsTrigger value="groups" className="text-xs">{t('communityFeed.groups')}</TabsTrigger>
+            <TabsTrigger value="saved" className="text-xs">{t('communityFeed.saved')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
         {isMobile ? (
           <div className="flex items-center justify-center">
-            <ViewModeToggle {...{ viewMode, setViewMode, currentLanguage }} />
+            <ViewModeToggle {...{ viewMode, setViewMode }} />
           </div>
         ) : (
-          <FilterControls {...{ currentLanguage, feedFilter, handleFilterChange, searchQuery, setSearchQuery }} />
+          <FilterControls {...{ feedFilter, handleFilterChange, searchQuery, setSearchQuery }} />
         )}
 
         {(feedFilter.travelZone || feedFilter.sortBy !== 'latest') && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-muted-foreground">{currentLanguage === 'th' ? 'ตัวกรอง:' : 'Filters:'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{t('communityFeed.activeFilters')}</span>
             {feedFilter.travelZone && (
               <Badge variant="secondary" className="text-xs bg-primary/10 border-primary/20">
                 {travelZones.find(z => z.value === feedFilter.travelZone)?.label}
@@ -232,9 +245,7 @@ const FeedHeader: React.FC<{
             {feedFilter.sortBy !== 'latest' && (
               <Badge variant="outline" className="text-xs">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                {feedFilter.sortBy === 'popular' ? (currentLanguage === 'th' ? 'ยอดนิยม' : 'Popular') :
-                 feedFilter.sortBy === 'trending' ? (currentLanguage === 'th' ? 'กำลังมาแรง' : 'Trending') :
-                 (currentLanguage === 'th' ? 'แรงบันดาลใจ' : 'Inspiring')}
+                {t(`communityFeed.${feedFilter.sortBy}`)}
               </Badge>
             )}
           </div>
@@ -246,13 +257,13 @@ const FeedHeader: React.FC<{
 
 
 const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProps> = ({
-  currentLanguage,
   initialViewMode = 'story'
 }) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { themeConfig } = useSeasonalTheme();
+  const { t } = useTranslation();
 
   const {
     posts,
@@ -301,7 +312,6 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
   return (
     <ResponsiveContainer maxWidth="2xl" className="space-y-6">
       <FeedHeader
-        currentLanguage={currentLanguage}
         themeConfig={themeConfig}
         viewMode={viewMode}
         setViewMode={setViewMode}
@@ -309,6 +319,7 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
         handleFilterChange={handleFilterChange}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        onShowCreatePost={() => setShowCreatePost(true)}
       />
 
       {/* Posts Feed with Smart Layout */}
@@ -384,7 +395,6 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
                         onShare={sharePost}
                         onComment={(postId, content) => addComment({ postId, content })}
                         className="rounded-2xl shadow-lg border-border/50 overflow-hidden transition-shadow duration-300 hover:shadow-xl"
-                        currentLanguage={currentLanguage}
                       />
                     ) : (
                       <GridPostCard
@@ -392,7 +402,6 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
                         layout={layout}
                         onSave={savePost}
                         onShare={sharePost}
-                        currentLanguage={currentLanguage}
                       />
                     )}
                   </motion.div>
@@ -407,19 +416,17 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
             >
               <div className="text-6xl">🗺️</div>
               <h3 className="text-lg font-medium text-foreground">
-                {currentLanguage === 'th' ? 'ยังไม่มีเรื่องราวการเดินทาง' : 'No travel stories yet'}
+                {t('communityFeed.noStories')}
               </h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                {currentLanguage === 'th' 
-                  ? 'เริ่มต้นการเดินทางครั้งแรกของคุณและแบ่งปันประสบการณ์กับชุมชน' 
-                  : 'Start your first journey and share your experiences with the community'}
+                {t('communityFeed.noStoriesDescription')}
               </p>
               <Button 
                 onClick={() => setShowCreatePost(true)}
                 className="mt-4 rounded-xl shadow-lg"
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                {currentLanguage === 'th' ? 'แบ่งปันเรื่องราว' : 'Share Your Story'}
+                {t('communityFeed.shareYourStory')}
               </Button>
             </motion.div>
           )}
@@ -430,18 +437,19 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
       <FloatingPostButton
         onClick={() => setShowCreatePost(true)}
         isVisible={!showCreatePost}
-        currentLanguage={currentLanguage}
       />
 
       {/* Create Post Modal */}
-      {showCreatePost && (
-        <CreatePost
-          onClose={() => setShowCreatePost(false)}
-          onSubmit={createPost}
-          isLoading={isCreatingPost}
-          currentLanguage={currentLanguage}
-        />
-      )}
+      <AnimatePresence>
+        {showCreatePost && (
+          <CreatePost
+            open={showCreatePost}
+            onOpenChange={setShowCreatePost}
+            onSubmit={createPost}
+            isSubmitting={isCreatingPost}
+          />
+        )}
+      </AnimatePresence>
     </ResponsiveContainer>
   );
 };
@@ -452,18 +460,17 @@ interface GridPostCardProps {
   layout: string;
   onSave: (postId: string) => void;
   onShare: (postId: string) => void;
-  currentLanguage: 'th' | 'en';
 }
 
 const GridPostCard: React.FC<GridPostCardProps> = ({
   post,
   onSave,
   onShare,
-  currentLanguage
 }) => {
   const [showMore, setShowMore] = useState(false);
   const hasMedia = post.images.length > 0 || post.videos.length > 0;
   const { themeConfig } = useSeasonalTheme();
+  const { t } = useTranslation();
 
   return (
     <Card className="overflow-hidden rounded-2xl shadow-md border-border/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card group">
@@ -505,21 +512,21 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
         {/* Actions */}
         <div className="flex items-center justify-between pt-2 border-t border-border/50">
           <div className="flex items-center -ml-2">
-            <button type="button" aria-label={currentLanguage === 'th' ? 'ถูกใจโพสต์' : 'Like post'} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-destructive transition-colors p-2 rounded-md">
+            <button type="button" aria-label={t('communityFeed.likePost')} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-destructive transition-colors p-2 rounded-md">
               <Heart className="h-4 w-4" />
               <span>{post.likes}</span>
             </button>
-            <button type="button" aria-label={currentLanguage === 'th' ? 'แสดงความคิดเห็นบนโพสต์' : 'Comment on post'} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-primary transition-colors p-2 rounded-md">
+            <button type="button" aria-label={t('communityFeed.commentOnPost')} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-primary transition-colors p-2 rounded-md">
               <MessageCircle className="h-4 w-4" />
               <span>{post.comments}</span>
             </button>
-            <button type="button" aria-label={currentLanguage === 'th' ? 'แชร์โพสต์' : 'Share post'} onClick={() => onShare(post.id)} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-accent-green transition-colors p-2 rounded-md">
+            <button type="button" aria-label={t('communityFeed.sharePost')} onClick={() => onShare(post.id)} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-accent-green transition-colors p-2 rounded-md">
               <Share2 className="h-4 w-4" />
             </button>
           </div>
           <button 
             type="button"
-            aria-label={post.isSaved ? (currentLanguage === 'th' ? 'ยกเลิกการบันทึกโพสต์' : 'Unsave post') : (currentLanguage === 'th' ? 'บันทึกโพสต์' : 'Save post')}
+            aria-label={t(post.isSaved ? 'communityFeed.unsavePost' : 'communityFeed.savePost')}
             onClick={() => onSave(post.id)}
             className={cn(
               "p-2 rounded-full transition-colors",

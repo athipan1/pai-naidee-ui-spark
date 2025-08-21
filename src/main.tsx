@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./app/App";
 import "./app/styles/index.css";
+import './i18n';
 import { logger } from './lib/logger';
 import { GlobalErrorBoundary } from './components/system/GlobalErrorBoundary';
 

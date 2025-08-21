@@ -49,10 +49,54 @@ export const useCommunity = () => {
   // Post mutations
   const createPostMutation = useMutation({
     mutationFn: (postData: CreatePostData) => communityService.createPost(postData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
+    onMutate: async (newPostData: CreatePostData) => {
+      await queryClient.cancelQueries({ queryKey: ['feed', feedFilter] });
+
+      const previousPosts = queryClient.getQueryData<Post[]>(['feed', feedFilter]);
+
+      // Create a temporary post for optimistic update
+      const optimisticPost: Post = {
+        id: `temp-${Date.now()}`,
+        content: newPostData.content,
+        images: newPostData.images.map(file => URL.createObjectURL(file)),
+        videos: newPostData.videos.map(file => URL.createObjectURL(file)),
+        tags: newPostData.tags,
+        location: newPostData.location,
+        accommodation: newPostData.accommodation,
+        privacy: newPostData.privacy,
+        createdAt: new Date().toISOString(),
+        user: { // This should be replaced with actual current user data
+          id: 'temp-user',
+          displayName: 'You',
+          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150',
+        },
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        isLiked: false,
+        isSaved: false,
+        inspirationScore: 0,
+        inspirationCount: 0,
+        userInspiration: 0,
+        title: newPostData.title,
+      };
+
+      queryClient.setQueryData(['feed', feedFilter], (oldData: Post[] = []) => [
+        optimisticPost,
+        ...oldData,
+      ]);
+
+      return { previousPosts };
+    },
+    onError: (err, newPost, context) => {
+      if (context?.previousPosts) {
+        queryClient.setQueryData(['feed', feedFilter], context.previousPosts);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed', feedFilter] });
       queryClient.invalidateQueries({ queryKey: ['userPoints'] });
-    }
+    },
   });
 
   const likePostMutation = useMutation({

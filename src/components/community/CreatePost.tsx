@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,6 +38,8 @@ export const CreatePost: React.FC<CreatePostProps> = ({
   onSubmit,
   isSubmitting = false
 }) => {
+  const { t } = useTranslation();
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [videos, setVideos] = useState<File[]>([]);
@@ -111,6 +114,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
     if (!content.trim()) return;
 
     const postData: CreatePostData = {
+      title: title.trim(),
       content: content.trim(),
       images,
       videos,
@@ -123,6 +127,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
     onSubmit(postData);
     
     // Reset form
+    setTitle('');
     setContent('');
     setImages([]);
     setVideos([]);
@@ -157,7 +162,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <span>สร้างโพสต์ใหม่</span>
+            <span>{t('createPost.title')}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -166,10 +171,10 @@ export const CreatePost: React.FC<CreatePostProps> = ({
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12">
               <AvatarImage src="https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150" />
-              <AvatarFallback>คุ</AvatarFallback>
+              <AvatarFallback>{t('createPost.userPlaceholder')}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium">คุณผู้ใช้</p>
+              <p className="font-medium">{t('createPost.userPlaceholder')}</p>
               <Select value={privacy} onValueChange={(value: any) => setPrivacy(value)}>
                 <SelectTrigger className="w-auto h-auto p-1 border-0 text-xs text-muted-foreground">
                   <SelectValue />
@@ -178,19 +183,19 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                   <SelectItem value="public">
                     <div className="flex items-center space-x-2">
                       <Globe className="h-3 w-3" />
-                      <span>สาธารณะ</span>
+                      <span>{t('createPost.privacyPublic')}</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="friends">
                     <div className="flex items-center space-x-2">
                       <Users className="h-3 w-3" />
-                      <span>เฉพาะเพื่อน</span>
+                      <span>{t('createPost.privacyFriends')}</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="private">
                     <div className="flex items-center space-x-2">
                       <Lock className="h-3 w-3" />
-                      <span>ส่วนตัว</span>
+                      <span>{t('createPost.privacyPrivate')}</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -198,9 +203,17 @@ export const CreatePost: React.FC<CreatePostProps> = ({
             </div>
           </div>
 
+          {/* Title */}
+          <Input
+            placeholder={t('createPost.titlePlaceholder')}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-lg font-semibold border-0 focus-visible:ring-0 px-0"
+          />
+
           {/* Content */}
           <Textarea
-            placeholder="คุณคิดอะไรอยู่? แบ่งปันเรื่องราวการเดินทางของคุณ..."
+            placeholder={t('createPost.placeholder')}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="min-h-[120px] resize-none border-0 text-base focus-visible:ring-0"
@@ -211,10 +224,10 @@ export const CreatePost: React.FC<CreatePostProps> = ({
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center space-x-1">
                 <MapPin className="h-4 w-4" />
-                <span>สถานที่</span>
+                <span>{t('createPost.locationLabel')}</span>
               </label>
               <Input
-                placeholder="เช่น ดอยสุเทพ, เชียงใหม่"
+                placeholder={t('createPost.locationPlaceholder')}
                 value={location?.name || ''}
                 onChange={(e) => {
                   if (e.target.value) {
@@ -233,10 +246,10 @@ export const CreatePost: React.FC<CreatePostProps> = ({
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center space-x-1">
                 <Building2 className="h-4 w-4" />
-                <span>ที่พัก</span>
+                <span>{t('createPost.accommodationLabel')}</span>
               </label>
               <Input
-                placeholder="เช่น โรงแรม ABC"
+                placeholder={t('createPost.accommodationPlaceholder')}
                 value={accommodation?.name || ''}
                 onChange={(e) => {
                   if (e.target.value) {
@@ -262,7 +275,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center space-x-1">
               <Hash className="h-4 w-4" />
-              <span>แท็ก</span>
+              <span>{t('createPost.tagsLabel')}</span>
             </label>
             <div className="flex flex-wrap gap-2 mb-2">
               {tags.map((tag, index) => (
@@ -275,7 +288,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
               ))}
             </div>
             <Input
-              placeholder="เพิ่มแท็ก (กด Enter เพื่อเพิ่ม)"
+              placeholder={t('createPost.tagsPlaceholder')}
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -320,7 +333,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                   {selectedImageIndex !== null && images[selectedImageIndex] && (
                     <div className="border rounded-lg p-4 bg-muted/50">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">แก้ไขรูปภาพ</h4>
+                        <h4 className="font-medium">{t('createPost.editImageTitle')}</h4>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -378,7 +391,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                 className="flex items-center space-x-2"
               >
                 <Camera className="h-4 w-4" />
-                <span>ถ่ายภาพ</span>
+                <span>{t('createPost.cameraButton')}</span>
               </Button>
 
               <Button
@@ -388,7 +401,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                 className="flex items-center space-x-2"
               >
                 <Folder className="h-4 w-4" />
-                <span>แกลเลอรี</span>
+                <span>{t('createPost.galleryButton')}</span>
               </Button>
 
               <Button
@@ -398,12 +411,12 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                 className="flex items-center space-x-2"
               >
                 <Video className="h-4 w-4" />
-                <span>วิดีโอ</span>
+                <span>{t('createPost.videoButton')}</span>
               </Button>
             </div>
 
             <div className="text-xs text-muted-foreground">
-              {images.length + videos.length}/10 ไฟล์
+              {t('createPost.fileCount', { count: images.length + videos.length })}
             </div>
 
             <input
@@ -432,13 +445,13 @@ export const CreatePost: React.FC<CreatePostProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              ยกเลิก
+              {t('createPost.cancelButton')}
             </Button>
             <Button 
               onClick={handleSubmit}
               disabled={!content.trim() || isSubmitting}
             >
-              {isSubmitting ? 'กำลังโพสต์...' : 'โพสต์'}
+              {isSubmitting ? t('createPost.submittingButton') : t('createPost.submitButton')}
             </Button>
           </div>
         </div>
