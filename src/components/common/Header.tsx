@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Menu, X, MapPin, Settings } from "lucide-react";
+import { Menu, X, MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
 import EnhancedLanguageToggle from "./EnhancedLanguageToggle";
+import { useUIContext } from "@/shared/contexts/UIContext";
 
 interface HeaderProps {
   currentLanguage: "th" | "en";
@@ -13,6 +14,7 @@ interface HeaderProps {
 const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { openCreatePostModal } = useUIContext();
 
   const menuItems = [
     { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
@@ -30,12 +32,14 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
     return location.pathname.startsWith(href);
   };
 
+  const isCommunityPage = location.pathname.startsWith('/community');
+
   return (
     <header className="sticky top-0 z-50 w-full glass-effect border-b border-white/20 shadow-lg safe-area-top">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Enhanced Logo */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="flex items-center space-x-2 interactive-scale"
           aria-label={currentLanguage === "th" ? "ไปไหนดี - หน้าแรก" : "PaiNaiDee - Home"}
         >
@@ -48,7 +52,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
         </Link>
 
         {/* Enhanced Desktop Navigation */}
-        <nav 
+        <nav
           className="hidden md:flex items-center space-x-6"
           aria-label={currentLanguage === "th" ? "เมนูหลัก" : "Main navigation"}
         >
@@ -67,26 +71,31 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
           ))}
         </nav>
 
-        {/* Enhanced Language Toggle - Desktop */}
+        {/* Actions - Desktop */}
         <div className="hidden md:flex items-center space-x-3">
+          {isCommunityPage && (
+            <Button onClick={openCreatePostModal}>
+              <Plus className="mr-2 h-4 w-4" />
+              {currentLanguage === "th" ? "โพสต์" : "Post"}
+            </Button>
+          )}
           <EnhancedLanguageToggle
             currentLanguage={currentLanguage}
             onLanguageChange={onLanguageChange}
             variant="dropdown"
             size="sm"
           />
-          
-
-          {/* Dark Mode Toggle */}
           <DarkModeToggle />
         </div>
 
-        {/* Language Toggle & Mobile Menu */}
+        {/* Actions - Mobile */}
         <div className="flex items-center space-x-3 md:hidden">
-          {/* Dark Mode Toggle */}
+          {isCommunityPage && (
+            <Button size="sm" onClick={openCreatePostModal}>
+              <Plus className="h-5 w-5" />
+            </Button>
+          )}
           <DarkModeToggle className="hidden sm:flex" />
-          
-          {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="sm"
@@ -120,7 +129,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
                 {item.label}
               </Link>
             ))}
-            
+
             {/* Developer Dashboard Link - Only in development */}
             {import.meta.env.DEV && (
               <Link
@@ -133,7 +142,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
                 🔧 {currentLanguage === "th" ? "แดชบอร์ดนักพัฒนา" : "Developer Dashboard"}
               </Link>
             )}
-            
+
             {/* Enhanced Language Toggle for Mobile */}
             <div className="pt-4 border-t border-border/30">
               <EnhancedLanguageToggle
@@ -147,7 +156,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
                 className="w-full justify-center"
               />
             </div>
-            
+
             {/* Dark Mode Toggle for Mobile */}
             <div className="flex justify-center">
               <DarkModeToggle size="sm" />
