@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
+import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
+import { useCommunity } from "@/shared/hooks/useCommunity";
+import { CreatePost } from "@/components/community/CreatePost";
 import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
@@ -43,7 +46,7 @@ import {
 } from "./routes/Redirects";
 
 // Conditionally load AccordionExamples only in development
-const AccordionExamples = import.meta.env.DEV 
+const AccordionExamples = import.meta.env.DEV
   ? lazy(() => import("./pages/AccordionExamples"))
   : null;
 
@@ -66,185 +69,182 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => {
+const AppContent = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
   const [isAIAssistantLoaded, setIsAIAssistantLoaded] = useState(false);
+
+  const { isCreatePostModalOpen, closeCreatePostModal } = useUIContext();
+  const { createPost, isCreatingPost } = useCommunity();
 
   // Apply responsive text sizing for better accessibility
   useResponsiveTextSize();
 
+  const handleCreatePost = (postData) => {
+    createPost(postData, {
+      onSuccess: () => {
+        closeCreatePostModal();
+      }
+    });
+  };
+
+  return (
+    <>
+      <SkipLink />
+      <Suspense fallback={
+        <LoadingSpinner
+          useSkeletonLoader={false}
+          text={currentLanguage === "th" ? "กำลังโหลด..." : "Loading..."}
+        />
+      }>
+        <Routes>
+          {/* Main Routes */}
+          <Route
+            path="/"
+            element={
+              <Index
+                currentLanguage={currentLanguage}
+                onLanguageChange={setCurrentLanguage}
+              />
+            }
+          />
+          {/* New Consolidated Routes */}
+          <Route
+            path="/discover"
+            element={
+              <DiscoverLayout currentLanguage={currentLanguage} />
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <SavedPage currentLanguage={currentLanguage} />
+            }
+          />
+          <Route
+            path="/me"
+            element={
+              <ProfilePage
+                currentLanguage={currentLanguage}
+                onLanguageChange={setCurrentLanguage}
+              />
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminLayout currentLanguage={currentLanguage} />
+            }
+          />
+          {/* Existing Essential Routes */}
+          <Route
+            path="/attraction/:id"
+            element={
+              <AttractionDetail
+                currentLanguage={currentLanguage}
+                onBack={() => window.history.back()}
+              />
+            }
+          />
+          <Route
+            path="/community"
+            element={
+              <CommunityFeed
+                currentLanguage={currentLanguage}
+              />
+            }
+          />
+          <Route
+            path="/community/instagram"
+            element={
+              <InstagramDemo />
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ContextualSearchResults
+                currentLanguage={currentLanguage}
+                onLanguageChange={setCurrentLanguage}
+              />
+            }
+          />
+          <Route
+            path="/video-upload"
+            element={
+              <VideoUploadPage
+                currentLanguage={currentLanguage}
+                onBack={() => window.history.back()}
+              />
+            }
+          />
+          {/* Legacy Route Redirects */}
+          <Route path="/explore" element={<ExploreRedirect />} />
+          <Route path="/favorites" element={<FavoritesRedirect />} />
+          <Route path="/search" element={<SearchRedirect />} />
+          <Route path="/map/:id?" element={<MapRedirect />} />
+          <Route path="/ai-assistant" element={<AIAssistantRedirect />} />
+          <Route path="/admin-panel" element={<AdminPanelRedirect />} />
+          <Route path="/admin/enhanced" element={<EnhancedAdminRedirect />} />
+          <Route path="/dashboard" element={<DashboardRedirect />} />
+          <Route path="/profile" element={<ProfileRedirect />} />
+          <Route
+            path="/category/:categoryName"
+            element={<ExploreRedirect />}
+          />
+          {/* Dev routes */}
+          {AccordionExamples && import.meta.env.DEV && (
+            <Route
+              path="/accordion-examples"
+              element={<AccordionExamples />}
+            />
+          )}
+          {/* 404 Route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+      {isAIAssistantLoaded ? (
+        <Suspense fallback={
+          <div className="fixed bottom-6 right-6 z-50">
+            <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
+          </div>
+        }>
+          <GlobalAIAssistant language={currentLanguage} />
+        </Suspense>
+      ) : (
+        <AIAssistantTrigger
+          onClick={() => setIsAIAssistantLoaded(true)}
+          language={currentLanguage}
+        />
+      )}
+      <CreatePost
+        open={isCreatePostModalOpen}
+        onOpenChange={(isOpen) => !isOpen && closeCreatePostModal()}
+        onSubmit={handleCreatePost}
+        isSubmitting={isCreatingPost}
+      />
+      <DevTools />
+    </>
+  );
+};
+
+
+const App = () => {
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
         <MediaProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <SkipLink />
-              <Suspense fallback={
-                <LoadingSpinner 
-                  useSkeletonLoader={false}
-                  text={currentLanguage === "th" ? "กำลังโหลด..." : "Loading..."}
-                />
-              }>
-                <Routes>
-                {/* 
-                  Route Consolidation Summary:
-                  - / -> Home (lightweight, redirects to /discover for main content)
-                  - /discover -> Unified discovery interface (mode=feed|category|search|map|trending)
-                  - /saved -> Consolidated favorites/saved content
-                  - /community -> Community feed (unchanged)
-                  - /me -> Profile with language toggle and settings
-                  - /admin -> Consolidated admin console (role-gated)
-                  
-                  Legacy routes redirect to new canonical paths for backward compatibility
-                */}
-                
-                {/* Main Routes */}
-                <Route
-                  path="/"
-                  element={
-                    <Index
-                      currentLanguage={currentLanguage}
-                      onLanguageChange={setCurrentLanguage}
-                    />
-                  }
-                />
-                
-                {/* New Consolidated Routes */}
-                <Route
-                  path="/discover"
-                  element={
-                    <DiscoverLayout currentLanguage={currentLanguage} />
-                  }
-                />
-                
-                <Route
-                  path="/saved"
-                  element={
-                    <SavedPage currentLanguage={currentLanguage} />
-                  }
-                />
-                
-                <Route
-                  path="/me"
-                  element={
-                    <ProfilePage
-                      currentLanguage={currentLanguage}
-                      onLanguageChange={setCurrentLanguage}
-                    />
-                  }
-                />
-                
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminLayout currentLanguage={currentLanguage} />
-                  }
-                />
-
-                {/* Existing Essential Routes */}
-                <Route
-                  path="/attraction/:id"
-                  element={
-                    <AttractionDetail
-                      currentLanguage={currentLanguage}
-                      onBack={() => window.history.back()}
-                    />
-                  }
-                />
-                
-                <Route
-                  path="/community"
-                  element={
-                    <CommunityFeed
-                      currentLanguage={currentLanguage}
-                      onLanguageChange={setCurrentLanguage}
-                      onBack={() => window.history.back()}
-                    />
-                  }
-                />
-                
-                <Route
-                  path="/community/instagram"
-                  element={
-                    <InstagramDemo />
-                  }
-                />
-                
-                <Route
-                  path="/search"
-                  element={
-                    <ContextualSearchResults
-                      currentLanguage={currentLanguage}
-                      onLanguageChange={setCurrentLanguage}
-                    />
-                  }
-                />
-                
-                <Route
-                  path="/video-upload"
-                  element={
-                    <VideoUploadPage 
-                      currentLanguage={currentLanguage}
-                      onBack={() => window.history.back()}
-                    />
-                  }
-                />
-
-                {/* Legacy Route Redirects for Backward Compatibility */}
-                <Route path="/explore" element={<ExploreRedirect />} />
-                <Route path="/favorites" element={<FavoritesRedirect />} />
-                <Route path="/search" element={<SearchRedirect />} />
-                <Route path="/map/:id?" element={<MapRedirect />} />
-                <Route path="/ai-assistant" element={<AIAssistantRedirect />} />
-                <Route path="/admin-panel" element={<AdminPanelRedirect />} />
-                <Route path="/admin/enhanced" element={<EnhancedAdminRedirect />} />
-                <Route path="/dashboard" element={<DashboardRedirect />} />
-                <Route path="/profile" element={<ProfileRedirect />} />
-                
-                {/* Legacy category route - redirect to discover with category mode */}
-                <Route
-                  path="/category/:categoryName"
-                  element={<ExploreRedirect />} // Will be handled by DiscoverLayout
-                />
-
-                {/* Development-only routes */}
-                {AccordionExamples && import.meta.env.DEV && (
-                  <Route
-                    path="/accordion-examples"
-                    element={<AccordionExamples />}
-                  />
-                )}
-
-                {/* 404 Route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-            
-            {/* Conditional AI Assistant - lazy loaded on demand */}
-            {isAIAssistantLoaded ? (
-              <Suspense fallback={
-                <div className="fixed bottom-6 right-6 z-50">
-                  <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
-                </div>
-              }>
-                <GlobalAIAssistant language={currentLanguage} />
-              </Suspense>
-            ) : (
-              <AIAssistantTrigger 
-                onClick={() => setIsAIAssistantLoaded(true)}
-                language={currentLanguage}
-              />
-            )}
-            
-            <DevTools />
-          </BrowserRouter>
-        </TooltipProvider>
-      </MediaProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
+          <UIProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </TooltipProvider>
+          </UIProvider>
+        </MediaProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

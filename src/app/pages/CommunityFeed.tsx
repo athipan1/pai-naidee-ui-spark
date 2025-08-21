@@ -5,19 +5,18 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import OptimizedImage from '@/components/common/OptimizedImage';
-import { 
-  PlusCircle, 
-  TrendingUp, 
-  Users, 
+import {
+  TrendingUp,
+  Users,
   Star,
   Filter,
   Search
 } from 'lucide-react';
 import { PostCard } from '@/components/community/PostCard';
-import { CreatePost } from '@/components/community/CreatePost';
 import { GroupCard } from '@/components/community/GroupCard';
 import { UserPoints } from '@/components/community/UserPoints';
 import { useCommunity } from '@/shared/hooks/useCommunity';
+import { useUIContext } from '@/shared/contexts/UIContext';
 import { FeedFilter } from '@/shared/types/community';
 import { Input } from '@/components/ui/input';
 
@@ -28,9 +27,9 @@ interface CommunityFeedProps {
 export const CommunityFeed: React.FC<CommunityFeedProps> = ({
   currentLanguage: _currentLanguage
 }) => {
-  const [showCreatePost, setShowCreatePost] = useState(false);
   const [activeTab, setActiveTab] = useState('feed');
   const [searchQuery, setSearchQuery] = useState('');
+  const { openCreatePostModal } = useUIContext();
 
   const {
     posts,
@@ -41,8 +40,6 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
     isLoadingGroups,
     userPoints,
     isLoadingPoints,
-    createPost,
-    isCreatingPost,
     likePost,
     savePost,
     sharePost,
@@ -55,8 +52,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
     setFeedFilter({ ...feedFilter, ...newFilter });
   };
 
-  const filteredPosts = posts.filter(post => 
-    searchQuery === '' || 
+  const filteredPosts = posts.filter(post =>
+    searchQuery === '' ||
     post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
     post.location?.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -78,14 +75,6 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
             แบ่งปันเรื่องราวและประสบการณ์การเดินทางของคุณ
           </p>
         </div>
-        
-        <Button 
-          onClick={() => setShowCreatePost(true)}
-          className="flex items-center space-x-2"
-        >
-          <PlusCircle className="h-4 w-4" />
-          <span>สร้างโพสต์</span>
-        </Button>
       </div>
 
       {/* Search */}
@@ -130,9 +119,9 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     <div className="flex items-center space-x-3">
                       <Filter className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">แสดง:</span>
-                      
-                      <Select 
-                        value={feedFilter.type} 
+
+                      <Select
+                        value={feedFilter.type}
                         onValueChange={(value: 'all' | 'following' | 'groups' | 'saved') => handleFilterChange({ type: value })}
                       >
                         <SelectTrigger className="w-auto">
@@ -147,8 +136,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                       </Select>
                     </div>
 
-                    <Select 
-                      value={feedFilter.sortBy} 
+                    <Select
+                      value={feedFilter.sortBy}
                       onValueChange={(value: 'latest' | 'popular' | 'trending' | 'inspiration') => handleFilterChange({ sortBy: value })}
                     >
                       <SelectTrigger className="w-auto">
@@ -207,7 +196,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     <p className="text-sm text-muted-foreground mb-4">
                       {searchQuery ? 'ลองค้นหาด้วยคำอื่น' : 'เป็นคนแรกที่สร้างโพสต์!'}
                     </p>
-                    <Button onClick={() => setShowCreatePost(true)}>
+                    <Button onClick={openCreatePostModal}>
                       สร้างโพสต์แรก
                     </Button>
                   </CardContent>
@@ -231,12 +220,12 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                   </h3>
                   <div className="space-y-3">
                     {groups.slice(0, 3).map((group) => (
-                      <div 
+                      <div
                         key={group.id}
                         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
                       >
-                        <OptimizedImage 
-                          src={group.coverImage} 
+                        <OptimizedImage
+                          src={group.coverImage}
                           alt={group.name}
                           className="h-10 w-10 rounded object-cover"
                           width={40}
@@ -251,9 +240,9 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                       </div>
                     ))}
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full mt-3"
                     onClick={() => setActiveTab('groups')}
                   >
@@ -271,9 +260,9 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                   </h3>
                   <div className="space-y-2">
                     {['เชียงใหม่', 'แบกเป้', 'เที่ยวคนเดียว', 'สายกิน', 'ประหยัด'].map((tag) => (
-                      <Badge 
+                      <Badge
                         key={tag}
-                        variant="outline" 
+                        variant="outline"
                         className="cursor-pointer hover:bg-muted w-full justify-start"
                         onClick={() => setSearchQuery(tag)}
                       >
@@ -351,7 +340,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
             <Card>
               <CardContent className="p-6 space-y-4">
                 <h3 className="font-medium">วิธีการสะสมคะแนน</h3>
-                
+
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                     <div className="flex items-center space-x-2">
@@ -360,7 +349,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     </div>
                     <Badge variant="secondary">50-100 คะแนน</Badge>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <Star className="h-4 w-4 text-green-500" />
@@ -368,7 +357,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     </div>
                     <Badge variant="secondary">10-25 คะแนน</Badge>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <Star className="h-4 w-4 text-purple-500" />
@@ -376,7 +365,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     </div>
                     <Badge variant="secondary">5 คะแนน</Badge>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <Star className="h-4 w-4 text-orange-500" />
@@ -390,14 +379,6 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
           </div>
         </TabsContent>
       </Tabs>
-
-      {/* Create Post Modal */}
-      <CreatePost
-        open={showCreatePost}
-        onOpenChange={setShowCreatePost}
-        onSubmit={createPost}
-        isSubmitting={isCreatingPost}
-      />
     </div>
   );
 };
