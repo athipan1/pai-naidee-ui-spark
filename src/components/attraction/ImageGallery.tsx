@@ -1,4 +1,4 @@
-import { useState } from "react";
+import * as React from "react";
 import {
   Carousel,
   CarouselContent,
@@ -6,56 +6,65 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card } from "@/components/ui/card";
-import { cn } from "@/shared/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import OptimizedImage from "@/components/common/OptimizedImage";
 
 interface ImageGalleryProps {
   images: string[];
-  title: string;
-  className?: string;
+  alt: string;
 }
 
-export function ImageGallery({ images, title, className }: ImageGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt }) => {
+  if (!images || images.length === 0) {
+    return (
+      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+        <p className="text-muted-foreground">No image available</p>
+      </div>
+    );
+  }
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* Main Image */}
-      <div className="relative aspect-[16/10] overflow-hidden rounded-lg">
-        <img
-          src={`https://images.unsplash.com/${images[selectedIndex]}?w=800&h=500&fit=crop`}
-          alt={`${title} - รูปที่ ${selectedIndex + 1}`}
-          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-        />
-        <div className="absolute bottom-4 right-4 rounded-full bg-background/80 px-3 py-1 text-sm backdrop-blur-sm">
-          {selectedIndex + 1} / {images.length}
-        </div>
-      </div>
-
-      {/* Thumbnail Carousel */}
-      <Carousel className="w-full max-w-sm mx-auto">
+    <div className="relative w-full">
+      <Carousel className="w-full rounded-lg overflow-hidden">
         <CarouselContent>
-          {images.map((image, index) => (
-            <CarouselItem key={index} className="basis-1/3">
-              <Card
-                className={cn(
-                  "cursor-pointer overflow-hidden transition-all duration-200 hover:ring-2 hover:ring-primary",
-                  selectedIndex === index && "ring-2 ring-primary"
-                )}
-                onClick={() => setSelectedIndex(index)}
-              >
-                <img
-                  src={`https://images.unsplash.com/${image}?w=200&h=150&fit=crop`}
-                  alt={`${title} - ภาพย่อที่ ${index + 1}`}
-                  className="aspect-[4/3] w-full object-cover"
-                />
-              </Card>
+          {images.map((src, index) => (
+            <CarouselItem key={index}>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="aspect-video w-full overflow-hidden cursor-zoom-in">
+                    <OptimizedImage
+                      src={src}
+                      alt={`${alt} - image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      width="100%"
+                      height="100%"
+                    />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl p-2 bg-transparent border-0">
+                  <OptimizedImage
+                    src={src}
+                    alt={`${alt} - image ${index + 1}`}
+                    className="w-full h-auto object-contain max-h-[90vh] rounded-lg"
+                    width="100%"
+                    height="auto"
+                  />
+                </DialogContent>
+              </Dialog>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+          <CarouselPrevious className="relative left-0 transform-none static text-white bg-black/50 hover:bg-black/70 hover:text-white" />
+          <CarouselNext className="relative right-0 transform-none static text-white bg-black/50 hover:bg-black/70 hover:text-white" />
+        </div>
       </Carousel>
     </div>
   );
-}
+};
+
+export default ImageGallery;
