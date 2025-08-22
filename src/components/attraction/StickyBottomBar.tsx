@@ -1,33 +1,29 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Hotel, Share2, Heart } from 'lucide-react';
+import { Camera, Share2, Heart } from 'lucide-react';
 
 interface StickyBottomBarProps {
   isFavorite: boolean;
   onToggleFavorite: () => void;
-  onBook: () => void;
+  onPostExperience: () => void;
   onShare: () => void;
-  price?: string;
   currentLanguage: 'th' | 'en';
 }
 
 const content = {
     th: {
-        bookNow: 'จองเลย',
-        pricePerNight: '/คืน',
+        postExperience: 'โพสต์ประสบการณ์ของคุณ',
     },
     en: {
-        bookNow: 'Book Now',
-        pricePerNight: '/night',
+        postExperience: 'Post Your Experience',
     }
 }
 
 const StickyBottomBar: React.FC<StickyBottomBarProps> = ({
   isFavorite,
   onToggleFavorite,
-  onBook,
+  onPostExperience,
   onShare,
-  price,
   currentLanguage
 }) => {
   const t = content[currentLanguage];
@@ -42,9 +38,9 @@ const StickyBottomBar: React.FC<StickyBottomBarProps> = ({
                 <Share2 className="w-5 h-5 text-muted-foreground" />
             </Button>
         </div>
-        <Button onClick={onBook} className="flex-grow">
-            <Hotel className="w-4 h-4 mr-2" />
-            {t.bookNow}
+        <Button onClick={onPostExperience} className="flex-grow">
+            <Camera className="w-4 h-4 mr-2" />
+            {t.postExperience}
         </Button>
       </div>
     </div>

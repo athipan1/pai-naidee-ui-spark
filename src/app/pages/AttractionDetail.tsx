@@ -34,6 +34,7 @@ import Reviews from "@/components/attraction/Reviews";
 import StickyBottomBar from "@/components/attraction/StickyBottomBar";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import OptimizedImage from "@/components/common/OptimizedImage";
+import { useUIContext } from "@/shared/contexts/UIContext";
 import { 
   useAttractionDetail, 
   useRefreshAttraction,
@@ -91,6 +92,8 @@ const AttractionDetail = ({
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [accommodationLoading, setAccommodationLoading] = useState(false);
   const [accommodationError, setAccommodationError] = useState<string | null>(null);
+
+  const { openCreatePostModal } = useUIContext();
 
   const content = {
     th: {
@@ -199,6 +202,10 @@ const AttractionDetail = ({
     } finally {
       setAccommodationLoading(false);
     }
+  };
+
+  const handlePostExperience = () => {
+    openCreatePostModal();
   };
 
   if (isLoading) {
@@ -547,12 +554,7 @@ const AttractionDetail = ({
           </CardContent>
         </Card>
 
-        {/* Post Experience Button */}
-        <div className="text-center">
-            <Button size="lg" className="w-full sm:w-auto">
-                {currentLanguage === 'th' ? 'โพสต์ประสบการณ์ของคุณ' : 'Post Your Experience'}
-            </Button>
-        </div>
+        {/* Post Experience Button is now in StickyBottomBar */}
       </div>
 
       {/* Modals */}
@@ -581,7 +583,7 @@ const AttractionDetail = ({
       <StickyBottomBar
         isFavorite={isFavorite}
         onToggleFavorite={toggleFavorite}
-        onBook={handleBookingClick}
+        onPostExperience={handlePostExperience}
         onShare={handleShare}
         currentLanguage={currentLanguage}
       />
