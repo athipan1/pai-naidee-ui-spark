@@ -17,8 +17,14 @@ import {
   Lock,
   Hash,
   Camera,
-  Folder
+  Folder,
+  ChevronDown
 } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { CreatePostData, LocationTag, AccommodationTag } from '@/shared/types/community';
 import { cn } from '@/shared/lib/utils';
 import { CameraCapture } from './CameraCapture';
@@ -48,22 +54,20 @@ export const CreatePost: React.FC<CreatePostProps> = ({
   const [privacy, setPrivacy] = useState<'public' | 'friends' | 'private'>('public');
   const [showCamera, setShowCamera] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setImages(prev => [...prev, ...files].slice(0, 10)); // Max 10 images
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const videoFiles = files.filter(file => file.type.startsWith('video/'));
+    setImages(prev => [...prev, ...imageFiles].slice(0, 10));
+    setVideos(prev => [...prev, ...videoFiles].slice(0, 3));
   };
 
   const handleCameraCapture = (file: File) => {
     setImages(prev => [...prev, file].slice(0, 10));
-  };
-
-  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setVideos(prev => [...prev, ...files].slice(0, 3)); // Max 3 videos
   };
 
   const removeImage = (index: number) => {
@@ -154,14 +158,17 @@ export const CreatePost: React.FC<CreatePostProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
+<DialogContent className="sm:max-w-2xl w-full h-full sm:h-auto sm:max-h-[90vh] flex flex-col p-0 rounded-none sm:rounded-lg">
+  <DialogHeader className="p-4 border-b sm:p-6">
+    <DialogTitle className="flex items-center justify-between">
             <span>สร้างโพสต์ใหม่</span>
+      <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="sm:hidden">
+        <X className="h-5 w-5" />
+      </Button>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+  <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {/* User Info */}
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12">
@@ -200,102 +207,113 @@ export const CreatePost: React.FC<CreatePostProps> = ({
 
           {/* Content */}
           <Textarea
-            placeholder="คุณคิดอะไรอยู่? แบ่งปันเรื่องราวการเดินทางของคุณ..."
+            placeholder="แชร์ประสบการณ์น่าประทับใจของคุณ ✨"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="min-h-[120px] resize-none border-0 text-base focus-visible:ring-0"
           />
 
-          {/* Location & Accommodation */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center space-x-1">
-                <MapPin className="h-4 w-4" />
-                <span>สถานที่</span>
-              </label>
-              <Input
-                placeholder="เช่น ดอยสุเทพ, เชียงใหม่"
-                value={location?.name || ''}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setLocation({
-                      id: Date.now().toString(),
-                      name: e.target.value,
-                      province: 'เชียงใหม่' // This would be autocompleted
-                    });
-                  } else {
-                    setLocation(undefined);
-                  }
-                }}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center space-x-1">
-                <Building2 className="h-4 w-4" />
-                <span>ที่พัก</span>
-              </label>
-              <Input
-                placeholder="เช่น โรงแรม ABC"
-                value={accommodation?.name || ''}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setAccommodation({
-                      id: Date.now().toString(),
-                      name: e.target.value,
-                      type: 'hotel',
-                      location: location || {
-                        id: '',
-                        name: '',
-                        province: ''
+          {/* Advanced Options */}
+          <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-center text-sm text-muted-foreground">
+                <span className="mr-2">ตัวเลือกขั้นสูง</span>
+                <ChevronDown className={cn("h-4 w-4 transition-transform", isAdvancedOpen && "rotate-180")} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 pt-4 animate-accordion-down">
+              {/* Location & Accommodation */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center space-x-1">
+                    <MapPin className="h-4 w-4" />
+                    <span>สถานที่</span>
+                  </label>
+                  <Input
+                    placeholder="เช่น ดอยสุเทพ, เชียงใหม่"
+                    value={location?.name || ''}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setLocation({
+                          id: Date.now().toString(),
+                          name: e.target.value,
+                          province: 'เชียงใหม่' // This would be autocompleted
+                        });
+                      } else {
+                        setLocation(undefined);
                       }
-                    });
-                  } else {
-                    setAccommodation(undefined);
-                  }
-                }}
-              />
-            </div>
-          </div>
+                    }}
+                  />
+                </div>
 
-          {/* Tags */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center space-x-1">
-              <Hash className="h-4 w-4" />
-              <span>แท็ก</span>
-            </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center space-x-1">
-                  <span>#{tag}</span>
-                  <button onClick={() => removeTag(tag)}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-            <Input
-              placeholder="เพิ่มแท็ก (กด Enter เพื่อเพิ่ม)"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              onBlur={addTag}
-            />
-          </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center space-x-1">
+                    <Building2 className="h-4 w-4" />
+                    <span>ที่พัก</span>
+                  </label>
+                  <Input
+                    placeholder="เช่น โรงแรม ABC"
+                    value={accommodation?.name || ''}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setAccommodation({
+                          id: Date.now().toString(),
+                          name: e.target.value,
+                          type: 'hotel',
+                          location: location || {
+                            id: '',
+                            name: '',
+                            province: ''
+                          }
+                        });
+                      } else {
+                        setAccommodation(undefined);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center space-x-1">
+                  <Hash className="h-4 w-4" />
+                  <span>แท็ก</span>
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center space-x-1">
+                      <span>#{tag}</span>
+                      <button onClick={() => removeTag(tag)}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <Input
+                  placeholder="เพิ่มแท็ก (กด Enter เพื่อเพิ่ม)"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  onBlur={addTag}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Media Preview */}
           {(images.length > 0 || videos.length > 0) && (
             <div className="space-y-4">
               {/* Images */}
               {images.length > 0 && (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-2">
+                 <div className="space-y-3">
+                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                     {images.map((image, index) => (
-                      <div key={index} className="relative group">
+                      <div key={index} className="relative group aspect-square">
                         <img
                           src={URL.createObjectURL(image)}
                           alt={`Preview ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg cursor-pointer"
+                          className="w-full h-full object-cover rounded-lg cursor-pointer"
                           style={{
                             filter: imageFilters[index]?.filter || 'none'
                           }}
@@ -303,7 +321,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                         />
                         <button
                           onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute -top-1 -right-1 bg-gray-900/70 text-white rounded-full p-0.5"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -347,17 +365,17 @@ export const CreatePost: React.FC<CreatePostProps> = ({
 
               {/* Videos */}
               {videos.length > 0 && (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {videos.map((video, index) => (
                     <div key={index} className="relative group">
                       <video
                         src={URL.createObjectURL(video)}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="w-full h-full object-cover rounded-lg"
                         controls
                       />
                       <button
                         onClick={() => removeVideo(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1 -right-1 bg-gray-900/70 text-white rounded-full p-0.5"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -369,78 +387,64 @@ export const CreatePost: React.FC<CreatePostProps> = ({
           )}
 
           {/* Media Upload Buttons */}
-          <div className="flex items-center justify-between pt-3 border-t">
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCamera(true)}
-                className="flex items-center space-x-2"
-              >
-                <Camera className="h-4 w-4" />
-                <span>ถ่ายภาพ</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => imageInputRef.current?.click()}
-                className="flex items-center space-x-2"
-              >
-                <Folder className="h-4 w-4" />
-                <span>แกลเลอรี</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => videoInputRef.current?.click()}
-                className="flex items-center space-x-2"
-              >
-                <Video className="h-4 w-4" />
-                <span>วิดีโอ</span>
-              </Button>
-            </div>
-
-            <div className="text-xs text-muted-foreground">
-              {images.length + videos.length}/10 ไฟล์
-            </div>
-
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-
-            <input
-              ref={videoInputRef}
-              type="file"
-              accept="video/*"
-              multiple
-              onChange={handleVideoUpload}
-              className="hidden"
-            />
-          </div>
-
-          {/* Submit */}
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
+          <div className="flex items-center gap-2 pt-3">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setShowCamera(true)}
+              className="flex-1 flex items-center space-x-2"
             >
-              ยกเลิก
+              <Camera className="h-5 w-5" />
+              <span>ถ่ายภาพ</span>
             </Button>
-            <Button 
-              onClick={handleSubmit}
-              disabled={!content.trim() || isSubmitting}
+
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => imageInputRef.current?.click()}
+              className="flex-1 flex items-center space-x-2"
             >
-              {isSubmitting ? 'กำลังโพสต์...' : 'โพสต์'}
+              <ImagePlus className="h-5 w-5" />
+              <span>รูปภาพ/วิดีโอ</span>
             </Button>
           </div>
+
+        </div>
+
+        {/* Hidden File Inputs */}
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*,video/*"
+          multiple
+          onChange={handleImageUpload}
+          className="hidden"
+        />
+
+        {/* Sticky Footer for Actions */}
+        <div className="p-4 border-t bg-background">
+            <div className="flex justify-between items-center">
+                 <div className="text-xs text-muted-foreground">
+                    {images.length + videos.length}/13 ไฟล์
+                </div>
+                <div className="flex space-x-2">
+                    <Button
+                    variant="ghost"
+                    onClick={() => onOpenChange(false)}
+                    disabled={isSubmitting}
+                    className="hidden sm:inline-flex"
+                    >
+                    ยกเลิก
+                    </Button>
+                    <Button
+                    onClick={handleSubmit}
+                    disabled={!content.trim() || isSubmitting}
+                    className="bg-travel-green-500 hover:bg-travel-green-500/90 text-white font-bold py-3 px-6 rounded-lg w-full sm:w-auto"
+                    >
+                    {isSubmitting ? 'กำลังโพสต์...' : 'โพสต์'}
+                    </Button>
+                </div>
+            </div>
         </div>
       </DialogContent>
 
