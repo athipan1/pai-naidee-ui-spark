@@ -31,7 +31,6 @@ import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
 import Reviews from "@/components/attraction/Reviews";
-import StickyBottomBar from "@/components/attraction/StickyBottomBar";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import { 
@@ -547,12 +546,6 @@ const AttractionDetail = ({
           </CardContent>
         </Card>
 
-        {/* Post Experience Button */}
-        <div className="text-center">
-            <Button size="lg" className="w-full sm:w-auto">
-                {currentLanguage === 'th' ? 'โพสต์ประสบการณ์ของคุณ' : 'Post Your Experience'}
-            </Button>
-        </div>
       </div>
 
       {/* Modals */}
@@ -576,14 +569,6 @@ const AttractionDetail = ({
         error={accommodationError}
         currentLanguage={currentLanguage}
         attractionName={attraction.name}
-      />
-
-      <StickyBottomBar
-        isFavorite={isFavorite}
-        onToggleFavorite={toggleFavorite}
-        onBook={handleBookingClick}
-        onShare={handleShare}
-        currentLanguage={currentLanguage}
       />
     </div>
   );
