@@ -1,8 +1,5 @@
-// API utility functions for the Explore page with mock data fallback
-import { mockVideos, mockComments, simulateDelay } from "../data/mockData";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+// API utility functions for the Explore page
+const API_BASE_URL = "https://Athipan01-PaiNaiDee_Backend.hf.space";
 
 // Get JWT token from localStorage
 const getAuthToken = (): string | null => {
@@ -114,98 +111,50 @@ export const isAuthenticated = (): boolean => {
   return !!token && !isTokenExpired(token);
 };
 
-// API endpoints for Explore page with mock fallbacks
+// API endpoints for Explore page
 export const exploreAPI = {
   // Get videos for explore feed
   getVideos: async (page: number = 1, limit: number = 10) => {
-    try {
-      return await apiCall(
-        `${API_BASE_URL}/explore/videos?page=${page}&limit=${limit}`
-      );
-    } catch {
-      console.warn("ใช้ mock videos เนื่องจาก backend error");
-      await simulateDelay();
-      return { videos: mockVideos, totalCount: mockVideos.length, page, limit };
-    }
+    return await apiCall(
+      `${API_BASE_URL}/explore/videos?page=${page}&limit=${limit}`
+    );
   },
 
   // Like/unlike a video
   toggleLike: async (videoId: string) => {
-    try {
-      return await apiCall(`${API_BASE_URL}/videos/${videoId}/like`, {
-        method: "POST",
-      });
-    } catch {
-      console.warn("Mock like toggle for video:", videoId);
-      await simulateDelay(200);
-      return { success: true, liked: true };
-    }
+    return await apiCall(`${API_BASE_URL}/videos/${videoId}/like`, {
+      method: "POST",
+    });
   },
 
   // Follow/unfollow a user
   toggleFollow: async (userId: string) => {
-    try {
-      return await apiCall(`${API_BASE_URL}/users/${userId}/follow`, {
-        method: "POST",
-      });
-    } catch {
-      console.warn("Mock follow toggle for user:", userId);
-      await simulateDelay(200);
-      return { success: true, following: true };
-    }
+    return await apiCall(`${API_BASE_URL}/users/${userId}/follow`, {
+      method: "POST",
+    });
   },
 
   // Get comments for a video
   getComments: async (videoId: string, page: number = 1) => {
-    try {
-      return await apiCall(
-        `${API_BASE_URL}/videos/${videoId}/comments?page=${page}`
-      );
-    } catch {
-      console.warn("ใช้ mock comments เนื่องจาก backend error");
-      await simulateDelay(300);
-      return { comments: mockComments, totalCount: mockComments.length, page };
-    }
+    return await apiCall(
+      `${API_BASE_URL}/videos/${videoId}/comments?page=${page}`
+    );
   },
 
   // Post a comment
   postComment: async (videoId: string, text: string) => {
-    try {
-      return await apiCall(`${API_BASE_URL}/videos/${videoId}/comments`, {
-        method: "POST",
-        body: JSON.stringify({ text }),
-      });
-    } catch {
-      console.warn("Mock comment post for video:", videoId);
-      await simulateDelay(400);
-      return {
-        success: true,
-        comment: {
-          id: `c${Date.now()}`,
-          text,
-          user: { id: "mock", name: "Mock User" },
-          timestamp: "just now",
-          likes: 0,
-        },
-      };
-    }
+    // The backend expects the format { "input": "..." }
+    return await apiCall(`${API_BASE_URL}/videos/${videoId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ input: text }),
+    });
   },
 
   // Share a video (get share URL)
   shareVideo: async (videoId: string) => {
-    try {
-      return await apiCall(`${API_BASE_URL}/videos/${videoId}/share`, {
-        method: "POST",
-      });
-    } catch {
-      console.warn("Mock share for video:", videoId);
-      await simulateDelay(200);
-      return {
-        success: true,
-        shareUrl: `https://mockapp.com/video/${videoId}`,
-        message: "Link copied to clipboard!",
-      };
-    }
+    return await apiCall(`${API_BASE_URL}/videos/${videoId}/share`, {
+      method: "POST",
+    });
   },
 };
 
@@ -213,32 +162,20 @@ export const exploreAPI = {
 export const accommodationAPI = {
   // Fetch nearby accommodations for an attraction
   fetchNearbyAccommodations: async (attractionId: string) => {
-    try {
-      const response = await apiCall<{
-        id: string;
-        name: string;
-        nameLocal?: string;
-        rating: number;
-        distance: number;
-        image: string;
-        price: number;
-        currency: string;
-        amenities: string[];
-        booking_url?: string;
-      }[]>(`/accommodations/nearby/${attractionId}`);
-      
-      return response;
-    } catch {
-      // Fallback to mock data
-      console.warn("Using mock accommodation data for attraction:", attractionId);
-      const { mockAccommodations, simulateDelay } = await import("../data/mockData");
-      
-      await simulateDelay(800); // Simulate realistic API delay
-      
-      const accommodations = mockAccommodations[attractionId as keyof typeof mockAccommodations] || [];
-      
-      return accommodations;
-    }
+    const response = await apiCall<{
+      id: string;
+      name: string;
+      nameLocal?: string;
+      rating: number;
+      distance: number;
+      image: string;
+      price: number;
+      currency: string;
+      amenities: string[];
+      booking_url?: string;
+    }[]>(`${API_BASE_URL}/accommodations/nearby/${attractionId}`);
+
+    return response;
   },
 };
 
