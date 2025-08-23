@@ -188,7 +188,10 @@ npm run test:ui
 สร้างไฟล์ `.env.development` สำหรับการพัฒนาในเครื่อง:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:5000/api
+# Backend URL (ถ้าต้องการทดสอบกับ local backend)
+# VITE_API_BASE_URL=http://localhost:5000
+
+# ค่าอื่นๆ
 VITE_APP_TITLE=PaiNaiDee - Development
 VITE_ENABLE_DEBUG=true
 VITE_ENABLE_ANALYTICS=false
@@ -300,151 +303,37 @@ docker compose up app
 
 การเปลี่ยนภาษาสามารถทำได้ในส่วนติดต่อผู้ใช้ และแอปพลิเคชันจะตรวจจับการตั้งค่าของผู้ใช้โดยอัตโนมัติ
 
-## 🚀 การ Deploy
+## 🚀 Backend & API
 
-### Production Build
+Backend ทั้งหมดของโปรเจกต์นี้ถูก deploy และทำงานบน **Hugging Face Spaces** ซึ่งเป็นแพลตฟอร์มที่เหมาะสำหรับโมเดล AI และ API ที่เกี่ยวข้อง
 
-```bash
-# สร้าง production build ที่ปรับแต่งแล้ว
-npm run build
+**Backend URL:** `https://Athipan01-PaiNaiDee_Backend.hf.space`
 
-# ดูตัวอย่าง production build ในเครื่อง
-npm run preview
-```
+[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/Athipan01/PaiNaiDee_Backend)
 
-### Deploy บน Vercel 🚀
+### API Endpoints
 
-Deploy โปรเจคนี้บน Vercel ได้อย่างง่ายดายด้วยปุ่มด้านล่าง:
+แอปพลิเคชันเชื่อมต่อกับ endpoints ต่อไปนี้:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A//github.com/athipan1/pai-naidee-ui-spark)
+| Method | Endpoint                    | คำอธิบาย                                        |
+|--------|-----------------------------|-------------------------------------------------|
+| `GET`  | `/health`                   | ตรวจสอบสถานะของ API (Health Check)              |
+| `POST` | `/predict`                  | **AI Chat API** - ส่งข้อความเพื่อประมวลผลโดย AI    |
+| `POST` | `/search`                   | ค้นหาสถานที่ตามเงื่อนไขที่กำหนด                   |
+| `GET`  | `/search/suggestions`       | ดึงคำแนะนำสำหรับการค้นหา (Autocomplete)          |
+| `GET`  | `/search/filters`           | ดึงข้อมูลตัวกรอง (เช่น จังหวัด, หมวดหมู่)         |
+| `GET`  | `/explore/videos`           | ดึงวิดีโอสำหรับหน้า Explore Feed                 |
+| `POST` | `/videos/{videoId}/like`    | กดไลค์/เลิกไลค์วิดีโอ                          |
+| `GET`  | `/videos/{videoId}/comments`| ดึงความคิดเห็นของวิดีโอ                        |
+| `POST` | `/videos/{videoId}/comments`| โพสต์ความคิดเห็นใหม่ในวิดีโอ                     |
 
-#### การตั้งค่า Environment Variables
+*หมายเหตุ: การเรียก API ทั้งหมดไม่จำเป็นต้องมี prefix `/api`*
 
-หลังจาก deploy แล้ว ให้ตั้งค่า environment variables ต่อไปนี้ใน Vercel dashboard:
+### 🧪 ทดสอบ API ทั้งหมดใน Google Colab
 
-**ตัวแปรที่จำเป็น / Required Variables:**
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-DATABASE_URL=your_database_connection_string
-VITE_API_BASE_URL=https://your-api-domain.com/api
-```
-
-**ตัวแปรเสริม / Optional Variables:**
-```bash
-VITE_APP_TITLE=PaiNaiDee
-VITE_ENABLE_DEBUG=false
-VITE_ENABLE_ANALYTICS=true
-VERCEL_PROJECT_NAME=pai-naidee-ui-spark
-```
-
-#### ขั้นตอนการ Deploy
-
-1. คลิกปุ่ม "Deploy with Vercel" ด้านบน
-2. เชื่อมต่อ GitHub account และเลือก repository
-3. ตั้งค่า environment variables ในหน้า settings
-4. รอ build process เสร็จสิ้น
-5. เข้าถึงแอปผ่าน URL ที่ Vercel สร้างให้
-
-### Deploy บน Hugging Face Spaces 🤗
-
-Deploy แอปพลิเคชันบน Hugging Face Spaces สำหรับการใช้งานและสาธิต:
-
-[![Deploy on HF Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/deploy-on-spaces-md.svg)](https://huggingface.co/spaces/new?template=https://github.com/athipan1/pai-naidee-ui-spark)
-
-#### การตั้งค่าสำหรับ Hugging Face Spaces
-
-1. **สร้างไฟล์ `requirements.txt`** (หากต้องการ Python backend):
-```txt
-fastapi==0.104.1
-uvicorn==0.24.0
-python-multipart==0.0.6
-requests==2.31.0
-```
-
-2. **สร้างไฟล์ `app.py`** (สำหรับ demo backend):
-```python
-import gradio as gr
-import requests
-
-def predict(message):
-    # ใส่ logic สำหรับ API calls ที่นี่
-    return f"Response: {message}"
-
-iface = gr.Interface(fn=predict, inputs="text", outputs="text")
-iface.launch()
-```
-
-3. **โครงสร้างสำหรับ Spaces**:
-```
-pai-naidee-ui-spark/
-├── app.py              # Gradio/Streamlit app (ถ้าต้องการ)
-├── requirements.txt    # Python dependencies
-├── README.md          # จะแสดงใน Spaces
-├── src/               # Frontend code
-└── package.json       # Node.js dependencies
-```
-
-#### หมายเหตุสำหรับ Hugging Face Spaces
-
-- **Framework**: รองรับ Gradio, Streamlit หรือ Static HTML
-- **API Demo**: สามารถใช้ Gradio สร้าง interactive demo
-- **Frontend**: Static files จะถูกให้บริการ automatically
-- **Python Backend**: เหมาะสำหรับ AI/ML features
-
-### ทดลองใช้งานบน Google Colab ⚗️
-
-#### 🧪 ทดลอง API ทั้งหมดใน Google Colab
-
-ทดสอบการทำงานของ API ทั้งหมดได้ทันทีผ่าน Google Colab โดยไม่ต้องติดตั้งอะไรเพิ่มเติม
-
-Test all API functionality instantly through Google Colab without any additional installation required
+ทดสอบการทำงานของ API ทั้งหมดได้ทันทีผ่าน Google Colab โดยไม่ต้องติดตั้งอะไรเพิ่มเติม Notebook สำหรับทดสอบได้รับการอัปเดตให้ตรงกับ endpoints ปัจจุบันบน Hugging Face Spaces แล้ว
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/athipan1/pai-naidee-ui-spark/blob/main/tests/test_all_apis.ipynb)
-
-#### รายการ API ที่ทดสอบ / Tested API Endpoints:
-
-- ✅ `/api/talk` - AI Chat API สำหรับสนทนากับ AI
-- ✅ `/api/attractions` - ค้นหาและแสดงสถานที่ท่องเที่ยว
-- ✅ `/api/attractions/<id>` - รายละเอียดของสถานที่ท่องเที่ยวเฉพาะ
-- ✅ `/api/videos` - จัดการและแสดงวิดีโอ
-- ✅ `/api/videos/upload` - อัปโหลดวิดีโอใหม่
-- ✅ `/api/user/profile` - จัดการโปรไฟล์ผู้ใช้
-- ✅ `/api/user/favorites` - จัดการรายการโปรดของผู้ใช้
-
-#### การตั้งค่าใน Google Colab:
-
-1. **ติดตั้ง dependencies**:
-```python
-!pip install requests pandas json5 tabulate
-```
-
-2. **ตั้งค่า API endpoint URL**:
-```python
-API_BASE_URL = "https://your-vercel-app.vercel.app/api"  # เปลี่ยนเป็น URL ของคุณ
-```
-
-3. **ใช้ helper function สำหรับเรียก API**:
-```python
-def call_api(method, url, payload=None, headers=None):
-    # ฟังก์ชันสำหรับเรียก API แบบง่ายๆ
-    # Simple function to call API endpoints
-    pass
-```
-
-#### คุณสมบัติของ Notebook:
-
-- 🐍 **ใช้ Python** สำหรับการทดสอบที่ยืดหยุ่น
-- 🌏 **แสดงผลเป็นภาษาไทย/อังกฤษ** เพื่อความชัดเจน
-- 📊 **แสดงผลแบบตาราง** สำหรับข้อมูลที่อ่านง่าย
-- 🔧 **ฟังก์ชันช่วยเหลือ** สำหรับการเรียก API
-- ✅ **ทดสอบครบถ้วน** ทุก endpoint ที่สำคัญ
-
-### ตัวเลือกการ Deploy อื่นๆ
-
-1. **Static Hosting** - Deploy โฟลเดอร์ `dist/` ไปยังบริการ static hosting ใดๆ
-2. **Docker** - ใช้ Dockerfile ที่มีให้สำหรับ deployment แบบ containerized  
-3. **Lovable Platform** - Deploy โดยตรงผ่าน Lovable (ดูการตั้งค่าเดิม)
-4. **GitHub Pages** - ใช้ GitHub Actions workflow ที่มีอยู่แล้ว
 
 ## 🤝 การร่วมพัฒนา
 
@@ -872,172 +761,6 @@ npm audit --audit-level high
 - 🐛 เปิด issue สำหรับรายงานบั๊กหรือขอคุณสมบัติใหม่
 - 💡 เริ่มการสนทนาสำหรับคำถามและไอเดีย
 
-## 📡 API Documentation
-
-### การจัดการข้อมูล (Current Implementation)
-
-ปัจจุบันแอปพลิเคชันใช้ข้อมูล mock ที่เก็บในไฟล์ `src/shared/data/mockData.ts` สำหรับการพัฒนาและทดสอบ
-
-#### ข้อมูลสถานที่ท่องเที่ยว
-```typescript
-interface Attraction {
-  id: string;
-  name: string;           // ชื่อภาษาอังกฤษ
-  nameLocal: string;      // ชื่อภาษาไทย
-  province: string;       // จังหวัด
-  category: string;       // หมวดหมู่
-  tags: string[];         // แท็กสำหรับการค้นหา
-  rating: number;         // คะแนนรีวิว (0-5)
-  reviewCount: number;    // จำนวนรีวิว
-  image: string;          // URL รูปภาพ
-  description: string;    // คำอธิบาย
-  location: {
-    lat: number;          // พิกัด GPS
-    lng: number;
-  };
-  amenities: string[];    // สิ่งอำนวยความสะดวก
-}
-```
-
-#### Search API Structure
-```typescript
-interface SearchResponse {
-  results: SearchResult[];
-  suggestions: SearchSuggestion[];
-  total: number;
-  hasMore: boolean;
-}
-
-interface SearchResult extends Attraction {
-  confidence: number;     // ระดับความมั่นใจในผลลัพธ์ (0-1)
-  matchedTerms: string[]; // คำที่ตรงกับการค้นหา
-}
-```
-
-### API Endpoints (Future Implementation)
-
-#### Authentication
-```typescript
-// POST /api/auth/login
-{
-  email: string;
-  password: string;
-}
-
-// POST /api/auth/register  
-{
-  email: string;
-  password: string;
-  name: string;
-  preferences?: UserPreferences;
-}
-
-// POST /api/auth/logout
-// DELETE /api/auth/refresh
-```
-
-#### Attractions
-```typescript
-// GET /api/attractions
-// Query parameters:
-// - search: string
-// - category: string
-// - province: string  
-// - limit: number
-// - offset: number
-// - sort: 'rating' | 'name' | 'distance'
-
-// GET /api/attractions/:id
-// Returns detailed attraction information
-
-// POST /api/attractions/:id/favorite
-// PUT /api/attractions/:id/rating
-{
-  rating: number; // 1-5
-  review?: string;
-}
-```
-
-#### User Management
-```typescript
-// GET /api/user/profile
-// PUT /api/user/profile
-{
-  name: string;
-  preferences: {
-    language: 'th' | 'en';
-    favoriteCategories: string[];
-    notifications: boolean;
-  };
-}
-
-// GET /api/user/favorites
-// POST /api/user/favorites/:attractionId
-// DELETE /api/user/favorites/:attractionId
-```
-
-### การใช้งาน API ในแอปพลิเคชัน
-
-#### การเรียกใช้ด้วย TanStack Query
-```typescript
-// hooks/useAttractions.ts
-export const useAttractions = (searchParams: SearchParams) => {
-  return useQuery({
-    queryKey: ['attractions', searchParams],
-    queryFn: () => attractionAPI.search(searchParams),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !!searchParams.query || !!searchParams.category,
-  });
-};
-
-// การใช้งานใน component
-const { data, isLoading, error } = useAttractions({
-  query: searchTerm,
-  category: selectedCategory,
-  limit: 20,
-});
-```
-
-#### Error Handling
-```typescript
-// utils/api.ts
-export const handleAPIError = (error: unknown) => {
-  if (error instanceof AxiosError) {
-    switch (error.response?.status) {
-      case 404:
-        return 'ไม่พบข้อมูลที่ค้นหา';
-      case 500:
-        return 'เกิดข้อผิดพลาดของระบบ กรุณาลองใหม่';
-      default:
-        return 'เกิดข้อผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ';
-    }
-  }
-  return 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ';
-};
-```
-
-### WebSocket Integration (Optional)
-
-```typescript
-// services/queueService.ts
-class QueueService {
-  private ws: WebSocket | null = null;
-  
-  connect() {
-    this.ws = new WebSocket('ws://localhost:5000/api/ws');
-    
-    this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      this.handleMessage(data);
-    };
-  }
-  
-  // Real-time updates สำหรับ:
-  // - Attraction availability
-  // - Live reviews
-  // - System notifications
-}
-```
 
 ## 📄 ใบอนุญาต
 
