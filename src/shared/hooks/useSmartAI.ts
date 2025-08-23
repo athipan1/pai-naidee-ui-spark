@@ -25,7 +25,7 @@ export interface AIRequest {
 
 export type AIStatus = 'idle' | 'listening' | 'thinking' | 'talking' | 'error';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_URL = "https://Athipan01-PaiNaiDee_Backend.hf.space/predict";
 
 const useSmartAI = () => {
   const [messages, setMessages] = useState<AIMessage[]>([]);
@@ -69,57 +69,35 @@ const useSmartAI = () => {
     }
   }, [sessionId]);
 
-  // API call to /api/talk endpoint
+  // API call to the new endpoint
   const callAIAPI = async (request: AIRequest): Promise<AIResponse> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/talk`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
+    const payload = {
+      input: request.message
+    };
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      }
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.warn('API call failed, using fallback response:', error);
-      
-      // Fallback to mock response when API is not available
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-      
-      const responses = {
-        th: [
-          'สวัสดีครับ! ยินดีต้อนรับสู่ PaiNaiDee ครับ',
-          'ขอบคุณที่ใช้บริการของเราครับ มีอะไรให้ช่วยเหลือไหมครับ?',
-          'ผมพร้อมช่วยแนะนำสถานที่ท่องเที่ยวในประเทศไทยให้ครับ',
-          'หากต้องการข้อมูลเกี่ยวกับการท่องเที่ยว กรุณาสอบถามได้เลยครับ'
-        ],
-        en: [
-          'Hello! Welcome to PaiNaiDee, your travel companion!',
-          'Thank you for using our service. How can I help you today?',
-          'I\'m ready to recommend amazing places to visit in Thailand',
-          'Feel free to ask me anything about travel destinations!'
-        ]
-      };
-
-      const isThaiInput = /[\u0E00-\u0E7F]/.test(request.message);
-      const responseLanguage = request.language === 'auto' ? (isThaiInput ? 'th' : 'en') : (request.language || 'en');
-      const responseOptions = responses[responseLanguage as keyof typeof responses] || responses.en;
-      const randomResponse = responseOptions[Math.floor(Math.random() * responseOptions.length)];
-
-      return {
-        response: randomResponse,
-        session_id: sessionId || `session_${Date.now()}`,
-        language: responseLanguage,
-        confidence: 0.85 + Math.random() * 0.15,
-        intent: 'greeting'
-      };
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error("API Error Response:", errorBody);
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
+
+    const data = await response.json();
+
+    const responseText = data.response || data.output || data.generated_text || JSON.stringify(data);
+
+    return {
+      response: responseText,
+      language: data.language || 'th', // Assume Thai
+      session_id: data.session_id, // Pass it if present
+    };
   };
 
   const mutation = useMutation({
