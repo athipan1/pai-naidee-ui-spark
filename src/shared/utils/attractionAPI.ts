@@ -66,23 +66,14 @@ export interface AttractionDetail {
 export const attractionAPI = {
   // Get attraction details by ID
   getAttractionDetail: async (id: string): Promise<AttractionDetail> => {
-    try {
-      // Try to fetch from real API first
-      const response = await apiCall<AttractionDetail>(
-        `${API_BASE_URL}/attractions/${id}`
-      );
-      return response;
-    } catch (_error) {
-      // Fallback to mock data with proper simulation
+    // Use mock data if the VITE_USE_MOCK_DATA flag is set
+    if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
       await simulateDelay(300);
-      
       const mockData = mockAttractionDetails[id as keyof typeof mockAttractionDetails];
-      
       if (!mockData) {
-        throw new Error(`Attraction with ID ${id} not found`);
+        // Still throw an error if mock data is not found
+        throw new Error(`Attraction with ID ${id} not found in mock data`);
       }
-
-      // Map mock data to proper interface
       return {
         id: mockData.id,
         name: mockData.name,
@@ -96,9 +87,12 @@ export const attractionAPI = {
         tags: mockData.tags,
         coordinates: mockData.location,
         externalLinks: mockData.externalLinks,
-        lastUpdated: new Date().toISOString(), // Add timestamp for cache busting
+        lastUpdated: new Date().toISOString(),
       };
     }
+
+    // Otherwise, fetch from the real API; apiCall will throw on non-ok responses
+    return apiCall<AttractionDetail>(`${API_BASE_URL}/attractions/${id}`);
   },
 
   // Get list of all attractions with basic info
@@ -113,25 +107,9 @@ export const attractionAPI = {
     page: number;
     limit: number;
   }> => {
-    try {
-      const params = new URLSearchParams();
-      if (options?.page) params.append('page', options.page.toString());
-      if (options?.limit) params.append('limit', options.limit.toString());
-      if (options?.category) params.append('category', options.category);
-      if (options?.search) params.append('search', options.search);
-
-      const response = await apiCall<{
-        attractions: Array<Pick<AttractionDetail, 'id' | 'name' | 'nameLocal' | 'category' | 'rating' | 'images'>>;
-        total: number;
-        page: number;
-        limit: number;
-      }>(`${API_BASE_URL}/attractions?${params.toString()}`);
-      
-      return response;
-    } catch (_error) {
+    // Use mock data if the VITE_USE_MOCK_DATA flag is set
+    if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
       await simulateDelay(500);
-      
-      // Convert mock data to list format
       const attractions = Object.values(mockAttractionDetails).map(attraction => ({
         id: attraction.id,
         name: attraction.name,
@@ -140,7 +118,6 @@ export const attractionAPI = {
         rating: attraction.rating,
         images: attraction.images,
       }));
-
       return {
         attractions,
         total: attractions.length,
@@ -148,33 +125,42 @@ export const attractionAPI = {
         limit: options?.limit || 10,
       };
     }
+
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.category) params.append('category', options.category);
+    if (options?.search) params.append('search', options.search);
+
+    return apiCall<{
+      attractions: Array<Pick<AttractionDetail, 'id' | 'name' | 'nameLocal' | 'category' | 'rating' | 'images'>>;
+      total: number;
+      page: number;
+      limit: number;
+    }>(`${API_BASE_URL}/attractions?${params.toString()}`);
   },
 
   // Force refresh attraction data (invalidate cache)
   refreshAttractionData: async (id?: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      // If real API exists, call refresh endpoint
-      const endpoint = id 
-        ? `${API_BASE_URL}/attractions/${id}/refresh`
-        : `${API_BASE_URL}/attractions/refresh`;
-        
-      const response = await apiCall<{ success: boolean; message: string }>(
-        endpoint,
-        { method: 'POST' }
-      );
-      
-      return response;
-    } catch (_error) {
-      // Simulate cache refresh for mock data
+    // Handle mock scenario
+    if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
       await simulateDelay(200);
-      
       return {
         success: true,
         message: id 
-          ? `Attraction ${id} data refreshed from cache`
-          : 'All attraction data refreshed from cache'
+          ? `Mock attraction ${id} data refreshed`
+          : 'All mock attraction data refreshed'
       };
     }
+
+    const endpoint = id
+      ? `${API_BASE_URL}/attractions/${id}/refresh`
+      : `${API_BASE_URL}/attractions/refresh`;
+
+    return apiCall<{ success: boolean; message: string }>(
+      endpoint,
+      { method: 'POST' }
+    );
   }
 };
 
