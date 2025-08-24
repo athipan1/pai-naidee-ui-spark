@@ -16,6 +16,7 @@ import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
 import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import AttractionListTest from "@/components/common/AttractionListTest";
 
 interface IndexProps {
   currentLanguage: "th" | "en";
@@ -244,6 +245,9 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       />
 
       <main id="main-content" role="main" className="focus:outline-none" tabIndex={-1}>
+        <div className="container mx-auto px-4 pt-4 border-b-2 border-dashed border-red-500 my-4">
+            <AttractionListTest />
+        </div>
         {/* API Status Display */}
         {(apiError || usingMockData) && (
           <div className="container mx-auto px-4 pt-4">
