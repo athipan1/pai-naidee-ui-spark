@@ -1,5 +1,5 @@
 // API utility functions for the Explore page
-const API_BASE_URL = "https://Athipan01-PaiNaiDee_Backend.hf.space";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://athipan01-painaidee_backend.hf.space/";
 
 // Get JWT token from localStorage
 const getAuthToken = (): string | null => {
