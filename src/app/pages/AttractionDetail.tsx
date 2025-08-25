@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { accommodationAPI } from "@/shared/utils/api";
+import { fetchNearbyAccommodations } from "@/services/attraction.service";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
@@ -38,7 +38,7 @@ import {
   useRefreshAttraction,
   getAttractionErrorMessage 
 } from "@/shared/hooks/useAttractionQueries";
-import type { AttractionDetail } from "@/shared/utils/attractionAPI";
+import type { Accommodation } from "@/shared/types/attraction";
 
 const pastelVariants = [
   "pastel-blue",
@@ -191,7 +191,7 @@ const AttractionDetail = ({
     setAccommodationError(null);
 
     try {
-      const accommodationData = await accommodationAPI.fetchNearbyAccommodations(attraction.id);
+      const accommodationData = await fetchNearbyAccommodations(attraction.id);
       setAccommodations(accommodationData);
     } catch (error) {
       setAccommodationError(error instanceof Error ? error.message : "Failed to load accommodations");

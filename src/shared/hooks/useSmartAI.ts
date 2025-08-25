@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { callAIAPI } from '@/services/ai.service';
 
 export interface AIMessage {
   id: string;
@@ -24,8 +25,6 @@ export interface AIRequest {
 }
 
 export type AIStatus = 'idle' | 'listening' | 'thinking' | 'talking' | 'error';
-
-const API_URL = "https://Athipan01-PaiNaiDee_Backend.hf.space/predict";
 
 const useSmartAI = () => {
   const [messages, setMessages] = useState<AIMessage[]>([]);
@@ -68,37 +67,6 @@ const useSmartAI = () => {
       localStorage.setItem('ai_session_id', sessionId);
     }
   }, [sessionId]);
-
-  // API call to the new endpoint
-  const callAIAPI = async (request: AIRequest): Promise<AIResponse> => {
-    const payload = {
-      input: request.message
-    };
-
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error("API Error Response:", errorBody);
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    const responseText = data.response || data.output || data.generated_text || JSON.stringify(data);
-
-    return {
-      response: responseText,
-      language: data.language || 'th', // Assume Thai
-      session_id: data.session_id, // Pass it if present
-    };
-  };
 
   const mutation = useMutation({
     mutationFn: callAIAPI,

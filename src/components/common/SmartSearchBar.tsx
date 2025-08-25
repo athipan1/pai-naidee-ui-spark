@@ -15,9 +15,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/shared/lib/utils";
 
-import type { SearchSuggestion, SearchResult } from "@/shared/utils/searchAPI";
+import type { SearchSuggestion, SearchResult } from "@/shared/types/search";
 import type { PostSearchResult } from "@/shared/types/posts";
-import { searchPosts, getTrendingSearches } from "@/shared/utils/contextualSearchAPI";
+import { searchPosts, getTrendingSearches } from "@/services/contextualSearch.service";
+import { getSearchSuggestions } from "@/services/search.service";
 
 interface SmartSearchBarProps {
   currentLanguage: "th" | "en";
@@ -122,7 +123,7 @@ const SmartSearchBar = ({
   );
 
   // Fetch suggestions using API client
-  const fetchSuggestions = async (_searchQuery: string) => {
+  const fetchSuggestions = async (searchQuery: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -131,8 +132,7 @@ const SmartSearchBar = ({
     setIsLoading(true);
 
     try {
-      // const suggestions = await apiClient.getSearchSuggestions(searchQuery, currentLanguage);
-      const suggestions = [];
+      const suggestions = await getSearchSuggestions(searchQuery, currentLanguage);
       setSuggestions(suggestions);
     } catch {
       // Handle error silently for now

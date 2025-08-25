@@ -7,7 +7,7 @@ import { MapPin, Clock, TrendingUp, Filter, SortAsc } from "lucide-react";
 import Header from "@/components/common/Header";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import PostCard from "@/components/common/PostCard";
-import { searchPosts, searchLocations } from "@/shared/utils/contextualSearchAPI";
+import { searchPosts, searchLocations } from "@/services/contextualSearch.service";
 import { PostSearchResult, Location } from "@/shared/types/posts";
 
 interface ContextualSearchResultsProps {
