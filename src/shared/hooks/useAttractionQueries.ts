@@ -1,6 +1,7 @@
 // React Query hooks for attraction data management
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { attractionAPI, AttractionDetail, handleAttractionAPIError } from '../utils/attractionAPI';
+import * as attractionAPI from '@/services/attraction.service';
+import { AttractionDetail } from '@/shared/types/attraction';
 
 // Query keys for consistent cache management
 export const attractionKeys = {
@@ -202,5 +203,6 @@ export const useUpdateAttractionCache = () => {
 // Utility function to get error message from query
 export const getAttractionErrorMessage = (error: Error | null, fallback: string = 'เกิดข้อผิดพลาด'): string => {
   if (!error) return fallback;
-  return handleAttractionAPIError(error);
+  // Simple error handling for now, can be expanded
+  return error.message || fallback;
 };
