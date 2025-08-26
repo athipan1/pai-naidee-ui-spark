@@ -1,21 +1,10 @@
 import axios from 'axios';
 
-// Helper function to determine the base URL
-const getBaseUrl = () => {
-  // If in production and no custom API URL is set, use the production backend URL.
-  if (import.meta.env.PROD && !import.meta.env.VITE_API_BASE_URL) {
-    return 'https://athipan01-painaidee-backend.hf.space/api';
-  }
-  // Otherwise, use the environment variable (works for dev and preview environments)
-  return import.meta.env.VITE_API_BASE_URL;
-};
-
 // Create an axios instance
 const apiClient = axios.create({
-  // CORRECT: Use VITE_API_BASE_URL which is defined in .env files
-  // NOTE: In development, this will be 'http://localhost:5000/api' via vite proxy.
-  // In production, this should be the full URL of the deployed backend.
-  baseURL: getBaseUrl(),
+  // The baseURL is now '/', so all requests are relative and will be
+  // intercepted by the Vite proxy in development.
+  baseURL: '/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -103,47 +92,5 @@ apiClient.interceptors.response.use(
   }
 );
 
-
-// Define the interface for an Attraction
-export interface Attraction {
-  id: string;
-  name: string;
-  detail: string;
-  coverimage: string;
-  latitude: number;
-  longitude: number;
-}
-
-// Define the interface for the list of attractions
-export interface AttractionsResponse {
-  attractions: Attraction[];
-}
-
-// Function to fetch all attractions
-export const getAttractions = async (): Promise<AttractionsResponse> => {
-  // REMOVED: '/api' prefix, as it's now part of the baseURL
-  const response = await apiClient.get<AttractionsResponse>('/attractions');
-  return response.data;
-};
-
-// Function to fetch a single attraction by its ID
-export const getAttractionById = async (id: string): Promise<Attraction> => {
-  // REMOVED: '/api' prefix
-  const response = await apiClient.get<Attraction>(`/attractions/${id}`);
-  return response.data;
-};
-
-// Function to create a new attraction
-export const createAttraction = async (attractionData: Omit<Attraction, 'id'>): Promise<Attraction> => {
-  // REMOVED: '/api' prefix
-  const response = await apiClient.post<Attraction>('/attractions', attractionData);
-  return response.data;
-};
-
-// ADDED: Function to check backend health
-export const getHealth = async (): Promise<{ status: string }> => {
-  const response = await apiClient.get<{ status: string }>('/health');
-  return response.data;
-};
 
 export default apiClient;
