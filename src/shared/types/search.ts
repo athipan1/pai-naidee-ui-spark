@@ -2,10 +2,14 @@ export interface SearchQuery {
   query: string;
   language: "th" | "en";
   filters: {
-    provinces: string[];
-    categories: string[];
-    amenities: string[];
+    provinces?: string[];
+    categories?: string[];
+    amenities?: string[];
+    priceRange?: 'all' | 'free' | 'paid';
+    maxDistance?: number;
+    minRating?: number;
   };
+  sortBy?: 'relevance' | 'price-low' | 'price-high' | 'rating' | 'distance';
 }
 
 export interface SearchSuggestion {
