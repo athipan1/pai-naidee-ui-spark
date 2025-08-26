@@ -3,7 +3,7 @@ import { AttractionDetail, Accommodation } from '@/shared/types/attraction';
 
 // Get attraction details by ID
 export const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
-  const { data } = await apiClient.get<AttractionDetail>(`/attractions/${id}`);
+  const { data } = await apiClient.get<AttractionDetail>(`/api/attractions/${id}`);
   return data;
 };
 
@@ -25,19 +25,19 @@ export const getAttractions = async (options?: {
   if (options?.category) params.append('category', options.category);
   if (options?.search) params.append('search', options.search);
 
-  const { data } = await apiClient.get(`/attractions?${params.toString()}`);
+  const { data } = await apiClient.get(`/api/attractions?${params.toString()}`);
   return data;
 };
 
 // Force refresh attraction data (invalidate cache)
 export const refreshAttractionData = async (id?: string): Promise<{ success: boolean; message: string }> => {
-  const endpoint = id ? `/attractions/${id}/refresh` : `/attractions/refresh`;
+  const endpoint = id ? `/api/attractions/${id}/refresh` : `/api/attractions/refresh`;
   const { data } = await apiClient.post(endpoint);
   return data;
 };
 
 // Fetch nearby accommodations for an attraction
 export const fetchNearbyAccommodations = async (attractionId: string): Promise<Accommodation[]> => {
-  const { data } = await apiClient.get<Accommodation[]>(`/accommodations/nearby/${attractionId}`);
+  const { data } = await apiClient.get<Accommodation[]>(`/api/accommodations/nearby/${attractionId}`);
   return data;
 };

@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         "/api": {
-          target: env.VITE_API_BASE_URL || "http://localhost:5000",
+          target: "http://localhost:5000",
           changeOrigin: true,
           secure: false,
         }
@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
           enabled: false // Disable PWA in development
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg}'],
+          globPatterns: ['**/*.{js,css,html,ico,svg}'],
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit
           runtimeCaching: [
             {
@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => {
             }
           ]
         },
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+        includeAssets: ['favicon.ico'],
         manifest: {
           name: 'Pai Naidee - Thailand Travel Guide',
           short_name: 'PaiNaidee',
@@ -81,15 +81,9 @@ export default defineConfig(({ mode }) => {
           start_url: '/',
           icons: [
             {
-              src: 'pwa-192x192.png',
-              sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any maskable'
+              src: 'favicon.ico',
+              sizes: '64x64 32x32 24x24 16x16',
+              type: 'image/x-icon'
             }
           ]
         }

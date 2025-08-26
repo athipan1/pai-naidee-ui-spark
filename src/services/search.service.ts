@@ -9,7 +9,7 @@ import { SearchQuery, SearchResponse, SearchSuggestion } from '@/shared/types/se
 export const performSearch = async (
   searchQuery: SearchQuery
 ): Promise<SearchResponse> => {
-  const { data } = await apiClient.post<SearchResponse>('/search', searchQuery);
+  const { data } = await apiClient.post<SearchResponse>('/api/search', searchQuery);
   return data;
 };
 
@@ -24,7 +24,7 @@ export const getSearchSuggestions = async (
   language: "th" | "en" = "th"
 ): Promise<SearchSuggestion[]> => {
   const { data } = await apiClient.get<{suggestions: SearchSuggestion[]}>(
-    `/search/suggestions?query=${encodeURIComponent(query)}&language=${language}`
+    `/api/search/suggestions?query=${encodeURIComponent(query)}&language=${language}`
   );
   return data.suggestions;
 };
@@ -38,6 +38,6 @@ export const fetchSearchFilters = async (): Promise<{
   categories: { id: string; name: string; nameLocal?: string }[];
   amenities: { id: string; name: string; nameLocal?: string }[];
 }> => {
-  const { data } = await apiClient.get('/search/filters');
+  const { data } = await apiClient.get('/api/search/filters');
   return data;
 };

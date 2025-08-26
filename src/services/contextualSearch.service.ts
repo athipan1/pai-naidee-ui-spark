@@ -29,7 +29,7 @@ export async function searchPosts(
             amenities: options.filters?.amenities || [],
         }
     }
-    const { data } = await apiClient.post<SearchResponse>('/search', searchQuery);
+    const { data } = await apiClient.post<SearchResponse>('/api/search', searchQuery);
 
     // This is a temporary solution. The backend should return the correct format.
     // For now, I will adapt the response to the format expected by the component.
@@ -55,11 +55,11 @@ export async function searchPosts(
 }
 
 export async function searchLocations(query: string, limit: number = 10): Promise<Location[]> {
-    const { data } = await apiClient.get(`/search/suggestions?query=${query}&limit=${limit}&type=location`);
+    const { data } = await apiClient.get(`/api/search/suggestions?query=${query}&limit=${limit}&type=location`);
     return data.suggestions;
 }
 
 export async function getTrendingSearches(language: 'th' | 'en' = 'th'): Promise<string[]> {
-  const { data } = await apiClient.get(`/search/trending?language=${language}`);
+  const { data } = await apiClient.get(`/api/search/trending?language=${language}`);
   return data;
 }

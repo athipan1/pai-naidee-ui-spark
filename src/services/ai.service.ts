@@ -7,7 +7,7 @@ export const callAIAPI = async (request: AIRequest): Promise<AIResponse> => {
     input: request.message
   };
 
-  const { data } = await apiClient.post('/predict', payload);
+  const { data } = await apiClient.post('/api/predict', payload);
 
   const responseText = data.response || data.output || data.generated_text || JSON.stringify(data);
 
