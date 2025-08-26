@@ -92,5 +92,10 @@ apiClient.interceptors.response.use(
   }
 );
 
+// ADDED: Function to check backend health, as required by HealthCheck.tsx
+export const getHealth = async (): Promise<{ status: string }> => {
+  const response = await apiClient.get<{ status: string }>('/api/health');
+  return response.data;
+};
 
 export default apiClient;

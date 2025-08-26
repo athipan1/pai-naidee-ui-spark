@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { getAttractions, Attraction } from '../../lib/axios';
+import { getAttractions } from '@/services/attraction.service';
+import { AttractionDetail } from '@/shared/types/attraction';
+
+type AttractionTeaser = Pick<AttractionDetail, 'id' | 'name'>;
 
 const AttractionListTest: React.FC = () => {
-  const [attractions, setAttractions] = useState<Attraction[]>([]);
+  const [attractions, setAttractions] = useState<AttractionTeaser[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
