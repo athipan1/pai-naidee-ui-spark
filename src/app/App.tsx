@@ -13,6 +13,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
 import AIAssistantTrigger from "@/components/common/AIAssistantTrigger";
+import BackendStatusIndicator from "@/components/common/BackendStatusIndicator";
 
 // Lazy load the GlobalAIAssistant 3D module
 const GlobalAIAssistant = lazy(() => import("@/components/3D/GlobalAIAssistant"));
@@ -94,6 +95,7 @@ const AppContent = () => {
 
   return (
     <>
+      <BackendStatusIndicator />
       <SkipLink />
       <Suspense fallback={
         <LoadingSpinner
