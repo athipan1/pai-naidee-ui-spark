@@ -32,6 +32,11 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
 const ContextualSearchResults = lazy(() => import("./pages/ContextualSearchResults"));
 
+// --- PaiNaiDee Example Pages ---
+const PaiNaiDeeUsers = lazy(() => import("./pages/PaiNaiDeeUsers"));
+const PaiNaiDeeTasks = lazy(() => import("./pages/PaiNaiDeeTasks"));
+// --- End PaiNaiDee Example Pages ---
+
 // Redirect components for backward compatibility
 import {
   ExploreRedirect,
@@ -200,6 +205,17 @@ const AppContent = () => {
           )}
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
+
+          {/* --- PaiNaiDee Example Routes --- */}
+          <Route
+            path="/painaidee/users"
+            element={<PaiNaiDeeUsers />}
+          />
+          <Route
+            path="/painaidee/tasks"
+            element={<PaiNaiDeeTasks />}
+          />
+          {/* --- End PaiNaiDee Example Routes --- */}
         </Routes>
       </Suspense>
       {isAIAssistantLoaded ? (
