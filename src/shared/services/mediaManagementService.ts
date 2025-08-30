@@ -1,4 +1,5 @@
 // Media Management Service for handling place media operations
+import API_BASE from '../../config/api';
 import type { MediaItem, MediaUploadData } from '../types/media';
 import { SecurityLevel } from '../types/media';
 
@@ -33,7 +34,7 @@ export interface PlaceCreationResult {
 }
 
 class MediaManagementService {
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = API_BASE;
 
   /**
    * Replace media for an existing place

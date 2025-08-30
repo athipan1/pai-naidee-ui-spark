@@ -21,12 +21,13 @@ import {
 import { authService } from './authService';
 import { queueService } from './queueService';
 import { securityService } from './securityService';
+import API_BASE from '../../config/api';
 
 class TestingService {
   private testSuites = new Map<string, TestSuite>();
   private runningTests = new Map<string, AbortController>();
   private testReports: TestReport[] = [];
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = API_BASE;
 
   constructor() {
     this.initializeDefaultTestSuites();

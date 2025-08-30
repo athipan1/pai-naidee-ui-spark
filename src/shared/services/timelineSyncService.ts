@@ -1,3 +1,4 @@
+import API_BASE from '../../config/api';
 // Timeline Sync Service for managing media timeline database synchronization
 export interface TimelineEntry {
   id: string;
@@ -33,7 +34,7 @@ export interface TimelineQueryOptions {
 }
 
 class TimelineSyncService {
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = API_BASE;
   private pendingEntries: TimelineEntry[] = [];
   private isAutoSyncEnabled = true;
   private syncInterval: NodeJS.Timeout | null = null;

@@ -1,4 +1,5 @@
 // Queue Management Service for improved sync performance
+import API_BASE from '../../config/api';
 import {
   QueueItem,
   QueueItemData,
@@ -21,7 +22,7 @@ class QueueService {
   private webSocket: WebSocket | null = null;
   private isProcessing = false;
   private performanceMetrics: PerformanceMetrics[] = [];
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = API_BASE;
 
   constructor() {
     this.initializeWebSocket();

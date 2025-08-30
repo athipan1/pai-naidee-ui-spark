@@ -1,13 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock environment variables - MUST be at the top
-// vi.mock('import.meta', () => ({
-//   env: {
-//     VITE_API_BASE_URL: 'http://localhost:5000/api',
-//     VITE_ENABLE_DEBUG: 'false',
-//     MODE: 'test'
-//   }
-// }));
+// Mock the API_BASE constant
+vi.mock('../config/api', () => ({
+  default: 'http://localhost:5000/api',
+}));
 
 import {
   getServiceStatus,
@@ -22,7 +18,7 @@ import {
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-describe.skip('Dashboard API Integration', () => {
+describe('Dashboard API Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.localStorage.getItem.mockReturnValue(null);
