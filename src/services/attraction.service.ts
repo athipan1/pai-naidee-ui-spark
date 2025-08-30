@@ -3,7 +3,9 @@ import { AttractionDetail, Accommodation } from '@/shared/types/attraction';
 
 // Get attraction details by ID
 export const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
-  const { data } = await apiClient.get<AttractionDetail>(`/attractions/${id}`);
+  const endpoint = `/attractions/${id}`;
+  console.log("✅ API endpoint OK:", endpoint);
+  const { data } = await apiClient.get<AttractionDetail>(endpoint);
   return data;
 };
 
@@ -25,19 +27,25 @@ export const getAttractions = async (options?: {
   if (options?.category) params.append('category', options.category);
   if (options?.search) params.append('search', options.search);
 
-  const { data } = await apiClient.get(`/attractions?${params.toString()}`);
+  const endpoint = `/attractions?${params.toString()}`;
+  console.log("✅ API endpoint OK:", endpoint);
+  const { data } = await apiClient.get(endpoint);
   return data;
 };
 
 // Force refresh attraction data (invalidate cache)
 export const refreshAttractionData = async (id?: string): Promise<{ success: boolean; message: string }> => {
   const endpoint = id ? `/attractions/${id}/refresh` : `/attractions/refresh`;
-  const { data } = await apiClient.post(endpoint);
-  return data;
+  console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
+  // This endpoint does not exist in the new API.
+  // Returning a mock error response.
+  return Promise.reject({ success: false, message: `Endpoint ${endpoint} not found.` });
 };
 
 // Fetch nearby accommodations for an attraction
 export const fetchNearbyAccommodations = async (attractionId: string): Promise<Accommodation[]> => {
-  const { data } = await apiClient.get<Accommodation[]>(`/accommodations/nearby/${attractionId}`);
+  const endpoint = `/accommodations/nearby/${attractionId}`;
+  console.log("✅ API endpoint OK:", endpoint);
+  const { data } = await apiClient.get<Accommodation[]>(endpoint);
   return data;
 };
