@@ -38,6 +38,10 @@ const PaiNaiDeeUsers = lazy(() => import("./pages/PaiNaiDeeUsers"));
 const PaiNaiDeeTasks = lazy(() => import("./pages/PaiNaiDeeTasks"));
 // --- End PaiNaiDee Example Pages ---
 
+// --- System Pages ---
+const HealthCheckPage = lazy(() => import("./pages/HealthCheckPage"));
+// --- End System Pages ---
+
 // Redirect components for backward compatibility
 import {
   ExploreRedirect,
@@ -205,6 +209,7 @@ const AppContent = () => {
               element={<AccordionExamples />}
             />
           )}
+          <Route path="/health-check" element={<HealthCheckPage />} />
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
 

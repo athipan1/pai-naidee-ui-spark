@@ -1,60 +1,93 @@
-/**
- * This module provides functions to verify the backend connection.
- */
-import apiClient from './axios';
+import apiClient from '@/lib/axios';
+import { AxiosError } from 'axios';
 
-// 1. Define the correct base URL for the backend API.
-// This should point to the Hugging Face Spaces backend.
-export const API_BASE = "https://athipan-painai-backend.hf.space";
+interface TestResult {
+  success: boolean;
+  status: number | string;
+  data: unknown;
+  message: string;
+}
 
 /**
- * Verifies the backend URL and checks the health of the backend service.
- * @returns {Promise<boolean>} A promise that resolves to true if the backend is correctly configured and responsive, false otherwise.
+ * A simple verifier that checks if the backend is reachable and returns a boolean.
+ * This is suitable for simple status indicators.
  */
 export const verifyBackendUrl = async (): Promise<boolean> => {
-  console.log("Verifying backend connection...");
-
-  // Get the currently configured baseURL from the axios client.
-  const currentBaseUrl = apiClient.defaults.baseURL || '';
-
-  // 2. Check if the current URL matches the required backend URL.
-  // We use startsWith because the baseURL in axios might include a path like '/api'.
-  if (!currentBaseUrl.startsWith(API_BASE)) {
-    console.error(
-      `[Backend Verification Failed]
-      - Expected API Base: ${API_BASE}
-      - Found API Base: ${currentBaseUrl}
-      Please check your '.env' file and ensure 'VITE_API_BASE_URL' is set correctly.`
-    );
-    // Display error in the UI as well.
-    // This part can be integrated with a global state or toast notification system.
+  try {
+    const result = await testHuggingFaceConnection();
+    return result.success;
+  } catch {
     return false;
   }
+};
 
-  console.log("Backend URL configuration is correct.", { url: currentBaseUrl });
+export const testHuggingFaceConnection = async (): Promise<TestResult> => {
+  console.log('🚀 Starting Hugging Face backend connection test...');
 
   try {
-    // 3. Call a simple endpoint (e.g., /health) to ensure the backend is responsive.
-    const response = await apiClient.get('/health');
+    // We test the /attractions endpoint as requested.
+    const response = await apiClient.get('/attractions', {
+      // Adding a timeout to handle network issues gracefully
+      timeout: 10000, // 10 seconds
+    });
 
-    // 4. Check for a successful response status (e.g., 200 OK).
-    if (response.status === 200) {
-      console.log("Backend health check successful.", { status: response.status, data: response.data });
-      return true; // Backend is connected and healthy.
-    } else {
-      console.error(
-        `[Backend Verification Failed]
-        - Health check returned an unexpected status: ${response.status}`
-      );
-      return false;
+    console.log('✅ Connection Test Successful!', {
+      status: response.status,
+      data: response.data,
+    });
+
+    return {
+      success: true,
+      status: response.status,
+      data: response.data,
+      message: 'Connection to Hugging Face backend was successful.',
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    console.error('❌ Connection Test Failed!', err);
+
+    if (err.code === 'ERR_CORS_MISMATCH' || err.message.toLowerCase().includes('cors')) {
+        return {
+            success: false,
+            status: 'CORS Error',
+            data: null,
+            message: 'CORS Error: The request was blocked due to a CORS mismatch. Ensure the backend server allows requests from this origin.',
+        };
     }
-  } catch (error: any) {
-    // The existing axios interceptor will likely handle this, but we also log it here for clarity.
-    console.error(
-      `[Backend Verification Failed]
-      - An error occurred during the health check. The backend might be down or unreachable.`,
-      error.message
-    );
-    return false;
+
+    if (err.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      const { status, data } = err.response;
+      let message = `Error: Server responded with status ${status}.`;
+
+      if (status === 401) {
+        message = 'Unauthorized (401): The provided HF_API_KEY is likely invalid or missing.';
+      } else if (status === 404) {
+        message = 'Not Found (404): The endpoint /api/attractions was not found on the server.';
+      } else {
+        message = `Server Error (${status}): ${JSON.stringify(data)}`;
+      }
+
+      return { success: false, status, data, message };
+
+    } else if (err.request) {
+      // The request was made but no response was received
+      return {
+        success: false,
+        status: 'Network Error',
+        data: null,
+        message: 'Network Error: No response received from the server. Check the backend URL and your internet connection.',
+      };
+    }
+    else {
+      // Something happened in setting up the request that triggered an Error
+      return {
+        success: false,
+        status: 'Request Setup Error',
+        data: null,
+        message: `An unexpected error occurred: ${err.message}`,
+      };
+    }
   }
 };
