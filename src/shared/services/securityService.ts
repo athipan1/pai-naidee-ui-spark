@@ -1,4 +1,5 @@
 // Security Service for file encryption and validation
+import API_BASE from '../../config/api';
 import {
   EncryptionConfig,
   EncryptedFile,
@@ -14,7 +15,7 @@ import {
 import { authService } from './authService';
 
 class SecurityService {
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = API_BASE;
   private encryptionConfig: EncryptionConfig = {
     algorithm: 'AES-GCM',
     keySize: 256,

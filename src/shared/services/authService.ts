@@ -1,4 +1,5 @@
 // Authentication and Authorization Service
+import API_BASE from '../../config/api';
 import { 
   UserRole, 
   Permission, 
@@ -11,7 +12,7 @@ import { SecurityAction, RiskLevel, type SecurityAuditLog } from '../types/secur
 class AuthService {
   private currentUser: User | null = null;
   private authToken: string | null = null;
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = API_BASE;
 
   // Mock users for development - replace with real API calls
   private mockUsers: User[] = [

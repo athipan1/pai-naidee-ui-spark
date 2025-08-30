@@ -43,8 +43,7 @@ interface SystemMetricsResponse {
   stats: SystemStats;
 }
 
-// Base API configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import API_BASE_URL from '../../config/api';
 
 // Debug mode detection
 const IS_DEBUG = import.meta.env.VITE_ENABLE_DEBUG === 'true' || import.meta.env.MODE === 'development';

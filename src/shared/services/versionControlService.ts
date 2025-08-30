@@ -11,9 +11,10 @@ import {
 } from '../types/version';
 import type { MediaItem } from '../types/media';
 import { authService } from './authService';
+import API_BASE from '../../config/api';
 
 class VersionControlService {
-  private apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private apiBaseUrl = API_BASE;
   private mediaVersions = new Map<string, MediaVersion[]>();
   private placeVersions = new Map<string, PlaceVersion[]>();
 
