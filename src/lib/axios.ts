@@ -1,6 +1,9 @@
 import axios from 'axios';
 import API_BASE from '@/config/api';
 
+// Get the API key from environment variables
+const apiKey = import.meta.env.VITE_HF_API_KEY;
+
 // Create an axios instance
 const apiClient = axios.create({
   baseURL: API_BASE,
@@ -8,6 +11,11 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add the Authorization header if the API key is available
+if (apiKey && apiKey !== 'your_hf_api_key_here') {
+  apiClient.defaults.headers.common['Authorization'] = `Bearer ${apiKey}`;
+}
 
 import { toast } from '@/shared/hooks/use-toast';
 

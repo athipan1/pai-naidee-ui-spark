@@ -29,7 +29,9 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env': {
-        VITE_API_BASE_URL: JSON.stringify(env.VITE_API_BASE_URL)
+        VITE_API_BASE_URL: JSON.stringify(env.VITE_API_BASE_URL),
+        VITE_HF_BACKEND_URL: JSON.stringify(env.VITE_HF_BACKEND_URL),
+        VITE_HF_API_KEY: JSON.stringify(env.VITE_HF_API_KEY)
       }
     },
     plugins: [
