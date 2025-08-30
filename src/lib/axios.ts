@@ -1,21 +1,9 @@
 import axios from 'axios';
-
-// Helper function to determine the base URL
-const getBaseUrl = () => {
-  // If in production and no custom API URL is set, use the production backend URL.
-  if (import.meta.env.PROD && !import.meta.env.VITE_API_BASE_URL) {
-    return 'https://athipan01-painaidee-backend.hf.space/api';
-  }
-  // Otherwise, use the environment variable (works for dev and preview environments)
-  return import.meta.env.VITE_API_BASE_URL;
-};
+import API_BASE from '@/config/api';
 
 // Create an axios instance
 const apiClient = axios.create({
-  // CORRECT: Use VITE_API_BASE_URL which is defined in .env files
-  // NOTE: In development, this will be 'http://localhost:5000/api' via vite proxy.
-  // In production, this should be the full URL of the deployed backend.
-  baseURL: getBaseUrl(),
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },

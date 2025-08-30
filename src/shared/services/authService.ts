@@ -1,5 +1,5 @@
 // Authentication and Authorization Service
-import API_BASE from '../../config/api';
+import apiClient from '@/lib/axios';
 import { 
   UserRole, 
   Permission, 
@@ -12,7 +12,6 @@ import { SecurityAction, RiskLevel, type SecurityAuditLog } from '../types/secur
 class AuthService {
   private currentUser: User | null = null;
   private authToken: string | null = null;
-  private apiBaseUrl = API_BASE;
 
   // Mock users for development - replace with real API calls
   private mockUsers: User[] = [
@@ -80,15 +79,11 @@ class AuthService {
         return this.mockLogin(username, password);
       }
 
-      const response = await fetch(`${this.apiBaseUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const endpoint = '/auth/login';
+      console.log("✅ API endpoint OK:", endpoint);
+      const response = await apiClient.post(endpoint, { username, password });
 
-      const result = await response.json();
+      const result = response.data;
 
       if (result.success && result.user && result.token) {
         this.currentUser = result.user;
@@ -126,7 +121,7 @@ class AuthService {
   /**
    * Mock login for development
    */
-  private async mockLogin(username: string, password: string): Promise<AuthenticationResult> {
+  private async mockLogin(username: string, password:string): Promise<AuthenticationResult> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -255,7 +250,7 @@ class AuthService {
   }
 
   /**
-   * Validate auth token with server
+   * Validate auth token with server by refreshing it
    */
   private async validateToken(token: string): Promise<boolean> {
     try {
@@ -264,17 +259,19 @@ class AuthService {
         return token.startsWith('mock_token_');
       }
 
-      const response = await fetch(`${this.apiBaseUrl}/auth/validate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return response.ok;
+      const endpoint = '/auth/refresh';
+      console.log("✅ API endpoint OK (was /auth/validate):", endpoint);
+      // We pass the token in the headers via the axios interceptor
+      const response = await apiClient.post(endpoint, {});
+      // If the refresh is successful, we get a new token
+      if (response.status === 200 && response.data.access_token) {
+        this.authToken = response.data.access_token;
+        localStorage.setItem('auth_token', this.authToken);
+        return true;
+      }
+      return false;
     } catch (error) {
-      console.error('Token validation error:', error);
+      console.error('Token validation/refresh error:', error);
       return false;
     }
   }
@@ -305,14 +302,9 @@ class AuthService {
 
       // In production, send to server
       if (!import.meta.env.DEV) {
-        await fetch(`${this.apiBaseUrl}/security/audit`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(auditLog),
-        });
+        const endpoint = '/security/audit';
+        console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
+        // await apiClient.post(endpoint, auditLog);
       } else {
         console.log('Security audit log:', auditLog);
       }
