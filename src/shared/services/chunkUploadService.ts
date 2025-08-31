@@ -1,3 +1,5 @@
+import API_BASE from '../../config/api';
+
 export interface ChunkUploadOptions {
   chunkSize?: number; // Default 1MB
   maxRetries?: number; // Default 3
@@ -301,7 +303,7 @@ class ChunkUploadService {
     formData.append('fileName', session.fileName);
     formData.append('totalChunks', session.totalChunks.toString());
     
-    const response = await fetch(uploadUrl, {
+    const response = await fetch(`${API_BASE}${uploadUrl}`, {
       method: 'POST',
       body: formData,
       signal
@@ -313,7 +315,7 @@ class ChunkUploadService {
   }
 
   private async completeUpload(uploadUrl: string, session: UploadSession): Promise<string> {
-    const response = await fetch(`${uploadUrl}/complete`, {
+    const response = await fetch(`${API_BASE}${uploadUrl}/complete`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
