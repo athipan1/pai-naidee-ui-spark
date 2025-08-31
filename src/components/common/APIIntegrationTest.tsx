@@ -60,7 +60,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       });
       setTests([...testResults]);
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/attractions`, {
+      const response = await fetch(`${import.meta.env.VITE_HF_BACKEND_URL}/attractions`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });

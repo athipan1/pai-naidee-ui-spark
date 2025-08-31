@@ -418,7 +418,7 @@ const MobileVideoUpload: React.FC<MobileVideoUploadProps> = ({
     try {
       await chunkUploadService.resumeUpload(
         video.file,
-        '/api/upload/chunk' // This would be your actual upload endpoint
+        '/upload/chunk' // The service now handles the base URL
       );
     } catch (error) {
       toast({
@@ -460,7 +460,7 @@ const MobileVideoUpload: React.FC<MobileVideoUploadProps> = ({
         try {
           const fileUrl = await chunkUploadService.uploadFile(
             video.file,
-            '/api/upload/chunk' // This would be your actual upload endpoint
+            '/upload/chunk' // The service now handles the base URL
           );
           return { ...video, uploadUrl: fileUrl };
         } catch (error) {
