@@ -59,9 +59,13 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
     );
   }
 
-  const attractions = data?.attractions || [];
+  const attractions = data?.data?.attractions || [];
 
   if (attractions.length === 0) {
+    const isSearching = searchQuery.length > 0;
+    const emptyTitle = isSearching ? t.noResults : "ยังไม่มีข้อมูลสถานที่";
+    const emptyMessage = isSearching ? t.tryDifferentKeyword : "ลองรีเฟรชหน้าเว็บหรือกลับมาใหม่ภายหลัง";
+
     return (
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
@@ -77,8 +81,8 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
 
         <div className="flex-grow flex items-center justify-center">
           <div className="text-center space-y-2">
-            <p className="text-lg font-medium">{t.noResults}</p>
-            <p className="text-muted-foreground">{t.tryDifferentKeyword}</p>
+            <p className="text-lg font-medium">{emptyTitle}</p>
+            <p className="text-muted-foreground">{emptyMessage}</p>
           </div>
         </div>
       </div>
