@@ -4,13 +4,10 @@
 // Fallback to the old local URL if it's not set.
 let apiBaseUrl = import.meta.env.VITE_HF_BACKEND_URL || import.meta.env.VITE_API_BASE_URL;
 
-// Ensure the base URL includes the /api path for consistency,
-// and remove any trailing slashes before appending.
+// The environment variable should contain the full, correct base URL.
+// We just need to remove any trailing slash to avoid double slashes in requests.
 if (apiBaseUrl) {
   apiBaseUrl = apiBaseUrl.replace(/\/$/, ''); // Remove trailing slash
-  if (!apiBaseUrl.endsWith('/api')) {
-    apiBaseUrl += '/api';
-  }
 }
 
 const API_BASE = apiBaseUrl;
