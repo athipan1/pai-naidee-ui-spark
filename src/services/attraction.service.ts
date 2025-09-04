@@ -29,8 +29,15 @@ export const getAttractions = async (options?: {
 
   const endpoint = `/attractions?${params.toString()}`;
   console.log("✅ API endpoint OK:", endpoint);
-  const { data } = await apiClient.get(endpoint);
-  return data;
+
+  try {
+    const { data } = await apiClient.get(endpoint);
+    return data;
+  } catch (error) {
+    console.error(`❌ Error fetching attractions from ${endpoint}:`, error);
+    // Re-throw the error to be handled by react-query and the global interceptor
+    throw error;
+  }
 };
 
 // Force refresh attraction data (invalidate cache)
