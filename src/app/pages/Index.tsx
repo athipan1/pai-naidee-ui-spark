@@ -7,8 +7,8 @@ import AttractionCard from "@/components/common/AttractionCard";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import OptimizedImage from "@/components/common/OptimizedImage";
-import { SearchResult } from "@/shared/utils/searchAPI";
-import { PostSearchResult } from "@/shared/types/posts";
+import { SearchResult as PostSearchResult } from "@/shared/types/posts";
+import { SearchResult } from "@/shared/types/search";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { MapPin, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -94,99 +94,38 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   ];
 
   // Try to fetch real data first, fallback to mock data
-  const { 
-    data: apiData, 
-    error: apiError, 
+  const {
+    data: apiData,
+    error: apiError,
     isLoading: apiLoading,
-    refetch: refetchAttractions 
+    refetch: refetchAttractions
   } = useAttractions({
     page: 1,
     limit: 10,
     category: _selectedCategory === "all" ? undefined : _selectedCategory
   });
 
-  // Mock attraction data as fallback
-  const _attractions = [
-    {
-      id: "1",
-      name: "Phi Phi Islands",
-      nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
-      category: "Beach",
-      rating: 4.8,
-      reviewCount: 2547,
-      image: heroBeachImage,
-      description:
-        currentLanguage === "th"
-          ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
-          : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
-      tags: ["Beach", "Snorkeling", "Island", "Photography"],
-    },
-    {
-      id: "2",
-      name: "Wat Phra Kaew",
-      nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Culture",
-      rating: 4.9,
-      reviewCount: 5243,
-      image: templeImage,
-      description:
-        currentLanguage === "th"
-          ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
-          : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
-      tags: ["Temple", "Culture", "Buddhism", "History"],
-    },
-    {
-      id: "3",
-      name: "Doi Inthanon",
-      nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
-      category: "Nature",
-      rating: 4.7,
-      reviewCount: 1876,
-      image: mountainImage,
-      description:
-        currentLanguage === "th"
-          ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
-          : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
-      tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
-    },
-    {
-      id: "4",
-      name: "Floating Market",
-      nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Food",
-      rating: 4.5,
-      reviewCount: 3156,
-      image: floatingMarketImage,
-      description:
-        currentLanguage === "th"
-          ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
-          : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
-      tags: ["Food", "Culture", "Traditional", "Market"],
-    },
-  ];
-
-  // Use API data if available, otherwise use mock data
-  const displayAttractions = apiData?.attractions ? apiData.attractions.map(attraction => ({
-    id: attraction.id,
-    name: attraction.name,
-    nameLocal: attraction.nameLocal || attraction.name,
-    province: "",
-    category: attraction.category,
-    rating: attraction.rating,
-    reviewCount: Math.floor(Math.random() * 5000) + 1000, // Mock review count for API data
-    image: attraction.images?.[0] || heroBeachImage,
-    description: `Discover the beauty of ${attraction.name}`,
-    tags: [attraction.category]
-  })) : mockAttractions;
+  // Use API data if available and has content, otherwise use mock data
+  const displayAttractions = (apiData?.attractions && apiData.attractions.length > 0)
+    ? apiData.attractions.map(attraction => ({
+      id: attraction.id,
+      name: attraction.name,
+      nameLocal: attraction.nameLocal || attraction.name,
+      province: attraction.province,
+      category: attraction.category,
+      rating: attraction.rating,
+      reviewCount: attraction.reviewCount,
+      image: attraction.image || heroBeachImage, // Use placeholder if no image
+      description: attraction.description,
+      tags: attraction.tags,
+    }))
+    : mockAttractions;
 
   // Track if we're using mock data
   useEffect(() => {
-    setUsingMockData(!apiData?.attractions && !apiLoading);
-  }, [apiData, apiLoading]);
+    const isApiUnavailable = !apiLoading && (!!apiError || !apiData?.attractions || apiData.attractions.length === 0);
+    setUsingMockData(isApiUnavailable);
+  }, [apiData, apiError, apiLoading]);
 
   const filteredAttractions =
     _selectedCategory === "all"

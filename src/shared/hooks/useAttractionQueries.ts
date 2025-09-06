@@ -63,46 +63,6 @@ export const useAttractions = (filters?: {
   });
 };
 
-// Hook to refresh attraction data (invalidate cache and refetch)
-export const useRefreshAttraction = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (id?: string) => {
-      // Call API refresh endpoint
-      const result = await attractionAPI.refreshAttractionData(id);
-      
-      if (id) {
-        // Invalidate specific attraction cache
-        await queryClient.invalidateQueries({
-          queryKey: attractionKeys.detail(id)
-        });
-        
-        // Also invalidate lists that might contain this attraction
-        await queryClient.invalidateQueries({
-          queryKey: attractionKeys.lists()
-        });
-      } else {
-        // Invalidate all attraction caches
-        await queryClient.invalidateQueries({
-          queryKey: attractionKeys.all
-        });
-      }
-      
-      return result;
-    },
-    onSuccess: (data) => {
-      // Success handled by component
-    },
-    onError: (error: Error) => {
-      // Error handled by component  
-    },
-    meta: {
-      errorMessage: 'Failed to refresh attraction data'
-    }
-  });
-};
-
 // Hook to manually invalidate and refetch attraction data
 export const useInvalidateAttraction = () => {
   const queryClient = useQueryClient();
