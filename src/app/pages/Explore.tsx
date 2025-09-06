@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
-import { APIErrorDisplay } from "@/components/common/APIErrorDisplay";
+import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import AttractionCard from "@/components/common/AttractionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -15,7 +15,18 @@ interface ExploreProps {
 const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [favorites, setFavorites] = useState<string[]>([]);
   const { data, isLoading, isError, error, refetch } = useAttractions({ search: searchQuery });
+
+  const handleFavoriteToggle = (id: string) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((fav) => fav !== id) : [...prev, id]
+    );
+  };
+
+  const handleCardClick = (id: string) => {
+    navigate(`/attraction/${id}`);
+  };
 
   const content = {
     th: {
@@ -59,7 +70,7 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
     );
   }
 
-  const attractions = data?.data?.attractions || [];
+  const attractions = data?.attractions || [];
 
   if (attractions.length === 0) {
     const isSearching = searchQuery.length > 0;
@@ -110,8 +121,10 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
           {attractions.map((attraction) => (
             <AttractionCard
               key={attraction.id}
-              attraction={attraction}
-              onClick={() => navigate(`/attraction/${attraction.id}`)}
+              {...attraction}
+              isFavorite={favorites.includes(attraction.id)}
+              onFavoriteToggle={handleFavoriteToggle}
+              onCardClick={handleCardClick}
               currentLanguage={currentLanguage}
             />
           ))}

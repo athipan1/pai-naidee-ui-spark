@@ -26,16 +26,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { fetchNearbyAccommodations } from "@/services/attraction.service";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
 import Reviews from "@/components/attraction/Reviews";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
-import OptimizedImage from "@/components/common/OptimizedImage";
 import { 
   useAttractionDetail, 
-  useRefreshAttraction,
   getAttractionErrorMessage 
 } from "@/shared/hooks/useAttractionQueries";
 import type { Accommodation } from "@/shared/types/attraction";
@@ -47,19 +44,6 @@ const pastelVariants = [
   "pastel-pink",
   "pastel-purple",
 ] as const;
-
-interface Accommodation {
-  id: string;
-  name: string;
-  nameLocal?: string;
-  rating: number;
-  distance: number;
-  image: string;
-  price: number;
-  currency: string;
-  amenities: string[];
-  booking_url?: string;
-}
 
 interface AttractionDetailProps {
   currentLanguage: "th" | "en";
@@ -81,10 +65,7 @@ const AttractionDetail = ({
     refetch: refetchAttraction 
   } = useAttractionDetail(id);
   
-  const refreshMutation = useRefreshAttraction();
-  
   const [isFavorite, setIsFavorite] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMapModal, setShowMapModal] = useState(false);
   const [showAccommodationModal, setShowAccommodationModal] = useState(false);
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
@@ -151,18 +132,6 @@ const AttractionDetail = ({
     window.open(googleMapsUrl, '_blank', 'noopener,noreferrer');
   };
 
-  // Handle refresh functionality
-  const handleRefresh = async () => {
-    if (!id) return;
-    
-    try {
-      await refreshMutation.mutateAsync(id);
-      // The query will automatically refetch due to invalidation
-    } catch {
-      // Error handled by mutation
-    }
-  };
-
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
     // Here you would typically call an API to update favorites
@@ -180,23 +149,6 @@ const AttractionDetail = ({
       navigator.clipboard.writeText(window.location.href);
       // In a real app, you'd use a toast component here
       alert(currentLanguage === 'th' ? 'คัดลอกลิงก์แล้ว' : 'Link copied to clipboard!');
-    }
-  };
-
-  const handleBookingClick = async () => {
-    if (!attraction) return;
-
-    setShowAccommodationModal(true);
-    setAccommodationLoading(true);
-    setAccommodationError(null);
-
-    try {
-      const accommodationData = await fetchNearbyAccommodations(attraction.id);
-      setAccommodations(accommodationData);
-    } catch (error) {
-      setAccommodationError(error instanceof Error ? error.message : "Failed to load accommodations");
-    } finally {
-      setAccommodationLoading(false);
     }
   };
 
@@ -269,13 +221,12 @@ const AttractionDetail = ({
             <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
               <Button
                 variant="ghost"
-                onClick={handleRefresh}
-                disabled={refreshMutation.isPending}
+                onClick={() => refetchAttraction()}
                 className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
                 title={t.refreshData}
               >
-                <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-                <span className="hidden lg:inline">{refreshMutation.isPending ? t.refreshing : t.refreshData}</span>
+                <RefreshCw className={'w-4 h-4'} />
+                <span className="hidden lg:inline">{t.refreshData}</span>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -491,33 +442,6 @@ const AttractionDetail = ({
         <div className="mb-8">
           <Reviews />
         </div>
-
-        {/* Accommodation Booking Section */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                  <Hotel className="h-5 w-5 text-primary" />
-                  {t.bookAccommodation}
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  {currentLanguage === 'th'
-                    ? 'ค้นหาและจองที่พักใกล้เคียงกับสถานที่ท่องเที่ยวนี้'
-                    : 'Find and book accommodations near this attraction'}
-                </p>
-              </div>
-              <Button
-                onClick={handleBookingClick}
-                className="flex items-center gap-2"
-                size="lg"
-              >
-                <Hotel className="w-5 h-5" />
-                {currentLanguage === 'th' ? 'ค้นหาที่พัก' : 'Find Hotels'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Nearby Activities Section */}
         <Card className="mb-8">
