@@ -1,0 +1,13 @@
+{
+  "error": "API endpoint not found",
+  "message": "The requested API endpoint is not available on this deployment. This is a static site and API requests should be directed to the appropriate backend service.",
+  "availableEndpoints": [
+    "This is a frontend-only deployment",
+    "API endpoints should be directed to the backend service"
+  ],
+  "support": {
+    "documentation": "https://github.com/athipan1/pai-naidee-ui-spark",
+    "backendUrl": "https://athipan01-painaidee-backend.hf.space"
+  },
+  "timestamp": "2025-09-06T00:00:00Z"
+}

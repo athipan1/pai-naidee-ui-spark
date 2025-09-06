@@ -7,8 +7,79 @@
     }
   ],
   "routes": [
-    { "src": "/assets/(.*)", "headers": { "cache-control": "public, max-age=31536000, immutable" }, "dest": "/assets/$1" },
-    { "src": "/sw.js", "headers": { "cache-control": "public, max-age=0, must-revalidate" }, "dest": "/sw.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/assets/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/sw.js",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      },
+      "dest": "/sw.js"
+    },
+    {
+      "src": "/manifest.webmanifest",
+      "headers": {
+        "cache-control": "public, max-age=86400"
+      },
+      "dest": "/manifest.webmanifest"
+    },
+    {
+      "src": "/api/(.*)",
+      "status": 404,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "dest": "/api-fallback.json"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/explore",
+      "destination": "/discover",
+      "permanent": true
+    },
+    {
+      "source": "/favorites",
+      "destination": "/saved",
+      "permanent": true
+    },
+    {
+      "source": "/admin-panel",
+      "destination": "/admin",
+      "permanent": true
+    },
+    {
+      "source": "/profile",
+      "destination": "/me",
+      "permanent": true
+    }
   ]
 }

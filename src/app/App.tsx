@@ -33,6 +33,9 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
 const ContextualSearchResults = lazy(() => import("./pages/ContextualSearchResults"));
 
+// Dev components
+const Error404Dashboard = lazy(() => import("@/components/dev/Error404Dashboard"));
+
 // --- PaiNaiDee Example Pages ---
 const PaiNaiDeeUsers = lazy(() => import("./pages/PaiNaiDeeUsers"));
 const PaiNaiDeeTasks = lazy(() => import("./pages/PaiNaiDeeTasks"));
@@ -207,6 +210,16 @@ const AppContent = () => {
             <Route
               path="/accordion-examples"
               element={<AccordionExamples />}
+            />
+          )}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/404-dashboard"
+              element={
+                <Suspense fallback={<div>Loading 404 Dashboard...</div>}>
+                  <Error404Dashboard />
+                </Suspense>
+              }
             />
           )}
           <Route path="/health-check" element={<HealthCheckPage />} />
