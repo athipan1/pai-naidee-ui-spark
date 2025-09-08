@@ -62,14 +62,9 @@ export interface Task {
  * @throws {Error} Throws an error if the API call fails.
  */
 const getUsers = async (): Promise<User[]> => {
-  try {
-    const response = await apiClient.get<User[]>('/users');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    // Re-throw the error to be handled by the calling component
-    throw new Error('Failed to fetch users. Please try again later.');
-  }
+  // DEPRECATED: Endpoint /users does not exist on the backend.
+  console.warn("DEPRECATED: getUsers called, but endpoint does not exist.");
+  return Promise.resolve([]);
 };
 
 /**
@@ -79,14 +74,16 @@ const getUsers = async (): Promise<User[]> => {
  * @throws {Error} Throws an error if the API call fails.
  */
 const createTask = async (taskData: NewTaskData): Promise<Task> => {
-  try {
-    const response = await apiClient.post<Task>('/tasks', taskData);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating task:', error);
-    // Re-throw the error to be handled by the calling component
-    throw new Error('Failed to create task. Please check your input and try again.');
-  }
+  // DEPRECATED: Endpoint /tasks does not exist on the backend.
+  console.warn("DEPRECATED: createTask called, but endpoint does not exist.");
+  // Return a mock Task object that matches the expected type
+  const mockTask: Task = {
+    id: 0,
+    title: taskData.title,
+    description: taskData.description,
+    completed: false
+  };
+  return Promise.resolve(mockTask);
 };
 
 // 6. Export the functions as part of a service object.

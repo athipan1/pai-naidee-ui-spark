@@ -26,22 +26,22 @@ export const communityService = {
   },
 
   savePost: async (postId: string): Promise<boolean> => {
-    const endpoint = `/posts/${postId}/save`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /posts/:postId/save does not exist on the backend.
+    console.warn("DEPRECATED: savePost called, but endpoint does not exist.");
+    return Promise.resolve(false);
   },
 
   sharePost: async (postId: string): Promise<void> => {
-    const endpoint = `/posts/${postId}/share`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /posts/:postId/share does not exist on the backend.
+    console.warn("DEPRECATED: sharePost called, but endpoint does not exist.");
+    return Promise.resolve();
   },
 
   // Inspiration rating
   ratePost: async (postId: string, rating: number): Promise<boolean> => {
-    const endpoint = `/posts/${postId}/rate`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /posts/:postId/rate does not exist on the backend.
+    console.warn("DEPRECATED: ratePost called, but endpoint does not exist.");
+    return Promise.resolve(false);
   },
 
   // Comments
@@ -62,33 +62,33 @@ export const communityService = {
 
   // Groups
   getGroups: async (): Promise<any[]> => {
-    const endpoint = `/groups`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /groups does not exist on the backend.
+    console.warn("DEPRECATED: getGroups called, but endpoint does not exist.");
+    return Promise.resolve([]);
   },
 
   joinGroup: async (groupId: string): Promise<boolean> => {
-    const endpoint = `/groups/${groupId}/join`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /groups/:groupId/join does not exist on the backend.
+    console.warn("DEPRECATED: joinGroup called, but endpoint does not exist.");
+    return Promise.resolve(false);
   },
 
   // User points and rewards
   getUserPoints: async (): Promise<any> => {
-    const endpoint = `/user/points`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /user/points does not exist on the backend.
+    console.warn("DEPRECATED: getUserPoints called, but endpoint does not exist.");
+    return Promise.resolve({ points: 0 });
   },
 
   getRewards: async (): Promise<any[]> => {
-    const endpoint = `/rewards`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /rewards does not exist on the backend.
+    console.warn("DEPRECATED: getRewards called, but endpoint does not exist.");
+    return Promise.resolve([]);
   },
 
   redeemReward: async (rewardId: string): Promise<boolean> => {
-    const endpoint = `/rewards/${rewardId}/redeem`;
-    console.error("❌ API endpoint ไม่ถูกต้อง:", endpoint);
-    return Promise.reject({ message: `Endpoint ${endpoint} not found.` });
+    // DEPRECATED: Endpoint /rewards/:rewardId/redeem does not exist on the backend.
+    console.warn("DEPRECATED: redeemReward called, but endpoint does not exist.");
+    return Promise.resolve(false);
   }
 };
