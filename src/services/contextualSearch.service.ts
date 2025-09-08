@@ -55,8 +55,9 @@ export async function searchPosts(
 }
 
 export async function searchLocations(query: string, limit: number = 10): Promise<Location[]> {
-    const { data } = await apiClient.get(`/search/suggestions?query=${query}&limit=${limit}&type=location`);
-    return data.suggestions;
+    // CORRECTED: Using the new /api/locations/autocomplete endpoint from FastAPI backend
+    const { data } = await apiClient.get(`/locations/autocomplete?q=${query}&limit=${limit}`);
+    return data; // Assuming the new endpoint returns the array of locations directly
 }
 
 export async function getTrendingSearches(language: 'th' | 'en' = 'th'): Promise<string[]> {

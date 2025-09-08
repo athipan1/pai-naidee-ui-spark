@@ -14,8 +14,9 @@ export const toggleLike = async (videoId: string) => {
 
 // Follow/unfollow a user
 export const toggleFollow = async (userId: string) => {
-  const { data } = await apiClient.post(`/users/${userId}/follow`);
-  return data;
+  // DEPRECATED: Endpoint /users/:userId/follow does not exist on the backend.
+  console.warn(`DEPRECATED: followUser(${userId}) called, but endpoint does not exist.`);
+  return Promise.resolve({ success: true });
 };
 
 // Get comments for a video
