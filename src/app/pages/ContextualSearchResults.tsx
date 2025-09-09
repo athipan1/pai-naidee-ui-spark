@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, TrendingUp, Filter, SortAsc } from "lucide-react";
+import { MapPin, Clock, TrendingUp, Filter, SortAsc, AlertTriangle, RefreshCw } from "lucide-react";
 import Header from "@/components/common/Header";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import PostCard from "@/components/common/PostCard";
@@ -23,6 +23,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
   const [postResults, setPostResults] = useState<PostSearchResult[]>([]);
   const [placeResults, setPlaceResults] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const [expandedTerms, setExpandedTerms] = useState<string[]>([]);
   const [processingTime, setProcessingTime] = useState(0);
@@ -44,7 +45,10 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
       expandedSearch: "ขยายการค้นหาเป็น",
       relatedPosts: "โพสต์ที่เกี่ยวข้อง",
       exploreNearby: "สำรวจสถานที่ใกล้เคียง",
-      backToHome: "กลับหน้าแรก"
+      backToHome: "กลับหน้าแรก",
+      searchErrorTitle: "เกิดข้อผิดพลาดในการค้นหา",
+      searchErrorMessage: "ขออภัย, เราไม่สามารถทำการค้นหาได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง",
+      retry: "ลองใหม่"
     },
     en: {
       searchResults: "Search Results",
@@ -62,7 +66,10 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
       expandedSearch: "Expanded search to",
       relatedPosts: "Related Posts",
       exploreNearby: "Explore Nearby",
-      backToHome: "Back to Home"
+      backToHome: "Back to Home",
+      searchErrorTitle: "Search Error",
+      searchErrorMessage: "Sorry, we couldn't perform the search at this time. Please try again.",
+      retry: "Retry"
     }
   };
 
@@ -72,15 +79,16 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
     if (query) {
       performSearch();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, currentLanguage]);
 
   const performSearch = async () => {
     if (!query.trim()) return;
     
     setIsLoading(true);
+    setError(null);
     
     try {
-      // Search for posts and places in parallel
       const [postsResponse, placesResponse] = await Promise.all([
         searchPosts(query, { language: currentLanguage, limit: 20 }),
         searchLocations(query, 10)
@@ -91,16 +99,20 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
       setExpandedTerms(postsResponse.expandedTerms);
       setProcessingTime(postsResponse.processingTime);
       
-      // Set default tab based on results
-      if (postsResponse.results.length > 0 && placesResponse.length > 0) {
+      if (postsResponse.results.length > 0 || placesResponse.length > 0) {
         setActiveTab("all");
       } else if (postsResponse.results.length > 0) {
         setActiveTab("posts");
       } else if (placesResponse.length > 0) {
         setActiveTab("places");
       }
-    } catch (error) {
-      console.error("Search failed:", error);
+    } catch (err) {
+      console.error("Search failed:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(t.searchErrorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -124,19 +136,149 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
 
   const totalResults = postResults.length + placeResults.length;
 
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="text-center py-12">
+          <div className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            {t.searching}
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+            <AlertTriangle className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            {t.searchErrorTitle}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            {error}
+          </p>
+          <Button onClick={performSearch}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            {t.retry}
+          </Button>
+        </div>
+      );
+    }
+
+    if (totalResults === 0) {
+      return (
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            {t.noResults}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {currentLanguage === "th"
+              ? "ลองใช้คำค้นหาอื่นหรือปรับเปลี่ยนตัวกรอง"
+              : "Try different keywords or adjust your filters"}
+          </p>
+          <Button onClick={() => navigate("/")}>{t.backToHome}</Button>
+        </div>
+      );
+    }
+
+    return (
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            {t.allResults}
+            <Badge variant="secondary" className="ml-1">
+              {totalResults}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="posts" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            {t.posts}
+            <Badge variant="secondary" className="ml-1">
+              {postResults.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="places" className="flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            {t.places}
+            <Badge variant="secondary" className="ml-1">
+              {placeResults.length}
+            </Badge>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-6">
+          {postResults.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                {t.posts} ({postResults.length})
+              </h2>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {postResults.slice(0, 6).map((post) => (
+                  <PostCard key={post.id} post={post} currentLanguage={currentLanguage} onLike={handlePostLike} onLocationClick={handleLocationClick} onUserClick={handleUserClick} showMetrics={true} />
+                ))}
+              </div>
+            </div>
+          )}
+          {placeResults.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                {t.places} ({placeResults.length})
+              </h2>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {placeResults.slice(0, 6).map((place) => (
+                  <div key={place.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2"><MapPin className="w-4 h-4 mr-1" />{place.province}</div>
+                      <div className="flex flex-wrap gap-1 mb-3">{place.tags.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
+                      <Button size="sm" className="w-full" onClick={() => handleLocationClick(place.id)}>{currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="posts" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {postResults.map((post) => (<PostCard key={post.id} post={post} currentLanguage={currentLanguage} onLike={handlePostLike} onLocationClick={handleLocationClick} onUserClick={handleUserClick} showMetrics={true} />))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="places" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {placeResults.map((place) => (
+              <div key={place.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2"><MapPin className="w-4 h-4 mr-1" />{place.province} • {place.category}</div>
+                  {place.description && (<p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{currentLanguage === "th" && place.descriptionLocal ? place.descriptionLocal : place.description}</p>)}
+                  <div className="flex flex-wrap gap-1 mb-3">{place.tags.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
+                  <div className="flex gap-2">
+                    <Button size="sm" className="flex-1" onClick={() => handleLocationClick(place.id)}>{currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/nearby/${place.id}`)}>{currentLanguage === "th" ? "ใกล้เคียง" : "Nearby"}</Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    );
+  };
+
   if (!query) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
         <Header currentLanguage={currentLanguage} onLanguageChange={onLanguageChange} />
         <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            {t.searchResults}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
-            {currentLanguage === "th" 
-              ? "กรุณาใส่คำค้นหาเพื่อเริ่มต้น" 
-              : "Please enter a search query to begin"}
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{t.searchResults}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">{currentLanguage === "th" ? "กรุณาใส่คำค้นหาเพื่อเริ่มต้น" : "Please enter a search query to begin"}</p>
           <Button onClick={() => navigate("/")}>{t.backToHome}</Button>
         </div>
         <BottomNavigation currentLanguage={currentLanguage} />
@@ -149,226 +291,28 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
       <Header currentLanguage={currentLanguage} onLanguageChange={onLanguageChange} />
       
       <div className="container mx-auto px-4 py-6">
-        {/* Search Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            {t.searchResults}: &quot;{query}&quot;
-          </h1>
-          
-          {/* Search Stats */}
-          {!isLoading && totalResults > 0 && (
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t.searchResults}: &quot;{query}&quot;</h1>
+          {!isLoading && totalResults > 0 && !error && (
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-              <span>
-                {t.foundResults} {totalResults} {t.results} {t.in} {processingTime}{t.ms}
-              </span>
-              
-              {/* Expanded Terms */}
+              <span>{t.foundResults} {totalResults} {t.results} {t.in} {processingTime}{t.ms}</span>
               {expandedTerms.length > 1 && (
                 <div className="flex items-center gap-2">
                   <span>{t.expandedSearch}:</span>
-                  {expandedTerms.slice(0, 3).map((term, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {term}
-                    </Badge>
-                  ))}
-                  {expandedTerms.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{expandedTerms.length - 3}
-                    </Badge>
-                  )}
+                  {expandedTerms.slice(0, 3).map((term, index) => (<Badge key={index} variant="outline" className="text-xs">{term}</Badge>))}
+                  {expandedTerms.length > 3 && (<Badge variant="secondary" className="text-xs">+{expandedTerms.length - 3}</Badge>)}
                 </div>
               )}
             </div>
           )}
-
-          {/* Action Buttons */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-8">
-              <Filter className="w-4 h-4 mr-2" />
-              {t.filters}
-            </Button>
-            <Button variant="outline" size="sm" className="h-8">
-              <SortAsc className="w-4 h-4 mr-2" />
-              {t.sort}
-            </Button>
+            <Button variant="outline" size="sm" className="h-8"><Filter className="w-4 h-4 mr-2" />{t.filters}</Button>
+            <Button variant="outline" size="sm" className="h-8"><SortAsc className="w-4 h-4 mr-2" />{t.sort}</Button>
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-              {t.searching}
-            </div>
-          </div>
-        ) : totalResults === 0 ? (
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {t.noResults}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {currentLanguage === "th" 
-                ? "ลองใช้คำค้นหาอื่นหรือปรับเปลี่ยนตัวกรอง"
-                : "Try different keywords or adjust your filters"}
-            </p>
-            <Button onClick={() => navigate("/")}>{t.backToHome}</Button>
-          </div>
-        ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                {t.allResults}
-                <Badge variant="secondary" className="ml-1">
-                  {totalResults}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="posts" className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                {t.posts}
-                <Badge variant="secondary" className="ml-1">
-                  {postResults.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="places" className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                {t.places}
-                <Badge variant="secondary" className="ml-1">
-                  {placeResults.length}
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
+        {renderContent()}
 
-            <TabsContent value="all" className="space-y-6">
-              {/* Mixed Results */}
-              <div className="space-y-6">
-                {/* Posts Section */}
-                {postResults.length > 0 && (
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                      {t.posts} ({postResults.length})
-                    </h2>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {postResults.slice(0, 6).map((post) => (
-                        <PostCard
-                          key={post.id}
-                          post={post}
-                          currentLanguage={currentLanguage}
-                          onLike={handlePostLike}
-                          onLocationClick={handleLocationClick}
-                          onUserClick={handleUserClick}
-                          showMetrics={true}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Places Section */}
-                {placeResults.length > 0 && (
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                      {t.places} ({placeResults.length})
-                    </h2>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {placeResults.slice(0, 6).map((place) => (
-                        <div key={place.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                          <div className="p-4">
-                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                              {currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}
-                            </h3>
-                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {place.province}
-                            </div>
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {place.tags.slice(0, 3).map((tag, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                            <Button 
-                              size="sm" 
-                              className="w-full"
-                              onClick={() => handleLocationClick(place.id)}
-                            >
-                              {currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="posts" className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {postResults.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    currentLanguage={currentLanguage}
-                    onLike={handlePostLike}
-                    onLocationClick={handleLocationClick}
-                    onUserClick={handleUserClick}
-                    showMetrics={true}
-                  />
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="places" className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {placeResults.map((place) => (
-                  <div key={place.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        {currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}
-                      </h3>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {place.province} • {place.category}
-                      </div>
-                      {place.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                          {currentLanguage === "th" && place.descriptionLocal 
-                            ? place.descriptionLocal 
-                            : place.description}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {place.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={() => handleLocationClick(place.id)}
-                        >
-                          {currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/nearby/${place.id}`)}
-                        >
-                          {currentLanguage === "th" ? "ใกล้เคียง" : "Nearby"}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
       </div>
 
       <BottomNavigation currentLanguage={currentLanguage} />
