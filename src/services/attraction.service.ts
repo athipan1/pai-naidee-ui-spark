@@ -6,10 +6,20 @@ import { AxiosError } from 'axios';
 // Helper to extract a meaningful error message from an API error
 const getApiErrorMessage = (error: unknown): string => {
   if (error instanceof AxiosError) {
+    // Handle specific network errors
+    if (error.code === "ERR_NETWORK") {
+      return "Network error. Please check your connection or for a possible CORS issue.";
+    }
+    if (!error.response) {
+      return "Could not connect to the server. Please try again later.";
+    }
+
     // Check for a specific error message from the backend
     if (error.response?.data?.detail) {
       return error.response.data.detail;
     }
+
+    // Fallback to the default Axios error message
     return error.message;
   }
   if (error instanceof Error) {
