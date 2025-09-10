@@ -159,10 +159,3 @@ export const useUpdateAttractionCache = () => {
     }
   };
 };
-
-// Utility function to get error message from query
-export const getAttractionErrorMessage = (error: Error | null, fallback: string = 'เกิดข้อผิดพลาด'): string => {
-  if (!error) return fallback;
-  // Simple error handling for now, can be expanded
-  return error.message || fallback;
-};

@@ -31,10 +31,7 @@ import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
 import Reviews from "@/components/attraction/Reviews";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
-import { 
-  useAttractionDetail, 
-  getAttractionErrorMessage 
-} from "@/shared/hooks/useAttractionQueries";
+import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
 import type { Accommodation } from "@/shared/types/attraction";
 
 const pastelVariants = [
@@ -168,7 +165,7 @@ const AttractionDetail = ({
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-muted-foreground mb-4">
-            {getAttractionErrorMessage(error, t.notFound)}
+            {error?.message || t.notFound}
           </p>
           <div className="flex gap-2 justify-center">
             <Button onClick={() => navigate("/")} variant="outline">
