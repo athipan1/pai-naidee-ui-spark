@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaiNaiDee - API Example</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: #4a4a4a; }
+        #attractions-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .attraction-card { background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s; }
+        .attraction-card:hover { transform: translateY(-5px); }
+        .attraction-card img { width: 100%; height: 180px; object-fit: cover; }
+        .attraction-card-content { padding: 15px; }
+        .attraction-card h2 { margin-top: 0; font-size: 1.25rem; }
+        .attraction-card p { font-size: 0.9rem; color: #666; }
+        .loading { text-align: center; font-size: 1.2rem; padding: 50px; }
+        .notice { background-color: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="notice">
+            <strong>นี่คือไฟล์ตัวอย่าง (painaidee_example.html)</strong><br>
+            ไฟล์นี้มีไว้เพื่อสาธิตการเชื่อมต่อ API เท่านั้น และไม่ได้เป็นส่วนหนึ่งของแอปพลิเคชันหลักของคุณ
+        </div>
+
+        <h1>🌴 PaiNaiDee - สถานที่ท่องเที่ยวแนะนำ 🌴</h1>
+        <div id="attractions-list">
+            <div class="loading">กำลังโหลดข้อมูล...</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const attractionsList = document.getElementById('attractions-list');
+            const apiUrl = 'https://athipan01-painaidee-backend.hf.space/api/attractions';
+
+            async function fetchAttractions() {
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.success && result.data.attractions.length > 0) {
+                        renderAttractions(result.data.attractions);
+                    } else {
+                        attractionsList.innerHTML = '<p>ไม่พบข้อมูลสถานที่ท่องเที่ยว</p>';
+                    }
+                } catch (error) {
+                    console.error('ไม่สามารถเชื่อมต่อกับ API ได้:', error);
+                    attractionsList.innerHTML = `<p>ขออภัย, ไม่สามารถโหลดข้อมูลได้ในขณะนี้</p>`;
+                }
+            }
+
+            function renderAttractions(attractions) {
+                attractionsList.innerHTML = '';
+                attractions.forEach(attraction => {
+                    const card = document.createElement('div');
+                    card.className = 'attraction-card';
+
+                    const img = document.createElement('img');
+                    img.src = attraction.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+                    img.alt = attraction.name;
+
+                    const content = document.createElement('div');
+                    content.className = 'attraction-card-content';
+
+                    const title = document.createElement('h2');
+                    title.textContent = attraction.name;
+
+                    const description = document.createElement('p');
+                    description.textContent = `${attraction.description} (${attraction.province})`;
+
+                    content.appendChild(title);
+                    content.appendChild(description);
+                    card.appendChild(img);
+                    card.appendChild(content);
+                    attractionsList.appendChild(card);
+                });
+            }
+
+            fetchAttractions();
+        });
+    </script>
+
+</body>
+</html>
