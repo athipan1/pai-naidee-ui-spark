@@ -98,3 +98,37 @@ export const getAttractions = async (options?: {
     throw new Error(`Failed to fetch attractions. ${getApiErrorMessage(error)}`);
   }
 };
+
+// [NEW] Get list of attractions from the legacy HuggingFace endpoint
+// This function also transforms the data to match the AttractionCardProps
+export const getLegacyAttractions = async (): Promise<SearchResult[]> => {
+  const endpoint = `/attractions`;
+  console.log("✅ Calling legacy HuggingFace endpoint for list:", endpoint);
+
+  try {
+    const { data } = await apiClient.get(endpoint);
+
+    if (data.success && data.data.attractions) {
+      // Transform the API data to match the SearchResult/AttractionCardProps type
+      return data.data.attractions.map((item: any): SearchResult => ({
+        id: item.id.toString(),
+        name: item.name,
+        nameLocal: item.name,
+        province: item.province,
+        category: item.category,
+        image: item.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
+        rating: item.average_rating || 0,
+        reviewCount: item.total_reviews || 0,
+        description: item.description || 'No description available.',
+        tags: item.tags || [], // Assuming tags might exist, otherwise empty array
+        location: item.location || { lat: 0, lng: 0 },
+        amenities: [], // Legacy endpoint doesn't provide amenities
+      }));
+    }
+
+    return [];
+  } catch (error) {
+    console.error(`❌ Error fetching legacy attractions from ${endpoint}:`, error);
+    throw new Error(`Failed to fetch legacy attractions. ${getApiErrorMessage(error)}`);
+  }
+};
