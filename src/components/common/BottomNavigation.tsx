@@ -1,10 +1,7 @@
 import { Compass, Heart, User, Users, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-
-interface BottomNavigationProps {
-  currentLanguage: "th" | "en";
-}
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 // Simple admin role check - in real app this would come from auth context
 const useAdminRole = () => {
@@ -20,7 +17,8 @@ const useAdminRole = () => {
   return isAdmin;
 };
 
-const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
+const BottomNavigation = () => {
+  const { language } = useLanguage();
   const location = useLocation();
   const isAdmin = useAdminRole();
   
@@ -110,7 +108,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
                   <Icon className={`w-6 h-6 ${isActive ? "drop-shadow-md" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`} />
                 </div>
                 <span className={`text-xs font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`}>
-                  {tab.label[currentLanguage]}
+                  {tab.label[language]}
                 </span>
 
                 {/* Enhanced active indicator */}

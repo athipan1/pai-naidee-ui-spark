@@ -25,6 +25,7 @@ import { MapViewModal } from './MapViewModal';
 import { CommentSection } from './CommentSection';
 import { cn } from '@/shared/lib/utils';
 import { useSeasonalTheme } from './SeasonalThemeProvider';
+import { useLanguage } from '@/shared/contexts/LanguageProvider';
 
 interface TravelStoryCardProps {
   post: Post;
@@ -33,7 +34,6 @@ interface TravelStoryCardProps {
   onShare: (postId: string) => void;
   onComment: (postId: string, content: string) => void;
   className?: string;
-  currentLanguage: 'th' | 'en';
 }
 
 export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
@@ -43,8 +43,8 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
   onShare,
   onComment,
   className,
-  currentLanguage
 }) => {
+  const { language } = useLanguage();
   const [showComments, setShowComments] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);

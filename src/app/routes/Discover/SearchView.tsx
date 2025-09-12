@@ -8,17 +8,18 @@ import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
 import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import { useLanguage } from '@/shared/contexts/LanguageProvider';
 
 interface SearchViewProps {
-  currentLanguage: "th" | "en";
   query: string;
   category?: string;
 }
 
 type ViewMode = 'grid' | 'list';
 
-const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
+const SearchView = ({ query, category }: SearchViewProps) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = React.useState(false);
@@ -36,12 +37,12 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
       id: "1",
       name: "Phi Phi Islands",
       nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
+      province: language === "th" ? "กระบี่" : "Krabi",
       category: "Beach",
       rating: 4.8,
       reviewCount: 2547,
       image: heroBeachImage,
-      description: currentLanguage === "th"
+      description: language === "th"
         ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
         : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
       tags: ["Beach", "Snorkeling", "Island", "Photography"],
@@ -52,12 +53,12 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
       id: "2",
       name: "Wat Phra Kaew",
       nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Culture",
       rating: 4.9,
       reviewCount: 5243,
       image: templeImage,
-      description: currentLanguage === "th"
+      description: language === "th"
         ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
         : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
       tags: ["Temple", "Culture", "Buddhism", "History"],
@@ -68,12 +69,12 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
       id: "3",
       name: "Doi Inthanon",
       nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
+      province: language === "th" ? "เชียงใหม่" : "Chiang Mai",
       category: "Nature",
       rating: 4.7,
       reviewCount: 1876,
       image: mountainImage,
-      description: currentLanguage === "th"
+      description: language === "th"
         ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
         : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
       tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
@@ -84,12 +85,12 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
       id: "4",
       name: "Floating Market",
       nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Food",
       rating: 4.5,
       reviewCount: 3156,
       image: floatingMarketImage,
-      description: currentLanguage === "th"
+      description: language === "th"
         ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
         : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
       tags: ["Food", "Culture", "Traditional", "Market"],
@@ -181,11 +182,11 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">
-                  {currentLanguage === 'th' ? 'ผลการค้นหา' : 'Search Results'}
+                  {language === 'th' ? 'ผลการค้นหา' : 'Search Results'}
                 </h2>
                 {query && (
                   <p className="text-muted-foreground">
-                    {currentLanguage === 'th' 
+                    {language === 'th'
                       ? `ค้นหา: "${query}" พบ ${filteredResults.length} รายการ`
                       : `Search: "${query}" - ${filteredResults.length} results`
                     }
@@ -193,7 +194,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
                 )}
                 {category && (
                   <p className="text-muted-foreground">
-                    {currentLanguage === 'th' 
+                    {language === 'th'
                       ? `หมวดหมู่: ${category}`
                       : `Category: ${category}`
                     }
@@ -205,7 +206,6 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
             {/* Filters and Controls */}
             <div className="space-y-4">
               <AdvancedFilters
-                currentLanguage={currentLanguage}
                 filters={filters}
                 onFiltersChange={handleFiltersChange}
                 onApplyFilters={handleApplyFilters}
@@ -221,7 +221,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
                     size="sm"
                     onClick={() => setViewMode('grid')}
                     className="rounded-r-none"
-                    aria-label={currentLanguage === 'th' ? 'มุมมองตาราง' : 'Grid view'}
+                    aria-label={language === 'th' ? 'มุมมองตาราง' : 'Grid view'}
                   >
                     <Grid3X3 className="w-4 h-4" />
                   </Button>
@@ -230,7 +230,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
                     size="sm"
                     onClick={() => setViewMode('list')}
                     className="rounded-l-none"
-                    aria-label={currentLanguage === 'th' ? 'มุมมองรายการ' : 'List view'}
+                    aria-label={language === 'th' ? 'มุมมองรายการ' : 'List view'}
                   >
                     <List className="w-4 h-4" />
                   </Button>
@@ -246,13 +246,13 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
         {filteredResults.length === 0 ? (
           <section className="text-center py-12">
             <p className="text-muted-foreground text-lg">
-              {currentLanguage === 'th' 
+              {language === 'th'
                 ? 'ไม่พบผลการค้นหา'
                 : 'No results found'
               }
             </p>
             <p className="text-muted-foreground">
-              {currentLanguage === 'th'
+              {language === 'th'
                 ? 'ลองเปลี่ยนคำค้นหาหรือกรองข้อมูล'
                 : 'Try adjusting your search or filters'
               }
@@ -267,7 +267,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
               }
             `}
             aria-label={
-              currentLanguage === 'th' 
+              language === 'th'
                 ? `ผลการค้นหา ${filteredResults.length} รายการ`
                 : `Search results ${filteredResults.length} items`
             }
@@ -276,7 +276,6 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
               <div key={attraction.id} className={viewMode === 'list' ? 'border border-border rounded-lg p-4' : ''}>
                 <AttractionCard
                   {...attraction}
-                  currentLanguage={currentLanguage}
                   isFavorite={favorites.includes(attraction.id)}
                   onFavoriteToggle={handleFavoriteToggle}
                   onCardClick={handleCardClick}

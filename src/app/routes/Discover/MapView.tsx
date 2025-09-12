@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface Attraction {
   id: string;
@@ -35,11 +36,11 @@ interface POI {
 }
 
 interface MapViewProps {
-  currentLanguage: "th" | "en";
   selectedAttractionId?: string;
 }
 
-const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
+const MapView = ({ selectedAttractionId }: MapViewProps) => {
+  const { language } = useLanguage();
   const _navigate = useNavigate(); // Keeping for future use
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -97,7 +98,7 @@ const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock attraction data with coordinates
   const attractions: Attraction[] = [
@@ -148,7 +149,7 @@ const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
     : attractions.filter(a => a.category === selectedCategory);
 
   // Get display name for current attraction
-  const displayName = currentLanguage === "th" && currentAttraction.nameLocal
+  const displayName = language === "th" && currentAttraction.nameLocal
     ? currentAttraction.nameLocal
     : currentAttraction.name;
 
@@ -500,7 +501,7 @@ const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
                       className="bg-white rounded-full px-3 py-1 text-xs border hover:bg-gray-50 transition-colors flex items-center gap-1 min-w-0"
                     >
                       <span>🏞️</span>
-                      <span className="truncate">{currentLanguage === "th" ? attraction.nameLocal : attraction.name}</span>
+                      <span className="truncate">{language === "th" ? attraction.nameLocal : attraction.name}</span>
                       <span className="text-yellow-500 flex-shrink-0">★{attraction.rating}</span>
                     </button>
                   ))

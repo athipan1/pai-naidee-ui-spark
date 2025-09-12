@@ -9,15 +9,12 @@ import BottomNavigation from "@/components/common/BottomNavigation";
 import PostCard from "@/components/common/PostCard";
 import { searchPosts, searchLocations } from "@/services/contextualSearch.service";
 import { PostSearchResult, Location } from "@/shared/types/posts";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
-interface ContextualSearchResultsProps {
-  currentLanguage: "th" | "en";
-  onLanguageChange: (language: "th" | "en") => void;
-}
-
-const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: ContextualSearchResultsProps) => {
+const ContextualSearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const query = searchParams.get("q") || "";
 
   const [postResults, setPostResults] = useState<PostSearchResult[]>([]);
@@ -73,14 +70,14 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   useEffect(() => {
     if (query) {
       performSearch();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, currentLanguage]);
+  }, [query, language]);
 
   const performSearch = async () => {
     if (!query.trim()) return;
@@ -90,7 +87,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
     
     try {
       const [postsResponse, placesResponse] = await Promise.all([
-        searchPosts(query, { language: currentLanguage, limit: 20 }),
+        searchPosts(query, { language: language, limit: 20 }),
         searchLocations(query, 10)
       ]);
       
@@ -175,7 +172,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
             {t.noResults}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {currentLanguage === "th"
+            {language === "th"
               ? "ลองใช้คำค้นหาอื่นหรือปรับเปลี่ยนตัวกรอง"
               : "Try different keywords or adjust your filters"}
           </p>
@@ -218,7 +215,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
               </h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {postResults.slice(0, 6).map((post) => (
-                  <PostCard key={post.id} post={post} currentLanguage={currentLanguage} onLike={handlePostLike} onLocationClick={handleLocationClick} onUserClick={handleUserClick} showMetrics={true} />
+                  <PostCard key={post.id} post={post} onLike={handlePostLike} onLocationClick={handleLocationClick} onUserClick={handleUserClick} showMetrics={true} />
                 ))}
               </div>
             </div>
@@ -232,10 +229,10 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
                 {placeResults.slice(0, 6).map((place) => (
                   <div key={place.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{language === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2"><MapPin className="w-4 h-4 mr-1" />{place.province}</div>
                       <div className="flex flex-wrap gap-1 mb-3">{place.tags.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
-                      <Button size="sm" className="w-full" onClick={() => handleLocationClick(place.id)}>{currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
+                      <Button size="sm" className="w-full" onClick={() => handleLocationClick(place.id)}>{language === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
                     </div>
                   </div>
                 ))}
@@ -246,7 +243,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
 
         <TabsContent value="posts" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {postResults.map((post) => (<PostCard key={post.id} post={post} currentLanguage={currentLanguage} onLike={handlePostLike} onLocationClick={handleLocationClick} onUserClick={handleUserClick} showMetrics={true} />))}
+            {postResults.map((post) => (<PostCard key={post.id} post={post} onLike={handlePostLike} onLocationClick={handleLocationClick} onUserClick={handleUserClick} showMetrics={true} />))}
           </div>
         </TabsContent>
 
@@ -255,13 +252,13 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
             {placeResults.map((place) => (
               <div key={place.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{language === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2"><MapPin className="w-4 h-4 mr-1" />{place.province} • {place.category}</div>
-                  {place.description && (<p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{currentLanguage === "th" && place.descriptionLocal ? place.descriptionLocal : place.description}</p>)}
+                  {place.description && (<p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{language === "th" && place.descriptionLocal ? place.descriptionLocal : place.description}</p>)}
                   <div className="flex flex-wrap gap-1 mb-3">{place.tags.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1" onClick={() => handleLocationClick(place.id)}>{currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
-                    <Button variant="outline" size="sm" onClick={() => navigate(`/nearby/${place.id}`)}>{currentLanguage === "th" ? "ใกล้เคียง" : "Nearby"}</Button>
+                    <Button size="sm" className="flex-1" onClick={() => handleLocationClick(place.id)}>{language === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/nearby/${place.id}`)}>{language === "th" ? "ใกล้เคียง" : "Nearby"}</Button>
                   </div>
                 </div>
               </div>
@@ -275,20 +272,20 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
   if (!query) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-        <Header currentLanguage={currentLanguage} onLanguageChange={onLanguageChange} />
+        <Header />
         <div className="container mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{t.searchResults}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">{currentLanguage === "th" ? "กรุณาใส่คำค้นหาเพื่อเริ่มต้น" : "Please enter a search query to begin"}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">{language === "th" ? "กรุณาใส่คำค้นหาเพื่อเริ่มต้น" : "Please enter a search query to begin"}</p>
           <Button onClick={() => navigate("/")}>{t.backToHome}</Button>
         </div>
-        <BottomNavigation currentLanguage={currentLanguage} />
+        <BottomNavigation />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      <Header currentLanguage={currentLanguage} onLanguageChange={onLanguageChange} />
+      <Header />
       
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
@@ -315,7 +312,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
 
       </div>
 
-      <BottomNavigation currentLanguage={currentLanguage} />
+      <BottomNavigation />
     </div>
   );
 };

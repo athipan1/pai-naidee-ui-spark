@@ -31,11 +31,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 import { useNavigate } from "react-router-dom";
-
-interface ProfilePageProps {
-  currentLanguage: "th" | "en";
-  onLanguageChange: (lang: "th" | "en") => void;
-}
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface UserProfile {
   id: string;
@@ -58,6 +54,8 @@ const ProfilePage = ({ currentLanguage, onLanguageChange }: ProfilePageProps) =>
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
+
+  const { language, setLanguage } = useLanguage();
 
   const content = {
     th: {
@@ -124,7 +122,7 @@ const ProfilePage = ({ currentLanguage, onLanguageChange }: ProfilePageProps) =>
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock user data - in real app this would come from auth context/API
   useEffect(() => {
@@ -134,7 +132,7 @@ const ProfilePage = ({ currentLanguage, onLanguageChange }: ProfilePageProps) =>
       email: t.guestEmail,
       avatar: "",
       bio: t.guestBio,
-      location: currentLanguage === "th" ? "กรุงเทพฯ, ประเทศไทย" : "Bangkok, Thailand",
+      location: language === "th" ? "กรุงเทพฯ, ประเทศไทย" : "Bangkok, Thailand",
       joinDate: "2024-01-01",
       stats: {
         places: 12,
@@ -170,7 +168,7 @@ const ProfilePage = ({ currentLanguage, onLanguageChange }: ProfilePageProps) =>
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
-      currentLanguage === "th" ? "th-TH" : "en-US",
+      language === "th" ? "th-TH" : "en-US",
       { year: 'numeric', month: 'long', day: 'numeric' }
     );
   };
@@ -296,21 +294,21 @@ const ProfilePage = ({ currentLanguage, onLanguageChange }: ProfilePageProps) =>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <Button
-                          variant={currentLanguage === "th" ? "default" : "outline"}
-                          onClick={() => handleLanguageChange("th")}
+                          variant={language === "th" ? "default" : "outline"}
+                          onClick={() => setLanguage("th")}
                           className="w-32 justify-start"
                         >
-                          {currentLanguage === "th" && <Check className="w-4 h-4 mr-2" />}
+                          {language === "th" && <Check className="w-4 h-4 mr-2" />}
                           {t.thai}
                         </Button>
                       </div>
                       <div className="flex items-center justify-between">
                         <Button
-                          variant={currentLanguage === "en" ? "default" : "outline"}
-                          onClick={() => handleLanguageChange("en")}
+                          variant={language === "en" ? "default" : "outline"}
+                          onClick={() => setLanguage("en")}
                           className="w-32 justify-start"
                         >
-                          {currentLanguage === "en" && <Check className="w-4 h-4 mr-2" />}
+                          {language === "en" && <Check className="w-4 h-4 mr-2" />}
                           {t.english}
                         </Button>
                       </div>

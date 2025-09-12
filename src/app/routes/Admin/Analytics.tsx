@@ -3,12 +3,10 @@ import { BarChart3, TrendingUp, Users, Eye, Calendar, Download } from "lucide-re
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
-interface AnalyticsProps {
-  currentLanguage: "th" | "en";
-}
-
-const Analytics = ({ currentLanguage }: AnalyticsProps) => {
+const Analytics = () => {
+  const { language } = useLanguage();
   const [selectedPeriod, setSelectedPeriod] = useState("7d");
 
   const content = {
@@ -62,7 +60,7 @@ const Analytics = ({ currentLanguage }: AnalyticsProps) => {
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock analytics data - in real app this would come from API
   const analyticsData = {

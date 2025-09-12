@@ -6,14 +6,10 @@ import BottomNavigation from '@/components/common/BottomNavigation';
 import { BackButton } from '@/components/attraction/BackButton';
 
 interface CommunityProps {
-  currentLanguage: 'th' | 'en';
-  onLanguageChange: (language: 'th' | 'en') => void;
   onBack?: () => void;
 }
 
 const Community: React.FC<CommunityProps> = ({ 
-  currentLanguage, 
-  onLanguageChange,
   onBack: _onBack 
 }) => {
   const navigate = useNavigate();
@@ -24,10 +20,7 @@ const Community: React.FC<CommunityProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20">
-      <Header
-        currentLanguage={currentLanguage}
-        onLanguageChange={onLanguageChange}
-      />
+      <Header />
       
       <main className="relative">
         {/* Background decorative elements */}
@@ -43,11 +36,11 @@ const Community: React.FC<CommunityProps> = ({
           </div>
 
           {/* Unified Community Feed */}
-          <UnifiedTravelCommunityFeed currentLanguage={currentLanguage} />
+          <UnifiedTravelCommunityFeed />
         </div>
       </main>
 
-      <BottomNavigation currentLanguage={currentLanguage} />
+      <BottomNavigation />
     </div>
   );
 };

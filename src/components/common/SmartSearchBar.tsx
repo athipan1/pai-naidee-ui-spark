@@ -19,9 +19,9 @@ import type { SearchSuggestion, SearchResult } from "@/shared/types/search";
 import type { PostSearchResult } from "@/shared/types/posts";
 import { searchPosts, getTrendingSearches } from "@/services/contextualSearch.service";
 import { getSearchSuggestions } from "@/services/search.service";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface SmartSearchBarProps {
-  currentLanguage: "th" | "en";
   onSearch: (query: string, results: SearchResult[] | PostSearchResult[]) => void;
   onSuggestionSelect?: (suggestion: SearchSuggestion) => void;
   placeholder?: string;
@@ -30,13 +30,13 @@ interface SmartSearchBarProps {
 }
 
 const SmartSearchBar = ({
-  currentLanguage,
   onSearch,
   onSuggestionSelect,
   placeholder,
   className,
   searchType = "all",
 }: SmartSearchBarProps) => {
+  const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -81,14 +81,14 @@ const SmartSearchBar = ({
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock trending searches
   const mockTrendingSearches = [
-    currentLanguage === "th" ? "เกาะพีพี" : "Phi Phi Islands",
-    currentLanguage === "th" ? "วัดพระแก้ว" : "Wat Phra Kaew",
-    currentLanguage === "th" ? "ดอยอินทนนท์" : "Doi Inthanon",
-    currentLanguage === "th" ? "ตลาดน้ำ" : "Floating Market",
+    language === "th" ? "เกาะพีพี" : "Phi Phi Islands",
+    language === "th" ? "วัดพระแก้ว" : "Wat Phra Kaew",
+    language === "th" ? "ดอยอินทนนท์" : "Doi Inthanon",
+    language === "th" ? "ตลาดน้ำ" : "Floating Market",
   ];
 
   // Initialize data
@@ -99,10 +99,10 @@ const SmartSearchBar = ({
     }
     
     // Load trending searches
-    getTrendingSearches(currentLanguage).then(trending => {
+    getTrendingSearches(language).then(trending => {
       setTrendingSearches(trending);
     });
-  }, [currentLanguage]);
+  }, [language]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -132,7 +132,7 @@ const SmartSearchBar = ({
     setIsLoading(true);
 
     try {
-      const suggestions = await getSearchSuggestions(searchQuery, currentLanguage);
+      const suggestions = await getSearchSuggestions(searchQuery, language);
       setSuggestions(suggestions);
     } catch {
       // Handle error silently for now
@@ -152,7 +152,7 @@ const SmartSearchBar = ({
       if (searchType === "posts" || searchType === "all") {
         // Use enhanced contextual search for posts
         const response = await searchPosts(searchQuery, {
-          language: currentLanguage,
+          language: language,
           limit: 20
         });
         

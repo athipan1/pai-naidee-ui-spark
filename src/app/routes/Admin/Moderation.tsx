@@ -4,10 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface ModerationProps {
-  currentLanguage: "th" | "en";
-}
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface ModerationItem {
   id: string;
@@ -21,7 +18,8 @@ interface ModerationItem {
   category: string;
 }
 
-const Moderation = ({ currentLanguage }: ModerationProps) => {
+const Moderation = () => {
+  const { language } = useLanguage();
   const [selectedTab, setSelectedTab] = useState("all");
 
   const content = {
@@ -77,7 +75,7 @@ const Moderation = ({ currentLanguage }: ModerationProps) => {
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock data - in real app this would come from API
   const moderationItems: ModerationItem[] = [
@@ -191,7 +189,7 @@ const Moderation = ({ currentLanguage }: ModerationProps) => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
-      currentLanguage === "th" ? "th-TH" : "en-US",
+      language === "th" ? "th-TH" : "en-US",
       { 
         year: 'numeric', 
         month: 'short', 

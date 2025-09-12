@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AttractionCard from "@/components/common/AttractionCard";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface SavedItem {
   id: string;
@@ -31,12 +32,9 @@ interface SavedItem {
   type: "attraction" | "video";
 }
 
-interface SavedPageProps {
-  currentLanguage: "th" | "en";
-}
-
-const SavedPage = ({ currentLanguage }: SavedPageProps) => {
+const SavedPage = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [favorites, setFavorites] = useState<SavedItem[]>([]);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
@@ -85,7 +83,7 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock data - in real app this would come from API/context
   useEffect(() => {
@@ -94,13 +92,13 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
         id: "1",
         name: "Phi Phi Islands",
         nameLocal: "หมู่เกาะพีพี",
-        province: currentLanguage === "th" ? "กระบี่" : "Krabi",
+        province: language === "th" ? "กระบี่" : "Krabi",
         category: "Beach",
         rating: 4.8,
         reviewCount: 2547,
         image: "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=800",
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม"
             : "Crystal clear waters and stunning limestone cliffs",
         tags: ["Beach", "Snorkeling", "Island"],
@@ -111,13 +109,13 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
         id: "2",
         name: "Wat Phra Kaew",
         nameLocal: "วัดพระแก้ว",
-        province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+        province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
         category: "Culture",
         rating: 4.9,
         reviewCount: 5243,
         image: "https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=800",
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย"
             : "The most sacred Buddhist temple in Thailand",
         tags: ["Temple", "Culture", "Buddhism"],
@@ -131,13 +129,13 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
         id: "3",
         name: "Doi Inthanon",
         nameLocal: "ดอยอินทนนท์",
-        province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
+        province: language === "th" ? "เชียงใหม่" : "Chiang Mai",
         category: "Nature",
         rating: 4.7,
         reviewCount: 1876,
         image: "https://images.pexels.com/photos/1450360/pexels-photo-1450360.jpeg?auto=compress&cs=tinysrgb&w=800",
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "ยอดเขาที่สูงที่สุดในประเทศไทย"
             : "The highest peak in Thailand",
         tags: ["Mountain", "Nature", "Hiking"],
@@ -151,13 +149,13 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
         id: "4",
         name: "Railay Beach",
         nameLocal: "หาดไร่เลย์",
-        province: currentLanguage === "th" ? "กระบี่" : "Krabi",
+        province: language === "th" ? "กระบี่" : "Krabi",
         category: "Beach",
         rating: 4.6,
         reviewCount: 1234,
         image: "https://images.pexels.com/photos/1450361/pexels-photo-1450361.jpeg?auto=compress&cs=tinysrgb&w=800",
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "หาดที่สวยงามและเงียบสงบ"
             : "Beautiful and peaceful beach",
         tags: ["Beach", "Rock Climbing", "Sunset"],
@@ -172,7 +170,7 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
       setRecommendations(mockRecommendations);
       setLoading(false);
     }, 1000);
-  }, [currentLanguage]);
+  }, [language]);
 
   const handleRemoveFromSaved = (id: string) => {
     if (activeTab === "favorites") {
@@ -192,7 +190,7 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return currentLanguage === "th"
+    return language === "th"
       ? date.toLocaleDateString("th-TH")
       : date.toLocaleDateString("en-US");
   };
@@ -249,7 +247,7 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
           <div className="p-4 space-y-3">
             <div className="space-y-2">
               <h3 className="font-semibold text-lg line-clamp-1">
-                {currentLanguage === "th" && item.nameLocal
+                {language === "th" && item.nameLocal
                   ? item.nameLocal
                   : item.name}
               </h3>
@@ -311,7 +309,7 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
 
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-lg line-clamp-1">
-              {currentLanguage === "th" && item.nameLocal
+              {language === "th" && item.nameLocal
                 ? item.nameLocal
                 : item.name}
             </h3>
@@ -480,7 +478,6 @@ const SavedPage = ({ currentLanguage }: SavedPageProps) => {
                   <AttractionCard
                     key={item.id}
                     {...item}
-                    currentLanguage={currentLanguage}
                     isFavorite={false}
                     onFavoriteToggle={() => {}}
                     onCardClick={handleViewDetails}

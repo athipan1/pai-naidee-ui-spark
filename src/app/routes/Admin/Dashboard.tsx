@@ -3,12 +3,10 @@ import { Server, Activity, TrendingUp, Eye, Database, RefreshCw } from "lucide-r
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
-interface DashboardProps {
-  currentLanguage: "th" | "en";
-}
-
-const Dashboard = ({ currentLanguage }: DashboardProps) => {
+const Dashboard = () => {
+  const { language } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
 
   const content = {
@@ -52,7 +50,7 @@ const Dashboard = ({ currentLanguage }: DashboardProps) => {
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock data - in real app this would come from API
   const systemMetrics = {

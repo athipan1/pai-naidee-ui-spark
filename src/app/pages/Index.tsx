@@ -17,13 +17,10 @@ import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
 import heroBeachImage from "@/shared/assets/hero-beach.jpg";
 import AttractionListTest from "@/components/common/AttractionListTest";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
-interface IndexProps {
-  currentLanguage: "th" | "en";
-  onLanguageChange: (language: "th" | "en") => void;
-}
-
-const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
+const Index = () => {
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const [_selectedCategory, _setSelectedCategory] = useState("all");
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -35,13 +32,13 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       id: "1",
       name: "Phi Phi Islands",
       nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
+      province: language === "th" ? "กระบี่" : "Krabi",
       category: "Beach",
       rating: 4.8,
       reviewCount: 2547,
       image: heroBeachImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
           : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
       tags: ["Beach", "Snorkeling", "Island", "Photography"],
@@ -50,13 +47,13 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       id: "2",
       name: "Wat Phra Kaew",
       nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Culture",
       rating: 4.9,
       reviewCount: 5243,
       image: templeImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
           : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
       tags: ["Temple", "Culture", "Buddhism", "History"],
@@ -65,13 +62,13 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       id: "3",
       name: "Doi Inthanon",
       nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
+      province: language === "th" ? "เชียงใหม่" : "Chiang Mai",
       category: "Nature",
       rating: 4.7,
       reviewCount: 1876,
       image: mountainImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
           : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
       tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
@@ -80,13 +77,13 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       id: "4",
       name: "Floating Market",
       nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Food",
       rating: 4.5,
       reviewCount: 3156,
       image: floatingMarketImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
           : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
       tags: ["Food", "Culture", "Traditional", "Market"],
@@ -178,10 +175,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   // Remove the view switching logic and just render the home page
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header
-        currentLanguage={currentLanguage}
-        onLanguageChange={onLanguageChange}
-      />
+      <Header />
 
       <main id="main-content" role="main" className="focus:outline-none" tabIndex={-1}>
         <div className="container mx-auto px-4 pt-4 border-b-2 border-dashed border-red-500 my-4">
@@ -197,23 +191,20 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               showRetryButton={!!apiError}
               fallbackMessage={
                 usingMockData
-                  ? currentLanguage === "th"
+                  ? language === "th"
                     ? "เซิร์ฟเวอร์ไม่พร้อมใช้งาน กำลังแสดงข้อมูลตัวอย่าง"
                     : "Server unavailable. Showing sample data instead."
                   : undefined
               }
-              currentLanguage={currentLanguage}
             />
           </div>
         )}
 
         <SearchSection
-          currentLanguage={currentLanguage}
           onSearch={handleSearch}
         />
 
         <CategoryFilter
-          currentLanguage={currentLanguage}
           selectedCategory={_selectedCategory}
           onCategoryChange={_handleCategoryChange}
           attractionCounts={attractionCounts}
@@ -221,12 +212,12 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
 
         {/* Trending Destinations Section */}
         {_selectedCategory === "all" && (
-          <section className="py-6 bg-accent/20" aria-label={currentLanguage === "th" ? "สถานที่ยอดนิยม" : "Trending destinations"}>
+          <section className="py-6 bg-accent/20" aria-label={language === "th" ? "สถานที่ยอดนิยม" : "Trending destinations"}>
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center">
                   <span className="mr-2" role="img" aria-label="fire">🔥</span>
-                  {currentLanguage === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
+                  {language === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
                 </h2>
               </div>
               
@@ -256,7 +247,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium truncate">
-                          {currentLanguage === "th" && attraction.nameLocal ? attraction.nameLocal : attraction.name}
+                          {language === "th" && attraction.nameLocal ? attraction.nameLocal : attraction.name}
                         </h3>
                         <p className="text-sm text-muted-foreground flex items-center">
                           <MapPin className="w-3 h-3 mr-1" />
@@ -279,11 +270,11 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       )}
 
         {/* Attractions Grid */}
-        <section className="py-8" aria-label={currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended places"}>
+        <section className="py-8" aria-label={language === "th" ? "สถานที่แนะนำ" : "Recommended places"}>
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">
-                {currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended Places"}
+                {language === "th" ? "สถานที่แนะนำ" : "Recommended Places"}
               </h2>
               <Button 
                 variant="outline" 
@@ -291,7 +282,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                 className="flex items-center gap-2"
               >
                 <span className="text-sm">
-                  {currentLanguage === "th" ? "ดูทั้งหมด" : "View All"}
+                  {language === "th" ? "ดูทั้งหมด" : "View All"}
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
@@ -301,7 +292,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               role="list"
               aria-label={
-                currentLanguage === "th" 
+                language === "th"
                   ? `รายการสถานที่ท่องเที่ยว ${Math.min(filteredAttractions.length, 8)} แห่ง`
                   : `Tourist attractions list ${Math.min(filteredAttractions.length, 8)} places`
               }
@@ -311,7 +302,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                 <div key={attraction.id} role="listitem">
                   <AttractionCard
                     {...attraction}
-                    currentLanguage={currentLanguage}
                     isFavorite={favorites.includes(attraction.id)}
                     onFavoriteToggle={handleFavoriteToggle}
                     onCardClick={handleCardClick}
@@ -323,7 +313,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
             {filteredAttractions.length === 0 && (
               <div className="text-center py-12" role="status" aria-live="polite">
                 <p className="text-muted-foreground text-lg">
-                  {currentLanguage === "th"
+                  {language === "th"
                     ? "ไม่พบสถานที่ในหมวดหมู่นี้"
                     : "No places found in this category"}
                 </p>
@@ -331,7 +321,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                   onClick={handleViewMore}
                   className="mt-4"
                 >
-                  {currentLanguage === "th" ? "สำรวจเพิ่มเติม" : "Explore More"}
+                  {language === "th" ? "สำรวจเพิ่มเติม" : "Explore More"}
                 </Button>
               </div>
             )}
@@ -339,7 +329,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         </section>
       </main>
 
-      <BottomNavigation currentLanguage={currentLanguage} />
+      <BottomNavigation />
     </div>
   );
 };

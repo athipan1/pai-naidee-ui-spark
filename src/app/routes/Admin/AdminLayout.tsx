@@ -7,10 +7,7 @@ import Dashboard from "./Dashboard";
 import MediaQueue from "./MediaQueue";
 import Moderation from "./Moderation";
 import Analytics from "./Analytics";
-
-interface AdminLayoutProps {
-  currentLanguage: "th" | "en";
-}
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 // Simple admin role check - in real app this would come from auth context
 const useAdminRole = () => {
@@ -26,8 +23,9 @@ const useAdminRole = () => {
   return isAdmin;
 };
 
-const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
+const AdminLayout = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const isAdmin = useAdminRole();
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -60,7 +58,7 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Show unauthorized access page if not admin
   if (!isAdmin) {
@@ -175,19 +173,19 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value="dashboard" className="space-y-6">
-            <Dashboard currentLanguage={currentLanguage} />
+            <Dashboard />
           </TabsContent>
 
           <TabsContent value="media" className="space-y-6">
-            <MediaQueue currentLanguage={currentLanguage} />
+            <MediaQueue />
           </TabsContent>
 
           <TabsContent value="moderation" className="space-y-6">
-            <Moderation currentLanguage={currentLanguage} />
+            <Moderation />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            <Analytics currentLanguage={currentLanguage} />
+            <Analytics />
           </TabsContent>
         </Tabs>
       </main>

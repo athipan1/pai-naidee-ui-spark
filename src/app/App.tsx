@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
+import { LanguageProvider, useLanguage } from "@/shared/contexts/LanguageProvider";
 import { useCommunity } from "@/shared/hooks/useCommunity";
 import { CreatePost } from "@/components/community/CreatePost";
 import DevTools from "@/components/dev/DevTools";
@@ -80,8 +81,8 @@ const queryClient = new QueryClient({
 });
 
 const AppContent = () => {
-  const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
   const [isAIAssistantLoaded, setIsAIAssistantLoaded] = useState(false);
+  const { language } = useLanguage();
 
   const { isCreatePostModalOpen, closeCreatePostModal } = useUIContext();
   const { createPost, isCreatingPost } = useCommunity();
@@ -104,89 +105,52 @@ const AppContent = () => {
       <Suspense fallback={
         <LoadingSpinner
           useSkeletonLoader={false}
-          text={currentLanguage === "th" ? "กำลังโหลด..." : "Loading..."}
+          text={language === "th" ? "กำลังโหลด..." : "Loading..."}
         />
       }>
         <Routes>
           {/* Main Routes */}
           <Route
             path="/"
-            element={
-              <Index
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
-              />
-            }
+            element={<Index />}
           />
           {/* New Consolidated Routes */}
           <Route
             path="/discover"
-            element={
-              <DiscoverLayout currentLanguage={currentLanguage} />
-            }
+            element={<DiscoverLayout />}
           />
           <Route
             path="/saved"
-            element={
-              <SavedPage currentLanguage={currentLanguage} />
-            }
+            element={<SavedPage />}
           />
           <Route
             path="/me"
-            element={
-              <ProfilePage
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
-              />
-            }
+            element={<ProfilePage />}
           />
           <Route
             path="/admin"
-            element={
-              <AdminLayout currentLanguage={currentLanguage} />
-            }
+            element={<AdminLayout />}
           />
           {/* Existing Essential Routes */}
           <Route
             path="/attraction/:id"
-            element={
-              <AttractionDetail
-                currentLanguage={currentLanguage}
-                onBack={() => window.history.back()}
-              />
-            }
+            element={<AttractionDetail onBack={() => window.history.back()} />}
           />
           <Route
             path="/community"
-            element={
-              <CommunityFeed
-                currentLanguage={currentLanguage}
-              />
-            }
+            element={<CommunityFeed />}
           />
           <Route
             path="/community/instagram"
-            element={
-              <InstagramDemo />
-            }
+            element={<InstagramDemo />}
           />
           <Route
             path="/search"
-            element={
-              <ContextualSearchResults
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
-              />
-            }
+            element={<ContextualSearchResults />}
           />
           <Route
             path="/video-upload"
-            element={
-              <VideoUploadPage
-                currentLanguage={currentLanguage}
-                onBack={() => window.history.back()}
-              />
-            }
+            element={<VideoUploadPage onBack={() => window.history.back()} />}
           />
           {/* Legacy Route Redirects */}
           <Route path="/explore" element={<ExploreRedirect />} />
@@ -231,12 +195,11 @@ const AppContent = () => {
             <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
           </div>
         }>
-          <GlobalAIAssistant language={currentLanguage} />
+          <GlobalAIAssistant />
         </Suspense>
       ) : (
         <AIAssistantTrigger
           onClick={() => setIsAIAssistantLoaded(true)}
-          language={currentLanguage}
         />
       )}
       <CreatePost
@@ -257,13 +220,15 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <MediaProvider>
           <UIProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
-            </TooltipProvider>
+            <LanguageProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </TooltipProvider>
+            </LanguageProvider>
           </UIProvider>
         </MediaProvider>
       </QueryClientProvider>

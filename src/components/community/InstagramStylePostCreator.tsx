@@ -30,6 +30,7 @@ import {
 import { cn } from '@/shared/lib/utils';
 import { CameraCapture } from './CameraCapture';
 import { useIsMobile } from '@/shared/hooks/use-mobile';
+import { useLanguage } from '@/shared/contexts/LanguageProvider';
 
 interface MediaFile {
   id: string;
@@ -72,7 +73,6 @@ interface InstagramStylePostCreatorProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (postData: PostData) => void;
   isSubmitting?: boolean;
-  currentLanguage?: 'th' | 'en';
 }
 
 export const InstagramStylePostCreator: React.FC<InstagramStylePostCreatorProps> = ({
@@ -80,9 +80,9 @@ export const InstagramStylePostCreator: React.FC<InstagramStylePostCreatorProps>
   onOpenChange,
   onSubmit,
   isSubmitting = false,
-  currentLanguage = 'th'
 }) => {
   const isMobile = useIsMobile();
+  const { language } = useLanguage();
   
   // Media states
   const [media, setMedia] = useState<MediaFile[]>([]);
@@ -173,7 +173,7 @@ export const InstagramStylePostCreator: React.FC<InstagramStylePostCreatorProps>
     }
   };
 
-  const t = texts[currentLanguage];
+  const t = texts[language];
 
   // Mock data - in real app these would come from API
   const locationSuggestions: LocationSuggestion[] = [

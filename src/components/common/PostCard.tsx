@@ -7,10 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/shared/lib/utils";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import type { Post, PostSearchResult } from "@/shared/types/posts";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface PostCardProps {
   post: Post | PostSearchResult;
-  currentLanguage: "th" | "en";
   onLike?: (postId: string) => void;
   onComment?: (postId: string) => void;
   onShare?: (postId: string) => void;
@@ -22,7 +22,6 @@ interface PostCardProps {
 
 const PostCard = ({
   post,
-  currentLanguage,
   onLike,
   onComment,
   onShare,
@@ -31,6 +30,7 @@ const PostCard = ({
   showMetrics = false,
   className
 }: PostCardProps) => {
+  const { language } = useLanguage();
   const [isLiked, setIsLiked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -59,7 +59,7 @@ const PostCard = ({
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -81,12 +81,12 @@ const PostCard = ({
     const diffInHours = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
 
     if (diffInHours < 1) {
-      return currentLanguage === "th" ? "เมื่อสักครู่" : "Just now";
+      return language === "th" ? "เมื่อสักครู่" : "Just now";
     } else if (diffInHours < 24) {
-      return currentLanguage === "th" ? `${diffInHours} ชั่วโมงที่แล้ว` : `${diffInHours}h ${t.timeAgo}`;
+      return language === "th" ? `${diffInHours} ชั่วโมงที่แล้ว` : `${diffInHours}h ${t.timeAgo}`;
     } else {
       const diffInDays = Math.floor(diffInHours / 24);
-      return currentLanguage === "th" ? `${diffInDays} วันที่แล้ว` : `${diffInDays}d ${t.timeAgo}`;
+      return language === "th" ? `${diffInDays} วันที่แล้ว` : `${diffInDays}d ${t.timeAgo}`;
     }
   };
 
@@ -134,7 +134,7 @@ const PostCard = ({
                     >
                       <MapPin className="h-3 w-3" />
                       <span className="truncate max-w-24">
-                        {currentLanguage === "th" && post.location.nameLocal 
+                        {language === "th" && post.location.nameLocal
                           ? post.location.nameLocal 
                           : post.location.name}
                       </span>

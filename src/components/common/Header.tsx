@@ -5,23 +5,20 @@ import { Link, useLocation } from "react-router-dom";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
 import EnhancedLanguageToggle from "./EnhancedLanguageToggle";
 import { useUIContext } from "@/shared/contexts/UIContext";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
-interface HeaderProps {
-  currentLanguage: "th" | "en";
-  onLanguageChange: (lang: "th" | "en") => void;
-}
-
-const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { openCreatePostModal } = useUIContext();
+  const { language, setLanguage } = useLanguage();
 
   const menuItems = [
-    { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
-    { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "/explore" },
-    { label: currentLanguage === "th" ? "ชุมชนนักเดินทาง" : "Community", href: "/community" },
-    { label: currentLanguage === "th" ? "รายการโปรด" : "Favorites", href: "/favorites" },
-    { label: currentLanguage === "th" ? "โปรไฟล์" : "Profile", href: "/profile" },
+    { label: language === "th" ? "หน้าแรก" : "Home", href: "/" },
+    { label: language === "th" ? "สำรวจ" : "Explore", href: "/explore" },
+    { label: language === "th" ? "ชุมชนนักเดินทาง" : "Community", href: "/community" },
+    { label: language === "th" ? "รายการโปรด" : "Favorites", href: "/favorites" },
+    { label: language === "th" ? "โปรไฟล์" : "Profile", href: "/profile" },
   ];
 
   // Helper function to check if route is active
@@ -41,20 +38,20 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
         <Link
           to="/"
           className="flex items-center space-x-2 interactive-scale"
-          aria-label={currentLanguage === "th" ? "ไปไหนดี - หน้าแรก" : "PaiNaiDee - Home"}
+          aria-label={language === "th" ? "ไปไหนดี - หน้าแรก" : "PaiNaiDee - Home"}
         >
           <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg neon-glow">
             <MapPin className="w-6 h-6 text-white animate-float" />
           </div>
           <h1 className="text-xl font-bold text-gradient-tropical font-noto-thai">
-            {currentLanguage === "th" ? "ไปไหนดี" : "PaiNaiDee"}
+            {language === "th" ? "ไปไหนดี" : "PaiNaiDee"}
           </h1>
         </Link>
 
         {/* Enhanced Desktop Navigation */}
         <nav
           className="hidden md:flex items-center space-x-6"
-          aria-label={currentLanguage === "th" ? "เมนูหลัก" : "Main navigation"}
+          aria-label={language === "th" ? "เมนูหลัก" : "Main navigation"}
         >
           {menuItems.map((item, index) => (
             <Link
@@ -76,12 +73,12 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
           {isCommunityPage && (
             <Button onClick={openCreatePostModal}>
               <Plus className="mr-2 h-4 w-4" />
-              {currentLanguage === "th" ? "โพสต์" : "Post"}
+              {language === "th" ? "โพสต์" : "Post"}
             </Button>
           )}
           <EnhancedLanguageToggle
-            currentLanguage={currentLanguage}
-            onLanguageChange={onLanguageChange}
+            currentLanguage={language}
+            onLanguageChange={setLanguage}
             variant="dropdown"
             size="sm"
           />
@@ -139,16 +136,16 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                🔧 {currentLanguage === "th" ? "แดชบอร์ดนักพัฒนา" : "Developer Dashboard"}
+                🔧 {language === "th" ? "แดชบอร์ดนักพัฒนา" : "Developer Dashboard"}
               </Link>
             )}
 
             {/* Enhanced Language Toggle for Mobile */}
             <div className="pt-4 border-t border-border/30">
               <EnhancedLanguageToggle
-                currentLanguage={currentLanguage}
+                currentLanguage={language}
                 onLanguageChange={(lang) => {
-                  onLanguageChange(lang);
+                  setLanguage(lang);
                   setIsMenuOpen(false);
                 }}
                 variant="dropdown"

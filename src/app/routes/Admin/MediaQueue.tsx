@@ -4,10 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface MediaQueueProps {
-  currentLanguage: "th" | "en";
-}
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface MediaItem {
   id: string;
@@ -21,7 +18,8 @@ interface MediaItem {
   thumbnail: string;
 }
 
-const MediaQueue = ({ currentLanguage }: MediaQueueProps) => {
+const MediaQueue = () => {
+  const { language } = useLanguage();
   const [selectedTab, setSelectedTab] = useState("all");
 
   const content = {
@@ -61,7 +59,7 @@ const MediaQueue = ({ currentLanguage }: MediaQueueProps) => {
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock data - in real app this would come from API
   const mediaItems: MediaItem[] = [
@@ -162,7 +160,7 @@ const MediaQueue = ({ currentLanguage }: MediaQueueProps) => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
-      currentLanguage === "th" ? "th-TH" : "en-US",
+      language === "th" ? "th-TH" : "en-US",
       { 
         year: 'numeric', 
         month: 'short', 

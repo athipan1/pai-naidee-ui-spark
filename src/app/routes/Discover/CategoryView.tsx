@@ -6,6 +6,7 @@ import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
 import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface Attraction {
   id: string;
@@ -21,12 +22,12 @@ interface Attraction {
 }
 
 interface CategoryViewProps {
-  currentLanguage: "th" | "en";
   category: string;
 }
 
-const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
+const CategoryView = ({ category }: CategoryViewProps) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -37,13 +38,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "1",
       name: "Phi Phi Islands",
       nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
+      province: language === "th" ? "กระบี่" : "Krabi",
       category: "Beach",
       rating: 4.8,
       reviewCount: 2547,
       image: heroBeachImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
           : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
       tags: ["Beach", "Snorkeling", "Island", "Photography"],
@@ -52,13 +53,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "5",
       name: "Phuket Beach",
       nameLocal: "หาดภูเก็ต",
-      province: currentLanguage === "th" ? "ภูเก็ต" : "Phuket",
+      province: language === "th" ? "ภูเก็ต" : "Phuket",
       category: "Beach",
       rating: 4.6,
       reviewCount: 3421,
       image: heroBeachImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "หาดทรายขาวและน้ำทะเลสีฟ้าใส พร้อมกิจกรรมทางน้ำมากมาย"
           : "White sandy beaches and crystal blue waters with plenty of water activities.",
       tags: ["Beach", "Water Sports", "Sunset", "Resort"],
@@ -67,13 +68,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "2",
       name: "Wat Phra Kaew",
       nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Culture",
       rating: 4.9,
       reviewCount: 5243,
       image: templeImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
           : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
       tags: ["Temple", "Culture", "Buddhism", "History"],
@@ -82,13 +83,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "6",
       name: "Wat Arun",
       nameLocal: "วัดอรุณ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Culture",
       rating: 4.7,
       reviewCount: 2876,
       image: templeImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "วัดที่มีเจดีย์ประธานสูงตระหง่าน เป็นสัญลักษณ์ของกรุงเทพมหานคร"
           : "Temple with a towering central spire, an iconic symbol of Bangkok.",
       tags: ["Temple", "Architecture", "River View", "Sunset"],
@@ -97,13 +98,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "3",
       name: "Doi Inthanon",
       nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
+      province: language === "th" ? "เชียงใหม่" : "Chiang Mai",
       category: "Nature",
       rating: 4.7,
       reviewCount: 1876,
       image: mountainImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
           : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
       tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
@@ -112,13 +113,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "7",
       name: "Khao Yai National Park",
       nameLocal: "อุทยานแห่งชาติเขาใหญ่",
-      province: currentLanguage === "th" ? "นครราชสีมา" : "Nakhon Ratchasima",
+      province: language === "th" ? "นครราชสีมา" : "Nakhon Ratchasima",
       category: "Nature",
       rating: 4.5,
       reviewCount: 2156,
       image: mountainImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "อุทยานแห่งชาติที่มีสัตว์ป่าและธรรมชาติที่หลากหลาย พร้อมน้ำตกที่สวยงาม"
           : "National park with diverse wildlife and nature, featuring beautiful waterfalls.",
       tags: ["Wildlife", "Hiking", "Waterfalls", "Camping"],
@@ -127,13 +128,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "4",
       name: "Floating Market",
       nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Food",
       rating: 4.5,
       reviewCount: 3156,
       image: floatingMarketImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
           : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
       tags: ["Food", "Culture", "Traditional", "Market"],
@@ -142,13 +143,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       id: "8",
       name: "Street Food Market",
       nameLocal: "ตลาดอาหารข้างถนน",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+      province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
       category: "Food",
       rating: 4.3,
       reviewCount: 4287,
       image: floatingMarketImage,
       description:
-        currentLanguage === "th"
+        language === "th"
           ? "ลิ้มรสอาหารไทยแท้ๆ จากร้านอาหารข้างถนน ราคาประหยัดและรสชาติเข้มข้น"
           : "Taste authentic Thai food from street vendors with affordable prices and intense flavors.",
       tags: ["Street Food", "Local Cuisine", "Night Market", "Budget"],
@@ -193,7 +194,7 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
       }
       setLoading(false);
     }, 500);
-  }, [category, currentLanguage]);
+  }, [category, language]);
 
   const handleFavoriteToggle = (id: string) => {
     setFavorites((prev) =>
@@ -220,7 +221,7 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
     : { emoji: "📍", th: category || "", en: category || "" };
 
   const displayName =
-    currentLanguage === "th" ? categoryInfo.th : categoryInfo.en;
+    language === "th" ? categoryInfo.th : categoryInfo.en;
 
   return (
     <div className="h-full bg-background">
@@ -233,7 +234,7 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
               <h2 className="text-xl font-semibold">{displayName}</h2>
               <p className="text-sm text-muted-foreground">
                 {attractions.length}{" "}
-                {currentLanguage === "th" ? "สถานที่" : "places"}
+                {language === "th" ? "สถานที่" : "places"}
               </p>
             </div>
           </div>
@@ -248,7 +249,6 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
               <AttractionCard
                 key={attraction.id}
                 {...attraction}
-                currentLanguage={currentLanguage}
                 isFavorite={favorites.includes(attraction.id)}
                 onFavoriteToggle={handleFavoriteToggle}
                 onCardClick={handleCardClick}
@@ -259,12 +259,12 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold mb-2">
-              {currentLanguage === "th"
+              {language === "th"
                 ? "ไม่พบสถานที่ในหมวดนี้"
                 : "No places found in this category"}
             </h3>
             <p className="text-muted-foreground">
-              {currentLanguage === "th"
+              {language === "th"
                 ? "ลองเลือกหมวดหมู่อื่นหรือกลับไปที่หน้าหลัก"
                 : "Try selecting another category or go back to the home page"}
             </p>

@@ -2,13 +2,14 @@ import SmartSearchBar from "./SmartSearchBar";
 import { SearchResult } from "@/shared/utils/searchAPI";
 import { PostSearchResult } from "@/shared/types/posts";
 import heroBeach from "@/shared/assets/hero-beach.jpg";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface SearchSectionProps {
-  currentLanguage: "th" | "en";
   onSearch: (query: string, results?: SearchResult[] | PostSearchResult[]) => void;
 }
 
-const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
+const SearchSection = ({ onSearch }: SearchSectionProps) => {
+  const { language } = useLanguage();
   const handleSearch = (query: string, results?: SearchResult[] | PostSearchResult[]) => {
     onSearch(query, results);
   };
@@ -27,14 +28,14 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
         <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
           {/* Title */}
           <h1 className="text-3xl md:text-6xl font-bold text-white mb-3 md:mb-4 animate-fade-in text-shadow-strong">
-            {currentLanguage === "th"
+            {language === "th"
               ? "ค้นหาสถานที่ท่องเที่ยวในฝัน"
               : "Discover Your Dream Destination"}
           </h1>
 
           {/* Subtitle */}
           <p className="text-base md:text-xl text-white/90 mb-6 md:mb-8 font-light animate-fade-in text-shadow">
-            {currentLanguage === "th"
+            {language === "th"
               ? "เที่ยวไทยและทั่วโลกไปกับเรา พบสถานที่น่าทึ่งที่รอคุณอยู่"
               : "Explore Thailand and beyond with us. Find amazing places waiting for you."}
           </p>
@@ -42,11 +43,10 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
           {/* Search Form */}
           <div className="animate-fade-in max-w-2xl mx-auto">
             <SmartSearchBar
-              currentLanguage={currentLanguage}
               onSearch={handleSearch}
               searchType="all"
               placeholder={
-                currentLanguage === "th"
+                language === "th"
                   ? "คุณอยากไปไหน?"
                   : "Where do you want to go?"
               }
@@ -65,12 +65,12 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
               <button
                 key={index}
                 onClick={() =>
-                  handleSearch(currentLanguage === "th" ? item.th : item.en)
+                  handleSearch(language === "th" ? item.th : item.en)
                 }
                 className="px-3 py-1.5 md:px-4 md:py-2 glass-effect hover:bg-white/30 backdrop-blur-sm rounded-full text-white text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation relative overflow-hidden group"
               >
                 <span className="relative z-10">
-                  {currentLanguage === "th" ? item.th : item.en}
+                  {language === "th" ? item.th : item.en}
                 </span>
                 <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-out" />
               </button>

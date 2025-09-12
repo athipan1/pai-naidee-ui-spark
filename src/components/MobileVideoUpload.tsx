@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 
 import { chunkUploadService, UploadProgress } from "@/shared/services/chunkUploadService";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface VideoFile {
   id: string;
@@ -50,15 +51,14 @@ interface MobileVideoUploadProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onVideosUpload: (videos: VideoFile[]) => void;
-  currentLanguage: "th" | "en";
 }
 
 const MobileVideoUpload: React.FC<MobileVideoUploadProps> = ({
   open,
   onOpenChange,
   onVideosUpload,
-  currentLanguage
 }) => {
+  const { language } = useLanguage();
   // File management states
   const [videoFiles, setVideoFiles] = useState<VideoFile[]>([]);
   const [dragActive, setDragActive] = useState(false);
@@ -207,7 +207,7 @@ const MobileVideoUpload: React.FC<MobileVideoUploadProps> = ({
     }
   };
 
-  const t = texts[currentLanguage];
+  const t = texts[language];
 
   // Network status monitoring
   useEffect(() => {
@@ -254,89 +254,23 @@ const MobileVideoUpload: React.FC<MobileVideoUploadProps> = ({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  const validateFile = (file: File): string | null => {
-    const validTypes = ['video/mp4', 'video/mov', 'video/quicktime', 'video/avi'];
-    const maxSize = 100 * 1024 * 1024; // 100MB
-
-    if (!validTypes.includes(file.type)) {
-      return t.invalidFile;
+      handleFileSelect(files, 'video');
     }
-
-    if (file.size > maxSize) {
-      return t.fileTooLarge;
-    }
-
-    return null;
   };
 
-  const generateVideoId = (file: File): string => {
-    return `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const handleCameraCapture = (file: File) => {
+    handleFileSelect(new DataTransfer().files, 'image');
+    const mediaFile: MediaFile = {
+      id: generateVideoId(file),
+      file,
+      type: 'image',
+      preview: URL.createObjectURL(file)
+    };
+    setVideoFiles(prev => [...prev, mediaFile]);
+    if (videoFiles.length === 0) {
+      setSelectedFileIndex(0);
+    }
   };
-
-  const handleFileSelect = useCallback((files: FileList) => {
-    const newVideoFiles: VideoFile[] = [];
-    const errors: string[] = [];
-
-    Array.from(files).forEach(file => {
-      const error = validateFile(file);
-      if (error) {
-        errors.push(`${file.name}: ${error}`);
-        return;
-      }
-
-      const videoId = generateVideoId(file);
-      const preview = URL.createObjectURL(file);
-      
-      newVideoFiles.push({
-        id: videoId,
-        file,
-        preview,
-        title: '',
-        caption: '',
-        location: '',
-        province: '',
-        tags: []
-      });
-    });
-
-    if (errors.length > 0) {
-      setVideoError(errors.join('\n'));
-      setTimeout(() => setVideoError(''), 5000);
-    }
-
-    if (newVideoFiles.length > 0) {
-      setVideoFiles(prev => [...prev, ...newVideoFiles]);
-      setVideoError('');
-    }
-  }, [t]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(false);
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handleFileSelect(files);
-    }
-  }, [handleFileSelect]);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(false);
-  }, []);
-
-  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileSelect(files);
-    }
-  }, [handleFileSelect]);
 
   const removeVideo = (videoId: string) => {
     setVideoFiles(prev => {

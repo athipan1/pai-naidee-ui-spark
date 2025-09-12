@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronRight, Home } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useLanguage } from '@/shared/contexts/LanguageProvider';
 
 interface BreadcrumbItem {
   label: string;
@@ -8,19 +9,19 @@ interface BreadcrumbItem {
 }
 
 interface BreadcrumbNavigationProps {
-  currentLanguage: "th" | "en";
   items?: BreadcrumbItem[];
 }
 
-const BreadcrumbNavigation = ({ currentLanguage, items }: BreadcrumbNavigationProps) => {
+const BreadcrumbNavigation = ({ items }: BreadcrumbNavigationProps) => {
   const location = useLocation();
+  const { language } = useLanguage();
   
   // Auto-generate breadcrumbs if not provided
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
     const breadcrumbs: BreadcrumbItem[] = [
       { 
-        label: currentLanguage === 'th' ? 'หน้าแรก' : 'Home', 
+        label: language === 'th' ? 'หน้าแรก' : 'Home',
         path: '/' 
       }
     ];
@@ -30,17 +31,17 @@ const BreadcrumbNavigation = ({ currentLanguage, items }: BreadcrumbNavigationPr
     // Handle specific routes
     if (pathSegments[0] === 'attraction') {
       breadcrumbs.push({
-        label: currentLanguage === 'th' ? 'สถานที่ท่องเที่ยว' : 'Attractions',
+        label: language === 'th' ? 'สถานที่ท่องเที่ยว' : 'Attractions',
         path: '/'
       });
       if (pathSegments[1]) {
         breadcrumbs.push({
-          label: currentLanguage === 'th' ? 'รายละเอียด' : 'Details'
+          label: language === 'th' ? 'รายละเอียด' : 'Details'
         });
       }
     } else if (pathSegments[0] === 'category') {
       breadcrumbs.push({
-        label: currentLanguage === 'th' ? 'หมวดหมู่' : 'Categories',
+        label: language === 'th' ? 'หมวดหมู่' : 'Categories',
         path: '/'
       });
       if (pathSegments[1]) {
@@ -50,19 +51,19 @@ const BreadcrumbNavigation = ({ currentLanguage, items }: BreadcrumbNavigationPr
       }
     } else if (pathSegments[0] === 'explore') {
       breadcrumbs.push({
-        label: currentLanguage === 'th' ? 'สำรวจ' : 'Explore'
+        label: language === 'th' ? 'สำรวจ' : 'Explore'
       });
     } else if (pathSegments[0] === 'favorites') {
       breadcrumbs.push({
-        label: currentLanguage === 'th' ? 'รายการโปรด' : 'Favorites'
+        label: language === 'th' ? 'รายการโปรด' : 'Favorites'
       });
     } else if (pathSegments[0] === 'profile') {
       breadcrumbs.push({
-        label: currentLanguage === 'th' ? 'โปรไฟล์' : 'Profile'
+        label: language === 'th' ? 'โปรไฟล์' : 'Profile'
       });
     } else if (pathSegments[0] === 'map') {
       breadcrumbs.push({
-        label: currentLanguage === 'th' ? 'แผนที่' : 'Map'
+        label: language === 'th' ? 'แผนที่' : 'Map'
       });
     }
 

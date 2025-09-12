@@ -33,6 +33,7 @@ import Reviews from "@/components/attraction/Reviews";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
 import type { Accommodation } from "@/shared/types/attraction";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 const pastelVariants = [
   "pastel-blue",
@@ -43,16 +44,15 @@ const pastelVariants = [
 ] as const;
 
 interface AttractionDetailProps {
-  currentLanguage: "th" | "en";
   onBack: () => void;
 }
 
 const AttractionDetail = ({
-  currentLanguage,
   onBack,
 }: AttractionDetailProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { language } = useLanguage();
   
   // Use React Query for data fetching
   const { 
@@ -116,7 +116,7 @@ const AttractionDetail = ({
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Handle Google Maps navigation
   const handleGoogleMapsNavigation = () => {
@@ -145,7 +145,7 @@ const AttractionDetail = ({
     } else {
       navigator.clipboard.writeText(window.location.href);
       // In a real app, you'd use a toast component here
-      alert(currentLanguage === 'th' ? 'คัดลอกลิงก์แล้ว' : 'Link copied to clipboard!');
+      alert(language === 'th' ? 'คัดลอกลิงก์แล้ว' : 'Link copied to clipboard!');
     }
   };
 
@@ -195,7 +195,7 @@ const AttractionDetail = ({
   }
 
   const displayName =
-    currentLanguage === "th" && attraction.nameLocal
+    language === "th" && attraction.nameLocal
       ? attraction.nameLocal
       : attraction.name;
 
@@ -252,7 +252,7 @@ const AttractionDetail = ({
                 variant="ghost"
                 onClick={() => navigate('/admin')}
                 className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hidden sm:flex"
-                title={currentLanguage === 'th' ? 'แผงควบคุมผู้ดูแลระบบ' : 'Admin Panel'}
+                title={language === 'th' ? 'แผงควบคุมผู้ดูแลระบบ' : 'Admin Panel'}
               >
                 <Settings className="w-4 h-4" />
               </Button>
@@ -273,10 +273,9 @@ const AttractionDetail = ({
 
       {/* Breadcrumb Navigation */}
       <BreadcrumbNavigation 
-        currentLanguage={currentLanguage} 
         items={[
-          { label: currentLanguage === 'th' ? 'หน้าแรก' : 'Home', path: '/' },
-          { label: currentLanguage === 'th' ? 'สถานที่ท่องเที่ยว' : 'Attractions', path: '/' },
+          { label: language === 'th' ? 'หน้าแรก' : 'Home', path: '/' },
+          { label: language === 'th' ? 'สถานที่ท่องเที่ยว' : 'Attractions', path: '/' },
           { label: displayName }
         ]}
       />
@@ -320,7 +319,7 @@ const AttractionDetail = ({
               <Star className="w-4 h-4 fill-current text-yellow-400" />
               <span>{attraction.rating}</span>
               <span className="opacity-80">
-                ({attraction.reviewCount.toLocaleString()} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})
+                ({attraction.reviewCount.toLocaleString()} {language === 'th' ? 'รีวิว' : 'reviews'})
               </span>
             </div>
           </div>
@@ -410,7 +409,7 @@ const AttractionDetail = ({
                     <div className="flex flex-col items-start">
                       <span className="font-medium">{t.officialWebsite}</span>
                       <span className="text-xs text-muted-foreground">
-                        {currentLanguage === "th" ? "เว็บไซต์หลัก" : "Official information"}
+                        {language === "th" ? "เว็บไซต์หลัก" : "Official information"}
                       </span>
                     </div>
                   </Button>
@@ -425,7 +424,7 @@ const AttractionDetail = ({
                     <div className="flex flex-col items-start">
                       <span className="font-medium">{t.wikipediaInfo}</span>
                       <span className="text-xs text-muted-foreground">
-                        {currentLanguage === "th" ? "ข้อมูลเชิงลึก" : "Detailed information"}
+                        {language === "th" ? "ข้อมูลเชิงลึก" : "Detailed information"}
                       </span>
                     </div>
                   </Button>
@@ -447,10 +446,10 @@ const AttractionDetail = ({
               <div>
                 <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                   <Wind className="h-5 w-5 text-primary" />
-                  {currentLanguage === 'th' ? 'กิจกรรมและทัวร์ใกล้เคียง' : 'Nearby Activities & Tours'}
+                  {language === 'th' ? 'กิจกรรมและทัวร์ใกล้เคียง' : 'Nearby Activities & Tours'}
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  {currentLanguage === 'th'
+                  {language === 'th'
                     ? 'ค้นหากิจกรรมสนุกๆ และทัวร์ที่น่าสนใจรอบๆ สถานที่นี้'
                     : 'Discover fun activities and interesting tours around this location.'}
                 </p>
@@ -461,7 +460,7 @@ const AttractionDetail = ({
                 size="lg"
               >
                 <Wind className="w-5 h-5" />
-                {currentLanguage === 'th' ? 'ค้นหากิจกรรม' : 'Find Activities'}
+                {language === 'th' ? 'ค้นหากิจกรรม' : 'Find Activities'}
               </Button>
             </div>
           </CardContent>
@@ -479,7 +478,6 @@ const AttractionDetail = ({
           name: attraction.name,
           nameLocal: attraction.nameLocal
         }}
-        currentLanguage={currentLanguage}
       />
 
       <AccommodationModal
@@ -488,7 +486,6 @@ const AttractionDetail = ({
         accommodations={accommodations}
         loading={accommodationLoading}
         error={accommodationError}
-        currentLanguage={currentLanguage}
         attractionName={attraction.name}
       />
     </div>

@@ -1,6 +1,7 @@
 import { AlertTriangle, Wifi, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface APIErrorDisplayProps {
   error: Error | null;
@@ -8,7 +9,6 @@ interface APIErrorDisplayProps {
   onRetry?: () => void;
   showRetryButton?: boolean;
   fallbackMessage?: string;
-  currentLanguage?: "th" | "en";
 }
 
 const getErrorType = (error: Error | null): "network" | "server" | "not_found" | "generic" => {
@@ -29,7 +29,7 @@ const getErrorType = (error: Error | null): "network" | "server" | "not_found" |
   return "generic";
 };
 
-const getErrorMessages = (errorType: string, currentLanguage: "th" | "en" = "en") => {
+const getErrorMessages = (errorType: string, language: "th" | "en" = "en") => {
   const messages = {
     network: {
       th: {
@@ -90,12 +90,12 @@ export const APIErrorDisplay: React.FC<APIErrorDisplayProps> = ({
   onRetry,
   showRetryButton = true,
   fallbackMessage,
-  currentLanguage = "en"
 }) => {
+  const { language } = useLanguage();
   if (!error && !fallbackMessage) return null;
   
   const errorType = getErrorType(error);
-  const messages = getErrorMessages(errorType, currentLanguage);
+  const messages = getErrorMessages(errorType, language);
   
   const getIcon = () => {
     switch (errorType) {
@@ -113,10 +113,10 @@ export const APIErrorDisplay: React.FC<APIErrorDisplayProps> = ({
         <div className="flex-1">
           <AlertDescription className="mb-3">
             <div className="font-medium text-orange-800 dark:text-orange-200 mb-1">
-              {error ? messages[currentLanguage].title : (currentLanguage === "th" ? "ใช้ข้อมูลตัวอย่าง" : "Using Sample Data")}
+              {error ? messages[language].title : (language === "th" ? "ใช้ข้อมูลตัวอย่าง" : "Using Sample Data")}
             </div>
             <div className="text-sm text-orange-700 dark:text-orange-300">
-              {error ? messages[currentLanguage].description : (fallbackMessage || messages[currentLanguage].fallback)}
+              {error ? messages[language].description : (fallbackMessage || messages[language].fallback)}
             </div>
           </AlertDescription>
           
@@ -131,12 +131,12 @@ export const APIErrorDisplay: React.FC<APIErrorDisplayProps> = ({
               {isLoading ? (
                 <>
                   <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
-                  {currentLanguage === "th" ? "กำลังลองใหม่..." : "Retrying..."}
+                  {language === "th" ? "กำลังลองใหม่..." : "Retrying..."}
                 </>
               ) : (
                 <>
                   <RefreshCw className="mr-2 h-3 w-3" />
-                  {currentLanguage === "th" ? "ลองใหม่" : "Try Again"}
+                  {language === "th" ? "ลองใหม่" : "Try Again"}
                 </>
               )}
             </Button>

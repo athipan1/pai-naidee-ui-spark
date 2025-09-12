@@ -10,14 +10,12 @@ import SearchView from "./SearchView";
 import CategoryView from "./CategoryView";
 import MapView from "./MapView";
 import TrendingView from "./TrendingView";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
-interface DiscoverLayoutProps {
-  currentLanguage: "th" | "en";
-}
-
-const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
+const DiscoverLayout = () => {
   const navigate = useNavigate();
   const { state, setMode, setQuery, setCategory } = useDiscoveryState();
+  const { language } = useLanguage();
 
   const content = {
     th: {
@@ -44,7 +42,7 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Handle search from SearchSection component
   const handleSearch = (query: string) => {
@@ -91,7 +89,6 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
       case 'search':
         return (
           <SearchView
-            currentLanguage={currentLanguage}
             query={state.query}
             category={state.category}
           />
@@ -99,22 +96,20 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
       case 'category':
         return (
           <CategoryView
-            currentLanguage={currentLanguage}
             category={state.category}
           />
         );
       case 'map':
         return (
           <MapView
-            currentLanguage={currentLanguage}
             selectedAttractionId={state.selectedAttractionId}
           />
         );
       case 'trending':
-        return <TrendingView currentLanguage={currentLanguage} />;
+        return <TrendingView />;
       case 'feed':
       default:
-        return <FeedView currentLanguage={currentLanguage} />;
+        return <FeedView />;
     }
   };
 
@@ -172,12 +167,10 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
         <div className="border-b border-border/30 bg-card/30">
           <div className="container mx-auto px-4 py-4 space-y-4">
             <SearchSection
-              currentLanguage={currentLanguage}
               onSearch={handleSearch}
             />
             
             <CategoryFilter
-              currentLanguage={currentLanguage}
               selectedCategory={state.category || "all"}
               onCategoryChange={handleCategoryChange}
               attractionCounts={attractionCounts}

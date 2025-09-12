@@ -16,14 +16,10 @@ import {
 import useSmartAI, { AIStatus } from '@/shared/hooks/useSmartAI';
 import useVoiceInput from '@/shared/hooks/useVoiceInput';
 import { useLocation } from 'react-router-dom';
+import { useLanguage } from '@/shared/contexts/LanguageProvider';
 
-interface GlobalAIAssistantProps {
-  language?: 'th' | 'en' | 'auto';
-}
-
-const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
-  language = 'auto'
-}) => {
+const GlobalAIAssistant: React.FC = () => {
+  const { language: lang, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [position, setPosition] = useState({ x: 24, y: 24 }); // right-6 bottom-6 in pixels
@@ -44,7 +40,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     startListening,
     stopListening
   } = useVoiceInput({
-    language: language === 'th' ? 'th-TH' : 'en-US',
+    language: lang === 'th' ? 'th-TH' : 'en-US',
     continuous: false,
     interimResults: true
   });
@@ -126,7 +122,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     ]
   };
 
-  const currentActions = language === 'th' ? quickActions.th : quickActions.en;
+  const currentActions = lang === 'th' ? quickActions.th : quickActions.en;
 
   const handleQuickAction = (query: string) => {
     if (query === 'hide') {
@@ -135,7 +131,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
       setIsMenuOpen(false);
       return;
     }
-    sendMessage(query, language);
+    sendMessage(query, lang);
     setIsMenuOpen(false);
   };
 
@@ -150,7 +146,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     } else {
       startListening((result) => {
         if (result.isFinal && result.transcript.trim()) {
-          sendMessage(result.transcript, language);
+          sendMessage(result.transcript, lang);
           setIsMenuOpen(false);
         }
       });
@@ -277,7 +273,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
           variant="outline"
           className="bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent/50 text-xs shadow-lg"
         >
-          {language === 'th' ? 'แสดง AI' : 'Show AI'}
+          {lang === 'th' ? 'แสดง AI' : 'Show AI'}
         </Button>
       </div>
     );
@@ -298,7 +294,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-sm">
-              {language === 'th' ? 'ผู้ช่วย AI' : 'AI Assistant'}
+              {lang === 'th' ? 'ผู้ช่วย AI' : 'AI Assistant'}
             </h3>
             <Button
               variant="ghost"
@@ -320,7 +316,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
               className="flex-1"
             >
               {isListening ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-              {language === 'th' ? 
+              {lang === 'th' ?
                 (isListening ? 'หยุดฟัง' : 'เริ่มพูด') : 
                 (isListening ? 'Stop' : 'Speak')
               }
@@ -364,7 +360,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
               className="w-full justify-start text-muted-foreground hover:text-foreground"
             >
               <EyeOff className="h-4 w-4 mr-2" />
-              {language === 'th' ? 'ซ่อนผู้ช่วย' : 'Hide Assistant'}
+              {lang === 'th' ? 'ซ่อนผู้ช่วย' : 'Hide Assistant'}
             </Button>
           </div>
 
@@ -374,7 +370,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${getStatusColor(status)}`}></div>
                 <span className="text-sm text-muted-foreground capitalize">
-                  {language === 'th' ? 
+                  {lang === 'th' ?
                     (status === 'listening' ? 'กำลังฟัง...' :
                      status === 'thinking' ? 'กำลังคิด...' :
                      status === 'talking' ? 'กำลังตอบ...' : status) : 
@@ -431,7 +427,7 @@ const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
         {/* Tooltip for first-time users */}
         {!isMenuOpen && status === 'idle' && messages.length === 0 && (
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-background/90 backdrop-blur-sm text-foreground px-3 py-1 rounded-lg text-xs shadow-lg border animate-fade-in whitespace-nowrap">
-            {language === 'th' ? 'คลิกเพื่อสอบถาม AI' : 'Click to ask AI'}
+            {lang === 'th' ? 'คลิกเพื่อสอบถาม AI' : 'Click to ask AI'}
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-background/90"></div>
           </div>
         )}

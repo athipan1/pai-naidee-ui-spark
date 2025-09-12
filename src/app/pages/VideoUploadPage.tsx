@@ -17,11 +17,7 @@ import {
   Users,
   PlayCircle
 } from "lucide-react";
-
-interface VideoUploadPageProps {
-  currentLanguage: "th" | "en";
-  onBack: () => void;
-}
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface VideoFile {
   id: string;
@@ -35,10 +31,10 @@ interface VideoFile {
   uploadUrl?: string;
 }
 
-const VideoUploadPage: React.FC<VideoUploadPageProps> = ({
-  currentLanguage,
+const VideoUploadPage: React.FC<{ onBack: () => void }> = ({
   onBack
 }) => {
+  const { language } = useLanguage();
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadedVideos, setUploadedVideos] = useState<VideoFile[]>([]);
 
@@ -169,7 +165,7 @@ const VideoUploadPage: React.FC<VideoUploadPageProps> = ({
     }
   };
 
-  const t = texts[currentLanguage];
+  const t = texts[language];
 
   const handleVideoUpload = async (videos: VideoFile[]) => {
     // Simulate API call to save video metadata
@@ -472,7 +468,6 @@ const VideoUploadPage: React.FC<VideoUploadPageProps> = ({
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         onVideosUpload={handleVideoUpload}
-        currentLanguage={currentLanguage}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
 import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface TrendingAttraction {
   id: string;
@@ -23,12 +24,9 @@ interface TrendingAttraction {
   weeklyGrowth: number;
 }
 
-interface TrendingViewProps {
-  currentLanguage: "th" | "en";
-}
-
-const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
+const TrendingView = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [attractions, setAttractions] = useState<TrendingAttraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -66,7 +64,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock trending attractions data
   useEffect(() => {
@@ -77,13 +75,13 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         id: "1",
         name: "Phi Phi Islands",
         nameLocal: "หมู่เกาะพีพี",
-        province: currentLanguage === "th" ? "กระบี่" : "Krabi",
+        province: language === "th" ? "กระบี่" : "Krabi",
         category: "Beach",
         rating: 4.8,
         reviewCount: 2547,
         image: heroBeachImage,
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
             : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
         tags: ["Beach", "Snorkeling", "Island", "Photography"],
@@ -95,13 +93,13 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         id: "2",
         name: "Wat Phra Kaew",
         nameLocal: "วัดพระแก้ว",
-        province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+        province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
         category: "Culture",
         rating: 4.9,
         reviewCount: 5243,
         image: templeImage,
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
             : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
         tags: ["Temple", "Culture", "Buddhism", "History"],
@@ -113,13 +111,13 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         id: "3",
         name: "Doi Inthanon",
         nameLocal: "ดอยอินทนนท์",
-        province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
+        province: language === "th" ? "เชียงใหม่" : "Chiang Mai",
         category: "Nature",
         rating: 4.7,
         reviewCount: 1876,
         image: mountainImage,
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
             : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
         tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
@@ -131,13 +129,13 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         id: "4",
         name: "Floating Market",
         nameLocal: "ตลาดน้ำ",
-        province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
+        province: language === "th" ? "กรุงเทพฯ" : "Bangkok",
         category: "Food",
         rating: 4.5,
         reviewCount: 3156,
         image: floatingMarketImage,
         description:
-          currentLanguage === "th"
+          language === "th"
             ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
             : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
         tags: ["Food", "Culture", "Traditional", "Market"],
@@ -153,7 +151,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
       setAttractions(sortedAttractions);
       setLoading(false);
     }, 1000);
-  }, [currentLanguage]);
+  }, [language]);
 
   const handleFavoriteToggle = (id: string) => {
     setFavorites((prev) =>
@@ -235,7 +233,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-lg line-clamp-1">
-                          {currentLanguage === "th" && attraction.nameLocal
+                          {language === "th" && attraction.nameLocal
                             ? attraction.nameLocal
                             : attraction.name}
                         </h4>
@@ -291,14 +289,13 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
             {attractions.length > 3 && (
               <section>
                 <h3 className="text-lg font-semibold mb-4">
-                  {currentLanguage === "th" ? "ยอดนิยมทั้งหมด" : "All Trending"}
+                  {language === "th" ? "ยอดนิยมทั้งหมด" : "All Trending"}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {attractions.slice(3).map((attraction) => (
                     <div key={attraction.id} className="relative">
                       <AttractionCard
                         {...attraction}
-                        currentLanguage={currentLanguage}
                         isFavorite={favorites.includes(attraction.id)}
                         onFavoriteToggle={handleFavoriteToggle}
                         onCardClick={handleCardClick}

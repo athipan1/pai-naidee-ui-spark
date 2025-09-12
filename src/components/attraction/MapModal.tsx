@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from '@/components/ui/button';
 import { Navigation, X } from 'lucide-react';
 import L from 'leaflet';
+import { useLanguage } from '@/shared/contexts/LanguageProvider';
 
 // Fix for default icon issue with webpack/vite
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -29,10 +30,10 @@ interface MapModalProps {
     name: string;
     nameLocal?: string;
   };
-  currentLanguage: "th" | "en";
 }
 
-const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps) => {
+const MapModal = ({ isOpen, onClose, location }: MapModalProps) => {
+  const { language } = useLanguage();
   const content = {
     th: {
       mapTitle: "ตำแหน่งบนแผนที่",
@@ -46,8 +47,8 @@ const MapModal = ({ isOpen, onClose, location, currentLanguage }: MapModalProps)
     },
   };
 
-  const t = content[currentLanguage];
-  const displayName = currentLanguage === "th" && location.nameLocal
+  const t = content[language];
+  const displayName = language === "th" && location.nameLocal
     ? location.nameLocal
     : location.name;
 

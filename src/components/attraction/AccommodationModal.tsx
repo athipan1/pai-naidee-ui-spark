@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 export interface Accommodation {
   id: string;
@@ -24,7 +25,6 @@ interface AccommodationModalProps {
   accommodations: Accommodation[];
   loading: boolean;
   error?: string | null;
-  currentLanguage: "th" | "en";
   attractionName: string;
 }
 
@@ -34,9 +34,9 @@ const AccommodationModal = ({
   accommodations,
   loading,
   error,
-  currentLanguage,
   attractionName,
 }: AccommodationModalProps) => {
+  const { language } = useLanguage();
   const content = {
     th: {
       modalTitle: "🏨 ที่พักใกล้เคียง",
@@ -66,7 +66,7 @@ const AccommodationModal = ({
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -105,7 +105,7 @@ const AccommodationModal = ({
   };
 
   const getDisplayName = (accommodation: Accommodation) => {
-    return currentLanguage === "th" && accommodation.nameLocal
+    return language === "th" && accommodation.nameLocal
       ? accommodation.nameLocal
       : accommodation.name;
   };

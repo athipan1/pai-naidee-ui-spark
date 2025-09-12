@@ -242,7 +242,6 @@ export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
         open={showInstagramCreator}
         onOpenChange={setShowInstagramCreator}
         onSubmit={handlePostSubmit}
-        currentLanguage="th"
       />
     </div>
   );

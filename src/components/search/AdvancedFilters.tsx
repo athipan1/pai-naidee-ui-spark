@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 export interface FilterState {
   priceRange: 'all' | 'free' | 'paid';
@@ -18,7 +19,6 @@ export interface FilterState {
 }
 
 interface AdvancedFiltersProps {
-  currentLanguage: "th" | "en";
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   onApplyFilters: () => void;
@@ -27,13 +27,13 @@ interface AdvancedFiltersProps {
 }
 
 const AdvancedFilters = ({
-  currentLanguage,
   filters,
   onFiltersChange,
   onApplyFilters,
   isOpen,
   onToggle,
 }: AdvancedFiltersProps) => {
+  const { language } = useLanguage();
   const [tempFilters, setTempFilters] = useState<FilterState>(filters);
 
   const content = {
@@ -83,7 +83,7 @@ const AdvancedFilters = ({
     }
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   const categories = [
     { id: "beach", th: "ชายหาด", en: "Beach" },
@@ -233,7 +233,7 @@ const AdvancedFilters = ({
                       htmlFor={`category-${category.id}`}
                       className="text-sm cursor-pointer"
                     >
-                      {currentLanguage === 'th' ? category.th : category.en}
+                      {language === 'th' ? category.th : category.en}
                     </Label>
                   </div>
                 ))}
@@ -315,7 +315,7 @@ const AdvancedFilters = ({
             </div>
             
             <div id="apply-filters-desc" className="sr-only">
-              {currentLanguage === 'th' 
+              {language === 'th'
                 ? 'ใช้ตัวกรองที่เลือกกับผลการค้นหา'
                 : 'Apply selected filters to search results'
               }

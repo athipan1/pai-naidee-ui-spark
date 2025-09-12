@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { showToast } from "./EnhancedToast";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 // Translation helpers
 const getCategoryNameTh = (category: string): string => {
@@ -56,7 +57,6 @@ interface AttractionCardProps {
   description: string;
   tags: string[];
   isFavorite?: boolean;
-  currentLanguage: "th" | "en";
   onFavoriteToggle: (id: string) => void;
   onCardClick: (id: string) => void;
 }
@@ -73,13 +73,13 @@ const AttractionCard = ({
   description,
   tags,
   isFavorite = false,
-  currentLanguage,
   onFavoriteToggle,
   onCardClick,
 }: AttractionCardProps) => {
+  const { language } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const displayName = currentLanguage === "th" && nameLocal ? nameLocal : name;
+  const displayName = language === "th" && nameLocal ? nameLocal : name;
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -95,7 +95,7 @@ const AttractionCard = ({
         // Fallback to clipboard
         await navigator.clipboard.writeText(window.location.origin + `/attraction/${id}`);
         showToast.success(
-          currentLanguage === "th" 
+          language === "th"
             ? "คัดลอกลิงก์แล้ว" 
             : "Link copied to clipboard"
         );
@@ -104,7 +104,7 @@ const AttractionCard = ({
       // User cancelled share or clipboard failed
       if (error instanceof Error && error.name !== 'AbortError') {
         showToast.error(
-          currentLanguage === "th" 
+          language === "th"
             ? "ไม่สามารถแชร์ได้" 
             : "Failed to share"
         );
@@ -130,7 +130,7 @@ const AttractionCard = ({
       className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-border/50 relative z-10"
       role="button"
       tabIndex={0}
-      aria-label={`${displayName}, ${province} - ${currentLanguage === "th" ? getCategoryNameTh(category) : category}`}
+      aria-label={`${displayName}, ${province} - ${language === "th" ? getCategoryNameTh(category) : category}`}
       onClick={() => onCardClick(id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -163,7 +163,7 @@ const AttractionCard = ({
         {/* Category badge with glow effect */}
         <div className="absolute top-3 left-3">
           <span className="px-3 py-1 glass-effect rounded-full text-xs font-medium text-white border border-white/20 backdrop-blur-md">
-            {currentLanguage === "th" ? getCategoryNameTh(category) : category}
+            {language === "th" ? getCategoryNameTh(category) : category}
           </span>
         </div>
 
@@ -177,7 +177,7 @@ const AttractionCard = ({
             }`}
             onClick={handleFavoriteToggle}
             aria-label={
-              currentLanguage === "th" 
+              language === "th"
                 ? (isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มในรายการโปรด")
                 : (isFavorite ? "Remove from favorites" : "Add to favorites")
             }
@@ -192,7 +192,7 @@ const AttractionCard = ({
             className="w-9 h-9 rounded-full glass-effect text-white hover:bg-white/20 flex items-center justify-center transition-all duration-300 touch-manipulation interactive-scale"
             onClick={handleShare}
             aria-label={
-              currentLanguage === "th" 
+              language === "th"
                 ? "แชร์สถานที่นี้"
                 : "Share this place"
             }
@@ -215,7 +215,7 @@ const AttractionCard = ({
             }}
           >
             <Navigation className="w-4 h-4 mr-2" />
-            {currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}
+            {language === "th" ? "ดูรายละเอียด" : "View Details"}
           </Button>
         </div>
       </div>
@@ -239,7 +239,7 @@ const AttractionCard = ({
               <span className="text-sm font-medium">{rating}</span>
               <span className="text-xs text-muted-foreground">
                 ({reviewCount}
-                {currentLanguage === "th" ? " รีวิว" : " reviews"})
+                {language === "th" ? " รีวิว" : " reviews"})
               </span>
             </div>
           </div>
@@ -257,7 +257,7 @@ const AttractionCard = ({
               key={index}
               className="px-2 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary rounded-md text-xs font-medium border border-primary/20 hover:border-primary/40 transition-all duration-300"
             >
-              {currentLanguage === "th" ? getTagNameTh(tag) : tag}
+              {language === "th" ? getTagNameTh(tag) : tag}
             </span>
           ))}
           {tags.length > 3 && (
@@ -266,7 +266,7 @@ const AttractionCard = ({
               onClick={() => onCardClick(id)}
             >
               +{tags.length - 3}{" "}
-              {currentLanguage === "th" ? "เพิ่มเติม" : "more"}
+              {language === "th" ? "เพิ่มเติม" : "more"}
             </button>
           )}
         </div>
@@ -282,14 +282,14 @@ const AttractionCard = ({
                   className="text-xs h-8"
                 >
                   <Navigation className="w-3 h-3 mr-1" />
-                  {currentLanguage === "th" ? "ดู & นำทาง" : "View & Navigate"}
+                  {language === "th" ? "ดู & นำทาง" : "View & Navigate"}
                   <ChevronDown className="w-2 h-2 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-40">
                 <DropdownMenuItem onClick={() => onCardClick(id)}>
                   <Navigation className="w-3 h-3 mr-2" />
-                  {currentLanguage === "th" ? "รายละเอียด" : "Details"}
+                  {language === "th" ? "รายละเอียด" : "Details"}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={(e) => {
@@ -298,7 +298,7 @@ const AttractionCard = ({
                   }}
                 >
                   <MapPin className="w-3 h-3 mr-2" />
-                  {currentLanguage === "th" ? "แผนที่" : "Map"}
+                  {language === "th" ? "แผนที่" : "Map"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -309,7 +309,7 @@ const AttractionCard = ({
             onClick={handleFavoriteToggle}
             className="text-xs h-8"
             aria-label={
-              currentLanguage === "th" 
+              language === "th"
                 ? (isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มในรายการโปรด")
                 : (isFavorite ? "Remove from favorites" : "Add to favorites")
             }

@@ -7,20 +7,20 @@ import {
   Utensils,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface CategoryFilterProps {
-  currentLanguage: "th" | "en";
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
   attractionCounts?: { [key: string]: number };
 }
 
 const CategoryFilter = ({
-  currentLanguage,
   selectedCategory,
   onCategoryChange,
   attractionCounts = {},
 }: CategoryFilterProps) => {
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const categories = [
     {
@@ -82,7 +82,7 @@ const CategoryFilter = ({
     <section className="py-8 bg-background">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-semibold text-center mb-6">
-          {currentLanguage === "th"
+          {language === "th"
             ? "หมวดหมู่ที่น่าสนใจ"
             : "Explore Categories"}
         </h2>
@@ -120,7 +120,7 @@ const CategoryFilter = ({
                   />
                 </div>
                 <span className="text-xs md:text-sm font-medium text-center leading-tight relative z-10">
-                  {currentLanguage === "th"
+                  {language === "th"
                     ? category.labelTh
                     : category.labelEn}
                 </span>

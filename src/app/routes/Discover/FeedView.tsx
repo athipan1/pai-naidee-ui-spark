@@ -9,6 +9,7 @@ import {
   Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/shared/contexts/LanguageProvider";
 
 interface VideoPost {
   id: string;
@@ -32,12 +33,9 @@ interface VideoPost {
   createdAt: string;
 }
 
-interface FeedViewProps {
-  currentLanguage: "th" | "en";
-}
-
-const FeedView = ({ currentLanguage }: FeedViewProps) => {
+const FeedView = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(true);
   const [videoPosts, setVideoPosts] = useState<VideoPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +73,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[language];
 
   // Mock data for video posts
   useEffect(() => {
