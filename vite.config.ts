@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       proxy: {
         "/api": {
-          target: env.VITE_API_BASE_URL || "http://localhost:5000",
+          target: env.VITE_API_BASE_URL || "http://localhost:8000",
           changeOrigin: true,
           secure: false,
         }
@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env': {
         VITE_API_BASE_URL: JSON.stringify(env.VITE_API_BASE_URL),
+        NEXT_PUBLIC_API_BASE_URL: JSON.stringify(env.NEXT_PUBLIC_API_BASE_URL),
         VITE_HF_BACKEND_URL: JSON.stringify(env.VITE_HF_BACKEND_URL),
         VITE_HF_API_KEY: JSON.stringify(env.VITE_HF_API_KEY)
       }

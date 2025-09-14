@@ -188,14 +188,21 @@ npm run test:ui
 สร้างไฟล์ `.env.development` สำหรับการพัฒนาในเครื่อง:
 
 ```bash
-# Backend URL (ถ้าต้องการทดสอบกับ local backend)
-# VITE_API_BASE_URL=http://localhost:5000
+# API Configuration - FastAPI backend
+VITE_API_BASE_URL=http://localhost:8000
+# Alternative Next.js convention (also supported)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 
 # ค่าอื่นๆ
 VITE_APP_TITLE=PaiNaiDee - Development
 VITE_ENABLE_DEBUG=true
 VITE_ENABLE_ANALYTICS=false
 ```
+
+**หมายเหตุ API Configuration:**
+- `VITE_API_BASE_URL`: URL หลักสำหรับ FastAPI backend (localhost:8000)
+- `NEXT_PUBLIC_API_BASE_URL`: รองรับรูปแบบ Next.js convention
+- ระบบจะใช้ `VITE_HF_BACKEND_URL` เป็นหลัก หากไม่มีจึงจะใช้ `VITE_API_BASE_URL` หรือ `NEXT_PUBLIC_API_BASE_URL`
 
 ## 📁 โครงสร้างโปรเจค
 
