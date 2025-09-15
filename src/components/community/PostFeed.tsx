@@ -14,6 +14,7 @@ import { usePostContext } from '@/shared/contexts/PostContext';
 import { useMedia } from '@/shared/contexts/MediaProvider';
 import { cn } from '@/shared/lib/utils';
 import { CreatePostData, Post } from '@/shared/types/community';
+import { PostCardSkeleton, ErrorState, EmptyState, LoadingSpinner } from '@/components/common/LoadingStates';
 
 interface PostFeedProps {
   /** Custom className */
@@ -163,23 +164,8 @@ export const PostFeed: React.FC<PostFeedProps> = ({
   if (isLoading && posts.length === 0) {
     return (
       <div className={cn("space-y-4", className)}>
-        {Array.from({ length: 3 }).map((_, index) => (
-          <Card key={index} className="w-full">
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse" />
-                </div>
-              </div>
-              <div className="h-48 bg-gray-200 rounded animate-pulse" />
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
-              </div>
-            </CardContent>
-          </Card>
+        {Array.from({ length: pageSize }).map((_, index) => (
+          <PostCardSkeleton key={index} />
         ))}
       </div>
     );
@@ -209,20 +195,13 @@ export const PostFeed: React.FC<PostFeedProps> = ({
     return (
       <div className={cn("space-y-4", className)}>
         {emptyComponent || (
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold">No posts yet</h3>
-              <p className="text-muted-foreground max-w-sm">
-                Be the first to share your travel experience!
-              </p>
-            </div>
-            {showCreatePost && (
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Post
-              </Button>
-            )}
-          </div>
+          <EmptyState
+            title="No posts yet"
+            description="Be the first to share your travel experience!"
+            actionLabel={showCreatePost ? "Create Post" : undefined}
+            onAction={showCreatePost ? () => setShowCreateDialog(true) : undefined}
+            icon={<Plus className="w-12 h-12 text-muted-foreground" />}
+          />
         )}
       </div>
     );
@@ -275,10 +254,7 @@ export const PostFeed: React.FC<PostFeedProps> = ({
         <div ref={loadMoreRef} className="py-8">
           <div className="flex justify-center">
             {isFetchingNextPage ? (
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Loading more posts...</span>
-              </div>
+              <LoadingSpinner size="md" text="Loading more posts..." />
             ) : (
               <Button 
                 variant="outline" 
