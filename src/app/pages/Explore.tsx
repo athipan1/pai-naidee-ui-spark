@@ -6,6 +6,7 @@ import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import AttractionCard from "@/components/common/AttractionCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AttractionCardSkeleton, ErrorState, EmptyState } from "@/components/common/LoadingStates";
 
 interface ExploreProps {
   currentLanguage: "th" | "en";
@@ -48,10 +49,22 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
   if (isLoading) {
     return (
       <div className="p-4">
-        <Skeleton className="h-10 w-full mb-4" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full" />
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" onClick={onBack} className="mr-4">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-xl font-semibold">{t.title}</h1>
+        </div>
+        
+        {/* Search bar skeleton */}
+        <div className="mb-6">
+          <Skeleton className="w-full h-10 rounded-md" />
+        </div>
+
+        {/* Grid of attraction card skeletons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <AttractionCardSkeleton key={index} />
           ))}
         </div>
       </div>
@@ -60,11 +73,21 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
 
   if (isError) {
     return (
-      <div className="p-4 h-screen flex items-center justify-center">
-        <APIErrorDisplay
-          error={error}
-          onRetry={refetch}
-          currentLanguage={currentLanguage}
+      <div className="p-4">
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" onClick={onBack} className="mr-4">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-xl font-semibold">{t.title}</h1>
+        </div>
+        
+        <ErrorState
+          title="Failed to load attractions"
+          message={error?.message || "Unable to fetch attractions. Please check your connection and try again."}
+          onRetry={() => refetch()}
+          onGoHome={onBack}
+          variant="network"
+          className="mt-8"
         />
       </div>
     );
@@ -91,10 +114,13 @@ const Explore = ({ currentLanguage, onBack }: ExploreProps) => {
         </header>
 
         <div className="flex-grow flex items-center justify-center">
-          <div className="text-center space-y-2">
-            <p className="text-lg font-medium">{emptyTitle}</p>
-            <p className="text-muted-foreground">{emptyMessage}</p>
-          </div>
+          <EmptyState
+            title={emptyTitle}
+            description={emptyMessage}
+            actionLabel={isSearching ? "Clear Search" : "Refresh"}
+            onAction={isSearching ? () => setSearchQuery("") : () => refetch()}
+            icon={<Search className="w-12 h-12 text-muted-foreground" />}
+          />
         </div>
       </div>
     );
