@@ -2,10 +2,10 @@
   "name": "pai-naidee-api",
   "version": "1.0.0",
   "description": "AI Chat API for PaiNaiDee Travel Assistant",
-  "main": "api-server.js",
+  "main": "api-server.cjs",
   "scripts": {
-    "start": "node api-server.js",
-    "dev": "nodemon api-server.js"
+    "start": "node api-server.cjs",
+    "dev": "nodemon api-server.cjs"
   },
   "dependencies": {
     "express": "^4.18.2",

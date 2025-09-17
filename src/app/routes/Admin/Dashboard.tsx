@@ -3,6 +3,7 @@ import { Server, Activity, TrendingUp, Eye, Database, RefreshCw } from "lucide-r
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import ApiStatusPrompt from "@/components/common/ApiStatusPrompt";
 
 interface DashboardProps {
   currentLanguage: "th" | "en";
@@ -124,19 +125,7 @@ const Dashboard = ({ currentLanguage }: DashboardProps) => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.apiStatus}</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              <Badge className={getStatusColor(systemMetrics.apiStatus)}>
-                {systemMetrics.apiStatus.toUpperCase()}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <ApiStatusPrompt />
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
