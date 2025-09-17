@@ -21,19 +21,19 @@ export const verifyBackendUrl = async (): Promise<boolean> => {
   }
 };
 
-// ADDED: New health check function as requested by the user.
+// Health check function to verify backend connection
 export const checkBackendHealth = async (): Promise<TestResult> => {
   console.log('🚀 Running backend health check...');
   try {
     const response = await apiClient.get('/health', { timeout: 10000 });
 
-    if (response.data && response.data.status === 'ok' && response.data.message === 'Backend is running') {
+    if (response.data && response.data.status === 'ok') {
       console.log('✅ Health Check Successful!', response.data);
       return {
         success: true,
         status: response.status,
         data: response.data,
-        message: 'Backend is running and reachable.',
+        message: 'Backend health check passed. Response: { "status": "ok" }',
       };
     } else {
       console.warn('⚠️ Health check returned unexpected data:', response.data);
@@ -41,7 +41,7 @@ export const checkBackendHealth = async (): Promise<TestResult> => {
         success: false,
         status: response.status,
         data: response.data,
-        message: `Backend is reachable, but returned an unexpected status: ${JSON.stringify(response.data)}`,
+        message: `Backend is reachable, but health check failed. Expected { "status": "ok" }, got: ${JSON.stringify(response.data)}`,
       };
     }
   } catch (error) {
@@ -49,12 +49,24 @@ export const checkBackendHealth = async (): Promise<TestResult> => {
     console.error('❌ Health Check Failed!', err);
 
     const errorMessage = (err.message || '').toLowerCase();
-    if (err.code === 'ERR_CORS_MISMATCH' || errorMessage.includes('cors')) {
+    
+    // Check for CORS errors
+    if (err.code === 'ERR_CORS_MISMATCH' || errorMessage.includes('cors') || errorMessage.includes('cross-origin')) {
       return {
         success: false,
         status: 'CORS Error',
         data: null,
-        message: 'CORS Error: The request was blocked. Ensure the backend allows requests from this origin.',
+        message: 'CORS Error: The request was blocked due to CORS policy. Ensure the backend server allows requests from this origin.',
+      };
+    }
+
+    // Check for fetch/network errors  
+    if (err.code === 'ERR_NETWORK' || errorMessage.includes('fetch') || errorMessage.includes('network')) {
+      return {
+        success: false,
+        status: 'Network Error',
+        data: null,
+        message: 'Failed to fetch: Network error or backend server is not responding. Check if https://Athipan01-PaiNaiDee-Backend.hf.space is accessible.',
       };
     }
 
@@ -64,14 +76,14 @@ export const checkBackendHealth = async (): Promise<TestResult> => {
         success: false,
         status,
         data,
-        message: `Backend Down: Server responded with status ${status}.`,
+        message: `Backend responded with HTTP ${status}. URL: https://Athipan01-PaiNaiDee-Backend.hf.space/health`,
       };
     } else if (err.request) {
       return {
         success: false,
         status: 'Network Error',
         data: null,
-        message: 'Network Error: Could not connect to the server. The backend might be down or the URL is incorrect.',
+        message: 'Network Error: Could not connect to https://Athipan01-PaiNaiDee-Backend.hf.space. The backend might be down or URL is incorrect.',
       };
     } else {
       return {

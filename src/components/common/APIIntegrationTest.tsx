@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, XCircle, AlertCircle, Loader2, Globe, Database, Image, Users } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, Loader2, Globe, Database, Image, Users, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { attractionAPI } from "@/shared/utils/attractionAPI";
+import { getAttractions, getAttractionDetail } from "@/services/attraction.service";
+import { checkBackendHealth } from "@/lib/backendVerifier";
 
 interface TestResult {
   name: string;
@@ -51,7 +52,38 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
     
     const testResults: TestResult[] = [];
 
-    // Test 1: Basic API Connection
+    // Test 1: Backend Health Check
+    try {
+      testResults.push({
+        name: currentLanguage === "th" ? "การตรวจสอบสุขภาพ Backend" : "Backend Health Check",
+        status: "loading",
+        message: currentLanguage === "th" ? "กำลังทดสอบ..." : "Testing...",
+      });
+      setTests([...testResults]);
+
+      const healthResult = await checkBackendHealth();
+      
+      testResults[0] = {
+        name: currentLanguage === "th" ? "การตรวจสอบสุขภาพ Backend" : "Backend Health Check",
+        status: healthResult.success ? "success" : "error",
+        message: healthResult.success 
+          ? (currentLanguage === "th" ? "Backend ทำงานปกติ" : "Backend is healthy")
+          : (currentLanguage === "th" ? "Backend ไม่สามารถเข้าถึงได้" : "Backend is not accessible"),
+        details: `URL: ${import.meta.env.VITE_HF_BACKEND_URL}/health | ${healthResult.message}`,
+        data: healthResult.data
+      };
+    } catch (error) {
+      testResults[0] = {
+        name: currentLanguage === "th" ? "การตรวจสอบสุขภาพ Backend" : "Backend Health Check",
+        status: "error",
+        message: currentLanguage === "th" ? "ไม่สามารถทดสอบได้" : "Unable to test",
+        details: error instanceof Error ? error.message : String(error),
+      };
+    }
+
+    setTests([...testResults]);
+
+    // Test 2: Basic API Connection  
     try {
       testResults.push({
         name: currentLanguage === "th" ? "การเชื่อมต่อ API พื้นฐาน" : "Basic API Connection",
@@ -67,7 +99,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
 
       if (response.ok) {
         const data = await response.json();
-        testResults[0] = {
+        testResults[1] = {
           name: currentLanguage === "th" ? "การเชื่อมต่อ API พื้นฐาน" : "Basic API Connection",
           status: "success",
           message: currentLanguage === "th" ? "เชื่อมต่อสำเร็จ" : "Connection successful",
@@ -75,7 +107,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
           data: data
         };
       } else {
-        testResults[0] = {
+        testResults[1] = {
           name: currentLanguage === "th" ? "การเชื่อมต่อ API พื้นฐาน" : "Basic API Connection",
           status: "error",
           message: currentLanguage === "th" ? "การเชื่อมต่อล้มเหลว" : "Connection failed",
@@ -83,7 +115,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
         };
       }
     } catch (error) {
-      testResults[0] = {
+      testResults[1] = {
         name: currentLanguage === "th" ? "การเชื่อมต่อ API พื้นฐาน" : "Basic API Connection",
         status: "error",
         message: currentLanguage === "th" ? "ไม่สามารถเชื่อมต่อได้" : "Unable to connect",
@@ -91,7 +123,9 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       };
     }
 
-    // Test 2: Attractions List API
+    setTests([...testResults]);
+
+    // Test 3: Attractions List API
     try {
       testResults.push({
         name: currentLanguage === "th" ? "API รายการสถานที่" : "Attractions List API",
@@ -100,17 +134,17 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       });
       setTests([...testResults]);
 
-      const attractionsData = await attractionAPI.getAttractions();
+      const attractionsData = await getAttractions();
       
-      testResults[1] = {
+      testResults[2] = {
         name: currentLanguage === "th" ? "API รายการสถานที่" : "Attractions List API",
         status: "success",
-        message: currentLanguage === "th" ? `พบข้อมูล ${attractionsData.attractions.length} รายการ` : `Found ${attractionsData.attractions.length} attractions`,
+        message: currentLanguage === "th" ? `พบข้อมูล ${attractionsData.results.length} รายการ` : `Found ${attractionsData.results.length} attractions`,
         details: `Total: ${attractionsData.total}, Page: ${attractionsData.page}`,
         data: attractionsData
       };
     } catch (error) {
-      testResults[1] = {
+      testResults[2] = {
         name: currentLanguage === "th" ? "API รายการสถานที่" : "Attractions List API",
         status: "warning",
         message: currentLanguage === "th" ? "ใช้ข้อมูลจำลอง" : "Using mock data",
@@ -118,7 +152,9 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       };
     }
 
-    // Test 3: Single Attraction Detail API
+    setTests([...testResults]);
+
+    // Test 4: Single Attraction Detail API
     try {
       testResults.push({
         name: currentLanguage === "th" ? "API รายละเอียดสถานที่" : "Attraction Detail API",
@@ -127,9 +163,9 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       });
       setTests([...testResults]);
 
-      const detailData = await attractionAPI.getAttractionDetail("1");
+      const detailData = await getAttractionDetail("1");
       
-      testResults[2] = {
+      testResults[3] = {
         name: currentLanguage === "th" ? "API รายละเอียดสถานที่" : "Attraction Detail API",
         status: "success",
         message: currentLanguage === "th" ? "โหลดรายละเอียดสำเร็จ" : "Detail loaded successfully",
@@ -137,7 +173,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
         data: detailData
       };
     } catch (error) {
-      testResults[2] = {
+      testResults[3] = {
         name: currentLanguage === "th" ? "API รายละเอียดสถานที่" : "Attraction Detail API",
         status: "warning",
         message: currentLanguage === "th" ? "ใช้ข้อมูลจำลอง" : "Using mock data",
@@ -145,7 +181,9 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       };
     }
 
-    // Test 4: Image Loading Test
+    setTests([...testResults]);
+
+    // Test 5: Image Loading Test
     try {
       testResults.push({
         name: currentLanguage === "th" ? "การโหลดรูปภาพ" : "Image Loading",
@@ -154,7 +192,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       });
       setTests([...testResults]);
 
-      const attractionData = await attractionAPI.getAttractionDetail("1");
+      const attractionData = await getAttractionDetail("1");
       const imageUrl = attractionData.images[0];
       
       // Test if image URL is accessible  
@@ -165,14 +203,14 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
         img.src = imageUrl;
       });
 
-      testResults[3] = {
+      testResults[4] = {
         name: currentLanguage === "th" ? "การโหลดรูปภาพ" : "Image Loading",
         status: "success",
         message: currentLanguage === "th" ? "รูปภาพโหลดได้" : "Images load successfully",
         details: `URL: ${imageUrl}`,
       };
     } catch (error) {
-      testResults[3] = {
+      testResults[4] = {
         name: currentLanguage === "th" ? "การโหลดรูปภาพ" : "Image Loading",
         status: "warning",
         message: currentLanguage === "th" ? "ใช้รูปภาพสำรอง" : "Using fallback images",
@@ -213,6 +251,19 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       case "loading":
         return <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />;
     }
+  };
+
+  const getTestTypeIcon = (testName: string) => {
+    if (testName.includes("Health") || testName.includes("สุขภาพ")) {
+      return <Heart className="w-4 h-4 text-green-600" />;
+    } else if (testName.includes("API") || testName.includes("Connection") || testName.includes("เชื่อมต่อ")) {
+      return <Globe className="w-4 h-4 text-blue-600" />;
+    } else if (testName.includes("List") || testName.includes("รายการ")) {
+      return <Database className="w-4 h-4 text-purple-600" />;
+    } else if (testName.includes("Image") || testName.includes("รูปภาพ")) {
+      return <Image className="w-4 h-4 text-orange-600" />;
+    }
+    return <Globe className="w-4 h-4 text-gray-600" />;
   };
 
   const getStatusBadge = (status: TestResult["status"]) => {
@@ -256,7 +307,10 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
         <div className="space-y-3">
           {tests.map((test, index) => (
             <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
-              {getStatusIcon(test.status)}
+              <div className="flex items-center gap-2">
+                {getTestTypeIcon(test.name)}
+                {getStatusIcon(test.status)}
+              </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium">{test.name}</h4>
@@ -280,7 +334,13 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
             </h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               {tests.some(t => t.status === "error") && (
-                <li>• {currentLanguage === "th" ? "เซิร์ฟเวอร์ Backend อาจไม่ทำงาน กรุณาตรวจสอบ localhost:5000" : "Backend server may not be running. Check localhost:5000"}</li>
+                <li>• {currentLanguage === "th" ? "เซิร์ฟเวอร์ Backend อาจไม่ทำงาน กรุณาตรวจสอบ https://Athipan01-PaiNaiDee-Backend.hf.space" : "Backend server may not be running. Check https://Athipan01-PaiNaiDee-Backend.hf.space"}</li>
+              )}
+              {tests.some(t => t.status === "error" && t.details?.includes("CORS")) && (
+                <li>• {currentLanguage === "th" ? "พบปัญหา CORS: ตรวจสอบการตั้งค่า Cross-Origin ของ Backend" : "CORS Error detected: Check backend Cross-Origin settings"}</li>
+              )}
+              {tests.some(t => t.status === "error" && t.details?.includes("fetch")) && (
+                <li>• {currentLanguage === "th" ? "Failed to fetch: ตรวจสอบการเชื่อมต่อเครือข่าย" : "Failed to fetch: Check network connection"}</li>
               )}
               {tests.some(t => t.status === "warning") && (
                 <li>• {currentLanguage === "th" ? "แอปใช้ข้อมูลจำลองเมื่อ Backend ไม่พร้อมใช้งาน" : "App falls back to mock data when Backend is unavailable"}</li>
@@ -288,6 +348,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
               {tests.some(t => t.status === "success") && (
                 <li>• {currentLanguage === "th" ? "การแสดงข้อมูลและรูปภาพทำงานได้ปกติ" : "Data display and image loading work correctly"}</li>
               )}
+              <li>• {currentLanguage === "th" ? "ใช้ Developer Tools > Network tab เพื่อดูรายละเอียดการเรียก API" : "Use Developer Tools > Network tab to inspect API calls"}</li>
             </ul>
           </div>
         )}
