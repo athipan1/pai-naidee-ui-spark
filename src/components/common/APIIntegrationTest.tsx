@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { getAttractions, getAttractionDetail } from "@/services/attraction.service";
 import { checkBackendHealth } from "@/lib/backendVerifier";
+import { getPlaces } from "@/services/supabase.service";
 
 interface TestResult {
   name: string;
@@ -214,6 +215,35 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
         name: currentLanguage === "th" ? "การโหลดรูปภาพ" : "Image Loading",
         status: "warning",
         message: currentLanguage === "th" ? "ใช้รูปภาพสำรอง" : "Using fallback images",
+        details: error instanceof Error ? error.message : String(error),
+      };
+    }
+
+    setTests(testResults);
+
+    // Test 6: Supabase Connection Test
+    try {
+      testResults.push({
+        name: currentLanguage === "th" ? "การเชื่อมต่อ Supabase" : "Supabase Connection",
+        status: "loading",
+        message: currentLanguage === "th" ? "กำลังทดสอบ..." : "Testing...",
+      });
+      setTests([...testResults]);
+
+      const placesData = await getPlaces();
+      
+      testResults[5] = {
+        name: currentLanguage === "th" ? "การเชื่อมต่อ Supabase" : "Supabase Connection",
+        status: "success",
+        message: currentLanguage === "th" ? `พบข้อมูลสถานที่ ${placesData?.length || 0} รายการ` : `Found ${placesData?.length || 0} places`,
+        details: placesData ? `Sample: ${JSON.stringify(placesData[0] || {})}` : "No data available",
+        data: placesData
+      };
+    } catch (error) {
+      testResults[5] = {
+        name: currentLanguage === "th" ? "การเชื่อมต่อ Supabase" : "Supabase Connection",
+        status: "warning",
+        message: currentLanguage === "th" ? "ยังไม่ได้กำหนดค่า Supabase" : "Supabase not configured",
         details: error instanceof Error ? error.message : String(error),
       };
     }

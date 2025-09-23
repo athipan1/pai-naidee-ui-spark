@@ -36,7 +36,9 @@ export default defineConfig(({ mode }) => {
         VITE_API_BASE_URL: JSON.stringify(env.VITE_API_BASE_URL),
         NEXT_PUBLIC_API_BASE_URL: JSON.stringify(env.NEXT_PUBLIC_API_BASE_URL),
         VITE_HF_BACKEND_URL: JSON.stringify(env.VITE_HF_BACKEND_URL),
-        VITE_HF_API_KEY: JSON.stringify(env.VITE_HF_API_KEY)
+        VITE_HF_API_KEY: JSON.stringify(env.VITE_HF_API_KEY),
+        EXPO_PUBLIC_SUPABASE_URL: JSON.stringify(env.EXPO_PUBLIC_SUPABASE_URL),
+        EXPO_PUBLIC_SUPABASE_KEY: JSON.stringify(env.EXPO_PUBLIC_SUPABASE_KEY)
       }
     },
     plugins: [
