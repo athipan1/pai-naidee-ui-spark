@@ -111,15 +111,23 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
       nameLocal: place.name_local || place.name,
       province: place.province,
       category: place.category,
-      rating: place.rating || 0,
-      reviewCount: place.review_count || 0,
+      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
       images: [place.image_url || 'https://via.placeholder.com/400x250?text=No+Image'],
       description: place.description || 'No description available.',
       tags: place.tags || [],
-      coordinates: {
+      amenities: place.amenities || [],
+      location: {
         lat: place.lat || 0,
         lng: place.lng || 0,
       },
+      rating: place.rating || 0,
+      reviewCount: place.review_count || 0,
+      reviews: {
+        count: place.review_count || 0,
+        average: place.rating || 0,
+      },
+      confidence: 1.0, // Default confidence for direct ID lookup
+      matchedTerms: [], // No search terms for a direct lookup
       lastUpdated: place.updated_at,
     };
 
@@ -130,55 +138,57 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
 };
 
 /**
- * Search places using multiple conditions with .or
- * @param searchTerm - The search term to look for
- * @param categories - Optional categories to include in search
- * @param provinces - Optional provinces to include in search
- * @param limit - Maximum number of results to return (default: 20)
- * @returns Promise<SearchResult[]>
+ * Search places with pagination and filtering.
+ * @param searchTerm - The term to search for in name, description, etc.
+ * @param categories - Optional array of categories to filter by.
+ * @param provinces - Optional array of provinces to filter by.
+ * @param limit - The number of results per page.
+ * @param page - The page number to retrieve.
+ * @returns A promise that resolves to an object with search results and total count.
  */
 export const searchPlaces = async (
   searchTerm: string,
   categories: string[] = [],
   provinces: string[] = [],
-  limit: number = 20
-): Promise<SearchResult[]> => {
+  limit: number = 20,
+  page: number = 1
+): Promise<{ results: SearchResult[]; totalCount: number }> => {
   try {
-    let query = supabase.from('places').select('*');
+    // Initialize the query and request total count
+    let query = supabase.from('places').select('*', { count: 'exact' });
 
-    // Build search conditions using .or for multiple search criteria
     const searchConditions: string[] = [];
-    
+
+    // Add search term conditions
     if (searchTerm) {
-      // Search in name, name_local, and description
       searchConditions.push(`name.ilike.%${searchTerm}%`);
       searchConditions.push(`name_local.ilike.%${searchTerm}%`);
       searchConditions.push(`description.ilike.%${searchTerm}%`);
     }
 
-    // Add category conditions if provided
+    // Add category conditions
     if (categories.length > 0) {
-      categories.forEach(category => {
-        searchConditions.push(`category.eq.${category}`);
-      });
+      const categoryConditions = categories.map(c => `category.eq.${c}`).join(',');
+      query = query.or(categoryConditions);
     }
 
-    // Add province conditions if provided
+    // Add province conditions
     if (provinces.length > 0) {
-      provinces.forEach(province => {
-        searchConditions.push(`province.eq.${province}`);
-      });
+      const provinceConditions = provinces.map(p => `province.eq.${p}`).join(',');
+      query = query.or(provinceConditions);
     }
 
-    // Apply OR conditions if we have any
+    // Apply search term conditions if any
     if (searchConditions.length > 0) {
       query = query.or(searchConditions.join(','));
     }
 
-    // Apply limit
-    query = query.limit(limit);
+    // Apply pagination
+    const offset = (page - 1) * limit;
+    query = query.range(offset, offset + limit - 1);
 
-    const { data, error } = await query;
+    // Execute the query
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('Failed to search places:', error);
@@ -186,11 +196,11 @@ export const searchPlaces = async (
     }
 
     if (!data) {
-      return [];
+      return { results: [], totalCount: 0 };
     }
 
-    // Transform Supabase data to SearchResult format
-    return data.map((place: PlaceRecord): SearchResult => ({
+    // Transform data to SearchResult format
+    const results = data.map((place: PlaceRecord): SearchResult => ({
       id: place.id,
       name: place.name,
       nameLocal: place.name_local || place.name,
@@ -201,14 +211,13 @@ export const searchPlaces = async (
       reviewCount: place.review_count || 0,
       image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
       description: place.description || 'No description available.',
-      confidence: 0.8, // Default confidence for search results
+      confidence: 0.8,
       matchedTerms: searchTerm ? [searchTerm] : [],
       amenities: place.amenities || [],
-      location: place.lat && place.lng ? {
-        lat: place.lat,
-        lng: place.lng
-      } : undefined,
+      location: place.lat && place.lng ? { lat: place.lat, lng: place.lng } : undefined,
     }));
+
+    return { results, totalCount: count || 0 };
 
   } catch (error) {
     console.error('Failed to search places:', error);
