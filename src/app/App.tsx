@@ -41,6 +41,7 @@ const PaiNaiDeeTasks = lazy(() => import("./pages/PaiNaiDeeTasks"));
 // --- System Pages ---
 const HealthCheckPage = lazy(() => import("./pages/HealthCheckPage"));
 const APITestPage = lazy(() => import("./pages/APITestPage"));
+const SupabaseDiagnostic = lazy(() => import("./pages/SupabaseDiagnostic"));
 // --- End System Pages ---
 
 // Redirect components for backward compatibility
@@ -212,6 +213,7 @@ const AppContent = () => {
           )}
           <Route path="/health-check" element={<HealthCheckPage />} />
           <Route path="/admin/api-test" element={<APITestPage />} />
+          <Route path="/supabase-diagnostic" element={<SupabaseDiagnostic />} />
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
 
