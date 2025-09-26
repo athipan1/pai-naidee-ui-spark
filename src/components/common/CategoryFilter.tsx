@@ -79,15 +79,22 @@ const CategoryFilter = ({
   };
 
   return (
-    <section className="py-8 bg-background">
-      <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          {currentLanguage === "th"
-            ? "หมวดหมู่ที่น่าสนใจ"
-            : "Explore Categories"}
-        </h2>
+    <section className="py-10 bg-gradient-to-br from-background to-accent/5">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            {currentLanguage === "th"
+              ? "หมวดหมู่ที่น่าสนใจ"
+              : "Explore Categories"}
+          </h2>
+          <p className="text-muted-foreground text-sm md:text-base">
+            {currentLanguage === "th"
+              ? "เลือกประเภทสถานที่ท่องเที่ยวที่คุณชื่นชอบ"
+              : "Choose your favorite type of destination"}
+          </p>
+        </div>
 
-        <div className="flex overflow-x-auto pb-4 space-x-3 md:space-x-4 scrollbar-hide">
+        <div className="flex overflow-x-auto pb-6 space-x-4 md:space-x-6 scrollbar-hide snap-x">
           {categories.map((category) => {
             const Icon = category.icon;
             const isActive = selectedCategory === category.id;
@@ -98,44 +105,56 @@ const CategoryFilter = ({
                 key={category.id}
                 onClick={() => handleCategoryClick(category.id)}
                 className={`
-                  category-btn flex-shrink-0 flex flex-col items-center p-3 md:p-4 rounded-2xl min-w-[90px] md:min-w-[100px] min-h-[80px] md:min-h-[90px]
-                  transition-all duration-500 hover:scale-105 active:scale-95 touch-manipulation relative overflow-hidden
+                  category-btn flex-shrink-0 flex flex-col items-center p-4 md:p-5 rounded-3xl min-w-[100px] md:min-w-[120px] min-h-[100px] md:min-h-[120px]
+                  transition-all duration-500 hover:scale-105 active:scale-95 touch-manipulation relative overflow-hidden group snap-center
                   ${
                     isActive
-                      ? "category-btn-active bg-primary text-primary-foreground shadow-xl scale-105"
-                      : "bg-card hover:bg-accent border border-border shadow-sm hover:shadow-md"
+                      ? "category-btn-active bg-gradient-to-br from-primary to-primary-dark text-white shadow-2xl shadow-primary/30 scale-105 border-2 border-white/20"
+                      : "bg-card/80 backdrop-blur-sm hover:bg-card border border-border/50 shadow-lg hover:shadow-xl hover:border-primary/30"
                   }
                 `}
+                role="tab"
+                aria-selected={isActive}
+                aria-label={`${currentLanguage === "th" ? category.labelTh : category.labelEn} category ${count ? `with ${count} attractions` : ''}`}
               >
                 <div
                   className={`
-                  w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 relative z-10
-                  ${isActive ? "bg-white/20 animate-float" : "bg-accent/50 group-hover:bg-primary/20"}
+                  w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 relative z-10 group-hover:scale-110
+                  ${isActive ? "bg-white/20 animate-float shadow-lg" : "bg-gradient-to-br from-accent/30 to-accent/10 group-hover:from-primary/20 group-hover:to-primary/10"}
                 `}
                 >
                   <Icon
-                    className={`w-5 h-5 md:w-6 md:h-6 transition-all duration-300 ${
-                      isActive ? "text-white animate-glow" : `${category.color} group-hover:scale-110`
+                    className={`w-6 h-6 md:w-7 md:h-7 transition-all duration-300 ${
+                      isActive ? "text-white animate-glow drop-shadow-lg" : `${category.color} group-hover:scale-110 group-hover:text-primary`
                     }`}
                   />
                 </div>
-                <span className="text-xs md:text-sm font-medium text-center leading-tight relative z-10">
+                <span className={`text-xs md:text-sm font-semibold text-center leading-tight relative z-10 transition-all duration-300 ${
+                  isActive ? "text-white" : "text-foreground group-hover:text-primary"
+                }`}>
                   {currentLanguage === "th"
                     ? category.labelTh
                     : category.labelEn}
                 </span>
                 {count > 0 && (
-                  <span className={`text-xs mt-1 px-1.5 py-0.5 rounded-full transition-all duration-300 relative z-10 ${
-                    isActive ? "bg-white/20 text-white animate-pulse" : "bg-primary/10 text-primary hover:bg-primary/20"
+                  <span className={`text-xs mt-2 px-2 py-1 rounded-full transition-all duration-300 relative z-10 font-medium ${
+                    isActive ? "bg-white/20 text-white animate-pulse shadow-md" : "bg-primary/10 text-primary group-hover:bg-primary/20 group-hover:scale-105"
                   }`}>
                     {count}
                   </span>
                 )}
                 
-                {/* Enhanced ripple effect */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl" />
+                {/* Enhanced visual effects */}
+                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-primary/5 rounded-3xl" />
                 </div>
+                
+                {/* Active state glow effect */}
+                {isActive && (
+                  <div className="absolute inset-0 rounded-3xl animate-pulse">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-3xl blur-sm" />
+                  </div>
+                )}
               </button>
             );
           })}

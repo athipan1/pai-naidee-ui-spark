@@ -219,22 +219,24 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
           attractionCounts={attractionCounts}
         />
 
-        {/* Trending Destinations Section */}
+        {/* Enhanced Trending Destinations Section */}
         {_selectedCategory === "all" && (
-          <section className="py-6 bg-accent/20" aria-label={currentLanguage === "th" ? "สถานที่ยอดนิยม" : "Trending destinations"}>
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold flex items-center">
-                  <span className="mr-2" role="img" aria-label="fire">🔥</span>
-                  {currentLanguage === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
+          <section className="py-8 bg-gradient-to-br from-accent/10 to-accent/5" aria-label={currentLanguage === "th" ? "สถานที่ยอดนิยม" : "Trending destinations"}>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold flex items-center">
+                  <span className="mr-3 text-2xl animate-bounce" role="img" aria-label="fire">🔥</span>
+                  <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    {currentLanguage === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
+                  </span>
                 </h2>
               </div>
               
-              <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide" role="list">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6" role="list">
                 {displayAttractions.slice(0, 2).map((attraction) => (
                   <article
                     key={`trending-${attraction.id}`}
-                    className="flex-shrink-0 w-64 md:w-72 bg-card rounded-xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                    className="bg-card/90 backdrop-blur-sm rounded-2xl p-5 border border-border/30 shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer group hover:scale-[1.02] hover:-translate-y-1"
                     onClick={() => handleCardClick(attraction.id)}
                     role="listitem"
                     tabIndex={0}
@@ -245,52 +247,65 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                       }
                     }}
                   >
-                    <div className="flex items-center space-x-3">
-                      <OptimizedImage
-                        src={attraction.image}
-                        alt={attraction.name}
-                        loading="lazy"
-                        className="w-16 h-16 rounded-lg object-cover"
-                        width={64}
-                        height={64}
-                      />
+                    <div className="flex items-center space-x-4">
+                      <div className="relative flex-shrink-0">
+                        <OptimizedImage
+                          src={attraction.image}
+                          alt={attraction.name}
+                          loading="lazy"
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover shadow-md group-hover:scale-110 transition-transform duration-300"
+                          width={96}
+                          height={96}
+                        />
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
+                          🔥
+                        </div>
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate">
+                        <h3 className="font-bold text-lg md:text-xl truncate group-hover:text-primary transition-colors duration-300">
                           {currentLanguage === "th" && attraction.nameLocal ? attraction.nameLocal : attraction.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground flex items-center">
-                          <MapPin className="w-3 h-3 mr-1" />
+                        <p className="text-sm text-muted-foreground flex items-center mt-1">
+                          <MapPin className="w-4 h-4 mr-2 text-primary" />
                           {attraction.province}
                         </p>
-                        <div className="flex items-center mt-1">
-                          <Star className="w-3 h-3 fill-accent-yellow text-accent-yellow mr-1" />
-                          <span className="text-sm font-medium">{attraction.rating}</span>
-                          <span className="text-xs text-muted-foreground ml-1">
-                            ({attraction.reviewCount})
+                        <div className="flex items-center mt-2 bg-accent/20 px-3 py-1 rounded-full w-fit">
+                          <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow mr-2" />
+                          <span className="text-sm font-bold">{attraction.rating}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            ({attraction.reviewCount.toLocaleString()} {currentLanguage === "th" ? "รีวิว" : "reviews"})
                           </span>
                         </div>
                       </div>
                     </div>
                   </article>
               ))}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
-        {/* Attractions Grid */}
-        <section className="py-8" aria-label={currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended places"}>
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">
-                {currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended Places"}
-              </h2>
+        {/* Enhanced Attractions Grid */}
+        <section className="py-12" aria-label={currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended places"}>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {currentLanguage === "th" ? "สถานที่แนะนำ" : "Recommended Places"}
+                </h2>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  {currentLanguage === "th" 
+                    ? "สถานที่ท่องเที่ยวยอดนิยมที่คัดสรรมาเป็นพิเศษ"
+                    : "Handpicked popular destinations just for you"
+                  }
+                </p>
+              </div>
               <Button 
                 variant="outline" 
                 onClick={handleViewMore}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 shadow-md hover:shadow-lg"
               >
-                <span className="text-sm">
+                <span className="text-sm font-medium">
                   {currentLanguage === "th" ? "ดูทั้งหมด" : "View All"}
                 </span>
                 <ArrowRight className="w-4 h-4" />
@@ -298,7 +313,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
             </div>
 
             <div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8"
               role="list"
               aria-label={
                 currentLanguage === "th" 
@@ -308,7 +323,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
             >
               {/* Show only first 8 items on home page */}
               {filteredAttractions.slice(0, 8).map((attraction) => (
-                <div key={attraction.id} role="listitem">
+                <div key={attraction.id} role="listitem" className="h-full">
                   <AttractionCard
                     {...attraction}
                     currentLanguage={currentLanguage}
@@ -321,18 +336,28 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
             </div>
 
             {filteredAttractions.length === 0 && (
-              <div className="text-center py-12" role="status" aria-live="polite">
-                <p className="text-muted-foreground text-lg">
-                  {currentLanguage === "th"
-                    ? "ไม่พบสถานที่ในหมวดหมู่นี้"
-                    : "No places found in this category"}
-                </p>
-                <Button 
-                  onClick={handleViewMore}
-                  className="mt-4"
-                >
-                  {currentLanguage === "th" ? "สำรวจเพิ่มเติม" : "Explore More"}
-                </Button>
+              <div className="text-center py-16" role="status" aria-live="polite">
+                <div className="max-w-md mx-auto">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-muted to-muted/50 rounded-full flex items-center justify-center">
+                    <MapPin className="w-12 h-12 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">
+                    {currentLanguage === "th"
+                      ? "ไม่พบสถานที่ในหมวดหมู่นี้"
+                      : "No places found in this category"}
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    {currentLanguage === "th"
+                      ? "ลองเลือกหมวดหมู่อื่น หรือค้นหาสถานที่ที่สนใจ"
+                      : "Try selecting another category or search for places you're interested in"}
+                  </p>
+                  <Button 
+                    onClick={handleViewMore}
+                    className="shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  >
+                    {currentLanguage === "th" ? "สำรวจเพิ่มเติม" : "Explore More"}
+                  </Button>
+                </div>
               </div>
             )}
           </div>
