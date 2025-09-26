@@ -22,6 +22,21 @@ function getEnvVar(key: string, fallback: string = ''): string {
   return fallback;
 }
 
+// Check if Supabase is properly configured
+export function isSupabaseConfigured(): boolean {
+  const url = getEnvVar('VITE_SUPABASE_URL');
+  const key = getEnvVar('VITE_SUPABASE_ANON_KEY');
+  
+  return !!(
+    url && 
+    url !== 'https://your-project.supabase.co' && 
+    url !== 'https://your-project-id.supabase.co' &&
+    key && 
+    key !== 'your-anon-key' && 
+    key !== 'your-supabase-anon-key-here'
+  );
+}
+
 // Supabase configuration with proper environment variable handling
 const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', 'https://your-project.supabase.co');
 const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY', 'your-anon-key');
@@ -57,6 +72,12 @@ export const getPlacesByCategory = async (
   category: string,
   limit: number = 10
 ): Promise<SearchResult[]> => {
+  // Check if Supabase is properly configured before making requests
+  if (!isSupabaseConfigured()) {
+    console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
+    throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
+  }
+
   try {
     const { data, error } = await supabase
       .from('places')
@@ -69,26 +90,27 @@ export const getPlacesByCategory = async (
       throw new Error(`Failed to fetch places by category: ${error.message}`);
     }
 
-    if (!data) {
+    if (!data || data.length === 0) {
+      console.info(`No places found for category: ${category}`);
       return [];
     }
 
-    // Transform Supabase data to SearchResult format
+    // Transform Supabase data to SearchResult format with better null handling
     return data.map((place: PlaceRecord): SearchResult => ({
-      id: place.id,
-      name: place.name,
-      nameLocal: place.name_local || place.name,
-      province: place.province,
-      category: place.category,
-      tags: place.tags || [],
-      rating: place.rating || 0,
-      reviewCount: place.review_count || 0,
+      id: place.id || 'unknown',
+      name: place.name || 'Unnamed Place',
+      nameLocal: place.name_local || place.name || 'Unnamed Place',
+      province: place.province || 'Unknown Province',
+      category: place.category || 'Unknown',
+      tags: Array.isArray(place.tags) ? place.tags : [],
+      rating: typeof place.rating === 'number' ? place.rating : 0,
+      reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
       image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
       description: place.description || 'No description available.',
       confidence: 1.0, // Default confidence for direct category match
       matchedTerms: [category],
-      amenities: place.amenities || [],
-      location: place.lat && place.lng ? {
+      amenities: Array.isArray(place.amenities) ? place.amenities : [],
+      location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? {
         lat: place.lat,
         lng: place.lng
       } : undefined,
@@ -96,7 +118,8 @@ export const getPlacesByCategory = async (
 
   } catch (error) {
     console.error('Failed to fetch places by category:', error);
-    throw new Error(error instanceof Error ? error.message : 'Unknown error occurred');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Database query failed: ${errorMessage}`);
   }
 };
 
@@ -106,6 +129,12 @@ export const getPlacesByCategory = async (
  * @returns Promise<AttractionDetail>
  */
 export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
+  // Check if Supabase is properly configured before making requests
+  if (!isSupabaseConfigured()) {
+    console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
+    throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
+  }
+
   try {
     const { data, error } = await supabase
       .from('places')
@@ -124,27 +153,39 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
 
     const place: PlaceRecord = data;
 
-    // Transform Supabase data to AttractionDetail format
+    // Transform Supabase data to AttractionDetail format with better null handling
     return {
-      id: place.id,
-      name: place.name,
-      nameLocal: place.name_local || place.name,
-      province: place.province,
-      category: place.category,
+      id: place.id || 'unknown',
+      name: place.name || 'Unnamed Place',
+      nameLocal: place.name_local || place.name || 'Unnamed Place',
+      province: place.province || 'Unknown Province',
+      category: place.category || 'Unknown',
       image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
       images: [place.image_url || 'https://via.placeholder.com/400x250?text=No+Image'],
       description: place.description || 'No description available.',
-      tags: place.tags || [],
-      amenities: place.amenities || [],
+      tags: Array.isArray(place.tags) ? place.tags : [],
+      amenities: Array.isArray(place.amenities) ? place.amenities : [],
       location: {
-        lat: place.lat || 0,
-        lng: place.lng || 0,
+        lat: typeof place.lat === 'number' ? place.lat : 0,
+        lng: typeof place.lng === 'number' ? place.lng : 0,
       },
-      rating: place.rating || 0,
-      reviewCount: place.review_count || 0,
+      rating: typeof place.rating === 'number' ? place.rating : 0,
+      reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
       reviews: {
-        count: place.review_count || 0,
-        average: place.rating || 0,
+        count: typeof place.review_count === 'number' ? place.review_count : 0,
+        average: typeof place.rating === 'number' ? place.rating : 0,
+        breakdown: {
+          5: 0,
+          4: 0,
+          3: 0,
+          2: 0,
+          1: 0,
+        },
+        recent: [],
+      },
+      coordinates: {
+        lat: typeof place.lat === 'number' ? place.lat : 0,
+        lng: typeof place.lng === 'number' ? place.lng : 0,
       },
       confidence: 1.0, // Default confidence for direct ID lookup
       matchedTerms: [], // No search terms for a direct lookup
@@ -153,7 +194,8 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
 
   } catch (error) {
     console.error('Failed to fetch place:', error);
-    throw new Error(error instanceof Error ? error.message : 'Unknown error occurred');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Database query failed: ${errorMessage}`);
   }
 };
 
@@ -173,6 +215,12 @@ export const searchPlaces = async (
   limit: number = 20,
   page: number = 1
 ): Promise<{ results: SearchResult[]; totalCount: number }> => {
+  // Check if Supabase is properly configured before making requests
+  if (!isSupabaseConfigured()) {
+    console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
+    throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
+  }
+
   try {
     // Initialize the query and request total count
     let query = supabase.from('places').select('*', { count: 'exact' });
@@ -219,29 +267,33 @@ export const searchPlaces = async (
       return { results: [], totalCount: 0 };
     }
 
-    // Transform data to SearchResult format
+    // Transform data to SearchResult format with better null handling
     const results = data.map((place: PlaceRecord): SearchResult => ({
-      id: place.id,
-      name: place.name,
-      nameLocal: place.name_local || place.name,
-      province: place.province,
-      category: place.category,
-      tags: place.tags || [],
-      rating: place.rating || 0,
-      reviewCount: place.review_count || 0,
+      id: place.id || 'unknown',
+      name: place.name || 'Unnamed Place',
+      nameLocal: place.name_local || place.name || 'Unnamed Place',
+      province: place.province || 'Unknown Province',
+      category: place.category || 'Unknown',
+      tags: Array.isArray(place.tags) ? place.tags : [],
+      rating: typeof place.rating === 'number' ? place.rating : 0,
+      reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
       image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
       description: place.description || 'No description available.',
       confidence: 0.8,
       matchedTerms: searchTerm ? [searchTerm] : [],
-      amenities: place.amenities || [],
-      location: place.lat && place.lng ? { lat: place.lat, lng: place.lng } : undefined,
+      amenities: Array.isArray(place.amenities) ? place.amenities : [],
+      location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? { 
+        lat: place.lat, 
+        lng: place.lng 
+      } : undefined,
     }));
 
     return { results, totalCount: count || 0 };
 
   } catch (error) {
     console.error('Failed to search places:', error);
-    throw new Error(error instanceof Error ? error.message : 'Unknown error occurred');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Database query failed: ${errorMessage}`);
   }
 };
 
