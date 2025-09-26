@@ -22,7 +22,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "build:semantic-index": "node scripts/buildSemanticIndex.cjs"
+    "build:semantic-index": "node scripts/buildSemanticIndex.cjs",
+    "check:supabase": "npx tsx scripts/check-supabase.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

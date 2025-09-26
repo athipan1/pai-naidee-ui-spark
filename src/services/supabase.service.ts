@@ -2,9 +2,29 @@ import { createClient } from '@supabase/supabase-js';
 import { SearchResult } from '@/shared/types/search';
 import { AttractionDetail } from '@/shared/types/attraction';
 
-// Supabase configuration
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+// Helper function to get environment variables in both browser and Node.js contexts
+function getEnvVar(key: string, fallback: string = ''): string {
+  // Browser context (Vite)
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env[key] || fallback;
+  }
+  
+  // Node.js context (via global mock setup in scripts)
+  if (typeof globalThis !== 'undefined' && (globalThis as any).import?.meta?.env) {
+    return (globalThis as any).import.meta.env[key] || fallback;
+  }
+  
+  // Direct Node.js environment access
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key] || fallback;
+  }
+  
+  return fallback;
+}
+
+// Supabase configuration with proper environment variable handling
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', 'https://your-project.supabase.co');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY', 'your-anon-key');
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
