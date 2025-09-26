@@ -7,6 +7,7 @@ import AttractionCard from "@/components/common/AttractionCard";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import OptimizedImage from "@/components/common/OptimizedImage";
+import SupabaseSetupGuide from "@/components/common/SupabaseSetupGuide";
 import { SearchResult as PostSearchResult } from "@/shared/types/posts";
 import { SearchResult } from "@/shared/types/search";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
@@ -184,6 +185,14 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       />
 
       <main id="main-content" role="main" className="focus:outline-none" tabIndex={-1}>
+        {/* Supabase Setup Guide */}
+        <div className="container mx-auto px-4 pt-4">
+          <SupabaseSetupGuide 
+            currentLanguage={currentLanguage}
+            showOnlyIfNeeded={true}
+          />
+        </div>
+        
         <div className="container mx-auto px-4 pt-4 border-b-2 border-dashed border-red-500 my-4">
             <AttractionListTest />
         </div>
