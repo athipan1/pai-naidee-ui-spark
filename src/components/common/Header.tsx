@@ -35,46 +35,63 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const isCommunityPage = location.pathname.startsWith('/community');
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-effect border-b border-white/20 shadow-lg safe-area-top">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Enhanced Logo */}
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/80 border-b border-border/50 shadow-xl safe-area-top">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Enhanced Logo with better spacing */}
         <Link
           to="/"
-          className="flex items-center space-x-2 interactive-scale"
+          className="flex items-center space-x-3 interactive-scale group"
           aria-label={currentLanguage === "th" ? "ไปไหนดี - หน้าแรก" : "PaiNaiDee - Home"}
         >
-          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg neon-glow">
-            <MapPin className="w-6 h-6 text-white animate-float" />
+          <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg neon-glow group-hover:scale-110 transition-transform duration-300">
+            <MapPin className="w-7 h-7 text-white animate-float" />
           </div>
-          <h1 className="text-xl font-bold text-gradient-tropical font-noto-thai">
-            {currentLanguage === "th" ? "ไปไหนดี" : "PaiNaiDee"}
-          </h1>
+          <div className="hidden sm:block">
+            <h1 className="text-xl font-bold text-gradient-tropical font-noto-thai group-hover:scale-105 transition-transform duration-300">
+              {currentLanguage === "th" ? "ไปไหนดี" : "PaiNaiDee"}
+            </h1>
+            <p className="text-xs text-muted-foreground -mt-1">
+              {currentLanguage === "th" ? "คู่มือท่องเที่ยว" : "Travel Guide"}
+            </p>
+          </div>
         </Link>
 
         {/* Enhanced Desktop Navigation */}
         <nav
-          className="hidden md:flex items-center space-x-6"
+          className="hidden lg:flex items-center space-x-1"
           aria-label={currentLanguage === "th" ? "เมนูหลัก" : "Main navigation"}
         >
           {menuItems.map((item, index) => (
             <Link
               key={index}
               to={item.href}
-              className={`text-muted-foreground hover:text-primary transition-all duration-300 font-medium px-3 py-2 rounded-lg relative overflow-hidden ${
-                isActiveRoute(item.href) ? "text-primary font-semibold bg-primary/10" : ""
+              className={`nav-link group relative px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 ${
+                isActiveRoute(item.href) 
+                  ? "text-primary bg-primary/10 shadow-md" 
+                  : "text-muted-foreground hover:text-primary hover:bg-accent/50"
               }`}
             >
               <span className="relative z-10">{item.label}</span>
-              {/* Hover effect background */}
-              <div className="absolute inset-0 bg-primary/10 scale-0 hover:scale-100 transition-transform duration-300 rounded-lg" />
+              
+              {/* Enhanced hover effect */}
+              <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${
+                isActiveRoute(item.href) 
+                  ? "bg-gradient-to-r from-primary/20 to-primary/10 scale-100" 
+                  : "bg-gradient-to-r from-primary/10 to-secondary/10 scale-0 group-hover:scale-100"
+              }`} />
+              
+              {/* Active indicator */}
+              {isActiveRoute(item.href) && (
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-pulse" />
+              )}
             </Link>
           ))}
         </nav>
 
-        {/* Actions - Desktop */}
+        {/* Enhanced Actions - Desktop */}
         <div className="hidden md:flex items-center space-x-3">
           {isCommunityPage && (
-            <Button onClick={openCreatePostModal}>
+            <Button onClick={openCreatePostModal} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <Plus className="mr-2 h-4 w-4" />
               {currentLanguage === "th" ? "โพสต์" : "Post"}
             </Button>
@@ -88,10 +105,10 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
           <DarkModeToggle />
         </div>
 
-        {/* Actions - Mobile */}
-        <div className="flex items-center space-x-3 md:hidden">
+        {/* Enhanced Actions - Mobile */}
+        <div className="flex items-center space-x-2 md:hidden">
           {isCommunityPage && (
-            <Button size="sm" onClick={openCreatePostModal}>
+            <Button size="sm" onClick={openCreatePostModal} className="shadow-md">
               <Plus className="h-5 w-5" />
             </Button>
           )}

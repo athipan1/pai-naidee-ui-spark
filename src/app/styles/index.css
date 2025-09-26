@@ -717,4 +717,158 @@
   .difficulty-hard {
     @apply bg-red-500 text-white;
   }
+
+  /* Enhanced UX/UI Improvements */
+  
+  /* Improved Interactive Elements */
+  .interactive-hover {
+    @apply transition-all duration-300 hover:scale-105 active:scale-95;
+  }
+
+  .interactive-scale {
+    @apply transition-transform duration-200 hover:scale-105 active:scale-95;
+  }
+
+  .glass-effect-enhanced {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* Enhanced Navigation */
+  .nav-link {
+    @apply relative overflow-hidden;
+  }
+
+  .nav-link::before {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300;
+  }
+
+  .nav-link:hover::before {
+    @apply w-full;
+  }
+
+  /* Enhanced Cards */
+  .card-enhanced {
+    @apply bg-card/95 backdrop-blur-sm border border-border/30 shadow-lg hover:shadow-2xl;
+    @apply transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1;
+  }
+
+  /* Improved Loading States */
+  .loading-pulse {
+    @apply animate-pulse bg-gradient-to-r from-muted via-muted/50 to-muted;
+  }
+
+  .loading-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted)/0.8) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Enhanced Search Bar */
+  .search-bar-enhanced {
+    @apply relative overflow-hidden;
+  }
+
+  .search-bar-enhanced::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 opacity-0;
+    @apply transition-opacity duration-300;
+  }
+
+  .search-bar-enhanced:focus-within::before {
+    @apply opacity-100;
+  }
+
+  /* Better Button Variants */
+  .btn-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary text-white font-semibold;
+    @apply shadow-lg hover:shadow-xl transition-all duration-300;
+    @apply hover:scale-105 active:scale-95;
+  }
+
+  .btn-glass {
+    @apply backdrop-blur-md bg-white/10 border border-white/20 text-white;
+    @apply hover:bg-white/20 transition-all duration-300;
+  }
+
+  /* Enhanced Typography */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent;
+  }
+
+  .text-gradient-secondary {
+    @apply bg-gradient-to-r from-secondary to-secondary-dark bg-clip-text text-transparent;
+  }
+
+  /* Improved Spacing and Layout */
+  .section-padding {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .container-enhanced {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Better Error States */
+  .error-state {
+    @apply text-center py-12 px-6;
+  }
+
+  .error-icon {
+    @apply w-16 h-16 mx-auto mb-4 text-muted-foreground;
+  }
+
+  /* Enhanced Accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  /* Better Mobile Experience */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Enhanced Scrollbars */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
 }

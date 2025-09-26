@@ -127,7 +127,7 @@ const AttractionCard = ({
 
   return (
     <article 
-      className="attraction-card group bg-card rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-border/50 relative z-10"
+      className="attraction-card group bg-card/95 backdrop-blur-sm rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-border/30 hover:border-primary/30 relative z-10 transform hover:scale-[1.02] hover:-translate-y-1"
       role="button"
       tabIndex={0}
       aria-label={`${displayName}, ${province} - ${currentLanguage === "th" ? getCategoryNameTh(category) : category}`}
@@ -139,40 +139,40 @@ const AttractionCard = ({
         }
       }}
     >
-      {/* Image Container */}
+      {/* Image Container with Enhanced Design */}
       <div 
-        className="relative overflow-hidden cursor-pointer z-10"
+        className="relative overflow-hidden cursor-pointer z-10 aspect-[4/3]"
         onClick={() => onCardClick(id)}
       >
         <div
-          className={`w-full h-48 bg-muted loading-shimmer ${imageLoaded ? "hidden" : "block"}`}
+          className={`w-full h-full bg-gradient-to-br from-muted to-muted/60 loading-shimmer ${imageLoaded ? "hidden" : "block"} rounded-t-3xl`}
         />
         <OptimizedImage
           src={image}
           alt={displayName}
           loading="lazy"
-          className={`hero-image transition-all duration-700 group-hover:scale-110 ${imageLoaded ? "block" : "hidden"}`}
+          className={`hero-image transition-all duration-700 group-hover:scale-110 rounded-t-3xl ${imageLoaded ? "block" : "hidden"}`}
           onLoad={() => setImageLoaded(true)}
           width={400}
-          height={192}
+          height={300}
         />
 
         {/* Enhanced overlay gradient */}
-        <div className="hero-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="hero-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-3xl" />
 
-        {/* Category badge with glow effect */}
-        <div className="absolute top-3 left-3">
-          <span className="px-3 py-1 glass-effect rounded-full text-xs font-medium text-white border border-white/20 backdrop-blur-md">
+        {/* Category badge with enhanced styling */}
+        <div className="absolute top-4 left-4">
+          <span className="px-3 py-1.5 glass-effect rounded-full text-xs font-semibold text-white border border-white/30 backdrop-blur-md shadow-lg">
             {currentLanguage === "th" ? getCategoryNameTh(category) : category}
           </span>
         </div>
 
         {/* Enhanced action buttons */}
-        <div className="absolute top-3 right-3 flex space-x-2">
+        <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
           <button
-            className={`heart-btn transition-all duration-300 ${
+            className={`heart-btn transition-all duration-300 transform hover:scale-110 active:scale-95 ${
               isFavorite 
-                ? "bg-destructive text-destructive-foreground shadow-lg neon-glow" 
+                ? "bg-red-500 text-white shadow-lg shadow-red-500/30" 
                 : "glass-effect text-white hover:bg-white/20"
             }`}
             onClick={handleFavoriteToggle}
@@ -185,11 +185,11 @@ const AttractionCard = ({
             role="button"
             tabIndex={0}
           >
-            <Heart className={`w-4 h-4 transition-all duration-300 ${isFavorite ? "fill-current scale-110" : ""}`} />
+            <Heart className={`w-4 h-4 transition-all duration-300 ${isFavorite ? "fill-current animate-pulse" : ""}`} />
           </button>
           
           <button
-            className="w-9 h-9 rounded-full glass-effect text-white hover:bg-white/20 flex items-center justify-center transition-all duration-300 touch-manipulation interactive-scale"
+            className="w-10 h-10 rounded-full glass-effect text-white hover:bg-white/20 flex items-center justify-center transition-all duration-300 touch-manipulation interactive-scale transform hover:scale-110 active:scale-95"
             onClick={handleShare}
             aria-label={
               currentLanguage === "th" 
@@ -204,10 +204,10 @@ const AttractionCard = ({
         </div>
 
         {/* Enhanced quick action overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center z-20 pointer-events-none group-hover:pointer-events-auto">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center z-20 pointer-events-none group-hover:pointer-events-auto rounded-t-3xl">
           <Button
             size="sm"
-            className="btn-primary transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg z-30 relative pointer-events-auto"
+            className="btn-primary transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 shadow-xl z-30 relative pointer-events-auto font-semibold"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -220,25 +220,25 @@ const AttractionCard = ({
         </div>
       </div>
 
-      {/* Content - Not clickable to avoid confusion */}
-      <div className="p-4 space-y-3">
+      {/* Enhanced Content Section */}
+      <div className="p-5 space-y-4">
         {/* Enhanced title and rating */}
-        <div className="space-y-2">
-          <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-all duration-300 text-shadow">
+        <div className="space-y-3">
+          <h3 className="font-bold text-xl line-clamp-1 group-hover:text-primary transition-all duration-300 text-shadow">
             {displayName}
           </h3>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1 text-muted-foreground">
+            <div className="flex items-center space-x-2 text-muted-foreground">
               <MapPin className="w-4 h-4 transition-colors duration-300 group-hover:text-primary" />
-              <span className="text-sm">{province}</span>
+              <span className="text-sm font-medium">{province}</span>
             </div>
 
-            <div className="flex items-center space-x-1 bg-accent/30 px-2 py-1 rounded-full">
+            <div className="flex items-center space-x-1 bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 px-3 py-1.5 rounded-full border border-accent-yellow/20">
               <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow animate-glow" />
-              <span className="text-sm font-medium">{rating}</span>
-              <span className="text-xs text-muted-foreground">
-                ({reviewCount}
+              <span className="text-sm font-bold text-accent-yellow">{rating}</span>
+              <span className="text-xs text-muted-foreground ml-1">
+                ({reviewCount.toLocaleString()}
                 {currentLanguage === "th" ? " รีวิว" : " reviews"})
               </span>
             </div>
@@ -250,19 +250,19 @@ const AttractionCard = ({
           {description}
         </p>
 
-        {/* Enhanced tags */}
-        <div className="flex flex-wrap gap-1">
+        {/* Enhanced tags with better styling */}
+        <div className="flex flex-wrap gap-2">
           {tags.slice(0, 3).map((tag, index) => (
             <span
               key={index}
-              className="px-2 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary rounded-md text-xs font-medium border border-primary/20 hover:border-primary/40 transition-all duration-300"
+              className="px-3 py-1 bg-gradient-to-r from-primary/15 to-secondary/15 text-primary rounded-full text-xs font-semibold border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:scale-105"
             >
               {currentLanguage === "th" ? getTagNameTh(tag) : tag}
             </span>
           ))}
           {tags.length > 3 && (
             <button 
-              className="px-2 py-1 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+              className="px-3 py-1 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer bg-muted/50 rounded-full hover:bg-muted border border-transparent hover:border-primary/30"
               onClick={() => onCardClick(id)}
             >
               +{tags.length - 3}{" "}
@@ -271,24 +271,24 @@ const AttractionCard = ({
           )}
         </div>
 
-        {/* Bottom action bar */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+        {/* Enhanced bottom action bar */}
+        <div className="flex items-center justify-between pt-3 border-t border-border/30">
           <div className="flex space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-8"
+                  className="text-xs h-9 font-medium hover:scale-105 transition-transform duration-200"
                 >
-                  <Navigation className="w-3 h-3 mr-1" />
+                  <Navigation className="w-3 h-3 mr-2" />
                   {currentLanguage === "th" ? "ดู & นำทาง" : "View & Navigate"}
-                  <ChevronDown className="w-2 h-2 ml-1" />
+                  <ChevronDown className="w-3 h-3 ml-2" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-40">
+              <DropdownMenuContent align="start" className="w-44">
                 <DropdownMenuItem onClick={() => onCardClick(id)}>
-                  <Navigation className="w-3 h-3 mr-2" />
+                  <Navigation className="w-4 h-4 mr-2" />
                   {currentLanguage === "th" ? "รายละเอียด" : "Details"}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
@@ -297,7 +297,7 @@ const AttractionCard = ({
                     window.open(`/map/${id}`, '_blank');
                   }}
                 >
-                  <MapPin className="w-3 h-3 mr-2" />
+                  <MapPin className="w-4 h-4 mr-2" />
                   {currentLanguage === "th" ? "แผนที่" : "Map"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -307,7 +307,7 @@ const AttractionCard = ({
             variant="ghost"
             size="sm"
             onClick={handleFavoriteToggle}
-            className="text-xs h-8"
+            className="text-xs h-9 hover:scale-105 transition-transform duration-200"
             aria-label={
               currentLanguage === "th" 
                 ? (isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มในรายการโปรด")
@@ -315,7 +315,7 @@ const AttractionCard = ({
             }
             aria-pressed={isFavorite}
           >
-            <Bookmark className={`w-3 h-3 ${isFavorite ? "fill-current" : ""}`} />
+            <Bookmark className={`w-4 h-4 transition-all duration-300 ${isFavorite ? "fill-current text-primary" : ""}`} />
           </Button>
         </div>
       </div>
