@@ -17,7 +17,7 @@ import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
 import heroBeachImage from "@/shared/assets/hero-beach.jpg";
-import AttractionListTest from "@/components/common/AttractionListTest";
+import { isDevelopment } from "@/shared/utils/devUtils";
 
 interface IndexProps {
   currentLanguage: "th" | "en";
@@ -185,19 +185,18 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       />
 
       <main id="main-content" role="main" className="focus:outline-none" tabIndex={-1}>
-        {/* Supabase Setup Guide */}
-        <div className="container mx-auto px-4 pt-4">
-          <SupabaseSetupGuide 
-            currentLanguage={currentLanguage}
-            showOnlyIfNeeded={true}
-          />
-        </div>
+        {/* Supabase Setup Guide - Only show in development */}
+        {isDevelopment && (
+          <div className="container mx-auto px-4 pt-4">
+            <SupabaseSetupGuide 
+              currentLanguage={currentLanguage}
+              showOnlyIfNeeded={true}
+            />
+          </div>
+        )}
         
-        <div className="container mx-auto px-4 pt-4 border-b-2 border-dashed border-red-500 my-4">
-            <AttractionListTest />
-        </div>
-        {/* API Status Display */}
-        {(apiError || usingMockData) && (
+        {/* API Status Display - Only show if needed and in development/when there are issues */}
+        {(apiError || (usingMockData && isDevelopment)) && (
           <div className="container mx-auto px-4 pt-4">
             <APIErrorDisplay
               error={apiError}

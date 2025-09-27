@@ -6,6 +6,7 @@ import { AttractionListSkeleton } from './SkeletonLoader';
 import APIErrorDisplay from './APIErrorDisplay';
 import { AlertCircle, Wifi, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { isDevelopment, debugLog } from '@/shared/utils/devUtils';
 
 // Mock data for fallback when Supabase is not configured or fails
 const mockAttractions: SearchResult[] = [
@@ -75,23 +76,23 @@ const AttractionListTest: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔄 Attempting to fetch attractions from Supabase...');
+      debugLog('Attempting to fetch attractions from Supabase...');
       
       // Call the new service function
       const attractionsData = await getLegacyAttractions();
       
       if (attractionsData && attractionsData.length > 0) {
-        console.log('✅ Successfully fetched attractions from Supabase:', attractionsData.length);
+        debugLog('Successfully fetched attractions from Supabase:', attractionsData.length);
         setAttractions(attractionsData);
         setUsingMockData(false);
       } else {
-        console.log('⚠️ No attractions returned from Supabase, using mock data');
+        debugLog('No attractions returned from Supabase, using mock data');
         setAttractions(mockAttractions);
         setUsingMockData(true);
       }
       
     } catch (err) {
-      console.error('❌ Error fetching attractions from Supabase, falling back to mock data:', err);
+      debugLog('Error fetching attractions from Supabase, falling back to mock data:', err);
       
       // Fallback to mock data when Supabase fails
       setAttractions(mockAttractions);
@@ -127,17 +128,24 @@ const AttractionListTest: React.FC = () => {
   // Handler for clicking on a card
   const handleCardClick = (id: string) => {
     // In a real app, this would navigate to the attraction's detail page
-    console.log(`Card clicked: ${id}. Would navigate to /attraction/${id}`);
-    // For demo purposes, show an alert
-    const attraction = attractions.find(a => a.id === id);
-    if (attraction) {
-      alert(`จะไปที่: ${currentLanguage === 'th' && attraction.nameLocal ? attraction.nameLocal : attraction.name}`);
+    debugLog(`Card clicked: ${id}. Would navigate to /attraction/${id}`);
+    // For demo purposes, show an alert only in development
+    if (isDevelopment) {
+      const attraction = attractions.find(a => a.id === id);
+      if (attraction) {
+        alert(`จะไปที่: ${currentLanguage === 'th' && attraction.nameLocal ? attraction.nameLocal : attraction.name}`);
+      }
     }
   };
 
   const handleRetry = () => {
     fetchAttractions();
   };
+
+  // Only render this component in development mode
+  if (!isDevelopment) {
+    return null;
+  }
 
   if (loading) {
     return (

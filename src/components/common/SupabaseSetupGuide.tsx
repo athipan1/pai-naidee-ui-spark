@@ -3,6 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Database, Key, AlertTriangle, CheckCircle } from 'lucide-react';
 import { isSupabaseConfigured } from '@/services/supabase.service';
+import { isDevelopment } from '@/shared/utils/devUtils';
 
 interface SupabaseSetupGuideProps {
   currentLanguage?: 'th' | 'en';
@@ -17,6 +18,11 @@ const SupabaseSetupGuide: React.FC<SupabaseSetupGuideProps> = ({
 
   // If showOnlyIfNeeded is true and Supabase is already configured, don't show the guide
   if (showOnlyIfNeeded && isConfigured) {
+    // Only show success message in development
+    if (!isDevelopment) {
+      return null;
+    }
+    
     return (
       <Alert className="mb-4 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
         <CheckCircle className="h-4 w-4 text-green-600" />
@@ -27,6 +33,11 @@ const SupabaseSetupGuide: React.FC<SupabaseSetupGuideProps> = ({
         </AlertDescription>
       </Alert>
     );
+  }
+
+  // Don't show setup guide in production unless explicitly needed
+  if (!isDevelopment && showOnlyIfNeeded) {
+    return null;
   }
 
   const content = {
