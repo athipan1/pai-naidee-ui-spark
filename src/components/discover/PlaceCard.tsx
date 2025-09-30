@@ -25,10 +25,12 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
   name,
   nameLocal,
   province,
+  category,
   rating,
   reviewCount,
   image,
   description,
+  tags,
   isFavorite = false,
   currentLanguage,
   onFavoriteToggle,
@@ -71,32 +73,44 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
 
       {/* Content */}
       <div className="p-4 space-y-3">
+        {/* Category and Rating */}
+        <div className="flex items-center justify-between">
+          <span className="px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">
+            {category}
+          </span>
+          <div className="flex items-center space-x-1">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <span className="font-semibold text-gray-900">{rating}</span>
+            <span className="text-gray-500 text-sm">({reviewCount.toLocaleString()})</span>
+          </div>
+        </div>
+
         {/* Title and Location */}
         <div>
-          <h3 className="text-lg font-bold text-gray-900 line-clamp-1 mb-1">
+          <h3 className="text-lg font-bold text-gray-900 line-clamp-1">
             {displayName}
           </h3>
-          <div className="flex items-center text-gray-600 text-sm">
+          <div className="flex items-center text-gray-600 text-sm mt-1">
             <MapPin className="w-4 h-4 mr-1" />
             <span>{province}</span>
           </div>
         </div>
 
-        {/* Rating */}
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold text-gray-900">{rating}</span>
-          </div>
-          <span className="text-gray-500 text-sm">
-            ({reviewCount.toLocaleString()} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})
-          </span>
-        </div>
-
         {/* Description */}
-        <p className="text-gray-600 text-sm line-clamp-2">
+        <p className="text-gray-600 text-sm line-clamp-2 h-10">
           {description}
         </p>
+
+        {/* Tags */}
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

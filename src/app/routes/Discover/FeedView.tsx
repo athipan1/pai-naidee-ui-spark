@@ -15,6 +15,7 @@ import PlaceCard from "@/components/discover/PlaceCard";
 import CategoryCard from "@/components/discover/CategoryCard";
 import SectionHeader from "@/components/discover/SectionHeader";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
+import { isSupabaseConfigured } from "@/services/supabase.service";
 import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
@@ -221,11 +222,11 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
     const loadData = async () => {
       setLoading(true);
       
-      // Use API data if available, otherwise use mock data
-      let displayPlaces = mockPlaces;
+      const supabaseConfigured = isSupabaseConfigured();
       
-      if (apiData?.attractions && apiData.attractions.length > 0) {
-        displayPlaces = apiData.attractions.map(attraction => ({
+      // Use API data if available and configured, otherwise use mock data
+      if (supabaseConfigured && apiData?.attractions && apiData.attractions.length > 0) {
+        const displayPlaces = apiData.attractions.map(attraction => ({
           id: attraction.id,
           name: attraction.name,
           nameLocal: attraction.nameLocal || attraction.name,
@@ -238,15 +239,21 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           tags: attraction.tags || [],
           isTrending: Math.random() > 0.5 // Random trending for demo
         }));
+        setPlaces(displayPlaces);
+      } else {
+        // Fallback to mock data if Supabase is not configured or API fails
+        setPlaces(mockPlaces);
       }
       
-      setPlaces(displayPlaces);
       setCategories(mockCategories);
       setLoading(false);
     };
 
-    setTimeout(loadData, 500); // Simulate loading
-  }, [apiData, currentLanguage]);
+    // We depend on the loading state of the API call to trigger this effect
+    if (!apiLoading) {
+      setTimeout(loadData, 500); // Simulate loading
+    }
+  }, [apiData, apiLoading, currentLanguage]);
 
   const handleFavoriteToggle = (id: string) => {
     setFavorites(prev =>
