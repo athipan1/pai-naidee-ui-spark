@@ -80,7 +80,7 @@ export const getPlacesByCategory = async (
 
   try {
     const { data, error } = await supabase
-      .from('places')
+      .from('attractions_table')
       .select('*')
       .eq('category', category)
       .limit(limit);
@@ -137,7 +137,7 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
 
   try {
     const { data, error } = await supabase
-      .from('places')
+      .from('attractions_table')
       .select('*')
       .eq('id', id)
       .single(); // Use .single() to get one record
@@ -223,7 +223,7 @@ export const searchPlaces = async (
 
   try {
     // Initialize the query and request total count
-    let query = supabase.from('places').select('*', { count: 'exact' });
+    let query = supabase.from('attractions_table').select('*', { count: 'exact' });
 
     const searchConditions: string[] = [];
 
