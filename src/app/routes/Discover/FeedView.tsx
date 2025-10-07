@@ -8,31 +8,15 @@ import {
   UtensilsCrossed,
   Camera,
   TrendingUp,
-  Star
+  Star,
+  WifiOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlaceCard from "@/components/discover/PlaceCard";
 import CategoryCard from "@/components/discover/CategoryCard";
 import SectionHeader from "@/components/discover/SectionHeader";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
-import templeImage from "@/shared/assets/temple-culture.jpg";
-import mountainImage from "@/shared/assets/mountain-nature.jpg";
-import floatingMarketImage from "@/shared/assets/floating-market.jpg";
-import heroBeachImage from "@/shared/assets/hero-beach.jpg";
-
-interface TravelPlace {
-  id: string;
-  name: string;
-  nameLocal?: string;
-  province: string;
-  category: string;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  description: string;
-  tags: string[];
-  isTrending?: boolean;
-}
+import { SearchResult } from "@/shared/types/search";
 
 interface Category {
   id: string;
@@ -47,19 +31,21 @@ interface FeedViewProps {
   currentLanguage: "th" | "en";
 }
 
+// Add isTrending to the SearchResult type for local state management
+type PlaceWithTrending = SearchResult & { isTrending?: boolean };
+
 const FeedView = ({ currentLanguage }: FeedViewProps) => {
   const navigate = useNavigate();
-  const [places, setPlaces] = useState<TravelPlace[]>([]);
+  const [places, setPlaces] = useState<PlaceWithTrending[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Try to get data from API, fallback to mock data
+  // Try to get data from API
   const {
     data: apiData,
     error: apiError,
-    isLoading: apiLoading
+    isLoading: apiLoading,
   } = useAttractions({
     page: 1,
     limit: 20,
@@ -105,73 +91,6 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
 
   const t = content[currentLanguage];
 
-  // Mock data for fallback
-  const mockPlaces: TravelPlace[] = [
-    {
-      id: "1",
-      name: "Phi Phi Islands",
-      nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
-      category: "Beach",
-      rating: 4.8,
-      reviewCount: 2547,
-      image: heroBeachImage,
-      description:
-        currentLanguage === "th"
-          ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
-          : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
-      tags: ["Beach", "Snorkeling", "Island", "Photography"],
-      isTrending: true
-    },
-    {
-      id: "2",
-      name: "Wat Phra Kaew",
-      nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Culture",
-      rating: 4.9,
-      reviewCount: 5243,
-      image: templeImage,
-      description:
-        currentLanguage === "th"
-          ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
-          : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
-      tags: ["Temple", "Culture", "Buddhism", "History"],
-      isTrending: false
-    },
-    {
-      id: "3",
-      name: "Doi Inthanon",
-      nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
-      category: "Nature",
-      rating: 4.7,
-      reviewCount: 1876,
-      image: mountainImage,
-      description:
-        currentLanguage === "th"
-          ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
-          : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
-      tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
-      isTrending: true
-    },
-    {
-      id: "4",
-      name: "Floating Market",
-      nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Food",
-      rating: 4.5,
-      reviewCount: 3156,
-      image: floatingMarketImage,
-      description:
-        currentLanguage === "th"
-          ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
-          : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
-      tags: ["Food", "Culture", "Traditional", "Market"],
-      isTrending: false
-    },
-  ];
 
   const mockCategories: Category[] = [
     {
@@ -216,37 +135,20 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
     }
   ];
 
-  // Load data
+  // Load data from API
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      
-      // Use API data if available, otherwise use mock data
-      let displayPlaces = mockPlaces;
-      
-      if (apiData?.attractions && apiData.attractions.length > 0) {
-        displayPlaces = apiData.attractions.map(attraction => ({
-          id: attraction.id,
-          name: attraction.name,
-          nameLocal: attraction.nameLocal || attraction.name,
-          province: attraction.province,
-          category: attraction.category,
-          rating: attraction.rating,
-          reviewCount: attraction.reviewCount,
-          image: attraction.image || heroBeachImage,
-          description: attraction.description,
-          tags: attraction.tags || [],
-          isTrending: Math.random() > 0.5 // Random trending for demo
-        }));
-      }
-      
+    if (apiData?.attractions) {
+      const displayPlaces = apiData.attractions.map(attraction => ({
+        ...attraction,
+        isTrending: Math.random() > 0.5 // Random trending for demo
+      }));
       setPlaces(displayPlaces);
+    }
+    // Only set categories once, they are static for now
+    if (categories.length === 0) {
       setCategories(mockCategories);
-      setLoading(false);
-    };
-
-    setTimeout(loadData, 500); // Simulate loading
-  }, [apiData, currentLanguage]);
+    }
+  }, [apiData, categories.length]);
 
   const handleFavoriteToggle = (id: string) => {
     setFavorites(prev =>
@@ -281,20 +183,45 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
   const trendingPlaces = places.filter(place => place.isTrending).slice(0, 6);
   const recommendedPlaces = places.slice(0, 8);
 
-  if (loading) {
+  if (apiLoading) {
     return (
       <div className="h-full bg-gray-50 p-6">
-        <div className="space-y-8">
+        <div className="space-y-8 animate-pulse">
           {/* Loading skeleton */}
-          <div className="animate-pulse">
+          <div>
             <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {[...Array(8)].map((_, i) => (
+              {[...Array(4)].map((_, i) => (
                 <div key={i} className="bg-gray-200 h-24 rounded-xl"></div>
               ))}
             </div>
           </div>
+          <div>
+            <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex-none w-80 h-64 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
+          </div>
         </div>
+      </div>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <div className="h-full bg-gray-50 p-6 flex flex-col items-center justify-center text-center">
+        <WifiOff className="w-20 h-20 text-red-400 mb-4" />
+        <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+          {currentLanguage === "th" ? "เกิดข้อผิดพลาด" : "An Error Occurred"}
+        </h2>
+        <p className="text-gray-500 mb-4">
+          {currentLanguage === "th"
+            ? "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ"
+            : "Could not connect to the server. Please check your internet connection."}
+        </p>
+        <p className="text-xs text-gray-400">({apiError.message})</p>
       </div>
     );
   }
