@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ImageOff } from "lucide-react";
 
 interface OptimizedImageProps {
   src: string;
   alt: string;
   className?: string;
-  fallbackSrc?: string;
   width?: string | number;
   height?: string | number;
   loading?: "lazy" | "eager";
@@ -14,43 +13,26 @@ interface OptimizedImageProps {
   onError?: () => void;
 }
 
-// Helper function to determine if URL is a local asset or external
+// Helper function to determine if URL is a local asset for Vite dev server
 const isLocalAsset = (src: string): boolean => {
   return src.startsWith('/src/') || src.startsWith('./') || src.startsWith('../');
 };
 
 // Helper function to convert local asset paths to proper URLs in development
 const normalizeImageUrl = (src: string): string => {
-  if (isLocalAsset(src)) {
-    // In development with Vite, convert local paths to proper import paths
-    if (src.startsWith('/src/')) {
-      // Remove '/src/' prefix for Vite to handle properly
-      return src.replace('/src/', '/');
-    }
+  if (import.meta.env.DEV && isLocalAsset(src)) {
+    // In development with Vite, local paths need to be relative to the root.
+    // e.g. /src/shared/assets/image.jpg -> /shared/assets/image.jpg
+    return src.replace('/src/', '/');
   }
   return src;
 };
 
-// Default fallback images for different scenarios
-const getDefaultFallback = (alt: string): string => {
-  // Use a default image based on the alt text context
-  if (alt.toLowerCase().includes('beach') || alt.toLowerCase().includes('sea')) {
-    return '/placeholder-beach.jpg';
-  } else if (alt.toLowerCase().includes('temple') || alt.toLowerCase().includes('culture')) {
-    return '/placeholder-temple.jpg';
-  } else if (alt.toLowerCase().includes('mountain') || alt.toLowerCase().includes('nature')) {
-    return '/placeholder-mountain.jpg';
-  } else if (alt.toLowerCase().includes('food') || alt.toLowerCase().includes('market')) {
-    return '/placeholder-food.jpg';
-  }
-  return '/placeholder-attraction.jpg';
-};
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
   className = "",
-  fallbackSrc,
   width,
   height,
   loading = "lazy",
@@ -59,7 +41,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onError,
 }) => {
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
-  const [currentSrc, setCurrentSrc] = useState(normalizeImageUrl(src));
+
+  // Normalize the URL only once
+  const finalSrc = useMemo(() => normalizeImageUrl(src), [src]);
 
   const handleImageLoad = () => {
     setImageState('loaded');
@@ -67,28 +51,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   const handleImageError = () => {
-    console.warn(`Failed to load image: ${currentSrc}`);
-    
-    if (fallbackSrc && currentSrc !== fallbackSrc) {
-      console.log(`Trying fallback image: ${fallbackSrc}`);
-      setCurrentSrc(fallbackSrc);
-      return;
-    }
-    
-    // If no custom fallback or fallback also failed, try default
-    const defaultFallback = getDefaultFallback(alt);
-    if (currentSrc !== defaultFallback) {
-      console.log(`Trying default fallback: ${defaultFallback}`);
-      setCurrentSrc(defaultFallback);
-      return;
-    }
-    
-    // All fallbacks failed
+    console.warn(`Failed to load image: ${finalSrc}`);
     setImageState('error');
     onError?.();
   };
 
-  if (imageState === 'error') {
+  // If the src is invalid or the image fails to load, show the error state.
+  if (imageState === 'error' || !finalSrc) {
     return (
       <div 
         className={`${className} bg-muted flex items-center justify-center text-muted-foreground`}
@@ -104,7 +73,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   return (
     <>
-      {/* Loading placeholder */}
+      {/* Loading placeholder skeleton */}
       {imageState === 'loading' && (
         <div 
           className={`${className} bg-muted animate-pulse`}
@@ -112,9 +81,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         />
       )}
       
-      {/* Actual image */}
+      {/* The actual image, hidden until loaded */}
       <img
-        src={currentSrc}
+        src={finalSrc}
         alt={alt}
         loading={loading}
         decoding={decoding}
