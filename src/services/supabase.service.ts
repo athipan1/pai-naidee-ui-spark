@@ -24,8 +24,8 @@ function getEnvVar(key: string, fallback: string = ''): string {
 
 // Check if Supabase is properly configured
 export function isSupabaseConfigured(): boolean {
-  const url = getEnvVar('VITE_SUPABASE_URL');
-  const key = getEnvVar('VITE_SUPABASE_ANON_KEY');
+  const url = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
+  const key = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
   
   return !!(
     url && 
@@ -38,8 +38,8 @@ export function isSupabaseConfigured(): boolean {
 }
 
 // Supabase configuration with proper environment variable handling
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', 'https://your-project.supabase.co');
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY', 'your-anon-key');
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL') || 'https://your-project.supabase.co';
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY') || 'your-anon-key';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
