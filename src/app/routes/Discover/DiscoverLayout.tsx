@@ -1,3 +1,4 @@
+import EnvDebugDisplay from "@/components/dev/EnvDebugDisplay"; // Temporary debug component
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -122,6 +123,7 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
+      <EnvDebugDisplay /> {/* Temporary debug component */}
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="container mx-auto px-4 py-3">
