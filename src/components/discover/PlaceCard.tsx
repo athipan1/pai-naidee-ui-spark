@@ -1,5 +1,5 @@
-import React from 'react';
-import { Heart, Star, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Heart, Star, MapPin, ImageOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PlaceCardProps {
@@ -10,7 +10,7 @@ interface PlaceCardProps {
   category: string;
   rating: number;
   reviewCount: number;
-  image: string;
+  image: string | null;
   description: string;
   tags?: string[];
   isFavorite?: boolean;
@@ -36,6 +36,17 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
   className = ''
 }) => {
   const displayName = currentLanguage === 'th' && nameLocal ? nameLocal : name;
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [image]);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  const showPlaceholder = !image || imageError;
 
   return (
     <div 
@@ -43,12 +54,20 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
       onClick={() => onCardClick?.(id)}
     >
       {/* Image Container */}
-      <div className="relative h-48 overflow-hidden rounded-t-xl">
-        <img
-          src={image}
-          alt={displayName}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-        />
+      <div className="relative h-48 overflow-hidden rounded-t-xl bg-gray-200">
+        {showPlaceholder ? (
+          <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
+            <ImageOff className="w-12 h-12 mb-2" />
+            <span className="text-sm font-medium">{currentLanguage === 'th' ? 'ไม่มีรูปภาพ' : 'No Image'}</span>
+          </div>
+        ) : (
+          <img
+            src={image}
+            alt={displayName}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            onError={handleImageError}
+          />
+        )}
         
         {/* Favorite Button */}
         <Button
