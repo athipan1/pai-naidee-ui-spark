@@ -8,7 +8,6 @@ Core Search / Strategies
 - [ ] Refactor existing fuzzy search into fuzzyStrategy.ts
 - [ ] Add mock embeddings JSON (data/embeddings/postsEmbeddings.sample.json)
 - [ ] Embeddings loader + validation (embeddingsLoader.ts)
-- [ ] HuggingFace inference client (huggingfaceClient.ts) + fallback
 - [ ] Query embedding cache (IndexedDB + in-memory)
 - [ ] Vector strategy (vectorStrategy.ts) with cosine similarity
 - [ ] Hybrid composer (hybridSearch.ts)

@@ -31,7 +31,7 @@ export interface SemanticSearchResult {
 }
 
 export interface EmbeddingClientConfig {
-  provider: 'mock' | 'openai' | 'cohere' | 'huggingface';
+  provider: 'mock' | 'openai' | 'cohere';
   apiKey?: string;
   model?: string;
   dimensions?: number;
