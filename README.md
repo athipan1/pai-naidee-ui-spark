@@ -316,7 +316,6 @@ Backend ทั้งหมดของโปรเจกต์นี้ถูก
 
 **Backend URL:** `https://Athipan01-PaiNaiDee_Backend.hf.space`
 
-[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/Athipan01/PaiNaiDee_Backend)
 
 ### API Endpoints
 

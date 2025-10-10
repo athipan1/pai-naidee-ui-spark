@@ -141,8 +141,6 @@ export function createEmbeddingClient(config: EmbeddingClientConfig = { provider
     //   return new OpenAIEmbeddingClient(config);
     // case 'cohere':
     //   return new CohereEmbeddingClient(config);
-    // case 'huggingface':
-    //   return new HuggingFaceEmbeddingClient(config);
     
     default:
       console.warn(`[embeddings] Unknown provider: ${config.provider}, falling back to mock`);
