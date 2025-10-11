@@ -220,10 +220,12 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      // Since useAttractions is a hook, we can't await it directly.
-      // The logic inside the if condition handles the data once it arrives.
-      if (!apiLoading && !apiError && apiData && apiData.length > 0) {
-        const displayPlaces = apiData.map(attraction => ({
+
+      // Use API data if available, otherwise use mock data
+      let displayPlaces = mockPlaces;
+
+      if (apiData?.attractions && apiData.attractions.length > 0) {
+        displayPlaces = apiData.attractions.map(attraction => ({
           id: attraction.id,
           name: attraction.name,
           nameLocal: attraction.nameLocal || attraction.name,
@@ -231,23 +233,20 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           category: attraction.category,
           rating: attraction.rating,
           reviewCount: attraction.reviewCount,
-          image: attraction.image || heroBeachImage, // Fallback image
+          image: attraction.image || heroBeachImage,
           description: attraction.description,
           tags: attraction.tags || [],
-          isTrending: Math.random() > 0.5, // Random trending for demo
+          isTrending: Math.random() > 0.5 // Random trending for demo
         }));
-        setPlaces(displayPlaces);
-      } else if (!apiLoading) {
-        // If not loading and still no data, or there was an error
-        if(apiError) console.error("API Error in FeedView:", apiError);
-        setPlaces(mockPlaces); // Use mock places as a fallback
       }
-      setCategories(mockCategories); // Still using mock categories for now
-      if(!apiLoading) setLoading(false);
+
+      setPlaces(displayPlaces);
+      setCategories(mockCategories);
+      setLoading(false);
     };
 
-    loadData();
-  }, [apiData, apiLoading, apiError, currentLanguage]);
+    setTimeout(loadData, 500); // Simulate loading
+  }, [apiData, currentLanguage]);
 
   const handleFavoriteToggle = (id: string) => {
     setFavorites(prev =>

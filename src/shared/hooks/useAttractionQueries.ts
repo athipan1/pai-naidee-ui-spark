@@ -39,14 +39,19 @@ export const useAttractionDetail = (id: string | undefined, options?: {
   });
 };
 
-// Hook to get list of attractions
-export const useAttractions = (options?: {
+// Hook to get list of attractions with filtering
+export const useAttractions = (filters?: {
+  page?: number;
+  limit?: number;
+  category?: string;
+  search?: string;
+}, options?: {
   enabled?: boolean;
   staleTime?: number;
 }) => {
   return useQuery({
-    queryKey: attractionKeys.list(),
-    queryFn: () => attractionAPI.getAttractions(),
+    queryKey: attractionKeys.list(filters || {}),
+    queryFn: () => attractionAPI.getAttractions(filters),
     enabled: options?.enabled !== false,
     staleTime: options?.staleTime || 3 * 60 * 1000, // 3 minutes
     gcTime: 8 * 60 * 1000, // 8 minutes
