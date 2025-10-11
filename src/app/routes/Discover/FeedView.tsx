@@ -220,10 +220,10 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      
+
       // Use API data if available, otherwise use mock data
       let displayPlaces = mockPlaces;
-      
+
       if (apiData?.attractions && apiData.attractions.length > 0) {
         displayPlaces = apiData.attractions.map(attraction => ({
           id: attraction.id,
@@ -239,7 +239,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           isTrending: Math.random() > 0.5 // Random trending for demo
         }));
       }
-      
+
       setPlaces(displayPlaces);
       setCategories(mockCategories);
       setLoading(false);
