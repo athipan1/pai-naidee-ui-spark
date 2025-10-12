@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Menu, X, MapPin, Plus } from "lucide-react";
+import { Menu, X, MapPin, Plus, LogIn, UserPlus, LogOut, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
 import EnhancedLanguageToggle from "./EnhancedLanguageToggle";
 import { useUIContext } from "@/shared/contexts/UIContext";
+import { useAuth } from "@/shared/contexts/AuthContext";
+import { signOut } from "@/services/auth.service";
+import { useToast } from "@/components/ui/toast";
 
 interface HeaderProps {
   currentLanguage: "th" | "en";
@@ -14,7 +17,27 @@ interface HeaderProps {
 const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { openCreatePostModal } = useUIContext();
+  const { user, isInitialized } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Logout Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const menuItems = [
     { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
@@ -103,6 +126,33 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             size="sm"
           />
           <DarkModeToggle />
+          {isInitialized && user ? (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/me')}>
+                <UserIcon className="mr-2 h-4 w-4" />
+                {user.email}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                {currentLanguage === "th" ? "ออกจากระบบ" : "Logout"}
+              </Button>
+            </>
+          ) : isInitialized && (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  {currentLanguage === "th" ? "เข้าสู่ระบบ" : "Login"}
+                </Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to="/signup">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  {currentLanguage === "th" ? "สมัครสมาชิก" : "Sign Up"}
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Enhanced Actions - Mobile */}
@@ -174,8 +224,54 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
               />
             </div>
 
+            {/* Auth Links for Mobile */}
+            <div className="pt-4 border-t border-border/30 space-y-2">
+              {isInitialized && user ? (
+                <>
+                  <Link
+                    to="/me"
+                    className="flex items-center py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <UserIcon className="mr-2 h-5 w-5" />
+                    <span>{user.email}</span>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="mr-2 h-5 w-5" />
+                    {currentLanguage === "th" ? "ออกจากระบบ" : "Logout"}
+                  </Button>
+                </>
+              ) : isInitialized && (
+                <>
+                  <Link
+                    to="/login"
+                    className="flex items-center py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LogIn className="mr-2 h-5 w-5" />
+                    {currentLanguage === "th" ? "เข้าสู่ระบบ" : "Login"}
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="flex items-center py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <UserPlus className="mr-2 h-5 w-5" />
+                    {currentLanguage === "th" ? "สมัครสมาชิก" : "Sign Up"}
+                  </Link>
+                </>
+              )}
+            </div>
+
             {/* Dark Mode Toggle for Mobile */}
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-4">
               <DarkModeToggle size="sm" />
             </div>
           </nav>
