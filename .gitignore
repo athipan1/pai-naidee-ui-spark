@@ -30,3 +30,6 @@ semanticIndex.json
 audit-report.json
 docker-build-temp/
 Dockerfile.test
+
+# Test coverage
+coverage/
