@@ -1,35 +1,129 @@
-// Updated contextualSearch.service.ts
+import { supabase } from "@/services/supabase.service";
+import { PostgrestError } from "@supabase/supabase-js";
+import { Location, PostSearchResult } from "@/shared/types/posts";
 
-import { supabase } from '../supabaseClient';
+interface SearchOptions {
+  language: "th" | "en";
+  limit?: number;
+}
 
-// Function to search posts using Supabase
-export const searchPosts = async (query) => {
-    const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .contains('tags', [query]);
+interface SearchResponse {
+  results: PostSearchResult[];
+  expandedTerms: string[];
+  processingTime: number;
+}
 
-    if (error) throw new Error(error.message);
-    return data;
+// Helper to convert a database place record to the Location type
+const convertToLocation = (place: any): Location => ({
+  id: place.id,
+  name: place.name,
+  nameLocal: place.name_local,
+  province: place.province,
+  category: place.category,
+  description: place.description,
+  descriptionLocal: place.description, // Fallback using English description
+  tags: place.tags || [],
+  amenities: place.amenities || [],
+  imageUrl: place.image_url,
+});
+
+// Helper to convert DB post to PostSearchResult type
+const convertToPostSearchResult = (post: any): PostSearchResult => {
+  const location = post.places ? convertToLocation(post.places) : undefined;
+
+  return {
+    id: post.id,
+    type: post.type,
+    title: post.title,
+    content: post.content,
+    imageUrl: post.image_url,
+    createdAt: post.created_at,
+    likeCount: post.like_count,
+    commentCount: post.comment_count,
+    user: {
+      id: post.profiles.id,
+      username: post.profiles.username,
+      avatarUrl: post.profiles.avatar_url,
+    },
+    location,
+  };
 };
 
-// Function to search locations using Supabase
-export const searchLocations = async (query) => {
-    const { data, error } = await supabase
-        .from('locations')
-        .select('*')
-        .ilike('name', `%${query}%`);
+export const searchPosts = async (
+  query: string,
+  options: SearchOptions
+): Promise<SearchResponse> => {
+  const startTime = Date.now();
+  const { language, limit = 10 } = options;
+  const queryLower = query.toLowerCase();
 
-    if (error) throw new Error(error.message);
-    return data;
+  // Expanded search terms (mock for now)
+  const expandedTerms = [queryLower];
+
+  let queryBuilder = supabase
+    .from("posts")
+    .select(
+      `
+      id, type, title, content, image_url, created_at, like_count, comment_count,
+      profiles ( id, username, avatar_url ),
+      places ( id, name, name_local, province, category, description, tags, amenities, image_url )
+    `
+    )
+    .or(`title.ilike.%${query}%,content.ilike.%${query}%,places.name.ilike.%${query}%,places.tags.cs.["${queryLower}"]`)
+    .limit(limit);
+
+  const { data, error } = await queryBuilder;
+
+  if (error) {
+    console.error("Supabase searchPosts error:", error);
+    throw new Error((error as PostgrestError).message);
+  }
+
+  const results = data.map(convertToPostSearchResult);
+  const endTime = Date.now();
+
+  return {
+    results,
+    expandedTerms,
+    processingTime: endTime - startTime,
+  };
 };
 
-// Function to convert search results to post format
-export const convertToPostSearchResult = (post) => {
-    return {
-        id: post.id,
-        title: post.title,
-        description: post.description, // Ensure this matches the Supabase schema
-        // Include other fields as necessary
-    };
+export const searchLocations = async (
+  query: string,
+  limit: number = 10
+): Promise<Location[]> => {
+  const { data, error } = await supabase
+    .from("places")
+    .select('id, name, name_local, province, category, description, tags')
+    .or(`name.ilike.%${query}%,description.ilike.%${query}%,tags.cs.["${query.toLowerCase()}"]`)
+    .limit(limit);
+
+  if (error) {
+    console.error("Supabase searchLocations error:", error);
+    throw new Error((error as PostgrestError).message);
+  }
+
+  return data.map(place => ({
+    id: place.id,
+    name: place.name,
+    nameLocal: place.name_local,
+    province: place.province,
+    category: place.category,
+    description: place.description,
+    descriptionLocal: place.name_local, // Using name_local as a fallback
+    tags: place.tags || [],
+    amenities: [], // Not fetched in this query
+    imageUrl: '', // Not fetched in this query
+  }));
+};
+
+export const getTrendingSearches = async (language: "th" | "en"): Promise<string[]> => {
+  // This is a mock implementation. In a real scenario, this would fetch data
+  // from a Supabase table or RPC function that tracks trending search terms.
+  console.log(`Fetching trending searches for language: ${language}`);
+
+  // Returning an empty array to ensure the build passes.
+  // The component that uses this should have a fallback or handle the empty state.
+  return Promise.resolve([]);
 };
