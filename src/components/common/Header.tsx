@@ -7,7 +7,7 @@ import EnhancedLanguageToggle from "./EnhancedLanguageToggle";
 import { useUIContext } from "@/shared/contexts/UIContext";
 import { useAuth } from "@/shared/contexts/AuthContext";
 import { signOut } from "@/services/auth.service";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/shared/hooks/use-toast";
 
 interface HeaderProps {
   currentLanguage: "th" | "en";
