@@ -8,22 +8,23 @@ interface AIAssistantPageProps {
   onBack: () => void;
 }
 
-const AIAssistantPage: React.FC<AIAssistantPageProps> = ({ currentLanguage: _currentLanguage, onBack }) => {
+const AIAssistantPage: React.FC<AIAssistantPageProps> = ({ currentLanguage, onBack }) => {
   return (
     <div className="min-h-screen relative">
       {/* Back Button */}
-      <BackButton 
+      <BackButton
         onClick={onBack}
         variant="floating"
         className="z-50"
       />
-      
-      <AIAssistant3D />
+
+      <AIAssistant3D language={currentLanguage} />
       {/* Add floating assistant that follows user */}
-      <FloatingAIAssistant 
-        position="bottom-right" 
-        size="small" 
-        alwaysVisible={true} 
+      <FloatingAIAssistant
+        position="bottom-right"
+        size="small"
+        alwaysVisible={true}
+        language={currentLanguage}
       />
     </div>
   );

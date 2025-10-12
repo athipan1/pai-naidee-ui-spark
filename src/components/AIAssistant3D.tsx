@@ -8,7 +8,6 @@ import useAIAnimation from '@/shared/hooks/useAIAnimation';
 // New component imports
 import ChatInterface from './AIAssistant/ChatInterface';
 import InputArea from './AIAssistant/InputArea';
-import LanguageSwitcher from './AIAssistant/LanguageSwitcher';
 import LoadingBar from './UI/LoadingBar';
 // import NavigationModel from './CSS3DAvatar';
 // import EnhancedAIAssistant from './3D/EnhancedAIAssistant';
@@ -31,15 +30,18 @@ const ChatMessage: React.FC<{ message: any; isLast: boolean }> = ({ message, isL
   );
 };
 
-const AIAssistant3D: React.FC = () => {
+interface AIAssistant3DProps {
+  language: 'th' | 'en' | 'auto';
+}
+
+const AIAssistant3D: React.FC<AIAssistant3DProps> = ({ language }) => {
   const [inputText, setInputText] = useState('');
-  const [language, setLanguage] = useState<'th' | 'en' | 'auto'>('auto');
   const [useEnhanced3D, setUseEnhanced3D] = useState(false);
   const [assistantConfig, setAssistantConfig] = useState(defaultConfig);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  
-  const { 
-    messages, 
+
+  const {
+    messages,
     status, 
     sessionId,
     isLoading, 
@@ -205,12 +207,6 @@ const AIAssistant3D: React.FC = () => {
               <div className="hidden sm:block w-20">
                 <LoadingBar isVisible={isLoading} />
               </div>
-              
-              {/* Language switcher */}
-              <LanguageSwitcher 
-                language={language} 
-                onLanguageChange={setLanguage} 
-              />
               
               {/* Session info */}
               {sessionId && (
