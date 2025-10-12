@@ -10,20 +10,21 @@ interface FloatingAIAssistantProps {
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
   size?: 'small' | 'medium' | 'large';
   alwaysVisible?: boolean;
+  language: 'th' | 'en' | 'auto';
 }
 
 const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
   position = 'bottom-right',
   size = 'small',
-  alwaysVisible = true
+  alwaysVisible = true,
+  language
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputText, setInputText] = useState('');
   const [isMuted, setIsMuted] = useState(false);
-  const [language] = useState<'th' | 'en' | 'auto'>('auto');
 
-  const { 
-    messages, 
+  const {
+    messages,
     status, 
     isLoading, 
     sendMessage,
