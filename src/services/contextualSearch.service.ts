@@ -117,3 +117,13 @@ export const searchLocations = async (
     imageUrl: '', // Not fetched in this query
   }));
 };
+
+export const getTrendingSearches = async (language: "th" | "en"): Promise<string[]> => {
+  // This is a mock implementation. In a real scenario, this would fetch data
+  // from a Supabase table or RPC function that tracks trending search terms.
+  console.log(`Fetching trending searches for language: ${language}`);
+
+  // Returning an empty array to ensure the build passes.
+  // The component that uses this should have a fallback or handle the empty state.
+  return Promise.resolve([]);
+};
