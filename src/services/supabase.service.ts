@@ -52,7 +52,6 @@ interface PlaceRecord {
   category: string;
   rating: number;
   review_count: number;
-  image_url: string;
   description: string;
   tags?: string[];
   lat?: number;
@@ -60,6 +59,11 @@ interface PlaceRecord {
   amenities?: string[];
   created_at?: string;
   updated_at?: string;
+  // Nested images
+  images: {
+    image_url: string;
+    caption: string | null;
+  }[];
 }
 
 /**
@@ -81,7 +85,13 @@ export const getPlacesByCategory = async (
   try {
     const { data, error } = await supabase
       .from('places')
-      .select('*')
+      .select(`
+        *,
+        images (
+          image_url,
+          caption
+        )
+      `)
       .eq('category', category)
       .limit(limit);
 
@@ -96,25 +106,28 @@ export const getPlacesByCategory = async (
     }
 
     // Transform Supabase data to SearchResult format with better null handling
-    return data.map((place: PlaceRecord): SearchResult => ({
-      id: place.id || 'unknown',
-      name: place.name || 'Unnamed Place',
-      nameLocal: place.name_local || place.name || 'Unnamed Place',
-      province: place.province || 'Unknown Province',
-      category: place.category || 'Unknown',
-      tags: Array.isArray(place.tags) ? place.tags : [],
-      rating: typeof place.rating === 'number' ? place.rating : 0,
-      reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
-      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
-      description: place.description || 'No description available.',
-      confidence: 1.0, // Default confidence for direct category match
-      matchedTerms: [category],
-      amenities: Array.isArray(place.amenities) ? place.amenities : [],
-      location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? {
-        lat: place.lat,
-        lng: place.lng
-      } : undefined,
-    }));
+    return data.map((place: PlaceRecord): SearchResult => {
+      const mainImage = place.images?.[0]?.image_url || `https://via.placeholder.com/400x250?text=${place.name.replace(/\s/g, '+')}`;
+      return {
+        id: place.id || 'unknown',
+        name: place.name || 'Unnamed Place',
+        nameLocal: place.name_local || place.name || 'Unnamed Place',
+        province: place.province || 'Unknown Province',
+        category: place.category || 'Unknown',
+        tags: Array.isArray(place.tags) ? place.tags : [],
+        rating: typeof place.rating === 'number' ? place.rating : 0,
+        reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
+        image: mainImage,
+        description: place.description || 'No description available.',
+        confidence: 1.0, // Default confidence for direct category match
+        matchedTerms: [category],
+        amenities: Array.isArray(place.amenities) ? place.amenities : [],
+        location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? {
+          lat: place.lat,
+          lng: place.lng
+        } : undefined,
+      };
+    });
 
   } catch (error) {
     console.error('Failed to fetch places by category:', error);
@@ -138,7 +151,13 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
   try {
     const { data, error } = await supabase
       .from('places')
-      .select('*')
+      .select(`
+        *,
+        images (
+          image_url,
+          caption
+        )
+      `)
       .eq('id', id)
       .single(); // Use .single() to get one record
 
@@ -152,6 +171,7 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
     }
 
     const place: PlaceRecord = data;
+    const mainImage = place.images?.[0]?.image_url || `https://via.placeholder.com/400x250?text=${place.name.replace(/\s/g, '+')}`;
 
     // Transform Supabase data to AttractionDetail format with better null handling
     return {
@@ -160,8 +180,8 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
       nameLocal: place.name_local || place.name || 'Unnamed Place',
       province: place.province || 'Unknown Province',
       category: place.category || 'Unknown',
-      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
-      images: [place.image_url || 'https://via.placeholder.com/400x250?text=No+Image'],
+      image: mainImage,
+      images: place.images?.map(img => img.image_url) ?? [mainImage],
       description: place.description || 'No description available.',
       tags: Array.isArray(place.tags) ? place.tags : [],
       amenities: Array.isArray(place.amenities) ? place.amenities : [],
@@ -223,7 +243,13 @@ export const searchPlaces = async (
 
   try {
     // Initialize the query and request total count
-    let query = supabase.from('places').select('*', { count: 'exact' });
+    let query = supabase.from('places').select(`
+      *,
+      images (
+        image_url,
+        caption
+      )
+    `, { count: 'exact' });
 
     const searchConditions: string[] = [];
 
@@ -268,25 +294,29 @@ export const searchPlaces = async (
     }
 
     // Transform data to SearchResult format with better null handling
-    const results = data.map((place: PlaceRecord): SearchResult => ({
-      id: place.id || 'unknown',
-      name: place.name || 'Unnamed Place',
-      nameLocal: place.name_local || place.name || 'Unnamed Place',
-      province: place.province || 'Unknown Province',
-      category: place.category || 'Unknown',
-      tags: Array.isArray(place.tags) ? place.tags : [],
-      rating: typeof place.rating === 'number' ? place.rating : 0,
-      reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
-      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
-      description: place.description || 'No description available.',
-      confidence: 0.8,
-      matchedTerms: searchTerm ? [searchTerm] : [],
-      amenities: Array.isArray(place.amenities) ? place.amenities : [],
-      location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? { 
-        lat: place.lat, 
-        lng: place.lng 
-      } : undefined,
-    }));
+    const results = data.map((place: PlaceRecord): SearchResult => {
+      const mainImage = place.images?.[0]?.image_url || `https://via.placeholder.com/400x250?text=${place.name.replace(/\s/g, '+')}`;
+
+      return {
+        id: place.id || 'unknown',
+        name: place.name || 'Unnamed Place',
+        nameLocal: place.name_local || place.name || 'Unnamed Place',
+        province: place.province || 'Unknown Province',
+        category: place.category || 'Unknown',
+        tags: Array.isArray(place.tags) ? place.tags : [],
+        rating: typeof place.rating === 'number' ? place.rating : 0,
+        reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
+        image: mainImage,
+        description: place.description || 'No description available.',
+        confidence: 0.8,
+        matchedTerms: searchTerm ? [searchTerm] : [],
+        amenities: Array.isArray(place.amenities) ? place.amenities : [],
+        location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? {
+          lat: place.lat,
+          lng: place.lng
+        } : undefined,
+      };
+    });
 
     return { results, totalCount: count || 0 };
 
