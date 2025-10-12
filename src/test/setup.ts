@@ -1,5 +1,10 @@
 // Test setup for Vitest
-import { vi } from 'vitest';
+import { vi, expect } from 'vitest';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers);
+
 
 // Mock environment variables for testing
 process.env.NODE_ENV = 'test';
@@ -35,3 +40,36 @@ Object.defineProperty(window, 'localStorage', {
   },
   writable: true,
 });
+
+// Mock ResizeObserver
+const ResizeObserverMock = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+
+// Polyfill for PointerEvent
+if (!global.PointerEvent) {
+  class PointerEvent extends MouseEvent {
+    constructor(type, params) {
+      super(type, params);
+    }
+  }
+  global.PointerEvent = PointerEvent as any;
+}
+
+// JSDOM doesn't implement hasPointerCapture
+if (global.Element && !global.Element.prototype.hasPointerCapture) {
+  global.Element.prototype.hasPointerCapture = function(pointerId) {
+    // A basic mock. You might need to expand this if your components
+    // rely on more complex pointer capture behavior.
+    return false;
+  };
+}
+
+// JSDOM doesn't implement scrollIntoView
+if (global.window.HTMLElement.prototype.scrollIntoView === undefined) {
+  global.window.HTMLElement.prototype.scrollIntoView = function() {};
+}
