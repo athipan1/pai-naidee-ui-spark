@@ -297,5 +297,26 @@ export const searchPlaces = async (
   }
 };
 
+/**
+ * Get place counts for each category using an RPC call.
+ * @returns A promise that resolves to an array of objects with category and count.
+ */
+export const getCategoryCounts = async (): Promise<{ category: string; count: number }[]> => {
+  if (!isSupabaseConfigured()) {
+    console.warn('⚠️ Supabase is not properly configured. Skipping RPC call.');
+    return [];
+  }
+
+  const { data, error } = await supabase.rpc('get_category_counts');
+
+  if (error) {
+    console.error('Failed to get category counts:', error);
+    throw new Error(`Failed to get category counts: ${error.message}`);
+  }
+
+  return data || [];
+};
+
+
 // Export the supabase client for direct usage if needed
 export { supabase };

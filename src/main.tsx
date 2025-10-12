@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./app/App";
+import "./i18n"; // Import i18n configuration
 import "./app/styles/index.css";
 import "leaflet/dist/leaflet.css";
 import { logger } from './lib/logger';

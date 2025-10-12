@@ -4,6 +4,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
+
+// Auth
+import { AuthProvider, useAuth } from "@/shared/contexts/AuthContext";
+import { Auth } from "@/components/auth/Auth";
+
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
 import { useCommunity } from "@/shared/hooks/useCommunity";
@@ -23,6 +28,7 @@ const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 const SavedPage = lazy(() => import("./routes/Saved/SavedPage"));
 const AdminLayout = lazy(() => import("./routes/Admin/AdminLayout"));
 const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
+const CreatePlacePage = lazy(() => import("./pages/CreatePlace"));
 
 // Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
@@ -101,7 +107,6 @@ const AppContent = () => {
 
   return (
     <>
-      <BackendStatusIndicator />
       <SkipLink />
       <Suspense fallback={
         <LoadingSpinner
@@ -118,6 +123,12 @@ const AppContent = () => {
                 currentLanguage={currentLanguage}
                 onLanguageChange={setCurrentLanguage}
               />
+            }
+          />
+          <Route
+            path="/create-place"
+            element={
+              <CreatePlacePage />
             }
           />
           {/* New Consolidated Routes */}
@@ -254,6 +265,38 @@ const AppContent = () => {
   );
 };
 
+import { useLocation } from 'react-router-dom';
+
+// Routes that can be accessed without authentication
+const PUBLIC_ROUTES = ['/discover', '/attraction', '/supabase-diagnostic'];
+
+const AuthWrapper = () => {
+  const { session, loading } = useAuth();
+  const location = useLocation();
+
+  // A route is public if it starts with one of the public prefixes.
+  const isPublicRoute = PUBLIC_ROUTES.some(route => location.pathname.startsWith(route));
+
+  // The root path should render the login page for unauthenticated users.
+  const isRootPath = location.pathname === '/';
+
+  if (loading) {
+    return <LoadingSpinner text="Initializing session..." />;
+  }
+
+  // If the user is not logged in, and the route is not public, show the login page.
+  // The root path is a special case: it should also show login for unauthenticated users.
+  if (!session && (isRootPath || !isPublicRoute)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Auth />
+      </div>
+    );
+  }
+
+  // Otherwise, show the main application content.
+  return <AppContent />;
+}
 
 const App = () => {
   return (
@@ -265,7 +308,9 @@ const App = () => {
               <Toaster />
               <Sonner />
               <BrowserRouter>
-                <AppContent />
+                <AuthProvider>
+                  <AuthWrapper />
+                </AuthProvider>
               </BrowserRouter>
             </TooltipProvider>
           </UIProvider>
