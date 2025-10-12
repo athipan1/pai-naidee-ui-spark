@@ -173,15 +173,6 @@ const AppContent = () => {
             }
           />
           <Route
-            path="/search"
-            element={
-              <ContextualSearchResults
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
-              />
-            }
-          />
-          <Route
             path="/video-upload"
             element={
               <VideoUploadPage
@@ -275,4 +266,5 @@ const App = () => {
   );
 };
 
+export { AppContent };
 export default App;
