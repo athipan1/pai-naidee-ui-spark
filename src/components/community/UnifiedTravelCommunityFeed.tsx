@@ -72,7 +72,7 @@ const FilterControls: React.FC<{
     <div className="grid grid-cols-2 gap-3">
       <Select
         value={feedFilter.sortBy}
-        onValueChange={(value) => handleFilterChange({ sortBy: value as 'latest' | 'popular' | 'trending' | 'inspiration' })}
+        onValueChange={(value) => handleFilterChange({ sortBy: value as 'latest' | 'popular' | 'trending' })}
       >
         <SelectTrigger className="bg-background/60 backdrop-blur-sm border-border/30 rounded-lg">
           <SelectValue />
@@ -81,7 +81,6 @@ const FilterControls: React.FC<{
           <SelectItem value="latest">{currentLanguage === 'th' ? 'ล่าสุด' : 'Latest'}</SelectItem>
           <SelectItem value="popular">{currentLanguage === 'th' ? 'ยอดนิยม' : 'Popular'}</SelectItem>
           <SelectItem value="trending">{currentLanguage === 'th' ? 'กำลังมาแรง' : 'Trending'}</SelectItem>
-          <SelectItem value="inspiration">{currentLanguage === 'th' ? 'แรงบันดาลใจ' : 'Inspiring'}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -232,9 +231,7 @@ const FeedHeader: React.FC<{
             {feedFilter.sortBy !== 'latest' && (
               <Badge variant="outline" className="text-xs">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                {feedFilter.sortBy === 'popular' ? (currentLanguage === 'th' ? 'ยอดนิยม' : 'Popular') :
-                 feedFilter.sortBy === 'trending' ? (currentLanguage === 'th' ? 'กำลังมาแรง' : 'Trending') :
-                 (currentLanguage === 'th' ? 'แรงบันดาลใจ' : 'Inspiring')}
+                {feedFilter.sortBy === 'popular' ? (currentLanguage === 'th' ? 'ยอดนิยม' : 'Popular') : (currentLanguage === 'th' ? 'กำลังมาแรง' : 'Trending')}
               </Badge>
             )}
           </div>
@@ -285,7 +282,6 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
       switch (feedFilter.sortBy) {
         case 'popular': return (b.likes + b.comments) - (a.likes + a.comments);
         case 'trending': return b.shares - a.shares;
-        case 'inspiration': return b.inspirationScore - a.inspirationScore;
         default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
     });
