@@ -1,7 +1,10 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/shared/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getCategoryCounts } from "@/services/supabase.service";
 import SearchSection from "@/components/common/SearchSection";
 import CategoryFilter from "@/components/common/CategoryFilter";
 import { useDiscoveryState, DiscoveryMode } from "./hooks/useDiscoveryState";
@@ -17,7 +20,17 @@ interface DiscoverLayoutProps {
 
 const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { state, setMode, setQuery, setCategory } = useDiscoveryState();
+  const { data: categoryData } = useQuery({
+    queryKey: ['categoryCounts'],
+    queryFn: getCategoryCounts
+  });
+
+  const attractionCounts = categoryData?.reduce((acc, item) => {
+    acc[item.category.toLowerCase()] = item.count;
+    return acc;
+  }, {} as Record<string, number>);
 
   const content = {
     th: {
@@ -59,15 +72,6 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
     } else {
       setCategory(category);
     }
-  };
-
-  // Calculate attraction counts for CategoryFilter - mock data for now
-  const attractionCounts = {
-    all: 12,
-    beach: 4,
-    culture: 3,
-    nature: 3,
-    food: 2
   };
 
   const getModeTitle = (mode: DiscoveryMode): string => {
@@ -162,6 +166,13 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
                   <TabsTrigger value="trending">{t.trending}</TabsTrigger>
                 </TabsList>
               </Tabs>
+
+              {user && (
+                <Button onClick={() => navigate('/create-place')} className="ml-2">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create Place
+                </Button>
+              )}
             </div>
           </div>
         </div>
