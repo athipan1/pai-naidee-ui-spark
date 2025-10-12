@@ -234,7 +234,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
                     <div className="p-4">
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2"><MapPin className="w-4 h-4 mr-1" />{place.province}</div>
-                      <div className="flex flex-wrap gap-1 mb-3">{place.tags.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
+                      <div className="flex flex-wrap gap-1 mb-3">{place.tags?.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
                       <Button size="sm" className="w-full" onClick={() => handleLocationClick(place.id)}>{currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
                     </div>
                   </div>
@@ -258,7 +258,7 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{currentLanguage === "th" && place.nameLocal ? place.nameLocal : place.name}</h3>
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2"><MapPin className="w-4 h-4 mr-1" />{place.province} • {place.category}</div>
                   {place.description && (<p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{currentLanguage === "th" && place.descriptionLocal ? place.descriptionLocal : place.description}</p>)}
-                  <div className="flex flex-wrap gap-1 mb-3">{place.tags.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
+                  <div className="flex flex-wrap gap-1 mb-3">{place.tags?.slice(0, 3).map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">{tag}</Badge>))}</div>
                   <div className="flex gap-2">
                     <Button size="sm" className="flex-1" onClick={() => handleLocationClick(place.id)}>{currentLanguage === "th" ? "ดูรายละเอียด" : "View Details"}</Button>
                     <Button variant="outline" size="sm" onClick={() => navigate(`/nearby/${place.id}`)}>{currentLanguage === "th" ? "ใกล้เคียง" : "Nearby"}</Button>
@@ -296,11 +296,11 @@ const ContextualSearchResults = ({ currentLanguage, onLanguageChange }: Contextu
           {!isLoading && totalResults > 0 && !error && (
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
               <span>{t.foundResults} {totalResults} {t.results} {t.in} {processingTime}{t.ms}</span>
-              {expandedTerms.length > 1 && (
+              {expandedTerms && expandedTerms.length > 1 && (
                 <div className="flex items-center gap-2">
                   <span>{t.expandedSearch}:</span>
-                  {expandedTerms.slice(0, 3).map((term, index) => (<Badge key={index} variant="outline" className="text-xs">{term}</Badge>))}
-                  {expandedTerms.length > 3 && (<Badge variant="secondary" className="text-xs">+{expandedTerms.length - 3}</Badge>)}
+                  {expandedTerms?.slice(0, 5).map((term, index) => (<Badge key={index} variant="outline" className="text-xs">{term}</Badge>))}
+                  {expandedTerms.length > 5 && (<Badge variant="secondary" className="text-xs">+{expandedTerms.length - 5}</Badge>)}
                 </div>
               )}
             </div>
