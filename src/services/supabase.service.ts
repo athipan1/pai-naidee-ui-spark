@@ -299,3 +299,94 @@ export const searchPlaces = async (
 
 // Export the supabase client for direct usage if needed
 export { supabase };
+
+/**
+ * Create a new place in the database.
+ * @param placeData - The data for the new place.
+ * @returns The newly created place.
+ */
+export const createPlace = async (placeData: Omit<PlaceRecord, 'id' | 'created_at' | 'updated_at'>): Promise<PlaceRecord> => {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase configuration is incomplete.');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('places')
+      .insert([placeData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to create place:', error);
+      throw new Error(`Failed to create place: ${error.message}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to create place:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Database query failed: ${errorMessage}`);
+  }
+};
+
+/**
+ * Update an existing place in the database.
+ * @param id - The ID of the place to update.
+ * @param updates - The fields to update.
+ * @returns The updated place.
+ */
+export const updatePlace = async (id: string, updates: Partial<PlaceRecord>): Promise<PlaceRecord> => {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase configuration is incomplete.');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('places')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to update place:', error);
+      throw new Error(`Failed to update place: ${error.message}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to update place:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Database query failed: ${errorMessage}`);
+  }
+};
+
+/**
+ * Delete a place from the database.
+ * @param id - The ID of the place to delete.
+ * @returns An object indicating success.
+ */
+export const deletePlace = async (id: string): Promise<{ success: boolean }> => {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase configuration is incomplete.');
+  }
+
+  try {
+    const { error } = await supabase
+      .from('places')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete place:', error);
+      throw new Error(`Failed to delete place: ${error.message}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete place:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Database query failed: ${errorMessage}`);
+  }
+};

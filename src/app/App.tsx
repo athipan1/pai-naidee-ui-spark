@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
+import { AuthProvider } from "@/shared/contexts/AuthContext";
 import { useCommunity } from "@/shared/hooks/useCommunity";
 import { CreatePost } from "@/components/community/CreatePost";
 import DevTools from "@/components/dev/DevTools";
@@ -23,6 +24,7 @@ const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 const SavedPage = lazy(() => import("./routes/Saved/SavedPage"));
 const AdminLayout = lazy(() => import("./routes/Admin/AdminLayout"));
 const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
+const ProtectedRoute = lazy(() => import("./routes/ProtectedRoute"));
 
 // Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
@@ -43,6 +45,11 @@ const HealthCheckPage = lazy(() => import("./pages/HealthCheckPage"));
 const APITestPage = lazy(() => import("./pages/APITestPage"));
 const SupabaseDiagnostic = lazy(() => import("./pages/SupabaseDiagnostic"));
 // --- End System Pages ---
+
+// --- Auth Pages ---
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignUpPage = lazy(() => import('./pages/SignUpPage'));
+// --- End Auth Pages ---
 
 // Redirect components for backward compatibility
 import {
@@ -124,7 +131,10 @@ const AppContent = () => {
           <Route
             path="/discover"
             element={
-              <DiscoverLayout currentLanguage={currentLanguage} />
+              <DiscoverLayout
+                currentLanguage={currentLanguage}
+                onLanguageChange={setCurrentLanguage}
+              />
             }
           />
           <Route
@@ -133,15 +143,17 @@ const AppContent = () => {
               <SavedPage currentLanguage={currentLanguage} />
             }
           />
-          <Route
-            path="/me"
-            element={
-              <ProfilePage
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
-              />
-            }
-          />
+          <Route element={<ProtectedRoute />}>
+            <Route
+              path="/me"
+              element={
+                <ProfilePage
+                  currentLanguage={currentLanguage}
+                  onLanguageChange={setCurrentLanguage}
+                />
+              }
+            />
+          </Route>
           <Route
             path="/admin"
             element={
@@ -214,6 +226,10 @@ const AppContent = () => {
           <Route path="/health-check" element={<HealthCheckPage />} />
           <Route path="/admin/api-test" element={<APITestPage />} />
           <Route path="/supabase-diagnostic" element={<SupabaseDiagnostic />} />
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
 
@@ -261,13 +277,15 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <MediaProvider>
           <UIProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
-            </TooltipProvider>
+            <AuthProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </TooltipProvider>
+            </AuthProvider>
           </UIProvider>
         </MediaProvider>
       </QueryClientProvider>
