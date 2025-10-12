@@ -1,4 +1,4 @@
-import { Header } from "@/components/common/Header";
+import Header from "@/components/common/Header";
 import SearchSection from "@/components/common/SearchSection";
 import CategoryFilter from "@/components/common/CategoryFilter";
 import { useDiscoveryState, DiscoveryMode } from "./hooks/useDiscoveryState";
