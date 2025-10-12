@@ -1,4 +1,4 @@
-import { supabase } from "@/supabaseClient";
+import { supabase } from "@/services/supabase.service";
 import { PostgrestError } from "@supabase/supabase-js";
 import { Location, PostSearchResult } from "@/shared/types/posts";
 
@@ -13,7 +13,7 @@ interface SearchResponse {
   processingTime: number;
 }
 
-// Helper to convert DB place to Location type
+// Helper to convert a database place record to the Location type
 const convertToLocation = (place: any): Location => ({
   id: place.id,
   name: place.name,
