@@ -43,4 +43,18 @@ describe("Legacy Search Redirect", () => {
 
     expect(screen.queryByText("Contextual Search Results Page")).not.toBeInTheDocument();
   });
+
+  it("should redirect from /search to /discover with the new search parameter", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/search?search=new_search"]}>
+          <AppContent />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Discover Page")).toBeInTheDocument();
+    });
+  });
 });
