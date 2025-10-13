@@ -60,12 +60,17 @@ const SearchRedirect = () => {
  */
 const MapRedirect = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const params = useParams();
+  const [searchParams] = useSearchParams();
+
+  // Use ID from URL params if available, otherwise use query params
+  const id = params.id || searchParams.get('id');
   
   useEffect(() => {
     const newParams = new URLSearchParams();
     newParams.set('mode', 'map');
     
+    // Only add the 'id' parameter if it has a value to avoid '/discover?id=null'
     if (id) {
       newParams.set('id', id);
     }
