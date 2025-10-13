@@ -11,7 +11,7 @@ const getApiErrorMessage = (error: unknown): string => {
 };
 
 // [REFACTORED] Get attraction details by ID from Supabase
-export const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
+const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
   console.log("✅ Calling Supabase to fetch attraction detail for id:", id);
   try {
     const attraction = await getPlaceById(id);
@@ -23,7 +23,7 @@ export const getAttractionDetail = async (id: string): Promise<AttractionDetail>
 };
 
 // [REFACTORED] Get list of all attractions from Supabase
-export const getAttractions = async (options?: {
+const getAttractions = async (options?: {
   page?: number;
   limit?: number;
   category?: string;
@@ -56,7 +56,7 @@ export const getAttractions = async (options?: {
 
 // [REFACTORED] Get list of attractions from Supabase
 // This function now uses the searchPlaces function to fetch data from Supabase
-export const getLegacyAttractions = async (): Promise<SearchResult[]> => {
+const getLegacyAttractions = async (): Promise<SearchResult[]> => {
   console.log("✅ Calling Supabase to fetch attractions");
 
   try {
@@ -67,4 +67,10 @@ export const getLegacyAttractions = async (): Promise<SearchResult[]> => {
     console.error('❌ Error fetching attractions from Supabase:', error);
     throw new Error(`Failed to fetch attractions from Supabase. ${getApiErrorMessage(error)}`);
   }
+};
+
+export const attractionService = {
+  getAttractionDetail,
+  getAttractions,
+  getLegacyAttractions,
 };

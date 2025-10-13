@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  getAttractionDetail,
-  getAttractions,
-  getLegacyAttractions,
-} from '@/services/attraction.service';
+import { attractionService } from '@/services/attraction.service';
 import { getPlaceById, searchPlaces } from '@/services/supabase.service';
 
 // Mock the supabase service functions
@@ -11,6 +7,10 @@ vi.mock('@/services/supabase.service', () => ({
   getPlaceById: vi.fn(),
   searchPlaces: vi.fn(),
 }));
+
+// Cast the mocked functions to be used in tests
+const mockedGetPlaceById = getPlaceById as vi.Mock;
+const mockedSearchPlaces = searchPlaces as vi.Mock;
 
 describe('Attraction Service', () => {
   beforeEach(() => {
@@ -20,19 +20,19 @@ describe('Attraction Service', () => {
   describe('getAttractionDetail', () => {
     it('should call getPlaceById with the correct ID', async () => {
       const mockAttraction = { id: '1', name: 'Test Attraction' };
-      getPlaceById.mockResolvedValue(mockAttraction);
+      mockedGetPlaceById.mockResolvedValue(mockAttraction);
 
-      const result = await getAttractionDetail('1');
+      const result = await attractionService.getAttractionDetail('1');
 
-      expect(getPlaceById).toHaveBeenCalledWith('1');
+      expect(mockedGetPlaceById).toHaveBeenCalledWith('1');
       expect(result).toEqual(mockAttraction);
     });
 
     it('should throw an error if getPlaceById fails', async () => {
       const errorMessage = 'Supabase error';
-      getPlaceById.mockRejectedValue(new Error(errorMessage));
+      mockedGetPlaceById.mockRejectedValue(new Error(errorMessage));
 
-      await expect(getAttractionDetail('1')).rejects.toThrow(
+      await expect(attractionService.getAttractionDetail('1')).rejects.toThrow(
         `Failed to fetch attraction details. ${errorMessage}`
       );
     });
@@ -41,11 +41,11 @@ describe('Attraction Service', () => {
   describe('getAttractions', () => {
     it('should call searchPlaces with default options', async () => {
       const mockResponse = { results: [], totalCount: 0 };
-      searchPlaces.mockResolvedValue(mockResponse);
+      mockedSearchPlaces.mockResolvedValue(mockResponse);
 
-      const result = await getAttractions();
+      const result = await attractionService.getAttractions();
 
-      expect(searchPlaces).toHaveBeenCalledWith('', [], [], 10, 1);
+      expect(mockedSearchPlaces).toHaveBeenCalledWith('', [], [], 10, 1);
       expect(result).toEqual({
         attractions: [],
         total: 0,
@@ -57,7 +57,7 @@ describe('Attraction Service', () => {
     it('should call searchPlaces with provided options', async () => {
       const mockAttractions = [{ id: '1', name: 'Searched Attraction' }];
       const mockResponse = { results: mockAttractions, totalCount: 1 };
-      searchPlaces.mockResolvedValue(mockResponse);
+      mockedSearchPlaces.mockResolvedValue(mockResponse);
 
       const options = {
         page: 2,
@@ -65,9 +65,9 @@ describe('Attraction Service', () => {
         category: 'Temples',
         search: 'Wat',
       };
-      const result = await getAttractions(options);
+      const result = await attractionService.getAttractions(options);
 
-      expect(searchPlaces).toHaveBeenCalledWith('Wat', ['Temples'], [], 5, 2);
+      expect(mockedSearchPlaces).toHaveBeenCalledWith('Wat', ['Temples'], [], 5, 2);
       expect(result).toEqual({
         attractions: mockAttractions,
         total: 1,
@@ -78,9 +78,9 @@ describe('Attraction Service', () => {
 
     it('should throw an error if searchPlaces fails', async () => {
       const errorMessage = 'Search failed';
-      searchPlaces.mockRejectedValue(new Error(errorMessage));
+      mockedSearchPlaces.mockRejectedValue(new Error(errorMessage));
 
-      await expect(getAttractions()).rejects.toThrow(
+      await expect(attractionService.getAttractions()).rejects.toThrow(
         `Failed to fetch attractions. ${errorMessage}`
       );
     });
@@ -90,19 +90,19 @@ describe('Attraction Service', () => {
     it('should call searchPlaces with an empty search term', async () => {
       const mockAttractions = [{ id: '1', name: 'Legacy Attraction' }];
       const mockResponse = { results: mockAttractions, totalCount: 1 };
-      searchPlaces.mockResolvedValue(mockResponse);
+      mockedSearchPlaces.mockResolvedValue(mockResponse);
 
-      const result = await getLegacyAttractions();
+      const result = await attractionService.getLegacyAttractions();
 
-      expect(searchPlaces).toHaveBeenCalledWith('');
+      expect(mockedSearchPlaces).toHaveBeenCalledWith('');
       expect(result).toEqual(mockAttractions);
     });
 
     it('should throw an error if searchPlaces fails', async () => {
       const errorMessage = 'Legacy fetch failed';
-      searchPlaces.mockRejectedValue(new Error(errorMessage));
+      mockedSearchPlaces.mockRejectedValue(new Error(errorMessage));
 
-      await expect(getLegacyAttractions()).rejects.toThrow(
+      await expect(attractionService.getLegacyAttractions()).rejects.toThrow(
         `Failed to fetch attractions from Supabase. ${errorMessage}`
       );
     });
