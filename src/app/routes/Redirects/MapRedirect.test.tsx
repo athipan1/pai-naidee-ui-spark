@@ -65,4 +65,18 @@ describe("MapRedirect Component", () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map", { replace: true });
   });
+
+  it("should not include the id in the redirect if the id is the string 'null'", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/map/null"]}>
+        <Routes>
+          <Route path="/map/:id" element={<MapRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map", { replace: true });
+  });
 });
