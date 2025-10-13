@@ -155,5 +155,24 @@ export {
   AdminPanelRedirect,
   EnhancedAdminRedirect,
   DashboardRedirect,
-  ProfileRedirect
+  ProfileRedirect,
+  CategoryRedirect
+};
+
+/**
+ * Redirect component for legacy /category/:categoryName route to /discover?cat=<categoryName>
+ */
+const CategoryRedirect = () => {
+  const navigate = useNavigate();
+  const { categoryName } = useParams();
+
+  useEffect(() => {
+    if (categoryName) {
+      navigate(`/discover?cat=${categoryName}`, { replace: true });
+    } else {
+      navigate('/discover', { replace: true });
+    }
+  }, [navigate, categoryName]);
+
+  return null;
 };

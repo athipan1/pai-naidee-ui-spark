@@ -54,7 +54,8 @@ import {
   AdminPanelRedirect,
   EnhancedAdminRedirect,
   DashboardRedirect,
-  ProfileRedirect
+  ProfileRedirect,
+  CategoryRedirect
 } from "./routes/Redirects";
 
 // Conditionally load AccordionExamples only in development
@@ -193,7 +194,7 @@ const AppContent = () => {
           <Route path="/profile" element={<ProfileRedirect />} />
           <Route
             path="/category/:categoryName"
-            element={<ExploreRedirect />}
+            element={<CategoryRedirect />}
           />
           {/* Dev routes */}
           {AccordionExamples && import.meta.env.DEV && (
