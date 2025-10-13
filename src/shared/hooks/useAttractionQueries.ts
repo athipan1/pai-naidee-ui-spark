@@ -22,7 +22,7 @@ export const useAttractionDetail = (id: string | undefined, options?: {
     queryKey: attractionKeys.detail(id || ''),
     queryFn: () => {
       if (!id) throw new Error('Attraction ID is required');
-      return attractionAPI.getAttractionDetail(id);
+      return attractionAPI.attractionService.getAttractionDetail(id);
     },
     enabled: !!id && (options?.enabled !== false),
     staleTime: options?.staleTime || 5 * 60 * 1000, // 5 minutes
@@ -51,7 +51,7 @@ export const useAttractions = (filters?: {
 }) => {
   return useQuery({
     queryKey: attractionKeys.list(filters || {}),
-    queryFn: () => attractionAPI.getAttractions(filters),
+    queryFn: () => attractionAPI.attractionService.getAttractions(filters),
     enabled: options?.enabled !== false,
     staleTime: options?.staleTime || 3 * 60 * 1000, // 3 minutes
     gcTime: 8 * 60 * 1000, // 8 minutes

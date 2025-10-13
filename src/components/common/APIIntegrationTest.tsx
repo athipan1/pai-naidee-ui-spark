@@ -3,7 +3,7 @@ import { CheckCircle, XCircle, AlertCircle, Loader2, Globe, Database, Image, Use
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getAttractions, getAttractionDetail } from "@/services/attraction.service";
+import { attractionService } from "@/services/attraction.service";
 import { checkBackendHealth } from "@/lib/backendVerifier";
 
 interface TestResult {
@@ -134,7 +134,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       });
       setTests([...testResults]);
 
-      const attractionsData = await getAttractions();
+      const attractionsData = await attractionService.getAttractions();
       
       testResults[2] = {
         name: currentLanguage === "th" ? "API รายการสถานที่" : "Attractions List API",
@@ -163,7 +163,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       });
       setTests([...testResults]);
 
-      const detailData = await getAttractionDetail("1");
+      const detailData = await attractionService.getAttractionDetail("1");
       
       testResults[3] = {
         name: currentLanguage === "th" ? "API รายละเอียดสถานที่" : "Attraction Detail API",
@@ -192,7 +192,7 @@ export const APIIntegrationTest: React.FC<APIIntegrationTestProps> = ({ currentL
       });
       setTests([...testResults]);
 
-      const attractionData = await getAttractionDetail("1");
+      const attractionData = await attractionService.getAttractionDetail("1");
       const imageUrl = attractionData.images[0];
       
       // Test if image URL is accessible  
