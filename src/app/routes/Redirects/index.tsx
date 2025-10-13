@@ -76,7 +76,7 @@ const MapRedirect = () => {
     newParams.set('mode', 'map');
     
     // Only add the 'id' parameter if it has a value to avoid '/discover?id=null'
-    if (id) {
+    if (id && id !== 'null' && id !== 'undefined') {
       newParams.set('id', id);
     }
     
