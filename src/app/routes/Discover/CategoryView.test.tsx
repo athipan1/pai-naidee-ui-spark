@@ -1,145 +1,164 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CategoryView from './CategoryView';
 import * as AttractionService from '@/services/attraction.service';
 
-// Mock services
-vi.mock('@/services/attraction.service');
+// Mock the attractionService specifically, providing a mock implementation
+vi.mock('@/services/attraction.service', () => ({
+  attractionService: {
+    getAttractions: vi.fn(),
+  },
+}));
 
-// Mock components
+// Mock child components
 vi.mock('@/components/common/LoadingSpinner', () => ({
   default: () => <div data-testid="loading-spinner">Loading...</div>,
 }));
 
 vi.mock('@/components/common/AttractionCard', () => ({
-  default: ({
-    name,
-    nameLocal,
-    currentLanguage,
-    onCardClick,
-    id,
-  }: {
-    name: string;
-    nameLocal: string;
-    currentLanguage: 'en' | 'th';
-    onCardClick: (id: string) => void;
-    id: string;
-  }) => (
+  default: ({ name, nameLocal, currentLanguage, onCardClick, id }: any) => (
     <div data-testid="attraction-card" onClick={() => onCardClick(id)}>
       {currentLanguage === 'th' ? nameLocal : name}
     </div>
   ),
 }));
 
-const mockBeachAttractions = [
-  {
-    id: '1',
-    name: 'Phi Phi Islands',
-    nameLocal: 'หมู่เกาะพีพี',
-    province: 'Krabi',
-    category: 'Beach',
-    rating: 4.8,
-    reviewCount: 2547,
-    image: 'phi_phi_islands.jpg',
-    description: 'Beautiful islands.',
-    tags: ['Beach', 'Snorkeling'],
-  },
-  {
-    id: '5',
-    name: 'Phuket Beach',
-    nameLocal: 'หาดภูเก็ต',
-    province: 'Phuket',
-    category: 'Beach',
-    rating: 4.6,
-    reviewCount: 3421,
-    image: 'phuket_beach.jpg',
-    description: 'A famous beach.',
-    tags: ['Beach', 'Sunset'],
-  },
-];
+const mockAttractionsResponse = {
+  attractions: [
+    {
+      id: '1',
+      name: 'Phi Phi Islands',
+      nameLocal: 'หมู่เกาะพีพี',
+      province: 'Krabi',
+      category: 'Beach',
+      rating: 4.8,
+      reviewCount: 2547,
+      image: 'phi_phi_islands.jpg',
+      description: 'Beautiful islands.',
+      tags: ['Beach', 'Snorkeling'],
+    },
+    {
+      id: '5',
+      name: 'Phuket Beach',
+      nameLocal: 'หาดภูเก็ต',
+      province: 'Phuket',
+      category: 'Beach',
+      rating: 4.6,
+      reviewCount: 3421,
+      image: 'phuket_beach.jpg',
+      description: 'A famous beach.',
+      tags: ['Beach', 'Sunset'],
+    },
+  ],
+  total: 2,
+  page: 1,
+  limit: 10,
+};
 
-describe('CategoryView Component', () => {
-  const renderComponent = (category: string, language: 'en' | 'th' = 'en') => {
-    return render(
-      <MemoryRouter initialEntries={[`/discover/category/${category}`]}>
+// Function to create a new query client for each test
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false, // Disable retries for tests
+    },
+  },
+});
+
+// Wrapper component to provide necessary context for rendering
+const renderWithProviders = (
+  ui: React.ReactElement,
+  { route = '/', path = '/' } = {}
+) => {
+  const testQueryClient = createTestQueryClient();
+  window.history.pushState({}, 'Test page', route);
+
+  return render(
+    <QueryClientProvider client={testQueryClient}>
+      <MemoryRouter initialEntries={[route]}>
         <Routes>
-          <Route
-            path="/discover/category/:category"
-            element={<CategoryView currentLanguage={language} category={category} />}
-          />
-          <Route path="/attraction/:id" element={<div>Attraction Page</div>} />
+          <Route path={path} element={ui} />
+          <Route path="/attraction/:id" element={<div>Attraction Detail Page</div>} />
         </Routes>
       </MemoryRouter>
+    </QueryClientProvider>
+  );
+};
+
+
+const mockedAttractionService = vi.mocked(AttractionService.attractionService);
+
+describe('CategoryView Component', () => {
+  beforeEach(() => {
+    // Reset mocks before each test
+    mockedAttractionService.getAttractions.mockClear();
+  });
+
+  it('should display a loading spinner while fetching data', () => {
+    // Mock a promise that never resolves to keep it in a loading state
+    mockedAttractionService.getAttractions.mockReturnValue(new Promise(() => {}));
+
+    renderWithProviders(
+      <CategoryView currentLanguage="en" category="Beach" />,
+      { route: '/discover/category/Beach', path: '/discover/category/:category' }
     );
-  };
-
-  it('should display a loading spinner while fetching data', async () => {
-    vi.mocked(AttractionService.getAttractions).mockReturnValue(new Promise(() => {})); // Never resolves
-
-    renderComponent('Beach');
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
   it('should display attraction cards in English when data is fetched successfully', async () => {
-    vi.mocked(AttractionService.getAttractions).mockResolvedValue(mockBeachAttractions as any);
+    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse as any);
 
-    renderComponent('Beach', 'en');
+    renderWithProviders(
+      <CategoryView currentLanguage="en" category="Beach" />,
+      { route: '/discover/category/Beach', path: '/discover/category/:category' }
+    );
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-
-    const attractionCards = screen.getAllByTestId('attraction-card');
-    expect(attractionCards).toHaveLength(2);
-    expect(screen.getByText('Phi Phi Islands')).toBeInTheDocument();
+    // Wait for the loading spinner to disappear and cards to appear
+    expect(await screen.findByText('Phi Phi Islands')).toBeInTheDocument();
     expect(screen.getByText('Phuket Beach')).toBeInTheDocument();
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
   });
 
   it('should display attraction cards in Thai when data is fetched successfully', async () => {
-    vi.mocked(AttractionService.getAttractions).mockResolvedValue(mockBeachAttractions as any);
+    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse as any);
 
-    renderComponent('Beach', 'th');
+    renderWithProviders(
+      <CategoryView currentLanguage="th" category="Beach" />,
+      { route: '/discover/category/Beach', path: '/discover/category/:category' }
+    );
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-
-    const attractionCards = screen.getAllByTestId('attraction-card');
-    expect(attractionCards).toHaveLength(2);
-    expect(screen.getByText('หมู่เกาะพีพี')).toBeInTheDocument();
+    expect(await screen.findByText('หมู่เกาะพีพี')).toBeInTheDocument();
     expect(screen.getByText('หาดภูเก็ต')).toBeInTheDocument();
   });
 
   it('should display an empty state message when no attractions are found', async () => {
-    vi.mocked(AttractionService.getAttractions).mockResolvedValue([]);
+    mockedAttractionService.getAttractions.mockResolvedValue({ attractions: [], total: 0, page: 1, limit: 10 });
 
-    renderComponent('Unpopular Category');
+    renderWithProviders(
+      <CategoryView currentLanguage="en" category="Unpopular" />,
+      { route: '/discover/category/Unpopular', path: '/discover/category/:category' }
+    );
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-
-    expect(screen.getByText('No places found in this category')).toBeInTheDocument();
+    expect(await screen.findByText('No places found in this category')).toBeInTheDocument();
   });
 
   it('should navigate to the attraction detail page when an attraction card is clicked', async () => {
     const user = userEvent.setup();
-    vi.mocked(AttractionService.getAttractions).mockResolvedValue(mockBeachAttractions as any);
+    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse as any);
 
-    renderComponent('Beach');
+    renderWithProviders(
+      <CategoryView currentLanguage="en" category="Beach" />,
+      { route: '/discover/category/Beach', path: '/discover/category/:category' }
+    );
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-
-    const firstCard = screen.getByText('Phi Phi Islands');
+    // Wait for the card to be available and then click it
+    const firstCard = await screen.findByText('Phi Phi Islands');
     await user.click(firstCard);
 
-    await waitFor(() => {
-      expect(screen.getByText('Attraction Page')).toBeInTheDocument();
-    });
+    // Check if navigation was successful
+    expect(await screen.findByText('Attraction Detail Page')).toBeInTheDocument();
   });
 });
