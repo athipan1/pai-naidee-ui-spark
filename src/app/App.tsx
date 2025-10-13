@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
+import { AuthProvider } from "@/shared/contexts/AuthContext";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
 import { useCommunity } from "@/shared/hooks/useCommunity";
@@ -250,17 +251,19 @@ const App = () => {
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
-        <MediaProvider>
-          <UIProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
-            </TooltipProvider>
-          </UIProvider>
-        </MediaProvider>
+        <AuthProvider>
+          <MediaProvider>
+            <UIProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </TooltipProvider>
+            </UIProvider>
+          </MediaProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
