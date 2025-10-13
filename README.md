@@ -58,7 +58,12 @@ cd pai-naidee-ui-spark
 # 3. ติดตั้ง dependencies
 npm install
 
-# 4. เริ่ม development server
+# 4. ตั้งค่า Environment Variables
+# คัดลอกไฟล์ .env.example และเปลี่ยนชื่อเป็น .env
+# จากนั้นกรอกข้อมูล Supabase URL และ Anon Key ของคุณลงไป
+cp .env.example .env
+
+# 5. เริ่ม development server
 npm run dev
 
 # 5. เปิดเว็บเบราว์เซอร์และไปที่ http://localhost:8080
