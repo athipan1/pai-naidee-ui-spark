@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 
 /**
  * Redirect component for legacy /explore route to /discover
@@ -60,11 +60,9 @@ const SearchRedirect = () => {
  */
 const MapRedirect = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { id } = useParams();
   
   useEffect(() => {
-    const id = searchParams.get('id') || '';
-    
     const newParams = new URLSearchParams();
     newParams.set('mode', 'map');
     
@@ -73,7 +71,7 @@ const MapRedirect = () => {
     }
     
     navigate(`/discover?${newParams.toString()}`, { replace: true });
-  }, [navigate, searchParams]);
+  }, [navigate, id]);
 
   return null;
 };
