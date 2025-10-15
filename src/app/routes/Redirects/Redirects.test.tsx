@@ -136,6 +136,25 @@ describe("SearchRedirect Component", () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?q=test&utm_source=facebook&mode=search", { replace: true });
   });
+
+  it("should remove legacy 'search' and 'category' parameters from the final URL", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/search?search=legacy-query&category=legacy-cat"]}>
+        <Routes>
+          <Route path="/search" element={<SearchRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    const [redirectUrl] = mockNavigate.mock.calls[0];
+    const url = new URL(redirectUrl, "http://localhost");
+    expect(url.searchParams.has("search")).toBe(false);
+    expect(url.searchParams.has("category")).toBe(false);
+    expect(url.searchParams.get("q")).toBe("legacy-query");
+    expect(url.searchParams.get("cat")).toBe("legacy-cat");
+  });
 });
 
 describe("ProfileRedirect Component", () => {
