@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
-import { MapRedirect, SearchRedirect } from "./index";
+import { MapRedirect, SearchRedirect, ProfileRedirect } from "./index";
 
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -99,5 +99,26 @@ describe("SearchRedirect Component", () => {
 
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=search&q=test", { replace: true });
+  });
+});
+
+describe("ProfileRedirect Component", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should redirect from /profile to /me", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/profile"]}>
+        <Routes>
+          <Route path="/profile" element={<ProfileRedirect />} />
+          <Route path="/me" element={<LocationDisplay />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/me", { replace: true });
   });
 });
