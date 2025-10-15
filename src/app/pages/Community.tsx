@@ -14,12 +14,16 @@ interface CommunityProps {
 const Community: React.FC<CommunityProps> = ({ 
   currentLanguage, 
   onLanguageChange,
-  onBack: _onBack 
+  onBack
 }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/');
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/');
+    }
   };
 
   return (
