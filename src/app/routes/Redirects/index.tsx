@@ -171,10 +171,10 @@ const CategoryRedirect = () => {
     const newParams = new URLSearchParams(searchParams);
     if (categoryName) {
       newParams.set('cat', categoryName);
-      navigate(`/discover?${newParams.toString()}`, { replace: true });
-    } else {
-      navigate(`/discover?${newParams.toString()}`, { replace: true });
     }
+    const queryString = newParams.toString();
+    const redirectUrl = queryString ? `/discover?${queryString}` : '/discover';
+    navigate(redirectUrl, { replace: true });
   }, [navigate, categoryName, searchParams]);
 
   return null;
