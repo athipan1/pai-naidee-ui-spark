@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
-import { MapRedirect, SearchRedirect, ProfileRedirect, CategoryRedirect } from "./index";
+import { ExploreRedirect, MapRedirect, SearchRedirect, ProfileRedirect, CategoryRedirect } from "./index";
 
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -210,5 +210,40 @@ describe("CategoryRedirect Component", () => {
 
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?utm_source=google&cat=temples", { replace: true });
+  });
+});
+
+describe("ExploreRedirect Component", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should redirect from /explore to /discover", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/explore"]}>
+        <Routes>
+          <Route path="/explore" element={<ExploreRedirect />} />
+          <Route path="/discover" element={<LocationDisplay />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/discover", { replace: true });
+  });
+
+  it("should preserve query parameters when redirecting", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/explore?q=test&utm_source=email"]}>
+        <Routes>
+          <Route path="/explore" element={<ExploreRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/discover?q=test&utm_source=email", { replace: true });
   });
 });
