@@ -6,10 +6,14 @@ import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
  */
 const ExploreRedirect = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
   useEffect(() => {
-    navigate('/discover', { replace: true });
-  }, [navigate]);
+    const newParams = new URLSearchParams(searchParams);
+    const queryString = newParams.toString();
+    const redirectUrl = queryString ? `/discover?${queryString}` : '/discover';
+    navigate(redirectUrl, { replace: true });
+  }, [navigate, searchParams]);
 
   return null;
 };
