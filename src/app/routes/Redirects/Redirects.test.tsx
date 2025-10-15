@@ -97,6 +97,20 @@ describe("MapRedirect Component", () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?utm_source=google&mode=map&id=123", { replace: true });
   });
+
+  it("should not include the id in the redirect if the id from query params is the string 'null'", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/map?id=null"]}>
+        <Routes>
+          <Route path="/map" element={<MapRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map", { replace: true });
+  });
 });
 
 describe("SearchRedirect Component", () => {
