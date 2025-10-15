@@ -38,7 +38,7 @@ const SearchRedirect = () => {
     const query = searchParams.get('q') || searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
     
-    const newParams = new URLSearchParams();
+    const newParams = new URLSearchParams(searchParams.toString());
     newParams.set('mode', 'search');
     
     if (query) {
@@ -67,7 +67,8 @@ const MapRedirect = () => {
   const id = params.id || searchParams.get('id');
   
   useEffect(() => {
-    const newParams = new URLSearchParams();
+    // Preserve existing search parameters
+    const newParams = new URLSearchParams(searchParams.toString());
     newParams.set('mode', 'map');
     
     // Only add the 'id' parameter if it has a value to avoid '/discover?id=null'
@@ -76,7 +77,7 @@ const MapRedirect = () => {
     }
     
     navigate(`/discover?${newParams.toString()}`, { replace: true });
-  }, [navigate, id]);
+  }, [navigate, id, searchParams]);
 
   return null;
 };
@@ -157,14 +158,15 @@ const ProfileRedirect = () => {
 const CategoryRedirect = () => {
   const navigate = useNavigate();
   const { categoryName } = useParams();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    const newParams = new URLSearchParams(searchParams.toString());
     if (categoryName) {
-      navigate(`/discover?cat=${categoryName}`, { replace: true });
-    } else {
-      navigate('/discover', { replace: true });
+      newParams.set('cat', categoryName);
     }
-  }, [navigate, categoryName]);
+    navigate(`/discover?${newParams.toString()}`, { replace: true });
+  }, [navigate, categoryName, searchParams]);
 
   return null;
 };

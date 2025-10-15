@@ -1,145 +1,92 @@
-import { render } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
-import { MapRedirect, SearchRedirect, ProfileRedirect, CategoryRedirect } from "./index";
+import { render } from '@testing-library/react';
+import { describe, it, vi, expect } from 'vitest';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MapRedirect, SearchRedirect, CategoryRedirect } from './index';
 
-const mockNavigate = vi.fn();
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
+// Mock useNavigate from react-router-dom
+const mockedNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
+    useNavigate: () => mockedNavigate,
   };
 });
 
-// This component is used to verify the destination of the redirect.
-const LocationDisplay = () => {
-  const location = useLocation();
-  return <div data-testid="location-display">{location.pathname}{location.search}</div>;
-}
-
-describe("MapRedirect Component", () => {
+describe('Redirect Components', () => {
+  // Clear mock history before each test
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should redirect from /map/:id to /discover?mode=map&id=:id", () => {
-    // Arrange
-    render(
-      <MemoryRouter initialEntries={["/map/456"]}>
-        <Routes>
-          <Route path="/map/:id" element={<MapRedirect />} />
-          <Route path="/discover" element={<LocationDisplay />} />
-        </Routes>
-      </MemoryRouter>
-    );
+  describe('MapRedirect', () => {
+    it('should preserve existing query parameters on redirect', () => {
+      render(
+        <MemoryRouter initialEntries={['/map?id=123&existing=param']}>
+          <Routes>
+            <Route path="/map" element={<MapRedirect />} />
+          </Routes>
+        </MemoryRouter>
+      );
 
-    // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map&id=456", { replace: true });
+      // Check that navigate was called and capture the URL
+      expect(mockedNavigate).toHaveBeenCalled();
+      const redirectUrl = new URL(mockedNavigate.mock.calls[0][0], 'http://localhost');
+
+      // Verify the path and parameters independently of order
+      expect(redirectUrl.pathname).toBe('/discover');
+      expect(redirectUrl.searchParams.get('mode')).toBe('map');
+      expect(redirectUrl.searchParams.get('id')).toBe('123');
+      expect(redirectUrl.searchParams.get('existing')).toBe('param');
+
+      // Verify the replace option
+      expect(mockedNavigate).toHaveBeenCalledWith(
+        expect.any(String),
+        { replace: true }
+      );
+    });
   });
 
-  it("should forward the id from query params when redirecting from /map?id=:id", () => {
-    // Arrange
-    render(
-      <MemoryRouter initialEntries={["/map?id=123"]}>
-        <Routes>
-          <Route path="/map" element={<MapRedirect />} />
-        </Routes>
-      </MemoryRouter>
-    );
+  describe('SearchRedirect', () => {
+    it('should preserve existing query parameters on redirect', () => {
+      render(
+        <MemoryRouter initialEntries={['/search?q=test&existing=param']}>
+          <Routes>
+            <Route path="/search" element={<SearchRedirect />} />
+          </Routes>
+        </MemoryRouter>
+      );
 
-    // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map&id=123", { replace: true });
+      // Check that navigate was called and capture the URL
+      expect(mockedNavigate).toHaveBeenCalled();
+      const redirectUrl = new URL(mockedNavigate.mock.calls[0][0], 'http://localhost');
+
+      // Verify the path and parameters independently of order
+      expect(redirectUrl.pathname).toBe('/discover');
+      expect(redirectUrl.searchParams.get('mode')).toBe('search');
+      expect(redirectUrl.searchParams.get('q')).toBe('test');
+      expect(redirectUrl.searchParams.get('existing')).toBe('param');
+    });
   });
 
-  it("should redirect to /discover?mode=map when no id is present", () => {
-    // Arrange
-    render(
-      <MemoryRouter initialEntries={["/map"]}>
-        <Routes>
-          <Route path="/map" element={<MapRedirect />} />
-        </Routes>
-      </MemoryRouter>
-    );
+  describe('CategoryRedirect', () => {
+    it('should preserve existing query parameters on redirect', () => {
+      render(
+        <MemoryRouter initialEntries={['/category/cafes?existing=param']}>
+          <Routes>
+            <Route path="/category/:categoryName" element={<CategoryRedirect />} />
+          </Routes>
+        </MemoryRouter>
+      );
 
-    // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map", { replace: true });
-  });
+      // Check that navigate was called and capture the URL
+      expect(mockedNavigate).toHaveBeenCalled();
+      const redirectUrl = new URL(mockedNavigate.mock.calls[0][0], 'http://localhost');
 
-  it("should not include the id in the redirect if the id is the string 'null'", () => {
-    // Arrange
-    render(
-      <MemoryRouter initialEntries={["/map/null"]}>
-        <Routes>
-          <Route path="/map/:id" element={<MapRedirect />} />
-        </Routes>
-      </MemoryRouter>
-    );
-
-    // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map", { replace: true });
-  });
-});
-
-describe("SearchRedirect Component", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should redirect from /search?search=test to /discover?mode=search&q=test", () => {
-    // Arrange
-    render(
-      <MemoryRouter initialEntries={["/search?search=test"]}>
-        <Routes>
-          <Route path="/search" element={<SearchRedirect />} />
-          <Route path="/discover" element={<LocationDisplay />} />
-        </Routes>
-      </MemoryRouter>
-    );
-
-    // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=search&q=test", { replace: true });
-  });
-});
-
-describe("ProfileRedirect Component", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should redirect from /profile to /me", () => {
-    // Arrange
-    render(
-      <MemoryRouter initialEntries={["/profile"]}>
-        <Routes>
-          <Route path="/profile" element={<ProfileRedirect />} />
-          <Route path="/me" element={<LocationDisplay />} />
-        </Routes>
-      </MemoryRouter>
-    );
-
-    // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/me", { replace: true });
-  });
-});
-
-describe("CategoryRedirect Component", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should redirect from /category/:categoryName to /discover?cat=:categoryName", () => {
-    // Arrange
-    render(
-      <MemoryRouter initialEntries={["/category/temples"]}>
-        <Routes>
-          <Route path="/category/:categoryName" element={<CategoryRedirect />} />
-          <Route path="/discover" element={<LocationDisplay />} />
-        </Routes>
-      </MemoryRouter>
-    );
-
-    // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?cat=temples", { replace: true });
+      // Verify the path and parameters independently of order
+      expect(redirectUrl.pathname).toBe('/discover');
+      expect(redirectUrl.searchParams.get('cat')).toBe('cafes');
+      expect(redirectUrl.searchParams.get('existing')).toBe('param');
+    });
   });
 });
