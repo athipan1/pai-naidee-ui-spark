@@ -48,6 +48,10 @@ const SearchRedirect = () => {
     if (category) {
       newParams.set('cat', category);
     }
+
+    // Clean up legacy params
+    newParams.delete('search');
+    newParams.delete('category');
     
     navigate(`/discover?${newParams.toString()}`, { replace: true });
   }, [navigate, searchParams]);
