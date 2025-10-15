@@ -151,6 +151,24 @@ const ProfileRedirect = () => {
   return null;
 };
 
+/**
+ * Redirect component for legacy /category/:categoryName route to /discover?cat=:categoryName
+ */
+const CategoryRedirect = () => {
+  const navigate = useNavigate();
+  const { categoryName } = useParams();
+
+  useEffect(() => {
+    if (categoryName) {
+      navigate(`/discover?cat=${categoryName}`, { replace: true });
+    } else {
+      navigate('/discover', { replace: true });
+    }
+  }, [navigate, categoryName]);
+
+  return null;
+};
+
 export {
   ExploreRedirect,
   FavoritesRedirect,
@@ -160,5 +178,6 @@ export {
   AdminPanelRedirect,
   EnhancedAdminRedirect,
   DashboardRedirect,
-  ProfileRedirect
+  ProfileRedirect,
+  CategoryRedirect
 };
