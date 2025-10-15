@@ -27,7 +27,7 @@ const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
 // Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
-const CommunityFeed = lazy(() => import("./pages/Community"));
+const Community = lazy(() => import("./pages/Community"));
 const InstagramDemo = lazy(() => import("./pages/InstagramDemo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
@@ -162,7 +162,7 @@ const AppContent = () => {
           <Route
             path="/community"
             element={
-              <CommunityFeed
+              <Community
                 currentLanguage={currentLanguage}
               />
             }
