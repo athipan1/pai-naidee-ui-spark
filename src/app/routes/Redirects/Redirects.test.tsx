@@ -211,6 +211,22 @@ describe("CategoryRedirect Component", () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?utm_source=google&cat=temples", { replace: true });
   });
+
+  it("should redirect to /discover without a trailing '?' even if categoryName is missing and there are no other params", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/category-legacy"]}>
+        <Routes>
+          {/* Test the component directly, not just the App's routing */}
+          <Route path="/category-legacy" element={<CategoryRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    // The buggy implementation would redirect to "/discover?", but we want "/discover"
+    expect(mockNavigate).toHaveBeenCalledWith("/discover", { replace: true });
+  });
 });
 
 describe("ExploreRedirect Component", () => {
