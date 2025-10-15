@@ -49,7 +49,11 @@ describe("MapRedirect Component", () => {
     );
 
     // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map&id=123", { replace: true });
+    const [redirectUrl] = mockNavigate.mock.calls[0];
+    const url = new URL(redirectUrl, "http://localhost");
+    expect(url.pathname).toBe("/discover");
+    expect(url.searchParams.get("mode")).toBe("map");
+    expect(url.searchParams.get("id")).toBe("123");
   });
 
   it("should redirect to /discover?mode=map when no id is present", () => {
@@ -79,6 +83,20 @@ describe("MapRedirect Component", () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=map", { replace: true });
   });
+
+  it("should preserve extra query parameters", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/map/123?utm_source=google"]}>
+        <Routes>
+          <Route path="/map/:id" element={<MapRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/discover?utm_source=google&mode=map&id=123", { replace: true });
+  });
 });
 
 describe("SearchRedirect Component", () => {
@@ -98,7 +116,25 @@ describe("SearchRedirect Component", () => {
     );
 
     // Assert
-    expect(mockNavigate).toHaveBeenCalledWith("/discover?mode=search&q=test", { replace: true });
+    const [redirectUrl] = mockNavigate.mock.calls[0];
+    const url = new URL(redirectUrl, "http://localhost");
+    expect(url.pathname).toBe("/discover");
+    expect(url.searchParams.get("mode")).toBe("search");
+    expect(url.searchParams.get("q")).toBe("test");
+  });
+
+  it("should preserve extra query parameters", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/search?q=test&utm_source=facebook"]}>
+        <Routes>
+          <Route path="/search" element={<SearchRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/discover?q=test&utm_source=facebook&mode=search", { replace: true });
   });
 });
 
@@ -141,5 +177,19 @@ describe("CategoryRedirect Component", () => {
 
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?cat=temples", { replace: true });
+  });
+
+  it("should preserve extra query parameters", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/category/temples?utm_source=google"]}>
+        <Routes>
+          <Route path="/category/:categoryName" element={<CategoryRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledWith("/discover?utm_source=google&cat=temples", { replace: true });
   });
 });
