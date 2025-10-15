@@ -35,9 +35,8 @@ const SearchRedirect = () => {
   const [searchParams] = useSearchParams();
   
   useEffect(() => {
-    const query = searchParams.get('q') || '';
+    const query = searchParams.get('q') || searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
-    const search = searchParams.get('search') || '';
     
     const newParams = new URLSearchParams();
     newParams.set('mode', 'search');
@@ -48,10 +47,6 @@ const SearchRedirect = () => {
     
     if (category) {
       newParams.set('cat', category);
-    }
-
-    if (search) {
-      newParams.set('search', search);
     }
     
     navigate(`/discover?${newParams.toString()}`, { replace: true });
