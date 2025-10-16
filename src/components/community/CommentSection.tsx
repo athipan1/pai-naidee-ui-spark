@@ -10,45 +10,30 @@ import {
   Verified
 } from 'lucide-react';
 import { Comment } from '@/shared/types/community';
-import { useCommunity } from '@/shared/hooks/useCommunity';
+import { useComments, useAddComment } from '@/shared/hooks/useCommunityQueries';
 import { cn } from '@/shared/lib/utils';
 
 interface CommentSectionProps {
   postId: string;
-  onAddComment: (content: string) => void;
 }
 
 export const CommentSection: React.FC<CommentSectionProps> = ({
   postId,
-  onAddComment
 }) => {
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [isLoadingComments, setIsLoadingComments] = useState(false);
-  
-  const { getComments, isAddingComment } = useCommunity();
-
-  useEffect(() => {
-    const loadComments = async () => {
-      setIsLoadingComments(true);
-      try {
-        const postComments = await getComments(postId);
-        setComments(postComments);
-      } catch (error) {
-        console.error('Failed to load comments:', error);
-      } finally {
-        setIsLoadingComments(false);
-      }
-    };
-
-    loadComments();
-  }, [postId, getComments]);
+  const { data: comments = [], isLoading: isLoadingComments } = useComments(postId);
+  const { mutate: addComment, isPending: isAddingComment } = useAddComment();
 
   const handleSubmitComment = () => {
     if (!commentText.trim()) return;
     
-    onAddComment(commentText);
-    setCommentText('');
+    // TODO: Replace with actual user ID from auth context
+    const userId = "123e4567-e89b-12d3-a456-426614174000";
+    addComment({ postId, content: commentText, userId }, {
+      onSuccess: () => {
+        setCommentText('');
+      }
+    });
   };
 
   const formatTimeAgo = (date: Date) => {

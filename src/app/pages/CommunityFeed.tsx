@@ -13,11 +13,8 @@ import {
   Search
 } from 'lucide-react';
 import { PostCard } from '@/components/community/PostCard';
-import { GroupCard } from '@/components/community/GroupCard';
-import { UserPoints } from '@/components/community/UserPoints';
-import { useCommunity } from '@/shared/hooks/useCommunity';
 import { useUIContext } from '@/shared/contexts/UIContext';
-import { FeedFilter } from '@/shared/types/community';
+import { useFeed, useLikePost, useAddComment } from '@/shared/hooks/useCommunityQueries';
 import { Input } from '@/components/ui/input';
 
 interface CommunityFeedProps {
@@ -31,38 +28,14 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const { openCreatePostModal } = useUIContext();
 
-  const {
-    posts,
-    isLoadingFeed,
-    feedFilter,
-    setFeedFilter,
-    groups,
-    isLoadingGroups,
-    userPoints,
-    isLoadingPoints,
-    likePost,
-    savePost,
-    sharePost,
-    addComment,
-    joinGroup,
-    isJoiningGroup
-  } = useCommunity();
+  const { data: posts = [], isLoading: isLoadingFeed } = useFeed();
+  const { mutate: likePost } = useLikePost();
+  const { mutate: addComment } = useAddComment();
 
-  const handleFilterChange = (newFilter: Partial<FeedFilter>) => {
-    setFeedFilter({ ...feedFilter, ...newFilter });
-  };
-
+  // TODO: Implement filtering and search
   const filteredPosts = posts.filter(post =>
     searchQuery === '' ||
-    post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    post.location?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredGroups = groups.filter(group =>
-    searchQuery === '' ||
-    group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    group.description.toLowerCase().includes(searchQuery.toLowerCase())
+    post.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -120,39 +93,6 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                       <Filter className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">แสดง:</span>
 
-                      <Select
-                        value={feedFilter.type}
-                        onValueChange={(value: 'all' | 'following' | 'groups' | 'saved') => handleFilterChange({ type: value })}
-                      >
-                        <SelectTrigger className="w-auto">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">โพสต์ทั้งหมด</SelectItem>
-                          <SelectItem value="following">คนที่ติดตาม</SelectItem>
-                          <SelectItem value="groups">จากกลุ่ม</SelectItem>
-                          <SelectItem value="saved">ที่บันทึกไว้</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Select
-                      value={feedFilter.sortBy}
-                      onValueChange={(value: 'latest' | 'popular' | 'trending' | 'inspiration') => handleFilterChange({ sortBy: value })}
-                    >
-                      <SelectTrigger className="w-auto">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="latest">ล่าสุด</SelectItem>
-                        <SelectItem value="popular">ยอดนิยม</SelectItem>
-                        <SelectItem value="trending">กำลังฮิต</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Posts */}
               {isLoadingFeed ? (
                 <div className="space-y-4">
@@ -181,10 +121,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     <PostCard
                       key={post.id}
                       post={post}
-                      onLike={likePost}
-                      onSave={savePost}
-                      onShare={sharePost}
-                      onComment={(postId, content) => addComment({ postId, content })}
+                      onLike={(postId) => likePost({ postId, userId: "123e4567-e89b-12d3-a456-426614174000" })}
+                      onComment={(postId, content) => addComment({ postId, content, userId: "123e4567-e89b-12d3-a456-426614174000" })}
                     />
                   ))}
                 </div>
@@ -204,54 +142,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               )}
             </div>
 
-            {/* Sidebar */}
+            {/* TODO: Re-implement sidebar with Supabase data */}
             <div className="space-y-4">
-              {/* User Points */}
-              {userPoints && !isLoadingPoints && (
-                <UserPoints userPoints={userPoints} />
-              )}
-
-              {/* Quick Groups */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-medium mb-3 flex items-center space-x-2">
-                    <Users className="h-4 w-4" />
-                    <span>กลุ่มแนะนำ</span>
-                  </h3>
-                  <div className="space-y-3">
-                    {groups.slice(0, 3).map((group) => (
-                      <div
-                        key={group.id}
-                        className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
-                      >
-                        <OptimizedImage
-                          src={group.coverImage}
-                          alt={group.name}
-                          className="h-10 w-10 rounded object-cover"
-                          width={40}
-                          height={40}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{group.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {group.memberCount.toLocaleString()} สมาชิก
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-3"
-                    onClick={() => setActiveTab('groups')}
-                  >
-                    ดูกลุ่มทั้งหมด
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Trending Topics */}
               <Card>
                 <CardContent className="p-4">
                   <h3 className="font-medium mb-3 flex items-center space-x-2">
@@ -273,109 +165,6 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </TabsContent>
-
-        {/* Groups Tab */}
-        <TabsContent value="groups" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoadingGroups ? (
-              Array.from({ length: 6 }, (_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="h-32 bg-muted" />
-                  <CardContent className="p-4 space-y-3">
-                    <div className="h-4 bg-muted rounded w-3/4" />
-                    <div className="h-3 bg-muted rounded w-full" />
-                    <div className="h-3 bg-muted rounded w-2/3" />
-                    <div className="h-8 bg-muted rounded" />
-                  </CardContent>
-                </Card>
-              ))
-            ) : filteredGroups.length > 0 ? (
-              filteredGroups.map((group) => (
-                <GroupCard
-                  key={group.id}
-                  group={group}
-                  onJoin={joinGroup}
-                  onView={(groupId) => console.log('View group:', groupId)}
-                  isJoining={isJoiningGroup}
-                />
-              ))
-            ) : (
-              <div className="col-span-full">
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="font-medium mb-2">ไม่พบกลุ่ม</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {searchQuery ? 'ลองค้นหาด้วยคำอื่น' : 'ยังไม่มีกลุ่มในระบบ'}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        {/* Points Tab */}
-        <TabsContent value="points" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {isLoadingPoints ? (
-              <Card className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-6 bg-muted rounded w-1/3 mb-6" />
-                  <div className="h-20 bg-muted rounded-full w-20 mx-auto mb-4" />
-                  <div className="h-4 bg-muted rounded w-1/2 mx-auto mb-6" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-16 bg-muted rounded" />
-                    <div className="h-16 bg-muted rounded" />
-                  </div>
-                </CardContent>
-              </Card>
-            ) : userPoints ? (
-              <UserPoints userPoints={userPoints} />
-            ) : null}
-
-            {/* Points Information */}
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <h3 className="font-medium">วิธีการสะสมคะแนน</h3>
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Star className="h-4 w-4 text-blue-500" />
-                      <span>โพสต์เรื่องราวที่มีคุณภาพ</span>
-                    </div>
-                    <Badge variant="secondary">50-100 คะแนน</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Star className="h-4 w-4 text-green-500" />
-                      <span>คอมเมนต์ที่ได้รับไลก์</span>
-                    </div>
-                    <Badge variant="secondary">10-25 คะแนน</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Star className="h-4 w-4 text-purple-500" />
-                      <span>ได้รับไลก์จากโพสต์</span>
-                    </div>
-                    <Badge variant="secondary">5 คะแนน</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Star className="h-4 w-4 text-orange-500" />
-                      <span>เชิญเพื่อนเข้าร่วม</span>
-                    </div>
-                    <Badge variant="secondary">25 คะแนน</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
       </Tabs>

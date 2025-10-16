@@ -60,7 +60,6 @@
     "@tanstack/react-query": "^5.56.2",
     "@types/leaflet": "^1.9.20",
     "@types/three": "^0.178.1",
-    "axios": "^1.11.0",
     "caniuse-lite": "^1.0.30001727",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

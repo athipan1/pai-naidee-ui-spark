@@ -26,7 +26,7 @@ import { TravelStoryCard } from './TravelStoryCard';
 import { CreatePost } from './CreatePost';
 import { FloatingPostButton } from './FloatingPostButton';
 import { SeasonalThemeProvider, useSeasonalTheme } from './SeasonalThemeProvider';
-import { useCommunity } from '@/shared/hooks/useCommunity';
+import { useFeed, useLikePost, useAddComment, useCreatePost } from '@/shared/hooks/useCommunityQueries';
 import { FeedFilter, TravelZone, Post } from '@/shared/types/community';
 import { cn } from '@/shared/lib/utils';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
@@ -251,21 +251,14 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
   const [searchQuery, setSearchQuery] = useState('');
   const { themeConfig } = useSeasonalTheme();
 
-  const {
-    posts,
-    isLoadingFeed,
-    feedFilter,
-    setFeedFilter,
-    createPost,
-    isCreatingPost,
-    savePost,
-    sharePost,
-    ratePost,
-    addComment,
-  } = useCommunity();
+  const { data: posts = [], isLoading: isLoadingFeed } = useFeed();
+  const { mutate: createPost, isPending: isCreatingPost } = useCreatePost();
+  const { mutate: addComment } = useAddComment();
+  const { mutate: likePost } = useLikePost();
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>({ type: 'all', sortBy: 'latest' });
 
   const handleFilterChange = (newFilter: Partial<FeedFilter>) => {
-    setFeedFilter({ ...feedFilter, ...newFilter });
+    setFeedFilter(prev => ({ ...prev, ...newFilter }));
   };
 
   const filteredPosts = useMemo(() => {
@@ -375,10 +368,8 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
                     {viewMode === 'story' ? (
                       <TravelStoryCard
                         post={post}
-                        onInspire={ratePost}
-                        onSave={savePost}
-                        onShare={sharePost}
-                        onComment={(postId, content) => addComment({ postId, content })}
+                        onInspire={(postId) => likePost({ postId, userId: "123e4567-e89b-12d3-a456-426614174000" })}
+                        onComment={(postId, content) => addComment({ postId, content, userId: "123e4567-e89b-12d3-a456-426614174000" })}
                         className="rounded-2xl shadow-lg border-border/50 overflow-hidden transition-shadow duration-300 hover:shadow-xl"
                         currentLanguage={currentLanguage}
                       />
@@ -386,8 +377,6 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
                       <GridPostCard
                         post={post}
                         layout={layout}
-                        onSave={savePost}
-                        onShare={sharePost}
                         currentLanguage={currentLanguage}
                       />
                     )}
@@ -406,11 +395,11 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
                 {currentLanguage === 'th' ? 'ยังไม่มีเรื่องราวการเดินทาง' : 'No travel stories yet'}
               </h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                {currentLanguage === 'th' 
-                  ? 'เริ่มต้นการเดินทางครั้งแรกของคุณและแบ่งปันประสบการณ์กับชุมชน' 
+                {currentLanguage === 'th'
+                  ? 'เริ่มต้นการเดินทางครั้งแรกของคุณและแบ่งปันประสบการณ์กับชุมชน'
                   : 'Start your first journey and share your experiences with the community'}
               </p>
-              <Button 
+              <Button
                 onClick={() => setShowCreatePost(true)}
                 className="mt-4 rounded-xl shadow-lg"
               >
@@ -433,7 +422,15 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
       {showCreatePost && (
         <CreatePost
           onClose={() => setShowCreatePost(false)}
-          onSubmit={createPost}
+          onSubmit={(postData) => {
+            // TODO: Replace with actual user ID from auth context
+            const userId = "123e4567-e89b-12d3-a456-426614174000";
+            createPost({ ...postData, user_id: userId }, {
+              onSuccess: () => {
+                setShowCreatePost(false);
+              }
+            });
+          }}
           isLoading={isCreatingPost}
           currentLanguage={currentLanguage}
         />
@@ -446,15 +443,11 @@ const UnifiedTravelCommunityFeedContent: React.FC<UnifiedTravelCommunityFeedProp
 interface GridPostCardProps {
   post: Post;
   layout: string;
-  onSave: (postId: string) => void;
-  onShare: (postId: string) => void;
   currentLanguage: 'th' | 'en';
 }
 
 const GridPostCard: React.FC<GridPostCardProps> = ({
   post,
-  onSave,
-  onShare,
   currentLanguage
 }) => {
   const [showMore, setShowMore] = useState(false);
@@ -509,14 +502,13 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
               <MessageCircle className="h-4 w-4" />
               <span>{post.comments}</span>
             </button>
-            <button type="button" aria-label={currentLanguage === 'th' ? 'แชร์โพสต์' : 'Share post'} onClick={() => onShare(post.id)} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-accent-green transition-colors p-2 rounded-md">
+            <button type="button" aria-label={currentLanguage === 'th' ? 'แชร์โพสต์' : 'Share post'} className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-accent-green transition-colors p-2 rounded-md">
               <Share2 className="h-4 w-4" />
             </button>
           </div>
-          <button 
+          <button
             type="button"
             aria-label={post.isSaved ? (currentLanguage === 'th' ? 'ยกเลิกการบันทึกโพสต์' : 'Unsave post') : (currentLanguage === 'th' ? 'บันทึกโพสต์' : 'Save post')}
-            onClick={() => onSave(post.id)}
             className={cn(
               "p-2 rounded-full transition-colors",
               post.isSaved

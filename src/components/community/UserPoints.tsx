@@ -13,7 +13,6 @@ import {
   Award
 } from 'lucide-react';
 import { UserPoints as UserPointsType, PointsTransaction } from '@/shared/types/community';
-import { RewardsModal } from './RewardsModal';
 import { cn } from '@/shared/lib/utils';
 
 interface UserPointsProps {
@@ -25,8 +24,6 @@ export const UserPoints: React.FC<UserPointsProps> = ({
   userPoints,
   className
 }) => {
-  const [showRewards, setShowRewards] = useState(false);
-
   const getLevelInfo = (points: number) => {
     if (points >= 5000) return { level: 'legend', name: 'ตำนาน', next: null, progress: 100, color: 'from-yellow-400 to-orange-500' };
     if (points >= 1501) return { level: 'expert', name: 'ผู้เชี่ยวชาญ', next: 5000, progress: ((points - 1501) / (5000 - 1501)) * 100, color: 'from-purple-400 to-pink-500' };
@@ -168,17 +165,7 @@ export const UserPoints: React.FC<UserPointsProps> = ({
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center space-x-1"
-              onClick={() => setShowRewards(true)}
-            >
-              <Gift className="h-4 w-4" />
-              <span>แลกรางวัล</span>
-            </Button>
-            
+          <div className="grid grid-cols-1 gap-2">
             <Button 
               variant="outline" 
               size="sm"
@@ -190,12 +177,6 @@ export const UserPoints: React.FC<UserPointsProps> = ({
           </div>
         </CardContent>
       </Card>
-
-      <RewardsModal 
-        open={showRewards}
-        onOpenChange={setShowRewards}
-        availablePoints={userPoints.available}
-      />
     </>
   );
 };

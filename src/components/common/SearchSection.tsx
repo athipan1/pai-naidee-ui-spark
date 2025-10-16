@@ -1,18 +1,12 @@
-import SmartSearchBar from "./SmartSearchBar";
 import { SearchResult } from "@/shared/utils/searchAPI";
 import { PostSearchResult } from "@/shared/types/posts";
 import heroBeach from "@/shared/assets/hero-beach.jpg";
 
 interface SearchSectionProps {
   currentLanguage: "th" | "en";
-  onSearch: (query: string, results?: SearchResult[] | PostSearchResult[]) => void;
 }
 
-const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
-  const handleSearch = (query: string, results?: SearchResult[] | PostSearchResult[]) => {
-    onSearch(query, results);
-  };
-
+const SearchSection = ({ currentLanguage }: SearchSectionProps) => {
   return (
     <section className="relative min-h-[350px] md:min-h-[550px] overflow-hidden" role="banner">
       {/* Background Image with Overlay */}
@@ -40,20 +34,6 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
               : "Explore Thailand and beyond with us. Find amazing places waiting for you."}
           </p>
 
-          {/* Search Form with enhanced responsive design */}
-          <div className="animate-fade-in max-w-3xl mx-auto px-4 sm:px-0">
-            <SmartSearchBar
-              currentLanguage={currentLanguage}
-              onSearch={handleSearch}
-              searchType="all"
-              placeholder={
-                currentLanguage === "th"
-                  ? "คุณอยากไปไหน?"
-                  : "Where do you want to go?"
-              }
-            />
-          </div>
-
           {/* Enhanced Quick Search Suggestions */}
           <div className="flex flex-wrap justify-center gap-3 mt-6 md:mt-8 animate-fade-in px-4 sm:px-0">
             {[
@@ -65,9 +45,6 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
             ].map((item, index) => (
               <button
                 key={index}
-                onClick={() =>
-                  handleSearch(currentLanguage === "th" ? item.th : item.en)
-                }
                 className="px-4 py-2 md:px-5 md:py-2.5 glass-effect hover:bg-white/30 backdrop-blur-md rounded-full text-white text-sm md:text-base font-medium transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation relative overflow-hidden group border border-white/20 hover:border-white/40"
                 aria-label={`Search for ${currentLanguage === "th" ? item.th : item.en}`}
               >
