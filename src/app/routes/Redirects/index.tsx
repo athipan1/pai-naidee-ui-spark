@@ -84,7 +84,7 @@ const MapRedirect = () => {
     }
     
     navigate(`/discover?${newParams.toString()}`, { replace: true });
-  }, [navigate, id, searchParams]);
+  }, [navigate, id]);
 
   return null;
 };
