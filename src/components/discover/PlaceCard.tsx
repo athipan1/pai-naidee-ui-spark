@@ -86,7 +86,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold text-gray-900">{rating}</span>
+            <span className="font-semibold text-gray-900">{rating.toFixed(1)}</span>
           </div>
           <span className="text-gray-500 text-sm">
             ({reviewCount.toLocaleString()} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})
