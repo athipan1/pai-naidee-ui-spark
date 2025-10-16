@@ -97,6 +97,29 @@ describe("MapRedirect Component", () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?utm_source=google&mode=map&id=123", { replace: true });
   });
+
+  it("should only call navigate once", () => {
+    // Arrange
+    const { rerender } = render(
+      <MemoryRouter initialEntries={["/map/123"]}>
+        <Routes>
+          <Route path="/map/:id" element={<MapRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Act
+    rerender(
+      <MemoryRouter initialEntries={["/map/123"]}>
+        <Routes>
+          <Route path="/map/:id" element={<MapRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("SearchRedirect Component", () => {
