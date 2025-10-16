@@ -47,6 +47,8 @@ const SearchRedirect = () => {
     
     if (query) {
       newParams.set('q', query);
+    } else {
+      newParams.delete('q');
     }
     
     if (category) {
