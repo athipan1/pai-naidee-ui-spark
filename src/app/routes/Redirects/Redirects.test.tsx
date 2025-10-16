@@ -178,6 +178,22 @@ describe("SearchRedirect Component", () => {
     expect(url.searchParams.get("q")).toBe("legacy-query");
     expect(url.searchParams.get("cat")).toBe("legacy-cat");
   });
+
+  it("should remove empty 'q' parameter from the final URL", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/search?q="]}>
+        <Routes>
+          <Route path="/search" element={<SearchRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    const [redirectUrl] = mockNavigate.mock.calls[0];
+    const url = new URL(redirectUrl, "http://localhost");
+    expect(url.searchParams.has("q")).toBe(false);
+  });
 });
 
 describe("ProfileRedirect Component", () => {
