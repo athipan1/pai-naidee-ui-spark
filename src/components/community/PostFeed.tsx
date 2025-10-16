@@ -7,9 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, RefreshCw, AlertCircle, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePosts } from '@/shared/hooks/usePosts';
-import { useCreatePost } from '@/shared/hooks/useCreatePost';
-import { useCommunity } from '@/shared/hooks/useCommunity';
+import { useFeed, useLikePost, useAddComment, useCreatePost } from '@/shared/hooks/useCommunityQueries';
 import { usePostContext } from '@/shared/contexts/PostContext';
 import { useMedia } from '@/shared/contexts/MediaProvider';
 import { cn } from '@/shared/lib/utils';
@@ -40,107 +38,43 @@ export const PostFeed: React.FC<PostFeedProps> = ({
   const { feedFilter } = usePostContext();
   
   // Hooks for posts and interactions
-  const {
-    posts,
-    isLoading,
-    isError,
-    error,
-    hasMore,
-    loadMore,
-    isFetchingNextPage,
-    refresh,
-    isRefetching
-  } = usePosts({ pageSize });
+  const { data: posts = [], isLoading, isError, error, refetch: refresh, isRefetching } = useFeed();
+  const { mutate: likePost, isPending: isLikingPost } = useLikePost();
+  const { mutate: createPost, isPending: isCreatingPost } = useCreatePost();
+  const { mutate: addComment } = useAddComment();
 
-  const {
-    likePostMutation,
-    savePostMutation,
-    sharePostMutation
-  } = useCommunity();
-
-  const {
-    submitPost,
-    isSubmitting
-  } = useCreatePost({
-    onSuccess: () => {
-      setShowCreateDialog(false);
-      refresh(); // Refresh feed after creating post
-    }
-  });
 
   // Local state
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
   const [selectedPost, setSelectedPost] = React.useState<Post | null>(null);
   const [showPostDetail, setShowPostDetail] = React.useState(false);
-  const [loadingPostId, setLoadingPostId] = React.useState<string | null>(null);
 
   // Refs for infinite scroll
-  const loadMoreRef = useRef<HTMLDivElement>(null);
   const feedRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    const loadMoreElement = loadMoreRef.current;
-    if (!loadMoreElement || !hasMore || isFetchingNextPage) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0];
-        if (first.isIntersecting) {
-          loadMore();
-        }
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '100px'
-      }
-    );
-
-    observer.observe(loadMoreElement);
-
-    return () => {
-      if (loadMoreElement) {
-        observer.unobserve(loadMoreElement);
-      }
-    };
-  }, [hasMore, isFetchingNextPage, loadMore]);
-
   // Post interaction handlers
-  const handleLike = useCallback(async (postId: string) => {
-    setLoadingPostId(postId);
-    try {
-      await likePostMutation.mutateAsync(postId);
-    } finally {
-      setLoadingPostId(null);
-    }
-  }, [likePostMutation]);
-
-  const handleSave = useCallback(async (postId: string) => {
-    setLoadingPostId(postId);
-    try {
-      await savePostMutation.mutateAsync(postId);
-    } finally {
-      setLoadingPostId(null);
-    }
-  }, [savePostMutation]);
-
-  const handleShare = useCallback(async (postId: string) => {
-    setLoadingPostId(postId);
-    try {
-      await sharePostMutation.mutateAsync(postId);
-    } finally {
-      setLoadingPostId(null);
-    }
-  }, [sharePostMutation]);
+  const handleLike = useCallback((postId: string) => {
+    // TODO: Replace with actual user ID from auth context
+    const userId = "123e4567-e89b-12d3-a456-426614174000";
+    likePost({ postId, userId });
+  }, [likePost]);
 
   const handleComment = useCallback((postId: string, content: string) => {
-    // Comment functionality would be implemented here
-    // console.log('Comment on post:', postId, content);
-  }, []);
+    // TODO: Replace with actual user ID from auth context
+    const userId = "123e4567-e89b-12d3-a456-426614174000";
+    addComment({ postId, content, userId });
+  }, [addComment]);
 
-  const handleCreatePost = useCallback(async (postData: CreatePostData) => {
-    await submitPost(postData);
-  }, [submitPost]);
+  const handleCreatePost = useCallback((postData: CreatePostData) => {
+    // TODO: Replace with actual user ID from auth context
+    const userId = "123e4567-e89b-12d3-a456-426614174000";
+    createPost({ ...postData, user_id: userId }, {
+        onSuccess: () => {
+            setShowCreateDialog(false);
+            refresh(); // Refresh feed after creating post
+        }
+    });
+  }, [createPost, refresh]);
 
   // Post detail handlers
   const handleOpenPostDetail = useCallback((post: Post) => {
@@ -239,49 +173,21 @@ export const PostFeed: React.FC<PostFeedProps> = ({
             <PostCard
               post={post}
               onLike={() => handleLike(post.id)}
-              onSave={() => handleSave(post.id)}
-              onShare={() => handleShare(post.id)}
               onComment={(content) => handleComment(post.id, content)}
               onOpenDetail={handleOpenPostDetail}
-              isLoading={loadingPostId === post.id}
+              isLoading={isLikingPost}
             />
           </motion.div>
         ))}
       </AnimatePresence>
 
-      {/* Load more trigger */}
-      {hasMore && (
-        <div ref={loadMoreRef} className="py-8">
-          <div className="flex justify-center">
-            {isFetchingNextPage ? (
-              <LoadingSpinner size="md" text="Loading more posts..." />
-            ) : (
-              <Button 
-                variant="outline" 
-                onClick={loadMore}
-                className="min-w-[120px]"
-              >
-                Load More
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* End of feed indicator */}
-      {!hasMore && posts.length > 0 && (
-        <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">
-            You&apos;ve reached the end! 🎉
-          </p>
-        </div>
-      )}
+      {/* TODO: Re-implement infinite scroll */}
 
       {/* Floating create post button (mobile) */}
       {showCreatePost && isMobile && (
         <FloatingPostButton 
           onClick={() => setShowCreateDialog(true)}
-          isLoading={isSubmitting}
+          isLoading={isCreatingPost}
         />
       )}
 
@@ -290,7 +196,7 @@ export const PostFeed: React.FC<PostFeedProps> = ({
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onSubmit={handleCreatePost}
-        isSubmitting={isSubmitting}
+        isSubmitting={isCreatingPost}
       />
 
       {/* Post detail modal */}
@@ -299,10 +205,8 @@ export const PostFeed: React.FC<PostFeedProps> = ({
         open={showPostDetail}
         onOpenChange={handleClosePostDetail}
         onLike={handleLike}
-        onSave={handleSave}
-        onShare={handleShare}
         onComment={handleComment}
-        isLoading={loadingPostId === selectedPost?.id}
+        isLoading={isLikingPost}
       />
     </div>
   );

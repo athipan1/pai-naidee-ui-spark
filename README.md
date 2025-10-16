@@ -66,51 +66,24 @@ cp .env.example .env
 # 5. เริ่ม development server
 npm run dev
 
-# 5. เปิดเว็บเบราว์เซอร์และไปที่ http://localhost:8080
+# 6. เปิดเว็บเบราว์เซอร์และไปที่ http://localhost:8080
 ```
 
-แอปพลิเคชันจะพร้อมใช้งานที่ `http://localhost:8080` พร้อมกับการ hot reload
+แอปพลิเคชันจะพร้อมใช้งานที่ `http://localhost:8080` พร้อมกับการ hot reload.
 
-### ⚙️ การกำหนดค่า Phase 2 Search (ขั้นสูง)
+### การกำหนดค่าสภาพแวดล้อม
 
-Phase 2 มาพร้อมกับระบบค้นหาที่ขั้นสูงที่สามารถปรับแต่งได้:
-
-#### การสร้าง Semantic Index
+สร้างไฟล์ `.env` โดยคัดลอกมาจาก `.env.example` และกรอกข้อมูล Supabase URL และ Anon Key ของคุณ:
 
 ```bash
-# สร้าง semantic index สำหรับการค้นหาด้วยความหมาย
-npm run build:semantic-index
+cp .env.example .env
 ```
 
-#### การกำหนดค่าผ่าน Environment Variables
-
-```bash
-# Feature Flags - เปิด/ปิดฟีเจอร์ต่างๆ
-ENABLE_SEMANTIC=true              # เปิดใช้งาน semantic search
-ENABLE_PERSONALIZATION=false     # เปิดใช้งาน personalization
-ENABLE_ADV_FILTERS=true          # เปิดใช้งาน advanced filters
-
-# Search Weights - ปรับน้ำหนักการจัดอันดับ (ผลรวมต้องเท่ากับ 1.0)
-SEARCH_WEIGHT_LEXICAL=0.45       # น้ำหนัก keyword matching
-SEARCH_WEIGHT_SEMANTIC=0.25      # น้ำหนัก semantic similarity
-SEARCH_WEIGHT_POPULARITY=0.15    # น้ำหนัก popularity score
-SEARCH_WEIGHT_RECENCY=0.10       # น้ำหนัก recency score
-SEARCH_WEIGHT_PERSONALIZATION=0.05 # น้ำหนัก personalization
+ไฟล์ `.env` ของคุณควรมีลักษณะดังนี้:
 ```
-
-#### การรันเทส
-
-```bash
-# รันเทสสำหรับ Phase 2 components
-npm run test
-
-# รันเทสแบบ watch mode
-npm run test:ui
+VITE_SUPABASE_URL="https://your-project-id.supabase.co"
+VITE_SUPABASE_ANON_KEY="your-supabase-anon-key-here"
 ```
-
-#### เอกสารเพิ่มเติม
-
-📚 **[Phase 2 Search Architecture](docs/search-architecture-phase2.md)** - เอกสารโครงสร้างและการทำงานของระบบค้นหาแบบละเอียด
 
 ## 📖 คู่มือการใช้งาน
 
@@ -125,12 +98,10 @@ npm run test:ui
 - **สถานที่แนะนำ**: แสดงสถานที่ท่องเที่ยวยอดนิยมพร้อมรีวิวและคะแนน
 
 #### 2. การค้นหาสถานที่
-```
 1. ใช้แถบค้นหาพิมพ์ชื่อสถานที่ เช่น "เกาะพีพี" หรือ "Phi Phi Islands"
 2. เลือกหมวดหมู่จากปุ่มด้านล่างแถบค้นหา
 3. ผลลัพธ์จะแสดงแบบเรียลไทม์พร้อมคะแนนและรีวิว
 4. คลิกที่การ์ดสถานที่เพื่อดูรายละเอียดเพิ่มเติม
-```
 
 #### 3. การใช้งานแผนที่
 - **เข้าถึงแผนที่**: คลิกปุ่ม "View & Navigate" ในการ์ดสถานที่ หรือไปที่หน้า Map
@@ -140,11 +111,9 @@ npm run test:ui
   - ใช้ปุ่ม "Get Directions" เพื่อเปิดแอปแผนที่ภายนอก
 
 #### 4. การจัดการรายการโปรด
-```
 1. คลิกไอคอนหัวใจ ❤️ ในการ์ดสถานที่เพื่อเพิ่มในรายการโปรด
 2. ไปที่หน้า Favorites เพื่อดูสถานที่ที่บันทึกไว้
 3. สามารถลบออกจากรายการโปรดได้โดยคลิกไอคอนหัวใจอีกครั้ง
-```
 
 #### 5. การสำรวจหมวดหมู่
 - **หน้า Explore**: แสดงโพสต์และการแนะนำจากชุมชน
@@ -161,53 +130,28 @@ npm run test:ui
 - คลิกไอคอนดวงอาทิตย์/ดวงจันทร์เพื่อเปลี่ยนโหมดการแสดงผล
 - รองรับการตั้งค่าอัตโนมัติตามระบบ
 
-#### เครื่องมือ Developer
-- ในโหมด development จะมีปุ่ม 🛠️ ที่มุมล่างขวา
-- คลิกเพื่อเข้าถึง DevTools panel สำหรับการ debug
-
 ## 🛠️ การพัฒนา
 
 ### คำสั่งที่มีให้ใช้งาน
 
 | คำสั่ง | คำอธิบาย |
-|---------|-------------|
+|---|---|
 | `npm run dev` | เริ่ม development server |
-| `npm run dev:debug` | เริ่ม server พร้อมเครื่องมือ debug |
 | `npm run build` | Build สำหรับ production |
-| `npm run build:dev` | Build สำหรับ development |
 | `npm run lint` | รัน ESLint |
 | `npm run lint:fix` | แก้ไข ESLint errors อัตโนมัติ |
-| `npm run type-check` | รัน TypeScript type checking |
+| `npm run type-check`| รัน TypeScript type checking |
 | `npm run preview` | ดูตัวอย่าง production build |
+| `npm run test` | รัน unit tests |
+
 
 ### เครื่องมือการพัฒนา
 
-เมื่อรันในโหมด debug (`npm run dev:debug`) คุณจะสามารถเข้าถึง:
-- **🛠️ Dev Tools Panel** - คลิกไอคอนประแจในมุมล่างขวา
+เมื่อรันในโหมด development (`npm run dev`) คุณจะสามารถเข้าถึง:
+- **🛠️ Dev Tools Panel** - คลิกไอคอนประแจในมุมล่างขวา (ถ้าเปิดใช้งาน)
 - **ข้อมูลสภาพแวดล้อม** - ดูการตั้งค่าและการกำหนดค่าปัจจุบัน
 - **การจัดการ Storage** - ล้าง localStorage และสถานะแอปพลิเคชัน
 - **Console Logging** - เอาต์พุตการ debug ที่ปรับปรุงแล้ว
-
-### การกำหนดค่าสภาพแวดล้อม
-
-สร้างไฟล์ `.env.development` สำหรับการพัฒนาในเครื่อง:
-
-```bash
-# API Configuration - FastAPI backend
-VITE_API_BASE_URL=http://localhost:8000
-# Alternative Next.js convention (also supported)
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-
-# ค่าอื่นๆ
-VITE_APP_TITLE=PaiNaiDee - Development
-VITE_ENABLE_DEBUG=true
-VITE_ENABLE_ANALYTICS=false
-```
-
-**หมายเหตุ API Configuration:**
-- `VITE_API_BASE_URL`: URL หลักสำหรับ FastAPI backend (localhost:8000)
-- `NEXT_PUBLIC_API_BASE_URL`: รองรับรูปแบบ Next.js convention
-- ระบบจะใช้ `VITE_HF_BACKEND_URL` เป็นหลัก หากไม่มีจึงจะใช้ `VITE_API_BASE_URL` หรือ `NEXT_PUBLIC_API_BASE_URL`
 
 ## 📁 โครงสร้างโปรเจค
 
@@ -232,6 +176,7 @@ pai-naidee-ui-spark/
 │   │   ├── hooks/            # Custom hooks
 │   │   ├── utils/            # ฟังก์ชันยูทิลิตี้
 │   │   └── assets/           # ไฟล์ static
+│   ├── services/             # Services (e.g., Supabase)
 │   └── main.tsx              # จุดเริ่มต้นแอปพลิเคชัน
 ├── public/                   # ไฟล์ static
 ├── docs/                     # เอกสารประกอบ
@@ -258,14 +203,12 @@ pai-naidee-ui-spark/
 │  └── Local Storage (User Preferences)                  │
 ├─────────────────────────────────────────────────────────┤
 │  Services Layer                                         │
-│  ├── API Services (Search, Attractions)                │
+│  ├── Supabase Service (Data Fetching)                  │
 │  ├── Map Services (Leaflet Integration)                │
-│  └── Queue Service (WebSocket, Optional)               │
+│  └── ...                                               │
 ├─────────────────────────────────────────────────────────┤
-│  Data Layer                                             │
-│  ├── Mock Data (Development)                           │
-│  ├── Static Assets (Images, Icons)                     │
-│  └── External APIs (Maps, Tourism Data)                │
+│  Backend                                                │
+│  └── Supabase (Database, Auth, Storage)                │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -273,6 +216,7 @@ pai-naidee-ui-spark/
 - **[React 18](https://react.dev/)** - React สมัยใหม่พร้อม hooks และคุณสมบัติ concurrent
 - **[TypeScript](https://www.typescriptlang.org/)** - การพัฒนา JavaScript ที่ปลอดภัยด้วยระบบ type
 - **[Vite](https://vitejs.dev/)** - เครื่องมือ build ที่เร็วและ development server
+- **[Supabase](https://supabase.com/)** - Backend-as-a-Service (Database, Auth, Storage)
 
 ### UI และการจัดแต่ง
 - **[Tailwind CSS](https://tailwindcss.com/)** - CSS framework แบบ utility-first
@@ -290,7 +234,7 @@ pai-naidee-ui-spark/
 ### เครื่องมือการพัฒนา
 - **[ESLint](https://eslint.org/)** - การตรวจสอบและคุณภาพโค้ด
 - **[Prettier](https://prettier.io/)** - การจัดรูปแบบโค้ด
-- **[TypeScript](https://www.typescriptlang.org/)** - การตรวจสอบ type แบบ static
+- **[Vitest](https://vitest.dev/)** - Unit testing framework
 
 ## 🐳 การพัฒนาด้วย Docker
 
@@ -314,38 +258,6 @@ docker compose up app
 - **ภาษาไทย (th)** - การรองรับภาษาท้องถิ่น
 
 การเปลี่ยนภาษาสามารถทำได้ในส่วนติดต่อผู้ใช้ และแอปพลิเคชันจะตรวจจับการตั้งค่าของผู้ใช้โดยอัตโนมัติ
-
-## 🚀 Backend & API
-
-Backend ทั้งหมดของโปรเจกต์นี้ถูก deploy และทำงานบน **Hugging Face Spaces** ซึ่งเป็นแพลตฟอร์มที่เหมาะสำหรับโมเดล AI และ API ที่เกี่ยวข้อง
-
-**Backend URL:** `https://Athipan01-PaiNaiDee_Backend.hf.space`
-
-[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/Athipan01/PaiNaiDee_Backend)
-
-### API Endpoints
-
-แอปพลิเคชันเชื่อมต่อกับ endpoints ต่อไปนี้:
-
-| Method | Endpoint                    | คำอธิบาย                                        |
-|--------|-----------------------------|-------------------------------------------------|
-| `GET`  | `/health`                   | ตรวจสอบสถานะของ API (Health Check)              |
-| `POST` | `/predict`                  | **AI Chat API** - ส่งข้อความเพื่อประมวลผลโดย AI    |
-| `POST` | `/search`                   | ค้นหาสถานที่ตามเงื่อนไขที่กำหนด                   |
-| `GET`  | `/search/suggestions`       | ดึงคำแนะนำสำหรับการค้นหา (Autocomplete)          |
-| `GET`  | `/search/filters`           | ดึงข้อมูลตัวกรอง (เช่น จังหวัด, หมวดหมู่)         |
-| `GET`  | `/explore/videos`           | ดึงวิดีโอสำหรับหน้า Explore Feed                 |
-| `POST` | `/videos/{videoId}/like`    | กดไลค์/เลิกไลค์วิดีโอ                          |
-| `GET`  | `/videos/{videoId}/comments`| ดึงความคิดเห็นของวิดีโอ                        |
-| `POST` | `/videos/{videoId}/comments`| โพสต์ความคิดเห็นใหม่ในวิดีโอ                     |
-
-*หมายเหตุ: การเรียก API ทั้งหมดไม่จำเป็นต้องมี prefix `/api`*
-
-### 🧪 ทดสอบ API ทั้งหมดใน Google Colab
-
-ทดสอบการทำงานของ API ทั้งหมดได้ทันทีผ่าน Google Colab โดยไม่ต้องติดตั้งอะไรเพิ่มเติม Notebook สำหรับทดสอบได้รับการอัปเดตให้ตรงกับ endpoints ปัจจุบันบน Hugging Face Spaces แล้ว
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/athipan1/pai-naidee-ui-spark/blob/main/tests/test_all_apis.ipynb)
 
 ## 🤝 การร่วมพัฒนา
 

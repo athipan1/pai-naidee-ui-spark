@@ -6,17 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
-import { useCommunity } from "@/shared/hooks/useCommunity";
+import { useCreatePost } from "@/shared/hooks/useCommunityQueries";
 import { CreatePost } from "@/components/community/CreatePost";
 import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
-import AIAssistantTrigger from "@/components/common/AIAssistantTrigger";
-import BackendStatusIndicator from "@/components/common/BackendStatusIndicator";
-
-// Lazy load the GlobalAIAssistant 3D module
-const GlobalAIAssistant = lazy(() => import("@/components/3D/GlobalAIAssistant"));
 
 // Lazy load new consolidated routes
 const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
@@ -30,17 +25,14 @@ const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 const CommunityFeed = lazy(() => import("./pages/Community"));
 const InstagramDemo = lazy(() => import("./pages/InstagramDemo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const VideoUploadPage = lazy(() => import("./pages/VideoUploadPage"));
 const ContextualSearchResults = lazy(() => import("./pages/ContextualSearchResults"));
 
 // --- PaiNaiDee Example Pages ---
-const PaiNaiDeeUsers = lazy(() => import("./pages/PaiNaiDeeUsers"));
-const PaiNaiDeeTasks = lazy(() => import("./pages/PaiNaiDeeTasks"));
+// const PaiNaiDeeUsers = lazy(() => import("./pages/PaiNaiDeeUsers"));
+// const PaiNaiDeeTasks = lazy(() => import("./pages/PaiNaiDeeTasks"));
 // --- End PaiNaiDee Example Pages ---
 
 // --- System Pages ---
-const HealthCheckPage = lazy(() => import("./pages/HealthCheckPage"));
-const APITestPage = lazy(() => import("./pages/APITestPage"));
 const SupabaseDiagnostic = lazy(() => import("./pages/SupabaseDiagnostic"));
 // --- End System Pages ---
 
@@ -84,16 +76,17 @@ const queryClient = new QueryClient({
 
 const AppContent = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
-  const [isAIAssistantLoaded, setIsAIAssistantLoaded] = useState(false);
 
   const { isCreatePostModalOpen, closeCreatePostModal } = useUIContext();
-  const { createPost, isCreatingPost } = useCommunity();
+  const { mutate: createPost, isPending: isCreatingPost } = useCreatePost();
 
   // Apply responsive text sizing for better accessibility
   useResponsiveTextSize();
 
   const handleCreatePost = (postData) => {
-    createPost(postData, {
+    // TODO: Replace with actual user ID from auth context
+    const userId = "123e4567-e89b-12d3-a456-426614174000";
+    createPost({ ...postData, user_id: userId }, {
       onSuccess: () => {
         closeCreatePostModal();
       }
@@ -102,7 +95,6 @@ const AppContent = () => {
 
   return (
     <>
-      <BackendStatusIndicator />
       <SkipLink />
       <Suspense fallback={
         <LoadingSpinner
@@ -173,15 +165,6 @@ const AppContent = () => {
               <InstagramDemo />
             }
           />
-          <Route
-            path="/video-upload"
-            element={
-              <VideoUploadPage
-                currentLanguage={currentLanguage}
-                onBack={() => window.history.back()}
-              />
-            }
-          />
           {/* Legacy Route Redirects */}
           <Route path="/explore" element={<ExploreRedirect />} />
           <Route path="/favorites" element={<FavoritesRedirect />} />
@@ -203,38 +186,22 @@ const AppContent = () => {
               element={<AccordionExamples />}
             />
           )}
-          <Route path="/health-check" element={<HealthCheckPage />} />
-          <Route path="/admin/api-test" element={<APITestPage />} />
           <Route path="/supabase-diagnostic" element={<SupabaseDiagnostic />} />
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
 
           {/* --- PaiNaiDee Example Routes --- */}
-          <Route
+          {/* <Route
             path="/painaidee/users"
             element={<PaiNaiDeeUsers />}
           />
           <Route
             path="/painaidee/tasks"
             element={<PaiNaiDeeTasks />}
-          />
+          /> */}
           {/* --- End PaiNaiDee Example Routes --- */}
         </Routes>
       </Suspense>
-      {isAIAssistantLoaded ? (
-        <Suspense fallback={
-          <div className="fixed bottom-6 right-6 z-50">
-            <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
-          </div>
-        }>
-          <GlobalAIAssistant language={currentLanguage} />
-        </Suspense>
-      ) : (
-        <AIAssistantTrigger
-          onClick={() => setIsAIAssistantLoaded(true)}
-          language={currentLanguage}
-        />
-      )}
       <CreatePost
         open={isCreatePostModalOpen}
         onOpenChange={(isOpen) => !isOpen && closeCreatePostModal()}

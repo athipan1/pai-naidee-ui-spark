@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { getEnvironmentInfo, isFeatureEnabled } from "@/shared/utils/devUtils";
-import HealthCheck from "@/components/common/HealthCheck";
 
 interface DevToolsProps {
   isVisible?: boolean;
@@ -37,10 +36,6 @@ const DevTools = ({ isVisible = false }: DevToolsProps) => {
             >
               ✕
             </button>
-          </div>
-
-          <div className="mb-3">
-            <HealthCheck />
           </div>
 
           <div className="space-y-2 text-xs">
