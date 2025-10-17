@@ -266,6 +266,26 @@ describe("CategoryRedirect Component", () => {
     // The buggy implementation would redirect to "/discover?", but we want "/discover"
     expect(mockNavigate).toHaveBeenCalledWith("/discover", { replace: true });
   });
+
+  it("should handle legacy 'search' parameter", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/category/temples?search=ancient"]}>
+        <Routes>
+          <Route path="/category/:categoryName" element={<CategoryRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    const [redirectUrl] = mockNavigate.mock.calls[0];
+    const url = new URL(redirectUrl, "http://localhost");
+    expect(url.pathname).toBe("/discover");
+    expect(url.searchParams.get("cat")).toBe("temples");
+    expect(url.searchParams.get("q")).toBe("ancient");
+    expect(url.searchParams.get("mode")).toBe("search");
+    expect(url.searchParams.has("search")).toBe(false);
+  });
 });
 
 describe("ExploreRedirect Component", () => {

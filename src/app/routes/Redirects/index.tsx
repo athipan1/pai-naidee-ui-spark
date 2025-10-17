@@ -174,6 +174,14 @@ const CategoryRedirect = () => {
     if (categoryName) {
       newParams.set('cat', categoryName);
     }
+
+    const query = newParams.get('q') || newParams.get('search');
+    if (query) {
+      newParams.set('q', query);
+      newParams.set('mode', 'search');
+      newParams.delete('search');
+    }
+
     const queryString = newParams.toString();
     const redirectUrl = queryString ? `/discover?${queryString}` : '/discover';
     navigate(redirectUrl, { replace: true });
