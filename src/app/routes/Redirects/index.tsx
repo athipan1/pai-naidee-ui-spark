@@ -182,8 +182,8 @@ const CategoryRedirect = () => {
     if (query) {
       newParams.set('q', query);
       newParams.set('mode', 'search');
-      newParams.delete('search');
     }
+    newParams.delete('search');
 
     const queryString = newParams.toString();
     const redirectUrl = queryString ? `/discover?${queryString}` : '/discover';
