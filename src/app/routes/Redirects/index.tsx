@@ -80,6 +80,9 @@ const MapRedirect = () => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set('mode', 'map');
     
+    // Ensure any existing 'id' from query params is removed
+    newParams.delete('id');
+
     // Only add the 'id' parameter if it has a value to avoid '/discover?id=null'
     if (id && id !== 'null' && id !== 'undefined') {
       newParams.set('id', id);

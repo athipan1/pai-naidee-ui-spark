@@ -38,4 +38,31 @@ describe("MapRedirect Component", () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledWith("/discover?utm_source=facebook&mode=map", { replace: true });
   });
+
+  it("should prioritize id from URL parameter over query parameter", () => {
+    // Arrange: URL has id in both path and query string
+    const initialEntries = ["/map/path-id?id=query-id"];
+    const searchParams = new URLSearchParams(initialEntries[0].split("?")[1]);
+    mockUseSearchParams.mockReturnValue([searchParams]);
+
+    render(
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          <Route path="/map/:id" element={<MapRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    // The path id 'path-id' should be used, and the query id 'query-id' should be discarded.
+    const correctParams = new URLSearchParams({
+      mode: "map",
+      id: "path-id",
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/discover?${correctParams.toString()}`,
+      { replace: true }
+    );
+  });
 });
