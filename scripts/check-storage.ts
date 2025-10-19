@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // --- Use credentials provided by the user ---
 const supabaseUrl = "https://quptneebcplnmzkyuxlu.supabase.co/";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1cHRuZWViY3Bsbm16a3l1eGx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5MzgyNjksImV4cCI6MjA3MTUxNDI2OX0.DU4-vgGZl2xJS2o6EvA5rPOA0YJlwOUJ5JTzrM58yA";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1cHRuZWViY3Bsbm16a3l1eGx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5MzgyNjksImV4cCI6MjA3MTUxNDI2OX0.DU4-vgGZFl2xJS2o6EvA5rPOA0YJlwOUJ5JTzrM58yA";
 
 // --- Main Script ---
 async function checkSupabaseStorage() {
