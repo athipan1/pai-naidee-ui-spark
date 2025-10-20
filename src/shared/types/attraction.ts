@@ -33,3 +33,11 @@ export interface Accommodation {
   amenities: string[];
   booking_url?: string;
 }
+
+export interface WikiData {
+  title: string;
+  extract: string;
+  thumbnail?: {
+    source: string;
+  };
+}

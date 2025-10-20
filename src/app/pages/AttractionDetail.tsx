@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -32,7 +32,7 @@ import ImageGallery from "@/components/attraction/ImageGallery";
 import Reviews from "@/components/attraction/Reviews";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
-import type { Accommodation } from "@/shared/types/attraction";
+import type { Accommodation, WikiData } from "@/shared/types/attraction";
 
 const pastelVariants = [
   "pastel-blue",
@@ -68,6 +68,15 @@ const AttractionDetail = ({
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [accommodationLoading, setAccommodationLoading] = useState(false);
   const [accommodationError, setAccommodationError] = useState<string | null>(null);
+  const [wikiData, setWikiData] = useState<WikiData | null>(null);
+  const [isWikiLoading, setIsWikiLoading] = useState(false);
+  const [wikiError, setWikiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (attraction) {
+      fetchWikiData(attraction.name);
+    }
+  }, [attraction]);
 
   const content = {
     th: {
@@ -149,6 +158,27 @@ const AttractionDetail = ({
     }
   };
 
+  const fetchWikiData = async (placeName: string) => {
+    setIsWikiLoading(true);
+    setWikiError(null);
+    try {
+      const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(placeName)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch Wikipedia data.');
+      }
+      const data: WikiData = await response.json();
+      setWikiData(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        setWikiError(error.message);
+      } else {
+        setWikiError('An unknown error occurred.');
+      }
+    } finally {
+      setIsWikiLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -197,7 +227,13 @@ const AttractionDetail = ({
   const displayName =
     currentLanguage === "th" && attraction.nameLocal
       ? attraction.nameLocal
-      : attraction.name;
+      : wikiData?.title || attraction.name;
+
+  const displayImages = wikiData?.thumbnail?.source
+    ? [wikiData.thumbnail.source, ...attraction.images]
+    : attraction.images.length > 0
+    ? attraction.images
+    : ['https://via.placeholder.com/400x250?text=No+Image'];
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -283,7 +319,7 @@ const AttractionDetail = ({
 
       {/* Hero Section with Image Gallery */}
       <div className="relative h-[60vh] min-h-[400px] w-full">
-        <ImageGallery images={attraction.images} alt={displayName} />
+        <ImageGallery images={displayImages} alt={displayName} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
 
         {/* Action Buttons */}
@@ -381,8 +417,17 @@ const AttractionDetail = ({
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4">About this place</h3>
             <p className="text-muted-foreground leading-relaxed">
-              {attraction.description}
+              {wikiData?.extract || attraction.description}
             </p>
+            {isWikiLoading && <p>Loading Wikipedia data...</p>}
+            {wikiError && <p className="text-red-500">{wikiError}</p>}
+             {!isWikiLoading && !wikiData?.extract && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {currentLanguage === 'th'
+                    ? 'ไม่มีข้อมูลเพิ่มเติมจากวิกิพีเดีย'
+                    : 'No additional information from Wikipedia'}
+                </p>
+              )}
           </CardContent>
         </Card>
 
