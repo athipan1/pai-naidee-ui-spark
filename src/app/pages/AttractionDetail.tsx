@@ -162,17 +162,37 @@ const AttractionDetail = ({
     setIsWikiLoading(true);
     setWikiError(null);
     try {
-      const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(placeName)}`);
+      // Use the Thai Wikipedia endpoint
+      const response = await fetch(`https://th.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(placeName)}`);
+
+      // Check if the response is successful
       if (!response.ok) {
-        throw new Error('Failed to fetch Wikipedia data.');
+        // If the page is not found or another error occurs, set data to null
+        setWikiData(null);
+        // We don't throw an error here to avoid breaking the UI, just log it.
+        console.error(`Wikipedia API error for "${placeName}": ${response.statusText}`);
+        setWikiError(`ไม่พบข้อมูลสำหรับ "${placeName}" ในวิกิพีเดีย`);
+        return;
       }
+
       const data: WikiData = await response.json();
+
+      // Ensure we have a valid extract to display
+      if (data.type === 'disambiguation' || !data.extract) {
+          setWikiData(null);
+          setWikiError(`ไม่มีข้อมูลสรุปสำหรับ "${placeName}"`);
+          return;
+      }
+
       setWikiData(data);
     } catch (error) {
+      setWikiData(null);
       if (error instanceof Error) {
         setWikiError(error.message);
+        console.error("Failed to fetch Wikipedia data:", error);
       } else {
-        setWikiError('An unknown error occurred.');
+        setWikiError('เกิดข้อผิดพลาดที่ไม่รู้จัก');
+        console.error("An unknown error occurred while fetching from Wikipedia:", error);
       }
     } finally {
       setIsWikiLoading(false);
@@ -229,6 +249,7 @@ const AttractionDetail = ({
       ? attraction.nameLocal
       : wikiData?.title || attraction.name;
 
+  // This logic correctly prioritizes the Wikipedia image if it exists.
   const displayImages = wikiData?.thumbnail?.source
     ? [wikiData.thumbnail.source, ...attraction.images]
     : attraction.images.length > 0
@@ -415,19 +436,39 @@ const AttractionDetail = ({
         {/* Description */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">About this place</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              {wikiData?.extract || attraction.description}
-            </p>
-            {isWikiLoading && <p>Loading Wikipedia data...</p>}
-            {wikiError && <p className="text-red-500">{wikiError}</p>}
-             {!isWikiLoading && !wikiData?.extract && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  {currentLanguage === 'th'
-                    ? 'ไม่มีข้อมูลเพิ่มเติมจากวิกิพีเดีย'
-                    : 'No additional information from Wikipedia'}
+            <h3 className="text-lg font-semibold mb-4">
+              {currentLanguage === 'th' ? 'เกี่ยวกับสถานที่นี้' : 'About this place'}
+            </h3>
+
+            {isWikiLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>{currentLanguage === 'th' ? 'กำลังโหลดข้อมูลจากวิกิพีเดีย...' : 'Loading Wikipedia data...'}</span>
+              </div>
+            ) : (
+              <>
+                <p className="text-muted-foreground leading-relaxed">
+                  {wikiData?.extract || attraction.description}
                 </p>
-              )}
+
+                {wikiError && !wikiData?.extract && (
+                  <p className="text-sm text-yellow-600 mt-2">
+                    {currentLanguage === 'th'
+                      ? `เกิดข้อผิดพลาด: ${wikiError}`
+                      : `Error: ${wikiError}`}
+                  </p>
+                )}
+
+                {!isWikiLoading && !wikiData?.extract && !wikiError && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {currentLanguage === 'th'
+                      ? 'ไม่มีข้อมูลเพิ่มเติมจากวิกิพีเดีย'
+                      : 'No additional information from Wikipedia'}
+                  </p>
+                )}
+              </>
+            )}
+
           </CardContent>
         </Card>
 
