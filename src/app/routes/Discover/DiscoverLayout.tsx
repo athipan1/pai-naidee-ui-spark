@@ -167,15 +167,20 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
         </div>
       </header>
 
-      {/* Search and Filter Section - only show for feed and category modes */}
+      {/* Search Section */}
+      <div className="border-b border-border/30 bg-card/30">
+        <div className="container mx-auto px-4 py-4">
+          <SearchSection
+            currentLanguage={currentLanguage}
+            onSearch={handleSearch}
+          />
+        </div>
+      </div>
+
+      {/* Filter Section - only show for feed and category modes */}
       {shouldShowSearchAndFilter && (
-        <div className="border-b border-border/30 bg-card/30">
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            <SearchSection
-              currentLanguage={currentLanguage}
-              onSearch={handleSearch}
-            />
-            
+        <div className="border-b border-border/30">
+          <div className="container mx-auto px-4 py-4">
             <CategoryFilter
               currentLanguage={currentLanguage}
               selectedCategory={state.category || "all"}
