@@ -43,9 +43,25 @@ const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_P
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+/**
+ * Ensures the client is authenticated, performing an anonymous sign-in if needed.
+ * This is crucial for accessing RLS-protected tables or authenticated Edge Functions.
+ */
+export const ensureAuthenticated = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      console.error('Error signing in anonymously:', error.message);
+      throw new Error(`Anonymous sign-in failed: ${error.message}`);
+    }
+  }
+};
+
 // Type definition for a place record from Supabase
 interface PlaceRecord {
   id: string;
+  place_id: string;
   name: string;
   name_local?: string;
   province: string;
@@ -80,8 +96,8 @@ export const getPlacesByCategory = async (
 
   try {
     const { data, error } = await supabase
-      .from('places')
-      .select('*')
+      .from('attractions')
+      .select('*,place_id')
       .eq('category', category)
       .limit(limit);
 
@@ -97,7 +113,7 @@ export const getPlacesByCategory = async (
 
     // Transform Supabase data to SearchResult format with better null handling
     return data.map((place: PlaceRecord): SearchResult => ({
-      id: place.id || 'unknown',
+      id: place.place_id || place.id || 'unknown',
       name: place.name || 'Unnamed Place',
       nameLocal: place.name_local || place.name || 'Unnamed Place',
       province: place.province || 'Unknown Province',
@@ -137,9 +153,9 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
 
   try {
     const { data, error } = await supabase
-      .from('places')
-      .select('*')
-      .eq('id', id)
+      .from('attractions')
+      .select('*,place_id')
+      .eq('place_id', id)
       .single(); // Use .single() to get one record
 
     if (error) {
@@ -155,7 +171,7 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
 
     // Transform Supabase data to AttractionDetail format with better null handling
     return {
-      id: place.id || 'unknown',
+      id: place.place_id || place.id || 'unknown',
       name: place.name || 'Unnamed Place',
       nameLocal: place.name_local || place.name || 'Unnamed Place',
       province: place.province || 'Unknown Province',
@@ -223,7 +239,7 @@ export const searchPlaces = async (
 
   try {
     // Initialize the query and request total count
-    let query = supabase.from('places').select('*', { count: 'exact' });
+    let query = supabase.from('attractions').select('*,place_id', { count: 'exact' });
 
     const searchConditions: string[] = [];
 
@@ -269,7 +285,7 @@ export const searchPlaces = async (
 
     // Transform data to SearchResult format with better null handling
     const results = data.map((place: PlaceRecord): SearchResult => ({
-      id: place.id || 'unknown',
+      id: place.place_id || place.id || 'unknown',
       name: place.name || 'Unnamed Place',
       nameLocal: place.name_local || place.name || 'Unnamed Place',
       province: place.province || 'Unknown Province',

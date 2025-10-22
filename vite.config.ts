@@ -19,6 +19,12 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/*.spec.ts' // Exclude Playwright tests
+      ],
     },
     server: {
       host: "0.0.0.0",
