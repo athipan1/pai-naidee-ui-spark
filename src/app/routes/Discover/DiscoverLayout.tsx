@@ -1,8 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import SearchSection from "@/components/common/SearchSection";
 import CategoryFilter from "@/components/common/CategoryFilter";
 import { useDiscoveryState, DiscoveryMode } from "./hooks/useDiscoveryState";
 import FeedView from "./FeedView";
@@ -167,15 +167,34 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
         </div>
       </header>
 
-      {/* Search and Filter Section - only show for feed and category modes */}
-      {shouldShowSearchAndFilter && (
-        <div className="border-b border-border/30 bg-card/30">
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            <SearchSection
-              currentLanguage={currentLanguage}
-              onSearch={handleSearch}
+      {/* Search Section */}
+      <div className="border-b border-border/30 bg-card/30">
+        <div className="container mx-auto px-4 py-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const query = formData.get("search") as string;
+              handleSearch(query);
+            }}
+            className="flex items-center space-x-2"
+          >
+            <Input
+              type="text"
+              name="search"
+              placeholder={t.searchPlaceholder}
+              className="flex-grow"
+              defaultValue={state.query}
             />
-            
+            <Button type="submit">{t.search}</Button>
+          </form>
+        </div>
+      </div>
+
+      {/* Filter Section - only show for feed and category modes */}
+      {shouldShowSearchAndFilter && (
+        <div className="border-b border-border/30">
+          <div className="container mx-auto px-4 py-4">
             <CategoryFilter
               currentLanguage={currentLanguage}
               selectedCategory={state.category || "all"}

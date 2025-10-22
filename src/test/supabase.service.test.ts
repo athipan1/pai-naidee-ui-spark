@@ -76,8 +76,8 @@ describe('Supabase Service', () => {
 
       await getPlacesByCategory('Test Category');
 
-      expect(mockFrom).toHaveBeenCalledWith('places');
-      expect(mockSelect).toHaveBeenCalledWith('*');
+      expect(mockFrom).toHaveBeenCalledWith('attractions');
+      expect(mockSelect).toHaveBeenCalledWith('*,place_id');
       expect(mockEq).toHaveBeenCalledWith('category', 'Test Category');
       expect(mockLimit).toHaveBeenCalledWith(10);
     });
@@ -96,9 +96,9 @@ describe('Supabase Service', () => {
 
       await getPlaceById('1');
 
-      expect(mockFrom).toHaveBeenCalledWith('places');
-      expect(mockSelect).toHaveBeenCalledWith('*');
-      expect(mockEq).toHaveBeenCalledWith('id', '1');
+      expect(mockFrom).toHaveBeenCalledWith('attractions');
+      expect(mockSelect).toHaveBeenCalledWith('*,place_id');
+      expect(mockEq).toHaveBeenCalledWith('place_id', '1');
       expect(mockSingle).toHaveBeenCalled();
     });
 
@@ -115,8 +115,8 @@ describe('Supabase Service', () => {
 
       const result = await searchPlaces('Filtered', ['Category1'], ['Province1'], 10, 1);
 
-      expect(mockFrom).toHaveBeenCalledWith('places');
-      expect(mockSelect).toHaveBeenCalledWith('*', { count: 'exact' });
+      expect(mockFrom).toHaveBeenCalledWith('attractions');
+      expect(mockSelect).toHaveBeenCalledWith('*,place_id', { count: 'exact' });
       expect(mockOr).toHaveBeenCalledWith('category.eq.Category1');
       expect(mockOr).toHaveBeenCalledWith('province.eq.Province1');
       expect(mockOr).toHaveBeenCalledWith(

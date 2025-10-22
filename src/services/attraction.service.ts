@@ -1,6 +1,6 @@
+import { supabase, ensureAuthenticated, isSupabaseConfigured } from '@/services/supabase.service';
 import { AttractionDetail } from '@/shared/types/attraction';
 import { SearchResult } from '@/shared/types/search';
-import { getPlaceById, searchPlaces } from './supabase.service';
 
 // Helper to extract a meaningful error message from an API error
 const getApiErrorMessage = (error: unknown): string => {
@@ -10,19 +10,34 @@ const getApiErrorMessage = (error: unknown): string => {
   return 'An unknown error occurred';
 };
 
-// [REFACTORED] Get attraction details by ID from Supabase
+// [REFACTORED] Get attraction details by ID from Supabase Edge Function
 const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
-  console.log("✅ Calling Supabase to fetch attraction detail for id:", id);
+  console.log('✅ Calling Edge Function to fetch attraction detail for id:', id);
   try {
-    const attraction = await getPlaceById(id);
-    return attraction;
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase is not configured. Please check your environment variables.');
+    }
+    await ensureAuthenticated(); // Ensure user is authenticated
+    const { data, error } = await supabase.functions.invoke('getAttractionDetail', {
+      body: { id },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data) {
+      throw new Error('Attraction not found.');
+    }
+
+    return data;
   } catch (error) {
-    console.error(`❌ Error fetching attraction detail from Supabase for id ${id}:`, error);
+    console.error(`❌ Error fetching attraction detail from Edge Function for id ${id}:`, error);
     throw new Error(`Failed to fetch attraction details. ${getApiErrorMessage(error)}`);
   }
 };
 
-// [REFACTORED] Get list of all attractions from Supabase
+// [REFACTORED] Get list of all attractions from Supabase Edge Function
 const getAttractions = async (options?: {
   page?: number;
   limit?: number;
@@ -34,39 +49,39 @@ const getAttractions = async (options?: {
   page: number;
   limit: number;
 }> => {
-  const page = options?.page || 1;
-  const limit = options?.limit || 10;
-  const category = options?.category ? [options.category] : [];
-  const search = options?.search || '';
-
-  console.log("✅ Calling Supabase to fetch attractions list with options:", options);
+  console.log('✅ Calling Edge Function to fetch attractions list with options:', options);
   try {
-    const { results, totalCount } = await searchPlaces(search, category, [], limit, page);
-    return {
-      attractions: results,
-      total: totalCount,
-      page,
-      limit,
-    };
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase is not configured. Please check your environment variables.');
+    }
+    await ensureAuthenticated(); // Ensure user is authenticated
+    const { data, error } = await supabase.functions.invoke('getAttractions', {
+      body: { ...options },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Ensure we have a valid response structure
+    if (!data || !Array.isArray(data.attractions)) {
+        throw new Error('Invalid response from server');
+    }
+
+    return data;
   } catch (error) {
-    console.error(`❌ Error fetching attractions from Supabase:`, error);
+    console.error(`❌ Error fetching attractions from Edge Function:`, error);
     throw new Error(`Failed to fetch attractions. ${getApiErrorMessage(error)}`);
   }
 };
 
-// [REFACTORED] Get list of attractions from Supabase
-// This function now uses the searchPlaces function to fetch data from Supabase
+// [DEPRECATED] This function is no longer needed as getAttractions can handle all cases.
+// It is kept for compatibility with any components that might still be using it.
 const getLegacyAttractions = async (): Promise<SearchResult[]> => {
-  console.log("✅ Calling Supabase to fetch attractions");
-
-  try {
-    // Calling searchPlaces with an empty search term to get all attractions
-    const { results } = await searchPlaces('');
-    return results;
-  } catch (error) {
-    console.error('❌ Error fetching attractions from Supabase:', error);
-    throw new Error(`Failed to fetch attractions from Supabase. ${getApiErrorMessage(error)}`);
-  }
+  console.warn('⚠️ DEPRECATED: getLegacyAttractions is called. Please use getAttractions instead.');
+  // Call with defaults that match the old behavior.
+  const { attractions } = await getAttractions({ page: 1, limit: 100 });
+  return attractions;
 };
 
 export const attractionService = {
