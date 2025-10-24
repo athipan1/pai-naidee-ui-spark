@@ -49,6 +49,7 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
   // Handle search from SearchSection component
   const handleSearch = (query: string) => {
     setQuery(query);
+    setMode('search');
   };
 
   // Handle category selection from CategoryFilter component  
