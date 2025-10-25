@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, User, Shield, Activity, BarChart3, Video } from "lucide-react";
+import { ArrowLeft, User, Shield, Activity, BarChart3, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/services/supabase.service";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Dashboard from "./Dashboard";
 import MediaQueue from "./MediaQueue";
 import Moderation from "./Moderation";
@@ -12,24 +14,33 @@ interface AdminLayoutProps {
   currentLanguage: "th" | "en";
 }
 
-// Simple admin role check - in real app this would come from auth context
-const useAdminRole = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  useEffect(() => {
-    // TODO: Replace with actual auth check
-    // For demo purposes, we'll simulate admin check
-    const isAdminUser = localStorage.getItem('isAdmin') === 'true' || import.meta.env.DEV;
-    setIsAdmin(isAdminUser);
-  }, []);
-  
-  return isAdmin;
-};
-
 const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
   const navigate = useNavigate();
-  const isAdmin = useAdminRole();
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login');
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const content = {
     th: {
@@ -62,40 +73,13 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
 
   const t = content[currentLanguage];
 
-  // Show unauthorized access page if not admin
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-6 px-6 max-w-md">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-            <Shield className="w-10 h-10 text-red-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
-              {t.unauthorized}
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              {t.unauthorizedDesc}
-            </p>
-          </div>
-          <div className="space-y-3">
-            <Button onClick={() => navigate("/")} className="w-full">
-              {t.backToHome}
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                // TODO: Implement access request functionality
-                alert("Access request functionality would be implemented here");
-              }}
-              className="w-full"
-            >
-              {t.requestAccess}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner text="Authenticating..." />;
   }
 
   return (
@@ -128,6 +112,10 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
                   {t.adminAccess}
                 </span>
               </div>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
         </div>
