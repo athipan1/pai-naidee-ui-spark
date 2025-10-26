@@ -1,10 +1,45 @@
+# Build artifacts
+dist
 node_modules
+.cache
+.DS_Store
+
+# Git and VSCode
 .git
 .vscode
+
+# Environment files
+.env
+.env.*
+!.env.production
+!.env.preview
+!.env.development
+
+# Jupyter Notebooks
 *.ipynb
+
+# Docker
 Dockerfile
-/.github
-/.idea
+docker-compose.yml
+
+# GitHub and IDEs
+.github
+.idea
+
+# Log files
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test files
+src/**/*.test.tsx
+src/**/*.test.ts
+src/test/
+
+# Scripts (assuming they are for local dev only)
 scripts/
+
+# Misc
 audit-report.json
+jules-scratch/

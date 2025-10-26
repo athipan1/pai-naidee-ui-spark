@@ -21,6 +21,7 @@ const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
 
 // Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 const CommunityFeed = lazy(() => import("./pages/Community"));
 const InstagramDemo = lazy(() => import("./pages/InstagramDemo"));
@@ -141,6 +142,7 @@ const AppContent = () => {
               <AdminLayout currentLanguage={currentLanguage} />
             }
           />
+          <Route path="/login" element={<LoginPage />} />
           {/* Existing Essential Routes */}
           <Route
             path="/attraction/:id"
