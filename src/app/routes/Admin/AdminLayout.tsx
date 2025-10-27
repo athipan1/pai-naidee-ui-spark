@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/services/supabase.service";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Dashboard from "./Dashboard";
-import MediaQueue from "./MediaQueue";
 import Moderation from "./Moderation";
 import Analytics from "./Analytics";
+import MediaManagementInterface from "@/components/admin/MediaManagementInterface";
 
 interface AdminLayoutProps {
   currentLanguage: "th" | "en";
@@ -167,7 +167,7 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
           </TabsContent>
 
           <TabsContent value="media" className="space-y-6">
-            <MediaQueue currentLanguage={currentLanguage} />
+            <MediaManagementInterface currentLanguage={currentLanguage} />
           </TabsContent>
 
           <TabsContent value="moderation" className="space-y-6">
