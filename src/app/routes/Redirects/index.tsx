@@ -75,6 +75,7 @@ const MapRedirect = () => {
 
   // Use ID from URL params if available, otherwise use query params
   const id = params.id || searchParams.get('id');
+  const searchString = searchParams.toString();
   
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams);
@@ -89,7 +90,7 @@ const MapRedirect = () => {
     }
     
     navigate(`/discover?${newParams.toString()}`, { replace: true });
-  }, [navigate, id, searchParams]);
+  }, [navigate, id, searchString]);
 
   return null;
 };
