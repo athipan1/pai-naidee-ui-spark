@@ -183,7 +183,9 @@ const CategoryRedirect = () => {
       newParams.set('q', query);
       newParams.set('mode', 'search');
     }
+
     newParams.delete('search');
+    newParams.delete('category');
 
     const queryString = newParams.toString();
     const redirectUrl = queryString ? `/discover?${queryString}` : '/discover';

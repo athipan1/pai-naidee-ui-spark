@@ -286,6 +286,23 @@ describe("CategoryRedirect Component", () => {
     expect(url.searchParams.get("mode")).toBe("search");
     expect(url.searchParams.has("search")).toBe(false);
   });
+
+  it("should remove legacy 'category' parameter from the final URL", () => {
+    // Arrange
+    render(
+      <MemoryRouter initialEntries={["/category/temples?category=museums"]}>
+        <Routes>
+          <Route path="/category/:categoryName" element={<CategoryRedirect />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Assert
+    const [redirectUrl] = mockNavigate.mock.calls[0];
+    const url = new URL(redirectUrl, "http://localhost");
+    expect(url.searchParams.has("category")).toBe(false);
+    expect(url.searchParams.get("cat")).toBe("temples");
+  });
 });
 
 describe("ExploreRedirect Component", () => {
