@@ -217,6 +217,10 @@ const AppContent = () => {
 
 
 const App = () => {
+  // --- VERCEL DIAGNOSTIC ---
+  console.log('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL);
+  console.log('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY);
+  // --- END VERCEL DIAGNOSTIC ---
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
