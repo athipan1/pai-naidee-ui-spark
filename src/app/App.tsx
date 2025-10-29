@@ -158,6 +158,7 @@ const AppContent = () => {
             element={
               <CommunityFeed
                 currentLanguage={currentLanguage}
+                onLanguageChange={setCurrentLanguage}
               />
             }
           />

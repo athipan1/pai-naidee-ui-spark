@@ -92,6 +92,20 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     <div className="flex items-center space-x-3">
                       <Filter className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">แสดง:</span>
+                      <Select defaultValue="all">
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="เลือกประเภท" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">ทั้งหมด</SelectItem>
+                          <SelectItem value="popular">ยอดนิยม</SelectItem>
+                          <SelectItem value="recent">ล่าสุด</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Posts */}
               {isLoadingFeed ? (
