@@ -17,6 +17,10 @@ import { SkipLink, useResponsiveTextSize } from "@/components/common/Accessibili
 const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 const SavedPage = lazy(() => import("./routes/Saved/SavedPage"));
 const AdminLayout = lazy(() => import("./routes/Admin/AdminLayout"));
+const Dashboard = lazy(() => import("./routes/Admin/Dashboard"));
+const AttractionManager = lazy(() => import("./routes/Admin/AttractionManager"));
+const Moderation = lazy(() => import("./routes/Admin/Moderation"));
+const Analytics = lazy(() => import("./routes/Admin/Analytics"));
 const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
 
 // Keep existing essential routes
@@ -48,8 +52,9 @@ import {
   EnhancedAdminRedirect,
   DashboardRedirect,
   ProfileRedirect,
-  CategoryRedirect
+  CategoryRedirect,
 } from "./routes/Redirects";
+import { Navigate } from "react-router-dom";
 
 // Conditionally load AccordionExamples only in development
 const AccordionExamples = import.meta.env.DEV
@@ -136,12 +141,13 @@ const AppContent = () => {
               />
             }
           />
-          <Route
-            path="/admin"
-            element={
-              <AdminLayout currentLanguage={currentLanguage} />
-            }
-          />
+          <Route path="/admin" element={<AdminLayout currentLanguage={currentLanguage} />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard currentLanguage={currentLanguage} />} />
+            <Route path="attractions" element={<AttractionManager currentLanguage={currentLanguage} />} />
+            <Route path="moderation" element={<Moderation currentLanguage={currentLanguage} />} />
+            <Route path="analytics" element={<Analytics currentLanguage={currentLanguage} />} />
+          </Route>
           <Route path="/login" element={<LoginPage />} />
           {/* Existing Essential Routes */}
           <Route
