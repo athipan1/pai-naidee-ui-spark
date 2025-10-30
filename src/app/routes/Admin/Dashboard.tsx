@@ -1,16 +1,24 @@
-import { useState } from "react";
-import { Server, Activity, TrendingUp, Eye, Database, RefreshCw } from "lucide-react";
+import { Server, Activity, TrendingUp, Eye, Database, RefreshCw, AlertTriangle } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ApiStatusPrompt from "@/components/common/ApiStatusPrompt";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getSystemMetrics } from "@/services/admin.service";
+import StatCard from "@/components/admin/StatCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardProps {
   currentLanguage: "th" | "en";
 }
 
 const Dashboard = ({ currentLanguage }: DashboardProps) => {
-  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: metrics, isLoading, isError, error } = useQuery({
+    queryKey: ['admin-metrics'],
+    queryFn: getSystemMetrics,
+  });
 
   const content = {
     th: {
@@ -35,6 +43,7 @@ const Dashboard = ({ currentLanguage }: DashboardProps) => {
     en: {
       title: "System Overview",
       subtitle: "Core system status and metrics",
+      error: "Failed to load metrics",
       systemStatus: "System Status",
       systemOnline: "System Online",
       systemOffline: "System Offline",
@@ -55,40 +64,23 @@ const Dashboard = ({ currentLanguage }: DashboardProps) => {
 
   const t = content[currentLanguage];
 
-  // Mock data - in real app this would come from API
-  const systemMetrics = {
-    isOnline: true,
-    apiStatus: "healthy",
-    databaseStatus: "connected",
-    serverLoad: 65,
-    activeUsers: 1247,
-    totalAttractions: 156,
-    todayViews: 8934,
-    weeklyGrowth: 12.5,
-    newUsers: 89,
-    lastUpdated: new Date().toLocaleTimeString()
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-metrics'] });
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setRefreshing(false);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "healthy":
-      case "connected":
-        return "bg-green-100 text-green-800";
-      case "warning":
-        return "bg-yellow-100 text-yellow-800";
-      case "error":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const renderSkeleton = () => (
+    Array.from({ length: 8 }).map((_, i) => (
+      <Card key={i}>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Skeleton className="h-4 w-2/3" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-8 w-1/2" />
+          <Skeleton className="h-3 w-1/3 mt-2" />
+        </CardContent>
+      </Card>
+    ))
+  );
 
   return (
     <div className="space-y-6">
@@ -100,121 +92,65 @@ const Dashboard = ({ currentLanguage }: DashboardProps) => {
         </div>
         <Button
           onClick={handleRefresh}
-          disabled={refreshing}
+          disabled={isLoading}
           variant="outline"
           className="flex items-center gap-2"
         >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
           {t.refresh}
         </Button>
       </div>
 
-      {/* System Status Cards */}
+      {isError && (
+        <Card className="bg-destructive/10 border-destructive">
+          <CardHeader className="flex flex-row items-center gap-4">
+            <AlertTriangle className="w-8 h-8 text-destructive" />
+            <div>
+              <CardTitle>{t.error}</CardTitle>
+              <CardDescription className="text-destructive-foreground">
+                {error?.message || "An unknown error occurred"}
+              </CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
+
+      {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.systemStatus}</CardTitle>
-            <Server className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              <Badge className={getStatusColor(systemMetrics.isOnline ? "healthy" : "error")}>
-                {systemMetrics.isOnline ? t.systemOnline : t.systemOffline}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <ApiStatusPrompt />
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.databaseStatus}</CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              <Badge className={getStatusColor(systemMetrics.databaseStatus)}>
-                {systemMetrics.databaseStatus.toUpperCase()}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.serverLoad}</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.serverLoad}%</div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div 
-                className="bg-primary h-2 rounded-full" 
-                style={{ width: `${systemMetrics.serverLoad}%` }}
-              ></div>
-            </div>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          renderSkeleton()
+        ) : metrics ? (
+          <>
+            <StatCard icon={<Database />} title={t.totalAttractions} value={metrics.totalAttractions} />
+            <StatCard icon={<Eye />} title={t.activeUsers} value={metrics.activeUsers.toLocaleString()} description="Placeholder" />
+            <StatCard icon={<Activity />} title={t.todayViews} value={metrics.todayViews.toLocaleString()} description="Placeholder" />
+            <StatCard icon={<TrendingUp />} title={t.serverLoad} value={`${metrics.serverLoad}%`} description="Placeholder" />
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{t.systemStatus}</CardTitle>
+                <Server className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <Badge className="bg-green-100 text-green-800">{t.systemOnline}</Badge>
+              </CardContent>
+            </Card>
+            <ApiStatusPrompt />
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{t.databaseStatus}</CardTitle>
+                <Database className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <Badge className="bg-green-100 text-green-800">
+                  {metrics.databaseStatus.toUpperCase()}
+                </Badge>
+              </CardContent>
+            </Card>
+          </>
+        ) : null}
       </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.activeUsers}</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.activeUsers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              +{systemMetrics.newUsers} {t.newUsers}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.totalAttractions}</CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.totalAttractions}</div>
-            <p className="text-xs text-muted-foreground">
-              {/* TODO: Add growth metric */}
-              Active destinations
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.todayViews}</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemMetrics.todayViews.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              +{systemMetrics.weeklyGrowth}% {t.weeklyGrowth}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.serverHealth}</CardTitle>
-            <Server className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">Good</div>
-            <p className="text-xs text-muted-foreground">
-              {t.lastUpdated}: {systemMetrics.lastUpdated}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* TODO: Add charts and more detailed metrics */}
+      {/* Performance Charts Placeholder */}
       <Card>
         <CardHeader>
           <CardTitle>System Performance</CardTitle>
