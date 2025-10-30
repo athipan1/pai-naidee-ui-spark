@@ -105,7 +105,8 @@ describe('CategoryView Component', () => {
       { route: '/discover/category/Beach', path: '/discover/category/:category' }
     );
 
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+    // Check for the presence of the loading skeleton container
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('should display attraction cards in English when data is fetched successfully', async () => {
