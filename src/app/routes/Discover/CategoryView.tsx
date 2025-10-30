@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { attractionService } from "@/services/attraction.service";
 import AttractionCard from "@/components/common/AttractionCard";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // The Attraction type should ideally come from a shared location,
 // but we're defining it here to match the expected data structure.
@@ -69,8 +69,32 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
 
   if (isLoading) {
     return (
-      <div className="h-full bg-background flex items-center justify-center pt-20">
-        <LoadingSpinner />
+      <div data-testid="loading-skeleton" className="h-full bg-background px-4 pb-8">
+        {/* Header Skeleton */}
+        <div className="border-b border-border/30 bg-card/50 backdrop-blur-sm mb-6 sticky top-0 z-20">
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card Grid Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="flex flex-col space-y-3">
+              <Skeleton className="h-[200px] w-full rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -84,11 +108,11 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
         </h3>
         <p className="text-muted-foreground">
           {currentLanguage === "th"
-            ? "ไม่สามารถโหลดข้อมูลได้ โปรดลองอีกครั้งในภายหลัง"
-            : "Could not load data. Please try again later."}
+            ? "ขออภัย, ไม่สามารถเชื่อมต่อกับบริการได้ในขณะนี้"
+            : "Service temporarily unavailable. Please try again later."}
         </p>
         <p className="text-xs text-muted-foreground mt-2 italic">
-          {error.message}
+          {error?.message || "TypeError: Load failed"}
         </p>
       </div>
     );

@@ -13,6 +13,10 @@ const mockRange = vi.fn();
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
     from: (...args) => mockFrom(...args),
+    auth: {
+      getSession: vi.fn().mockResolvedValue({ data: { session: 'mock-session' } }),
+      signInAnonymously: vi.fn().mockResolvedValue({ error: null }),
+    },
   })),
 }));
 

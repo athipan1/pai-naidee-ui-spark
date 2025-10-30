@@ -78,6 +78,15 @@ export const getPlacesByCategory = async (
     throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
   }
 
+  // Ensure the user has a session, even if anonymous
+  await ensureAuthenticated();
+
+  // Ensure the user has a session, even if anonymous
+  await ensureAuthenticated();
+
+  // Ensure the user has a session, even if anonymous
+  await ensureAuthenticated();
+
   try {
     const { data, error } = await supabase
       .from('places')
@@ -296,6 +305,40 @@ export const searchPlaces = async (
     throw new Error(`Database query failed: ${errorMessage}`);
   }
 };
+
+// --- Authentication ---
+
+/**
+ * Ensures the user is authenticated, performing an anonymous sign-in if necessary.
+ * This is crucial for RLS policies that grant access to the 'anon' role.
+ */
+export const ensureAuthenticated = async () => {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+
+    // If there's an error fetching the session, log it
+    if (error) {
+      console.error('Error fetching auth session:', error);
+    }
+
+    // If there is no active session, perform a sign-in with a generic JWT
+    // This is a common pattern for anonymous access with Supabase
+    if (!data.session) {
+      console.log('No active session, performing anonymous sign-in...');
+      const { error: signInError } = await supabase.auth.signInAnonymously();
+
+      if (signInError) {
+        console.error('Anonymous sign-in failed:', signInError);
+        throw new Error(`Anonymous sign-in failed: ${signInError.message}`);
+      }
+    }
+  } catch (error) {
+    console.error('Authentication check failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
+    throw new Error(`Authentication check failed: ${errorMessage}`);
+  }
+};
+
 
 // Export the supabase client for direct usage if needed
 export { supabase };
