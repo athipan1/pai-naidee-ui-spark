@@ -50,6 +50,10 @@ import {
   ProfileRedirect,
   CategoryRedirect
 } from "./routes/Redirects";
+import Dashboard from "./routes/Admin/Dashboard";
+import AttractionManager from "@/components/admin/AttractionManager";
+import Moderation from "./routes/Admin/Moderation";
+import Analytics from "./routes/Admin/Analytics";
 
 // Conditionally load AccordionExamples only in development
 const AccordionExamples = import.meta.env.DEV
@@ -138,10 +142,14 @@ const AppContent = () => {
           />
           <Route
             path="/admin"
-            element={
-              <AdminLayout currentLanguage={currentLanguage} />
-            }
-          />
+            element={<AdminLayout currentLanguage={currentLanguage} />}
+          >
+            <Route index element={<DashboardRedirect to="/admin/dashboard" />} />
+            <Route path="dashboard" element={<Dashboard currentLanguage={currentLanguage} />} />
+            <Route path="media" element={<AttractionManager currentLanguage={currentLanguage} />} />
+            <Route path="moderation" element={<Moderation currentLanguage={currentLanguage} />} />
+            <Route path="analytics" element={<Analytics currentLanguage={currentLanguage} />} />
+          </Route>
           <Route path="/login" element={<LoginPage />} />
           {/* Existing Essential Routes */}
           <Route
