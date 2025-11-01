@@ -3,7 +3,7 @@ import { ArrowLeft, User, Shield, Activity, BarChart3, Video, LogOut } from "luc
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/services/supabase.service";
+import { getSupabaseClient } from "@/services/supabase.service";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Dashboard from "./Dashboard";
 import Moderation from "./Moderation";
@@ -20,6 +20,7 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
+    const supabase = getSupabaseClient();
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -74,6 +75,7 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
   const t = content[currentLanguage];
 
   const handleLogout = async () => {
+    const supabase = getSupabaseClient();
     await supabase.auth.signOut();
     navigate('/login');
   };

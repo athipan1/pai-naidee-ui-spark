@@ -1,4 +1,4 @@
-import { supabase } from "@/services/supabase.service";
+import { getSupabaseClient } from "@/services/supabase.service";
 import { PostgrestError } from "@supabase/supabase-js";
 import { Location, PostSearchResult } from "@/shared/types/posts";
 
@@ -54,6 +54,7 @@ export const searchPosts = async (
   options: SearchOptions
 ): Promise<SearchResponse> => {
   const startTime = Date.now();
+  const supabase = getSupabaseClient();
   const { language, limit = 10 } = options;
   const queryLower = query.toLowerCase();
 
@@ -93,6 +94,7 @@ export const searchLocations = async (
   query: string,
   limit: number = 10
 ): Promise<Location[]> => {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("places")
     .select('id, name, name_local, province, category, description, tags')
