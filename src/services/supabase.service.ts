@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SearchResult } from '@/shared/types/search';
 import { AttractionDetail } from '@/shared/types/attraction';
 
@@ -37,11 +37,24 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
-// Supabase configuration with proper environment variable handling
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL') || 'https://your-project.supabase.co';
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY') || 'your-anon-key';
+// Supabase client singleton. Use `getSupabaseClient()` to access it.
+let supabase: SupabaseClient | null = null;
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+/**
+ * Lazily initializes and returns the Supabase client instance.
+ * This ensures that environment variables are loaded before the client is created.
+ */
+function getSupabaseClient(): SupabaseClient {
+  if (supabase) {
+    return supabase;
+  }
+
+  const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL') || 'https://your-project.supabase.co';
+  const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY') || 'your-anon-key';
+
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
+  return supabase;
+}
 
 // Type definition for a place record from Supabase
 interface PlaceRecord {
@@ -60,6 +73,9 @@ interface PlaceRecord {
   amenities?: string[];
   created_at?: string;
   updated_at?: string;
+  details?: any;
+  external_links?: any;
+  coordinates?: any;
 }
 
 /**
@@ -81,14 +97,8 @@ export const getPlacesByCategory = async (
   // Ensure the user has a session, even if anonymous
   await ensureAuthenticated();
 
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
-
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
-
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('places')
       .select('*')
       .eq('category', category)
@@ -145,7 +155,7 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('places')
       .select('*')
       .eq('id', id)
@@ -232,7 +242,7 @@ export const searchPlaces = async (
 
   try {
     // Initialize the query and request total count
-    let query = supabase.from('places').select('*', { count: 'exact' });
+    let query = getSupabaseClient().from('places').select('*', { count: 'exact' });
 
     const searchConditions: string[] = [];
 
@@ -314,7 +324,7 @@ export const searchPlaces = async (
  */
 export const ensureAuthenticated = async () => {
   try {
-    const { data, error } = await supabase.auth.getSession();
+    const { data, error } = await getSupabaseClient().auth.getSession();
 
     // If there's an error fetching the session, log it
     if (error) {
@@ -325,7 +335,7 @@ export const ensureAuthenticated = async () => {
     // This is a common pattern for anonymous access with Supabase
     if (!data.session) {
       console.log('No active session, performing anonymous sign-in...');
-      const { error: signInError } = await supabase.auth.signInAnonymously();
+      const { error: signInError } = await getSupabaseClient().auth.signInAnonymously();
 
       if (signInError) {
         console.error('Anonymous sign-in failed:', signInError);
@@ -339,6 +349,5 @@ export const ensureAuthenticated = async () => {
   }
 };
 
-
-// Export the supabase client for direct usage if needed
-export { supabase };
+// Export the factory function for use in other services
+export { getSupabaseClient };

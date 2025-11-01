@@ -1,5 +1,5 @@
 // Supabase Connectivity Verification Service
-import { supabase } from './supabase.service';
+import { getSupabaseClient } from './supabase.service';
 
 export interface ConnectivityResult {
   isConnected: boolean;
@@ -43,6 +43,7 @@ export const verifySupabaseConnection = async (): Promise<ConnectivityResult> =>
     }
 
     // Try to get the current session to test connection
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase.auth.getSession();
     
     if (error) {
@@ -79,6 +80,7 @@ export const testTableAccess = async (
   limit: number = 5
 ): Promise<TableDataResult> => {
   try {
+    const supabase = getSupabaseClient();
     const { data, error, count } = await supabase
       .from(tableName)
       .select('*', { count: 'exact' })
