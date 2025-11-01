@@ -1,4 +1,4 @@
-import { supabase } from '@/services/supabase.service';
+import { getSupabaseClient } from '@/services/supabase.service';
 import { Post, Comment, CreatePostData } from '../types/community';
 
 const getErrorMessage = (error: unknown): string => {
@@ -10,6 +10,7 @@ const getErrorMessage = (error: unknown): string => {
 
 const getFeed = async (): Promise<Post[]> => {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('posts')
       .select(`
@@ -32,6 +33,7 @@ const getFeed = async (): Promise<Post[]> => {
 
 const createPost = async (postData: CreatePostData): Promise<Post> => {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('posts')
       .insert([postData])
@@ -49,6 +51,7 @@ const createPost = async (postData: CreatePostData): Promise<Post> => {
 
 const likePost = async (postId: string, userId: string): Promise<{ success: boolean }> => {
     try {
+        const supabase = getSupabaseClient();
         const { error } = await supabase
             .from('likes')
             .insert({ post_id: postId, user_id: userId });
@@ -73,6 +76,7 @@ const likePost = async (postId: string, userId: string): Promise<{ success: bool
 
 const getComments = async (postId: string): Promise<Comment[]> => {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('comments')
       .select(`
@@ -96,6 +100,7 @@ const getComments = async (postId: string): Promise<Comment[]> => {
 
 const addComment = async (postId: string, content: string, userId: string): Promise<Comment> => {
     try {
+        const supabase = getSupabaseClient();
         const { data, error } = await supabase
             .from('comments')
             .insert({ post_id: postId, content, user_id: userId })
