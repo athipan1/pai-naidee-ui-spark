@@ -139,14 +139,16 @@ const EnhancedAdminRedirect = () => {
 };
 
 /**
- * Redirect component for legacy /dashboard route to /admin
+ * Redirect component for legacy /dashboard route to /admin or a nested route.
+ * @param {object} props - The component props.
+ * @param {string} [props.to="/admin"] - The target URL to redirect to.
  */
-const DashboardRedirect = () => {
+const DashboardRedirect = ({ to = "/admin" }) => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    navigate('/admin', { replace: true });
-  }, [navigate]);
+    navigate(to, { replace: true });
+  }, [navigate, to]);
 
   return null;
 };

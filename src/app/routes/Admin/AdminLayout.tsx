@@ -1,14 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, User, Shield, Activity, BarChart3, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getSupabaseClient } from "@/services/supabase.service";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import Dashboard from "./Dashboard";
-import Moderation from "./Moderation";
-import Analytics from "./Analytics";
-import MediaManagementInterface from "@/components/admin/MediaManagementInterface";
+import { cn } from "@/shared/utils/cn";
 
 interface AdminLayoutProps {
   currentLanguage: "th" | "en";
@@ -16,8 +12,8 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -126,60 +122,62 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
       {/* Admin Navigation */}
       <div className="border-b border-border/30 bg-card/30">
         <div className="container mx-auto px-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4 h-12">
-              <TabsTrigger 
-                value="dashboard" 
-                className="flex items-center gap-2 text-xs sm:text-sm"
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span className="hidden sm:inline">{t.dashboard}</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="media" 
-                className="flex items-center gap-2 text-xs sm:text-sm"
-              >
-                <Video className="w-4 h-4" />
-                <span className="hidden sm:inline">{t.media}</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="moderation" 
-                className="flex items-center gap-2 text-xs sm:text-sm"
-              >
-                <Shield className="w-4 h-4" />
-                <span className="hidden sm:inline">{t.moderation}</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="analytics" 
-                className="flex items-center gap-2 text-xs sm:text-sm"
-              >
-                <Activity className="w-4 h-4" />
-                <span className="hidden sm:inline">{t.analytics}</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <nav className="grid w-full grid-cols-4 h-12">
+            <NavLink
+              to="/admin/dashboard"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center justify-center gap-2 text-xs sm:text-sm",
+                  isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground"
+                )
+              }
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.dashboard}</span>
+            </NavLink>
+            <NavLink
+              to="/admin/media"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center justify-center gap-2 text-xs sm:text-sm",
+                  isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground"
+                )
+              }
+            >
+              <Video className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.media}</span>
+            </NavLink>
+            <NavLink
+              to="/admin/moderation"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center justify-center gap-2 text-xs sm:text-sm",
+                  isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground"
+                )
+              }
+            >
+              <Shield className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.moderation}</span>
+            </NavLink>
+            <NavLink
+              to="/admin/analytics"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center justify-center gap-2 text-xs sm:text-sm",
+                  isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground"
+                )
+              }
+            >
+              <Activity className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.analytics}</span>
+            </NavLink>
+          </nav>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="dashboard" className="space-y-6">
-            <Dashboard currentLanguage={currentLanguage} />
-          </TabsContent>
-
-          <TabsContent value="media" className="space-y-6">
-            <MediaManagementInterface currentLanguage={currentLanguage} />
-          </TabsContent>
-
-          <TabsContent value="moderation" className="space-y-6">
-            <Moderation currentLanguage={currentLanguage} />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <Analytics currentLanguage={currentLanguage} />
-          </TabsContent>
-        </Tabs>
+        <Outlet />
       </main>
     </div>
   );

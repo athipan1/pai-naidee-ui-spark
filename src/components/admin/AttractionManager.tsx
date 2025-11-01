@@ -23,7 +23,7 @@ import { notificationService } from '@/shared/services/notificationService';
 import { networkStatusService } from '@/shared/services/networkStatusService';
 import MediaManagementTest from './MediaManagementTest';
 
-interface MediaManagementInterfaceProps {
+interface AttractionManagerProps {
   currentLanguage: 'th' | 'en';
 }
 
@@ -37,7 +37,7 @@ interface MediaFilters {
   searchTerm: string;
 }
 
-const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceProps) => {
+const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
   const { isMobile, isTablet } = useMedia();
   
   // Place search state
@@ -1436,4 +1436,4 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
   );
 };
 
-export default MediaManagementInterface;
+export default AttractionManager;
