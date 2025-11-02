@@ -29,9 +29,6 @@ export default defineConfig(({ mode }) => {
       mode === 'development' && componentTagger(),
       VitePWA({
         registerType: 'autoUpdate',
-        devOptions: {
-          enabled: false // Disable PWA in development
-        },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg}'],
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit

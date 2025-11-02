@@ -167,11 +167,15 @@ const AttractionDetail = ({
 
       // Check if the response is successful
       if (!response.ok) {
-        // If the page is not found or another error occurs, set data to null
+        // Handle non-successful responses (like 404s) gracefully
         setWikiData(null);
-        // We don't throw an error here to avoid breaking the UI, just log it.
-        console.error(`Wikipedia API error for "${placeName}": ${response.statusText}`);
-        setWikiError(`ไม่พบข้อมูลสำหรับ "${placeName}" ในวิกิพีเดีย`);
+        // Set an error message for the UI, but avoid logging a console error for 404s
+        // as this is an expected outcome for places without a Wikipedia page.
+        if (response.status === 404) {
+          setWikiError(`ไม่พบข้อมูลสำหรับ "${placeName}" ในวิกิพีเดีย`);
+        } else {
+          setWikiError(`เกิดข้อผิดพลาดในการดึงข้อมูล: ${response.statusText}`);
+        }
         return;
       }
 
