@@ -418,7 +418,7 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
 
     try {
       const imageFile = newPlaceMediaFiles[0];
-      const imageUrl = await uploadAttractionImage(imageFile.name);
+      const imageUrl = await uploadAttractionImage(imageFile);
 
       const attractionData = {
         name: newPlaceName,
