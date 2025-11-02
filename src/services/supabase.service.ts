@@ -23,18 +23,27 @@ function getEnvVar(key: string, fallback: string = ''): string {
 }
 
 // Check if Supabase is properly configured
+export function getSupabaseConfigStatus() {
+  const url = getEnvVar('VITE_SUPABASE_URL');
+  const key = getEnvVar('VITE_SUPABASE_ANON_KEY');
+
+  const isUrlValid = url && url !== 'https://your-project.supabase.co' && url !== 'https://your-project-id.supabase.co';
+  const isKeyValid = key && key !== 'your-anon-key' && key !== 'your-supabase-anon-key-here';
+
+  const missingVars = [];
+  if (!isUrlValid) missingVars.push('VITE_SUPABASE_URL');
+  if (!isKeyValid) missingVars.push('VITE_SUPABASE_ANON_KEY');
+
+  return {
+    isConfigured: isUrlValid && isKeyValid,
+    missingVariables: missingVars,
+    url,
+    key
+  };
+}
+
 export function isSupabaseConfigured(): boolean {
-  const url = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
-  const key = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
-  
-  return !!(
-    url && 
-    url !== 'https://your-project.supabase.co' && 
-    url !== 'https://your-project-id.supabase.co' &&
-    key && 
-    key !== 'your-anon-key' && 
-    key !== 'your-supabase-anon-key-here'
-  );
+  return getSupabaseConfigStatus().isConfigured;
 }
 
 // Supabase client singleton. Use `getSupabaseClient()` to access it.

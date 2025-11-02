@@ -1,6 +1,8 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getSupabaseConfigStatus } from "@/services/supabase.service";
+import ConfigError from "@/components/common/ConfigError";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
@@ -226,6 +228,12 @@ const AppContent = () => {
 
 
 const App = () => {
+  const configStatus = getSupabaseConfigStatus();
+
+  if (!configStatus.isConfigured) {
+    return <ConfigError missingVariables={configStatus.missingVariables} />;
+  }
+
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
