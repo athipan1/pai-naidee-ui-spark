@@ -37,6 +37,8 @@ const ContextualSearchResults = lazy(() => import("./pages/ContextualSearchResul
 const SupabaseDiagnostic = lazy(() => import("./pages/SupabaseDiagnostic"));
 // --- End System Pages ---
 
+import { isSupabaseConfigured } from "@/services/supabase.service";
+
 // Redirect components for backward compatibility
 import {
   ExploreRedirect,
@@ -224,8 +226,29 @@ const AppContent = () => {
   );
 };
 
+const ConfigError = () => (
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundColor: '#1a1a1a',
+    color: 'white',
+    fontFamily: 'sans-serif',
+    padding: '2rem'
+  }}>
+    <h1 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#ff4d4d' }}>Configuration Error</h1>
+    <p style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>Supabase environment variables are missing or invalid.</p>
+    <p style={{ color: '#ccc' }}>Please ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are correctly set in your Vercel project settings.</p>
+  </div>
+);
 
 const App = () => {
+  if (!isSupabaseConfigured()) {
+    return <ConfigError />;
+  }
+
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
