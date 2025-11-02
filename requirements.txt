@@ -1,3 +1,6 @@
+# Build tools
+setuptools
+
 # Python dependencies for API testing and deployment support
 # สำหรับการทดสอบ API และรองรับการ deploy
 
