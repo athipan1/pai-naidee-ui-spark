@@ -16,14 +16,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { cn } from '@/shared/utils/cn';
 import { useMedia } from '@/shared/contexts/MediaProvider';
-import { mediaManagementService, type PlaceMediaData, type MediaReplacementResult, type PlaceCreationResult } from '@/shared/services/mediaManagementService';
+import { addAttraction, uploadAttractionImage } from '@/services/admin.service';
 import { timelineSyncService, type TimelineEntry, type SyncResult } from '@/shared/services/timelineSyncService';
 import type { MediaUploadData } from '@/shared/types/media';
 import { notificationService } from '@/shared/services/notificationService';
 import { networkStatusService } from '@/shared/services/networkStatusService';
 import MediaManagementTest from './MediaManagementTest';
 
-interface MediaManagementInterfaceProps {
+interface AttractionManagerProps {
   currentLanguage: 'th' | 'en';
 }
 
@@ -37,7 +37,7 @@ interface MediaFilters {
   searchTerm: string;
 }
 
-const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceProps) => {
+const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
   const { isMobile, isTablet } = useMedia();
   
   // Place search state
@@ -80,7 +80,6 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
   const [newPlaceLongitude, setNewPlaceLongitude] = useState('');
   const [newPlaceMediaFiles, setNewPlaceMediaFiles] = useState<File[]>([]);
   const [newPlaceMediaData, setNewPlaceMediaData] = useState<MediaUploadData[]>([]);
-  const [creationResult, setCreationResult] = useState<PlaceCreationResult | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   // Timeline state
@@ -395,7 +394,7 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
   // Handle new place creation
   const handleCreatePlace = async () => {
     // Validate required fields including GPS coordinates
-    if (!newPlaceName.trim() || !newPlaceProvince.trim() || newPlaceMediaData.length === 0) {
+    if (!newPlaceName.trim() || !newPlaceProvince.trim() || newPlaceMediaFiles.length === 0) {
       notificationService.showValidationError('Required fields', 'Please fill in all required fields and select media files');
       return;
     }
@@ -403,7 +402,7 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
     // Validate GPS coordinates
     const lat = parseFloat(newPlaceLatitude);
     const lng = parseFloat(newPlaceLongitude);
-    
+
     if (!newPlaceLatitude.trim() || !newPlaceLongitude.trim()) {
       notificationService.showValidationError('GPS Coordinates Required', t.gpsRequired);
       return;
@@ -416,55 +415,42 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
 
     setIsCreating(true);
     const loadingToast = notificationService.showLoading('Creating new place...');
-    
+
     try {
-      const placeData = {
-        placeId: '',
-        placeName: newPlaceName,
-        placeNameLocal: newPlaceNameLocal,
+      const imageFile = newPlaceMediaFiles[0];
+      const imageUrl = await uploadAttractionImage(imageFile.name);
+
+      const attractionData = {
+        name: newPlaceName,
+        nameLocal: newPlaceNameLocal,
         province: newPlaceProvince,
         category: newPlaceCategory,
+        image: imageUrl,
+        images: [imageUrl],
         description: newPlaceDescription,
-        coordinates: {
-          lat: lat,
-          lng: lng
-        },
-        media: []
+        tags: [],
+        amenities: [],
+        location: { lat, lng },
+        rating: 0,
+        reviewCount: 0,
+        coordinates: { lat, lng },
       };
 
-      const result = await mediaManagementService.createPlaceWithMedia(placeData, newPlaceMediaData);
-      setCreationResult(result);
+      await addAttraction(attractionData);
 
-      // Sync with timeline
-      if (result.success) {
-        await timelineSyncService.syncPlaceCreation(
-          result.placeId,
-          result.mediaIds,
-          'current_user'
-        );
+      notificationService.dismiss(loadingToast);
+      notificationService.show('success', `Place "${newPlaceName}" created successfully!`);
 
-        notificationService.dismiss(loadingToast);
-        notificationService.showSuccessWithUndo(
-          `Place "${newPlaceName}" created successfully with GPS coordinates`,
-          () => {
-            // TODO: Implement undo functionality
-            notificationService.show('info', 'Undo functionality not yet implemented');
-          }
-        );
-
-        // Reset form
-        setNewPlaceName('');
-        setNewPlaceNameLocal('');
-        setNewPlaceProvince('');
-        setNewPlaceCategory('');
-        setNewPlaceDescription('');
-        setNewPlaceLatitude('');
-        setNewPlaceLongitude('');
-        setNewPlaceMediaFiles([]);
-        setNewPlaceMediaData([]);
-      } else {
-        throw new Error(result.message || 'Place creation failed');
-      }
+      // Reset form
+      setNewPlaceName('');
+      setNewPlaceNameLocal('');
+      setNewPlaceProvince('');
+      setNewPlaceCategory('');
+      setNewPlaceDescription('');
+      setNewPlaceLatitude('');
+      setNewPlaceLongitude('');
+      setNewPlaceMediaFiles([]);
+      setNewPlaceMediaData([]);
     } catch (error) {
       notificationService.dismiss(loadingToast);
       notificationService.showSyncFailure(
@@ -1436,4 +1422,4 @@ const MediaManagementInterface = ({ currentLanguage }: MediaManagementInterfaceP
   );
 };
 
-export default MediaManagementInterface;
+export default AttractionManager;

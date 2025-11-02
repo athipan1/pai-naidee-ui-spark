@@ -19,10 +19,14 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
+      exclude: ['**/tests/e2e/**'],
     },
     server: {
       host: "0.0.0.0",
-      port: 8080
+      port: 8080,
+      watch: {
+        ignored: ['**/playwright-report/**'],
+      },
     },
     plugins: [
       react(),
