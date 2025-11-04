@@ -1,25 +1,191 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
+const { createClient } = require('@supabase/supabase-js');
+const multer = require('multer');
+const path = require('path');
 
+// --- Basic Setup ---
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// Enable CORS and JSON parsing
+// --- Middleware ---
 app.use(cors());
 app.use(express.json());
 
-// In-memory session storage (in production, use Redis or database)
+// --- Supabase Client Setup ---
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Supabase URL or Service Role Key is missing. Make sure to set them in the .env file.");
+}
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// --- Multer Setup for File Uploads ---
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+
+// ====================================================================
+// --- New Media Management API Endpoints ---
+// ====================================================================
+
+/**
+ * Endpoint to create a new place with media files.
+ * This function now handles:
+ * 1. Inserting place data into the 'places' table.
+ * 2. Uploading media files to Supabase Storage.
+ * 3. Inserting media metadata into the 'media' table.
+ */
+app.post('/api/places', upload.any(), async (req, res) => {
+  const { placeData: placeDataJson, metadata: metadataJson } = req.body; // metadata from frontend
+  const files = req.files;
+
+  if (!placeDataJson || !files || files.length === 0) {
+    return res.status(400).json({ error: 'Missing place data or media files.' });
+  }
+
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase client is not initialized.' });
+  }
+
+  const placeData = JSON.parse(placeDataJson);
+  // Metadata for each file should be sent as an array of JSON strings
+  const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
+
+  let newPlaceId = null;
+
+  try {
+    // 1. Insert place data into the 'places' table
+    const { data: placeResult, error: placeError } = await supabase
+      .from('places')
+      .insert({
+        name: placeData.placeName,
+        name_local: placeData.placeNameLocal,
+        province: placeData.province,
+        category: placeData.category,
+        description: placeData.description,
+        // Supabase PostGIS format for coordinates: 'POINT(lng lat)'
+        coordinates: `POINT(${placeData.coordinates.lng} ${placeData.coordinates.lat})`,
+      })
+      .select()
+      .single();
+
+    if (placeError) {
+      throw new Error(`Supabase DB Error (places): ${placeError.message}`);
+    }
+
+    newPlaceId = placeResult.id;
+    console.log(`Successfully created place with ID: ${newPlaceId}`);
+
+    // 2. Upload files to Storage and collect metadata
+    const mediaToInsert = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const metadata = mediaMetadata[i] || {}; // Get corresponding metadata
+      const fileExt = path.extname(file.originalname);
+      const fileName = `${newPlaceId}/${uuidv4()}${fileExt}`; // Organize files by placeId
+
+      const { error: uploadError } = await supabase.storage
+        .from('place-images')
+        .upload(fileName, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(`Supabase Storage Error: ${uploadError.message}`);
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('place-images')
+        .getPublicUrl(fileName);
+
+      mediaToInsert.push({
+        place_id: newPlaceId,
+        url: publicUrl,
+        type: file.mimetype.startsWith('video') ? 'video' : 'image',
+        title: metadata.title || path.basename(file.originalname, fileExt),
+        description: metadata.description || '',
+      });
+    }
+
+    // 3. Insert media metadata into the 'media' table
+    if (mediaToInsert.length > 0) {
+        const { data: mediaResult, error: mediaError } = await supabase
+            .from('media')
+            .insert(mediaToInsert)
+            .select();
+
+        if (mediaError) {
+            throw new Error(`Supabase DB Error (media): ${mediaError.message}`);
+        }
+        console.log(`Successfully inserted ${mediaResult.length} media records.`);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully created '${placeData.placeName}' and uploaded ${files.length} files.`,
+      placeId: newPlaceId,
+      mediaCount: mediaToInsert.length
+    });
+
+  } catch (error) {
+    console.error('Error in /api/places:', error.message);
+
+    // Cleanup on failure: If place was created but something else failed, delete the place.
+    // This is a simple form of transaction rollback.
+    if (newPlaceId) {
+        console.log(`Attempting to clean up created place with ID: ${newPlaceId}`);
+        await supabase.from('places').delete().eq('id', newPlaceId);
+    }
+
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+    });
+  }
+});
+
+// ... (other endpoints remain the same)
+app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) => {
+    const { placeId } = req.params;
+    const files = req.files;
+
+    console.log(`Received request to replace media for place ID: ${placeId}`);
+    console.log(`Received ${files ? files.length : 0} new files.`);
+
+    res.status(200).json({
+        success: true,
+        message: `Media replacement for place ${placeId} is not fully implemented yet.`,
+        placeId,
+        replacedMediaIds: [],
+        newMediaIds: files ? files.map((f, i) => `new_media_${Date.now()}_${i}`) : [],
+    });
+});
+
+app.get('/api/places/search', async (req, res) => {
+    const { name, province } = req.query;
+    console.log(`Searching for place: ${name}` + (province ? ` in ${province}`: ''));
+
+    res.status(200).json({
+        places: []
+    });
+});
+
+
+// ====================================================================
+// --- Existing Chatbot API Endpoints ---
+// ====================================================================
+
 const sessions = new Map();
 
-// Helper function to detect language
 function detectLanguage(text) {
-  // Simple Thai detection (contains Thai characters)
   const thaiRegex = /[\u0E00-\u0E7F]/;
   return thaiRegex.test(text) ? 'th' : 'en';
 }
 
-// Helper function to generate travel-related responses
 function generateTravelResponse(message, language, _sessionId) {
   const responses = {
     th: {
@@ -81,7 +247,6 @@ function generateTravelResponse(message, language, _sessionId) {
   const messageLower = message.toLowerCase();
   let category = 'general';
   
-  // Simple keyword detection
   if (messageLower.includes('northern') || messageLower.includes('north') || messageLower.includes('เหนือ') || messageLower.includes('เชียงใหม่')) {
     category = 'northern';
   } else if (messageLower.includes('food') || messageLower.includes('eat') || messageLower.includes('อาหาร') || messageLower.includes('กิน')) {
@@ -98,7 +263,6 @@ function generateTravelResponse(message, language, _sessionId) {
   return randomResponse;
 }
 
-// POST /api/talk endpoint
 app.post('/api/talk', (req, res) => {
   try {
     const { message, session_id, language = 'auto' } = req.body;
@@ -109,13 +273,9 @@ app.post('/api/talk', (req, res) => {
       });
     }
 
-    // Generate or use existing session ID
     const sessionId = session_id || uuidv4();
-    
-    // Detect language if auto
     const detectedLanguage = language === 'auto' ? detectLanguage(message) : language;
     
-    // Get or create session
     if (!sessions.has(sessionId)) {
       sessions.set(sessionId, {
         id: sessionId,
@@ -126,7 +286,6 @@ app.post('/api/talk', (req, res) => {
     
     const session = sessions.get(sessionId);
     
-    // Add user message to session
     session.messages.push({
       role: 'user',
       content: message,
@@ -134,10 +293,8 @@ app.post('/api/talk', (req, res) => {
       language: detectedLanguage
     });
 
-    // Generate AI response
     const response = generateTravelResponse(message, detectedLanguage, sessionId);
     
-    // Add AI response to session
     session.messages.push({
       role: 'assistant',
       content: response,
@@ -145,10 +302,8 @@ app.post('/api/talk', (req, res) => {
       language: detectedLanguage
     });
 
-    // Calculate confidence based on keyword matching
-    const confidence = Math.random() * 0.2 + 0.8; // 0.8 to 1.0
+    const confidence = Math.random() * 0.2 + 0.8;
 
-    // Return response
     res.json({
       response,
       session_id: sessionId,
@@ -167,7 +322,6 @@ app.post('/api/talk', (req, res) => {
   }
 });
 
-// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -176,10 +330,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Start server
+// --- Start Server ---
 app.listen(PORT, () => {
   console.log(`🤖 PaiNaiDee AI API Server running on port ${PORT}`);
-  console.log(`📡 API endpoint: http://localhost:${PORT}/api/talk`);
+  console.log(`📡 Chatbot endpoint: http://localhost:${PORT}/api/talk`);
+  console.log(`🚀 Media endpoint: http://localhost:${PORT}/api/places`);
   console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
 });
 
