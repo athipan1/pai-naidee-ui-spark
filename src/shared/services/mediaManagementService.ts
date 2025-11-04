@@ -18,286 +18,132 @@ export interface PlaceMediaData {
   tags?: string[];
 }
 
+// Updated to match the actual API response
 export interface MediaReplacementResult {
   success: boolean;
   placeId: string;
-  replacedMediaIds: string[];
-  newMediaIds: string[];
   message: string;
+  replacedMediaIds?: string[];
+  newMediaIds?: string[];
 }
 
 export interface PlaceCreationResult {
   success: boolean;
   placeId: string;
-  mediaIds: string[];
   message: string;
+  mediaCount?: number;
 }
 
 class MediaManagementService {
   private apiBaseUrl = API_BASE;
 
   /**
-   * Replace media for an existing place
+   * Replace media for an existing place.
+   * This is still a placeholder and needs full implementation.
    */
   async replaceMediaForPlace(
     placeId: string,
     newMedia: MediaUploadData[]
   ): Promise<MediaReplacementResult> {
-    try {
-      const formData = new FormData();
-      
-      // Add place ID
-      formData.append('placeId', placeId);
-      
-      // Add media files and metadata
-      newMedia.forEach((media, index) => {
-        if (media.file) {
-          formData.append(`media_${index}`, media.file);
-        }
-        formData.append(`metadata_${index}`, JSON.stringify({
-          title: media.title,
-          description: media.description,
-          type: media.type
-        }));
-      });
-
-      const response = await fetch(`${this.apiBaseUrl}/places/${placeId}/media/replace`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      
-      return {
-        success: true,
-        placeId,
-        replacedMediaIds: result.replacedMediaIds || [],
-        newMediaIds: result.newMediaIds || [],
-        message: result.message || 'Media replaced successfully'
-      };
-
-    } catch (error) {
-      console.warn('API call failed, using mock response:', error);
-      
-      // Mock response for development
-      await this.simulateDelay(1000);
-      
-      const mockMediaIds = newMedia.map((_, index) => `media_${Date.now()}_${index}`);
-      
-      return {
-        success: true,
-        placeId,
-        replacedMediaIds: [`old_media_${placeId}_1`, `old_media_${placeId}_2`],
-        newMediaIds: mockMediaIds,
-        message: 'Media replaced successfully (mock response)'
-      };
-    }
+    console.warn("replaceMediaForPlace is not fully implemented yet.");
+    // Mocking a successful response as the endpoint is a placeholder
+    return Promise.resolve({
+      success: true,
+      placeId,
+      message: "Media replacement feature is under development.",
+      replacedMediaIds: [],
+      newMediaIds: newMedia.map((_, i) => `temp_id_${i}`),
+    });
   }
 
   /**
-   * Add new place with media
+   * Add new place with media.
+   * This now calls the real backend API.
    */
   async createPlaceWithMedia(
-    placeData: Omit<PlaceMediaData, 'media'>,
+    placeData: Omit<PlaceMediaData, 'media' | 'placeId'>,
     media: MediaUploadData[]
   ): Promise<PlaceCreationResult> {
-    try {
-      const formData = new FormData();
-      
-      // Add place data
-      formData.append('placeData', JSON.stringify({
-        placeName: placeData.placeName,
-        placeNameLocal: placeData.placeNameLocal,
-        province: placeData.province,
-        category: placeData.category,
-        coordinates: placeData.coordinates,
-        description: placeData.description,
-        tags: placeData.tags
-      }));
-      
-      // Add media files and metadata
-      media.forEach((mediaItem, index) => {
-        if (mediaItem.file) {
-          formData.append(`media_${index}`, mediaItem.file);
-        }
-        formData.append(`metadata_${index}`, JSON.stringify({
-          title: mediaItem.title,
-          description: mediaItem.description,
-          type: mediaItem.type
-        }));
-      });
+    const formData = new FormData();
 
-      const response = await fetch(`${this.apiBaseUrl}/places`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`
-        }
-      });
+    // 1. Append place data as a JSON string
+    formData.append('placeData', JSON.stringify({
+      placeName: placeData.placeName,
+      placeNameLocal: placeData.placeNameLocal,
+      province: placeData.province,
+      category: placeData.category,
+      description: placeData.description,
+      coordinates: placeData.coordinates,
+      tags: placeData.tags,
+    }));
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    // 2. Append media metadata as a JSON string array
+    const mediaMetadata = media.map(m => ({
+        title: m.title,
+        description: m.description,
+        type: m.type,
+    }));
+    formData.append('metadata', JSON.stringify(mediaMetadata));
+
+    // 3. Append each file
+    media.forEach((mediaItem, index) => {
+      if (mediaItem.file) {
+        // Use a consistent key for the backend to find the files
+        formData.append(`files`, mediaItem.file, mediaItem.file.name);
       }
+    });
 
-      const result = await response.json();
-      
-      return {
-        success: true,
-        placeId: result.placeId,
-        mediaIds: result.mediaIds || [],
-        message: result.message || 'Place created successfully'
-      };
+    const response = await fetch(`${this.apiBaseUrl}/places`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // 'Content-Type': 'multipart/form-data' is set automatically by the browser with boundary
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+      },
+    });
 
-    } catch (error) {
-      console.warn('API call failed, using mock response:', error);
-      
-      // Mock response for development
-      await this.simulateDelay(1500);
-      
-      const mockPlaceId = `place_${Date.now()}`;
-      const mockMediaIds = media.map((_, index) => `media_${Date.now()}_${index}`);
-      
-      return {
-        success: true,
-        placeId: mockPlaceId,
-        mediaIds: mockMediaIds,
-        message: 'Place created successfully (mock response)'
-      };
+    const result = await response.json();
+
+    if (!response.ok) {
+        // Throw an error with the message from the API, or a default one
+        throw new Error(result.message || `HTTP ${response.status}: ${response.statusText}`);
     }
+
+    return {
+        success: result.success,
+        placeId: result.placeId,
+        message: result.message,
+        mediaCount: result.mediaCount,
+    };
   }
 
   /**
-   * Check if place exists
+   * Check if a place exists.
+   * This is still a placeholder and needs full implementation.
    */
   async checkPlaceExists(placeName: string, province?: string): Promise<{
     exists: boolean;
     placeId?: string;
     place?: PlaceMediaData;
   }> {
-    try {
-      const searchParams = new URLSearchParams({
-        name: placeName,
-        ...(province && { province })
-      });
-
-      const response = await fetch(`${this.apiBaseUrl}/places/search?${searchParams}`, {
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.places && result.places.length > 0) {
-        return {
-          exists: true,
-          placeId: result.places[0].id,
-          place: result.places[0]
-        };
-      }
-
-      return { exists: false };
-
-    } catch (error) {
-      console.warn('API call failed, using mock response:', error);
-      
-      // Mock response for development
-      await this.simulateDelay(500);
-      
-      // Simulate some existing places
-      const mockExistingPlaces = [
-        'วัดพระแก้ว', 'หมู่เกาะพีพี', 'ดอยอินทนนท์',
-        'Temple of the Emerald Buddha', 'Phi Phi Islands', 'Doi Inthanon'
-      ];
-      
-      const exists = mockExistingPlaces.some(place => 
-        place.toLowerCase().includes(placeName.toLowerCase())
-      );
-      
-      if (exists) {
-        return {
-          exists: true,
-          placeId: `mock_place_${Date.now()}`,
-          place: {
-            placeId: `mock_place_${Date.now()}`,
-            placeName,
-            province: province || 'Mock Province',
-            category: 'Mock Category',
-            media: []
-          }
-        };
-      }
-
-      return { exists: false };
-    }
+     console.warn("checkPlaceExists is not fully implemented yet.");
+    // Mocking a "not found" response as the endpoint is a placeholder
+    return Promise.resolve({ exists: false });
   }
 
   /**
-   * Get place media details
+   * Get place media details.
+   * This is still a placeholder and needs full implementation.
    */
   async getPlaceMedia(placeId: string): Promise<PlaceMediaData | null> {
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/places/${placeId}/media`, {
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      return await response.json();
-
-    } catch (error) {
-      console.warn('API call failed, using mock response:', error);
-      
-      // Mock response for development
-      await this.simulateDelay(500);
-      
-      return {
-        placeId,
-        placeName: 'Mock Place',
-        province: 'Mock Province',
-        category: 'Mock Category',
-        media: [
-          {
-            id: 'mock_media_1',
-            title: 'Mock Image 1',
-            description: 'Mock description',
-            type: 'image',
-            url: '/src/shared/assets/hero-beach.jpg',
-            uploadedAt: new Date(),
-            updatedAt: new Date(),
-            status: 'approved',
-            version: 1,
-            isCurrentVersion: true,
-            securityLevel: SecurityLevel.PUBLIC,
-            createdBy: 'system',
-            accessPermissions: []
-          }
-        ]
-      };
-    }
+    console.warn("getPlaceMedia is not fully implemented yet.");
+    // Mocking a null response as the endpoint is a placeholder
+    return Promise.resolve(null);
   }
 
   private getAuthToken(): string {
-    return localStorage.getItem('authToken') || 'mock-token';
-  }
-
-  private async simulateDelay(ms: number = 500): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    // In a real app, this would get a JWT token from auth state (e.g., Zustand, Redux)
+    return localStorage.getItem('authToken') || 'mock-token-for-dev';
   }
 }
 
