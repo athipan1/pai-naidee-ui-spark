@@ -174,6 +174,48 @@ app.get('/api/places/search', async (req, res) => {
     });
 });
 
+/**
+ * Endpoint to get a single place with its associated media.
+ */
+app.get('/api/places/:placeId', async (req, res) => {
+  const { placeId } = req.params;
+
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase client is not initialized.' });
+  }
+
+  try {
+    const { data: place, error } = await supabase
+      .from('places')
+      .select(`
+        *,
+        media (*)
+      `)
+      .eq('id', placeId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') { // PostgREST error for "exact one row not found"
+        return res.status(404).json({ error: 'Place not found.' });
+      }
+      throw new Error(`Supabase DB Error: ${error.message}`);
+    }
+
+    if (!place) {
+      return res.status(404).json({ error: 'Place not found.' });
+    }
+
+    res.status(200).json(place);
+
+  } catch (error) {
+    console.error(`Error in /api/places/${placeId}:`, error.message);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+    });
+  }
+});
+
 
 // ====================================================================
 // --- Existing Chatbot API Endpoints ---
