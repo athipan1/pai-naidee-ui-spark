@@ -254,10 +254,11 @@ const AttractionDetail = ({
       : wikiData?.title || attraction.name;
 
   // This logic correctly prioritizes the Wikipedia image if it exists.
+  const mediaImages = attraction.media?.filter(m => m.type === 'image').map(m => m.url) || [];
   const displayImages = wikiData?.thumbnail?.source
-    ? [wikiData.thumbnail.source, ...attraction.images]
-    : attraction.images.length > 0
-    ? attraction.images
+    ? [wikiData.thumbnail.source, ...mediaImages]
+    : mediaImages.length > 0
+    ? mediaImages
     : ['https://via.placeholder.com/400x250?text=No+Image'];
 
   return (
