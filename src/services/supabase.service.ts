@@ -76,6 +76,7 @@ interface PlaceRecord {
   details?: any;
   external_links?: any;
   coordinates?: any;
+  media?: { url: string; [key: string]: any }[];
 }
 
 /**
@@ -157,7 +158,7 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
   try {
     const { data, error } = await getSupabaseClient()
       .from('places')
-      .select('*')
+      .select('*, media(*)')
       .eq('id', id)
       .single(); // Use .single() to get one record
 
@@ -173,14 +174,17 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
     const place: PlaceRecord = data;
 
     // Transform Supabase data to AttractionDetail format with better null handling
+    const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+    const allImages = place.media && place.media.length > 0 ? place.media.map(m => m.url) : [mainImage];
+
     return {
       id: place.id || 'unknown',
       name: place.name || 'Unnamed Place',
       nameLocal: place.name_local || place.name || 'Unnamed Place',
       province: place.province || 'Unknown Province',
       category: place.category || 'Unknown',
-      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
-      images: [place.image_url || 'https://via.placeholder.com/400x250?text=No+Image'],
+      image: mainImage,
+      images: allImages,
       description: place.description || 'No description available.',
       tags: Array.isArray(place.tags) ? place.tags : [],
       amenities: Array.isArray(place.amenities) ? place.amenities : [],
@@ -242,7 +246,7 @@ export const searchPlaces = async (
 
   try {
     // Initialize the query and request total count
-    let query = getSupabaseClient().from('places').select('*', { count: 'exact' });
+    let query = getSupabaseClient().from('places').select('*, media(*)', { count: 'exact' });
 
     const searchConditions: string[] = [];
 
@@ -287,25 +291,28 @@ export const searchPlaces = async (
     }
 
     // Transform data to SearchResult format with better null handling
-    const results = data.map((place: PlaceRecord): SearchResult => ({
-      id: place.id || 'unknown',
-      name: place.name || 'Unnamed Place',
-      nameLocal: place.name_local || place.name || 'Unnamed Place',
-      province: place.province || 'Unknown Province',
-      category: place.category || 'Unknown',
-      tags: Array.isArray(place.tags) ? place.tags : [],
-      rating: typeof place.rating === 'number' ? place.rating : 0,
-      reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
-      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
-      description: place.description || 'No description available.',
-      confidence: 0.8,
-      matchedTerms: searchTerm ? [searchTerm] : [],
-      amenities: Array.isArray(place.amenities) ? place.amenities : [],
-      location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? { 
-        lat: place.lat, 
-        lng: place.lng 
-      } : undefined,
-    }));
+    const results = data.map((place: PlaceRecord): SearchResult => {
+      const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+      return {
+        id: place.id || 'unknown',
+        name: place.name || 'Unnamed Place',
+        nameLocal: place.name_local || place.name || 'Unnamed Place',
+        province: place.province || 'Unknown Province',
+        category: place.category || 'Unknown',
+        tags: Array.isArray(place.tags) ? place.tags : [],
+        rating: typeof place.rating === 'number' ? place.rating : 0,
+        reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
+        image: mainImage,
+        description: place.description || 'No description available.',
+        confidence: 0.8,
+        matchedTerms: searchTerm ? [searchTerm] : [],
+        amenities: Array.isArray(place.amenities) ? place.amenities : [],
+        location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? {
+          lat: place.lat,
+          lng: place.lng
+        } : undefined,
+      };
+    });
 
     return { results, totalCount: count || 0 };
 
