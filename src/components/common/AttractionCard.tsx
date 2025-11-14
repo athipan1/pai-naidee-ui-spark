@@ -126,7 +126,8 @@ const AttractionCard = ({
   };
 
   return (
-    <article 
+    <article
+      data-testid="attraction-card"
       className="attraction-card group bg-card/95 backdrop-blur-sm rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-border/30 hover:border-primary/30 relative z-10 transform hover:scale-[1.02] hover:-translate-y-1"
       role="button"
       tabIndex={0}

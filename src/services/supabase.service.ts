@@ -155,6 +155,9 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
     throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
   }
 
+  // Ensure the user has a session, even if anonymous
+  await ensureAuthenticated();
+
   try {
     const { data, error } = await getSupabaseClient()
       .from('places')
@@ -243,6 +246,9 @@ export const searchPlaces = async (
     console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
     throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
   }
+
+  // Ensure the user has a session, even if anonymous
+  await ensureAuthenticated();
 
   try {
     // Initialize the query and request total count
