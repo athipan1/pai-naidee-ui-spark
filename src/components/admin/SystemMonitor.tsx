@@ -1,47 +1,97 @@
 // System Monitor Component
-import { useState } from 'react';
-import { Settings, Server, Activity, Database } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Server, Activity, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { checkSupabaseConnection } from '@/shared/utils/supabaseHealthCheck';
+
+type ConnectionStatus = 'checking' | 'connected' | 'error';
 
 interface SystemMonitorProps {
   currentLanguage: 'th' | 'en';
 }
 
 const SystemMonitor = ({ currentLanguage }: SystemMonitorProps) => {
+  const [supabaseStatus, setSupabaseStatus] = useState<ConnectionStatus>('checking');
+  const [supabaseError, setSupabaseError] = useState<string | null>(null);
+
   const content = {
     th: {
       title: 'ตรวจสอบระบบ',
-      description: 'ตรวจสอบสถานะและประสิทธิภาพของระบบ',
-      systemStatus: 'สถานะระบบ',
-      performance: 'ประสิทธิภาพ',
-      resources: 'ทรัพยากร',
-      online: 'ออนไลน์',
-      offline: 'ออฟไลน์'
+      description: 'ตรวจสอบสถานะและการเชื่อมต่อของส่วนประกอบต่างๆ',
+      systemStatus: 'สถานะการเชื่อมต่อ',
+      supabaseConnection: 'การเชื่อมต่อ Supabase',
+      checking: 'กำลังตรวจสอบ...',
+      connected: 'เชื่อมต่อสำเร็จ',
+      error: 'เชื่อมต่อล้มเหลว',
+      refresh: 'รีเฟรช',
+      apiServer: 'เซิร์ฟเวอร์ API',
+      queueService: 'บริการคิว',
     },
     en: {
       title: 'System Monitor',
-      description: 'Monitor system status and performance',
-      systemStatus: 'System Status',
-      performance: 'Performance',
-      resources: 'Resources',
-      online: 'Online',
-      offline: 'Offline'
+      description: 'Monitor the status and connectivity of various components.',
+      systemStatus: 'Connection Status',
+      supabaseConnection: 'Supabase Connection',
+      checking: 'Checking...',
+      connected: 'Connected Successfully',
+      error: 'Connection Failed',
+      refresh: 'Refresh',
+      apiServer: 'API Server',
+      queueService: 'Queue Service',
     }
   };
 
   const t = content[currentLanguage];
 
+  const handleCheckSupabaseStatus = async () => {
+    setSupabaseStatus('checking');
+    setSupabaseError(null);
+    console.log('Checking Supabase connection...');
+    const result = await checkSupabaseConnection();
+    if (result.ok) {
+      setSupabaseStatus('connected');
+      console.log('Supabase connection successful.');
+    } else {
+      setSupabaseStatus('error');
+      setSupabaseError(result.error || 'An unknown error occurred.');
+      console.error('Supabase connection failed:', result.error);
+    }
+  };
+
+  useEffect(() => {
+    handleCheckSupabaseStatus();
+  }, []);
+
+  const getStatusBadge = (status: ConnectionStatus) => {
+    switch (status) {
+      case 'checking':
+        return <Badge variant="secondary">{t.checking}</Badge>;
+      case 'connected':
+        return <Badge variant="default" className="bg-green-500 hover:bg-green-600">{t.connected}</Badge>;
+      case 'error':
+        return <Badge variant="destructive">{t.error}</Badge>;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            {t.title}
-          </CardTitle>
-          <CardDescription>{t.description}</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              {t.title}
+            </CardTitle>
+            <CardDescription>{t.description}</CardDescription>
+          </div>
+          <Button onClick={handleCheckSupabaseStatus} size="sm" variant="outline" className="flex items-center gap-2">
+            <RefreshCw className={`w-4 h-4 ${supabaseStatus === 'checking' ? 'animate-spin' : ''}`} />
+            {t.refresh}
+          </Button>
         </CardHeader>
       </Card>
 
@@ -54,54 +104,34 @@ const SystemMonitor = ({ currentLanguage }: SystemMonitorProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>API Server</span>
-                <Badge variant="default">{t.online}</Badge>
+                <span>{t.supabaseConnection}</span>
+                {getStatusBadge(supabaseStatus)}
+              </div>
+              {/* Mock statuses for other services */}
+              <div className="flex justify-between items-center">
+                <span>{t.apiServer}</span>
+                <Badge variant="default" className="bg-gray-400">Not Monitored</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span>Database</span>
-                <Badge variant="default">{t.online}</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Queue Service</span>
-                <Badge variant="default">{t.online}</Badge>
+                <span>{t.queueService}</span>
+                <Badge variant="default" className="bg-gray-400">Not Monitored</Badge>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        {/* You can add other monitoring cards here if needed */}
+        <Card className="opacity-50">
+           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="w-5 h-5" />
-              {t.performance}
+              Performance
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>CPU Usage</span>
-                  <span>45%</span>
-                </div>
-                <Progress value={45} />
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Memory Usage</span>
-                  <span>67%</span>
-                </div>
-                <Progress value={67} />
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Disk Usage</span>
-                  <span>23%</span>
-                </div>
-                <Progress value={23} />
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground">Performance monitoring is not implemented.</p>
           </CardContent>
         </Card>
       </div>
