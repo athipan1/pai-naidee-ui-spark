@@ -166,12 +166,128 @@ app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) =>
 });
 
 app.get('/api/places/search', async (req, res) => {
-    const { name, province } = req.query;
-    console.log(`Searching for place: ${name}` + (province ? ` in ${province}`: ''));
+  const { placeName, province } = req.query;
 
-    res.status(200).json({
-        places: []
-    });
+  if (!placeName) {
+    return res.status(400).json({ message: 'placeName query parameter is required' });
+  }
+
+  try {
+    let query = supabase.from('places').select('*, media(*)').ilike('name', `%${placeName}%`);
+    if (province) {
+      query = query.ilike('province', `%${province}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Supabase search error:', error.message);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ message: 'No places found' });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+});
+
+app.get('/api/places/:placeId', async (req, res) => {
+  const { placeId } = req.params;
+  try {
+    const { data, error } = await supabase
+      .from('places')
+      .select('*, media(*)')
+      .eq('id', placeId)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ message: `Place with ID ${placeId} not found.` });
+    }
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching place details', error: error.message });
+  }
+});
+
+app.put('/api/places/:placeId', upload.any(), async (req, res) => {
+  const { placeId } = req.params;
+  const { placeData: placeDataJson, mediaToDelete: mediaToDeleteJson } = req.body;
+  const newFiles = req.files;
+
+  if (!placeDataJson) {
+    return res.status(400).json({ message: 'placeData is required.' });
+  }
+
+  const placeData = JSON.parse(placeDataJson);
+  const mediaToDelete = mediaToDeleteJson ? JSON.parse(mediaToDeleteJson) : [];
+
+  try {
+    // 1. Update textual place data
+    const { error: placeUpdateError } = await supabase
+      .from('places')
+      .update({
+        name: placeData.name,
+        name_local: placeData.name_local,
+        province: placeData.province,
+        category: placeData.category,
+        description: placeData.description,
+        coordinates: `POINT(${placeData.coordinates.lng} ${placeData.coordinates.lat})`,
+      })
+      .eq('id', placeId);
+
+    if (placeUpdateError) throw new Error(`Place Update Error: ${placeUpdateError.message}`);
+
+    // 2. Delete media marked for removal
+    if (mediaToDelete.length > 0) {
+      // First, get the file paths from the media table
+      const { data: mediaPaths, error: pathError } = await supabase
+        .from('media')
+        .select('url')
+        .in('id', mediaToDelete);
+
+      if (pathError) throw new Error(`Error fetching media paths: ${pathError.message}`);
+
+      // Extract file names from URLs to delete from storage
+      const fileNames = mediaPaths.map(m => m.url.split('/').pop());
+      const { error: storageError } = await supabase.storage.from('place-images').remove(fileNames);
+      if (storageError) throw new Error(`Storage Deletion Error: ${storageError.message}`);
+
+      // Now, delete the records from the media table
+      const { error: dbError } = await supabase.from('media').delete().in('id', mediaToDelete);
+      if (dbError) throw new Error(`DB Deletion Error: ${dbError.message}`);
+    }
+
+    // 3. Upload new media files
+    if (newFiles && newFiles.length > 0) {
+      const mediaToInsert = [];
+      for (const file of newFiles) {
+        const fileExt = path.extname(file.originalname);
+        const fileName = `${placeId}/${uuidv4()}${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage.from('place-images').upload(fileName, file.buffer, { contentType: file.mimetype });
+        if (uploadError) throw new Error(`Storage Upload Error: ${uploadError.message}`);
+
+        const { data: { publicUrl } } = supabase.storage.from('place-images').getPublicUrl(fileName);
+        mediaToInsert.push({
+          place_id: placeId,
+          url: publicUrl,
+          type: file.mimetype.startsWith('video') ? 'video' : 'image',
+          title: path.basename(file.originalname, fileExt),
+        });
+      }
+      const { error: mediaInsertError } = await supabase.from('media').insert(mediaToInsert);
+      if (mediaInsertError) throw new Error(`Media Insert Error: ${mediaInsertError.message}`);
+    }
+
+    res.status(200).json({ success: true, message: 'Place updated successfully' });
+  } catch (error) {
+    console.error('Error updating place:', error.message);
+    res.status(500).json({ message: 'Error updating place', error: error.message });
+  }
 });
 
 

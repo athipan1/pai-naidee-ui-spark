@@ -43,7 +43,8 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
   // Place search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchProvince, setSearchProvince] = useState('');
-  const [searchResults, setSearchResults] = useState<{ exists: boolean; placeId?: string; place?: PlaceMediaData }>({ exists: false });
+  const [searchResultsList, setSearchResultsList] = useState<PlaceMediaData[]>([]);
+  const [noResultsFound, setNoResultsFound] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
   // Advanced filters state
@@ -58,30 +59,12 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Media replacement state
-  const [selectedPlaceId, setSelectedPlaceId] = useState('');
-  const [selectedPlaceName, setSelectedPlaceName] = useState('');
-  const [selectedPlaceCoordinates, setSelectedPlaceCoordinates] = useState<{lat: number; lng: number} | null>(null);
-  const [editingCoordinates, setEditingCoordinates] = useState(false);
-  const [newLatitude, setNewLatitude] = useState('');
-  const [newLongitude, setNewLongitude] = useState('');
-  const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
-  const [newMediaData, setNewMediaData] = useState<MediaUploadData[]>([]);
-  const [replacementResult, setReplacementResult] = useState<MediaReplacementResult | null>(null);
-  const [isReplacing, setIsReplacing] = useState(false);
-
-  // New place creation state
-  const [newPlaceName, setNewPlaceName] = useState('');
-  const [newPlaceNameLocal, setNewPlaceNameLocal] = useState('');
-  const [newPlaceProvince, setNewPlaceProvince] = useState('');
-  const [newPlaceCategory, setNewPlaceCategory] = useState('');
-  const [newPlaceDescription, setNewPlaceDescription] = useState('');
-  const [newPlaceLatitude, setNewPlaceLatitude] = useState('');
-  const [newPlaceLongitude, setNewPlaceLongitude] = useState('');
-  const [newPlaceMediaFiles, setNewPlaceMediaFiles] = useState<File[]>([]);
-  const [newPlaceMediaData, setNewPlaceMediaData] = useState<MediaUploadData[]>([]);
-  const [creationResult, setCreationResult] = useState<PlaceCreationResult | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  // Unified state for the active place being created or edited
+  const [activePlace, setActivePlace] = useState<Partial<PlaceMediaData>>({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaToDelete, setMediaToDelete] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Timeline state
   const [timelineEntries, setTimelineEntries] = useState<TimelineEntry[]>([]);
@@ -224,30 +207,51 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
   const t = content[currentLanguage];
 
   // Search for existing place
+  const handleSelectPlace = async (place: PlaceMediaData) => {
+    const loadingToast = notificationService.showLoading('Loading place details...');
+    try {
+      const fullPlaceDetails = await mediaManagementService.getPlaceMedia(place.id);
+      if (fullPlaceDetails) {
+        setActivePlace(fullPlaceDetails);
+        setIsEditing(true);
+        setSearchResultsList([]); // Clear search results
+        setNoResultsFound(false);
+      } else {
+        notificationService.show('error', 'Failed to load place details.');
+      }
+    } catch (error) {
+      notificationService.showSyncFailure(
+        'Load Failed',
+        error instanceof Error ? error.message : 'Unknown error',
+        () => handleSelectPlace(place)
+      );
+    } finally {
+      notificationService.dismiss(loadingToast);
+    }
+  };
+
   const handleSearchPlace = async () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
+    setNoResultsFound(false);
+    setSearchResultsList([]);
+    setActivePlace({});
     const loadingToast = notificationService.showLoading('Searching for place...');
     
     try {
-      const result = await mediaManagementService.checkPlaceExists(searchQuery, searchProvince);
-      setSearchResults(result);
+      const results = await mediaManagementService.searchPlaces(searchQuery, searchProvince);
       
-      if (result.exists && result.placeId) {
-        setSelectedPlaceId(result.placeId);
-        setSelectedPlaceName(result.place?.placeName || searchQuery);
-        setSelectedPlaceCoordinates(result.place?.coordinates || null);
-        setNewLatitude(result.place?.coordinates?.lat.toString() || '');
-        setNewLongitude(result.place?.coordinates?.lng.toString() || '');
-        setEditingCoordinates(false);
+      if (results.length > 0) {
+        setSearchResultsList(results);
         notificationService.dismiss(loadingToast);
-        notificationService.show('success', 'Place found successfully');
+        notificationService.show('success', `${results.length} place(s) found.`);
       } else {
+        setNoResultsFound(true);
+        setActivePlace({ placeName: searchQuery, province: searchProvince });
+        setIsEditing(false);
         notificationService.dismiss(loadingToast);
-        notificationService.show('info', 'Place not found', {
-          description: 'You can create a new place using the "Add New Place" tab'
-        });
+        notificationService.show('info', 'No places found. You can create a new one.');
       }
     } catch (error) {
       notificationService.dismiss(loadingToast);
@@ -258,44 +262,6 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
       );
     } finally {
       setIsSearching(false);
-    }
-  };
-
-  // Handle coordinate update for existing place
-  const handleUpdateCoordinates = async () => {
-    if (!selectedPlaceId) return;
-
-    const lat = parseFloat(newLatitude);
-    const lng = parseFloat(newLongitude);
-    
-    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      notificationService.showValidationError('Invalid GPS Coordinates', t.invalidCoordinates);
-      return;
-    }
-
-    try {
-      // Update coordinates via the media management service
-      // Note: This would need to be implemented in the service, for now we'll update locally
-      setSelectedPlaceCoordinates({ lat, lng });
-      setEditingCoordinates(false);
-      
-      notificationService.show('success', 'GPS coordinates updated successfully');
-      
-      // In a real implementation, this would sync with the backend
-      await timelineSyncService.syncMediaReplacement(
-        selectedPlaceId,
-        [],
-        [],
-        'current_user',
-        `GPS coordinates updated to ${lat}, ${lng}`
-      );
-      
-    } catch (error) {
-      notificationService.showSyncFailure(
-        'Coordinate Update',
-        error instanceof Error ? error.message : 'Unknown error',
-        () => handleUpdateCoordinates()
-      );
     }
   };
   const applyFilters = (mediaList: MediaUploadData[]): MediaUploadData[] => {
@@ -348,132 +314,82 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
     console.log('Filtered media:', filtered);
   };
 
-  // Handle media replacement
-  const handleReplaceMedia = async () => {
-    if (!selectedPlaceId || newMediaData.length === 0) return;
+  const handleSubmit = async () => {
+    // Basic Validation
+    if (!activePlace.placeName || !activePlace.province || !activePlace.coordinates) {
+      notificationService.showValidationError('Missing Fields', 'Please fill in all required fields.');
+      return;
+    }
+    if (mediaFiles.length === 0 && !isEditing) {
+      notificationService.showValidationError('Missing Media', 'Please select at least one media file.');
+      return;
+    }
 
-    setIsReplacing(true);
-    const loadingToast = notificationService.showLoading('Replacing media...');
-    
+    setIsSubmitting(true);
+    const loadingToast = notificationService.showLoading(isEditing ? 'Updating place...' : 'Creating new place...');
+
     try {
-      const result = await mediaManagementService.replaceMediaForPlace(selectedPlaceId, newMediaData);
-      setReplacementResult(result);
+      const mediaUploadData: MediaUploadData[] = mediaFiles.map(file => ({
+        file,
+        title: file.name,
+        description: '',
+        type: file.type.startsWith('video') ? 'video' : 'image',
+      }));
 
-      // Sync with timeline
-      if (result.success) {
-        await timelineSyncService.syncMediaReplacement(
-          selectedPlaceId,
-          result.replacedMediaIds,
-          result.newMediaIds,
-          'current_user',
-          'Manual media replacement via admin interface'
-        );
-        
-        notificationService.dismiss(loadingToast);
-        notificationService.show('success', 'Media replaced successfully', {
-          description: result.message,
-        });
-        
-        // Reset media files
-        setNewMediaFiles([]);
-        setNewMediaData([]);
+      if (isEditing) {
+        const result = await mediaManagementService.updatePlace(activePlace.placeId, activePlace, mediaUploadData, mediaToDelete);
+        if (result.success) {
+          notificationService.show('success', 'Place updated successfully!');
+          setMediaToDelete([]);
+          setMediaFiles([]);
+          // Re-fetch data to show changes
+          handleSelectPlace(activePlace);
+        }
       } else {
-        throw new Error(result.message || 'Media replacement failed');
+        const result = await mediaManagementService.createPlaceWithMedia(activePlace, mediaUploadData);
+        if (result.success) {
+          notificationService.show('success', 'Place created successfully!');
+          // Reset form
+          setActivePlace({});
+          setMediaFiles([]);
+          setSearchResults({ exists: undefined });
+        }
       }
     } catch (error) {
-      notificationService.dismiss(loadingToast);
       notificationService.showSyncFailure(
-        'Media Replacement',
+        isEditing ? 'Update Failed' : 'Creation Failed',
         error instanceof Error ? error.message : 'Unknown error',
-        () => handleReplaceMedia()
+        handleSubmit
       );
     } finally {
-      setIsReplacing(false);
+      notificationService.dismiss(loadingToast);
+      setIsSubmitting(false);
     }
   };
 
-  // Handle new place creation
-  const handleCreatePlace = async () => {
-    // Validate required fields including GPS coordinates
-    if (!newPlaceName.trim() || !newPlaceProvince.trim() || newPlaceMediaData.length === 0) {
-      notificationService.showValidationError('Required fields', 'Please fill in all required fields and select media files');
-      return;
-    }
-
-    // Validate GPS coordinates
-    const lat = parseFloat(newPlaceLatitude);
-    const lng = parseFloat(newPlaceLongitude);
-    
-    if (!newPlaceLatitude.trim() || !newPlaceLongitude.trim()) {
-      notificationService.showValidationError('GPS Coordinates Required', t.gpsRequired);
-      return;
-    }
-
-    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      notificationService.showValidationError('Invalid GPS Coordinates', t.invalidCoordinates);
-      return;
-    }
-
-    setIsCreating(true);
-    const loadingToast = notificationService.showLoading('Creating new place...');
+  // Force sync
+  const handleForceSync = async () => {
+    const loadingToast = notificationService.showLoading('Syncing database...');
     
     try {
-      const placeData = {
-        placeId: '',
-        placeName: newPlaceName,
-        placeNameLocal: newPlaceNameLocal,
-        province: newPlaceProvince,
-        category: newPlaceCategory,
-        description: newPlaceDescription,
-        coordinates: {
-          lat: lat,
-          lng: lng
-        },
-        media: []
-      };
+      const result = await timelineSyncService.forceSyncAll();
+      setSyncStatus(result);
 
-      const result = await mediaManagementService.createPlaceWithMedia(placeData, newPlaceMediaData);
-      setCreationResult(result);
-
-      // Sync with timeline
+      notificationService.dismiss(loadingToast);
       if (result.success) {
-        await timelineSyncService.syncPlaceCreation(
-          result.placeId,
-          result.mediaIds,
-          'current_user'
-        );
-
-        notificationService.dismiss(loadingToast);
-        notificationService.showSuccessWithUndo(
-          `Place "${newPlaceName}" created successfully with GPS coordinates`,
-          () => {
-            // TODO: Implement undo functionality
-            notificationService.show('info', 'Undo functionality not yet implemented');
-          }
-        );
-
-        // Reset form
-        setNewPlaceName('');
-        setNewPlaceNameLocal('');
-        setNewPlaceProvince('');
-        setNewPlaceCategory('');
-        setNewPlaceDescription('');
-        setNewPlaceLatitude('');
-        setNewPlaceLongitude('');
-        setNewPlaceMediaFiles([]);
-        setNewPlaceMediaData([]);
+        notificationService.show('success', 'Database synced successfully', {
+          description: `Synced ${result.syncedEntries} entries`,
+        });
       } else {
-        throw new Error(result.message || 'Place creation failed');
+        throw new Error('Sync completed with errors');
       }
     } catch (error) {
       notificationService.dismiss(loadingToast);
       notificationService.showSyncFailure(
-        'Place Creation',
+        'Database Sync',
         error instanceof Error ? error.message : 'Unknown error',
-        () => handleCreatePlace()
+        () => handleForceSync()
       );
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -802,64 +718,15 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
         )}
       </Card>
 
-      <Tabs defaultValue="search" className="space-y-4 sm:space-y-6">
-        <TabsList className={cn(
-          "w-full",
-          isMobile ? "grid-cols-2" : isTablet ? "grid-cols-3" : "grid-cols-5",
-          "grid"
-        )}>
-          <TabsTrigger value="search" className={cn(
-            "flex items-center gap-1 sm:gap-2",
-            isMobile && "text-xs px-2"
-          )}>
-            <Search className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className={isMobile ? "hidden" : ""}>{t.searchPlace}</span>
-          </TabsTrigger>
-          <TabsTrigger value="replace" className={cn(
-            "flex items-center gap-1 sm:gap-2",
-            isMobile && "text-xs px-2"
-          )}>
-            <Replace className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className={isMobile ? "hidden" : ""}>{t.replaceMedia}</span>
-          </TabsTrigger>
-          <TabsTrigger value="create" className={cn(
-            "flex items-center gap-1 sm:gap-2",
-            isMobile && "text-xs px-2",
-            isMobile && "col-span-2"
-          )}>
-            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className={isMobile ? "text-xs" : ""}>{t.addNewPlace}</span>
-          </TabsTrigger>
-          {!isMobile && (
-            <>
-              <TabsTrigger value="timeline" className="flex items-center gap-2">
-                <History className="h-4 w-4" />
-                {t.viewTimeline}
-              </TabsTrigger>
-              <TabsTrigger value="test" className="flex items-center gap-2">
-                <TestTube className="h-4 w-4" />
-                {t.runTests}
-              </TabsTrigger>
-            </>
-          )}
+      <Tabs defaultValue="manage" className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="manage">Manage Place</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="test">Tests</TabsTrigger>
         </TabsList>
 
-        {/* Mobile-only secondary tab list for timeline and test */}
-        {isMobile && (
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="timeline" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              {t.viewTimeline}
-            </TabsTrigger>
-            <TabsTrigger value="test" className="flex items-center gap-2">
-              <TestTube className="h-4 w-4" />
-              {t.runTests}
-            </TabsTrigger>
-          </TabsList>
-        )}
-
-        {/* Search Place Tab */}
-        <TabsContent value="search">
+        <TabsContent value="manage" className="space-y-4">
+          {/* Search Place Section */}
           <Card>
             <CardHeader>
               <CardTitle className={isMobile ? "text-lg" : "text-xl"}>
@@ -898,415 +765,149 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
                 </div>
               </div>
 
-              {searchResults.exists !== undefined && (
-                <Alert className={cn(
-                  searchResults.exists ? "border-green-500" : "border-orange-500",
-                  "mt-4"
-                )}>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {searchResults.exists ? (
-                      <div className="space-y-2">
-                        <div>
-                          <strong>{t.placeExists}:</strong> {searchResults.place?.placeName}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            ID: {searchResults.placeId}
-                          </Badge>
-                          {searchResults.place?.coordinates && (
-                            <Badge variant="outline" className="text-xs">
-                              GPS: {searchResults.place.coordinates.lat.toFixed(4)}, {searchResults.place.coordinates.lng.toFixed(4)}
-                            </Badge>
-                          )}
-                        </div>
-                        {searchResults.place?.coordinates && (
-                          <p className="text-sm text-muted-foreground">
-                            Location verified with GPS coordinates
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <strong>{t.placeNotExists}</strong>
-                    )}
-                  </AlertDescription>
-                </Alert>
-              )}
             </CardContent>
           </Card>
-        </TabsContent>
 
-        {/* Replace Media Tab */}
-        <TabsContent value="replace">
-          <Card>
-            <CardHeader>
-              <CardTitle className={isMobile ? "text-lg" : "text-xl"}>
-                {t.replaceMedia}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {selectedPlaceId ? (
-                <>
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      <div className="space-y-2">
-                        <div>
-                          {t.replaceMedia}: <strong>{selectedPlaceName}</strong>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            ID: {selectedPlaceId}
-                          </Badge>
-                          {selectedPlaceCoordinates && (
-                            <Badge variant="secondary" className="text-xs">
-                              GPS: {selectedPlaceCoordinates.lat.toFixed(4)}, {selectedPlaceCoordinates.lng.toFixed(4)}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-
-                  {/* GPS Coordinate Editing Section */}
-                  <Card className="border-muted">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-medium">{t.coordinates}</CardTitle>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingCoordinates(!editingCoordinates)}
-                        >
-                          {editingCoordinates ? t.cancel : t.editGPS}
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {!editingCoordinates ? (
-                        <div className="space-y-2">
-                          {selectedPlaceCoordinates ? (
-                            <div className="grid grid-cols-2 gap-2">
-                              <div className="text-sm">
-                                <span className="font-medium">{t.latitude}:</span> {selectedPlaceCoordinates.lat.toFixed(6)}
-                              </div>
-                              <div className="text-sm">
-                                <span className="font-medium">{t.longitude}:</span> {selectedPlaceCoordinates.lng.toFixed(6)}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-sm text-muted-foreground">
-                              {t.noGPS}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <Label className="text-xs">{t.latitude} *</Label>
-                              <Input
-                                type="number"
-                                step="any"
-                                value={newLatitude}
-                                onChange={(e) => setNewLatitude(e.target.value)}
-                                placeholder="13.7563"
-                                className="text-sm"
-                                min="-90"
-                                max="90"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">{t.longitude} *</Label>
-                              <Input
-                                type="number"
-                                step="any"
-                                value={newLongitude}
-                                onChange={(e) => setNewLongitude(e.target.value)}
-                                placeholder="100.5018"
-                                className="text-sm"
-                                min="-180"
-                                max="180"
-                              />
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            onClick={handleUpdateCoordinates}
-                            disabled={!newLatitude.trim() || !newLongitude.trim()}
-                            className="w-full"
-                          >
-                            {t.updateGPS}
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <div className="space-y-2">
-                    <Label>{t.selectFiles}</Label>
-                    <Input
-                      type="file"
-                      multiple
-                      accept="image/*,video/*"
-                      onChange={(e) => handleMediaFileChange(e.target.files)}
-                      className="w-full mobile-touch-target"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Supported: Images and Videos (max 100MB each)
-                    </p>
-                  </div>
-
-                  {newMediaFiles.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Selected Files ({newMediaFiles.length})</Label>
-                      <div className={cn(
-                        "grid gap-2",
-                        isMobile ? "grid-cols-1" : "grid-cols-2"
-                      )}>
-                        {newMediaFiles.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 border rounded">
-                            <div className="flex items-center gap-2 min-w-0">
-                              {file.type.startsWith('video/') ? (
-                                <FileType className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                              ) : (
-                                <FileType className="h-4 w-4 text-green-500 flex-shrink-0" />
-                              )}
-                              <span className="text-sm truncate">{file.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <HardDrive className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">
-                                {(file.size / (1024 * 1024)).toFixed(1)}MB
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+          {/* Search Results List */}
+          {searchResultsList.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Search Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {searchResultsList.map(place => (
+                    <div
+                      key={place.id}
+                      className="p-2 border rounded-md cursor-pointer hover:bg-muted"
+                      onClick={() => handleSelectPlace(place)}
+                    >
+                      <p className="font-semibold">{place.name}</p>
+                      <p className="text-sm text-muted-foreground">{place.province}</p>
                     </div>
-                  )}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-                  <Button 
-                    onClick={handleReplaceMedia}
-                    disabled={isReplacing || newMediaFiles.length === 0}
-                    className="w-full mobile-touch-target"
-                  >
-                    <Replace className="h-4 w-4 mr-2" />
-                    {isReplacing ? t.processing : t.replaceMedia}
-                  </Button>
-
-                  {replacementResult && (
-                    <Alert className="border-green-500">
-                      <CheckCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>{t.replacementSuccess}</strong><br />
-                        {replacementResult.message}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </>
-              ) : (
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Please search and select a place first in the Search tab.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Create New Place Tab */}
-        <TabsContent value="create">
-          <Card>
-            <CardHeader>
-              <CardTitle className={isMobile ? "text-lg" : "text-xl"}>
-                {t.addNewPlace}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t.placeName} *</Label>
-                  <Input
-                    value={newPlaceName}
-                    onChange={(e) => setNewPlaceName(e.target.value)}
-                    placeholder={t.placeName}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Local Name</Label>
-                  <Input
-                    value={newPlaceNameLocal}
-                    onChange={(e) => setNewPlaceNameLocal(e.target.value)}
-                    placeholder="ชื่อภาษาท้องถิ่น"
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t.province} *</Label>
-                  <Input
-                    value={newPlaceProvince}
-                    onChange={(e) => setNewPlaceProvince(e.target.value)}
-                    placeholder={t.province}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t.category}</Label>
-                  <Input
-                    value={newPlaceCategory}
-                    onChange={(e) => setNewPlaceCategory(e.target.value)}
-                    placeholder={t.category}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* GPS Coordinates Section */}
-              <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{t.coordinates} *</Badge>
-                  <p className="text-sm text-muted-foreground">
-                    Required for location accuracy and mapping
-                  </p>
-                </div>
+          {/* Create/Edit Form Section */}
+          {(noResultsFound || activePlace.id) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className={isMobile ? "text-lg" : "text-xl"}>
+                  {isEditing ? `Editing: ${activePlace.placeName}` : 'Create New Place'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t.latitude} *</Label>
+                    <Label>{t.placeName} *</Label>
                     <Input
-                      type="number"
-                      step="any"
-                      value={newPlaceLatitude}
-                      onChange={(e) => setNewPlaceLatitude(e.target.value)}
-                      placeholder="13.7563"
-                      className="w-full"
-                      min="-90"
-                      max="90"
+                      value={activePlace.placeName || ''}
+                      onChange={(e) => setActivePlace(p => ({ ...p, placeName: e.target.value }))}
+                      placeholder={t.placeName}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Range: -90 to 90
-                    </p>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.longitude} *</Label>
+                    <Label>Local Name</Label>
+                    <Input
+                      value={activePlace.placeNameLocal || ''}
+                      onChange={(e) => setActivePlace(p => ({ ...p, placeNameLocal: e.target.value }))}
+                      placeholder="ชื่อภาษาท้องถิ่น"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t.province} *</Label>
+                    <Input
+                      value={activePlace.province || ''}
+                      onChange={(e) => setActivePlace(p => ({ ...p, province: e.target.value }))}
+                      placeholder={t.province}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t.category}</Label>
+                    <Input
+                      value={activePlace.category || ''}
+                      onChange={(e) => setActivePlace(p => ({ ...p, category: e.target.value }))}
+                      placeholder={t.category}
+                    />
+                  </div>
+                </div>
+
+                {/* GPS Coordinates Section */}
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <Label className="font-semibold">{t.coordinates} *</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       type="number"
-                      step="any"
-                      value={newPlaceLongitude}
-                      onChange={(e) => setNewPlaceLongitude(e.target.value)}
-                      placeholder="100.5018"
-                      className="w-full"
-                      min="-180"
-                      max="180"
+                      value={activePlace.coordinates?.lat || ''}
+                      onChange={(e) => setActivePlace(p => ({ ...p, coordinates: { ...p.coordinates, lat: parseFloat(e.target.value) } }))}
+                      placeholder={t.latitude}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Range: -180 to 180
-                    </p>
+                    <Input
+                      type="number"
+                      value={activePlace.coordinates?.lng || ''}
+                      onChange={(e) => setActivePlace(p => ({ ...p, coordinates: { ...p.coordinates, lng: parseFloat(e.target.value) } }))}
+                      placeholder={t.longitude}
+                    />
                   </div>
                 </div>
-                {(newPlaceLatitude && newPlaceLongitude) && (
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription className="text-sm">
-                      <strong>Preview:</strong> {newPlaceLatitude}, {newPlaceLongitude}
-                      {parseFloat(newPlaceLatitude) >= -90 && parseFloat(newPlaceLatitude) <= 90 && 
-                       parseFloat(newPlaceLongitude) >= -180 && parseFloat(newPlaceLongitude) <= 180 ? (
-                        <Badge variant="default" className="ml-2 text-xs">Valid</Badge>
-                      ) : (
-                        <Badge variant="destructive" className="ml-2 text-xs">Invalid</Badge>
-                      )}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <Label>{t.description}</Label>
-                <Textarea
-                  value={newPlaceDescription}
-                  onChange={(e) => setNewPlaceDescription(e.target.value)}
-                  placeholder={t.description}
-                  rows={isMobile ? 2 : 3}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t.selectFiles} *</Label>
-                <Input
-                  type="file"
-                  multiple
-                  accept="image/*,video/*"
-                  onChange={(e) => handleNewPlaceFileChange(e.target.files)}
-                  className="w-full mobile-touch-target"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Supported: Images and Videos (max 100MB each)
-                </p>
-              </div>
-
-              {newPlaceMediaFiles.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Selected Files ({newPlaceMediaFiles.length})</Label>
-                  <div className={cn(
-                    "grid gap-2",
-                    isMobile ? "grid-cols-1" : "grid-cols-2"
-                  )}>
-                    {newPlaceMediaFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 border rounded">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {file.type.startsWith('video/') ? (
-                            <FileType className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                          ) : (
-                            <FileType className="h-4 w-4 text-green-500 flex-shrink-0" />
-                          )}
-                          <span className="text-sm truncate">{file.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <HardDrive className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {(file.size / (1024 * 1024)).toFixed(1)}MB
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <Label>{t.description}</Label>
+                  <Textarea
+                    value={activePlace.description || ''}
+                    onChange={(e) => setActivePlace(p => ({ ...p, description: e.target.value }))}
+                    placeholder={t.description}
+                    rows={3}
+                  />
                 </div>
-              )}
 
-              <Button 
-                onClick={handleCreatePlace}
-                disabled={isCreating || !newPlaceName.trim() || !newPlaceProvince.trim() || !newPlaceLatitude.trim() || !newPlaceLongitude.trim() || newPlaceMediaFiles.length === 0}
-                className="w-full mobile-touch-target"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {isCreating ? t.processing : t.createPlace}
-              </Button>
+                <div className="space-y-2">
+                  <Label>{t.selectFiles} *</Label>
+                  <Input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*"
+                    onChange={(e) => setMediaFiles(Array.from(e.target.files || []))}
+                  />
+                </div>
 
-              {creationResult && (
-                <Alert className="border-green-500">
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="space-y-2">
-                      <div>
-                        <strong>{t.creationSuccess}</strong><br />
-                        {creationResult.message}
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        ID: {creationResult.placeId}
-                      </Badge>
+                {/* Display existing media if editing */}
+                {isEditing && activePlace.media && activePlace.media.length > 0 && (
+                  <div>
+                    <Label>Existing Media</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                    {activePlace.media.filter(m => !mediaToDelete.includes(m.id)).map(m => (
+                        <div key={m.id} className="relative">
+                          <img src={m.url} alt={m.title} className="rounded-md object-cover aspect-square" />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-6 w-6"
+                          onClick={() => setMediaToDelete(prev => [...prev, m.id])}
+                        >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? t.processing : (isEditing ? 'Update Place' : t.createPlace)}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
-        {/* Timeline Tab */}
         <TabsContent value="timeline">
           <div className="space-y-4">
             <Card>
@@ -1427,7 +1028,6 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
           </div>
         </TabsContent>
 
-        {/* Test Tab */}
         <TabsContent value="test">
           <MediaManagementTest currentLanguage={currentLanguage} />
         </TabsContent>

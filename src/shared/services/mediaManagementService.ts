@@ -117,28 +117,62 @@ class MediaManagementService {
     };
   }
 
-  /**
-   * Check if a place exists.
-   * This is still a placeholder and needs full implementation.
-   */
-  async checkPlaceExists(placeName: string, province?: string): Promise<{
-    exists: boolean;
-    placeId?: string;
-    place?: PlaceMediaData;
-  }> {
-     console.warn("checkPlaceExists is not fully implemented yet.");
-    // Mocking a "not found" response as the endpoint is a placeholder
-    return Promise.resolve({ exists: false });
+  async searchPlaces(placeName: string, province?: string): Promise<PlaceMediaData[]> {
+    const queryParams = new URLSearchParams({ placeName });
+    if (province) {
+      queryParams.append('province', province);
+    }
+
+    const response = await fetch(`${this.apiBaseUrl}/places/search?${queryParams}`);
+
+    if (response.status === 404) {
+      return []; // Return empty array if no places are found
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to search for places: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 
-  /**
-   * Get place media details.
-   * This is still a placeholder and needs full implementation.
-   */
   async getPlaceMedia(placeId: string): Promise<PlaceMediaData | null> {
-    console.warn("getPlaceMedia is not fully implemented yet.");
-    // Mocking a null response as the endpoint is a placeholder
-    return Promise.resolve(null);
+    const response = await fetch(`${this.apiBaseUrl}/places/${placeId}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error(`Failed to fetch place media: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  async updatePlace(placeId: string, placeData: Partial<PlaceMediaData>, newMedia: MediaUploadData[], mediaToDelete: string[]): Promise<any> {
+    const formData = new FormData();
+
+    formData.append('placeData', JSON.stringify(placeData));
+    formData.append('mediaToDelete', JSON.stringify(mediaToDelete));
+
+    newMedia.forEach(mediaItem => {
+      if (mediaItem.file) {
+        formData.append('files', mediaItem.file, mediaItem.file.name);
+      }
+    });
+
+    const response = await fetch(`${this.apiBaseUrl}/places/${placeId}`, {
+      method: 'PUT',
+      body: formData,
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP ${response.status}: Failed to update place`);
+    }
+
+    return response.json();
   }
 
   private getAuthToken(): string {

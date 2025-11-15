@@ -34,3 +34,7 @@ Dockerfile.test
 
 # Test coverage
 coverage/
+
+# Playwright reports
+playwright-report/
+test-results/
