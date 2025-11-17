@@ -148,7 +148,103 @@ app.post('/api/places', upload.any(), async (req, res) => {
   }
 });
 
+/**
+ * Endpoint to get a list of all places with their media.
+ */
+app.get('/api/places', async (req, res) => {
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase client is not initialized.' });
+  }
+  try {
+    const { data, error } = await supabase
+      .from('places')
+      .select('*, media(*)'); // This performs a join with the media table
+
+    if (error) {
+      throw new Error(`Supabase DB Error: ${error.message}`);
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error in GET /api/places:', error.message);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+/**
+ * Endpoint to get a single place by its ID, including its media.
+ */
+app.get('/api/places/:placeId', async (req, res) => {
+  const { placeId } = req.params;
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase client is not initialized.' });
+  }
+  try {
+    const { data, error } = await supabase
+      .from('places')
+      .select('*, media(*)') // Join with media table
+      .eq('id', placeId)
+      .single(); // Expect only one result
+
+    if (error) {
+      // If the error is due to no rows found, it's a 404
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Place not found.' });
+      }
+      throw new Error(`Supabase DB Error: ${error.message}`);
+    }
+
+    if (!data) {
+      return res.status(404).json({ error: 'Place not found.' });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(`Error in GET /api/places/${placeId}:`, error.message);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
 // ... (other endpoints remain the same)
+
+/**
+ * Endpoint to update place details.
+ */
+app.put('/api/places/:placeId', async (req, res) => {
+  const { placeId } = req.params;
+  const { name, name_local, province, category, description, coordinates } = req.body;
+
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase client is not initialized.' });
+  }
+
+  try {
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (name_local) updateData.name_local = name_local;
+    if (province) updateData.province = province;
+    if (category) updateData.category = category;
+    if (description) updateData.description = description;
+    if (coordinates) updateData.coordinates = `POINT(${coordinates.lng} ${coordinates.lat})`;
+
+    const { data, error } = await supabase
+      .from('places')
+      .update(updateData)
+      .eq('id', placeId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Supabase DB Error: ${error.message}`);
+    }
+
+    res.status(200).json({ success: true, message: 'Place updated successfully.', data });
+  } catch (error) {
+    console.error(`Error in PUT /api/places/${placeId}:`, error.message);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
 app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) => {
     const { placeId } = req.params;
     const files = req.files;
@@ -156,22 +252,150 @@ app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) =>
     console.log(`Received request to replace media for place ID: ${placeId}`);
     console.log(`Received ${files ? files.length : 0} new files.`);
 
-    res.status(200).json({
-        success: true,
-        message: `Media replacement for place ${placeId} is not fully implemented yet.`,
-        placeId,
-        replacedMediaIds: [],
-        newMediaIds: files ? files.map((f, i) => `new_media_${Date.now()}_${i}`) : [],
-    });
+    // This is a complex operation. For now, we will add the new media
+    // and the user can manually delete the old ones. A full implementation
+    // would involve deleting old files from storage and the database.
+
+    if (!files || files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded.' });
+    }
+
+    if (!supabase) {
+        return res.status(500).json({ error: 'Supabase client is not initialized.' });
+    }
+
+    try {
+        const mediaToInsert = [];
+        for (const file of files) {
+            const fileExt = path.extname(file.originalname);
+            const fileName = `${placeId}/${uuidv4()}${fileExt}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('place-images')
+                .upload(fileName, file.buffer, {
+                    contentType: file.mimetype,
+                    upsert: false,
+                });
+
+            if (uploadError) {
+                throw new Error(`Supabase Storage Error: ${uploadError.message}`);
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('place-images')
+                .getPublicUrl(fileName);
+
+            mediaToInsert.push({
+                place_id: placeId,
+                url: publicUrl,
+                type: file.mimetype.startsWith('video') ? 'video' : 'image',
+                title: path.basename(file.originalname, fileExt),
+                description: '',
+            });
+        }
+
+        const { data: newMedia, error: mediaError } = await supabase
+            .from('media')
+            .insert(mediaToInsert)
+            .select();
+
+        if (mediaError) {
+            throw new Error(`Supabase DB Error (media): ${mediaError.message}`);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Successfully added ${newMedia.length} new media items.`,
+            placeId,
+            newMedia,
+        });
+    } catch (error) {
+        console.error('Error in media replacement:', error.message);
+        res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
 });
 
 app.get('/api/places/search', async (req, res) => {
     const { name, province } = req.query;
     console.log(`Searching for place: ${name}` + (province ? ` in ${province}`: ''));
 
-    res.status(200).json({
-        places: []
-    });
+    if (!supabase) {
+        return res.status(500).json({ error: 'Supabase client is not initialized.' });
+    }
+
+    try {
+        let query = supabase.from('places').select('*, media(*)');
+
+        if (name) {
+            query = query.ilike('name', `%${name}%`);
+        }
+        if (province) {
+            query = query.ilike('province', `%${province}%`);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+            throw new Error(`Supabase DB Error: ${error.message}`);
+        }
+
+        res.status(200).json({ places: data });
+    } catch (error) {
+        console.error('Error in place search:', error.message);
+        res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+});
+
+/**
+ * Endpoint to delete a media item.
+ */
+app.delete('/api/media/:mediaId', async (req, res) => {
+    const { mediaId } = req.params;
+    if (!supabase) {
+        return res.status(500).json({ error: 'Supabase client is not initialized.' });
+    }
+
+    try {
+        // First, get the media record to find out its URL
+        const { data: media, error: getError } = await supabase
+            .from('media')
+            .select('url')
+            .eq('id', mediaId)
+            .single();
+
+        if (getError || !media) {
+            return res.status(404).json({ error: 'Media not found.' });
+        }
+
+        // Extract the file path from the URL
+        const url = new URL(media.url);
+        const filePath = url.pathname.split('/place-images/')[1];
+
+        // Delete from storage
+        const { error: storageError } = await supabase.storage
+            .from('place-images')
+            .remove([filePath]);
+
+        if (storageError) {
+            // Log the error but proceed to delete the DB record anyway
+            console.error('Supabase Storage Error on delete:', storageError.message);
+        }
+
+        // Delete from database
+        const { error: dbError } = await supabase
+            .from('media')
+            .delete()
+            .eq('id', mediaId);
+
+        if (dbError) {
+            throw new Error(`Supabase DB Error: ${dbError.message}`);
+        }
+
+        res.status(200).json({ success: true, message: 'Media deleted successfully.' });
+    } catch (error) {
+        console.error(`Error deleting media ${mediaId}:`, error.message);
+        res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
 });
 
 
