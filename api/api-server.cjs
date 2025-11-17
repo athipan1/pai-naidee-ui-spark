@@ -112,6 +112,7 @@ app.post('/api/places', upload.any(), async (req, res) => {
     }
 
     // 3. Insert media metadata into the 'media' table
+    let insertedMedia = [];
     if (mediaToInsert.length > 0) {
         const { data: mediaResult, error: mediaError } = await supabase
             .from('media')
@@ -121,14 +122,16 @@ app.post('/api/places', upload.any(), async (req, res) => {
         if (mediaError) {
             throw new Error(`Supabase DB Error (media): ${mediaError.message}`);
         }
-        console.log(`Successfully inserted ${mediaResult.length} media records.`);
+        insertedMedia = mediaResult;
+        console.log(`Successfully inserted ${insertedMedia.length} media records.`);
     }
 
     res.status(201).json({
       success: true,
       message: `Successfully created '${placeData.placeName}' and uploaded ${files.length} files.`,
       placeId: newPlaceId,
-      mediaCount: mediaToInsert.length
+      mediaCount: mediaToInsert.length,
+      media: insertedMedia
     });
 
   } catch (error) {
