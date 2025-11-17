@@ -1,32 +1,29 @@
 // Media Management Service for handling place media operations
 import API_BASE from '../../config/api';
 import type { MediaItem, MediaUploadData } from '../types/media';
-import { SecurityLevel } from '../types/media';
 
-export interface PlaceMediaData {
-  placeId: string;
-  placeName: string;
-  placeNameLocal?: string;
+// Represents a place with its associated media, matching the backend API response
+export interface PlaceWithMedia {
+  id: string;
+  name: string;
+  name_local?: string;
   province: string;
   category: string;
-  media: MediaItem[];
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
   description?: string;
-  tags?: string[];
+  coordinates: string; // Stored as 'POINT(lng lat)'
+  media: MediaItem[];
+  created_at: string;
 }
 
-// Updated to match the actual API response
+// Simplified result for media replacement
 export interface MediaReplacementResult {
   success: boolean;
-  placeId: string;
   message: string;
-  replacedMediaIds?: string[];
-  newMediaIds?: string[];
+  placeId: string;
+  newMedia?: MediaItem[];
 }
 
+// Result for place creation
 export interface PlaceCreationResult {
   success: boolean;
   placeId: string;
@@ -34,116 +31,164 @@ export interface PlaceCreationResult {
   mediaCount?: number;
 }
 
+// Result for updating a place
+export interface PlaceUpdateResult {
+  success: boolean;
+  message: string;
+  data: PlaceWithMedia;
+}
+
 class MediaManagementService {
   private apiBaseUrl = API_BASE;
 
+  // --- Core API Methods ---
+
   /**
-   * Replace media for an existing place.
-   * This is still a placeholder and needs full implementation.
+   * Fetch all places from the backend.
+   */
+  async getPlaces(): Promise<PlaceWithMedia[]> {
+    const response = await this.fetchWithErrorHandling('/places');
+    return response.json();
+  }
+
+  /**
+   * Fetch a single place by its ID.
+   */
+  async getPlaceById(placeId: string): Promise<PlaceWithMedia> {
+    const response = await this.fetchWithErrorHandling(`/places/${placeId}`);
+    return response.json();
+  }
+
+  /**
+   * Create a new place with media.
+   */
+  async createPlaceWithMedia(
+    placeData: Omit<PlaceWithMedia, 'id' | 'media' | 'created_at' | 'coordinates'> & { coordinates: { lat: number, lng: number } },
+    media: MediaUploadData[]
+  ): Promise<PlaceCreationResult> {
+    const formData = new FormData();
+    formData.append('placeData', JSON.stringify({
+      placeName: placeData.name,
+      placeNameLocal: placeData.name_local,
+      province: placeData.province,
+      category: placeData.category,
+      description: placeData.description,
+      coordinates: placeData.coordinates,
+    }));
+
+    const mediaMetadata = media.map(m => ({
+      title: m.title,
+      description: m.description,
+      type: m.type,
+    }));
+    formData.append('metadata', JSON.stringify(mediaMetadata));
+
+    media.forEach(mediaItem => {
+      if (mediaItem.file) {
+        formData.append('files', mediaItem.file, mediaItem.file.name);
+      }
+    });
+
+    const response = await this.fetchWithErrorHandling('/places', {
+      method: 'POST',
+      body: formData,
+    });
+
+    return response.json();
+  }
+
+  /**
+   * Update an existing place's details.
+   */
+  async updatePlace(
+    placeId: string,
+    updateData: Partial<Omit<PlaceWithMedia, 'id' | 'media' | 'created_at' | 'coordinates'> & { coordinates: { lat: number, lng: number } }>
+  ): Promise<PlaceUpdateResult> {
+    const response = await this.fetchWithErrorHandling(`/places/${placeId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData),
+    });
+    return response.json();
+  }
+
+  /**
+   * "Replaces" media by adding new files to a place.
    */
   async replaceMediaForPlace(
     placeId: string,
     newMedia: MediaUploadData[]
   ): Promise<MediaReplacementResult> {
-    console.warn("replaceMediaForPlace is not fully implemented yet.");
-    // Mocking a successful response as the endpoint is a placeholder
-    return Promise.resolve({
-      success: true,
-      placeId,
-      message: "Media replacement feature is under development.",
-      replacedMediaIds: [],
-      newMediaIds: newMedia.map((_, i) => `temp_id_${i}`),
-    });
-  }
-
-  /**
-   * Add new place with media.
-   * This now calls the real backend API.
-   */
-  async createPlaceWithMedia(
-    placeData: Omit<PlaceMediaData, 'media' | 'placeId'>,
-    media: MediaUploadData[]
-  ): Promise<PlaceCreationResult> {
     const formData = new FormData();
-
-    // 1. Append place data as a JSON string
-    formData.append('placeData', JSON.stringify({
-      placeName: placeData.placeName,
-      placeNameLocal: placeData.placeNameLocal,
-      province: placeData.province,
-      category: placeData.category,
-      description: placeData.description,
-      coordinates: placeData.coordinates,
-      tags: placeData.tags,
-    }));
-
-    // 2. Append media metadata as a JSON string array
-    const mediaMetadata = media.map(m => ({
-        title: m.title,
-        description: m.description,
-        type: m.type,
-    }));
-    formData.append('metadata', JSON.stringify(mediaMetadata));
-
-    // 3. Append each file
-    media.forEach((mediaItem, index) => {
+    newMedia.forEach(mediaItem => {
       if (mediaItem.file) {
-        // Use a consistent key for the backend to find the files
-        formData.append(`files`, mediaItem.file, mediaItem.file.name);
+        formData.append('files', mediaItem.file, mediaItem.file.name);
       }
     });
 
-    const response = await fetch(`${this.apiBaseUrl}/places`, {
+    const response = await this.fetchWithErrorHandling(`/places/${placeId}/media/replace`, {
       method: 'POST',
       body: formData,
-      headers: {
-        // 'Content-Type': 'multipart/form-data' is set automatically by the browser with boundary
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
     });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-        // Throw an error with the message from the API, or a default one
-        throw new Error(result.message || `HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    return {
-        success: result.success,
-        placeId: result.placeId,
-        message: result.message,
-        mediaCount: result.mediaCount,
-    };
+    return response.json();
   }
 
   /**
-   * Check if a place exists.
-   * This is still a placeholder and needs full implementation.
+   * Search for places by name and/or province.
    */
-  async checkPlaceExists(placeName: string, province?: string): Promise<{
-    exists: boolean;
-    placeId?: string;
-    place?: PlaceMediaData;
-  }> {
-     console.warn("checkPlaceExists is not fully implemented yet.");
-    // Mocking a "not found" response as the endpoint is a placeholder
-    return Promise.resolve({ exists: false });
+  async searchPlaces(name?: string, province?: string): Promise<{ places: PlaceWithMedia[] }> {
+    const params = new URLSearchParams();
+    if (name) params.append('name', name);
+    if (province) params.append('province', province);
+
+    const response = await this.fetchWithErrorHandling(`/places/search?${params.toString()}`);
+    return response.json();
   }
 
   /**
-   * Get place media details.
-   * This is still a placeholder and needs full implementation.
+   * Delete a media item by its ID.
    */
-  async getPlaceMedia(placeId: string): Promise<PlaceMediaData | null> {
-    console.warn("getPlaceMedia is not fully implemented yet.");
-    // Mocking a null response as the endpoint is a placeholder
-    return Promise.resolve(null);
+  async deleteMedia(mediaId: string): Promise<{ success: boolean; message: string }> {
+    const response = await this.fetchWithErrorHandling(`/media/${mediaId}`, {
+      method: 'DELETE',
+    });
+    return response.json();
   }
+
+  // --- Helper Methods ---
 
   private getAuthToken(): string {
-    // In a real app, this would get a JWT token from auth state (e.g., Zustand, Redux)
     return localStorage.getItem('authToken') || 'mock-token-for-dev';
+  }
+
+  /**
+   * A wrapper for fetch that includes authorization and basic error handling.
+   */
+  private async fetchWithErrorHandling(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    const headers = {
+      'Authorization': `Bearer ${this.getAuthToken()}`,
+      ...options.headers,
+    };
+
+    // Do not set Content-Type for FormData, browser does it with boundary
+    if (options.body instanceof FormData) {
+      delete headers['Content-Type'];
+    }
+
+    const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorResult = await response.json();
+      throw new Error(errorResult.message || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return response;
   }
 }
 
