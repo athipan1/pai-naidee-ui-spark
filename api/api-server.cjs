@@ -50,13 +50,12 @@ app.post('/api/places', upload.any(), async (req, res) => {
     return res.status(500).json({ error: 'Supabase client is not initialized.' });
   }
 
-  const placeData = JSON.parse(placeDataJson);
-  // Metadata for each file should be sent as an array of JSON strings
-  const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
-
   let newPlaceId = null;
 
   try {
+    const placeData = JSON.parse(placeDataJson);
+    // Metadata for each file should be sent as an array of JSON strings
+    const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
     // 1. Insert place data into the 'places' table
     const { data: placeResult, error: placeError } = await supabase
       .from('places')
