@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import MediaManagementInterface from '@/components/admin/MediaManagementInterface';
+import ContentManagement from '@/components/dashboard/ContentManagement';
 
 interface AdminPanelProps {
   currentLanguage: 'th' | 'en';
@@ -65,7 +65,7 @@ const AdminPanel = ({ currentLanguage }: AdminPanelProps) => {
         </div>
 
         {/* Media Management Interface */}
-        <MediaManagementInterface currentLanguage={currentLanguage} />
+        <ContentManagement currentLanguage={currentLanguage} />
       </div>
     </div>
   );
