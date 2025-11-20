@@ -50,13 +50,12 @@ app.post('/api/places', upload.any(), async (req, res) => {
     return res.status(500).json({ error: 'Supabase client is not initialized.' });
   }
 
-  const placeData = JSON.parse(placeDataJson);
-  // Metadata for each file should be sent as an array of JSON strings
-  const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
-
   let newPlaceId = null;
 
   try {
+    const placeData = JSON.parse(placeDataJson);
+    // Metadata for each file should be sent as an array of JSON strings
+    const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
     // 1. Insert place data into the 'places' table
     const { data: placeResult, error: placeError } = await supabase
       .from('places')
@@ -399,6 +398,77 @@ app.delete('/api/media/:mediaId', async (req, res) => {
         console.error(`Error deleting media ${mediaId}:`, error.message);
         res.status(500).json({ error: 'Internal server error', message: error.message });
     }
+});
+
+
+// ====================================================================
+// --- API Status Endpoint ---
+// ====================================================================
+
+app.get('/api/status', async (req, res) => {
+  const checks = {
+    supabaseUrlEnv: 'pending',
+    supabaseKeyEnv: 'pending',
+    supabaseClientInitialized: 'pending',
+    dbConnection: 'pending',
+  };
+  const errors = [];
+
+  // 1. Check for Supabase URL env var
+  if (process.env.VITE_SUPABASE_URL) {
+    checks.supabaseUrlEnv = 'ok';
+  } else {
+    checks.supabaseUrlEnv = 'error';
+    errors.push('VITE_SUPABASE_URL environment variable is not set.');
+  }
+
+  // 2. Check for Supabase Service Role Key env var
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    checks.supabaseKeyEnv = 'ok';
+  } else {
+    checks.supabaseKeyEnv = 'error';
+    errors.push('SUPABASE_SERVICE_ROLE_KEY environment variable is not set.');
+  }
+
+  // 3. Check if Supabase client was initialized
+  if (supabase) {
+    checks.supabaseClientInitialized = 'ok';
+
+    // 4. Attempt a simple DB query
+    try {
+      // A lightweight query to check if the connection and credentials are valid
+      const { error } = await supabase.from('places').select('id', { count: 'exact', head: true });
+      if (error) {
+        throw new Error(error.message);
+      }
+      checks.dbConnection = 'ok';
+    } catch (e) {
+      checks.dbConnection = 'error';
+      errors.push(`Database connection failed: ${e.message}`);
+    }
+  } else {
+    checks.supabaseClientInitialized = 'error';
+    errors.push('Supabase client failed to initialize. Check environment variables.');
+    checks.dbConnection = 'skipped';
+  }
+
+  const overallStatus = errors.length === 0 ? 'ok' : 'error';
+
+  if (overallStatus === 'error') {
+    console.error('API Status Check Failed:', errors);
+    res.status(500).json({
+      status: overallStatus,
+      message: 'The API server is not configured correctly. See errors for details.',
+      checks,
+      errors,
+    });
+  } else {
+    res.status(200).json({
+      status: overallStatus,
+      message: 'API server is running and configured correctly.',
+      checks,
+    });
+  }
 });
 
 

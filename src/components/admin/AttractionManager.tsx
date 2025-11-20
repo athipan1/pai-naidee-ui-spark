@@ -124,15 +124,31 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
   };
   const t = content[currentLanguage];
 
-  // Fetch all places on component mount
+  const [errorInfo, setErrorInfo] = useState<string | null>(null);
+
+  // Fetch all places on component mount, now with a pre-flight status check
   const fetchPlaces = useCallback(async () => {
     setIsLoading(true);
+    setErrorInfo(null);
     try {
+      // First, check the API status
+      const statusResponse = await fetch('/api/status');
+      const statusData = await statusResponse.json();
+
+      if (!statusResponse.ok) {
+        // If status check fails, show a detailed error
+        const detailedError = statusData.errors ? statusData.errors.join(' ') : 'An unknown configuration error occurred.';
+        throw new Error(`API Configuration Error: ${detailedError}`);
+      }
+
+      // If status is OK, proceed to fetch places
       const allPlaces = await mediaManagementService.getPlaces();
       setPlaces(allPlaces);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setErrorInfo(errorMessage); // Store the detailed error message for display
       notificationService.show('error', t.errorLoading, {
-        description: error instanceof Error ? error.message : String(error)
+        description: errorMessage
       });
     } finally {
       setIsLoading(false);
@@ -357,11 +373,22 @@ const AttractionManager = ({ currentLanguage }: AttractionManagerProps) => {
           </div>
         </CardHeader>
         <ScrollArea className="flex-1">
-          {isLoading ? (
-            <div className="p-4 text-center text-muted-foreground">{t.loading}</div>
-          ) : filteredPlaces.length === 0 ? (
+          {isLoading && <div className="p-4 text-center text-muted-foreground">{t.loading}</div>}
+
+          {errorInfo && (
+            <Alert variant="destructive" className="m-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>{t.errorLoading}:</strong> {errorInfo}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {!isLoading && !errorInfo && filteredPlaces.length === 0 && (
             <div className="p-4 text-center text-muted-foreground">{t.noPlaces}</div>
-          ) : (
+          )}
+
+          {!isLoading && !errorInfo && filteredPlaces.length > 0 && (
             <Table>
               <TableBody>
                 {filteredPlaces.map((place) => (
