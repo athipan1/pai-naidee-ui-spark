@@ -67,8 +67,7 @@ export const PostFeed: React.FC<PostFeedProps> = ({
 
   const handleCreatePost = useCallback((postData: CreatePostData) => {
     // TODO: Replace with actual user ID from auth context
-    const userId = "123e4567-e89b-12d3-a456-426614174000";
-    createPost({ ...postData, user_id: userId }, {
+    createPost(postData, {
         onSuccess: () => {
             setShowCreateDialog(false);
             refresh(); // Refresh feed after creating post
@@ -173,6 +172,8 @@ export const PostFeed: React.FC<PostFeedProps> = ({
             <PostCard
               post={post}
               onLike={() => handleLike(post.id)}
+              onSave={(postId) => console.log('Save:', postId)}
+              onShare={(postId) => console.log('Share:', postId)}
               onComment={(content) => handleComment(post.id, content)}
               onOpenDetail={handleOpenPostDetail}
               isLoading={isLikingPost}
@@ -186,8 +187,7 @@ export const PostFeed: React.FC<PostFeedProps> = ({
       {/* Floating create post button (mobile) */}
       {showCreatePost && isMobile && (
         <FloatingPostButton 
-          onClick={() => setShowCreateDialog(true)}
-          isLoading={isCreatingPost}
+          onCreatePost={() => setShowCreateDialog(true)}
         />
       )}
 
@@ -205,6 +205,8 @@ export const PostFeed: React.FC<PostFeedProps> = ({
         open={showPostDetail}
         onOpenChange={handleClosePostDetail}
         onLike={handleLike}
+        onSave={(postId) => console.log('Save:', postId)}
+        onShare={(postId) => console.log('Share:', postId)}
         onComment={handleComment}
         isLoading={isLikingPost}
       />

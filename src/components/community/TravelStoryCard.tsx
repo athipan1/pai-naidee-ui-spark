@@ -260,7 +260,7 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
               <AnimatePresence>
                 {showComments && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }}>
-                    <CommentSection postId={post.id} onAddComment={(content) => onComment(post.id, content)} />
+                    <CommentSection postId={post.id} />
                   </motion.div>
                 )}
               </AnimatePresence>
