@@ -4,8 +4,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Folder, Upload } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import MediaUpload from "./MediaUpload";
-import MediaGallery from "./MediaGallery";
-import { MediaItem, MediaUploadData } from "@/shared/types/media";
+import MediaGallerySimple from "./MediaGallerySimple";
+import { MediaItem, MediaUploadData, SecurityLevel } from "@/shared/types/media";
 
 interface ContentManagementProps {
   currentLanguage: "th" | "en";
@@ -51,12 +51,12 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
         file: data.file,
         uploadedAt: new Date(),
         updatedAt: new Date(),
-        status: 'pending',
+        status: 'approved',
         createdBy: 'admin',
         accessPermissions: [],
         version: 1,
         isCurrentVersion: true,
-        securityLevel: data.securityLevel || 'PUBLIC' as any
+        securityLevel: data.securityLevel || SecurityLevel.PUBLIC
       };
       
       setMediaItems(prev => [newItem, ...prev]);
@@ -134,7 +134,7 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
         </TabsContent>
 
         <TabsContent value="gallery">
-          <MediaGallery 
+          <MediaGallerySimple 
             currentLanguage={currentLanguage}
             mediaItems={mediaItems}
             onEdit={handleEdit}
