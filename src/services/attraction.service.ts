@@ -1,6 +1,7 @@
 import { AttractionDetail } from '@/shared/types/attraction';
 import { SearchResult } from '@/shared/types/search';
 import { getPlaceById, searchPlaces } from './supabase.service';
+import API_BASE from '../config/api';
 
 // Helper to extract a meaningful error message from an API error
 const getApiErrorMessage = (error: unknown): string => {
@@ -10,14 +11,19 @@ const getApiErrorMessage = (error: unknown): string => {
   return 'An unknown error occurred';
 };
 
-// [REFACTORED] Get attraction details by ID from Supabase
+// [REFACTORED] Get attraction details by ID from the backend API
 const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
-  console.log("✅ Calling Supabase to fetch attraction detail for id:", id);
+  console.log("✅ Calling backend API to fetch attraction detail for id:", id);
   try {
-    const attraction = await getPlaceById(id);
+    const response = await fetch(`${API_BASE}/places/${id}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `API error: ${response.status}`);
+    }
+    const attraction: AttractionDetail = await response.json();
     return attraction;
   } catch (error) {
-    console.error(`❌ Error fetching attraction detail from Supabase for id ${id}:`, error);
+    console.error(`❌ Error fetching attraction detail from backend for id ${id}:`, error);
     throw new Error(`Failed to fetch attraction details. ${getApiErrorMessage(error)}`);
   }
 };
