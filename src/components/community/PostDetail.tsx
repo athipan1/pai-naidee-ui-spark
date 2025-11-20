@@ -280,10 +280,9 @@ export const PostDetail: React.FC<PostDetailProps> = ({
                 <Separator />
 
                 {/* Comments */}
-                <CommentSection
-                  postId={post.id}
-                  onAddComment={(content) => onComment(post.id, content)}
-                />
+              <CommentSection
+                postId={post.id}
+              />
               </div>
             </ScrollArea>
           </div>

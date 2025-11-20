@@ -139,11 +139,13 @@ const EnhancedAdminRedirect = () => {
 };
 
 /**
- * Redirect component for legacy /dashboard route to /admin or a nested route.
- * @param {object} props - The component props.
- * @param {string} [props.to="/admin"] - The target URL to redirect to.
+ * Redirect component for nested admin routes
  */
-const DashboardRedirect = ({ to = "/admin" }) => {
+interface DashboardRedirectProps {
+  to?: string;
+}
+
+const DashboardRedirect: React.FC<DashboardRedirectProps> = ({ to = "/admin" }) => {
   const navigate = useNavigate();
   
   useEffect(() => {

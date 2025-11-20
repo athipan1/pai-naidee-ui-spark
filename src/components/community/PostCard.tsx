@@ -203,10 +203,9 @@ export const PostCard: React.FC<PostCardProps> = ({
 
         {/* Comments Section */}
         {showComments && (
-          <CommentSection
-            postId={post.id}
-            onAddComment={(content) => onComment(post.id, content)}
-          />
+        <CommentSection 
+          postId={post.id}
+        />
         )}
       </CardContent>
     </Card>
