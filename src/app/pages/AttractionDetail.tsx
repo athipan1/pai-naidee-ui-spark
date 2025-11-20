@@ -182,7 +182,7 @@ const AttractionDetail = ({
       const data: WikiData = await response.json();
 
       // Ensure we have a valid extract to display
-      if (data.type === 'disambiguation' || !data.extract) {
+      if (!data.extract) {
           setWikiData(null);
           setWikiError(`ไม่มีข้อมูลสรุปสำหรับ "${placeName}"`);
           return;
@@ -398,7 +398,6 @@ const AttractionDetail = ({
               {attraction.tags.map((tag, index) => (
                 <Badge
                   key={index}
-                  as="button"
                   variant={pastelVariants[index % pastelVariants.length]}
                   className="cursor-pointer text-sm"
                   onClick={() => alert(`Filtering by ${tag}`)}

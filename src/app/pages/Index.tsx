@@ -8,7 +8,6 @@ import BottomNavigation from "@/components/common/BottomNavigation";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import SupabaseSetupGuide from "@/components/common/SupabaseSetupGuide";
-import { SearchResult as PostSearchResult } from "@/shared/types/posts";
 import { SearchResult } from "@/shared/types/search";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { MapPin, Star, ArrowRight } from "lucide-react";
@@ -144,7 +143,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
     return counts;
   }, {} as { [key: string]: number });
 
-  const handleSearch = (query: string, _results?: SearchResult[] | PostSearchResult[]) => {
+  const handleSearch = (query: string, _results?: SearchResult[]) => {
     // Navigate to our new contextual search results page
     const searchParams = new URLSearchParams();
     searchParams.set('q', query);

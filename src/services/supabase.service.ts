@@ -186,35 +186,15 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
       nameLocal: place.name_local || place.name || 'Unnamed Place',
       province: place.province || 'Unknown Province',
       category: place.category || 'Unknown',
-      image: mainImage,
       images: allImages,
       description: place.description || 'No description available.',
       tags: Array.isArray(place.tags) ? place.tags : [],
-      amenities: Array.isArray(place.amenities) ? place.amenities : [],
-      location: {
-        lat: typeof place.lat === 'number' ? place.lat : 0,
-        lng: typeof place.lng === 'number' ? place.lng : 0,
-      },
       rating: typeof place.rating === 'number' ? place.rating : 0,
       reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
-      reviews: {
-        count: typeof place.review_count === 'number' ? place.review_count : 0,
-        average: typeof place.rating === 'number' ? place.rating : 0,
-        breakdown: {
-          5: 0,
-          4: 0,
-          3: 0,
-          2: 0,
-          1: 0,
-        },
-        recent: [],
-      },
       coordinates: {
         lat: typeof place.lat === 'number' ? place.lat : 0,
         lng: typeof place.lng === 'number' ? place.lng : 0,
       },
-      confidence: 1.0, // Default confidence for direct ID lookup
-      matchedTerms: [], // No search terms for a direct lookup
       lastUpdated: place.updated_at,
     };
 
