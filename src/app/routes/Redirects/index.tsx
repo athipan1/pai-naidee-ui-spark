@@ -145,7 +145,7 @@ interface DashboardRedirectProps {
   to?: string;
 }
 
-const DashboardRedirect: React.FC<DashboardRedirectProps> = ({ to = "/admin" }) => {
+const DashboardPathRedirect: React.FC<DashboardRedirectProps> = ({ to = "/admin/dashboard" }) => {
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -207,7 +207,7 @@ export {
   AIAssistantRedirect,
   AdminPanelRedirect,
   EnhancedAdminRedirect,
-  DashboardRedirect,
+  DashboardPathRedirect as DashboardRedirect,
   ProfileRedirect,
   CategoryRedirect
 };

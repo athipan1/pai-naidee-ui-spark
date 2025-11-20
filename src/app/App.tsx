@@ -23,18 +23,16 @@ const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
 const Index = lazy(() => import("./pages/Index"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
-const CommunityFeed = lazy(() => import("./pages/Community"));
+
 const InstagramDemo = lazy(() => import("./pages/InstagramDemo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const ContextualSearchResults = lazy(() => import("./pages/ContextualSearchResults"));
+
 
 // --- PaiNaiDee Example Pages ---
 // const PaiNaiDeeUsers = lazy(() => import("./pages/PaiNaiDeeUsers"));
 // const PaiNaiDeeTasks = lazy(() => import("./pages/PaiNaiDeeTasks"));
 // --- End PaiNaiDee Example Pages ---
 
-// --- System Pages ---
-const SupabaseDiagnostic = lazy(() => import("./pages/SupabaseDiagnostic"));
 // --- End System Pages ---
 
 import { isSupabaseConfigured } from "@/services/supabase.service";
@@ -146,7 +144,7 @@ const AppContent = () => {
             path="/admin"
             element={<AdminLayout currentLanguage={currentLanguage} />}
           >
-            <Route index element={<DashboardRedirect to="/admin/dashboard" />} />
+            <Route index element={<DashboardRedirect />} />
             <Route path="dashboard" element={<Dashboard currentLanguage={currentLanguage} />} />
             <Route path="media" element={<AttractionManager currentLanguage={currentLanguage} />} />
             <Route path="moderation" element={<Moderation currentLanguage={currentLanguage} />} />
@@ -160,15 +158,6 @@ const AppContent = () => {
               <AttractionDetail
                 currentLanguage={currentLanguage}
                 onBack={() => window.history.back()}
-              />
-            }
-          />
-          <Route
-            path="/community"
-            element={
-              <CommunityFeed
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
               />
             }
           />
@@ -199,7 +188,7 @@ const AppContent = () => {
               element={<AccordionExamples />}
             />
           )}
-          <Route path="/supabase-diagnostic" element={<SupabaseDiagnostic />} />
+          
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
 
