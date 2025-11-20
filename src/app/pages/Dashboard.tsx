@@ -11,7 +11,6 @@ import ContentManagement from "@/components/dashboard/ContentManagement";
 import UsageAnalytics from "@/components/dashboard/UsageAnalytics";
 import ImpactAnalytics from "@/components/dashboard/ImpactAnalytics";
 import ExploreVideoManagement from "@/components/dashboard/ExploreVideoManagement";
-import APIIntegrationTest from "@/components/common/APIIntegrationTest";
 
 interface DashboardProps {
   currentLanguage: "th" | "en";
@@ -168,7 +167,9 @@ const Dashboard = ({ currentLanguage, onBack }: DashboardProps) => {
           </TabsContent>
 
           <TabsContent value="apitest" className="space-y-6">
-            <APIIntegrationTest currentLanguage={currentLanguage} />
+            <div className="text-center py-12 text-muted-foreground">
+              API Integration testing is currently disabled
+            </div>
           </TabsContent>
         </Tabs>
       </div>

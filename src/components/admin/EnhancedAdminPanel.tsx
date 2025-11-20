@@ -18,7 +18,7 @@ import SecurityManager from '@/components/admin/SecurityManager';
 import QueueMonitor from '@/components/admin/QueueMonitor';
 import TestingInterface from '@/components/admin/TestingInterface';
 import SystemMonitor from '@/components/admin/SystemMonitor';
-import MediaManagementInterface from '@/components/admin/MediaManagementInterface';
+import ContentManagement from '@/components/dashboard/ContentManagement';
 
 interface EnhancedAdminPanelProps {
   currentLanguage: 'th' | 'en';
@@ -298,7 +298,7 @@ const EnhancedAdminPanel = ({ currentLanguage }: EnhancedAdminPanelProps) => {
 
             {/* Media Management Tab */}
             <TabsContent value="mediaManagement">
-              <MediaManagementInterface currentLanguage={currentLanguage} />
+              <ContentManagement currentLanguage={currentLanguage} />
             </TabsContent>
 
             {/* Authentication Tab */}
