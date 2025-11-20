@@ -1,5 +1,5 @@
 // Media Management Service for handling place media operations
-import API_BASE from '../../config/api';
+import { getSupabaseClient } from '@/services/supabase.service';
 import type { MediaItem, MediaUploadData } from '../types/media';
 
 // Represents a place with its associated media, matching the backend API response
@@ -39,7 +39,9 @@ export interface PlaceUpdateResult {
 }
 
 class MediaManagementService {
-  private apiBaseUrl = API_BASE;
+  private getSupabase() {
+    return getSupabaseClient();
+  }
 
   // --- Core API Methods ---
 
@@ -47,16 +49,28 @@ class MediaManagementService {
    * Fetch all places from the backend.
    */
   async getPlaces(): Promise<PlaceWithMedia[]> {
-    const response = await this.fetchWithErrorHandling('/places');
-    return response.json();
+    const supabase = this.getSupabase();
+    const { data, error } = await supabase
+      .from('places')
+      .select('*, media(*)');
+    
+    if (error) throw new Error(error.message);
+    return (data || []) as PlaceWithMedia[];
   }
 
   /**
    * Fetch a single place by its ID.
    */
   async getPlaceById(placeId: string): Promise<PlaceWithMedia> {
-    const response = await this.fetchWithErrorHandling(`/places/${placeId}`);
-    return response.json();
+    const supabase = this.getSupabase();
+    const { data, error } = await supabase
+      .from('places')
+      .select('*, media(*)')
+      .eq('id', placeId)
+      .single();
+    
+    if (error) throw new Error(error.message);
+    return data as PlaceWithMedia;
   }
 
   /**
@@ -66,35 +80,75 @@ class MediaManagementService {
     placeData: Omit<PlaceWithMedia, 'id' | 'media' | 'created_at' | 'coordinates'> & { coordinates: { lat: number, lng: number } },
     media: MediaUploadData[]
   ): Promise<PlaceCreationResult> {
-    const formData = new FormData();
-    formData.append('placeData', JSON.stringify({
-      placeName: placeData.name,
-      placeNameLocal: placeData.name_local,
-      province: placeData.province,
-      category: placeData.category,
-      description: placeData.description,
-      coordinates: placeData.coordinates,
-    }));
+    try {
+      const supabase = this.getSupabase();
+      
+      // Insert place into database
+      const { data: place, error: placeError } = await supabase
+        .from('places')
+        .insert({
+          name: placeData.name,
+          name_local: placeData.name_local,
+          province: placeData.province,
+          category: placeData.category || 'Attraction',
+          description: placeData.description,
+          lat: placeData.coordinates.lat,
+          lng: placeData.coordinates.lng,
+        })
+        .select()
+        .single();
 
-    const mediaMetadata = media.map(m => ({
-      title: m.title,
-      description: m.description,
-      type: m.type,
-    }));
-    formData.append('metadata', JSON.stringify(mediaMetadata));
+      if (placeError) throw new Error(placeError.message);
 
-    media.forEach(mediaItem => {
-      if (mediaItem.file) {
-        formData.append('files', mediaItem.file, mediaItem.file.name);
+      // Upload media files to storage
+      const uploadedMedia: MediaItem[] = [];
+      for (const mediaItem of media) {
+        if (mediaItem.file) {
+          const fileExt = mediaItem.file.name.split('.').pop();
+          const fileName = `${place.id}/${Date.now()}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('place-media')
+            .upload(fileName, mediaItem.file);
+
+          if (uploadError) {
+            console.error('Media upload error:', uploadError);
+            continue;
+          }
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('place-media')
+            .getPublicUrl(fileName);
+
+          // Insert media record
+          const { data: mediaRecord, error: mediaError } = await supabase
+            .from('media')
+            .insert({
+              place_id: place.id,
+              url: publicUrl,
+              type: mediaItem.type,
+              title: mediaItem.title,
+              description: mediaItem.description,
+            })
+            .select()
+            .single();
+
+          if (!mediaError && mediaRecord) {
+            uploadedMedia.push(mediaRecord as MediaItem);
+          }
+        }
       }
-    });
 
-    const response = await this.fetchWithErrorHandling('/places', {
-      method: 'POST',
-      body: formData,
-    });
-
-    return response.json();
+      return {
+        success: true,
+        placeId: place.id,
+        message: 'Place created successfully',
+        mediaCount: uploadedMedia.length,
+      };
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to create place');
+    }
   }
 
   /**
@@ -104,12 +158,35 @@ class MediaManagementService {
     placeId: string,
     updateData: Partial<Omit<PlaceWithMedia, 'id' | 'media' | 'created_at' | 'coordinates'> & { coordinates: { lat: number, lng: number } }>
   ): Promise<PlaceUpdateResult> {
-    const response = await this.fetchWithErrorHandling(`/places/${placeId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updateData),
-    });
-    return response.json();
+    const supabase = this.getSupabase();
+    
+    const dbUpdate: any = {
+      name: updateData.name,
+      name_local: updateData.name_local,
+      province: updateData.province,
+      category: updateData.category,
+      description: updateData.description,
+    };
+
+    if (updateData.coordinates) {
+      dbUpdate.lat = updateData.coordinates.lat;
+      dbUpdate.lng = updateData.coordinates.lng;
+    }
+
+    const { data, error } = await supabase
+      .from('places')
+      .update(dbUpdate)
+      .eq('id', placeId)
+      .select('*, media(*)')
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    return {
+      success: true,
+      message: 'Place updated successfully',
+      data: data as PlaceWithMedia,
+    };
   }
 
   /**
@@ -119,76 +196,112 @@ class MediaManagementService {
     placeId: string,
     newMedia: MediaUploadData[]
   ): Promise<MediaReplacementResult> {
-    const formData = new FormData();
-    newMedia.forEach(mediaItem => {
-      if (mediaItem.file) {
-        formData.append('files', mediaItem.file, mediaItem.file.name);
-      }
-    });
+    const supabase = this.getSupabase();
+    const uploadedMedia: MediaItem[] = [];
 
-    const response = await this.fetchWithErrorHandling(`/places/${placeId}/media/replace`, {
-      method: 'POST',
-      body: formData,
-    });
-    return response.json();
+    for (const mediaItem of newMedia) {
+      if (mediaItem.file) {
+        const fileExt = mediaItem.file.name.split('.').pop();
+        const fileName = `${placeId}/${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('place-media')
+          .upload(fileName, mediaItem.file);
+
+        if (uploadError) {
+          console.error('Media upload error:', uploadError);
+          continue;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('place-media')
+          .getPublicUrl(fileName);
+
+        const { data: mediaRecord, error: mediaError } = await supabase
+          .from('media')
+          .insert({
+            place_id: placeId,
+            url: publicUrl,
+            type: mediaItem.type,
+            title: mediaItem.title,
+            description: mediaItem.description,
+          })
+          .select()
+          .single();
+
+        if (!mediaError && mediaRecord) {
+          uploadedMedia.push(mediaRecord as MediaItem);
+        }
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Media replaced successfully',
+      placeId,
+      newMedia: uploadedMedia,
+    };
   }
 
   /**
-   * Search for places by name and/or province.
+   * Search places by name or province.
    */
   async searchPlaces(name?: string, province?: string): Promise<{ places: PlaceWithMedia[] }> {
-    const params = new URLSearchParams();
-    if (name) params.append('name', name);
-    if (province) params.append('province', province);
+    const supabase = this.getSupabase();
+    let query = supabase
+      .from('places')
+      .select('*, media(*)');
 
-    const response = await this.fetchWithErrorHandling(`/places/search?${params.toString()}`);
-    return response.json();
+    if (name) {
+      query = query.ilike('name', `%${name}%`);
+    }
+    if (province) {
+      query = query.ilike('province', `%${province}%`);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) throw new Error(error.message);
+    return { places: (data || []) as PlaceWithMedia[] };
   }
 
   /**
    * Delete a media item by its ID.
    */
   async deleteMedia(mediaId: string): Promise<{ success: boolean; message: string }> {
-    const response = await this.fetchWithErrorHandling(`/media/${mediaId}`, {
-      method: 'DELETE',
-    });
-    return response.json();
-  }
+    const supabase = this.getSupabase();
+    
+    // First get the media record to find the file path
+    const { data: media, error: fetchError } = await supabase
+      .from('media')
+      .select('url')
+      .eq('id', mediaId)
+      .single();
 
-  // --- Helper Methods ---
+    if (fetchError) throw new Error(fetchError.message);
 
-  private getAuthToken(): string {
-    return localStorage.getItem('authToken') || 'mock-token-for-dev';
-  }
+    // Delete from storage if URL exists
+    if (media?.url) {
+      const filePath = media.url.split('/place-media/')[1];
+      if (filePath) {
+        await supabase.storage
+          .from('place-media')
+          .remove([filePath]);
+      }
+    }
 
-  /**
-   * A wrapper for fetch that includes authorization and basic error handling.
-   */
-  private async fetchWithErrorHandling(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<Response> {
-    const headers = {
-      'Authorization': `Bearer ${this.getAuthToken()}`,
-      ...options.headers,
+    // Delete from database
+    const { error: deleteError } = await supabase
+      .from('media')
+      .delete()
+      .eq('id', mediaId);
+
+    if (deleteError) throw new Error(deleteError.message);
+
+    return {
+      success: true,
+      message: 'Media deleted successfully',
     };
-
-    // Do not set Content-Type for FormData, browser does it with boundary
-    if (options.body instanceof FormData) {
-      delete headers['Content-Type'];
-    }
-
-    const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
-      ...options,
-      headers,
-    });
-
-    if (!response.ok) {
-      const errorResult = await response.json();
-      throw new Error(errorResult.message || `HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    return response;
   }
 }
 
