@@ -39,6 +39,8 @@ export const useAttractionDetail = (id: string | undefined, options?: {
   });
 };
 
+import { useInfiniteQuery } from '@tanstack/react-query';
+
 // Hook to get list of attractions with filtering
 export const useAttractions = (filters?: {
   page?: number;
@@ -60,6 +62,28 @@ export const useAttractions = (filters?: {
     meta: {
       errorMessage: 'Failed to load attractions list'
     }
+  });
+};
+
+// Hook for infinite scrolling attractions list
+export const useInfiniteAttractions = (filters: {
+  limit?: number;
+  category?: string;
+  search?: string;
+}) => {
+  return useInfiniteQuery({
+    queryKey: attractionKeys.list(filters),
+    queryFn: ({ pageParam = 1 }) => {
+      return attractionAPI.attractionService.getAttractions({ ...filters, page: pageParam });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const nextPage = lastPage.page + 1;
+      const totalPages = Math.ceil(lastPage.total / lastPage.limit);
+      return nextPage <= totalPages ? nextPage : undefined;
+    },
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    gcTime: 8 * 60 * 1000, // 8 minutes
   });
 };
 

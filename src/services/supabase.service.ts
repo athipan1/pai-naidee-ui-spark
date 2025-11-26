@@ -232,7 +232,12 @@ export const searchPlaces = async (
 
   try {
     // Initialize the query and request total count
-    let query = getSupabaseClient().from('places').select('*, media(*)', { count: 'exact' });
+    let query = getSupabaseClient()
+      .from('places')
+      .select(
+        'id, name, name_local, province, category, rating, review_count, image_url, description, tags, lat, lng, amenities',
+        { count: 'exact' }
+      );
 
     const searchConditions: string[] = [];
 
@@ -278,7 +283,22 @@ export const searchPlaces = async (
 
     // Transform data to SearchResult format with better null handling
     const results = data.map((place: PlaceRecord): SearchResult => {
-      const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+      let imageUrl = place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+
+      // Apply Supabase image transformation for performance
+      const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+      if (supabaseUrl && imageUrl.includes(supabaseUrl)) {
+        try {
+          const url = new URL(imageUrl);
+          url.searchParams.set('width', '400');
+          url.searchParams.set('quality', '75');
+          url.searchParams.set('resize', 'contain');
+          imageUrl = url.toString();
+        } catch (e) {
+          // Silently ignore URL parsing errors and use the original URL
+        }
+      }
+
       return {
         id: place.id || 'unknown',
         name: place.name || 'Unnamed Place',
@@ -288,7 +308,7 @@ export const searchPlaces = async (
         tags: Array.isArray(place.tags) ? place.tags : [],
         rating: typeof place.rating === 'number' ? place.rating : 0,
         reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
-        image: mainImage,
+        image: imageUrl,
         description: place.description || 'No description available.',
         confidence: 0.8,
         matchedTerms: searchTerm ? [searchTerm] : [],
