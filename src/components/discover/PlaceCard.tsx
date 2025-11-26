@@ -47,6 +47,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
         <img
           src={image}
           alt={displayName}
+          loading="lazy"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
         

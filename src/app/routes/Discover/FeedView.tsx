@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import PlaceCard from "@/components/discover/PlaceCard";
 import CategoryCard from "@/components/discover/CategoryCard";
 import SectionHeader from "@/components/discover/SectionHeader";
-import { useAttractions } from "@/shared/hooks/useAttractionQueries";
+import { useInfiniteAttractions } from "@/shared/hooks/useAttractionQueries";
 import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
@@ -49,21 +49,20 @@ interface FeedViewProps {
 
 const FeedView = ({ currentLanguage }: FeedViewProps) => {
   const navigate = useNavigate();
-  const [places, setPlaces] = useState<TravelPlace[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Try to get data from API, fallback to mock data
   const {
-    data: apiData,
-    error: apiError,
-    isLoading: apiLoading
-  } = useAttractions({
-    page: 1,
-    limit: 20,
-    category: selectedCategory === "all" ? undefined : selectedCategory
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteAttractions({
+    limit: 12,
+    category: selectedCategory === "all" ? undefined : selectedCategory,
   });
 
   const content = {
@@ -104,74 +103,6 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
   };
 
   const t = content[currentLanguage];
-
-  // Mock data for fallback
-  const mockPlaces: TravelPlace[] = [
-    {
-      id: "1",
-      name: "Phi Phi Islands",
-      nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
-      category: "Beach",
-      rating: 4.8,
-      reviewCount: 2547,
-      image: heroBeachImage,
-      description:
-        currentLanguage === "th"
-          ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
-          : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
-      tags: ["Beach", "Snorkeling", "Island", "Photography"],
-      isTrending: true
-    },
-    {
-      id: "2",
-      name: "Wat Phra Kaew",
-      nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Culture",
-      rating: 4.9,
-      reviewCount: 5243,
-      image: templeImage,
-      description:
-        currentLanguage === "th"
-          ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
-          : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
-      tags: ["Temple", "Culture", "Buddhism", "History"],
-      isTrending: false
-    },
-    {
-      id: "3",
-      name: "Doi Inthanon",
-      nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
-      category: "Nature",
-      rating: 4.7,
-      reviewCount: 1876,
-      image: mountainImage,
-      description:
-        currentLanguage === "th"
-          ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
-          : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
-      tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
-      isTrending: true
-    },
-    {
-      id: "4",
-      name: "Floating Market",
-      nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Food",
-      rating: 4.5,
-      reviewCount: 3156,
-      image: floatingMarketImage,
-      description:
-        currentLanguage === "th"
-          ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
-          : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
-      tags: ["Food", "Culture", "Traditional", "Market"],
-      isTrending: false
-    },
-  ];
 
   const mockCategories: Category[] = [
     {
@@ -216,37 +147,11 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
     }
   ];
 
-  // Load data
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      
-      // Use API data if available, otherwise use mock data
-      let displayPlaces = mockPlaces;
-      
-      if (apiData?.attractions && apiData.attractions.length > 0) {
-        displayPlaces = apiData.attractions.map(attraction => ({
-          id: attraction.id,
-          name: attraction.name,
-          nameLocal: attraction.nameLocal || attraction.name,
-          province: attraction.province,
-          category: attraction.category,
-          rating: attraction.rating,
-          reviewCount: attraction.reviewCount,
-          image: attraction.image || heroBeachImage,
-          description: attraction.description,
-          tags: attraction.tags || [],
-          isTrending: Math.random() > 0.5 // Random trending for demo
-        }));
-      }
-      
-      setPlaces(displayPlaces);
-      setCategories(mockCategories);
-      setLoading(false);
-    };
+    setCategories(mockCategories);
+  }, []);
 
-    setTimeout(loadData, 500); // Simulate loading
-  }, [apiData, currentLanguage]);
+  const allPlaces = data?.pages.flatMap(page => page.attractions) || [];
 
   const handleFavoriteToggle = (id: string) => {
     setFavorites(prev =>
@@ -273,15 +178,10 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
     navigate(`/discover?section=${section}`);
   };
 
-  // Filter places by selected category
-  const filteredPlaces = selectedCategory === "all" 
-    ? places 
-    : places.filter(place => place.category.toLowerCase() === selectedCategory.toLowerCase());
+  const trendingPlaces = allPlaces.slice(0, 6);
+  const recommendedPlaces = allPlaces.slice(0, 8);
 
-  const trendingPlaces = places.filter(place => place.isTrending).slice(0, 6);
-  const recommendedPlaces = places.slice(0, 8);
-
-  if (loading) {
+  if (isLoading && !data) {
     return (
       <div className="h-full bg-gray-50 p-6">
         <div className="space-y-8">
@@ -395,20 +295,34 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
             icon={MapPin}
             currentLanguage={currentLanguage}
           />
-          
-          {filteredPlaces.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredPlaces.map((place) => (
-                <PlaceCard
-                  key={place.id}
-                  {...place}
-                  currentLanguage={currentLanguage}
-                  isFavorite={favorites.includes(place.id)}
-                  onFavoriteToggle={handleFavoriteToggle}
-                  onCardClick={handlePlaceClick}
-                />
-              ))}
-            </div>
+
+          {allPlaces.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {allPlaces.map((place) => (
+                  <PlaceCard
+                    key={place.id}
+                    {...place}
+                    currentLanguage={currentLanguage}
+                    isFavorite={favorites.includes(place.id)}
+                    onFavoriteToggle={handleFavoriteToggle}
+                    onCardClick={handlePlaceClick}
+                  />
+                ))}
+              </div>
+              {hasNextPage && (
+                <div className="text-center mt-8">
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage
+                      ? (currentLanguage === 'th' ? 'กำลังโหลด...' : 'Loading more...')
+                      : (currentLanguage === 'th' ? 'โหลดเพิ่มเติม' : 'Load More')}
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12">
               <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
