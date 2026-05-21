@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SearchResult } from '@/shared/types/search';
 import { AttractionDetail } from '@/shared/types/attraction';
+import API_BASE from '@/config/api';
 
 // Helper function to get environment variables in both browser and Node.js contexts
 function getEnvVar(key: string, fallback: string = ''): string {
@@ -87,36 +88,18 @@ interface PlaceRecord {
  */
 export const getPlacesByCategory = async (
   category: string,
-  limit: number = 10
+  _limit: number = 10
 ): Promise<SearchResult[]> => {
-  // Check if Supabase is properly configured before making requests
-  if (!isSupabaseConfigured()) {
-    console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
-    throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
-  }
-
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
-
   try {
-    const { data, error } = await getSupabaseClient()
-      .from('places')
-      .select('*')
-      .eq('category', category)
-      .limit(limit);
+    // Call backend API which handles Google Sheets/Supabase fallback
+    const response = await fetch(`${API_BASE}/places`);
+    if (!response.ok) throw new Error('Failed to fetch places');
+    const data = await response.json();
 
-    if (error) {
-      console.error('Failed to fetch places by category:', error);
-      throw new Error(`Failed to fetch places by category: ${error.message}`);
-    }
+    // Filter by category client-side (or could add backend support)
+    const filtered = data.filter((p: any) => p.category === category);
 
-    if (!data || data.length === 0) {
-      console.info(`No places found for category: ${category}`);
-      return [];
-    }
-
-    // Transform Supabase data to SearchResult format with better null handling
-    return data.map((place: PlaceRecord): SearchResult => ({
+    return filtered.map((place: any): SearchResult => ({
       id: place.id || 'unknown',
       name: place.name || 'Unnamed Place',
       nameLocal: place.name_local || place.name || 'Unnamed Place',
@@ -125,9 +108,9 @@ export const getPlacesByCategory = async (
       tags: Array.isArray(place.tags) ? place.tags : [],
       rating: typeof place.rating === 'number' ? place.rating : 0,
       reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
-      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
+      image: place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
       description: place.description || 'No description available.',
-      confidence: 1.0, // Default confidence for direct category match
+      confidence: 1.0,
       matchedTerms: [category],
       amenities: Array.isArray(place.amenities) ? place.amenities : [],
       location: (typeof place.lat === 'number' && typeof place.lng === 'number') ? {
@@ -135,11 +118,9 @@ export const getPlacesByCategory = async (
         lng: place.lng
       } : undefined,
     }));
-
   } catch (error) {
     console.error('Failed to fetch places by category:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    throw new Error(`Database query failed: ${errorMessage}`);
+    throw error;
   }
 };
 
@@ -149,36 +130,13 @@ export const getPlacesByCategory = async (
  * @returns Promise<AttractionDetail>
  */
 export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
-  // Check if Supabase is properly configured before making requests
-  if (!isSupabaseConfigured()) {
-    console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
-    throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
-  }
-
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
-
   try {
-    const { data, error } = await getSupabaseClient()
-      .from('places')
-      .select('*, media(*)')
-      .eq('id', id)
-      .single(); // Use .single() to get one record
+    const response = await fetch(`${API_BASE}/places/${id}`);
+    if (!response.ok) throw new Error('Place not found');
+    const place = await response.json();
 
-    if (error) {
-      console.error('Failed to fetch place:', error);
-      throw new Error(`Failed to fetch place: ${error.message}`);
-    }
-
-    if (!data) {
-      throw new Error('Place not found');
-    }
-
-    const place: PlaceRecord = data;
-
-    // Transform Supabase data to AttractionDetail format with better null handling
     const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
-    const allImages = place.media && place.media.length > 0 ? place.media.map(m => m.url) : [mainImage];
+    const allImages = place.media && place.media.length > 0 ? place.media.map((m: any) => m.url) : [mainImage];
 
     return {
       id: place.id || 'unknown',
@@ -195,13 +153,11 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
         lat: typeof place.lat === 'number' ? place.lat : 0,
         lng: typeof place.lng === 'number' ? place.lng : 0,
       },
-      lastUpdated: place.updated_at,
+      lastUpdated: place.updated_at || place.created_at,
     };
-
   } catch (error) {
     console.error('Failed to fetch place:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    throw new Error(`Database query failed: ${errorMessage}`);
+    throw error;
   }
 };
 
@@ -218,66 +174,33 @@ export const searchPlaces = async (
   searchTerm: string,
   categories: string[] = [],
   provinces: string[] = [],
-  limit: number = 20,
-  page: number = 1
+  _limit: number = 20,
+  _page: number = 1
 ): Promise<{ results: SearchResult[]; totalCount: number }> => {
-  // Check if Supabase is properly configured before making requests
-  if (!isSupabaseConfigured()) {
-    console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
-    throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
-  }
-
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
-
   try {
-    // Initialize the query and request total count
-    let query = getSupabaseClient().from('places').select('*, media(*)', { count: 'exact' });
+    const response = await fetch(`${API_BASE}/places`);
+    if (!response.ok) throw new Error('Failed to fetch places');
+    let data = await response.json();
 
-    const searchConditions: string[] = [];
-
-    // Add search term conditions
+    // Client-side filtering for simplicity, matching backend fallback
     if (searchTerm) {
-      searchConditions.push(`name.ilike.%${searchTerm}%`);
-      searchConditions.push(`name_local.ilike.%${searchTerm}%`);
-      searchConditions.push(`description.ilike.%${searchTerm}%`);
+      const s = searchTerm.toLowerCase();
+      data = data.filter((p: any) =>
+        p.name.toLowerCase().includes(s) ||
+        (p.name_local && p.name_local.toLowerCase().includes(s)) ||
+        (p.description && p.description.toLowerCase().includes(s))
+      );
     }
 
-    // Add category conditions
     if (categories.length > 0) {
-      const categoryConditions = categories.map(c => `category.eq.${c}`).join(',');
-      query = query.or(categoryConditions);
+      data = data.filter((p: any) => categories.includes(p.category));
     }
 
-    // Add province conditions
     if (provinces.length > 0) {
-      const provinceConditions = provinces.map(p => `province.eq.${p}`).join(',');
-      query = query.or(provinceConditions);
+      data = data.filter((p: any) => provinces.includes(p.province));
     }
 
-    // Apply search term conditions if any
-    if (searchConditions.length > 0) {
-      query = query.or(searchConditions.join(','));
-    }
-
-    // Apply pagination
-    const offset = (page - 1) * limit;
-    query = query.range(offset, offset + limit - 1);
-
-    // Execute the query
-    const { data, error, count } = await query;
-
-    if (error) {
-      console.error('Failed to search places:', error);
-      throw new Error(`Failed to search places: ${error.message}`);
-    }
-
-    if (!data) {
-      return { results: [], totalCount: 0 };
-    }
-
-    // Transform data to SearchResult format with better null handling
-    const results = data.map((place: PlaceRecord): SearchResult => {
+    const results = data.map((place: any): SearchResult => {
       const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
       return {
         id: place.id || 'unknown',
@@ -300,12 +223,10 @@ export const searchPlaces = async (
       };
     });
 
-    return { results, totalCount: count || 0 };
-
+    return { results, totalCount: data.length };
   } catch (error) {
     console.error('Failed to search places:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    throw new Error(`Database query failed: ${errorMessage}`);
+    throw error;
   }
 };
 

@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
 const path = require('path');
+const googleService = require('./google-service.cjs');
 
 // --- Basic Setup ---
 const app = express();
@@ -32,105 +33,220 @@ const upload = multer({ storage: storage });
 // ====================================================================
 
 /**
+ * Helper to get places from Google Sheets or Supabase
+ */
+async function getPlacesWithFallback() {
+  const placeHeaders = [
+    'id', 'name', 'name_local', 'province', 'category', 'rating', 'review_count',
+    'image_url', 'description', 'tags', 'lat', 'lng', 'amenities', 'created_at', 'updated_at'
+  ];
+
+  try {
+    // Priority 1: Google Sheets
+    const rows = await googleService.getRows('places', placeHeaders);
+
+    if (rows && rows.length > 0) {
+      const mediaRows = await googleService.getRows('media', [
+        'id', 'place_id', 'url', 'type', 'title', 'description'
+      ]);
+
+      return rows.map(row => {
+        const placeMedia = mediaRows
+          .filter(m => m.get('place_id') === row.get('id'))
+          .map(m => ({
+            id: m.get('id'),
+            place_id: m.get('place_id'),
+            url: m.get('url'),
+            type: m.get('type'),
+            title: m.get('title'),
+            description: m.get('description')
+          }));
+
+        return {
+          id: row.get('id'),
+          name: row.get('name'),
+          name_local: row.get('name_local'),
+          province: row.get('province'),
+          category: row.get('category'),
+          rating: parseFloat(row.get('rating') || 0),
+          review_count: parseInt(row.get('review_count') || 0),
+          image_url: row.get('image_url'),
+          description: row.get('description'),
+          tags: row.get('tags') ? JSON.parse(row.get('tags')) : [],
+          amenities: row.get('amenities') ? JSON.parse(row.get('amenities')) : [],
+          coordinates: `POINT(${row.get('lng')} ${row.get('lat')})`,
+          lat: parseFloat(row.get('lat')),
+          lng: parseFloat(row.get('lng')),
+          media: placeMedia,
+          created_at: row.get('created_at'),
+          updated_at: row.get('updated_at')
+        };
+      });
+    }
+  } catch (err) {
+    console.error('Google Sheets read failed, falling back to Supabase:', err.message);
+  }
+
+  // Priority 2: Supabase
+  if (supabase) {
+    const { data, error } = await supabase.from('places').select('*, media(*)');
+    if (error) throw error;
+    return data;
+  }
+
+  return [];
+}
+
+/**
  * Endpoint to create a new place with media files.
- * This function now handles:
- * 1. Inserting place data into the 'places' table.
- * 2. Uploading media files to Supabase Storage.
- * 3. Inserting media metadata into the 'media' table.
+ * Handles dual-write to Supabase and Google Sheets/Drive.
  */
 app.post('/api/places', upload.any(), async (req, res) => {
-  const { placeData: placeDataJson, metadata: metadataJson } = req.body; // metadata from frontend
+  const { placeData: placeDataJson, metadata: metadataJson } = req.body;
   const files = req.files;
 
   if (!placeDataJson || !files || files.length === 0) {
     return res.status(400).json({ error: 'Missing place data or media files.' });
   }
 
-  if (!supabase) {
-    return res.status(500).json({ error: 'Supabase client is not initialized.' });
-  }
-
-  let newPlaceId = null;
+  const placeData = JSON.parse(placeDataJson);
+  const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
+  const newPlaceId = uuidv4();
+  const timestamp = new Date().toISOString();
 
   try {
-    const placeData = JSON.parse(placeDataJson);
-    // Metadata for each file should be sent as an array of JSON strings
-    const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
-    // 1. Insert place data into the 'places' table
-    const { data: placeResult, error: placeError } = await supabase
-      .from('places')
-      .insert({
+    // 1. Dual Write: Supabase
+    if (supabase) {
+      const { error } = await supabase.from('places').insert({
+        id: newPlaceId,
         name: placeData.placeName,
         name_local: placeData.placeNameLocal,
         province: placeData.province,
         category: placeData.category,
         description: placeData.description,
-        // Supabase PostGIS format for coordinates: 'POINT(lng lat)'
+        rating: 0,
+        review_count: 0,
+        tags: [],
+        amenities: [],
         coordinates: `POINT(${placeData.coordinates.lng} ${placeData.coordinates.lat})`,
-      })
-      .select()
-      .single();
-
-    if (placeError) {
-      throw new Error(`Supabase DB Error (places): ${placeError.message}`);
+        lat: placeData.coordinates.lat,
+        lng: placeData.coordinates.lng,
+        created_at: timestamp
+      });
+      if (error) console.error('Supabase place insert failed:', error.message);
     }
 
-    newPlaceId = placeResult.id;
-    console.log(`Successfully created place with ID: ${newPlaceId}`);
+    // 2. Dual Write: Google Sheets
+    try {
+      const placeHeaders = [
+        'id', 'name', 'name_local', 'province', 'category', 'rating', 'review_count',
+        'image_url', 'description', 'tags', 'lat', 'lng', 'amenities', 'created_at', 'updated_at'
+      ];
 
-    // 2. Upload files to Storage and collect metadata
-    const mediaToInsert = [];
+      await googleService.addRow('places', {
+        id: newPlaceId,
+        name: placeData.placeName,
+        name_local: placeData.placeNameLocal,
+        province: placeData.province,
+        category: placeData.category,
+        rating: 0,
+        review_count: 0,
+        description: placeData.description,
+        tags: JSON.stringify([]),
+        amenities: JSON.stringify([]),
+        lat: placeData.coordinates.lat,
+        lng: placeData.coordinates.lng,
+        created_at: timestamp,
+        updated_at: timestamp
+      }, placeHeaders);
+    } catch (err) {
+      console.error('Google Sheets place insert failed:', err.message);
+    }
+
+    // 3. Process Media (Dual Storage & Dual Metadata)
+    const mediaRecords = [];
+    let mainImageUrl = '';
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const metadata = mediaMetadata[i] || {}; // Get corresponding metadata
+      const metadata = mediaMetadata[i] || {};
       const fileExt = path.extname(file.originalname);
-      const fileName = `${newPlaceId}/${uuidv4()}${fileExt}`; // Organize files by placeId
+      const fileName = `${newPlaceId}/${uuidv4()}${fileExt}`;
+      const mediaId = uuidv4();
 
-      const { error: uploadError } = await supabase.storage
-        .from('place-images')
-        .upload(fileName, file.buffer, {
-          contentType: file.mimetype,
-          upsert: false,
-        });
+      let supabaseUrl = null;
+      let googleDriveUrl = null;
 
-      if (uploadError) {
-        throw new Error(`Supabase Storage Error: ${uploadError.message}`);
+      // Upload to Supabase Storage
+      if (supabase) {
+        const { error: uploadError } = await supabase.storage
+          .from('place-images')
+          .upload(fileName, file.buffer, { contentType: file.mimetype });
+
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('place-images').getPublicUrl(fileName);
+          supabaseUrl = publicUrl;
+        }
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('place-images')
-        .getPublicUrl(fileName);
+      // Upload to Google Drive
+      try {
+        const driveFile = await googleService.uploadFile(file.buffer, fileName, file.mimetype);
+        if (driveFile) googleDriveUrl = driveFile.url;
+      } catch (err) {
+        console.error('Google Drive upload failed:', err.message);
+      }
 
-      mediaToInsert.push({
+      const finalUrl = googleDriveUrl || supabaseUrl; // Prefer Google Drive as per requirements
+      if (i === 0) mainImageUrl = finalUrl;
+
+      const mediaData = {
+        id: mediaId,
         place_id: newPlaceId,
-        url: publicUrl,
+        url: finalUrl,
         type: file.mimetype.startsWith('video') ? 'video' : 'image',
         title: metadata.title || path.basename(file.originalname, fileExt),
         description: metadata.description || '',
-      });
+      };
+
+      mediaRecords.push(mediaData);
+
+      // Write media metadata to Supabase
+      if (supabase) {
+        await supabase.from('media').insert(mediaData);
+      }
+
+      // Write media metadata to Google Sheets
+      try {
+        await googleService.addRow('media', mediaData, ['id', 'place_id', 'url', 'type', 'title', 'description']);
+      } catch (err) {
+        console.error('Google Sheets media insert failed:', err.message);
+      }
     }
 
-    // 3. Insert media metadata into the 'media' table
-    let insertedMedia = [];
-    if (mediaToInsert.length > 0) {
-        const { data: mediaResult, error: mediaError } = await supabase
-            .from('media')
-            .insert(mediaToInsert)
-            .select();
-
-        if (mediaError) {
-            throw new Error(`Supabase DB Error (media): ${mediaError.message}`);
+    // Update main image_url in both databases
+    if (mainImageUrl) {
+      if (supabase) {
+        await supabase.from('places').update({ image_url: mainImageUrl }).eq('id', newPlaceId);
+      }
+      try {
+        const rows = await googleService.getRows('places');
+        const row = rows.find(r => r.get('id') === newPlaceId);
+        if (row) {
+          row.set('image_url', mainImageUrl);
+          await row.save();
         }
-        insertedMedia = mediaResult;
-        console.log(`Successfully inserted ${insertedMedia.length} media records.`);
+      } catch (err) {
+        console.error('Google Sheets main image update failed:', err.message);
+      }
     }
 
     res.status(201).json({
       success: true,
-      message: `Successfully created '${placeData.placeName}' and uploaded ${files.length} files.`,
+      message: `Successfully created '${placeData.placeName}' in Google Sheets & Supabase.`,
       placeId: newPlaceId,
-      mediaCount: mediaToInsert.length,
-      media: insertedMedia
+      mediaCount: mediaRecords.length,
+      media: mediaRecords
     });
 
   } catch (error) {
@@ -154,18 +270,8 @@ app.post('/api/places', upload.any(), async (req, res) => {
  * Endpoint to get a list of all places with their media.
  */
 app.get('/api/places', async (req, res) => {
-  if (!supabase) {
-    return res.status(500).json({ error: 'Supabase client is not initialized.' });
-  }
   try {
-    const { data, error } = await supabase
-      .from('places')
-      .select('*, media(*)'); // This performs a join with the media table
-
-    if (error) {
-      throw new Error(`Supabase DB Error: ${error.message}`);
-    }
-
+    const data = await getPlacesWithFallback();
     res.status(200).json(data);
   } catch (error) {
     console.error('Error in GET /api/places:', error.message);
@@ -174,7 +280,7 @@ app.get('/api/places', async (req, res) => {
 });
 
 /**
- * Endpoint to get a single place by its ID, including its media.
+ * Endpoint to search for places.
  */
 app.get('/api/places/search', async (req, res) => {
     const { name, province } = req.query;
@@ -209,29 +315,15 @@ app.get('/api/places/search', async (req, res) => {
 
 app.get('/api/places/:placeId', async (req, res) => {
   const { placeId } = req.params;
-  if (!supabase) {
-    return res.status(500).json({ error: 'Supabase client is not initialized.' });
-  }
   try {
-    const { data, error } = await supabase
-      .from('places')
-      .select('*, media(*)') // Join with media table
-      .eq('id', placeId)
-      .single(); // Expect only one result
+    const allPlaces = await getPlacesWithFallback();
+    const place = allPlaces.find(p => p.id === placeId);
 
-    if (error) {
-      // If the error is due to no rows found, it's a 404
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Place not found.' });
-      }
-      throw new Error(`Supabase DB Error: ${error.message}`);
-    }
-
-    if (!data) {
+    if (!place) {
       return res.status(404).json({ error: 'Place not found.' });
     }
 
-    res.status(200).json(data);
+    res.status(200).json(place);
   } catch (error) {
     console.error(`Error in GET /api/places/${placeId}:`, error.message);
     res.status(500).json({ error: 'Internal server error', message: error.message });
@@ -242,36 +334,63 @@ app.get('/api/places/:placeId', async (req, res) => {
 
 /**
  * Endpoint to update place details.
+ * Supports dual-write to Supabase and Google Sheets.
  */
 app.put('/api/places/:placeId', async (req, res) => {
   const { placeId } = req.params;
-  const { name, name_local, province, category, description, coordinates } = req.body;
-
-  if (!supabase) {
-    return res.status(500).json({ error: 'Supabase client is not initialized.' });
-  }
+  const { name, name_local, province, category, description, coordinates, tags, amenities, rating, review_count } = req.body;
+  const timestamp = new Date().toISOString();
 
   try {
-    const updateData = {};
+    const updateData = { updated_at: timestamp };
     if (name) updateData.name = name;
     if (name_local) updateData.name_local = name_local;
     if (province) updateData.province = province;
     if (category) updateData.category = category;
     if (description) updateData.description = description;
-    if (coordinates) updateData.coordinates = `POINT(${coordinates.lng} ${coordinates.lat})`;
+    if (tags) updateData.tags = tags;
+    if (amenities) updateData.amenities = amenities;
+    if (rating !== undefined) updateData.rating = rating;
+    if (review_count !== undefined) updateData.review_count = review_count;
 
-    const { data, error } = await supabase
-      .from('places')
-      .update(updateData)
-      .eq('id', placeId)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Supabase DB Error: ${error.message}`);
+    if (coordinates) {
+      updateData.coordinates = `POINT(${coordinates.lng} ${coordinates.lat})`;
+      updateData.lat = coordinates.lat;
+      updateData.lng = coordinates.lng;
     }
 
-    res.status(200).json({ success: true, message: 'Place updated successfully.', data });
+    // 1. Update Supabase
+    if (supabase) {
+      const { error } = await supabase.from('places').update(updateData).eq('id', placeId);
+      if (error) console.error('Supabase update failed:', error.message);
+    }
+
+    // 2. Update Google Sheets
+    try {
+      const rows = await googleService.getRows('places');
+      const row = rows.find(r => r.get('id') === placeId);
+      if (row) {
+        if (name) row.set('name', name);
+        if (name_local) row.set('name_local', name_local);
+        if (province) row.set('province', province);
+        if (category) row.set('category', category);
+        if (description) row.set('description', description);
+        if (tags) row.set('tags', JSON.stringify(tags));
+        if (amenities) row.set('amenities', JSON.stringify(amenities));
+        if (rating !== undefined) row.set('rating', rating);
+        if (review_count !== undefined) row.set('review_count', review_count);
+        if (coordinates) {
+          row.set('lat', coordinates.lat);
+          row.set('lng', coordinates.lng);
+        }
+        row.set('updated_at', timestamp);
+        await row.save();
+      }
+    } catch (err) {
+      console.error('Google Sheets update failed:', err.message);
+    }
+
+    res.status(200).json({ success: true, message: 'Place updated successfully.' });
   } catch (error) {
     console.error(`Error in PUT /api/places/${placeId}:`, error.message);
     res.status(500).json({ error: 'Internal server error', message: error.message });
@@ -279,70 +398,72 @@ app.put('/api/places/:placeId', async (req, res) => {
 });
 
 app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) => {
-    const { placeId } = req.params;
-    const files = req.files;
+  const { placeId } = req.params;
+  const files = req.files;
 
-    console.log(`Received request to replace media for place ID: ${placeId}`);
-    console.log(`Received ${files ? files.length : 0} new files.`);
+  if (!files || files.length === 0) {
+    return res.status(400).json({ error: 'No files uploaded.' });
+  }
 
-    // This is a complex operation. For now, we will add the new media
-    // and the user can manually delete the old ones. A full implementation
-    // would involve deleting old files from storage and the database.
+  try {
+    const mediaRecords = [];
+    for (const file of files) {
+      const fileExt = path.extname(file.originalname);
+      const fileName = `${placeId}/${uuidv4()}${fileExt}`;
+      const mediaId = uuidv4();
 
-    if (!files || files.length === 0) {
-        return res.status(400).json({ error: 'No files uploaded.' });
+      let supabaseUrl = null;
+      let googleDriveUrl = null;
+
+      // Supabase
+      if (supabase) {
+        const { error: uploadError } = await supabase.storage
+          .from('place-images')
+          .upload(fileName, file.buffer, { contentType: file.mimetype });
+
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('place-images').getPublicUrl(fileName);
+          supabaseUrl = publicUrl;
+        }
+      }
+
+      // Google Drive
+      try {
+        const driveFile = await googleService.uploadFile(file.buffer, fileName, file.mimetype);
+        if (driveFile) googleDriveUrl = driveFile.url;
+      } catch (err) {
+        console.error('Google Drive upload failed:', err.message);
+      }
+
+      const mediaData = {
+        id: mediaId,
+        place_id: placeId,
+        url: googleDriveUrl || supabaseUrl,
+        type: file.mimetype.startsWith('video') ? 'video' : 'image',
+        title: path.basename(file.originalname, fileExt),
+        description: '',
+      };
+
+      mediaRecords.push(mediaData);
+
+      if (supabase) {
+        await supabase.from('media').insert(mediaData);
+      }
+
+      try {
+        await googleService.addRow('media', mediaData, ['id', 'place_id', 'url', 'type', 'title', 'description']);
+      } catch (err) {
+        console.error('Google Sheets media insert failed:', err.message);
+      }
     }
 
-    if (!supabase) {
-        return res.status(500).json({ error: 'Supabase client is not initialized.' });
-    }
-
-    try {
-        const mediaToInsert = [];
-        for (const file of files) {
-            const fileExt = path.extname(file.originalname);
-            const fileName = `${placeId}/${uuidv4()}${fileExt}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('place-images')
-                .upload(fileName, file.buffer, {
-                    contentType: file.mimetype,
-                    upsert: false,
-                });
-
-            if (uploadError) {
-                throw new Error(`Supabase Storage Error: ${uploadError.message}`);
-            }
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('place-images')
-                .getPublicUrl(fileName);
-
-            mediaToInsert.push({
-                place_id: placeId,
-                url: publicUrl,
-                type: file.mimetype.startsWith('video') ? 'video' : 'image',
-                title: path.basename(file.originalname, fileExt),
-                description: '',
-            });
-        }
-
-        const { data: newMedia, error: mediaError } = await supabase
-            .from('media')
-            .insert(mediaToInsert)
-            .select();
-
-        if (mediaError) {
-            throw new Error(`Supabase DB Error (media): ${mediaError.message}`);
-        }
-
-        res.status(200).json({
-            success: true,
-            message: `Successfully added ${newMedia.length} new media items.`,
-            placeId,
-            newMedia,
-        });
-    } catch (error) {
+    res.status(200).json({
+      success: true,
+      message: `Successfully added ${mediaRecords.length} new media items.`,
+      placeId,
+      newMedia: mediaRecords,
+    });
+  } catch (error) {
         console.error('Error in media replacement:', error.message);
         res.status(500).json({ error: 'Internal server error', message: error.message });
     }
@@ -381,51 +502,41 @@ app.get('/api/places/search', async (req, res) => {
 
 /**
  * Endpoint to delete a media item.
+ * Handles deletion from Supabase (DB & Storage) and Google Sheets.
  */
 app.delete('/api/media/:mediaId', async (req, res) => {
-    const { mediaId } = req.params;
-    if (!supabase) {
-        return res.status(500).json({ error: 'Supabase client is not initialized.' });
-    }
+  const { mediaId } = req.params;
 
-    try {
-        // First, get the media record to find out its URL
-        const { data: media, error: getError } = await supabase
-            .from('media')
-            .select('url')
-            .eq('id', mediaId)
-            .single();
-
-        if (getError || !media) {
-            return res.status(404).json({ error: 'Media not found.' });
-        }
-
-        // Extract the file path from the URL
+  try {
+    // 1. Delete from Supabase
+    if (supabase) {
+      const { data: media } = await supabase.from('media').select('url').eq('id', mediaId).single();
+      if (media && media.url.includes('supabase.co')) {
         const url = new URL(media.url);
         const filePath = url.pathname.split('/place-images/')[1];
+        if (filePath) await supabase.storage.from('place-images').remove([filePath]);
+      }
+      await supabase.from('media').delete().eq('id', mediaId);
+    }
 
-        // Delete from storage
-        const { error: storageError } = await supabase.storage
-            .from('place-images')
-            .remove([filePath]);
-
-        if (storageError) {
-            // Log the error but proceed to delete the DB record anyway
-            console.error('Supabase Storage Error on delete:', storageError.message);
+    // 2. Delete from Google Sheets
+    try {
+      const rows = await googleService.getRows('media');
+      const row = rows.find(r => r.get('id') === mediaId);
+      if (row) {
+        const url = row.get('url');
+        if (url && url.includes('googleusercontent.com')) {
+          const fileId = url.split('/d/')[1];
+          if (fileId) await googleService.deleteFile(fileId);
         }
+        await row.delete();
+      }
+    } catch (err) {
+      console.error('Google Sheets media delete failed:', err.message);
+    }
 
-        // Delete from database
-        const { error: dbError } = await supabase
-            .from('media')
-            .delete()
-            .eq('id', mediaId);
-
-        if (dbError) {
-            throw new Error(`Supabase DB Error: ${dbError.message}`);
-        }
-
-        res.status(200).json({ success: true, message: 'Media deleted successfully.' });
-    } catch (error) {
+    res.status(200).json({ success: true, message: 'Media deleted successfully.' });
+  } catch (error) {
         console.error(`Error deleting media ${mediaId}:`, error.message);
         res.status(500).json({ error: 'Internal server error', message: error.message });
     }
