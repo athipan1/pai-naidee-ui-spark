@@ -8,8 +8,9 @@ const stream = require('stream');
  */
 class GoogleService {
   constructor() {
-    this.sheetId = process.env.GOOGLE_SHEET_ID;
-    this.driveFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+    // Use provided IDs as defaults
+    this.sheetId = process.env.GOOGLE_SHEET_ID || '11vWarJAWiQZRAFIlSF1AK__5XTIKLJ64edAbqVJz7xg';
+    this.driveFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID || '1Tllbbyi3SI7zFs-_7_1Wv5hqsVflMS7M';
     this.clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     this.privateKey = process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n') : null;
 

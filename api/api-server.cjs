@@ -36,11 +36,14 @@ const upload = multer({ storage: storage });
  * Helper to get places from Google Sheets or Supabase
  */
 async function getPlacesWithFallback() {
+  const placeHeaders = [
+    'id', 'name', 'name_local', 'province', 'category', 'rating', 'review_count',
+    'image_url', 'description', 'tags', 'lat', 'lng', 'amenities', 'created_at', 'updated_at'
+  ];
+
   try {
     // Priority 1: Google Sheets
-    const rows = await googleService.getRows('places', [
-      'id', 'name', 'name_local', 'province', 'category', 'description', 'lat', 'lng', 'created_at'
-    ]);
+    const rows = await googleService.getRows('places', placeHeaders);
 
     if (rows && rows.length > 0) {
       const mediaRows = await googleService.getRows('media', [
@@ -65,12 +68,18 @@ async function getPlacesWithFallback() {
           name_local: row.get('name_local'),
           province: row.get('province'),
           category: row.get('category'),
+          rating: parseFloat(row.get('rating') || 0),
+          review_count: parseInt(row.get('review_count') || 0),
+          image_url: row.get('image_url'),
           description: row.get('description'),
+          tags: row.get('tags') ? JSON.parse(row.get('tags')) : [],
+          amenities: row.get('amenities') ? JSON.parse(row.get('amenities')) : [],
           coordinates: `POINT(${row.get('lng')} ${row.get('lat')})`,
           lat: parseFloat(row.get('lat')),
           lng: parseFloat(row.get('lng')),
           media: placeMedia,
-          created_at: row.get('created_at')
+          created_at: row.get('created_at'),
+          updated_at: row.get('updated_at')
         };
       });
     }
@@ -107,43 +116,57 @@ app.post('/api/places', upload.any(), async (req, res) => {
 
   try {
     // 1. Dual Write: Supabase
-    let supabaseResult = null;
     if (supabase) {
-      const { data, error } = await supabase.from('places').insert({
+      const { error } = await supabase.from('places').insert({
         id: newPlaceId,
         name: placeData.placeName,
         name_local: placeData.placeNameLocal,
         province: placeData.province,
         category: placeData.category,
         description: placeData.description,
+        rating: 0,
+        review_count: 0,
+        tags: [],
+        amenities: [],
         coordinates: `POINT(${placeData.coordinates.lng} ${placeData.coordinates.lat})`,
         lat: placeData.coordinates.lat,
-        lng: placeData.coordinates.lng
-      }).select().single();
-
+        lng: placeData.coordinates.lng,
+        created_at: timestamp
+      });
       if (error) console.error('Supabase place insert failed:', error.message);
-      supabaseResult = data;
     }
 
     // 2. Dual Write: Google Sheets
     try {
+      const placeHeaders = [
+        'id', 'name', 'name_local', 'province', 'category', 'rating', 'review_count',
+        'image_url', 'description', 'tags', 'lat', 'lng', 'amenities', 'created_at', 'updated_at'
+      ];
+
       await googleService.addRow('places', {
         id: newPlaceId,
         name: placeData.placeName,
         name_local: placeData.placeNameLocal,
         province: placeData.province,
         category: placeData.category,
+        rating: 0,
+        review_count: 0,
         description: placeData.description,
+        tags: JSON.stringify([]),
+        amenities: JSON.stringify([]),
         lat: placeData.coordinates.lat,
         lng: placeData.coordinates.lng,
-        created_at: timestamp
-      }, ['id', 'name', 'name_local', 'province', 'category', 'description', 'lat', 'lng', 'created_at']);
+        created_at: timestamp,
+        updated_at: timestamp
+      }, placeHeaders);
     } catch (err) {
       console.error('Google Sheets place insert failed:', err.message);
     }
 
     // 3. Process Media (Dual Storage & Dual Metadata)
     const mediaRecords = [];
+    let mainImageUrl = '';
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const metadata = mediaMetadata[i] || {};
@@ -175,6 +198,7 @@ app.post('/api/places', upload.any(), async (req, res) => {
       }
 
       const finalUrl = googleDriveUrl || supabaseUrl; // Prefer Google Drive as per requirements
+      if (i === 0) mainImageUrl = finalUrl;
 
       const mediaData = {
         id: mediaId,
@@ -197,6 +221,23 @@ app.post('/api/places', upload.any(), async (req, res) => {
         await googleService.addRow('media', mediaData, ['id', 'place_id', 'url', 'type', 'title', 'description']);
       } catch (err) {
         console.error('Google Sheets media insert failed:', err.message);
+      }
+    }
+
+    // Update main image_url in both databases
+    if (mainImageUrl) {
+      if (supabase) {
+        await supabase.from('places').update({ image_url: mainImageUrl }).eq('id', newPlaceId);
+      }
+      try {
+        const rows = await googleService.getRows('places');
+        const row = rows.find(r => r.get('id') === newPlaceId);
+        if (row) {
+          row.set('image_url', mainImageUrl);
+          await row.save();
+        }
+      } catch (err) {
+        console.error('Google Sheets main image update failed:', err.message);
       }
     }
 
@@ -297,15 +338,20 @@ app.get('/api/places/:placeId', async (req, res) => {
  */
 app.put('/api/places/:placeId', async (req, res) => {
   const { placeId } = req.params;
-  const { name, name_local, province, category, description, coordinates } = req.body;
+  const { name, name_local, province, category, description, coordinates, tags, amenities, rating, review_count } = req.body;
+  const timestamp = new Date().toISOString();
 
   try {
-    const updateData = {};
+    const updateData = { updated_at: timestamp };
     if (name) updateData.name = name;
     if (name_local) updateData.name_local = name_local;
     if (province) updateData.province = province;
     if (category) updateData.category = category;
     if (description) updateData.description = description;
+    if (tags) updateData.tags = tags;
+    if (amenities) updateData.amenities = amenities;
+    if (rating !== undefined) updateData.rating = rating;
+    if (review_count !== undefined) updateData.review_count = review_count;
 
     if (coordinates) {
       updateData.coordinates = `POINT(${coordinates.lng} ${coordinates.lat})`;
@@ -329,10 +375,15 @@ app.put('/api/places/:placeId', async (req, res) => {
         if (province) row.set('province', province);
         if (category) row.set('category', category);
         if (description) row.set('description', description);
+        if (tags) row.set('tags', JSON.stringify(tags));
+        if (amenities) row.set('amenities', JSON.stringify(amenities));
+        if (rating !== undefined) row.set('rating', rating);
+        if (review_count !== undefined) row.set('review_count', review_count);
         if (coordinates) {
           row.set('lat', coordinates.lat);
           row.set('lng', coordinates.lng);
         }
+        row.set('updated_at', timestamp);
         await row.save();
       }
     } catch (err) {

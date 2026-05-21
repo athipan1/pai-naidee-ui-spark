@@ -1,5 +1,5 @@
 require('dotenv').config();
-const googleService = require('./api/google-service.cjs');
+const googleService = require('../api/google-service.cjs');
 const fs = require('fs');
 
 async function runDiagnostics() {
