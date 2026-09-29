@@ -1,5 +1,6 @@
 // Media Management Service for handling place media operations
-import { getSupabaseClient } from '@/services/supabase.service';
+import { getAuthenticatedUser, getSupabaseClient } from '@/services/supabase.service';
+import { canManageContent, getAppRole, isAdminRole } from '@/shared/auth/roles';
 import type { MediaItem, MediaUploadData } from '../types/media';
 
 // Represents a place with its associated media, matching the backend API response
@@ -43,6 +44,24 @@ class MediaManagementService {
     return getSupabaseClient();
   }
 
+  private async assertCanManageContent() {
+    const user = await getAuthenticatedUser();
+    const role = getAppRole(user);
+
+    if (!canManageContent(role)) {
+      throw new Error('Administrator or editor access is required.');
+    }
+  }
+
+  private async assertAdmin() {
+    const user = await getAuthenticatedUser();
+    const role = getAppRole(user);
+
+    if (!isAdminRole(role)) {
+      throw new Error('Administrator access is required.');
+    }
+  }
+
   // --- Core API Methods ---
 
   /**
@@ -81,6 +100,7 @@ class MediaManagementService {
     media: MediaUploadData[]
   ): Promise<PlaceCreationResult> {
     try {
+      await this.assertCanManageContent();
       const supabase = this.getSupabase();
       
       // Insert place into database
@@ -158,6 +178,7 @@ class MediaManagementService {
     placeId: string,
     updateData: Partial<Omit<PlaceWithMedia, 'id' | 'media' | 'created_at' | 'coordinates'> & { coordinates: { lat: number, lng: number } }>
   ): Promise<PlaceUpdateResult> {
+    await this.assertCanManageContent();
     const supabase = this.getSupabase();
     
     const dbUpdate: any = {
@@ -196,6 +217,7 @@ class MediaManagementService {
     placeId: string,
     newMedia: MediaUploadData[]
   ): Promise<MediaReplacementResult> {
+    await this.assertCanManageContent();
     const supabase = this.getSupabase();
     const uploadedMedia: MediaItem[] = [];
 
@@ -269,6 +291,7 @@ class MediaManagementService {
    * Delete a media item by its ID.
    */
   async deleteMedia(mediaId: string): Promise<{ success: boolean; message: string }> {
+    await this.assertAdmin();
     const supabase = this.getSupabase();
     
     // First get the media record to find the file path
