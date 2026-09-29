@@ -4,10 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AttractionCard from "@/components/common/AttractionCard";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import templeImage from "@/shared/assets/temple-culture.jpg";
-import mountainImage from "@/shared/assets/mountain-nature.jpg";
-import floatingMarketImage from "@/shared/assets/floating-market.jpg";
-import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 
 interface Attraction {
   id: string;
@@ -43,7 +40,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Beach",
       rating: 4.8,
       reviewCount: 2547,
-      image: heroBeachImage,
+      image: getThailandPlaceImage("Phi Phi Islands"),
       description:
         currentLanguage === "th"
           ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
@@ -58,7 +55,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Beach",
       rating: 4.6,
       reviewCount: 3421,
-      image: heroBeachImage,
+      image: getThailandPlaceImage("Phuket Beach"),
       description:
         currentLanguage === "th"
           ? "หาดทรายขาวและน้ำทะเลสีฟ้าใส พร้อมกิจกรรมทางน้ำมากมาย"
@@ -73,7 +70,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Culture",
       rating: 4.9,
       reviewCount: 5243,
-      image: templeImage,
+      image: getThailandPlaceImage("Wat Phra Kaew"),
       description:
         currentLanguage === "th"
           ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
@@ -88,7 +85,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Culture",
       rating: 4.7,
       reviewCount: 2876,
-      image: templeImage,
+      image: getThailandPlaceImage("Wat Arun"),
       description:
         currentLanguage === "th"
           ? "วัดที่มีเจดีย์ประธานสูงตระหง่าน เป็นสัญลักษณ์ของกรุงเทพมหานคร"
@@ -103,7 +100,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Nature",
       rating: 4.7,
       reviewCount: 1876,
-      image: mountainImage,
+      image: getThailandPlaceImage("Doi Inthanon"),
       description:
         currentLanguage === "th"
           ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
@@ -118,7 +115,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Nature",
       rating: 4.5,
       reviewCount: 2156,
-      image: mountainImage,
+      image: getThailandPlaceImage("Khao Yai National Park"),
       description:
         currentLanguage === "th"
           ? "อุทยานแห่งชาติที่มีสัตว์ป่าและธรรมชาติที่หลากหลาย พร้อมน้ำตกที่สวยงาม"
@@ -133,7 +130,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Food",
       rating: 4.5,
       reviewCount: 3156,
-      image: floatingMarketImage,
+      image: getThailandPlaceImage("Floating Market"),
       description:
         currentLanguage === "th"
           ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
@@ -148,7 +145,7 @@ const CategoryPage = ({ currentLanguage }: CategoryPageProps) => {
       category: "Food",
       rating: 4.3,
       reviewCount: 4287,
-      image: floatingMarketImage,
+      image: getThailandPlaceImage("Street Food Market"),
       description:
         currentLanguage === "th"
           ? "ลิ้มรสอาหารไทยแท้ๆ จากร้านอาหารข้างถนน ราคาประหยัดและรสชาติเข้มข้น"

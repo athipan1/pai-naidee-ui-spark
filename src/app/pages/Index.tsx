@@ -12,10 +12,7 @@ import { SearchResult } from "@/shared/types/search";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { MapPin, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import templeImage from "@/shared/assets/temple-culture.jpg";
-import mountainImage from "@/shared/assets/mountain-nature.jpg";
-import floatingMarketImage from "@/shared/assets/floating-market.jpg";
-import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 import { isDevelopment } from "@/shared/utils/devUtils";
 
 interface IndexProps {
@@ -39,7 +36,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       category: "Beach",
       rating: 4.8,
       reviewCount: 2547,
-      image: heroBeachImage,
+      image: getThailandPlaceImage("Phi Phi Islands"),
       description:
         currentLanguage === "th"
           ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
@@ -54,7 +51,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       category: "Culture",
       rating: 4.9,
       reviewCount: 5243,
-      image: templeImage,
+      image: getThailandPlaceImage("Wat Phra Kaew"),
       description:
         currentLanguage === "th"
           ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
@@ -69,7 +66,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       category: "Nature",
       rating: 4.7,
       reviewCount: 1876,
-      image: mountainImage,
+      image: getThailandPlaceImage("Doi Inthanon"),
       description:
         currentLanguage === "th"
           ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
@@ -84,7 +81,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       category: "Food",
       rating: 4.5,
       reviewCount: 3156,
-      image: floatingMarketImage,
+      image: getThailandPlaceImage("Floating Market"),
       description:
         currentLanguage === "th"
           ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
@@ -115,7 +112,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       category: attraction.category,
       rating: attraction.rating,
       reviewCount: attraction.reviewCount,
-      image: attraction.image || heroBeachImage, // Use placeholder if no image
+      image: getThailandPlaceImage(attraction.name, attraction.image),
       description: attraction.description,
       tags: attraction.tags,
     }))

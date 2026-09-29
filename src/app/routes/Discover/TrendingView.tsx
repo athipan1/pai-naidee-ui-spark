@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, Flame, Star, MapPin } from "lucide-react";
 import AttractionCard from "@/components/common/AttractionCard";
-import templeImage from "@/shared/assets/temple-culture.jpg";
-import mountainImage from "@/shared/assets/mountain-nature.jpg";
-import floatingMarketImage from "@/shared/assets/floating-market.jpg";
-import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 
 interface TrendingAttraction {
   id: string;
@@ -81,7 +78,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         category: "Beach",
         rating: 4.8,
         reviewCount: 2547,
-        image: heroBeachImage,
+        image: getThailandPlaceImage("Phi Phi Islands"),
         description:
           currentLanguage === "th"
             ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
@@ -99,7 +96,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         category: "Culture",
         rating: 4.9,
         reviewCount: 5243,
-        image: templeImage,
+        image: getThailandPlaceImage("Wat Phra Kaew"),
         description:
           currentLanguage === "th"
             ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
@@ -117,7 +114,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         category: "Nature",
         rating: 4.7,
         reviewCount: 1876,
-        image: mountainImage,
+        image: getThailandPlaceImage("Doi Inthanon"),
         description:
           currentLanguage === "th"
             ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
@@ -135,7 +132,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
         category: "Food",
         rating: 4.5,
         reviewCount: 3156,
-        image: floatingMarketImage,
+        image: getThailandPlaceImage("Floating Market"),
         description:
           currentLanguage === "th"
             ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
