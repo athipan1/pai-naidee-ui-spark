@@ -25,15 +25,19 @@ function getEnvVar(key: string, fallback: string = ''): string {
 // Check if Supabase is properly configured
 export function isSupabaseConfigured(): boolean {
   const url = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
-  const key = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const key =
+    getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY') ||
+    getEnvVar('VITE_SUPABASE_ANON_KEY') ||
+    getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
   
   return !!(
     url && 
     url !== 'https://your-project.supabase.co' && 
     url !== 'https://your-project-id.supabase.co' &&
     key && 
-    key !== 'your-anon-key' && 
-    key !== 'your-supabase-anon-key-here'
+    key !== 'your-anon-key' &&
+    key !== 'your-supabase-anon-key-here' &&
+    key !== 'sb_publishable_your-key-here'
   );
 }
 
@@ -50,9 +54,13 @@ function getSupabaseClient(): SupabaseClient {
   }
 
   const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL') || 'https://your-project.supabase.co';
-  const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY') || 'your-anon-key';
+  const supabasePublicKey =
+    getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY') ||
+    getEnvVar('VITE_SUPABASE_ANON_KEY') ||
+    getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
+    'your-anon-key';
 
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
+  supabase = createClient(supabaseUrl, supabasePublicKey);
   return supabase;
 }
 
@@ -94,9 +102,6 @@ export const getPlacesByCategory = async (
     console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
     throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
   }
-
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
 
   try {
     const { data, error } = await getSupabaseClient()
@@ -154,9 +159,6 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
     console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
     throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
   }
-
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
 
   try {
     const { data, error } = await getSupabaseClient()
@@ -226,9 +228,6 @@ export const searchPlaces = async (
     console.warn('⚠️ Supabase is not properly configured. Skipping database query.');
     throw new Error('Supabase configuration is incomplete. Please check your environment variables.');
   }
-
-  // Ensure the user has a session, even if anonymous
-  await ensureAuthenticated();
 
   try {
     // Initialize the query and request total count
@@ -312,34 +311,21 @@ export const searchPlaces = async (
 // --- Authentication ---
 
 /**
- * Ensures the user is authenticated, performing an anonymous sign-in if necessary.
- * This is crucial for RLS policies that grant access to the 'anon' role.
+ * Returns the authenticated user verified by Supabase Auth.
+ * Public read paths must not create anonymous sessions implicitly.
  */
-export const ensureAuthenticated = async () => {
-  try {
-    const { data, error } = await getSupabaseClient().auth.getSession();
+export const getAuthenticatedUser = async () => {
+  const { data: { user }, error } = await getSupabaseClient().auth.getUser();
 
-    // If there's an error fetching the session, log it
-    if (error) {
-      console.error('Error fetching auth session:', error);
-    }
-
-    // If there is no active session, perform a sign-in with a generic JWT
-    // This is a common pattern for anonymous access with Supabase
-    if (!data.session) {
-      console.log('No active session, performing anonymous sign-in...');
-      const { error: signInError } = await getSupabaseClient().auth.signInAnonymously();
-
-      if (signInError) {
-        console.error('Anonymous sign-in failed:', signInError);
-        throw new Error(`Anonymous sign-in failed: ${signInError.message}`);
-      }
-    }
-  } catch (error) {
-    console.error('Authentication check failed:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
-    throw new Error(`Authentication check failed: ${errorMessage}`);
+  if (error) {
+    throw new Error(`Authentication check failed: ${error.message}`);
   }
+
+  if (!user) {
+    throw new Error('Authentication required');
+  }
+
+  return user;
 };
 
 // Export the factory function for use in other services
