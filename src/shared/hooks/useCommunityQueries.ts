@@ -29,7 +29,7 @@ export const useCreatePost = () => {
 export const useLikePost = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ postId, userId }: { postId: string, userId: string }) => communityService.likePost(postId, userId),
+    mutationFn: ({ postId }: { postId: string }) => communityService.likePost(postId),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: communityKeys.post(variables.postId) });
       queryClient.invalidateQueries({ queryKey: communityKeys.posts() });
@@ -48,7 +48,7 @@ export const useComments = (postId: string) => {
 export const useAddComment = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ postId, content, userId }: { postId: string, content: string, userId: string }) => communityService.addComment(postId, content, userId),
+    mutationFn: ({ postId, content }: { postId: string, content: string }) => communityService.addComment(postId, content),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: communityKeys.comments(variables.postId) });
     },
