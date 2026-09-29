@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
+import { AuthProvider, useAuth } from "@/shared/contexts/AuthContext";
 import { useCreatePost } from "@/shared/hooks/useCommunityQueries";
 import { CreatePost } from "@/components/community/CreatePost";
 import DevTools from "@/components/dev/DevTools";
@@ -83,15 +84,20 @@ const AppContent = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
 
   const { isCreatePostModalOpen, closeCreatePostModal } = useUIContext();
+  const { isAuthenticated } = useAuth();
   const { mutate: createPost, isPending: isCreatingPost } = useCreatePost();
 
   // Apply responsive text sizing for better accessibility
   useResponsiveTextSize();
 
   const handleCreatePost = (postData) => {
-    // TODO: Replace with actual user ID from auth context
-    const userId = "123e4567-e89b-12d3-a456-426614174000";
-    createPost({ ...postData, user_id: userId }, {
+    if (!isAuthenticated) {
+      closeCreatePostModal();
+      window.location.assign('/login');
+      return;
+    }
+
+    createPost(postData, {
       onSuccess: () => {
         closeCreatePostModal();
       }
@@ -241,8 +247,9 @@ const App = () => {
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
-        <MediaProvider>
-          <UIProvider>
+        <AuthProvider>
+          <MediaProvider>
+            <UIProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -250,8 +257,9 @@ const App = () => {
                 <AppContent />
               </BrowserRouter>
             </TooltipProvider>
-          </UIProvider>
-        </MediaProvider>
+            </UIProvider>
+          </MediaProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
