@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@/services/supabase.service';
+import { getAuthenticatedUser, getSupabaseClient } from '@/services/supabase.service';
 import { Post, Comment, CreatePostData } from '../types/community';
 
 const getErrorMessage = (error: unknown): string => {
@@ -34,9 +34,10 @@ const getFeed = async (): Promise<Post[]> => {
 const createPost = async (postData: CreatePostData): Promise<Post> => {
   try {
     const supabase = getSupabaseClient();
+    const user = await getAuthenticatedUser();
     const { data, error } = await supabase
       .from('posts')
-      .insert([postData])
+      .insert([{ ...postData, user_id: user.id }])
       .select()
       .single();
 
@@ -49,12 +50,13 @@ const createPost = async (postData: CreatePostData): Promise<Post> => {
   }
 };
 
-const likePost = async (postId: string, userId: string): Promise<{ success: boolean }> => {
+const likePost = async (postId: string): Promise<{ success: boolean }> => {
     try {
         const supabase = getSupabaseClient();
+        const user = await getAuthenticatedUser();
         const { error } = await supabase
             .from('likes')
-            .insert({ post_id: postId, user_id: userId });
+            .insert({ post_id: postId, user_id: user.id });
 
         if (error) {
             // Handle unique constraint violation (already liked)
@@ -62,7 +64,7 @@ const likePost = async (postId: string, userId: string): Promise<{ success: bool
                 await supabase
                     .from('likes')
                     .delete()
-                    .match({ post_id: postId, user_id: userId });
+                    .match({ post_id: postId, user_id: user.id });
                 return { success: true };
             }
             throw new Error(error.message);
@@ -98,12 +100,13 @@ const getComments = async (postId: string): Promise<Comment[]> => {
   }
 };
 
-const addComment = async (postId: string, content: string, userId: string): Promise<Comment> => {
+const addComment = async (postId: string, content: string): Promise<Comment> => {
     try {
         const supabase = getSupabaseClient();
+        const user = await getAuthenticatedUser();
         const { data, error } = await supabase
             .from('comments')
-            .insert({ post_id: postId, content, user_id: userId })
+            .insert({ post_id: postId, content, user_id: user.id })
             .select()
             .single();
 
