@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSupabaseClient } from '@/services/supabase.service';
+import { getAppRole, isAdminRole } from '@/shared/auth/roles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,21 +25,36 @@ const LoginPage = () => {
       password,
     });
 
-    setIsLoading(false);
-
     if (error) {
+      setIsLoading(false);
       toast({
         title: 'Login Failed',
         description: error.message,
         variant: 'destructive',
       });
-    } else {
-      toast({
-        title: 'Login Successful',
-        description: 'Redirecting to admin panel...',
-      });
-      navigate('/admin');
+      return;
     }
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const role = getAppRole(user);
+
+    if (userError || !user || !isAdminRole(role)) {
+      await supabase.auth.signOut();
+      setIsLoading(false);
+      toast({
+        title: 'Access Denied',
+        description: 'This account does not have administrator access.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(false);
+    toast({
+      title: 'Login Successful',
+      description: 'Redirecting to admin panel...',
+    });
+    navigate('/admin');
   };
 
   return (

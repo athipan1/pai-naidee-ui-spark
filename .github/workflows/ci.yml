@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -25,6 +25,12 @@ jobs:
 
       - name: Run tests
         run: npm run test:run
+
+      - name: Install API dependencies
+        run: npm ci --prefix api
+
+      - name: Run API security tests
+        run: npm test --prefix api
 
   security-audit:
     name: Security Audit
@@ -36,13 +42,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
+
+      - name: Check for committed secrets
+        run: node scripts/check-secrets.mjs
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate security audit report (temporary fix)
+      - name: Enforce production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Generate full dependency audit report
         run: |
           echo "Generating npm audit report for analysis..."
           npm audit --json > audit-report.json || true
@@ -65,7 +77,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -113,7 +125,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies

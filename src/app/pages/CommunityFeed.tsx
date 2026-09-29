@@ -135,10 +135,10 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     <PostCard
                       key={post.id}
                       post={post}
-                      onLike={(postId) => likePost({ postId, userId: "123e4567-e89b-12d3-a456-426614174000" })}
+                      onLike={(postId) => likePost({ postId })}
                       onSave={(postId) => console.log('Save:', postId)}
                       onShare={(postId) => console.log('Share:', postId)}
-                      onComment={(postId, content) => addComment({ postId, content, userId: "123e4567-e89b-12d3-a456-426614174000" })}
+                      onComment={(postId, content) => addComment({ postId, content })}
                     />
                   ))}
                 </div>

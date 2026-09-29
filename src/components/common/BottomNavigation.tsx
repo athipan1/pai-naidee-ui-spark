@@ -1,28 +1,14 @@
 import { Compass, Heart, User, Users, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useAuth } from "@/shared/contexts/AuthContext";
 
 interface BottomNavigationProps {
   currentLanguage: "th" | "en";
 }
 
-// Simple admin role check - in real app this would come from auth context
-const useAdminRole = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  useEffect(() => {
-    // TODO: Replace with actual auth check
-    // For demo purposes, we'll simulate admin check
-    const isAdminUser = localStorage.getItem('isAdmin') === 'true' || import.meta.env.DEV;
-    setIsAdmin(isAdminUser);
-  }, []);
-  
-  return isAdmin;
-};
-
 const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   const location = useLocation();
-  const isAdmin = useAdminRole();
+  const { isAdmin } = useAuth();
   
   // Helper function to determine if a tab is active
   const isTabActive = (tabPath: string) => {

@@ -27,9 +27,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const handleSubmitComment = () => {
     if (!commentText.trim()) return;
     
-    // TODO: Replace with actual user ID from auth context
-    const userId = "123e4567-e89b-12d3-a456-426614174000";
-    addComment({ postId, content: commentText, userId }, {
+    addComment({ postId, content: commentText }, {
       onSuccess: () => {
         setCommentText('');
       }

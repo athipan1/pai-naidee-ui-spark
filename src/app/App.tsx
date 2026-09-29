@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
+import { AuthProvider, useAuth } from "@/shared/contexts/AuthContext";
 import { useCreatePost } from "@/shared/hooks/useCommunityQueries";
+import type { CreatePostData } from "@/shared/types/community";
 import { CreatePost } from "@/components/community/CreatePost";
 import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -83,15 +85,20 @@ const AppContent = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
 
   const { isCreatePostModalOpen, closeCreatePostModal } = useUIContext();
+  const { isAuthenticated } = useAuth();
   const { mutate: createPost, isPending: isCreatingPost } = useCreatePost();
 
   // Apply responsive text sizing for better accessibility
   useResponsiveTextSize();
 
-  const handleCreatePost = (postData) => {
-    // TODO: Replace with actual user ID from auth context
-    const userId = "123e4567-e89b-12d3-a456-426614174000";
-    createPost({ ...postData, user_id: userId }, {
+  const handleCreatePost = (postData: CreatePostData) => {
+    if (!isAuthenticated) {
+      closeCreatePostModal();
+      window.location.assign('/login');
+      return;
+    }
+
+    createPost(postData, {
       onSuccess: () => {
         closeCreatePostModal();
       }
@@ -229,7 +236,7 @@ const ConfigError = () => (
   }}>
     <h1 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#ff4d4d' }}>Configuration Error</h1>
     <p style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>Supabase environment variables are missing or invalid.</p>
-    <p style={{ color: '#ccc' }}>Please ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are correctly set in your Vercel project settings.</p>
+    <p style={{ color: '#ccc' }}>Please ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (or the legacy anon-key fallback) are correctly set in your deployment settings.</p>
   </div>
 );
 
@@ -241,8 +248,9 @@ const App = () => {
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
-        <MediaProvider>
-          <UIProvider>
+        <AuthProvider>
+          <MediaProvider>
+            <UIProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -250,8 +258,9 @@ const App = () => {
                 <AppContent />
               </BrowserRouter>
             </TooltipProvider>
-          </UIProvider>
-        </MediaProvider>
+            </UIProvider>
+          </MediaProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

@@ -43,68 +43,11 @@ ON CONFLICT (id) DO NOTHING;
 ALTER TABLE places ENABLE ROW LEVEL SECURITY;
 ALTER TABLE media ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for places
-CREATE POLICY "Public read access to places"
-ON places FOR SELECT
-TO public
-USING (true);
-
-CREATE POLICY "Authenticated users can insert places"
-ON places FOR INSERT
-TO authenticated
-WITH CHECK (true);
-
-CREATE POLICY "Authenticated users can update places"
-ON places FOR UPDATE
-TO authenticated
-USING (true);
-
-CREATE POLICY "Authenticated users can delete places"
-ON places FOR DELETE
-TO authenticated
-USING (true);
-
--- RLS Policies for media
-CREATE POLICY "Public read access to media"
-ON media FOR SELECT
-TO public
-USING (true);
-
-CREATE POLICY "Authenticated users can insert media"
-ON media FOR INSERT
-TO authenticated
-WITH CHECK (true);
-
-CREATE POLICY "Authenticated users can update media"
-ON media FOR UPDATE
-TO authenticated
-USING (true);
-
-CREATE POLICY "Authenticated users can delete media"
-ON media FOR DELETE
-TO authenticated
-USING (true);
-
--- Storage policies
-CREATE POLICY "Public read access to place-media"
-ON storage.objects FOR SELECT
-TO public
-USING (bucket_id = 'place-media');
-
-CREATE POLICY "Authenticated users can upload to place-media"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'place-media');
-
-CREATE POLICY "Authenticated users can update place-media"
-ON storage.objects FOR UPDATE
-TO authenticated
-USING (bucket_id = 'place-media');
-
-CREATE POLICY "Authenticated users can delete from place-media"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (bucket_id = 'place-media');
+-- Security policies are intentionally maintained in:
+-- supabase/migrations/20260929150000_phase1_security_hardening.sql
+--
+-- Do NOT add blanket write policies for the authenticated role here.
+-- Apply the migration so write access is restricted by app_metadata.role.
 ```
 
 ## After running the SQL:

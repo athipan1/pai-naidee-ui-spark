@@ -54,19 +54,14 @@ export const PostFeed: React.FC<PostFeedProps> = ({
 
   // Post interaction handlers
   const handleLike = useCallback((postId: string) => {
-    // TODO: Replace with actual user ID from auth context
-    const userId = "123e4567-e89b-12d3-a456-426614174000";
-    likePost({ postId, userId });
+    likePost({ postId });
   }, [likePost]);
 
   const handleComment = useCallback((postId: string, content: string) => {
-    // TODO: Replace with actual user ID from auth context
-    const userId = "123e4567-e89b-12d3-a456-426614174000";
-    addComment({ postId, content, userId });
+    addComment({ postId, content });
   }, [addComment]);
 
   const handleCreatePost = useCallback((postData: CreatePostData) => {
-    // TODO: Replace with actual user ID from auth context
     createPost(postData, {
         onSuccess: () => {
             setShowCreateDialog(false);

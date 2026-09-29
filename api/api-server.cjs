@@ -5,26 +5,61 @@ const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
 const path = require('path');
+const {
+  buildCorsOptions,
+  createRateLimiter,
+  createRoleGuard,
+  isUuid,
+  validateCreatePlacePayload,
+  validateTalkPayload,
+  validateUpdatePlacePayload,
+} = require('./security.cjs');
 
 // --- Basic Setup ---
 const app = express();
 const PORT = process.env.PORT || 8000;
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 // --- Middleware ---
-app.use(cors());
-app.use(express.json());
+app.use(cors(buildCorsOptions()));
+app.use(express.json({ limit: '256kb' }));
+app.use('/api', createRateLimiter({ windowMs: 60_000, max: 120 }));
 
 // --- Supabase Client Setup ---
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Prefer the new server-only secret key. Legacy service_role remains a temporary fallback.
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Supabase URL or Service Role Key is missing. Make sure to set them in the .env file.");
+  console.error('Server-side Supabase configuration is missing.');
 }
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+const supabase = supabaseUrl && supabaseKey
+  ? createClient(supabaseUrl, supabaseKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  : null;
+
+const requireContentManager = createRoleGuard(supabase, ['admin', 'editor']);
+const requireAdmin = createRoleGuard(supabase, ['admin']);
+const talkRateLimit = createRateLimiter({ windowMs: 60_000, max: 30, keyPrefix: 'talk' });
 
 // --- Multer Setup for File Uploads ---
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage,
+  limits: {
+    files: 13,
+    fileSize: 10 * 1024 * 1024,
+  },
+  fileFilter: (_req, file, callback) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Only image and video uploads are allowed.'));
+  },
+});
 
 
 // ====================================================================
@@ -38,7 +73,7 @@ const upload = multer({ storage: storage });
  * 2. Uploading media files to Supabase Storage.
  * 3. Inserting media metadata into the 'media' table.
  */
-app.post('/api/places', upload.any(), async (req, res) => {
+app.post('/api/places', requireContentManager, upload.any(), async (req, res) => {
   const { placeData: placeDataJson, metadata: metadataJson } = req.body; // metadata from frontend
   const files = req.files;
 
@@ -53,9 +88,25 @@ app.post('/api/places', upload.any(), async (req, res) => {
   let newPlaceId = null;
 
   try {
-    const placeData = JSON.parse(placeDataJson);
-    // Metadata for each file should be sent as an array of JSON strings
-    const mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
+    let placeData;
+    let mediaMetadata = [];
+
+    try {
+      placeData = JSON.parse(placeDataJson);
+      mediaMetadata = metadataJson ? JSON.parse(metadataJson) : [];
+    } catch {
+      return res.status(400).json({ error: 'placeData and metadata must contain valid JSON.' });
+    }
+
+    const validation = validateCreatePlacePayload(placeData);
+    if (!validation.ok) {
+      return res.status(400).json({ error: 'Invalid place data.', details: validation.errors });
+    }
+
+    if (!Array.isArray(mediaMetadata)) {
+      return res.status(400).json({ error: 'metadata must be a JSON array.' });
+    }
+
     // 1. Insert place data into the 'places' table
     const { data: placeResult, error: placeError } = await supabase
       .from('places')
@@ -87,7 +138,7 @@ app.post('/api/places', upload.any(), async (req, res) => {
       const fileName = `${newPlaceId}/${uuidv4()}${fileExt}`; // Organize files by placeId
 
       const { error: uploadError } = await supabase.storage
-        .from('place-images')
+        .from('place-media')
         .upload(fileName, file.buffer, {
           contentType: file.mimetype,
           upsert: false,
@@ -98,7 +149,7 @@ app.post('/api/places', upload.any(), async (req, res) => {
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('place-images')
+        .from('place-media')
         .getPublicUrl(fileName);
 
       mediaToInsert.push({
@@ -145,7 +196,6 @@ app.post('/api/places', upload.any(), async (req, res) => {
 
     res.status(500).json({
       error: 'Internal server error',
-      message: error.message,
     });
   }
 });
@@ -169,7 +219,7 @@ app.get('/api/places', async (req, res) => {
     res.status(200).json(data);
   } catch (error) {
     console.error('Error in GET /api/places:', error.message);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -203,7 +253,7 @@ app.get('/api/places/search', async (req, res) => {
         res.status(200).json({ places: data });
     } catch (error) {
         console.error('Error in place search:', error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -234,7 +284,7 @@ app.get('/api/places/:placeId', async (req, res) => {
     res.status(200).json(data);
   } catch (error) {
     console.error(`Error in GET /api/places/${placeId}:`, error.message);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -243,9 +293,18 @@ app.get('/api/places/:placeId', async (req, res) => {
 /**
  * Endpoint to update place details.
  */
-app.put('/api/places/:placeId', async (req, res) => {
+app.put('/api/places/:placeId', requireContentManager, async (req, res) => {
   const { placeId } = req.params;
   const { name, name_local, province, category, description, coordinates } = req.body;
+
+  if (!isUuid(placeId)) {
+    return res.status(400).json({ error: 'Invalid place ID.' });
+  }
+
+  const validation = validateUpdatePlacePayload(req.body);
+  if (!validation.ok) {
+    return res.status(400).json({ error: 'Invalid update payload.', details: validation.errors });
+  }
 
   if (!supabase) {
     return res.status(500).json({ error: 'Supabase client is not initialized.' });
@@ -274,13 +333,17 @@ app.put('/api/places/:placeId', async (req, res) => {
     res.status(200).json({ success: true, message: 'Place updated successfully.', data });
   } catch (error) {
     console.error(`Error in PUT /api/places/${placeId}:`, error.message);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) => {
+app.post('/api/places/:placeId/media/replace', requireContentManager, upload.any(), async (req, res) => {
     const { placeId } = req.params;
     const files = req.files;
+
+    if (!isUuid(placeId)) {
+        return res.status(400).json({ error: 'Invalid place ID.' });
+    }
 
     console.log(`Received request to replace media for place ID: ${placeId}`);
     console.log(`Received ${files ? files.length : 0} new files.`);
@@ -304,7 +367,7 @@ app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) =>
             const fileName = `${placeId}/${uuidv4()}${fileExt}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('place-images')
+                .from('place-media')
                 .upload(fileName, file.buffer, {
                     contentType: file.mimetype,
                     upsert: false,
@@ -315,7 +378,7 @@ app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) =>
             }
 
             const { data: { publicUrl } } = supabase.storage
-                .from('place-images')
+                .from('place-media')
                 .getPublicUrl(fileName);
 
             mediaToInsert.push({
@@ -344,46 +407,20 @@ app.post('/api/places/:placeId/media/replace', upload.any(), async (req, res) =>
         });
     } catch (error) {
         console.error('Error in media replacement:', error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
-    }
-});
-
-app.get('/api/places/search', async (req, res) => {
-    const { name, province } = req.query;
-    console.log(`Searching for place: ${name}` + (province ? ` in ${province}`: ''));
-
-    if (!supabase) {
-        return res.status(500).json({ error: 'Supabase client is not initialized.' });
-    }
-
-    try {
-        let query = supabase.from('places').select('*, media(*)');
-
-        if (name) {
-            query = query.ilike('name', `%${name}%`);
-        }
-        if (province) {
-            query = query.ilike('province', `%${province}%`);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-            throw new Error(`Supabase DB Error: ${error.message}`);
-        }
-
-        res.status(200).json({ places: data });
-    } catch (error) {
-        console.error('Error in place search:', error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
 /**
  * Endpoint to delete a media item.
  */
-app.delete('/api/media/:mediaId', async (req, res) => {
+app.delete('/api/media/:mediaId', requireAdmin, async (req, res) => {
     const { mediaId } = req.params;
+
+    if (!isUuid(mediaId)) {
+        return res.status(400).json({ error: 'Invalid media ID.' });
+    }
+
     if (!supabase) {
         return res.status(500).json({ error: 'Supabase client is not initialized.' });
     }
@@ -402,11 +439,11 @@ app.delete('/api/media/:mediaId', async (req, res) => {
 
         // Extract the file path from the URL
         const url = new URL(media.url);
-        const filePath = url.pathname.split('/place-images/')[1];
+        const filePath = url.pathname.split('/place-media/')[1];
 
         // Delete from storage
         const { error: storageError } = await supabase.storage
-            .from('place-images')
+            .from('place-media')
             .remove([filePath]);
 
         if (storageError) {
@@ -427,7 +464,7 @@ app.delete('/api/media/:mediaId', async (req, res) => {
         res.status(200).json({ success: true, message: 'Media deleted successfully.' });
     } catch (error) {
         console.error(`Error deleting media ${mediaId}:`, error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -520,16 +557,17 @@ function generateTravelResponse(message, language, _sessionId) {
   return randomResponse;
 }
 
-app.post('/api/talk', (req, res) => {
+app.post('/api/talk', talkRateLimit, (req, res) => {
   try {
-    const { message, session_id, language = 'auto' } = req.body;
-
-    if (!message || typeof message !== 'string') {
-      return res.status(400).json({ 
-        error: 'Message is required and must be a string' 
+    const validation = validateTalkPayload(req.body);
+    if (!validation.ok) {
+      return res.status(400).json({
+        error: 'Invalid request.',
+        details: validation.errors,
       });
     }
 
+    const { message, session_id, language = 'auto' } = req.body;
     const sessionId = session_id || uuidv4();
     const detectedLanguage = language === 'auto' ? detectLanguage(message) : language;
     
@@ -585,6 +623,24 @@ app.get('/api/health', (req, res) => {
     message: 'PaiNaiDee AI API is running',
     timestamp: new Date().toISOString()
   });
+});
+
+// Return predictable JSON for upload/CORS/body parsing failures.
+app.use((error, _req, res, _next) => {
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({ error: 'Upload rejected.', message: error.message });
+  }
+
+  if (error?.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Request body is too large.' });
+  }
+
+  if (error?.message === 'Origin is not allowed by CORS policy') {
+    return res.status(403).json({ error: error.message });
+  }
+
+  console.error('Unhandled API error:', error?.message || error);
+  return res.status(500).json({ error: 'Internal server error.' });
 });
 
 // --- Start Server ---

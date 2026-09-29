@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ArrowLeft, User, Shield, Activity, BarChart3, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getSupabaseClient } from "@/services/supabase.service";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "@/shared/contexts/AuthContext";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { cn } from "@/shared/utils/cn";
 
@@ -12,32 +12,13 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, isAuthenticated, isAdmin, signOut } = useAuth();
 
   useEffect(() => {
-    const supabase = getSupabaseClient();
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/login');
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    checkSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate('/login');
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [navigate]);
+    if (!isLoading && !isAuthenticated) {
+      navigate('/login', { replace: true });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
   const content = {
     th: {
@@ -71,13 +52,25 @@ const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
   const t = content[currentLanguage];
 
   const handleLogout = async () => {
-    const supabase = getSupabaseClient();
-    await supabase.auth.signOut();
-    navigate('/login');
+    await signOut();
+    navigate('/login', { replace: true });
   };
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return <LoadingSpinner text="Authenticating..." />;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="max-w-md text-center space-y-4">
+          <Shield className="w-12 h-12 mx-auto text-destructive" />
+          <h1 className="text-2xl font-bold">{t.unauthorized}</h1>
+          <p className="text-muted-foreground">{t.unauthorizedDesc}</p>
+          <Button onClick={() => navigate('/', { replace: true })}>{t.backToHome}</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
