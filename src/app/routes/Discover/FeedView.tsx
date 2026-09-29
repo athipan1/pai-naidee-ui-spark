@@ -15,10 +15,7 @@ import PlaceCard from "@/components/discover/PlaceCard";
 import CategoryCard from "@/components/discover/CategoryCard";
 import SectionHeader from "@/components/discover/SectionHeader";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
-import templeImage from "@/shared/assets/temple-culture.jpg";
-import mountainImage from "@/shared/assets/mountain-nature.jpg";
-import floatingMarketImage from "@/shared/assets/floating-market.jpg";
-import heroBeachImage from "@/shared/assets/hero-beach.jpg";
+import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 
 interface TravelPlace {
   id: string;
@@ -115,7 +112,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
       category: "Beach",
       rating: 4.8,
       reviewCount: 2547,
-      image: heroBeachImage,
+      image: getThailandPlaceImage("Phi Phi Islands"),
       description:
         currentLanguage === "th"
           ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
@@ -131,7 +128,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
       category: "Culture",
       rating: 4.9,
       reviewCount: 5243,
-      image: templeImage,
+      image: getThailandPlaceImage("Wat Phra Kaew"),
       description:
         currentLanguage === "th"
           ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
@@ -147,7 +144,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
       category: "Nature",
       rating: 4.7,
       reviewCount: 1876,
-      image: mountainImage,
+      image: getThailandPlaceImage("Doi Inthanon"),
       description:
         currentLanguage === "th"
           ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
@@ -163,7 +160,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
       category: "Food",
       rating: 4.5,
       reviewCount: 3156,
-      image: floatingMarketImage,
+      image: getThailandPlaceImage("Floating Market"),
       description:
         currentLanguage === "th"
           ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
@@ -233,7 +230,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           category: attraction.category,
           rating: attraction.rating,
           reviewCount: attraction.reviewCount,
-          image: attraction.image || heroBeachImage,
+          image: getThailandPlaceImage(attraction.name, attraction.image),
           description: attraction.description,
           tags: attraction.tags || [],
           isTrending: Math.random() > 0.5 // Random trending for demo
