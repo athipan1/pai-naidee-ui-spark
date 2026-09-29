@@ -55,7 +55,6 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
       - name: Generate full dependency audit report
-        run: npm audit --json > audit-report.json || true
         run: |
           echo "Generating npm audit report for analysis..."
           npm audit --json > audit-report.json || true
