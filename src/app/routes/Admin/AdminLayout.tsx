@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { ArrowLeft, User, Shield, Activity, BarChart3, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/contexts/AuthContext";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { cn } from "@/shared/utils/cn";
@@ -12,7 +12,6 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ currentLanguage }: AdminLayoutProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { isLoading, isAuthenticated, isAdmin, signOut } = useAuth();
 
   useEffect(() => {
