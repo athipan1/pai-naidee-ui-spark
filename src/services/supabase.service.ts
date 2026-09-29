@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SearchResult } from '@/shared/types/search';
 import { AttractionDetail } from '@/shared/types/attraction';
+import { getThailandPlaceImage } from '@/shared/data/thailandPlaceImages';
 
 // Helper function to get environment variables in both browser and Node.js contexts
 function getEnvVar(key: string, fallback: string = ''): string {
@@ -130,7 +131,7 @@ export const getPlacesByCategory = async (
       tags: Array.isArray(place.tags) ? place.tags : [],
       rating: typeof place.rating === 'number' ? place.rating : 0,
       reviewCount: typeof place.review_count === 'number' ? place.review_count : 0,
-      image: place.image_url || 'https://via.placeholder.com/400x250?text=No+Image',
+      image: getThailandPlaceImage(place.name, place.image_url),
       description: place.description || 'No description available.',
       confidence: 1.0, // Default confidence for direct category match
       matchedTerms: [category],
@@ -179,7 +180,8 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
     const place: PlaceRecord = data;
 
     // Transform Supabase data to AttractionDetail format with better null handling
-    const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+    const storedImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url;
+    const mainImage = getThailandPlaceImage(place.name, storedImage);
     const allImages = place.media && place.media.length > 0 ? place.media.map(m => m.url) : [mainImage];
 
     return {
@@ -277,7 +279,8 @@ export const searchPlaces = async (
 
     // Transform data to SearchResult format with better null handling
     const results = data.map((place: PlaceRecord): SearchResult => {
-      const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+      const storedImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url;
+      const mainImage = getThailandPlaceImage(place.name, storedImage);
       return {
         id: place.id || 'unknown',
         name: place.name || 'Unnamed Place',
