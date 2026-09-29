@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node api-server.cjs",
     "dev": "nodemon api-server.cjs",
-    "test": "node --test security.test.cjs"
+    "test": "node --test security.node-test.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.79.0",
