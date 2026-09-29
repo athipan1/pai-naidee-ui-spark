@@ -235,7 +235,7 @@ const ConfigError = () => (
   }}>
     <h1 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#ff4d4d' }}>Configuration Error</h1>
     <p style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>Supabase environment variables are missing or invalid.</p>
-    <p style={{ color: '#ccc' }}>Please ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are correctly set in your Vercel project settings.</p>
+    <p style={{ color: '#ccc' }}>Please ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (or the legacy anon-key fallback) are correctly set in your deployment settings.</p>
   </div>
 );
 
