@@ -411,37 +411,6 @@ app.post('/api/places/:placeId/media/replace', requireContentManager, upload.any
     }
 });
 
-app.get('/api/places/search', async (req, res) => {
-    const { name, province } = req.query;
-    console.log(`Searching for place: ${name}` + (province ? ` in ${province}`: ''));
-
-    if (!supabase) {
-        return res.status(500).json({ error: 'Supabase client is not initialized.' });
-    }
-
-    try {
-        let query = supabase.from('places').select('*, media(*)');
-
-        if (name) {
-            query = query.ilike('name', `%${name}%`);
-        }
-        if (province) {
-            query = query.ilike('province', `%${province}%`);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-            throw new Error(`Supabase DB Error: ${error.message}`);
-        }
-
-        res.status(200).json({ places: data });
-    } catch (error) {
-        console.error('Error in place search:', error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
-    }
-});
-
 /**
  * Endpoint to delete a media item.
  */
