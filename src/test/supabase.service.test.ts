@@ -14,8 +14,15 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
     from: (...args) => mockFrom(...args),
     auth: {
-      getSession: vi.fn().mockResolvedValue({ data: { session: 'mock-session' } }),
-      signInAnonymously: vi.fn().mockResolvedValue({ error: null }),
+      getSession: vi.fn().mockResolvedValue({ data: { session: 'mock-session' }, error: null }),
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'verified-user', app_metadata: {}, user_metadata: {} } },
+        error: null,
+      }),
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
     },
   })),
 }));
@@ -26,6 +33,7 @@ import {
   getPlaceById,
   searchPlaces,
   isSupabaseConfigured,
+  getAuthenticatedUser,
 } from '@/services/supabase.service';
 
 describe('Supabase Service', () => {
@@ -70,6 +78,13 @@ describe('Supabase Service', () => {
     it('should return false if URL is a placeholder', () => {
       vi.stubEnv('VITE_SUPABASE_URL', 'https://your-project.supabase.co');
       expect(isSupabaseConfigured()).toBe(false);
+    });
+  });
+
+  describe('getAuthenticatedUser', () => {
+    it('returns the Supabase-verified user', async () => {
+      const user = await getAuthenticatedUser();
+      expect(user.id).toBe('verified-user');
     });
   });
 
