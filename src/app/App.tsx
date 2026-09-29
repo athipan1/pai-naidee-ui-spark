@@ -8,6 +8,7 @@ import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
 import { AuthProvider, useAuth } from "@/shared/contexts/AuthContext";
 import { useCreatePost } from "@/shared/hooks/useCommunityQueries";
+import type { CreatePostData } from "@/shared/types/community";
 import { CreatePost } from "@/components/community/CreatePost";
 import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -90,7 +91,7 @@ const AppContent = () => {
   // Apply responsive text sizing for better accessibility
   useResponsiveTextSize();
 
-  const handleCreatePost = (postData) => {
+  const handleCreatePost = (postData: CreatePostData) => {
     if (!isAuthenticated) {
       closeCreatePostModal();
       window.location.assign('/login');
