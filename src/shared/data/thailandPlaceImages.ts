@@ -20,7 +20,7 @@ export const thailandPlaceImages = {
   },
   doiInthanon: {
     url: "https://images.unsplash.com/photo-1544467187-784a3534a696?auto=format&fit=crop&w=1200&q=80",
-    sourcePage: "https://unsplash.com/s/photos/doi-inthanon",
+    sourcePage: "https://unsplash.com/photos/a_P2nDysDt0",
     photographer: "Haydn Golden",
     provider: "Unsplash",
   },
