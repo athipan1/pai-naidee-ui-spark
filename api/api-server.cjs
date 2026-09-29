@@ -18,6 +18,7 @@ const {
 // --- Basic Setup ---
 const app = express();
 const PORT = process.env.PORT || 8000;
+app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
 // --- Middleware ---
@@ -195,7 +196,6 @@ app.post('/api/places', requireContentManager, upload.any(), async (req, res) =>
 
     res.status(500).json({
       error: 'Internal server error',
-      message: error.message,
     });
   }
 });
@@ -219,7 +219,7 @@ app.get('/api/places', async (req, res) => {
     res.status(200).json(data);
   } catch (error) {
     console.error('Error in GET /api/places:', error.message);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -253,7 +253,7 @@ app.get('/api/places/search', async (req, res) => {
         res.status(200).json({ places: data });
     } catch (error) {
         console.error('Error in place search:', error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -284,7 +284,7 @@ app.get('/api/places/:placeId', async (req, res) => {
     res.status(200).json(data);
   } catch (error) {
     console.error(`Error in GET /api/places/${placeId}:`, error.message);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -333,7 +333,7 @@ app.put('/api/places/:placeId', requireContentManager, async (req, res) => {
     res.status(200).json({ success: true, message: 'Place updated successfully.', data });
   } catch (error) {
     console.error(`Error in PUT /api/places/${placeId}:`, error.message);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -407,7 +407,7 @@ app.post('/api/places/:placeId/media/replace', requireContentManager, upload.any
         });
     } catch (error) {
         console.error('Error in media replacement:', error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -464,7 +464,7 @@ app.delete('/api/media/:mediaId', requireAdmin, async (req, res) => {
         res.status(200).json({ success: true, message: 'Media deleted successfully.' });
     } catch (error) {
         console.error(`Error deleting media ${mediaId}:`, error.message);
-        res.status(500).json({ error: 'Internal server error', message: error.message });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
