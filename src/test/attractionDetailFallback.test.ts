@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/services/supabase.service", () => ({
-  getPlaceById: vi.fn(),
-  searchPlaces: vi.fn(),
+vi.mock("@/services/railway-api.service", () => ({
+  getRailwayAttractionDetail: vi.fn(),
+  getRailwayAttractions: vi.fn(),
 }));
 
-import { getPlaceById } from "@/services/supabase.service";
+import { getRailwayAttractionDetail } from "@/services/railway-api.service";
 import { attractionService } from "@/services/attraction.service";
 
 describe("attraction detail offline fallback", () => {
@@ -13,8 +13,8 @@ describe("attraction detail offline fallback", () => {
     vi.clearAllMocks();
   });
 
-  it("returns a local attraction when Supabase cannot be reached", async () => {
-    vi.mocked(getPlaceById).mockRejectedValue(new TypeError("Failed to fetch"));
+  it("returns a local attraction when the Railway API cannot be reached", async () => {
+    vi.mocked(getRailwayAttractionDetail).mockRejectedValue(new TypeError("Failed to fetch"));
 
     const attraction = await attractionService.getAttractionDetail("2");
 
@@ -25,7 +25,7 @@ describe("attraction detail offline fallback", () => {
   });
 
   it("still surfaces an error for unknown attraction ids", async () => {
-    vi.mocked(getPlaceById).mockRejectedValue(new TypeError("Failed to fetch"));
+    vi.mocked(getRailwayAttractionDetail).mockRejectedValue(new TypeError("Failed to fetch"));
 
     await expect(
       attractionService.getAttractionDetail("unknown-id"),

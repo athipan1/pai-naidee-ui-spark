@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { getSupabaseClient } from '@/services/supabase.service';
+import { getSupabaseClient, isSupabaseConfigured } from '@/services/supabase.service';
 import { getAppRole, isAdminRole, type AppRole } from '@/shared/auth/roles';
 
 interface AuthContextValue {
@@ -28,6 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+
+    if (!isSupabaseConfigured()) {
+      setSession(null);
+      setIsLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
     const supabase = getSupabaseClient();
 
     const initialize = async () => {
@@ -73,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: isAdminRole(role),
       isLoading,
       signOut: async () => {
+        if (!isSupabaseConfigured()) return;
         const { error } = await getSupabaseClient().auth.signOut();
         if (error) throw error;
       },
