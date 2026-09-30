@@ -132,8 +132,21 @@ async function ensureSchema() {
   }
 }
 
+function normalizeJsonArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 function normalizePlace(row) {
-  const media = Array.isArray(row.media) ? row.media : [];
+  const media = normalizeJsonArray(row.media);
   return {
     id: row.id,
     name: row.name,
@@ -149,7 +162,7 @@ function normalizePlace(row) {
         ? [row.image_url]
         : [],
     description: row.description || '',
-    tags: Array.isArray(row.tags) ? row.tags : [],
+    tags: normalizeJsonArray(row.tags),
     coordinates: {
       lat: Number(row.lat) || 0,
       lng: Number(row.lng) || 0,
