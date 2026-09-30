@@ -1,6 +1,7 @@
 import { AttractionDetail } from '@/shared/types/attraction';
 import { SearchResult } from '@/shared/types/search';
 import { getPlaceById, searchPlaces } from './supabase.service';
+import { getFallbackAttractionDetail } from '@/shared/data/fallbackAttractions';
 
 // Helper to extract a meaningful error message from an API error
 const getApiErrorMessage = (error: unknown): string => {
@@ -18,6 +19,13 @@ const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
     return attraction;
   } catch (error) {
     console.error(`❌ Error fetching attraction detail from Supabase for id ${id}:`, error);
+
+    const fallback = getFallbackAttractionDetail(id);
+    if (fallback) {
+      console.warn(`⚠️ Using local attraction fallback for id ${id}`);
+      return fallback;
+    }
+
     throw new Error(`Failed to fetch attraction details. ${getApiErrorMessage(error)}`);
   }
 };
