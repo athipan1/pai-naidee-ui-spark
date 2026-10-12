@@ -13,7 +13,6 @@ import {
   ExternalLink,
   Globe,
   BookOpen,
-  Settings,
   RefreshCw,
   Wind,
 } from "lucide-react";
