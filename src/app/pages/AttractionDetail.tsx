@@ -13,7 +13,6 @@ import {
   ExternalLink,
   Globe,
   BookOpen,
-  Settings,
   RefreshCw,
   Wind,
 } from "lucide-react";
@@ -309,14 +308,6 @@ const AttractionDetail = ({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin')}
-                className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hidden sm:flex"
-                title={currentLanguage === 'th' ? 'แผงควบคุมผู้ดูแลระบบ' : 'Admin Panel'}
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
               <Button
                 variant={isFavorite ? "default" : "outline"}
                 onClick={toggleFavorite}

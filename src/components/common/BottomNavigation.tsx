@@ -1,29 +1,13 @@
-import { Compass, Heart, User, Users, Shield } from "lucide-react";
+import { Compass, Heart, User, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 interface BottomNavigationProps {
   currentLanguage: "th" | "en";
 }
 
-// Simple admin role check - in real app this would come from auth context
-const useAdminRole = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  useEffect(() => {
-    // TODO: Replace with actual auth check
-    // For demo purposes, we'll simulate admin check
-    const isAdminUser = localStorage.getItem('isAdmin') === 'true' || import.meta.env.DEV;
-    setIsAdmin(isAdminUser);
-  }, []);
-  
-  return isAdmin;
-};
-
 const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   const location = useLocation();
-  const isAdmin = useAdminRole();
-  
+
   // Helper function to determine if a tab is active
   const isTabActive = (tabPath: string) => {
     if (tabPath === "/discover") {
@@ -45,8 +29,8 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
     return location.pathname.startsWith(tabPath);
   };
 
-  // Base navigation tabs - minimal set
-  const baseTabs = [
+  // Navigation tabs
+  const tabs = [
     {
       id: "discover",
       path: "/discover",
@@ -73,21 +57,10 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
     },
   ];
 
-  // Add admin tab if user is admin
-  const tabs = isAdmin ? [
-    ...baseTabs,
-    {
-      id: "admin",
-      path: "/admin",
-      label: { th: "แอดมิน", en: "Admin" },
-      icon: Shield,
-    },
-  ] : baseTabs;
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-effect border-t border-white/20 safe-area-bottom">
       <div className="container mx-auto px-4">
-        <div className={`flex items-center justify-around py-2 ${isAdmin ? 'grid grid-cols-5' : ''}`}>
+        <div className="flex items-center justify-around py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = isTabActive(tab.path);
@@ -103,27 +76,19 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
                       ? "text-primary bg-primary/20 shadow-lg"
                       : "text-muted-foreground hover:text-primary hover:bg-accent/30"
                   }
-                  ${tab.id === "admin" ? "text-orange-600" : ""}
                 `}
               >
                 <div className={`nav-icon transition-all duration-300 ${isActive ? "scale-110 animate-bounce" : ""}`}>
-                  <Icon className={`w-6 h-6 ${isActive ? "drop-shadow-md" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`} />
+                  <Icon className={`w-6 h-6 ${isActive ? "drop-shadow-md" : ""}`} />
                 </div>
-                <span className={`text-xs font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`}>
+                <span className={`text-xs font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""}`}>
                   {tab.label[currentLanguage]}
                 </span>
 
                 {/* Enhanced active indicator */}
                 {isActive && (
                   <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
-                    <div className={`w-2 h-2 rounded-full animate-pulse shadow-lg ${tab.id === "admin" ? "bg-orange-600" : "bg-primary"}`} />
-                  </div>
-                )}
-
-                {/* Admin badge */}
-                {tab.id === "admin" && (
-                  <div className="absolute -top-1 -right-1">
-                    <div className="w-3 h-3 bg-orange-600 rounded-full border border-background" />
+                    <div className="w-2 h-2 rounded-full animate-pulse shadow-lg bg-primary" />
                   </div>
                 )}
 
