@@ -14,7 +14,6 @@ import templeImage from "@/shared/assets/temple-culture.jpg";
 import mountainImage from "@/shared/assets/mountain-nature.jpg";
 import floatingMarketImage from "@/shared/assets/floating-market.jpg";
 import heroBeachImage from "@/shared/assets/hero-beach.jpg";
-import { isDevelopment } from "@/shared/utils/devUtils";
 
 interface IndexProps {
   currentLanguage: "th" | "en";
