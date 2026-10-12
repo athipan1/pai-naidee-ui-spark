@@ -24,7 +24,6 @@ const Index = lazy(() => import("./pages/Index"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 
-const InstagramDemo = lazy(() => import("./pages/InstagramDemo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 
@@ -159,12 +158,6 @@ const AppContent = () => {
                 currentLanguage={currentLanguage}
                 onBack={() => window.history.back()}
               />
-            }
-          />
-          <Route
-            path="/community/instagram"
-            element={
-              <InstagramDemo />
             }
           />
           {/* Legacy Route Redirects */}
