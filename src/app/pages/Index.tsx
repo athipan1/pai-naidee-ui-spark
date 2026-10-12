@@ -184,35 +184,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       />
 
       <main id="main-content" role="main" className="focus:outline-none" tabIndex={-1}>
-        {/* Supabase Setup Guide - Only show in development */}
-        {isDevelopment && (
-          <div className="container mx-auto px-4 pt-4">
-            <SupabaseSetupGuide 
-              currentLanguage={currentLanguage}
-              showOnlyIfNeeded={true}
-            />
-          </div>
-        )}
         
-        {/* API Status Display - Only show if needed and in development/when there are issues */}
-        {(apiError || (usingMockData && isDevelopment)) && (
-          <div className="container mx-auto px-4 pt-4">
-            <APIErrorDisplay
-              error={apiError}
-              isLoading={apiLoading}
-              onRetry={refetchAttractions}
-              showRetryButton={!!apiError}
-              fallbackMessage={
-                usingMockData
-                  ? currentLanguage === "th"
-                    ? "เซิร์ฟเวอร์ไม่พร้อมใช้งาน กำลังแสดงข้อมูลตัวอย่าง"
-                    : "Server unavailable. Showing sample data instead."
-                  : undefined
-              }
-              currentLanguage={currentLanguage}
-            />
-          </div>
-        )}
 
         <SearchSection
           currentLanguage={currentLanguage}
