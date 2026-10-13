@@ -10,13 +10,11 @@ const URL_VALIDITY_SECONDS = 60 * 60 * 24; // 1 day
 interface MediaRow {
   url?: string | null;
   storage_path?: string | null;
-  [key: string]: unknown;
 }
 
 interface PlaceRow {
   media?: MediaRow[] | null;
   image_url?: string | null;
-  [key: string]: unknown;
 }
 
 /**
