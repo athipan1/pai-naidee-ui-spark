@@ -114,3 +114,4 @@ export async function signMediaPath(
 }
 
 export { BUCKET as PLACE_MEDIA_BUCKET };
+export { toObjectPath as resolveObjectPath };
