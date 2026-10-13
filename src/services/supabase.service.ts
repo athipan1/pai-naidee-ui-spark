@@ -331,14 +331,14 @@ export const ensureAuthenticated = async () => {
       const { error: signInError } = await getSupabaseClient().auth.signInAnonymously();
 
       if (signInError) {
-        console.error('Anonymous sign-in failed:', signInError);
-        throw new Error(`Anonymous sign-in failed: ${signInError.message}`);
+        // Non-fatal: read access is granted to the anon role via RLS,
+        // so data can still be fetched without an anonymous session.
+        console.warn('Anonymous sign-in unavailable, continuing without session:', signInError.message);
       }
     }
   } catch (error) {
-    console.error('Authentication check failed:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
-    throw new Error(`Authentication check failed: ${errorMessage}`);
+    // Non-fatal: allow public reads to proceed even if auth is unreachable.
+    console.warn('Authentication check failed, continuing without session:', error);
   }
 };
 
