@@ -1,5 +1,6 @@
 // Media Management Service for handling place media operations
 import { getSupabaseClient } from '@/services/supabase.service';
+import { resolveObjectPath, signMediaPath, withSignedMediaUrls } from './mediaUrls';
 import type { MediaItem, MediaUploadData } from '../types/media';
 
 // Represents a place with its associated media, matching the backend API response
@@ -55,7 +56,7 @@ class MediaManagementService {
       .select('*, media(*)');
     
     if (error) throw new Error(error.message);
-    return (data || []) as PlaceWithMedia[];
+    return withSignedMediaUrls(supabase, (data || []) as PlaceWithMedia[]);
   }
 
   /**
@@ -70,7 +71,8 @@ class MediaManagementService {
       .single();
     
     if (error) throw new Error(error.message);
-    return data as PlaceWithMedia;
+    const [place] = await withSignedMediaUrls(supabase, [data as PlaceWithMedia]);
+    return (place ?? data) as PlaceWithMedia;
   }
 
   /**
@@ -116,17 +118,13 @@ class MediaManagementService {
             continue;
           }
 
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('place-media')
-            .getPublicUrl(fileName);
-
-          // Insert media record
+          // The bucket is private: keep the object path and sign it when read
           const { data: mediaRecord, error: mediaError } = await supabase
             .from('media')
             .insert({
               place_id: place.id,
-              url: publicUrl,
+              url: fileName,
+              storage_path: fileName,
               type: mediaItem.type,
               title: mediaItem.title,
               description: mediaItem.description,
@@ -135,7 +133,8 @@ class MediaManagementService {
             .single();
 
           if (!mediaError && mediaRecord) {
-            uploadedMedia.push(mediaRecord as MediaItem);
+            const signedUrl = await signMediaPath(supabase, fileName);
+            uploadedMedia.push({ ...(mediaRecord as MediaItem), url: signedUrl ?? fileName });
           }
         }
       }
@@ -182,10 +181,12 @@ class MediaManagementService {
 
     if (error) throw new Error(error.message);
 
+    const [updatedPlace] = await withSignedMediaUrls(supabase, [data as PlaceWithMedia]);
+
     return {
       success: true,
       message: 'Place updated successfully',
-      data: data as PlaceWithMedia,
+      data: (updatedPlace ?? data) as PlaceWithMedia,
     };
   }
 
@@ -213,15 +214,12 @@ class MediaManagementService {
           continue;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('place-media')
-          .getPublicUrl(fileName);
-
         const { data: mediaRecord, error: mediaError } = await supabase
           .from('media')
           .insert({
             place_id: placeId,
-            url: publicUrl,
+            url: fileName,
+            storage_path: fileName,
             type: mediaItem.type,
             title: mediaItem.title,
             description: mediaItem.description,
@@ -230,7 +228,8 @@ class MediaManagementService {
           .single();
 
         if (!mediaError && mediaRecord) {
-          uploadedMedia.push(mediaRecord as MediaItem);
+          const signedUrl = await signMediaPath(supabase, fileName);
+          uploadedMedia.push({ ...(mediaRecord as MediaItem), url: signedUrl ?? fileName });
         }
       }
     }
@@ -262,7 +261,7 @@ class MediaManagementService {
     const { data, error } = await query;
     
     if (error) throw new Error(error.message);
-    return { places: (data || []) as PlaceWithMedia[] };
+    return { places: await withSignedMediaUrls(supabase, (data || []) as PlaceWithMedia[]) };
   }
 
   /**
@@ -274,20 +273,18 @@ class MediaManagementService {
     // First get the media record to find the file path
     const { data: media, error: fetchError } = await supabase
       .from('media')
-      .select('url')
+      .select('url, storage_path')
       .eq('id', mediaId)
       .single();
 
     if (fetchError) throw new Error(fetchError.message);
 
-    // Delete from storage if URL exists
-    if (media?.url) {
-      const filePath = media.url.split('/place-media/')[1];
-      if (filePath) {
-        await supabase.storage
-          .from('place-media')
-          .remove([filePath]);
-      }
+    // Delete the stored file, if there is one
+    const filePath = media?.storage_path || resolveObjectPath(media?.url);
+    if (filePath) {
+      await supabase.storage
+        .from('place-media')
+        .remove([filePath]);
     }
 
     // Delete from database

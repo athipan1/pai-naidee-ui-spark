@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SearchResult } from '@/shared/types/search';
+import { withSignedMediaUrls } from '@/shared/services/mediaUrls';
 import { AttractionDetail } from '@/shared/types/attraction';
 
 // Helper function to get environment variables in both browser and Node.js contexts
@@ -116,7 +117,9 @@ export const getPlacesByCategory = async (
     }
 
     // Transform Supabase data to SearchResult format with better null handling
-    return data.map((place: PlaceRecord): SearchResult => ({
+    const places = await withSignedMediaUrls(getSupabaseClient(), data as PlaceRecord[]);
+
+    return places.map((place: PlaceRecord): SearchResult => ({
       id: place.id || 'unknown',
       name: place.name || 'Unnamed Place',
       nameLocal: place.name_local || place.name || 'Unnamed Place',
@@ -174,7 +177,7 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
       throw new Error('Place not found');
     }
 
-    const place: PlaceRecord = data;
+    const [place] = await withSignedMediaUrls(getSupabaseClient(), [data as PlaceRecord]);
 
     // Transform Supabase data to AttractionDetail format with better null handling
     const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
@@ -277,7 +280,8 @@ export const searchPlaces = async (
     }
 
     // Transform data to SearchResult format with better null handling
-    const results = data.map((place: PlaceRecord): SearchResult => {
+    const places = await withSignedMediaUrls(getSupabaseClient(), data as PlaceRecord[]);
+    const results = places.map((place: PlaceRecord): SearchResult => {
       const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
       return {
         id: place.id || 'unknown',
