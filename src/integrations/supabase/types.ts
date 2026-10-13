@@ -14,7 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      media: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          place_id: string | null
+          title: string | null
+          type: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          place_id?: string | null
+          title?: string | null
+          type: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          place_id?: string | null
+          title?: string | null
+          type?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      places: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          lat: number
+          lng: number
+          name: string
+          name_local: string | null
+          province: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          lat: number
+          lng: number
+          name: string
+          name_local?: string | null
+          province: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          lat?: number
+          lng?: number
+          name?: string
+          name_local?: string | null
+          province?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
