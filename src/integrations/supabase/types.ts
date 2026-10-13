@@ -20,6 +20,7 @@ export type Database = {
           description: string | null
           id: string
           place_id: string | null
+          storage_path: string | null
           title: string | null
           type: string
           updated_at: string | null
@@ -30,6 +31,7 @@ export type Database = {
           description?: string | null
           id?: string
           place_id?: string | null
+          storage_path?: string | null
           title?: string | null
           type: string
           updated_at?: string | null
@@ -40,6 +42,7 @@ export type Database = {
           description?: string | null
           id?: string
           place_id?: string | null
+          storage_path?: string | null
           title?: string | null
           type?: string
           updated_at?: string | null
@@ -57,39 +60,54 @@ export type Database = {
       }
       places: {
         Row: {
+          amenities: string[] | null
           category: string
           created_at: string | null
           description: string | null
           id: string
+          image_url: string | null
           lat: number
           lng: number
           name: string
           name_local: string | null
           province: string
+          rating: number | null
+          review_count: number | null
+          tags: string[] | null
           updated_at: string | null
         }
         Insert: {
+          amenities?: string[] | null
           category: string
           created_at?: string | null
           description?: string | null
           id?: string
+          image_url?: string | null
           lat: number
           lng: number
           name: string
           name_local?: string | null
           province: string
+          rating?: number | null
+          review_count?: number | null
+          tags?: string[] | null
           updated_at?: string | null
         }
         Update: {
+          amenities?: string[] | null
           category?: string
           created_at?: string | null
           description?: string | null
           id?: string
+          image_url?: string | null
           lat?: number
           lng?: number
           name?: string
           name_local?: string | null
           province?: string
+          rating?: number | null
+          review_count?: number | null
+          tags?: string[] | null
           updated_at?: string | null
         }
         Relationships: []

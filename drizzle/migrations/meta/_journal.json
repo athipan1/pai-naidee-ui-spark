@@ -8,6 +8,13 @@
       "when": 1791859355813,
       "tag": "0000_create_places_and_media",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791859408267,
+      "tag": "0001_add_place_fields_and_media_path",
+      "breakpoints": true
     }
   ]
 }
