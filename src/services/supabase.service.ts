@@ -1,4 +1,5 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase as cloudSupabase } from '@/integrations/supabase/client';
 import { SearchResult } from '@/shared/types/search';
 import { withSignedMediaUrls } from '@/shared/services/mediaUrls';
 import { AttractionDetail } from '@/shared/types/attraction';
@@ -26,7 +27,10 @@ function getEnvVar(key: string, fallback: string = ''): string {
 // Check if Supabase is properly configured
 export function isSupabaseConfigured(): boolean {
   const url = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
-  const key = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const key =
+    getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY') ||
+    getEnvVar('VITE_SUPABASE_ANON_KEY') ||
+    getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
   
   return !!(
     url && 
@@ -38,23 +42,12 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
-// Supabase client singleton. Use `getSupabaseClient()` to access it.
-let supabase: SupabaseClient | null = null;
-
 /**
- * Lazily initializes and returns the Supabase client instance.
- * This ensures that environment variables are loaded before the client is created.
+ * Returns the shared backend client created by the generated integration, which
+ * always uses the credentials currently issued for this project.
  */
 function getSupabaseClient(): SupabaseClient {
-  if (supabase) {
-    return supabase;
-  }
-
-  const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('NEXT_PUBLIC_SUPABASE_URL') || 'https://your-project.supabase.co';
-  const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY') || 'your-anon-key';
-
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
-  return supabase;
+  return cloudSupabase;
 }
 
 // Type definition for a place record from Supabase
@@ -323,22 +316,14 @@ export const ensureAuthenticated = async () => {
   try {
     const { data, error } = await getSupabaseClient().auth.getSession();
 
-    // If there's an error fetching the session, log it
     if (error) {
       console.error('Error fetching auth session:', error);
     }
 
-    // If there is no active session, perform a sign-in with a generic JWT
-    // This is a common pattern for anonymous access with Supabase
+    // Public place data is readable without a session, so an unsigned visitor
+    // simply continues in public mode instead of failing the page.
     if (!data.session) {
-      console.log('No active session, performing anonymous sign-in...');
-      const { error: signInError } = await getSupabaseClient().auth.signInAnonymously();
-
-      if (signInError) {
-        // Non-fatal: read access is granted to the anon role via RLS,
-        // so data can still be fetched without an anonymous session.
-        console.warn('Anonymous sign-in unavailable, continuing without session:', signInError.message);
-      }
+      console.info('No active session — continuing with public access.');
     }
   } catch (error) {
     // Non-fatal: allow public reads to proceed even if auth is unreachable.
