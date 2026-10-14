@@ -103,28 +103,27 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   return (
-    <>
-      {/* Loading placeholder */}
+    <div className={`relative ${className}`} style={{ width, height }}>
+      {/* The placeholder overlays the image instead of hiding it, so the browser
+          still fetches the picture while the loading shimmer is visible. */}
       {imageState === 'loading' && (
-        <div 
-          className={`${className} bg-muted animate-pulse`}
-          style={{ width, height }}
-        />
+        <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
       )}
-      
-      {/* Actual image */}
+
       <img
         src={currentSrc}
         alt={alt}
         loading={loading}
         decoding={decoding}
-        className={`${className} ${imageState === 'loaded' ? 'block' : 'hidden'}`}
+        className={`h-full w-full object-cover transition-opacity duration-300 ${
+          imageState === 'loaded' ? 'opacity-100' : 'opacity-0'
+        }`}
         onLoad={handleImageLoad}
         onError={handleImageError}
         width={width}
         height={height}
       />
-    </>
+    </div>
   );
 };
 
