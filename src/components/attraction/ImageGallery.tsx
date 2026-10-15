@@ -90,8 +90,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt, credits, langu
                   </div>
                 </DialogContent>
               </Dialog>
-              {/* Credit shown just under the image area (above the hero gradient) */}
-              <div className="absolute top-3 left-3 z-20 max-w-[70%]">
+              {/* Credit pinned to the bottom corner of each photo */}
+              <div className="absolute bottom-1 right-2 z-20 max-w-[60%] text-right">
                 <CreditLine credit={credits?.[index]} language={language} />
               </div>
             </CarouselItem>
