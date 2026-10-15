@@ -59,7 +59,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt, credits, langu
 
   return (
     <div className="relative w-full h-full">
-      <Carousel className="w-full h-full rounded-lg overflow-hidden">
+      <Carousel className="w-full h-full rounded-lg overflow-hidden [&>div]:h-full">
         <CarouselContent className="h-full">
           {images.map((src, index) => (
             <CarouselItem key={index} className="h-full">
