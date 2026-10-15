@@ -31,7 +31,7 @@ import ImageGallery from "@/components/attraction/ImageGallery";
 import Reviews from "@/components/attraction/Reviews";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
-import type { Accommodation, WikiData } from "@/shared/types/attraction";
+import type { Accommodation, WikiData, ImageCredit } from "@/shared/types/attraction";
 
 const pastelVariants = [
   "pastel-blue",
@@ -69,11 +69,12 @@ const AttractionDetail = ({
   const [accommodationError, setAccommodationError] = useState<string | null>(null);
   const [wikiData, setWikiData] = useState<WikiData | null>(null);
   const [isWikiLoading, setIsWikiLoading] = useState(false);
-  const [wikiError, setWikiError] = useState<string | null>(null);
+  const [, setWikiError] = useState<string | null>(null);
+  const [wikiUrl, setWikiUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (attraction) {
-      fetchWikiData(attraction.name);
+      fetchWikiData(attraction.name, attraction.nameLocal);
     }
   }, [attraction]);
 
