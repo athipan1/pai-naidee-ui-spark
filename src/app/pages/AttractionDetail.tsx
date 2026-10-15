@@ -31,7 +31,7 @@ import ImageGallery from "@/components/attraction/ImageGallery";
 import Reviews from "@/components/attraction/Reviews";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
-import type { Accommodation, WikiData } from "@/shared/types/attraction";
+import type { Accommodation, WikiData, ImageCredit } from "@/shared/types/attraction";
 
 const pastelVariants = [
   "pastel-blue",
@@ -69,11 +69,12 @@ const AttractionDetail = ({
   const [accommodationError, setAccommodationError] = useState<string | null>(null);
   const [wikiData, setWikiData] = useState<WikiData | null>(null);
   const [isWikiLoading, setIsWikiLoading] = useState(false);
-  const [wikiError, setWikiError] = useState<string | null>(null);
+  const [, setWikiError] = useState<string | null>(null);
+  const [wikiUrl, setWikiUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (attraction) {
-      fetchWikiData(attraction.name);
+      fetchWikiData(attraction.name, attraction.nameLocal);
     }
   }, [attraction]);
 
@@ -157,46 +158,38 @@ const AttractionDetail = ({
     }
   };
 
-  const fetchWikiData = async (placeName: string) => {
+  // Find the article via the Search API (Thai first, then English); hide silently if none.
+  const fetchWikiData = async (placeName: string, localName?: string) => {
     setIsWikiLoading(true);
     setWikiError(null);
+    setWikiUrl(null);
+    const attempts: Array<[string, string]> = [
+      ['th', localName || placeName],
+      ['en', placeName],
+    ];
     try {
-      // Use the Thai Wikipedia endpoint
-      const response = await fetch(`https://th.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(placeName)}`);
-
-      // Check if the response is successful
-      if (!response.ok) {
-        // Handle non-successful responses (like 404s) gracefully
-        setWikiData(null);
-        // Set an error message for the UI, but avoid logging a console error for 404s
-        // as this is an expected outcome for places without a Wikipedia page.
-        if (response.status === 404) {
-          setWikiError(`ไม่พบข้อมูลสำหรับ "${placeName}" ในวิกิพีเดีย`);
-        } else {
-          setWikiError(`เกิดข้อผิดพลาดในการดึงข้อมูล: ${response.statusText}`);
-        }
+      for (const [lang, term] of attempts) {
+        if (!term) continue;
+        const searchRes = await fetch(
+          `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&srlimit=1&format=json&origin=*`
+        );
+        if (!searchRes.ok) continue;
+        const searchJson = await searchRes.json();
+        const title: string | undefined = searchJson?.query?.search?.[0]?.title;
+        if (!title) continue;
+        const summaryRes = await fetch(
+          `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
+        );
+        if (!summaryRes.ok) continue;
+        const data: WikiData = await summaryRes.json();
+        if (!data?.extract) continue;
+        setWikiData(data);
+        setWikiUrl(`https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`);
         return;
       }
-
-      const data: WikiData = await response.json();
-
-      // Ensure we have a valid extract to display
-      if (!data.extract) {
-          setWikiData(null);
-          setWikiError(`ไม่มีข้อมูลสรุปสำหรับ "${placeName}"`);
-          return;
-      }
-
-      setWikiData(data);
-    } catch (error) {
       setWikiData(null);
-      if (error instanceof Error) {
-        setWikiError(error.message);
-        console.error("Failed to fetch Wikipedia data:", error);
-      } else {
-        setWikiError('เกิดข้อผิดพลาดที่ไม่รู้จัก');
-        console.error("An unknown error occurred while fetching from Wikipedia:", error);
-      }
+    } catch {
+      setWikiData(null);
     } finally {
       setIsWikiLoading(false);
     }
@@ -252,12 +245,17 @@ const AttractionDetail = ({
       ? attraction.nameLocal
       : wikiData?.title || attraction.name;
 
-  // This logic correctly prioritizes the Wikipedia image if it exists.
-  const displayImages = wikiData?.thumbnail?.source
-    ? [wikiData.thumbnail.source, ...attraction.images]
-    : attraction.images.length > 0
+  // Wikipedia thumbnail is prepended with a credit pointing back to its article.
+  const ownImages = attraction.images.length > 0
     ? attraction.images
     : ['https://via.placeholder.com/400x250?text=No+Image'];
+  const ownCredits: ImageCredit[] = ownImages.map((_, i) => attraction.imageCredits?.[i] ?? {});
+  const displayImages = wikiData?.thumbnail?.source
+    ? [wikiData.thumbnail.source, ...ownImages]
+    : ownImages;
+  const displayCredits: ImageCredit[] = wikiData?.thumbnail?.source
+    ? [{ source: 'Wikipedia', sourceUrl: wikiUrl }, ...ownCredits]
+    : ownCredits;
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -335,7 +333,7 @@ const AttractionDetail = ({
 
       {/* Hero Section with Image Gallery */}
       <div className="relative h-[60vh] min-h-[400px] w-full">
-        <ImageGallery images={displayImages} alt={displayName} />
+        <ImageGallery images={displayImages} credits={displayCredits} alt={displayName} language={currentLanguage === 'th' ? 'th' : 'en'} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
 
         {/* Action Buttons */}
@@ -361,8 +359,8 @@ const AttractionDetail = ({
         </div>
 
         {/* Overlay Content */}
-        <div className="absolute bottom-6 left-6 right-6 text-white pointer-events-none">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2 drop-shadow-lg">{displayName}</h1>
+        <div className="absolute bottom-14 left-4 right-4 md:left-6 md:right-6 text-white pointer-events-none">
+          <h1 className="text-3xl md:text-5xl font-bold mb-2 drop-shadow-lg leading-tight break-words">{displayName}</h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
@@ -441,23 +439,12 @@ const AttractionDetail = ({
               </div>
             ) : (
               <>
-                <p className="text-muted-foreground leading-relaxed">
-                  {wikiData?.extract || attraction.description}
+                <p className="text-base text-foreground/80 leading-relaxed break-words">
+                  {attraction.description || wikiData?.extract}
                 </p>
-
-                {wikiError && !wikiData?.extract && (
-                  <p className="text-sm text-yellow-600 mt-2">
-                    {currentLanguage === 'th'
-                      ? `เกิดข้อผิดพลาด: ${wikiError}`
-                      : `Error: ${wikiError}`}
-                  </p>
-                )}
-
-                {!isWikiLoading && !wikiData?.extract && !wikiError && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {currentLanguage === 'th'
-                      ? 'ไม่มีข้อมูลเพิ่มเติมจากวิกิพีเดีย'
-                      : 'No additional information from Wikipedia'}
+                {wikiData?.extract && attraction.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-3 break-words">
+                    {wikiData.extract}
                   </p>
                 )}
               </>
@@ -467,7 +454,7 @@ const AttractionDetail = ({
         </Card>
 
         {/* External Links Section */}
-        {attraction.externalLinks && (
+        {(attraction.externalLinks?.officialWebsite || wikiUrl) && (
           <Card className="mb-8">
             <CardContent className="p-6">
               <div className="mb-4">
@@ -480,7 +467,7 @@ const AttractionDetail = ({
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {attraction.externalLinks.officialWebsite && (
+                {attraction.externalLinks?.officialWebsite && (
                   <Button
                     variant="outline"
                     className="flex items-center gap-2 h-auto p-4 text-left justify-start"
@@ -495,11 +482,11 @@ const AttractionDetail = ({
                     </div>
                   </Button>
                 )}
-                {attraction.externalLinks.wikipediaUrl && (
+                {wikiUrl && (
                   <Button
                     variant="outline"
                     className="flex items-center gap-2 h-auto p-4 text-left justify-start"
-                    onClick={() => window.open(attraction.externalLinks!.wikipediaUrl, '_blank')}
+                    onClick={() => window.open(wikiUrl, '_blank', 'noopener')}
                   >
                     <BookOpen className="h-4 w-4 text-primary flex-shrink-0" />
                     <div className="flex flex-col items-start">

@@ -175,6 +175,15 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
     // Transform Supabase data to AttractionDetail format with better null handling
     const mainImage = place.media && place.media.length > 0 ? place.media[0].url : place.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
     const allImages = place.media && place.media.length > 0 ? place.media.map(m => m.url) : [mainImage];
+    const imageCredits = place.media && place.media.length > 0
+      ? place.media.map(m => ({
+          source: m.source ?? null,
+          license: m.license ?? null,
+          credit: m.credit ?? null,
+          sourceUrl: m.source_url ?? null,
+          isAiGenerated: m.is_ai_generated === true,
+        }))
+      : [{}];
 
     return {
       id: place.id || 'unknown',
@@ -183,6 +192,7 @@ export const getPlaceById = async (id: string): Promise<AttractionDetail> => {
       province: place.province || 'Unknown Province',
       category: place.category || 'Unknown',
       images: allImages,
+      imageCredits,
       description: place.description || 'No description available.',
       tags: Array.isArray(place.tags) ? place.tags : [],
       rating: typeof place.rating === 'number' ? place.rating : 0,

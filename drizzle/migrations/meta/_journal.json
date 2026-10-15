@@ -15,6 +15,13 @@
       "when": 1791859408267,
       "tag": "0001_add_place_fields_and_media_path",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792069750773,
+      "tag": "0002_media_credits_admin_roles",
+      "breakpoints": true
     }
   ]
 }

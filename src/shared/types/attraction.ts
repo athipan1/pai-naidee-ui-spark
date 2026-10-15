@@ -1,4 +1,12 @@
 // Attraction data interface
+export interface ImageCredit {
+  source?: string | null;
+  license?: string | null;
+  credit?: string | null;
+  sourceUrl?: string | null;
+  isAiGenerated?: boolean;
+}
+
 export interface AttractionDetail {
   id: string;
   name: string;
@@ -8,6 +16,8 @@ export interface AttractionDetail {
   rating: number;
   reviewCount: number;
   images: string[];
+  /** Credits aligned by index with `images` */
+  imageCredits?: ImageCredit[];
   description: string;
   tags: string[];
   coordinates: {
