@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Folder, Upload } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Folder, RefreshCw, Upload } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import MediaUpload from "./MediaUpload";
 import MediaGallerySimple from "./MediaGallerySimple";
 import { MediaItem, MediaUploadData, SecurityLevel } from "@/shared/types/media";
@@ -13,6 +15,7 @@ interface ContentManagementProps {
 
 const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [isWikiSyncing, setIsWikiSyncing] = useState(false);
   const { toast } = useToast();
 
   const texts = {
@@ -24,7 +27,13 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       uploadDescription: "Add new images, videos, or text content",
       galleryDescription: "View and manage existing content",
       uploadSuccess: "Content uploaded successfully!",
-      uploadError: "Failed to upload content. Please try again."
+      uploadError: "Failed to upload content. Please try again.",
+      wikiTitle: "Wikipedia Data Sync",
+      wikiDescription: "Pull descriptions for every attraction from Wikipedia (Thai first, then English) and update the database.",
+      wikiButton: "Sync from Wikipedia",
+      wikiSyncing: "Syncing...",
+      wikiSuccess: (updated: number, total: number) => `Updated ${updated} of ${total} places from Wikipedia`,
+      wikiError: "Failed to sync from Wikipedia. Please try again."
     },
     th: {
       title: "การจัดการเนื้อหา",
@@ -34,11 +43,39 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
       uploadDescription: "เพิ่มรูปภาพ วิดีโอ หรือเนื้อหาข้อความใหม่",
       galleryDescription: "ดูและจัดการเนื้อหาที่มีอยู่",
       uploadSuccess: "อัปโหลดเนื้อหาสำเร็จ!",
-      uploadError: "ไม่สามารถอัปโหลดเนื้อหาได้ กรุณาลองใหม่อีกครั้ง"
+      uploadError: "ไม่สามารถอัปโหลดเนื้อหาได้ กรุณาลองใหม่อีกครั้ง",
+      wikiTitle: "ดึงข้อมูลจาก Wikipedia",
+      wikiDescription: "ดึงรายละเอียดสถานที่ท่องเที่ยวทุกแห่งจาก Wikipedia (ภาษาไทยก่อน แล้วภาษาอังกฤษ) มาอัปเดตฐานข้อมูล",
+      wikiButton: "ดึงข้อมูลจาก Wikipedia",
+      wikiSyncing: "กำลังดึงข้อมูล...",
+      wikiSuccess: (updated: number, total: number) => `อัปเดต ${updated} จาก ${total} สถานที่จาก Wikipedia แล้ว`,
+      wikiError: "ไม่สามารถดึงข้อมูลจาก Wikipedia ได้ กรุณาลองใหม่อีกครั้ง"
     }
   };
 
   const t = texts[currentLanguage];
+
+  const handleWikiSync = async () => {
+    setIsWikiSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enrich-places-wikipedia');
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Sync failed');
+      toast({
+        title: "Success",
+        description: t.wikiSuccess(data.updated ?? 0, data.total ?? 0),
+      });
+    } catch (error) {
+      console.error('Wikipedia sync failed:', error);
+      toast({
+        title: "Error",
+        description: t.wikiError,
+        variant: "destructive",
+      });
+    } finally {
+      setIsWikiSyncing(false);
+    }
+  };
 
   const handleUpload = async (data: MediaUploadData) => {
     try {
@@ -111,6 +148,23 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
           </CardTitle>
           <CardDescription>{t.subtitle}</CardDescription>
         </CardHeader>
+      </Card>
+
+      {/* Wikipedia Sync */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-blue-600" />
+            {t.wikiTitle}
+          </CardTitle>
+          <CardDescription>{t.wikiDescription}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleWikiSync} disabled={isWikiSyncing} className="flex items-center gap-2">
+            <RefreshCw className={`h-4 w-4 ${isWikiSyncing ? 'animate-spin' : ''}`} />
+            {isWikiSyncing ? t.wikiSyncing : t.wikiButton}
+          </Button>
+        </CardContent>
       </Card>
 
       {/* Content Tabs */}
