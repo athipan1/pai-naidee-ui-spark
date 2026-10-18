@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Folder, Upload } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Folder, RefreshCw, Upload } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import MediaUpload from "./MediaUpload";
 import MediaGallerySimple from "./MediaGallerySimple";
 import { MediaItem, MediaUploadData, SecurityLevel } from "@/shared/types/media";
