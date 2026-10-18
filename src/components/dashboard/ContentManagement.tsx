@@ -55,6 +55,28 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
 
   const t = texts[currentLanguage];
 
+  const handleWikiSync = async () => {
+    setIsWikiSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enrich-places-wikipedia');
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Sync failed');
+      toast({
+        title: "Success",
+        description: t.wikiSuccess(data.updated ?? 0, data.total ?? 0),
+      });
+    } catch (error) {
+      console.error('Wikipedia sync failed:', error);
+      toast({
+        title: "Error",
+        description: t.wikiError,
+        variant: "destructive",
+      });
+    } finally {
+      setIsWikiSyncing(false);
+    }
+  };
+
   const handleUpload = async (data: MediaUploadData) => {
     try {
       const newItem: MediaItem = {
