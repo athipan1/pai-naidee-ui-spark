@@ -150,6 +150,23 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
         </CardHeader>
       </Card>
 
+      {/* Wikipedia Sync */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-blue-600" />
+            {t.wikiTitle}
+          </CardTitle>
+          <CardDescription>{t.wikiDescription}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleWikiSync} disabled={isWikiSyncing} className="flex items-center gap-2">
+            <RefreshCw className={`h-4 w-4 ${isWikiSyncing ? 'animate-spin' : ''}`} />
+            {isWikiSyncing ? t.wikiSyncing : t.wikiButton}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Content Tabs */}
       <Tabs defaultValue="upload" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
