@@ -119,7 +119,7 @@ app.post('/api/talk', createRateLimiter({ windowMs: 60_000, max: 30, keyPrefix: 
 app.get('/api/health', async (_req, res) => {
   try {
     const databaseOk = await pingDatabase();
-    res.json({
+    res.status(databaseOk ? 200 : 503).json({
       status: databaseOk ? 'ok' : 'degraded',
       service: 'painaidee-railway-api',
       database: databaseOk ? 'ok' : 'unavailable',
