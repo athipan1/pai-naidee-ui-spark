@@ -22,6 +22,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "test:production-smoke": "node scripts/production-smoke.mjs",
     "build:semantic-index": "node scripts/buildSemanticIndex.cjs",
     "check:supabase": "npx tsx scripts/check-supabase.ts",
     "check:storage": "npx tsx scripts/check-storage.ts"
