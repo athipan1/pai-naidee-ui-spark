@@ -225,11 +225,10 @@ pai-naidee-ui-spark/
 - **[Lucide React](https://lucide.dev/)** - ไลบรารีไอคอนที่สวยงาม
 
 ### ฟังก์ชันการทำงาน
-- **[React Router v6](https://reactrouter.com/)** - การจัดการเส้นทางฝั่งไคลเอ็นต์
+- **[React Router v7](https://reactrouter.com/)** - การจัดการเส้นทางฝั่งไคลเอ็นต์
 - **[TanStack Query](https://tanstack.com/query/)** - การดึงข้อมูลและแคชชิ่ง
 - **[React Leaflet](https://react-leaflet.js.org/)** - แผนที่แบบโต้ตอบ
 - **[React Hook Form](https://react-hook-form.com/)** - การจัดการฟอร์ม
-- **[Zod](https://zod.dev/)** - การตรวจสอบ schema
 
 ### เครื่องมือการพัฒนา
 - **[ESLint](https://eslint.org/)** - การตรวจสอบและคุณภาพโค้ด
