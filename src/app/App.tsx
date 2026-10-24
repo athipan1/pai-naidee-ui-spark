@@ -37,7 +37,7 @@ import {
   MapRedirect,
   AIAssistantRedirect,
   CategoryRedirect
-} from "./routes/Redirects";
+} from "./routes/Redirects/index";
 
 // Conditionally load AccordionExamples only in development
 const AccordionExamples = import.meta.env.DEV
