@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('node:crypto');
 const {
   buildCorsOptions,
   createRateLimiter,
@@ -99,7 +99,7 @@ app.post('/api/talk', createRateLimiter({ windowMs: 60_000, max: 30, keyPrefix: 
   }
 
   const { message, session_id, language = 'auto' } = req.body;
-  const sessionId = session_id || uuidv4();
+  const sessionId = session_id || randomUUID();
   const detectedLanguage = language === 'auto' ? detectLanguage(message) : language;
 
   if (!sessions.has(sessionId)) {
