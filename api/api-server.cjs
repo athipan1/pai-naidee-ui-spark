@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('node:crypto');
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
 const path = require('path');
@@ -135,7 +135,7 @@ app.post('/api/places', requireContentManager, upload.any(), async (req, res) =>
       const file = files[i];
       const metadata = mediaMetadata[i] || {}; // Get corresponding metadata
       const fileExt = path.extname(file.originalname);
-      const fileName = `${newPlaceId}/${uuidv4()}${fileExt}`; // Organize files by placeId
+      const fileName = `${newPlaceId}/${randomUUID()}${fileExt}`; // Organize files by placeId
 
       const { error: uploadError } = await supabase.storage
         .from('place-media')
@@ -364,7 +364,7 @@ app.post('/api/places/:placeId/media/replace', requireContentManager, upload.any
         const mediaToInsert = [];
         for (const file of files) {
             const fileExt = path.extname(file.originalname);
-            const fileName = `${placeId}/${uuidv4()}${fileExt}`;
+            const fileName = `${placeId}/${randomUUID()}${fileExt}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('place-media')
@@ -568,7 +568,7 @@ app.post('/api/talk', talkRateLimit, (req, res) => {
     }
 
     const { message, session_id, language = 'auto' } = req.body;
-    const sessionId = session_id || uuidv4();
+    const sessionId = session_id || randomUUID();
     const detectedLanguage = language === 'auto' ? detectLanguage(message) : language;
     
     if (!sessions.has(sessionId)) {
