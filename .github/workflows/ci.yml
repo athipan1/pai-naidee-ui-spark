@@ -54,6 +54,12 @@ jobs:
       - name: Enforce production dependency audit
         run: npm audit --omit=dev --audit-level=high
 
+      - name: Install Backend API dependencies
+        run: npm ci --prefix api
+
+      - name: Enforce Backend production dependency audit
+        run: npm audit --prefix api --omit=dev --audit-level=low
+
       - name: Generate full dependency audit report
         run: |
           echo "Generating npm audit report for analysis..."
@@ -65,6 +71,18 @@ jobs:
         with:
           name: npm-audit-report
           path: audit-report.json
+          retention-days: 30
+
+      - name: Generate Backend dependency audit report
+        if: always()
+        run: npm audit --prefix api --omit=dev --json > backend-audit-report.json || true
+
+      - name: Upload Backend npm audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-npm-audit-report
+          path: backend-audit-report.json
           retention-days: 30
 
   lint-and-type-check:
