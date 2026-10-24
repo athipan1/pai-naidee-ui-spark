@@ -13,7 +13,6 @@ import {
   ExternalLink,
   Globe,
   BookOpen,
-  Settings,
   RefreshCw,
   Wind,
 } from "lucide-react";
@@ -29,7 +28,6 @@ import { Badge } from "@/components/ui/badge";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
-import Reviews from "@/components/attraction/Reviews";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
 import type { Accommodation, WikiData } from "@/shared/types/attraction";
@@ -310,14 +308,6 @@ const AttractionDetail = ({
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
-                variant="ghost"
-                onClick={() => navigate('/admin')}
-                className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hidden sm:flex"
-                title={currentLanguage === 'th' ? 'แผงควบคุมผู้ดูแลระบบ' : 'Admin Panel'}
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-              <Button
                 variant={isFavorite ? "default" : "outline"}
                 onClick={toggleFavorite}
                 className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
@@ -524,10 +514,7 @@ const AttractionDetail = ({
           </Card>
         )}
 
-        {/* Reviews Section */}
-        <div className="mb-8">
-          <Reviews />
-        </div>
+        {/* Reviews remain hidden until a real per-attraction source is available. */}
 
         {/* Nearby Activities Section */}
         <Card className="mb-8">

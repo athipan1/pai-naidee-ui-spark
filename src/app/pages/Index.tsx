@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchSection from "@/components/common/SearchSection";
@@ -24,71 +24,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   const navigate = useNavigate();
   const [_selectedCategory, _setSelectedCategory] = useState("all");
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [usingMockData, setUsingMockData] = useState(false);
-
-  // Mock attractions data (defined first so it can be used in the API data fallback)
-  const mockAttractions = [
-    {
-      id: "1",
-      name: "Phi Phi Islands",
-      nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
-      category: "Beach",
-      rating: 4.8,
-      reviewCount: 2547,
-      image: getThailandPlaceImage("Phi Phi Islands"),
-      description:
-        currentLanguage === "th"
-          ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
-          : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
-      tags: ["Beach", "Snorkeling", "Island", "Photography"],
-    },
-    {
-      id: "2",
-      name: "Wat Phra Kaew",
-      nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Culture",
-      rating: 4.9,
-      reviewCount: 5243,
-      image: getThailandPlaceImage("Wat Phra Kaew"),
-      description:
-        currentLanguage === "th"
-          ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
-          : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
-      tags: ["Temple", "Culture", "Buddhism", "History"],
-    },
-    {
-      id: "3",
-      name: "Doi Inthanon",
-      nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
-      category: "Nature",
-      rating: 4.7,
-      reviewCount: 1876,
-      image: getThailandPlaceImage("Doi Inthanon"),
-      description:
-        currentLanguage === "th"
-          ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
-          : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
-      tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
-    },
-    {
-      id: "4",
-      name: "Floating Market",
-      nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Food",
-      rating: 4.5,
-      reviewCount: 3156,
-      image: getThailandPlaceImage("Floating Market"),
-      description:
-        currentLanguage === "th"
-          ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
-          : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
-      tags: ["Food", "Culture", "Traditional", "Market"],
-    },
-  ];
 
   // Try to fetch real data first, fallback to mock data
   const {
@@ -102,9 +37,8 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
     category: _selectedCategory === "all" ? undefined : _selectedCategory
   });
 
-  // Use API data if available and has content, otherwise use mock data
-  const displayAttractions = (apiData?.attractions && apiData.attractions.length > 0)
-    ? apiData.attractions.map(attraction => ({
+  // Production reads only API records; empty/error responses must never invent places.
+  const displayAttractions = (apiData?.attractions ?? []).map(attraction => ({
       id: attraction.id,
       name: attraction.name,
       nameLocal: attraction.nameLocal || attraction.name,
@@ -115,14 +49,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       image: getThailandPlaceImage(attraction.name, attraction.image),
       description: attraction.description,
       tags: attraction.tags,
-    }))
-    : mockAttractions;
-
-  // Track if we're using mock data
-  useEffect(() => {
-    const isApiUnavailable = !apiLoading && (!!apiError || !apiData?.attractions || apiData.attractions.length === 0);
-    setUsingMockData(isApiUnavailable);
-  }, [apiData, apiError, apiLoading]);
+    }));
 
   const filteredAttractions =
     _selectedCategory === "all"
@@ -192,20 +119,14 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         )}
         
         {/* API Status Display - Only show if needed and in development/when there are issues */}
-        {(apiError || (usingMockData && isDevelopment)) && (
+        {apiError && (
           <div className="container mx-auto px-4 pt-4">
             <APIErrorDisplay
               error={apiError}
               isLoading={apiLoading}
               onRetry={refetchAttractions}
               showRetryButton={!!apiError}
-              fallbackMessage={
-                usingMockData
-                  ? currentLanguage === "th"
-                    ? "เซิร์ฟเวอร์ไม่พร้อมใช้งาน กำลังแสดงข้อมูลตัวอย่าง"
-                    : "Server unavailable. Showing sample data instead."
-                  : undefined
-              }
+              fallbackMessage={currentLanguage === "th" ? "ไม่สามารถโหลดข้อมูลจริงจากเซิร์ฟเวอร์ได้" : "Unable to load live places from the server."}
               currentLanguage={currentLanguage}
             />
           </div>

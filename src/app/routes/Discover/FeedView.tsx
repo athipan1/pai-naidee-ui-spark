@@ -10,7 +10,6 @@ import {
   TrendingUp,
   Star
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import PlaceCard from "@/components/discover/PlaceCard";
 import CategoryCard from "@/components/discover/CategoryCard";
 import SectionHeader from "@/components/discover/SectionHeader";
@@ -35,7 +34,7 @@ interface Category {
   id: string;
   name: string;
   nameLocal: string;
-  icon: any;
+  icon: typeof Waves;
   color: string;
   count: number;
 }
@@ -102,74 +101,6 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
 
   const t = content[currentLanguage];
 
-  // Mock data for fallback
-  const mockPlaces: TravelPlace[] = [
-    {
-      id: "1",
-      name: "Phi Phi Islands",
-      nameLocal: "หมู่เกาะพีพี",
-      province: currentLanguage === "th" ? "กระบี่" : "Krabi",
-      category: "Beach",
-      rating: 4.8,
-      reviewCount: 2547,
-      image: getThailandPlaceImage("Phi Phi Islands"),
-      description:
-        currentLanguage === "th"
-          ? "น้ำทะเลใสและหน้าผาหินปูนที่สวยงาม ทำให้ที่นี่เป็นสวรรค์สำหรับผู้ที่ชื่นชอบชายหาดและการดำน้ำดูปะการัง"
-          : "Crystal clear waters and stunning limestone cliffs make this a paradise for beach lovers and snorkeling enthusiasts.",
-      tags: ["Beach", "Snorkeling", "Island", "Photography"],
-      isTrending: true
-    },
-    {
-      id: "2",
-      name: "Wat Phra Kaew",
-      nameLocal: "วัดพระแก้ว",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Culture",
-      rating: 4.9,
-      reviewCount: 5243,
-      image: getThailandPlaceImage("Wat Phra Kaew"),
-      description:
-        currentLanguage === "th"
-          ? "วัดที่ศักดิ์สิทธิ์ที่สุดในประเทศไทย เป็นที่ประดิษฐานของพระแก้วมรกต"
-          : "The most sacred Buddhist temple in Thailand, home to the revered Emerald Buddha statue.",
-      tags: ["Temple", "Culture", "Buddhism", "History"],
-      isTrending: false
-    },
-    {
-      id: "3",
-      name: "Doi Inthanon",
-      nameLocal: "ดอยอินทนนท์",
-      province: currentLanguage === "th" ? "เชียงใหม่" : "Chiang Mai",
-      category: "Nature",
-      rating: 4.7,
-      reviewCount: 1876,
-      image: getThailandPlaceImage("Doi Inthanon"),
-      description:
-        currentLanguage === "th"
-          ? "ยอดเขาที่สูงที่สุดในประเทศไทย ชมวิวภูเขาที่งดงาม น้ำตก และอากาศเย็นสบาย"
-          : "The highest peak in Thailand offering breathtaking mountain views, waterfalls, and cool weather.",
-      tags: ["Mountain", "Nature", "Hiking", "Waterfalls"],
-      isTrending: true
-    },
-    {
-      id: "4",
-      name: "Floating Market",
-      nameLocal: "ตลาดน้ำ",
-      province: currentLanguage === "th" ? "กรุงเทพฯ" : "Bangkok",
-      category: "Food",
-      rating: 4.5,
-      reviewCount: 3156,
-      image: getThailandPlaceImage("Floating Market"),
-      description:
-        currentLanguage === "th"
-          ? "สัมผัสวัฒนธรรมไทยแบบดั้งเดิม ขณะช้อปปิ้งผลไม้สดและอาหารพื้นเมืองจากเรือ"
-          : "Experience traditional Thai culture while shopping for fresh fruits and local delicacies from boats.",
-      tags: ["Food", "Culture", "Traditional", "Market"],
-      isTrending: false
-    },
-  ];
-
   const mockCategories: Category[] = [
     {
       id: "beach",
@@ -219,7 +150,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
       setLoading(true);
       
       // Use API data if available, otherwise use mock data
-      let displayPlaces = mockPlaces;
+      let displayPlaces: TravelPlace[] = [];
       
       if (apiData?.attractions && apiData.attractions.length > 0) {
         displayPlaces = apiData.attractions.map(attraction => ({
@@ -233,16 +164,16 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           image: getThailandPlaceImage(attraction.name, attraction.image),
           description: attraction.description,
           tags: attraction.tags || [],
-          isTrending: Math.random() > 0.5 // Random trending for demo
+          isTrending: false // No verified trending metric in Railway data
         }));
       }
       
       setPlaces(displayPlaces);
-      setCategories(mockCategories);
+      setCategories(mockCategories.map(cat => ({ ...cat, count: displayPlaces.filter(place => place.category.toLowerCase() === cat.id).length })));
       setLoading(false);
     };
 
-    setTimeout(loadData, 500); // Simulate loading
+    loadData();
   }, [apiData, currentLanguage]);
 
   const handleFavoriteToggle = (id: string) => {
@@ -278,7 +209,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
   const trendingPlaces = places.filter(place => place.isTrending).slice(0, 6);
   const recommendedPlaces = places.slice(0, 8);
 
-  if (loading) {
+  if (loading || apiLoading) {
     return (
       <div className="h-full bg-gray-50 p-6">
         <div className="space-y-8">
@@ -294,6 +225,12 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
         </div>
       </div>
     );
+  }
+
+  if (apiError) {
+    return <div role="alert" className="p-6 text-center text-destructive">
+      {currentLanguage === 'th' ? 'ไม่สามารถโหลดสถานที่จาก Railway ได้' : 'Unable to load places from Railway.'}
+    </div>;
   }
 
   return (

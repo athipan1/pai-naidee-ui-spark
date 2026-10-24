@@ -19,9 +19,6 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const menuItems = [
     { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
     { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "/explore" },
-    { label: currentLanguage === "th" ? "ชุมชนนักเดินทาง" : "Community", href: "/community" },
-    { label: currentLanguage === "th" ? "รายการโปรด" : "Favorites", href: "/favorites" },
-    { label: currentLanguage === "th" ? "โปรไฟล์" : "Profile", href: "/profile" },
   ];
 
   // Helper function to check if route is active
@@ -148,7 +145,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
             ))}
 
             {/* Developer Dashboard Link - Only in development */}
-            {import.meta.env.DEV && (
+            {false && import.meta.env.DEV && (
               <Link
                 to="/dashboard"
                 className={`block py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium border-t border-border/30 pt-4 ${

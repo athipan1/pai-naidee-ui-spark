@@ -1,4 +1,4 @@
-import { Compass, Heart, User, Users, Shield } from "lucide-react";
+import { Compass, Heart, User, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/shared/contexts/AuthContext";
 
@@ -60,15 +60,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   ];
 
   // Add admin tab if user is admin
-  const tabs = isAdmin ? [
-    ...baseTabs,
-    {
-      id: "admin",
-      path: "/admin",
-      label: { th: "แอดมิน", en: "Admin" },
-      icon: Shield,
-    },
-  ] : baseTabs;
+  const tabs = baseTabs.filter(tab => tab.id === 'discover');
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-effect border-t border-white/20 safe-area-bottom">
