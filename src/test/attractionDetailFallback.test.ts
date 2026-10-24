@@ -13,15 +13,9 @@ describe("attraction detail offline fallback", () => {
     vi.clearAllMocks();
   });
 
-  it("returns a local attraction when the Railway API cannot be reached", async () => {
+  it("does not display a local attraction when Railway cannot be reached", async () => {
     vi.mocked(getRailwayAttractionDetail).mockRejectedValue(new TypeError("Failed to fetch"));
-
-    const attraction = await attractionService.getAttractionDetail("2");
-
-    expect(attraction.id).toBe("2");
-    expect(attraction.name).toBe("Wat Phra Kaew");
-    expect(attraction.nameLocal).toBe("วัดพระแก้ว");
-    expect(attraction.images[0]).toContain("unsplash");
+    await expect(attractionService.getAttractionDetail("2")).rejects.toThrow('Failed to fetch attraction details');
   });
 
   it("still surfaces an error for unknown attraction ids", async () => {

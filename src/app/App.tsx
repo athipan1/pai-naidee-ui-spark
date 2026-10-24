@@ -2,14 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
-import { UIProvider, useUIContext } from "@/shared/contexts/UIContext";
-import { AuthProvider, useAuth } from "@/shared/contexts/AuthContext";
-import { useCreatePost } from "@/shared/hooks/useCommunityQueries";
-import type { CreatePostData } from "@/shared/types/community";
-import { CreatePost } from "@/components/community/CreatePost";
+import { UIProvider } from "@/shared/contexts/UIContext";
+import { AuthProvider } from "@/shared/contexts/AuthContext";
 import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
@@ -17,16 +14,11 @@ import { SkipLink, useResponsiveTextSize } from "@/components/common/Accessibili
 
 // Lazy load new consolidated routes
 const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
-const SavedPage = lazy(() => import("./routes/Saved/SavedPage"));
-const AdminLayout = lazy(() => import("./routes/Admin/AdminLayout"));
-const ProfilePage = lazy(() => import("./routes/Profile/ProfilePage"));
 
 // Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
-const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 
-const InstagramDemo = lazy(() => import("./pages/InstagramDemo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 
@@ -41,20 +33,11 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Redirect components for backward compatibility
 import {
   ExploreRedirect,
-  FavoritesRedirect,
   SearchRedirect,
   MapRedirect,
   AIAssistantRedirect,
-  AdminPanelRedirect,
-  EnhancedAdminRedirect,
-  DashboardRedirect,
-  ProfileRedirect,
   CategoryRedirect
 } from "./routes/Redirects";
-import Dashboard from "./routes/Admin/Dashboard";
-import AttractionManager from "@/components/admin/AttractionManager";
-import Moderation from "./routes/Admin/Moderation";
-import Analytics from "./routes/Admin/Analytics";
 
 // Conditionally load AccordionExamples only in development
 const AccordionExamples = import.meta.env.DEV
@@ -83,26 +66,10 @@ const queryClient = new QueryClient({
 const AppContent = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
 
-  const { isCreatePostModalOpen, closeCreatePostModal } = useUIContext();
-  const { isAuthenticated } = useAuth();
-  const { mutate: createPost, isPending: isCreatingPost } = useCreatePost();
 
   // Apply responsive text sizing for better accessibility
   useResponsiveTextSize();
 
-  const handleCreatePost = (postData: CreatePostData) => {
-    if (!isAuthenticated) {
-      closeCreatePostModal();
-      window.location.assign('/login');
-      return;
-    }
-
-    createPost(postData, {
-      onSuccess: () => {
-        closeCreatePostModal();
-      }
-    });
-  };
 
   return (
     <>
@@ -131,32 +98,12 @@ const AppContent = () => {
               <DiscoverLayout currentLanguage={currentLanguage} />
             }
           />
-          <Route
-            path="/saved"
-            element={
-              <SavedPage currentLanguage={currentLanguage} />
-            }
-          />
-          <Route
-            path="/me"
-            element={
-              <ProfilePage
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
-              />
-            }
-          />
-          <Route
-            path="/admin"
-            element={<AdminLayout currentLanguage={currentLanguage} />}
-          >
-            <Route index element={<DashboardRedirect />} />
-            <Route path="dashboard" element={<Dashboard currentLanguage={currentLanguage} />} />
-            <Route path="media" element={<AttractionManager currentLanguage={currentLanguage} />} />
-            <Route path="moderation" element={<Moderation currentLanguage={currentLanguage} />} />
-            <Route path="analytics" element={<Analytics currentLanguage={currentLanguage} />} />
-          </Route>
-          <Route path="/login" element={<LoginPage />} />
+          {/* Public launch: browsing only. Restricted routes never mount write-capable UI. */}
+          <Route path="/saved" element={<Navigate to="/discover" replace />} />
+          <Route path="/me" element={<Navigate to="/discover" replace />} />
+          <Route path="/login" element={<Navigate to="/discover" replace />} />
+          <Route path="/admin/*" element={<Navigate to="/discover" replace />} />
+          <Route path="/upload/*" element={<Navigate to="/discover" replace />} />
           {/* Existing Essential Routes */}
           <Route
             path="/attraction/:id"
@@ -167,22 +114,16 @@ const AppContent = () => {
               />
             }
           />
-          <Route
-            path="/community/instagram"
-            element={
-              <InstagramDemo />
-            }
-          />
+          <Route path="/community/*" element={<Navigate to="/discover" replace />} />
           {/* Legacy Route Redirects */}
           <Route path="/explore" element={<ExploreRedirect />} />
-          <Route path="/favorites" element={<FavoritesRedirect />} />
+          <Route path="/favorites" element={<Navigate to="/discover" replace />} />
           <Route path="/search" element={<SearchRedirect />} />
           <Route path="/map/:id?" element={<MapRedirect />} />
           <Route path="/ai-assistant" element={<AIAssistantRedirect />} />
-          <Route path="/admin-panel" element={<AdminPanelRedirect />} />
-          <Route path="/admin/enhanced" element={<EnhancedAdminRedirect />} />
-          <Route path="/dashboard" element={<DashboardRedirect />} />
-          <Route path="/profile" element={<ProfileRedirect />} />
+          <Route path="/admin-panel" element={<Navigate to="/discover" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/discover" replace />} />
+          <Route path="/profile" element={<Navigate to="/discover" replace />} />
           <Route
             path="/category/:categoryName"
             element={<CategoryRedirect />}
@@ -210,12 +151,6 @@ const AppContent = () => {
           {/* --- End PaiNaiDee Example Routes --- */}
         </Routes>
       </Suspense>
-      <CreatePost
-        open={isCreatePostModalOpen}
-        onOpenChange={(isOpen) => !isOpen && closeCreatePostModal()}
-        onSubmit={handleCreatePost}
-        isSubmitting={isCreatingPost}
-      />
       <DevTools />
     </>
   );

@@ -22,6 +22,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "test:e2e:read-only": "playwright test tests/e2e/read-only-discovery.spec.ts",
+    "smoke:read-only": "node scripts/smoke-read-only.mjs",
     "build:semantic-index": "node scripts/buildSemanticIndex.cjs",
     "check:supabase": "npx tsx scripts/check-supabase.ts",
     "check:storage": "npx tsx scripts/check-storage.ts"

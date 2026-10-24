@@ -10,6 +10,7 @@ import SearchView from "./SearchView";
 import CategoryView from "./CategoryView";
 import MapView from "./MapView";
 import TrendingView from "./TrendingView";
+import { useAttractions } from '@/shared/hooks/useAttractionQueries';
 
 interface DiscoverLayoutProps {
   currentLanguage: "th" | "en";
@@ -63,13 +64,13 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
   };
 
   // Calculate attraction counts for CategoryFilter - mock data for now
-  const attractionCounts = {
-    all: 12,
-    beach: 4,
-    culture: 3,
-    nature: 3,
-    food: 2
-  };
+  const { data: catalog } = useAttractions({ page: 1, limit: 100 });
+  const attractionCounts = (catalog?.attractions ?? []).reduce((counts, item) => {
+    const key = item.category.toLowerCase();
+    counts[key] = (counts[key] || 0) + 1;
+    counts.all = (counts.all || 0) + 1;
+    return counts;
+  }, {} as Record<string, number>);
 
   const getModeTitle = (mode: DiscoveryMode): string => {
     switch (mode) {
@@ -112,7 +113,7 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
           />
         );
       case 'trending':
-        return <TrendingView currentLanguage={currentLanguage} />;
+        return <FeedView currentLanguage={currentLanguage} />;
       case 'feed':
       default:
         return <FeedView currentLanguage={currentLanguage} />;
@@ -160,7 +161,7 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
                   <TabsTrigger value="search">{t.search}</TabsTrigger>
                   <TabsTrigger value="category">{t.category}</TabsTrigger>
                   <TabsTrigger value="map">{t.map}</TabsTrigger>
-                  <TabsTrigger value="trending">{t.trending}</TabsTrigger>
+                  <TabsTrigger value="trending" disabled>{t.trending}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -196,7 +197,7 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
               <TabsTrigger value="search" className="text-xs">{t.search}</TabsTrigger>
               <TabsTrigger value="category" className="text-xs">{t.category}</TabsTrigger>
               <TabsTrigger value="map" className="text-xs">{t.map}</TabsTrigger>
-              <TabsTrigger value="trending" className="text-xs">{t.trending}</TabsTrigger>
+              <TabsTrigger value="trending" disabled className="text-xs">{t.trending}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
