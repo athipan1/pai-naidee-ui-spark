@@ -22,6 +22,20 @@ describe("Railway attraction API client", () => {
     expect(getApiBaseUrl()).toBe("https://example.test");
   });
 
+  it("normalizes a legacy /api suffix without doubling the endpoint path", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://example.test/api/");
+    expect(getApiBaseUrl()).toBe("https://example.test");
+
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ attractions: [], total: 0, page: 1, limit: 10 }), { status: 200 }),
+    );
+    await getRailwayAttractions({ search: "เชียงใหม่" });
+    const requestUrl = String(fetchMock.mock.calls[0][0]);
+    expect(requestUrl).toContain("https://example.test/api/places?");
+    expect(requestUrl).not.toContain("/api/api/");
+    expect(new URL(requestUrl).searchParams.get("search")).toBe("เชียงใหม่");
+  });
+
   it("fetches attraction details from the backend API", async () => {
     vi.stubEnv("VITE_API_BASE_URL", "https://example.test");
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(

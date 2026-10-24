@@ -33,6 +33,8 @@ export default defineConfig(({ mode }) => {
       mode === 'development' && componentTagger(),
       VitePWA({
         registerType: 'autoUpdate',
+        // Inline registration avoids /registerSW.js being rewritten to index.html on Vercel.
+        injectRegister: 'inline',
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg}'],
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit

@@ -42,3 +42,22 @@ test('API failure never substitutes sample places', async ({ page }) => {
   await expect(page.getByText('Phi Phi Islands')).toHaveCount(0);
   await expect(page.getByText('Floating Market')).toHaveCount(0);
 });
+
+test('legacy Explore route navigates to Discover and preserves query', async ({ page }) => {
+  await page.goto('/explore?mode=search&q=เชียงใหม่');
+  await expect(page).toHaveURL(/\/discover\?.*mode=search.*q=/);
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+});
+
+test('production page never loads the missing external registerSW.js script', async ({ page }) => {
+  const missingRegistrationRequests: string[] = [];
+  page.on('request', request => {
+    if (new URL(request.url()).pathname === '/registerSW.js') {
+      missingRegistrationRequests.push(request.url());
+    }
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /Discover Your Dream Destination/i })).toBeVisible();
+  expect(missingRegistrationRequests).toEqual([]);
+});
+

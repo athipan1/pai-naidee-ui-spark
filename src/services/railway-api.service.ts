@@ -6,7 +6,9 @@ const REQUEST_TIMEOUT_MS = 8_000;
 
 function getApiBaseUrl(): string {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim();
-  return (configured || DEFAULT_API_BASE_URL).replace(/\/$/, "");
+  // Accept either a service origin or a legacy base ending in /api.
+  // Endpoint builders already prefix every path with /api.
+  return (configured || DEFAULT_API_BASE_URL).replace(/\/+$/, "").replace(/\/api$/i, "");
 }
 
 async function requestJson<T>(path: string): Promise<T> {
