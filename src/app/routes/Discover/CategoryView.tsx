@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { attractionService } from "@/services/attraction.service";
+import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 import AttractionCard from "@/components/common/AttractionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -32,16 +31,13 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
   const decodedCategory = category ? decodeURIComponent(category) : undefined;
 
   const {
-    data: attractions = [],
+    data: catalogue,
     isLoading,
     isError,
     error,
-  } = useQuery({
-    queryKey: ["attractions", decodedCategory],
-    queryFn: () => attractionService.getAttractions({ category: decodedCategory }),
-    // Use the select option to transform the data and extract the attractions array
-    select: (data) => data.attractions,
-  });
+  } = useAllAttractions({ category: decodedCategory });
+
+  const attractions = catalogue?.attractions ?? [];
 
 
   const handleFavoriteToggle = (id: string) => {
