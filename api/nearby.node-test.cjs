@@ -20,7 +20,7 @@ test('nearby rejects missing or unsafe search parameters', () => {
 
 test('all new curated locations have distinct IDs, provenance, and real Thailand coordinates', () => {
   const curated = SEED_PLACES.filter(place => place.id.startsWith('curated-'));
-  assert.equal(curated.length, 29);
+  assert.equal(curated.length, 54);
   assert.equal(new Set(curated.map(place => place.id)).size, curated.length);
   for (const place of curated) {
     assert.ok(place.lat >= 5 && place.lat <= 21);
@@ -35,8 +35,8 @@ test('all new curated locations have distinct IDs, provenance, and real Thailand
 });
 
 test('expanded nationwide catalogue contains no duplicate IDs or demo ratings/photos', () => {
-  assert.equal(SEED_PLACES.length, 33);
-  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 33);
+  assert.equal(SEED_PLACES.length, 58);
+  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 58);
   for (const place of SEED_PLACES) {
     assert.equal(place.rating, 0);
     assert.equal(place.reviewCount, 0);
@@ -54,6 +54,12 @@ test('new destinations cover multiple regions and retain stable location/source 
     ['curated-ko-samet', 'ระยอง'],
     ['curated-ko-lipe', 'สตูล'],
     ['curated-wat-phra-mahathat-nakhon', 'นครศรีธรรมราช'],
+    ['curated-wat-phumin', 'น่าน'],
+    ['curated-phu-phra-bat-historical-park', 'อุดรธานี'],
+    ['curated-maeklong-railway-market', 'สมุทรสงคราม'],
+    ['curated-ko-kradan', 'ตรัง'],
+    ['curated-samila-beach', 'สงขลา'],
+    ['curated-ko-tarutao', 'สตูล'],
   ]) {
     const place = byId.get(id);
     assert.ok(place, `${id} is absent from the catalogue`);
