@@ -1,4 +1,5 @@
 const postgres = require('postgres');
+const ADDITIONAL_CURATED_PLACES = require('./additional-curated-places.cjs');
 
 let sqlClient = null;
 
@@ -142,6 +143,7 @@ const SEED_PLACES = [
     sourceName: 'Wikipedia: Phuket Big Buddha',
     sourceUrl: 'https://en.wikipedia.org/wiki/Phuket_Big_Buddha',
   },
+  ...ADDITIONAL_CURATED_PLACES,
 ];
 
 // Only remove the original demo ratings/images if their exact unchanged seed
