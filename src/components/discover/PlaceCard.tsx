@@ -83,15 +83,15 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
         </div>
 
         {/* Rating */}
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1">
+        {rating > 0 && reviewCount > 0 ? (
+          <div className="flex items-center space-x-2">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             <span className="font-semibold text-gray-900">{rating}</span>
+            <span className="text-gray-500 text-sm">
+              ({reviewCount.toLocaleString()} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})
+            </span>
           </div>
-          <span className="text-gray-500 text-sm">
-            ({reviewCount.toLocaleString()} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})
-          </span>
-        </div>
+        ) : <p className="text-sm text-gray-500">{currentLanguage === 'th' ? 'ยังไม่มีคะแนนที่ยืนยันได้' : 'No verified rating yet'}</p>}
 
         {/* Description */}
         <p className="text-gray-600 text-sm line-clamp-2">

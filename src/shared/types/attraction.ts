@@ -1,5 +1,6 @@
 // Attraction data interface
 export interface AttractionDetail {
+  source?: { name: string; url: string; verifiedAt?: string | null } | null;
   id: string;
   name: string;
   nameLocal: string;

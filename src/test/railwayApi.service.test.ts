@@ -3,6 +3,7 @@ import {
   getApiBaseUrl,
   getRailwayAttractionDetail,
   getRailwayAttractions,
+  getRailwayNearbyAttractions,
 } from "@/services/railway-api.service";
 
 describe("Railway attraction API client", () => {
@@ -88,5 +89,22 @@ describe("Railway attraction API client", () => {
     expect(url).toContain("limit=5");
     expect(url).toContain("category=Nature");
     expect(url).toContain("search=doi");
+  });
+
+  it("requests real nearby places with bounded distance parameters", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://example.test");
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({
+        attractions: [{ id: 'curated-wat-arun', distanceKm: 0.4 }],
+        center: { lat: 13.74361, lng: 100.48889 }, radiusKm: 10,
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }),
+    );
+    const result = await getRailwayNearbyAttractions({ lat: 13.74361, lng: 100.48889, radiusKm: 10 });
+    const url = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(url.pathname).toBe('/api/places/nearby');
+    expect(url.searchParams.get('lat')).toBe('13.74361');
+    expect(url.searchParams.get('lng')).toBe('100.48889');
+    expect(url.searchParams.get('radiusKm')).toBe('10');
+    expect(result.attractions[0].distanceKm).toBe(0.4);
   });
 });

@@ -46,6 +46,27 @@ export interface RailwayAttractionsResponse {
   limit: number;
 }
 
+export interface RailwayNearbyResponse {
+  attractions: SearchResult[];
+  center: { lat: number; lng: number };
+  radiusKm: number;
+}
+
+export async function getRailwayNearbyAttractions(options: {
+  lat: number;
+  lng: number;
+  radiusKm?: number;
+  limit?: number;
+}): Promise<RailwayNearbyResponse> {
+  const params = new URLSearchParams({
+    lat: String(options.lat),
+    lng: String(options.lng),
+    radiusKm: String(options.radiusKm ?? 25),
+    limit: String(options.limit ?? 30),
+  });
+  return requestJson<RailwayNearbyResponse>(`/api/places/nearby?${params}`);
+}
+
 export async function getRailwayAttractionDetail(
   id: string,
 ): Promise<AttractionDetail> {

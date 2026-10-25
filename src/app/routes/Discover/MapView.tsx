@@ -1,535 +1,178 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Navigation,
-  MapPin,
-  Filter,
-  UtensilsCrossed,
-  Fuel,
-  Target,
-  Grid3X3,
-  ExternalLink,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { Loader2, LocateFixed, MapPin, RefreshCw } from 'lucide-react';
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+import { Button } from '@/components/ui/button';
+import { useAttractions, useNearbyAttractions } from '@/shared/hooks/useAttractionQueries';
+import type { SearchResult } from '@/shared/types/search';
 
-interface Attraction {
-  id: string;
-  name: string;
-  nameLocal: string;
-  category: string;
-  coordinates: { lat: number; lng: number };
-  rating: number;
-  description: string;
+const markerIcon = L.icon({
+  iconUrl,
+  shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+const THAILAND_CENTER: [number, number] = [15.87, 100.99];
+const RADII_KM = [5, 10, 25, 50, 100] as const;
+
+function hasValidCoordinates(place: SearchResult): boolean {
+  const coordinates = place.coordinates ?? place.location;
+  return !!coordinates && Number.isFinite(coordinates.lat) && Number.isFinite(coordinates.lng) &&
+    coordinates.lat >= 5 && coordinates.lat <= 21 &&
+    coordinates.lng >= 97 && coordinates.lng <= 106;
 }
 
-interface POI {
-  id: string;
-  name: string;
-  type: "gas_station" | "restaurant" | "attraction";
-  coordinates: { lat: number; lng: number };
-  distance?: number;
+function RecenterMap({ target, zoom }: { target: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => { map.setView(target, zoom); }, [map, target[0], target[1], zoom]);
+  return null;
 }
 
 interface MapViewProps {
-  currentLanguage: "th" | "en";
+  currentLanguage: 'th' | 'en';
   selectedAttractionId?: string;
 }
 
 const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
-  const _navigate = useNavigate(); // Keeping for future use
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [showTraffic, setShowTraffic] = useState(false);
-  const [searchRadius, setSearchRadius] = useState([10]);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [nearbyPOIs, setNearbyPOIs] = useState<POI[]>([]);
-  const [showNearbyPOIs, setShowNearbyPOIs] = useState(false);
-  const [selectedPOIType, setSelectedPOIType] = useState<string>("all");
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [radiusKm, setRadiusKm] = useState(25);
+  const [locationError, setLocationError] = useState('');
+  const [locating, setLocating] = useState(false);
+  const [showNearby, setShowNearby] = useState(false);
+  const catalogue = useAttractions({ page: 1, limit: 50 });
+  const nearby = useNearbyAttractions(showNearby ? location : null, radiusKm);
+  const rawPlaces = showNearby ? nearby.data?.attractions : catalogue.data?.attractions;
+  const places = useMemo(() => (rawPlaces ?? []).filter(hasValidCoordinates), [rawPlaces]);
+  const selectedPlace = places.find(place => place.id === selectedAttractionId);
+  const selectedCoordinates = selectedPlace?.coordinates ?? selectedPlace?.location;
+  const target: [number, number] = showNearby && location
+    ? [location.lat, location.lng]
+    : selectedCoordinates
+      ? [selectedCoordinates.lat, selectedCoordinates.lng]
+      : THAILAND_CENTER;
+  const zoom = showNearby && location ? (radiusKm <= 10 ? 12 : radiusKm <= 25 ? 10 : 9) : selectedCoordinates ? 13 : 6;
+  const loading = showNearby ? nearby.isLoading : catalogue.isLoading;
+  const requestError = showNearby ? nearby.error : catalogue.error;
+  const th = currentLanguage === 'th';
 
-  const content = {
-    th: {
-      title: "แผนที่",
-      navigateExternal: "นำทางด้วยแอปแผนที่ภายนอก",
-      exploreNearby: "📍ใกล้ฉัน",
-      showAllCategories: "🏞️ แสดงทุกหมวด",
-      filters: "ตัวกรอง",
-      trafficLayer: "แสดงการจราจร",
-      searchRadius: "รัศมีการค้นหา",
-      kilometers: "กิโลเมตร",
-      gasStations: "⛽ ปั๊มน้ำมัน",
-      restaurants: "🍽️ ร้านอาหาร",
-      attractions: "🏞️ สถานที่ท่องเที่ยว",
-      nearbyPOIs: "สถานที่ใกล้เคียง",
-      navigate: "นำทาง",
-      categories: {
-        all: "ทั้งหมด",
-        beach: "ชายหาด",
-        culture: "วัฒนธรรม",
-        nature: "ธรรมชาติ",
-        food: "อาหาร"
-      }
-    },
-    en: {
-      title: "Map",
-      navigateExternal: "Navigate with External Map App",
-      exploreNearby: "📍Near Me",
-      showAllCategories: "🏞️ Show All Categories",
-      filters: "Filters",
-      trafficLayer: "Show Traffic",
-      searchRadius: "Search Radius",
-      kilometers: "kilometers",
-      gasStations: "⛽ Gas Stations",
-      restaurants: "🍽️ Restaurants",
-      attractions: "🏞️ Attractions",
-      nearbyPOIs: "Nearby POIs",
-      navigate: "Navigate",
-      categories: {
-        all: "All",
-        beach: "Beach",
-        culture: "Culture",
-        nature: "Nature",
-        food: "Food"
-      }
-    },
-  };
-
-  const t = content[currentLanguage];
-
-  // Mock attraction data with coordinates
-  const attractions: Attraction[] = [
-    {
-      id: "1",
-      name: "Phi Phi Islands",
-      nameLocal: "หมู่เกาะพีพี",
-      category: "beach",
-      coordinates: { lat: 7.7367, lng: 98.7784 },
-      rating: 4.8,
-      description: "Beautiful beach destination"
-    },
-    {
-      id: "2",
-      name: "Wat Phra Kaew",
-      nameLocal: "วัดพระแก้ว",
-      category: "culture",
-      coordinates: { lat: 13.7563, lng: 100.4925 },
-      rating: 4.9,
-      description: "Sacred Buddhist temple"
-    },
-    {
-      id: "3",
-      name: "Doi Inthanon",
-      nameLocal: "ดอยอินทนนท์",
-      category: "nature",
-      coordinates: { lat: 18.5833, lng: 98.4833 },
-      rating: 4.7,
-      description: "Highest peak in Thailand"
-    },
-    {
-      id: "4",
-      name: "Floating Market",
-      nameLocal: "ตลาดน้ำ",
-      category: "food",
-      coordinates: { lat: 13.5282, lng: 100.1145 },
-      rating: 4.5,
-      description: "Traditional floating market"
+  const findNearMe = () => {
+    if (!navigator.geolocation) {
+      setLocationError(th ? 'อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง' : 'Geolocation is unavailable.');
+      return;
     }
-  ];
-
-  // Find current attraction or default to first one
-  const currentAttraction = attractions.find(a => a.id === selectedAttractionId) || attractions[0];
-  
-  // Filter attractions based on selected category
-  const filteredAttractions = selectedCategory === "all" 
-    ? attractions 
-    : attractions.filter(a => a.category === selectedCategory);
-
-  // Get display name for current attraction
-  const displayName = currentLanguage === "th" && currentAttraction.nameLocal
-    ? currentAttraction.nameLocal
-    : currentAttraction.name;
-
-  // Get user location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.log("Geolocation error:", error);
-          // Default to Bangkok if geolocation fails
-          setUserLocation({ lat: 13.7563, lng: 100.5018 });
-        }
-      );
-    }
-  }, []);
-
-  // Generate nearby POIs based on radius with realistic data
-  const generateNearbyPOIs = (center: { lat: number; lng: number }, radiusKm: number) => {
-    const pois: POI[] = [];
-    
-    // More POIs for larger radius, with realistic distribution
-    const gasStationCount = Math.max(1, Math.floor(radiusKm / 5));
-    const restaurantCount = Math.max(2, Math.floor(radiusKm / 3));
-    const attractionCount = Math.max(1, Math.floor(radiusKm / 8));
-    
-    const gasStationNames = [
-      "Shell Station", "PTT Station", "Bangchak Station", "Esso Station", "Caltex Station"
-    ];
-    const restaurantNames = [
-      "Local Thai Restaurant", "Street Food Corner", "Seafood Paradise", "Coffee House", "Night Market Food"
-    ];
-    const attractionNames = [
-      "Local Temple", "Scenic Viewpoint", "Cultural Center", "Art Gallery", "Local Park"
-    ];
-    
-    // Generate gas stations
-    for (let i = 0; i < gasStationCount; i++) {
-      const angle = (Math.PI * 2 * i) / gasStationCount + Math.random() * 0.5;
-      const distance = Math.random() * radiusKm * 0.8 + radiusKm * 0.2;
-      const lat = center.lat + (distance / 111) * Math.cos(angle);
-      const lng = center.lng + (distance / (111 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
-      
-      pois.push({
-        id: `gas-${i}`,
-        name: gasStationNames[i % gasStationNames.length],
-        type: "gas_station",
-        coordinates: { lat, lng },
-        distance: Math.round(distance * 10) / 10
-      });
-    }
-    
-    // Generate restaurants
-    for (let i = 0; i < restaurantCount; i++) {
-      const angle = (Math.PI * 2 * i) / restaurantCount + Math.random() * 0.8;
-      const distance = Math.random() * radiusKm * 0.7 + radiusKm * 0.1;
-      const lat = center.lat + (distance / 111) * Math.cos(angle);
-      const lng = center.lng + (distance / (111 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
-      
-      pois.push({
-        id: `restaurant-${i}`,
-        name: restaurantNames[i % restaurantNames.length],
-        type: "restaurant",
-        coordinates: { lat, lng },
-        distance: Math.round(distance * 10) / 10
-      });
-    }
-    
-    // Generate attractions
-    for (let i = 0; i < attractionCount; i++) {
-      const angle = (Math.PI * 2 * i) / attractionCount + Math.random() * 1.2;
-      const distance = Math.random() * radiusKm * 0.9 + radiusKm * 0.3;
-      const lat = center.lat + (distance / 111) * Math.cos(angle);
-      const lng = center.lng + (distance / (111 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
-      
-      pois.push({
-        id: `attraction-${i}`,
-        name: attractionNames[i % attractionNames.length],
-        type: "attraction",
-        coordinates: { lat, lng },
-        distance: Math.round(distance * 10) / 10
-      });
-    }
-    
-    return pois;
+    setLocationError('');
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        // Approximate to ~100 m before sending a URL query, limiting location precision.
+        setLocation({
+          lat: Math.round(coords.latitude * 1000) / 1000,
+          lng: Math.round(coords.longitude * 1000) / 1000,
+        });
+        setShowNearby(true);
+        setLocating(false);
+      },
+      (error) => {
+        setLocationError(error.code === 1
+          ? (th ? 'ไม่ได้รับอนุญาตให้ใช้ตำแหน่ง กรุณาเปิดสิทธิ์ในเบราว์เซอร์' : 'Location permission was denied.')
+          : (th ? 'ไม่สามารถรับตำแหน่งได้ กรุณาลองอีกครั้ง' : 'Unable to determine your location.'));
+        setLocating(false);
+      },
+      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 },
+    );
   };
-
-  // Handle explore nearby
-  const handleExploreNearby = () => {
-    if (userLocation) {
-      const pois = generateNearbyPOIs(userLocation, searchRadius[0]);
-      setNearbyPOIs(pois);
-      setShowNearbyPOIs(true);
-    }
-  };
-
-  // Handle show all categories
-  const handleShowAllCategories = () => {
-    setSelectedCategory("all");
-    setShowNearbyPOIs(false);
-  };
-
-  // Handle external navigation
-  const handleExternalNavigation = (lat: number, lng: number) => {
-    // Generic navigation without specific Google Maps reference
-    alert(`นำทางไปยังตำแหน่ง: ${lat}, ${lng}`);
-  };
-
-  // Custom marker icons for different POI types
-  const getMarkerIcon = (type: string) => {
-    switch (type) {
-      case "gas_station":
-        return "⛽";
-      case "restaurant":
-        return "🍽️";
-      case "attraction":
-        return "🏞️";
-      default:
-        return "📍";
-    }
-  };
-
-  const openLocation = (lat: number, lng: number, placeName?: string) => {
-    // Display location information instead of opening Google Maps
-    const locationText = placeName 
-      ? `ตำแหน่ง: ${placeName}\nพิกัด: ${lat}, ${lng}`
-      : `พิกัด: ${lat}, ${lng}`;
-    alert(locationText);
-  };
-
-  const mapCenter = userLocation && showNearbyPOIs ? userLocation : currentAttraction.coordinates;
 
   return (
-    <div className="h-full bg-background">
-      {/* Filters Controls */}
-      <div className="border-b border-border/30 bg-card/50 backdrop-blur-sm">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">{t.title}</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-            >
-              <Filter className="w-4 h-4" />
-              {t.filters}
-            </Button>
-          </div>
-
-          {showFilters && (
-            <div className="space-y-4 border-t border-border/30 pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">{t.categories.all}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t.categories.all}</SelectItem>
-                      <SelectItem value="beach">{t.categories.beach}</SelectItem>
-                      <SelectItem value="culture">{t.categories.culture}</SelectItem>
-                      <SelectItem value="nature">{t.categories.nature}</SelectItem>
-                      <SelectItem value="food">{t.categories.food}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">{t.nearbyPOIs}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">{t.searchRadius}</label>
-                    <Slider
-                      value={searchRadius}
-                      onValueChange={setSearchRadius}
-                      max={50}
-                      min={5}
-                      step={5}
-                      className="w-full"
-                    />
-                    <div className="text-xs text-muted-foreground text-center">
-                      {searchRadius[0]} {t.kilometers}
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleExploreNearby}
-                      className="justify-start"
-                    >
-                      <Target className="w-4 h-4 mr-2" />
-                      {t.exploreNearby}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleShowAllCategories}
-                      className="justify-start"
-                    >
-                      <Grid3X3 className="w-4 h-4 mr-2" />
-                      {t.showAllCategories}
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">{t.trafficLayer}</span>
-                      <Switch checked={showTraffic} onCheckedChange={setShowTraffic} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">POI Shortcuts</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setSelectedPOIType("gas_station")}>
-                    <Fuel className="w-4 h-4 mr-2" />
-                    {t.gasStations}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedPOIType("restaurant")}>
-                    <UtensilsCrossed className="w-4 h-4 mr-2" />
-                    {t.restaurants}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedPOIType("attraction")}>
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {t.attractions}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+    <section className="container mx-auto space-y-4 px-4 py-5" data-testid="real-attractions-map">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">{th ? 'แผนที่สถานที่ท่องเที่ยวจริง' : 'Map of real places'}</h2>
+          <p className="text-sm text-muted-foreground">
+            {th ? 'หมุดมาจากฐานข้อมูลสถานที่ท่องเที่ยว ไม่สร้างพิกัดจำลอง' : 'Markers come from the places database; no simulated locations.'}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor="nearby-radius" className="text-sm">{th ? 'รัศมี' : 'Radius'}</label>
+          <select
+            id="nearby-radius"
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={radiusKm}
+            onChange={(event) => setRadiusKm(Number(event.target.value))}
+          >
+            {RADII_KM.map(radius => <option key={radius} value={radius}>{radius} km</option>)}
+          </select>
+          <Button onClick={findNearMe} disabled={locating}>
+            {locating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LocateFixed className="mr-2 h-4 w-4" />}
+            {th ? 'ค้นหาใกล้ฉัน' : 'Find near me'}
+          </Button>
+          {showNearby && <Button variant="outline" onClick={() => setShowNearby(false)}>{th ? 'ดูทั้งหมด' : 'Show all'}</Button>}
         </div>
       </div>
 
-      {/* Map Container */}
-      <div className="flex-1 relative p-4">
-        {/* Map Placeholder with Interactive Elements */}
-        <div className="h-96 w-full bg-gradient-to-br from-blue-50 to-green-50 border rounded-lg overflow-hidden relative">
-          
-          {/* Map Header with Controls */}
-          <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
-              <h3 className="font-semibold text-sm mb-2">
-                {showNearbyPOIs ? `${t.nearbyPOIs} (${searchRadius[0]}km)` : displayName}
-              </h3>
-              <div className="text-xs text-gray-600">
-                📍 {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}
-              </div>
-            </div>
-            
-            {showTraffic && (
-              <div className="bg-red-500/90 text-white text-xs px-2 py-1 rounded">
-                🚦 Traffic Layer Active
-              </div>
-            )}
-          </div>
-
-          {/* Central Map View */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 shadow-xl max-w-md text-center">
-              <div className="w-20 h-20 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                <MapPin className="w-10 h-10 text-primary" />
-              </div>
-              
-              <h3 className="text-xl font-semibold mb-2">{displayName}</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                📍 {currentAttraction.coordinates.lat.toFixed(6)}, {currentAttraction.coordinates.lng.toFixed(6)}
-              </p>
-              
-              <div className="grid gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => openLocation(currentAttraction.coordinates.lat, currentAttraction.coordinates.lng, displayName)}
-                  className="flex items-center gap-2"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  View Location
-                </Button>
-                
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleExternalNavigation(currentAttraction.coordinates.lat, currentAttraction.coordinates.lng)}
-                  className="flex items-center gap-2"
-                >
-                  <Navigation className="w-4 h-4" />
-                  Get Directions
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Attraction Markers Display */}
-          <div className="absolute bottom-4 left-4 right-4">
-            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
-              <div className="text-xs font-medium mb-2">
-                {showNearbyPOIs ? (
-                  <>
-                    <span>Found {nearbyPOIs.length} POIs nearby </span>
-                    {selectedPOIType !== "all" && <span>({selectedPOIType.replace('_', ' ')} only)</span>}
-                    <span className="text-gray-500"> • {userLocation ? 'Your location' : 'Default location'}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{filteredAttractions.length} Attractions</span>
-                    <span className="text-gray-500"> • Category: {selectedCategory}</span>
-                  </>
-                )}
-              </div>
-              
-              <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
-                {showNearbyPOIs ? (
-                  nearbyPOIs
-                    .filter(poi => selectedPOIType === "all" || poi.type === selectedPOIType)
-                    .slice(0, 8)
-                    .map((poi) => (
-                      <button
-                        key={poi.id}
-                        onClick={() => handleExternalNavigation(poi.coordinates.lat, poi.coordinates.lng)}
-                        className="bg-white rounded-full px-3 py-1 text-xs border hover:bg-gray-50 transition-colors flex items-center gap-1 min-w-0"
-                      >
-                        <span>{getMarkerIcon(poi.type)}</span>
-                        <span className="truncate">{poi.name}</span>
-                        {poi.distance && <span className="text-gray-500 flex-shrink-0">({poi.distance}km)</span>}
-                      </button>
-                    ))
-                ) : (
-                  filteredAttractions.map((attraction) => (
-                    <button
-                      key={attraction.id}
-                      onClick={() => handleExternalNavigation(attraction.coordinates.lat, attraction.coordinates.lng)}
-                      className="bg-white rounded-full px-3 py-1 text-xs border hover:bg-gray-50 transition-colors flex items-center gap-1 min-w-0"
-                    >
-                      <span>🏞️</span>
-                      <span className="truncate">{currentLanguage === "th" ? attraction.nameLocal : attraction.name}</span>
-                      <span className="text-yellow-500 flex-shrink-0">★{attraction.rating}</span>
-                    </button>
-                  ))
-                )}
-                
-                {/* Show preview of hidden items */}
-                {showNearbyPOIs && nearbyPOIs.filter(poi => selectedPOIType === "all" || poi.type === selectedPOIType).length > 8 && (
-                  <div className="bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-600 flex items-center">
-                    +{nearbyPOIs.filter(poi => selectedPOIType === "all" || poi.type === selectedPOIType).length - 8} more
-                  </div>
-                )}
-              </div>
-              
-              {/* Quick action hint */}
-              <div className="text-xs text-gray-500 mt-2 text-center">
-                Click any location to navigate • Use filters to refine results
-              </div>
-            </div>
-          </div>
-
-          {/* User Location Indicator */}
-          {userLocation && (
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-              <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
-            </div>
-          )}
+      {locationError && <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{locationError}</p>}
+      {requestError && (
+        <div role="alert" className="flex flex-wrap items-center gap-3 rounded-md border p-3 text-sm">
+          {th ? 'โหลดข้อมูลสถานที่จากเซิร์ฟเวอร์ไม่สำเร็จ' : 'Could not load places from the server.'}
+          <Button size="sm" variant="outline" onClick={() => { void (showNearby ? nearby.refetch() : catalogue.refetch()); }}>
+            <RefreshCw className="mr-1 h-4 w-4" /> {th ? 'ลองอีกครั้ง' : 'Retry'}
+          </Button>
         </div>
+      )}
+
+      <div className="h-[440px] overflow-hidden rounded-xl border" aria-label={th ? 'แผนที่สถานที่ท่องเที่ยว' : 'Attractions map'}>
+        <MapContainer center={THAILAND_CENTER} zoom={6} scrollWheelZoom className="h-full w-full">
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          <RecenterMap target={target} zoom={zoom} />
+          {places.map(place => {
+            const coords = place.coordinates ?? place.location!;
+            const displayName = th ? (place.nameLocal || place.name) : place.name;
+            return (
+              <Marker key={place.id} position={[coords.lat, coords.lng]} icon={markerIcon}>
+                <Popup>
+                  <div className="space-y-1">
+                    <strong>{displayName}</strong>
+                    <div>{place.province}</div>
+                    {typeof place.distanceKm === 'number' && <div>{place.distanceKm.toFixed(1)} km</div>}
+                    <div><Link to={`/attraction/${encodeURIComponent(place.id)}`}>{th ? 'ดูรายละเอียด' : 'View details'}</Link></div>
+                    <div><a href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer">{th ? 'นำทาง' : 'Directions'}</a></div>
+                    {place.source?.url && <div><a href={place.source.url} target="_blank" rel="noopener noreferrer">{th ? 'แหล่งข้อมูล' : 'Source'}</a></div>}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
       </div>
-    </div>
+
+      {loading ? <p role="status">{th ? 'กำลังโหลดสถานที่จริง...' : 'Loading places...'}</p> : !requestError && (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            {showNearby
+              ? (th ? `พบ ${places.length} สถานที่ในฐานข้อมูลภายใน ${radiusKm} กม. (ไม่ใช่สถานที่ทั้งหมดในพื้นที่)` : `${places.length} catalogued places within ${radiusKm} km (not all places in the area).`)
+              : (th ? `แสดง ${places.length} สถานที่จากฐานข้อมูล` : `Showing ${places.length} database locations`)}
+          </p>
+          {places.length === 0 && <p>{th ? 'ยังไม่มีสถานที่พร้อมพิกัดในบริเวณนี้ ลองเพิ่มรัศมีค้นหา' : 'No catalogued places with coordinates here. Try a larger radius.'}</p>}
+          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {places.map(place => <li key={place.id} className="rounded-lg border p-3">
+              <Link className="flex items-center gap-2 font-medium hover:underline" to={`/attraction/${encodeURIComponent(place.id)}`}>
+                <MapPin className="h-4 w-4 shrink-0" /> {th ? place.nameLocal || place.name : place.name}
+              </Link>
+              <p className="text-sm text-muted-foreground">{place.province}{typeof place.distanceKm === 'number' ? ` · ${place.distanceKm.toFixed(1)} km` : ''}</p>
+            </li>)}
+          </ul>
+          <p className="text-xs text-muted-foreground">{th ? 'ใช้ตำแหน่งเพื่อค้นหาเท่านั้น ไม่บันทึกลงฐานข้อมูลผู้ใช้ (ผู้ให้บริการอาจมีบันทึกคำขอ)' : 'Used only for nearby search, not saved to a user database (the service provider may log requests).'}</p>
+        </div>
+      )}
+    </section>
   );
 };
 

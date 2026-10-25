@@ -235,14 +235,15 @@ const AttractionCard = ({
               <span className="text-sm font-medium">{province}</span>
             </div>
 
-            <div className="flex items-center space-x-1 bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 px-3 py-1.5 rounded-full border border-accent-yellow/20">
-              <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow animate-glow" />
-              <span className="text-sm font-bold text-accent-yellow">{rating}</span>
-              <span className="text-xs text-muted-foreground ml-1">
-                ({reviewCount.toLocaleString()}
-                {currentLanguage === "th" ? " รีวิว" : " reviews"})
-              </span>
-            </div>
+            {reviewCount > 0 && rating > 0 ? (
+              <div className="flex items-center space-x-1 bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 px-3 py-1.5 rounded-full border border-accent-yellow/20">
+                <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow animate-glow" />
+                <span className="text-sm font-bold text-accent-yellow">{rating}</span>
+                <span className="text-xs text-muted-foreground ml-1">
+                  ({reviewCount.toLocaleString()}{currentLanguage === "th" ? " รีวิว" : " reviews"})
+                </span>
+              </div>
+            ) : <span className="text-xs text-muted-foreground">{currentLanguage === 'th' ? 'ยังไม่มีคะแนนที่ยืนยันได้' : 'No verified rating yet'}</span>}
           </div>
         </div>
 

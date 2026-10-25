@@ -1,0 +1,56 @@
+name: Production Health and Journey Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: painaidee-production-monitor
+  cancel-in-progress: false
+
+jobs:
+  production-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify live frontend, database, catalogue, search, details and nearby API
+        run: npm run smoke:production
+      - name: Install frontend test dependencies
+        if: success()
+        run: npm ci
+      - name: Install Chromium
+        if: success()
+        run: npx playwright install --with-deps chromium
+      - name: Test production browser journeys
+        if: success()
+        run: npm run test:e2e:production
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-browser-failure
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Open one GitHub issue for production failure
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh issue list --state open --search 'Production monitoring failure in:title' --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh issue create --title 'Production monitoring failure' --body "Production smoke or browser journey failed. Check workflow run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}. No user location is retained."
+          else
+            gh issue comment "$existing" --body "Another failure: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          fi

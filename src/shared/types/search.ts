@@ -41,6 +41,9 @@ export interface SearchResult {
     lat: number;
     lng: number;
   };
+  coordinates?: { lat: number; lng: number };
+  distanceKm?: number;
+  source?: { name: string; url: string; verifiedAt?: string | null } | null;
 }
 
 export interface SearchResponse {

@@ -1,6 +1,7 @@
 // React Query hooks for attraction data management
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as attractionAPI from '@/services/attraction.service';
+import { getRailwayNearbyAttractions } from '@/services/railway-api.service';
 import { AttractionDetail } from '@/shared/types/attraction';
 
 // Query keys for consistent cache management
@@ -60,6 +61,19 @@ export const useAttractions = (filters?: {
     meta: {
       errorMessage: 'Failed to load attractions list'
     }
+  });
+};
+
+export const useNearbyAttractions = (location: { lat: number; lng: number } | null, radiusKm: number) => {
+  return useQuery({
+    queryKey: [...attractionKeys.all, 'nearby', location?.lat, location?.lng, radiusKm],
+    queryFn: () => {
+      if (!location) throw new Error('Location is required');
+      return getRailwayNearbyAttractions({ ...location, radiusKm });
+    },
+    enabled: !!location,
+    staleTime: 60_000,
+    retry: 1,
   });
 };
 
