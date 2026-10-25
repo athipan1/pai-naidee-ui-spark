@@ -20,11 +20,13 @@ test('nearby rejects missing or unsafe search parameters', () => {
 
 test('all new curated locations have distinct IDs, provenance, and real Thailand coordinates', () => {
   const curated = SEED_PLACES.filter(place => place.id.startsWith('curated-'));
-  assert.equal(curated.length, 7);
+  assert.equal(curated.length, 29);
   assert.equal(new Set(curated.map(place => place.id)).size, curated.length);
   for (const place of curated) {
     assert.ok(place.lat >= 5 && place.lat <= 21);
     assert.ok(place.lng >= 97 && place.lng <= 106);
+    assert.ok(place.name && place.nameLocal && place.province && place.description);
+    assert.ok(['Beach', 'Nature', 'Culture', 'Food'].includes(place.category));
     assert.match(place.sourceUrl, /^https:\/\//);
     assert.equal(place.reviewCount, 0);
     assert.equal(place.rating, 0);
@@ -32,12 +34,30 @@ test('all new curated locations have distinct IDs, provenance, and real Thailand
   }
 });
 
-test('initial catalogue entries do not ship unverified demo ratings or photos', () => {
-  assert.equal(SEED_PLACES.length, 11);
+test('expanded nationwide catalogue contains no duplicate IDs or demo ratings/photos', () => {
+  assert.equal(SEED_PLACES.length, 33);
+  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 33);
   for (const place of SEED_PLACES) {
     assert.equal(place.rating, 0);
     assert.equal(place.reviewCount, 0);
     assert.equal(place.imageUrl, null);
     assert.match(place.sourceUrl, /^https:\/\//);
+  }
+});
+
+test('new destinations cover multiple regions and retain stable location/source records', () => {
+  const byId = new Map(SEED_PLACES.map(place => [place.id, place]));
+  for (const [id, province] of [
+    ['curated-ayutthaya-historical-park', 'พระนครศรีอยุธยา'],
+    ['curated-phanom-rung-historical-park', 'บุรีรัมย์'],
+    ['curated-phu-chi-fa', 'เชียงราย'],
+    ['curated-ko-samet', 'ระยอง'],
+    ['curated-ko-lipe', 'สตูล'],
+    ['curated-wat-phra-mahathat-nakhon', 'นครศรีธรรมราช'],
+  ]) {
+    const place = byId.get(id);
+    assert.ok(place, `${id} is absent from the catalogue`);
+    assert.equal(place.province, province);
+    assert.ok(new URL(place.sourceUrl).host);
   }
 });
