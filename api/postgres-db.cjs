@@ -1,6 +1,7 @@
 const postgres = require('postgres');
 const ADDITIONAL_CURATED_PLACES = require('./additional-curated-places.cjs');
 const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs');
+const ADDITIONAL_CURATED_PLACES_V3 = require('./additional-curated-places-v3.cjs');
 
 let sqlClient = null;
 
@@ -146,6 +147,7 @@ const SEED_PLACES = [
   },
   ...ADDITIONAL_CURATED_PLACES,
   ...ADDITIONAL_CURATED_PLACES_V2,
+  ...ADDITIONAL_CURATED_PLACES_V3,
 ];
 
 // Only remove the original demo ratings/images if their exact unchanged seed
