@@ -1,5 +1,6 @@
 const postgres = require('postgres');
 const ADDITIONAL_CURATED_PLACES = require('./additional-curated-places.cjs');
+const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs');
 
 let sqlClient = null;
 
@@ -144,6 +145,7 @@ const SEED_PLACES = [
     sourceUrl: 'https://en.wikipedia.org/wiki/Phuket_Big_Buddha',
   },
   ...ADDITIONAL_CURATED_PLACES,
+  ...ADDITIONAL_CURATED_PLACES_V2,
 ];
 
 // Only remove the original demo ratings/images if their exact unchanged seed
@@ -358,7 +360,7 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
         p.province ILIKE ${searchPattern}
       )
     GROUP BY p.id
-    ORDER BY p.rating DESC, p.name ASC
+    ORDER BY p.rating DESC, p.name ASC, p.id ASC
     LIMIT ${safeLimit}
     OFFSET ${offset}
   `;
