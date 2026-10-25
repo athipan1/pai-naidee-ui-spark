@@ -71,6 +71,37 @@ test('map uses Railway places and requests consent for real near-me search', asy
   await expect(page.getByText('Phi Phi Islands')).toHaveCount(0);
 });
 
+test('map, search, and category browse beyond the Railway 50-place page limit', async ({ page }) => {
+  const places = Array.from({ length: 55 }, (_, index) => ({
+    ...place,
+    id: `railway-page-${index + 1}`,
+    name: `Destination ${index + 1}`,
+    nameLocal: `สถานที่ ${index + 1}`,
+    coordinates: { lat: 12 + index * 0.01, lng: 100 + index * 0.01 },
+  }));
+  const requestedPages: number[] = [];
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places**', route => {
+    const url = new URL(route.request().url());
+    const currentPage = Number(url.searchParams.get('page') || 1);
+    requestedPages.push(currentPage);
+    const matching = url.searchParams.has('search') && url.searchParams.get('search') !== 'Destination'
+      ? [] : places;
+    const start = (currentPage - 1) * 50;
+    return route.fulfill({ json: {
+      attractions: matching.slice(start, start + 50), total: matching.length,
+      page: currentPage, limit: 50,
+    } });
+  });
+  await page.goto('/discover?mode=map');
+  await expect(page.locator('[data-testid="real-attractions-map"] li')).toHaveCount(55);
+  expect(requestedPages).toContain(2);
+  await page.goto('/discover?mode=search&q=Destination');
+  await expect(page.getByText('Destination 55').first()).toBeVisible();
+  await page.goto('/discover?mode=category&category=Nature');
+  await expect(page.getByText('Destination 55').first()).toBeVisible();
+});
+
 test('production page never loads the missing external registerSW.js script', async ({ page }) => {
   const missingRegistrationRequests: string[] = [];
   page.on('request', request => {
