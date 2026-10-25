@@ -7,6 +7,8 @@ test('visitor searches and opens a published place without mock APIs', async ({ 
   await expect(page.getByText('Wat Arun').first()).toBeVisible({ timeout: 20_000 });
   await page.goto('/attraction/curated-wat-arun');
   await expect(page.getByText('Wat Arun').first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Wikipedia: Wat Arun' })).toBeVisible();
+  await expect(page.getByText(/Error: ไม่พบข้อมูล/)).toHaveCount(0);
 });
 
 test('real map and geolocation search return places from Railway', async ({ browser }) => {
