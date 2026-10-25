@@ -71,9 +71,17 @@ const AttractionDetail = ({
   const [wikiError, setWikiError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (attraction) {
-      fetchWikiData(attraction.name);
+    if (!attraction) return;
+    // The Railway record already carries reviewed place text and provenance.
+    // A best-effort Wikipedia enrichment must not replace it or show a 404
+    // simply because the Thai Wikipedia API cannot resolve an English name.
+    if (attraction.source?.url) {
+      setWikiData(null);
+      setWikiError(null);
+      setIsWikiLoading(false);
+      return;
     }
+    fetchWikiData(attraction.nameLocal || attraction.name);
   }, [attraction]);
 
   const content = {
@@ -462,7 +470,7 @@ const AttractionDetail = ({
                   </p>
                 )}
 
-                {!isWikiLoading && !wikiData?.extract && !wikiError && (
+                {!isWikiLoading && !wikiData?.extract && !wikiError && !attraction.source?.url && (
                   <p className="text-sm text-muted-foreground mt-2">
                     {currentLanguage === 'th'
                       ? 'ไม่มีข้อมูลเพิ่มเติมจากวิกิพีเดีย'

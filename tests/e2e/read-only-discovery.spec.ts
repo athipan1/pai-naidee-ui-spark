@@ -5,6 +5,7 @@ const place = {
   province: 'เชียงใหม่', category: 'Nature', rating: 4.7, reviewCount: 12,
   description: 'สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่', tags: ['Mountain'],
   image: '', images: [], coordinates: { lat: 18.59, lng: 98.49 },
+  source: { name: 'Wikipedia: Doi Inthanon', url: 'https://en.wikipedia.org/wiki/Doi_Inthanon' },
 };
 
 test.beforeEach(async ({ page }) => {
@@ -20,11 +21,17 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('search redirects and opens a Railway-backed place', async ({ page }) => {
+  const wikiRequests: string[] = [];
+  page.on('request', request => {
+    if (request.url().includes('wikipedia.org/api/rest_v1/page/summary')) wikiRequests.push(request.url());
+  });
   await page.goto('/search?search=เชียงใหม่');
   await expect(page).toHaveURL(/\/discover\?.*mode=search/);
   await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
   await page.goto('/attraction/railway-test-1');
   await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Wikipedia: Doi Inthanon' })).toBeVisible();
+  expect(wikiRequests).toEqual([]);
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
 });
 
