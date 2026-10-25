@@ -367,19 +367,29 @@ const AttractionDetail = ({
               <MapPin className="w-4 h-4" />
               <span>{attraction.province}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Star className="w-4 h-4 fill-current text-yellow-400" />
-              <span>{attraction.rating}</span>
-              <span className="opacity-80">
-                ({attraction.reviewCount.toLocaleString()} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})
-              </span>
-            </div>
+            {attraction.rating > 0 && attraction.reviewCount > 0 ? (
+              <div className="flex items-center gap-1.5">
+                <Star className="w-4 h-4 fill-current text-yellow-400" />
+                <span>{attraction.rating}</span>
+                <span className="opacity-80">
+                  ({attraction.reviewCount.toLocaleString()} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})
+                </span>
+              </div>
+            ) : <span className="text-sm">{currentLanguage === 'th' ? 'ยังไม่มีคะแนนรีวิวที่ยืนยันได้' : 'No verified reviews yet'}</span>}
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8 max-w-full overflow-hidden">
+        {attraction.source?.url && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            {currentLanguage === 'th' ? 'แหล่งอ้างอิงสถานที่: ' : 'Place source: '}
+            <a className="underline" href={attraction.source.url} target="_blank" rel="noopener noreferrer">
+              {attraction.source.name}
+            </a>
+          </p>
+        )}
         {/* Tags Section */}
         <Card className="mb-8">
           <CardContent className="p-6">

@@ -11,6 +11,8 @@ const {
   ensureSchema,
   getPlaceById,
   listPlaces,
+  listNearbyPlaces,
+  parseNearbyOptions,
   pingDatabase,
   closeDatabase,
 } = require('./postgres-db.cjs');
@@ -39,6 +41,25 @@ app.get('/api/places', async (req, res) => {
   }
 });
 
+// Geospatial read-only search. Do not store the caller's coordinates.
+app.get('/api/places/nearby', async (req, res) => {
+  try {
+    const options = parseNearbyOptions(req.query);
+    res.json(await listNearbyPlaces({
+      lat: options.latitude,
+      lng: options.longitude,
+      radiusKm: options.radius,
+      limit: options.count,
+    }));
+  } catch (error) {
+    if (error instanceof RangeError) {
+      return res.status(400).json({ error: 'Invalid nearby search parameters.' });
+    }
+    console.error('GET /api/places/nearby failed:', error?.message || error);
+    res.status(503).json({ error: 'Nearby places database is unavailable.' });
+  }
+});
+
 app.get('/api/places/:placeId', async (req, res) => {
   try {
     const place = await getPlaceById(req.params.placeId);
@@ -58,6 +79,7 @@ app.get('/api/places/:placeId', async (req, res) => {
       description: place.description,
       tags: place.tags,
       coordinates: place.coordinates,
+      source: place.source,
     });
   } catch (error) {
     console.error('GET /api/places/:placeId failed:', error?.message || error);

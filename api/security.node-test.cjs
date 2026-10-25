@@ -104,6 +104,7 @@ test('Railway production app exposes no place write routes', () => {
   const placeRoutes = routes.filter(({ path }) => path === '/api/places' || path.startsWith('/api/places/'));
   assert.deepEqual(placeRoutes, [
     { path: '/api/places', methods: ['get'] },
+    { path: '/api/places/nearby', methods: ['get'] },
     { path: '/api/places/:placeId', methods: ['get'] },
   ]);
   assert.equal(routes.some(({ path }) => path.startsWith('/api/admin') || path.startsWith('/api/upload')), false);

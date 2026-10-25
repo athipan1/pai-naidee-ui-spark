@@ -49,6 +49,21 @@ test('legacy Explore route navigates to Discover and preserves query', async ({ 
   await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
 });
 
+test('map uses Railway places and requests consent for real near-me search', async ({ page, context }) => {
+  await context.grantPermissions(['geolocation']);
+  await context.setGeolocation({ latitude: 18.59, longitude: 98.49 });
+  await page.route('**/api/places/nearby?**', route => route.fulfill({ json: {
+    attractions: [{ ...place, distanceKm: 0.02 }],
+    center: { lat: 18.59, lng: 98.49 }, radiusKm: 25,
+  } }));
+  await page.goto('/discover?mode=map');
+  await expect(page.getByTestId('real-attractions-map')).toBeVisible();
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+  await page.getByRole('button', { name: /Find near me|ค้นหาใกล้ฉัน/ }).click();
+  await expect(page.getByText(/0\.0 km/).first()).toBeVisible();
+  await expect(page.getByText('Phi Phi Islands')).toHaveCount(0);
+});
+
 test('production page never loads the missing external registerSW.js script', async ({ page }) => {
   const missingRegistrationRequests: string[] = [];
   page.on('request', request => {
