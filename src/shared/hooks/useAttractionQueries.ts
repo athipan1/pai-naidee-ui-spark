@@ -64,6 +64,35 @@ export const useAttractions = (filters?: {
   });
 };
 
+// Fetch the complete matching catalogue across the Railway API's 50-row pages.
+// This avoids silently hiding newer destinations in maps, categories and search.
+export const useAllAttractions = (filters?: { category?: string; search?: string }) => {
+  return useQuery({
+    queryKey: [...attractionKeys.lists(), 'all-pages', filters || {}],
+    queryFn: async () => {
+      const limit = 50;
+      const first = await attractionAPI.attractionService.getAttractions({ ...filters, page: 1, limit });
+      const attractions = [...first.attractions];
+      // Bound client-side work. Raise this bound only alongside a server-side
+      // catalogue strategy; a partial catalogue must never appear complete.
+      const maxPages = 20;
+      let page = 2;
+      while (attractions.length < first.total && page <= maxPages) {
+        const next = await attractionAPI.attractionService.getAttractions({ ...filters, page, limit });
+        if (next.attractions.length === 0) throw new Error('Incomplete attractions catalogue');
+        attractions.push(...next.attractions);
+        page += 1;
+      }
+      if (attractions.length < first.total) throw new Error('Attractions catalogue exceeds available pages');
+      return { attractions, total: first.total, page: 1, limit: attractions.length };
+    },
+    staleTime: 3 * 60 * 1000,
+    gcTime: 8 * 60 * 1000,
+    retry: 2,
+    throwOnError: false,
+  });
+};
+
 export const useNearbyAttractions = (location: { lat: number; lng: number } | null, radiusKm: number) => {
   return useQuery({
     queryKey: [...attractionKeys.all, 'nearby', location?.lat, location?.lng, radiusKm],

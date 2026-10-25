@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Grid3X3, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AttractionCard from '@/components/common/AttractionCard';
-import { useAttractions } from '@/shared/hooks/useAttractionQueries';
+import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 import { getThailandPlaceImage } from '@/shared/data/thailandPlaceImages';
 
 interface SearchViewProps {
@@ -18,7 +18,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
   const navigate = useNavigate();
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
-  const { data, error, isLoading, refetch } = useAttractions({ page: 1, limit: 100, search: query || undefined, category: category || undefined });
+  const { data, error, isLoading, refetch } = useAllAttractions({ search: query || undefined, category: category || undefined });
 
   const railwayResults = (data?.attractions ?? []).map(item => ({
     id: item.id, name: item.name, nameLocal: item.nameLocal || item.name,

@@ -10,7 +10,7 @@ import SearchView from "./SearchView";
 import CategoryView from "./CategoryView";
 import MapView from "./MapView";
 import TrendingView from "./TrendingView";
-import { useAttractions } from '@/shared/hooks/useAttractionQueries';
+import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 
 interface DiscoverLayoutProps {
   currentLanguage: "th" | "en";
@@ -63,8 +63,8 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
     }
   };
 
-  // Calculate attraction counts for CategoryFilter - mock data for now
-  const { data: catalog } = useAttractions({ page: 1, limit: 100 });
+  // Calculate the counts using every paginated Railway result.
+  const { data: catalog } = useAllAttractions();
   const attractionCounts = (catalog?.attractions ?? []).reduce((counts, item) => {
     const key = item.category.toLowerCase();
     counts[key] = (counts[key] || 0) + 1;

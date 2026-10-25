@@ -6,7 +6,7 @@ import { Loader2, LocateFixed, MapPin, RefreshCw } from 'lucide-react';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 import { Button } from '@/components/ui/button';
-import { useAttractions, useNearbyAttractions } from '@/shared/hooks/useAttractionQueries';
+import { useAllAttractions, useNearbyAttractions } from '@/shared/hooks/useAttractionQueries';
 import type { SearchResult } from '@/shared/types/search';
 
 const markerIcon = L.icon({
@@ -45,7 +45,7 @@ const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
   const [locationError, setLocationError] = useState('');
   const [locating, setLocating] = useState(false);
   const [showNearby, setShowNearby] = useState(false);
-  const catalogue = useAttractions({ page: 1, limit: 50 });
+  const catalogue = useAllAttractions();
   const nearby = useNearbyAttractions(showNearby ? location : null, radiusKm);
   const rawPlaces = showNearby ? nearby.data?.attractions : catalogue.data?.attractions;
   const places = useMemo(() => (rawPlaces ?? []).filter(hasValidCoordinates), [rawPlaces]);
