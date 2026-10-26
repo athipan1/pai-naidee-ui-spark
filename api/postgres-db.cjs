@@ -270,7 +270,7 @@ async function ensureSchema() {
         WHEN COALESCE(BTRIM(p.description_en), '') = ''
           AND p.description = loc.description_th THEN loc.description_en
         ELSE p.description_en END
-    FROM jsonb_to_recordset(${JSON.stringify(translations)}::jsonb)
+    FROM jsonb_to_recordset(${sql.json(translations)})
       AS loc(id text, province_th text, province_en text,
              description_th text, description_en text)
     WHERE p.id = loc.id
