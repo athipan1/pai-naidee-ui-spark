@@ -10,52 +10,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { showToast } from "./EnhancedToast";
 import type { AttractionPhotoCredit } from '@/shared/types/attraction';
-
-// Translation helpers
-const getCategoryNameTh = (category: string): string => {
-  const categories: { [key: string]: string } = {
-    Beach: "ชายหาด",
-    Culture: "วัฒนธรรม",
-    Nature: "ธรรมชาติ",
-    Food: "อาหาร",
-    Mountain: "ภูเขา",
-    Temple: "วัด",
-  };
-  return categories[category] || category;
-};
-
-const getTagNameTh = (tag: string): string => {
-  const tags: { [key: string]: string } = {
-    Beach: "ชายหาด",
-    Snorkeling: "ดำน้ำดูปะการัง",
-    Island: "เกาะ",
-    Photography: "ถ่ายรูป",
-    Temple: "วัด",
-    Culture: "วัฒนธรรม",
-    Buddhism: "พุทธศาสนา",
-    History: "ประวัติศาสตร์",
-    Mountain: "ภูเขา",
-    Nature: "ธรรมชาติ",
-    Hiking: "เดินป่า",
-    Waterfalls: "น้ำตก",
-    Food: "อาหาร",
-    Traditional: "แบบดั้งเดิม",
-    Market: "ตลาด",
-  };
-  return tags[tag] || tag;
-};
+import { localizedProvince, localizedDescription, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
 
 interface AttractionCardProps {
   id: string;
   name: string;
   nameLocal?: string;
   province: string;
+  provinceEn?: string | null;
   category: string;
   rating: number;
   reviewCount: number;
   image: string;
   mediaCredits?: AttractionPhotoCredit[];
   description: string;
+  descriptionEn?: string | null;
   tags: string[];
   isFavorite?: boolean;
   currentLanguage: "th" | "en";
@@ -68,12 +37,14 @@ const AttractionCard = ({
   name,
   nameLocal,
   province,
+  provinceEn,
   category,
   rating,
   reviewCount,
   image,
   mediaCredits,
   description,
+  descriptionEn,
   tags,
   isFavorite = false,
   currentLanguage,
@@ -84,6 +55,8 @@ const AttractionCard = ({
   const imageCredit = mediaCredits?.find(credit => credit.url === image);
 
   const displayName = currentLanguage === "th" && nameLocal ? nameLocal : name;
+  const displayProvince = localizedProvince({ province, provinceEn, description, descriptionEn }, currentLanguage);
+  const displayDescription = localizedDescription({ province, provinceEn, description, descriptionEn }, currentLanguage);
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -91,7 +64,7 @@ const AttractionCard = ({
       if (navigator.share) {
         await navigator.share({
           title: displayName,
-          text: description,
+          text: displayDescription,
           url: window.location.origin + `/attraction/${id}`,
         });
         showToast.shared(displayName);
@@ -135,7 +108,7 @@ const AttractionCard = ({
       className="attraction-card group bg-card/95 backdrop-blur-sm rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-border/30 hover:border-primary/30 relative z-10 transform hover:scale-[1.02] hover:-translate-y-1"
       role="button"
       tabIndex={0}
-      aria-label={`${displayName}, ${province} - ${currentLanguage === "th" ? getCategoryNameTh(category) : category}`}
+      aria-label={`${displayName}, ${displayProvince} - ${localizedCategory(category, currentLanguage)}`}
       onClick={() => onCardClick(id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -180,7 +153,7 @@ const AttractionCard = ({
         {/* Category badge with enhanced styling */}
         <div className="absolute top-4 left-4">
           <span className="px-3 py-1.5 glass-effect rounded-full text-xs font-semibold text-white border border-white/30 backdrop-blur-md shadow-lg">
-            {currentLanguage === "th" ? getCategoryNameTh(category) : category}
+            {localizedCategory(category, currentLanguage)}
           </span>
         </div>
 
@@ -248,7 +221,7 @@ const AttractionCard = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-muted-foreground">
               <MapPin className="w-4 h-4 transition-colors duration-300 group-hover:text-primary" />
-              <span className="text-sm font-medium">{province}</span>
+              <span className="text-sm font-medium">{displayProvince}</span>
             </div>
 
             {reviewCount > 0 && rating > 0 ? (
@@ -265,7 +238,7 @@ const AttractionCard = ({
 
         {/* Enhanced description */}
         <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed group-hover:text-foreground transition-colors duration-300">
-          {description}
+          {displayDescription}
         </p>
 
         {/* Enhanced tags with better styling */}
@@ -275,7 +248,7 @@ const AttractionCard = ({
               key={index}
               className="px-3 py-1 bg-gradient-to-r from-primary/15 to-secondary/15 text-primary rounded-full text-xs font-semibold border border-primary/30 hover:border-primary/50 transition-all duration-300 hover:scale-105"
             >
-              {currentLanguage === "th" ? getTagNameTh(tag) : tag}
+              {localizedTag(tag, currentLanguage)}
             </span>
           ))}
           {tags.length > 3 && (

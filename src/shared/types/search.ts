@@ -30,6 +30,7 @@ export interface SearchResult {
   name: string;
   nameLocal?: string;
   province: string;
+  provinceEn?: string | null;
   category: string;
   tags: string[];
   rating: number;
@@ -37,6 +38,7 @@ export interface SearchResult {
   image: string;
   mediaCredits?: AttractionPhotoCredit[];
   description: string;
+  descriptionEn?: string | null;
   confidence: number;
   matchedTerms: string[];
   amenities?: string[];

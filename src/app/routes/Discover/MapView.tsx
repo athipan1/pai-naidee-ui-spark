@@ -8,6 +8,7 @@ import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 import { Button } from '@/components/ui/button';
 import { useAllAttractions, useNearbyAttractions } from '@/shared/hooks/useAttractionQueries';
 import type { SearchResult } from '@/shared/types/search';
+import { localizedProvince } from '@/shared/i18n/placeLocalization';
 
 const markerIcon = L.icon({
   iconUrl,
@@ -140,7 +141,7 @@ const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
                 <Popup>
                   <div className="space-y-1">
                     <strong>{displayName}</strong>
-                    <div>{place.province}</div>
+                    <div>{localizedProvince(place, currentLanguage)}</div>
                     {typeof place.distanceKm === 'number' && <div>{place.distanceKm.toFixed(1)} km</div>}
                     <div><Link to={`/attraction/${encodeURIComponent(place.id)}`}>{th ? 'ดูรายละเอียด' : 'View details'}</Link></div>
                     <div><a href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer">{th ? 'นำทาง' : 'Directions'}</a></div>
@@ -166,7 +167,7 @@ const MapView = ({ currentLanguage, selectedAttractionId }: MapViewProps) => {
               <Link className="flex items-center gap-2 font-medium hover:underline" to={`/attraction/${encodeURIComponent(place.id)}`}>
                 <MapPin className="h-4 w-4 shrink-0" /> {th ? place.nameLocal || place.name : place.name}
               </Link>
-              <p className="text-sm text-muted-foreground">{place.province}{typeof place.distanceKm === 'number' ? ` · ${place.distanceKm.toFixed(1)} km` : ''}</p>
+              <p className="text-sm text-muted-foreground">{localizedProvince(place, currentLanguage)}{typeof place.distanceKm === 'number' ? ` · ${place.distanceKm.toFixed(1)} km` : ''}</p>
             </li>)}
           </ul>
           <p className="text-xs text-muted-foreground">{th ? 'ใช้ตำแหน่งเพื่อค้นหาเท่านั้น ไม่บันทึกลงฐานข้อมูลผู้ใช้ (ผู้ให้บริการอาจมีบันทึกคำขอ)' : 'Used only for nearby search, not saved to a user database (the service provider may log requests).'}</p>

@@ -43,12 +43,14 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       name: attraction.name,
       nameLocal: attraction.nameLocal || attraction.name,
       province: attraction.province,
+      provinceEn: attraction.provinceEn,
       category: attraction.category,
       rating: attraction.rating,
       reviewCount: attraction.reviewCount,
       image: getThailandPlaceImage(attraction.name, attraction.image),
       mediaCredits: attraction.mediaCredits,
       description: attraction.description,
+      descriptionEn: attraction.descriptionEn,
       tags: attraction.tags,
     }));
 

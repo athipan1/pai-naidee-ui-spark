@@ -13,6 +13,7 @@ export interface AttractionDetail {
   name: string;
   nameLocal: string;
   province: string;
+  provinceEn?: string | null;
   category: string;
   rating: number;
   reviewCount: number;
@@ -20,6 +21,7 @@ export interface AttractionDetail {
   mediaCredits?: AttractionPhotoCredit[];
   detailedDescription?: { text: string; sourceUrl: string | null } | null;
   description: string;
+  descriptionEn?: string | null;
   tags: string[];
   coordinates: {
     lat: number;

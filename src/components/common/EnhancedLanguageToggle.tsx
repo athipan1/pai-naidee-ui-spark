@@ -134,7 +134,7 @@ const EnhancedLanguageToggle = ({
               <div className="flex items-center gap-1">
                 <Check className="h-3 w-3 text-primary" />
                 <Badge variant="secondary" className="text-xs">
-                  Current
+                  {currentLanguage === 'th' ? 'ปัจจุบัน' : 'Current'}
                 </Badge>
               </div>
             )}

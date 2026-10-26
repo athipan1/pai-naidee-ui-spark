@@ -2,7 +2,36 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { parseNearbyOptions, normalizePlace, SEED_PLACES } = require('./postgres-db.cjs');
 const { serializePlaceDetail } = require('./railway-server.cjs');
+const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
 const verifiedMedia = require('./curated-wikimedia-media.json');
+
+test('every curated attraction has an English province and reviewed English summary', () => {
+  assert.equal(SEED_PLACES.length, 108);
+  assert.equal(Object.keys(DESCRIPTION_EN).length, SEED_PLACES.length);
+  for (const place of SEED_PLACES) {
+    const province = PROVINCE_EN[place.province];
+    const description = DESCRIPTION_EN[place.id];
+    assert.ok(province, `Missing English province: ${place.id}`);
+    assert.ok(description && description.length >= 30, `Missing English description: ${place.id}`);
+    assert.doesNotMatch(province, /[\u0e00-\u0e7f]/);
+    assert.doesNotMatch(description, /[\u0e00-\u0e7f]/);
+  }
+});
+
+test('Railway place normalization keeps both languages in list and detail responses', () => {
+  const row = {
+    id: 'test-localized', name: 'Amphawa Floating Market', name_local: 'ตลาดน้ำอัมพวา',
+    province: 'สมุทรสงคราม', province_en: 'Samut Songkhram',
+    description: 'ตลาดน้ำริมคลอง', description_en: 'A canal-side floating market.',
+    category: 'Food', rating: 0, review_count: 0, tags: [], lat: 13.4, lng: 100.1,
+  };
+  const normalized = normalizePlace(row);
+  assert.equal(normalized.provinceEn, row.province_en);
+  assert.equal(normalized.descriptionEn, row.description_en);
+  const detail = serializePlaceDetail(normalized);
+  assert.equal(detail.provinceEn, row.province_en);
+  assert.equal(detail.descriptionEn, row.description_en);
+});
 
 test('licensed Wikimedia photos have distinct place IDs and verifiable attribution', () => {
   assert.ok(verifiedMedia.length >= 70);

@@ -9,14 +9,15 @@ import FeedView from "./FeedView";
 import SearchView from "./SearchView";
 import CategoryView from "./CategoryView";
 import MapView from "./MapView";
-import TrendingView from "./TrendingView";
 import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
+import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
 
 interface DiscoverLayoutProps {
   currentLanguage: "th" | "en";
+  onLanguageChange: (language: "th" | "en") => void;
 }
 
-const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
+const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutProps) => {
   const navigate = useNavigate();
   const { state, setMode, setQuery, setCategory } = useDiscoveryState();
 
@@ -144,6 +145,8 @@ const DiscoverLayout = ({ currentLanguage }: DiscoverLayoutProps) => {
 
             {/* Mode Switcher - Only show for non-mobile or when relevant */}
             <div className="flex items-center space-x-2">
+              <EnhancedLanguageToggle currentLanguage={currentLanguage}
+                onLanguageChange={onLanguageChange} variant="button" size="sm" />
               {state.mode !== 'feed' && (
                 <Button
                   variant="outline"
