@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { parseNearbyOptions, normalizePlace, SEED_PLACES } = require('./postgres-db.cjs');
+const { serializePlaceDetail } = require('./railway-server.cjs');
 const verifiedMedia = require('./curated-wikimedia-media.json');
 
 test('licensed Wikimedia photos have distinct place IDs and verifiable attribution', () => {
@@ -33,6 +34,10 @@ test('Railway API normalizes seeded images, source credits and encyclopedia deta
   assert.equal(result.mediaCredits[0].licenseUrl, photo.licenseUrl);
   assert.equal(result.detailedDescription.text, photo.detailText);
   assert.equal(result.description, 'Reviewed Thai summary');
+  const response = serializePlaceDetail(result);
+  assert.deepEqual(response.mediaCredits, result.mediaCredits);
+  assert.deepEqual(response.detailedDescription, result.detailedDescription);
+  assert.deepEqual(response.images, [photo.url]);
 });
 const latestCurated = require('./additional-curated-places-v3.cjs');
 const newestCurated = require('./additional-curated-places-v4.cjs');

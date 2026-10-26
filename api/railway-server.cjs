@@ -60,14 +60,8 @@ app.get('/api/places/nearby', async (req, res) => {
   }
 });
 
-app.get('/api/places/:placeId', async (req, res) => {
-  try {
-    const place = await getPlaceById(req.params.placeId);
-    if (!place) {
-      return res.status(404).json({ error: 'Place not found.' });
-    }
-
-    res.json({
+function serializePlaceDetail(place) {
+  return {
       id: place.id,
       name: place.name,
       nameLocal: place.nameLocal,
@@ -76,11 +70,23 @@ app.get('/api/places/:placeId', async (req, res) => {
       rating: place.rating,
       reviewCount: place.reviewCount,
       images: place.images,
+      mediaCredits: place.mediaCredits,
+      detailedDescription: place.detailedDescription,
       description: place.description,
       tags: place.tags,
       coordinates: place.coordinates,
       source: place.source,
-    });
+  };
+}
+
+app.get('/api/places/:placeId', async (req, res) => {
+  try {
+    const place = await getPlaceById(req.params.placeId);
+    if (!place) {
+      return res.status(404).json({ error: 'Place not found.' });
+    }
+
+    res.json(serializePlaceDetail(place));
   } catch (error) {
     console.error('GET /api/places/:placeId failed:', error?.message || error);
     res.status(503).json({ error: 'Places database is unavailable.' });
@@ -193,4 +199,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, start };
+module.exports = { app, start, serializePlaceDetail };
