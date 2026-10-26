@@ -35,6 +35,28 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
 });
 
+test('feed shows each destination only once across recommendations and more places', async ({ page }) => {
+  const destinations = Array.from({ length: 12 }, (_, index) => ({
+    ...place,
+    id: `destination-${index}`,
+    name: index === 1 ? 'Amphawa Floating Market' : `Destination ${index}`,
+    nameLocal: index === 1 ? 'ตลาดน้ำอัมพวา' : `Destination ${index}`,
+  }));
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places**', route => route.fulfill({ json: {
+    attractions: [...destinations, destinations[1]],
+    total: 13, page: 1, limit: 20,
+  } }));
+
+  await page.goto('/discover?mode=feed');
+  await expect(page.getByRole('heading', { name: /Recommended Places|สถานที่แนะนำ/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /More Destinations|สถานที่อื่น ๆ/ })).toBeVisible();
+  await expect(page.locator('img[alt="Amphawa Floating Market"]')).toHaveCount(1);
+  for (const destination of destinations) {
+    await expect(page.getByRole('heading', { name: destination.name, exact: true })).toHaveCount(1);
+  }
+});
+
 test('detail page displays Railway photo attribution, license, and sourced additional details', async ({ page }) => {
   const photoUrl = 'https://images.painaidee.test/test-photo.png';
   await page.route('**/test-photo.png', route => route.fulfill({
