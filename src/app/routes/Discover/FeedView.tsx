@@ -70,7 +70,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
       exploreCategories: "หมวดหมู่สถานที่",
       trendingNow: "กำลังมาแรง",
       recommendedPlaces: "สถานที่แนะนำ",
-      allDestinations: "สถานที่ทั้งหมด",
+      moreDestinations: "สถานที่อื่น ๆ",
       noPlaces: "ไม่พบสถานที่ท่องเที่ยว",
       loading: "กำลังโหลด...",
       categories: {
@@ -87,7 +87,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
       exploreCategories: "Explore Categories",
       trendingNow: "Trending Now",
       recommendedPlaces: "Recommended Places", 
-      allDestinations: "All Destinations",
+      moreDestinations: "More Destinations",
       noPlaces: "No places found",
       loading: "Loading...",
       categories: {
@@ -204,13 +204,18 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
     navigate(`/discover?section=${section}`);
   };
 
+  // Keep one card per place ID even if an API response contains duplicate rows.
+  const uniquePlaces = Array.from(new Map(places.map(place => [place.id, place])).values());
+
   // Filter places by selected category
   const filteredPlaces = selectedCategory === "all" 
-    ? places 
-    : places.filter(place => place.category.toLowerCase() === selectedCategory.toLowerCase());
+    ? uniquePlaces
+    : uniquePlaces.filter(place => place.category.toLowerCase() === selectedCategory.toLowerCase());
 
-  const trendingPlaces = places.filter(place => place.isTrending).slice(0, 6);
-  const recommendedPlaces = places.slice(0, 8);
+  const trendingPlaces = uniquePlaces.filter(place => place.isTrending).slice(0, 6);
+  const recommendedPlaces = uniquePlaces.slice(0, 8);
+  const recommendedIds = new Set(recommendedPlaces.map(place => place.id));
+  const morePlaces = filteredPlaces.filter(place => !recommendedIds.has(place.id));
 
   if (loading || apiLoading) {
     return (
@@ -324,18 +329,18 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           </div>
         </section>
 
-        {/* All Destinations Section */}
-        <section>
+        {/* Further places exclude cards already shown in Recommended Places. */}
+        {(morePlaces.length > 0 || filteredPlaces.length === 0) && <section>
           <SectionHeader
-            title={t.allDestinations}
-            subtitle={currentLanguage === "th" ? "สถานที่ท่องเที่ยวทั้งหมด" : "All travel destinations"}
+            title={t.moreDestinations}
+            subtitle={currentLanguage === "th" ? "สำรวจสถานที่อื่นโดยไม่ซ้ำกับที่แนะนำ" : "Explore places not already shown in recommendations"}
             icon={MapPin}
             currentLanguage={currentLanguage}
           />
           
-          {filteredPlaces.length > 0 ? (
+          {morePlaces.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredPlaces.map((place) => (
+              {morePlaces.map((place) => (
                 <PlaceCard
                   key={place.id}
                   {...place}
@@ -360,7 +365,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
               </p>
             </div>
           )}
-        </section>
+        </section>}
       </div>
     </div>
   );
