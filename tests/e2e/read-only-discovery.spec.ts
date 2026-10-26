@@ -72,7 +72,7 @@ test('map uses Railway places and requests consent for real near-me search', asy
 });
 
 test('map, search, and category browse beyond the Railway 50-place page limit', async ({ page }) => {
-  const places = Array.from({ length: 55 }, (_, index) => ({
+  const places = Array.from({ length: 125 }, (_, index) => ({
     ...place,
     id: `railway-page-${index + 1}`,
     name: `Destination ${index + 1}`,
@@ -94,12 +94,13 @@ test('map, search, and category browse beyond the Railway 50-place page limit', 
     } });
   });
   await page.goto('/discover?mode=map');
-  await expect(page.locator('[data-testid="real-attractions-map"] li')).toHaveCount(55);
+  await expect(page.locator('[data-testid="real-attractions-map"] li')).toHaveCount(125);
   expect(requestedPages).toContain(2);
+  expect(requestedPages).toContain(3);
   await page.goto('/discover?mode=search&q=Destination');
-  await expect(page.getByText('Destination 55').first()).toBeVisible();
+  await expect(page.getByText('Destination 125').first()).toBeVisible();
   await page.goto('/discover?mode=category&category=Nature');
-  await expect(page.getByText('Destination 55').first()).toBeVisible();
+  await expect(page.getByText('Destination 125').first()).toBeVisible();
 });
 
 test('production page never loads the missing external registerSW.js script', async ({ page }) => {
