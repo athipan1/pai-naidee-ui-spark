@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { showToast } from "./EnhancedToast";
+import type { AttractionPhotoCredit } from '@/shared/types/attraction';
 
 // Translation helpers
 const getCategoryNameTh = (category: string): string => {
@@ -53,6 +54,7 @@ interface AttractionCardProps {
   rating: number;
   reviewCount: number;
   image: string;
+  mediaCredits?: AttractionPhotoCredit[];
   description: string;
   tags: string[];
   isFavorite?: boolean;
@@ -70,6 +72,7 @@ const AttractionCard = ({
   rating,
   reviewCount,
   image,
+  mediaCredits,
   description,
   tags,
   isFavorite = false,
@@ -78,6 +81,7 @@ const AttractionCard = ({
   onCardClick,
 }: AttractionCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const imageCredit = mediaCredits?.find(credit => credit.url === image);
 
   const displayName = currentLanguage === "th" && nameLocal ? nameLocal : name;
 
@@ -157,6 +161,18 @@ const AttractionCard = ({
           width={400}
           height={300}
         />
+        {imageCredit && (
+          <a
+            href={imageCredit.sourcePage}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-2 right-2 z-30 max-w-[90%] truncate rounded bg-black/70 px-2 py-1 text-[10px] text-white"
+            onClick={event => event.stopPropagation()}
+            aria-label={`Photo by ${imageCredit.photographer}, ${imageCredit.licenseName}, Wikimedia Commons`}
+          >
+            © {imageCredit.photographer} · {imageCredit.licenseName}
+          </a>
+        )}
 
         {/* Enhanced overlay gradient */}
         <div className="hero-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-3xl" />

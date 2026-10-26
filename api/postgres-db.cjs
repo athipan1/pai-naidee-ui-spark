@@ -3,6 +3,7 @@ const ADDITIONAL_CURATED_PLACES = require('./additional-curated-places.cjs');
 const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs');
 const ADDITIONAL_CURATED_PLACES_V3 = require('./additional-curated-places-v3.cjs');
 const ADDITIONAL_CURATED_PLACES_V4 = require('./additional-curated-places-v4.cjs');
+const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
 
 let sqlClient = null;
 
@@ -181,6 +182,8 @@ async function ensureSchema() {
       source_name TEXT,
       source_url TEXT,
       verified_at TIMESTAMPTZ,
+      detail_text TEXT,
+      detail_source_url TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -192,6 +195,10 @@ async function ensureSchema() {
       type TEXT NOT NULL DEFAULT 'image',
       title TEXT NOT NULL DEFAULT '',
       description TEXT NOT NULL DEFAULT '',
+      creator_name TEXT,
+      license_name TEXT,
+      license_url TEXT,
+      source_page TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
@@ -202,6 +209,12 @@ async function ensureSchema() {
     ALTER TABLE places ADD COLUMN IF NOT EXISTS source_name TEXT;
     ALTER TABLE places ADD COLUMN IF NOT EXISTS source_url TEXT;
     ALTER TABLE places ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
+    ALTER TABLE places ADD COLUMN IF NOT EXISTS detail_text TEXT;
+    ALTER TABLE places ADD COLUMN IF NOT EXISTS detail_source_url TEXT;
+    ALTER TABLE media ADD COLUMN IF NOT EXISTS creator_name TEXT;
+    ALTER TABLE media ADD COLUMN IF NOT EXISTS license_name TEXT;
+    ALTER TABLE media ADD COLUMN IF NOT EXISTS license_url TEXT;
+    ALTER TABLE media ADD COLUMN IF NOT EXISTS source_page TEXT;
     CREATE INDEX IF NOT EXISTS idx_places_coordinates ON places (lat, lng);
   `);
 
@@ -239,6 +252,30 @@ async function ensureSchema() {
         AND review_count = ${demoReviews} AND image_url = ${demoImageUrl}
     `;
   }
+
+  // Licensed, carefully matched Wikimedia thumbnail metadata is stored in
+  // PostgreSQL; the images themselves remain on Wikimedia's CDN. Use an
+  // immutable namespaced ID to preserve any existing user-uploaded media.
+  for (const photo of VERIFIED_WIKIMEDIA_MEDIA) {
+    await sql`
+      INSERT INTO media (
+        id, place_id, url, type, title, description,
+        creator_name, license_name, license_url, source_page
+      ) VALUES (
+        ${`wikimedia:${photo.placeId}`}, ${photo.placeId}, ${photo.url},
+        'image', ${photo.placeName}, 'Photograph sourced from Wikimedia Commons',
+        ${photo.photographer}, ${photo.licenseName}, ${photo.licenseUrl}, ${photo.sourcePage}
+      ) ON CONFLICT (id) DO NOTHING
+    `;
+    if (photo.detailText) {
+      await sql`
+        UPDATE places SET detail_text = ${photo.detailText},
+          detail_source_url = ${photo.detailSourceUrl}
+        WHERE id = ${photo.placeId}
+          AND (detail_text IS NULL OR detail_text = '')
+      `;
+    }
+  }
 }
 
 function normalizeJsonArray(value) {
@@ -270,6 +307,17 @@ function normalizePlace(row) {
       : row.image_url
         ? [row.image_url]
         : [],
+    mediaCredits: media.filter((item) => item.sourcePage && item.licenseUrl).map((item) => ({
+      url: item.url,
+      photographer: item.creatorName || 'Wikimedia Commons contributor',
+      licenseName: item.licenseName,
+      licenseUrl: item.licenseUrl,
+      sourcePage: item.sourcePage,
+    })),
+    detailedDescription: row.detail_text ? {
+      text: row.detail_text,
+      sourceUrl: row.detail_source_url || null,
+    } : null,
     description: row.description || '',
     tags: normalizeJsonArray(row.tags),
     source: row.source_url ? {
@@ -315,8 +363,11 @@ async function listNearbyPlaces(options) {
     SELECT ranked.*,
       (SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
         'id', m.id, 'url', m.url, 'type', m.type,
-        'title', m.title, 'description', m.description
-      )), '[]'::json) FROM media m WHERE m.place_id = ranked.id) AS media
+        'title', m.title, 'description', m.description,
+        'creatorName', m.creator_name, 'licenseName', m.license_name,
+        'licenseUrl', m.license_url, 'sourcePage', m.source_page
+      ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC), '[]'::json)
+      FROM media m WHERE m.place_id = ranked.id) AS media
     FROM ranked
     WHERE distance_km <= ${radius}
     ORDER BY distance_km ASC, name ASC
@@ -347,8 +398,10 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
             'url', m.url,
             'type', m.type,
             'title', m.title,
-            'description', m.description
-          )
+            'description', m.description,
+            'creatorName', m.creator_name, 'licenseName', m.license_name,
+            'licenseUrl', m.license_url, 'sourcePage', m.source_page
+          ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC
         ) FILTER (WHERE m.id IS NOT NULL),
         '[]'::json
       ) AS media
@@ -403,8 +456,10 @@ async function getPlaceById(id) {
             'url', m.url,
             'type', m.type,
             'title', m.title,
-            'description', m.description
-          )
+            'description', m.description,
+            'creatorName', m.creator_name, 'licenseName', m.license_name,
+            'licenseUrl', m.license_url, 'sourcePage', m.source_page
+          ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC
         ) FILTER (WHERE m.id IS NOT NULL),
         '[]'::json
       ) AS media
@@ -438,6 +493,7 @@ module.exports = {
   listPlaces,
   listNearbyPlaces,
   parseNearbyOptions,
+  normalizePlace,
   SEED_PLACES,
   pingDatabase,
 };

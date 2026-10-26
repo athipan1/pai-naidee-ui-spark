@@ -1,6 +1,39 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseNearbyOptions, SEED_PLACES } = require('./postgres-db.cjs');
+const { parseNearbyOptions, normalizePlace, SEED_PLACES } = require('./postgres-db.cjs');
+const verifiedMedia = require('./curated-wikimedia-media.json');
+
+test('licensed Wikimedia photos have distinct place IDs and verifiable attribution', () => {
+  assert.ok(verifiedMedia.length >= 70);
+  assert.equal(new Set(verifiedMedia.map(photo => photo.placeId)).size, verifiedMedia.length);
+  const places = new Set(SEED_PLACES.map(place => place.id));
+  for (const photo of verifiedMedia) {
+    assert.ok(places.has(photo.placeId), `Missing linked place: ${photo.placeId}`);
+    assert.match(photo.url, /^https:\/\/(?:thumb|upload)\.wikimedia\.org\//);
+    assert.match(photo.sourcePage, /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+    assert.match(photo.licenseUrl, /^https:\/\//);
+    assert.ok(photo.photographer.length > 0 && photo.photographer.length <= 180);
+    assert.ok(photo.licenseName && photo.detailSourceUrl.startsWith('https://'));
+  }
+});
+
+test('Railway API normalizes seeded images, source credits and encyclopedia details', () => {
+  const photo = verifiedMedia[0];
+  const result = normalizePlace({
+    id: photo.placeId, name: photo.placeName, name_local: photo.placeName,
+    province: 'กรุงเทพฯ', category: 'Culture', rating: 0, review_count: 0,
+    image_url: null, description: 'Reviewed Thai summary', tags: [], lat: 13.7, lng: 100.5,
+    detail_text: photo.detailText, detail_source_url: photo.detailSourceUrl,
+    media: [{url: photo.url,creatorName:photo.photographer,licenseName:photo.licenseName,
+      licenseUrl:photo.licenseUrl,sourcePage:photo.sourcePage}],
+  });
+  assert.equal(result.image, photo.url);
+  assert.deepEqual(result.images, [photo.url]);
+  assert.equal(result.mediaCredits[0].photographer, photo.photographer);
+  assert.equal(result.mediaCredits[0].licenseUrl, photo.licenseUrl);
+  assert.equal(result.detailedDescription.text, photo.detailText);
+  assert.equal(result.description, 'Reviewed Thai summary');
+});
 const latestCurated = require('./additional-curated-places-v3.cjs');
 const newestCurated = require('./additional-curated-places-v4.cjs');
 

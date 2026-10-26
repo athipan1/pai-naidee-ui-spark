@@ -1,3 +1,5 @@
+import type { AttractionPhotoCredit } from './attraction';
+
 export interface SearchQuery {
   query: string;
   language: "th" | "en";
@@ -33,6 +35,7 @@ export interface SearchResult {
   rating: number;
   reviewCount: number;
   image: string;
+  mediaCredits?: AttractionPhotoCredit[];
   description: string;
   confidence: number;
   matchedTerms: string[];

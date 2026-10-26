@@ -86,7 +86,9 @@ export function getThailandPlaceImage(
   placeName: string,
   fallbackUrl?: string,
 ): string {
-  return aliases.get(normalizePlaceName(placeName))?.url ?? fallbackUrl ?? "/placeholder-attraction.jpg";
+  // Live Railway images with verified source/license take precedence over
+  // older static examples. Only use legacy imagery as a missing-data fallback.
+  return fallbackUrl || aliases.get(normalizePlaceName(placeName))?.url || "/placeholder-attraction.jpg";
 }
 
 export function getThailandPlaceImageMeta(

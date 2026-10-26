@@ -34,6 +34,11 @@ describe("Thailand attraction image catalog", () => {
     );
   });
 
+  it("prefers a sourced Railway image over the legacy catalog for known places", () => {
+    const databaseImage = "https://thumb.wikimedia.org/example.jpg";
+    expect(getThailandPlaceImage("Wat Arun", databaseImage)).toBe(databaseImage);
+  });
+
   it("falls back safely when no image is known", () => {
     expect(getThailandPlaceImage("Unknown Place")).toBe(
       "/placeholder-attraction.jpg",
