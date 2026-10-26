@@ -112,13 +112,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         />
       )}
       
-      {/* Actual image */}
+      {/* Keep the image in the layout while loading: display:none prevents native lazy loading. */}
       <img
         src={currentSrc}
         alt={alt}
         loading={loading}
         decoding={decoding}
-        className={`${className} ${imageState === 'loaded' ? 'block' : 'hidden'}`}
+        className={`${className} ${imageState === 'loaded' ? 'block' : 'opacity-0'}`}
         onLoad={handleImageLoad}
         onError={handleImageError}
         width={width}
