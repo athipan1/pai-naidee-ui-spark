@@ -66,6 +66,7 @@ function serializePlaceDetail(place) {
       name: place.name,
       nameLocal: place.nameLocal,
       province: place.province,
+      provinceEn: place.provinceEn,
       category: place.category,
       rating: place.rating,
       reviewCount: place.reviewCount,
@@ -73,6 +74,7 @@ function serializePlaceDetail(place) {
       mediaCredits: place.mediaCredits,
       detailedDescription: place.detailedDescription,
       description: place.description,
+      descriptionEn: place.descriptionEn,
       tags: place.tags,
       coordinates: place.coordinates,
       source: place.source,
@@ -153,7 +155,7 @@ app.get('/api/health', async (_req, res) => {
       database: databaseOk ? 'ok' : 'unavailable',
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch {
     res.status(503).json({
       status: 'degraded',
       service: 'painaidee-railway-api',

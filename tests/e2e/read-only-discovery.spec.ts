@@ -2,8 +2,10 @@ import { test, expect } from '@playwright/test';
 
 const place = {
   id: 'railway-test-1', name: 'Doi Inthanon', nameLocal: 'ดอยอินทนนท์',
-  province: 'เชียงใหม่', category: 'Nature', rating: 4.7, reviewCount: 12,
-  description: 'สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่', tags: ['Mountain'],
+  province: 'เชียงใหม่', provinceEn: 'Chiang Mai', category: 'Nature', rating: 4.7, reviewCount: 12,
+  description: 'สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่',
+  descriptionEn: 'A scenic mountain destination in Chiang Mai province.',
+  tags: ['Mountain'],
   image: '', images: [], coordinates: { lat: 18.59, lng: 98.49 },
   source: { name: 'Wikipedia: Doi Inthanon', url: 'https://en.wikipedia.org/wiki/Doi_Inthanon' },
 };
@@ -18,6 +20,28 @@ test.beforeEach(async ({ page }) => {
       await route.fulfill({ json: { attractions: match ? [place] : [], total: match ? 1 : 0, page: 1, limit: 100 } });
     }
   });
+});
+
+test('language choice translates the Railway feed and details and persists across navigation and reload', async ({ page }) => {
+  await page.goto('/discover?mode=feed');
+  await expect(page.getByText('A scenic mountain destination in Chiang Mai province.').first()).toBeVisible();
+  await expect(page.getByText('Chiang Mai').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Switch to ไทย' })).toBeVisible();
+  await page.getByRole('button', { name: 'Switch to ไทย' }).click();
+  await expect(page.getByText('สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่').first()).toBeVisible();
+  await expect(page.getByText('เชียงใหม่').first()).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Switch to English' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'th');
+  await page.goto('/attraction/railway-test-1');
+  await expect(page.getByRole('heading', { name: 'ดอยอินทนนท์', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'เกี่ยวกับสถานที่นี้' })).toBeVisible();
+  await expect(page.getByText('สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่').first()).toBeVisible();
+  await expect(page.getByText('เชียงใหม่').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Switch to English' }).click();
+  await expect(page.getByRole('heading', { name: 'About this place' })).toBeVisible();
+  await expect(page.getByText('A scenic mountain destination in Chiang Mai province.').first()).toBeVisible();
+  await expect(page.getByText('Chiang Mai').first()).toBeVisible();
 });
 
 test('search redirects and opens a Railway-backed place', async ({ page }) => {

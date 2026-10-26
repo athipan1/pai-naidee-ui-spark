@@ -22,12 +22,14 @@ interface TravelPlace {
   name: string;
   nameLocal?: string;
   province: string;
+  provinceEn?: string | null;
   category: string;
   rating: number;
   reviewCount: number;
   image: string;
   mediaCredits?: AttractionPhotoCredit[];
   description: string;
+  descriptionEn?: string | null;
   tags: string[];
   isTrending?: boolean;
 }
@@ -160,12 +162,14 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           name: attraction.name,
           nameLocal: attraction.nameLocal || attraction.name,
           province: attraction.province,
+          provinceEn: attraction.provinceEn,
           category: attraction.category,
           rating: attraction.rating,
           reviewCount: attraction.reviewCount,
           image: getThailandPlaceImage(attraction.name, attraction.image),
           mediaCredits: attraction.mediaCredits,
           description: attraction.description,
+          descriptionEn: attraction.descriptionEn,
           tags: attraction.tags || [],
           isTrending: false // No verified trending metric in Railway data
         }));

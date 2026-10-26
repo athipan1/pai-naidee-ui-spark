@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import AttractionCard from '@/components/common/AttractionCard';
 import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 import { getThailandPlaceImage } from '@/shared/data/thailandPlaceImages';
+import { localizedCategory } from '@/shared/i18n/placeLocalization';
 
 interface SearchViewProps {
   currentLanguage: "th" | "en";
@@ -22,10 +23,11 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
 
   const railwayResults = (data?.attractions ?? []).map(item => ({
     id: item.id, name: item.name, nameLocal: item.nameLocal || item.name,
-    province: item.province, category: item.category, rating: item.rating,
+    province: item.province, provinceEn: item.provinceEn,
+    category: item.category, rating: item.rating,
     reviewCount: item.reviewCount, image: getThailandPlaceImage(item.name, item.image),
     mediaCredits: item.mediaCredits,
-    description: item.description, tags: item.tags || []
+    description: item.description, descriptionEn: item.descriptionEn, tags: item.tags || []
   }));
   const filteredResults = railwayResults;
 
@@ -62,7 +64,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
                 {category && (
                   <p className="text-muted-foreground">
                     {currentLanguage === 'th' 
-                      ? `หมวดหมู่: ${category}`
+                      ? `หมวดหมู่: ${localizedCategory(category, currentLanguage)}`
                       : `Category: ${category}`
                     }
                   </p>
@@ -74,7 +76,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
             <div className="space-y-4">
               {/* View Mode Controls */}
               <div className="flex items-center justify-end">
-                <div className="flex border border-border rounded-md" role="group" aria-label="View mode">
+                <div className="flex border border-border rounded-md" role="group" aria-label={currentLanguage === 'th' ? 'รูปแบบการแสดงผล' : 'View mode'}>
                   <Button
                     variant={viewMode === 'grid' ? "default" : "ghost"}
                     size="sm"

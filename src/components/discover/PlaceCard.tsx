@@ -2,18 +2,21 @@ import React from 'react';
 import { Heart, Star, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { AttractionPhotoCredit } from '@/shared/types/attraction';
+import { localizedProvince, localizedDescription } from '@/shared/i18n/placeLocalization';
 
 interface PlaceCardProps {
   id: string;
   name: string;
   nameLocal?: string;
   province: string;
+  provinceEn?: string | null;
   category: string;
   rating: number;
   reviewCount: number;
   image: string;
   mediaCredits?: AttractionPhotoCredit[];
   description: string;
+  descriptionEn?: string | null;
   tags?: string[];
   isFavorite?: boolean;
   currentLanguage: 'th' | 'en';
@@ -27,11 +30,13 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
   name,
   nameLocal,
   province,
+  provinceEn,
   rating,
   reviewCount,
   image,
   mediaCredits,
   description,
+  descriptionEn,
   isFavorite = false,
   currentLanguage,
   onFavoriteToggle,
@@ -40,6 +45,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
 }) => {
   const displayName = currentLanguage === 'th' && nameLocal ? nameLocal : name;
   const imageCredit = mediaCredits?.find(credit => credit.url === image);
+  const translatedFields = { province, provinceEn, description, descriptionEn };
 
   return (
     <div 
@@ -93,7 +99,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
           </h3>
           <div className="flex items-center text-gray-600 text-sm">
             <MapPin className="w-4 h-4 mr-1" />
-            <span>{province}</span>
+            <span>{localizedProvince(translatedFields, currentLanguage)}</span>
           </div>
         </div>
 
@@ -110,7 +116,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
 
         {/* Description */}
         <p className="text-gray-600 text-sm line-clamp-2">
-          {description}
+          {localizedDescription(translatedFields, currentLanguage)}
         </p>
       </div>
     </div>

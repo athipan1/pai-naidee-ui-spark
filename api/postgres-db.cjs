@@ -4,6 +4,7 @@ const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs
 const ADDITIONAL_CURATED_PLACES_V3 = require('./additional-curated-places-v3.cjs');
 const ADDITIONAL_CURATED_PLACES_V4 = require('./additional-curated-places-v4.cjs');
 const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
+const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
 
 let sqlClient = null;
 
@@ -171,11 +172,13 @@ async function ensureSchema() {
       name TEXT NOT NULL,
       name_local TEXT,
       province TEXT NOT NULL,
+      province_en TEXT,
       category TEXT NOT NULL,
       rating DOUBLE PRECISION NOT NULL DEFAULT 0,
       review_count INTEGER NOT NULL DEFAULT 0,
       image_url TEXT,
       description TEXT NOT NULL DEFAULT '',
+      description_en TEXT,
       tags JSONB NOT NULL DEFAULT '[]'::jsonb,
       lat DOUBLE PRECISION,
       lng DOUBLE PRECISION,
@@ -211,6 +214,8 @@ async function ensureSchema() {
     ALTER TABLE places ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
     ALTER TABLE places ADD COLUMN IF NOT EXISTS detail_text TEXT;
     ALTER TABLE places ADD COLUMN IF NOT EXISTS detail_source_url TEXT;
+    ALTER TABLE places ADD COLUMN IF NOT EXISTS province_en TEXT;
+    ALTER TABLE places ADD COLUMN IF NOT EXISTS description_en TEXT;
     ALTER TABLE media ADD COLUMN IF NOT EXISTS creator_name TEXT;
     ALTER TABLE media ADD COLUMN IF NOT EXISTS license_name TEXT;
     ALTER TABLE media ADD COLUMN IF NOT EXISTS license_url TEXT;
@@ -243,6 +248,35 @@ async function ensureSchema() {
       `;
     }
   }
+
+  // Backfill bilingual fields for unchanged seed data without overwriting
+  // translations or descriptions edited by a user. One set-based query keeps
+  // startup migration inexpensive as the curated catalogue grows.
+  const translations = SEED_PLACES.map(place => ({
+    id: place.id,
+    province_th: place.province,
+    province_en: PROVINCE_EN[place.province],
+    description_th: place.description,
+    description_en: DESCRIPTION_EN[place.id],
+  }));
+  await sql`
+    UPDATE places AS p
+    SET
+      province_en = CASE
+        WHEN COALESCE(BTRIM(p.province_en), '') = ''
+          AND p.province = loc.province_th THEN loc.province_en
+        ELSE p.province_en END,
+      description_en = CASE
+        WHEN COALESCE(BTRIM(p.description_en), '') = ''
+          AND p.description = loc.description_th THEN loc.description_en
+        ELSE p.description_en END
+    FROM jsonb_to_recordset(${JSON.stringify(translations)}::jsonb)
+      AS loc(id text, province_th text, province_en text,
+             description_th text, description_en text)
+    WHERE p.id = loc.id
+      AND (COALESCE(BTRIM(p.province_en), '') = ''
+        OR COALESCE(BTRIM(p.description_en), '') = '')
+  `;
 
   for (const [id, demoRating, demoReviews, demoImageUrl] of LEGACY_DEMO_VALUES) {
     await sql`
@@ -298,6 +332,7 @@ function normalizePlace(row) {
     name: row.name,
     nameLocal: row.name_local || row.name,
     province: row.province,
+    provinceEn: row.province_en || null,
     category: row.category,
     rating: Number(row.rating) || 0,
     reviewCount: Number(row.review_count) || 0,
@@ -319,6 +354,7 @@ function normalizePlace(row) {
       sourceUrl: row.detail_source_url || null,
     } : null,
     description: row.description || '',
+    descriptionEn: row.description_en || null,
     tags: normalizeJsonArray(row.tags),
     source: row.source_url ? {
       name: row.source_name || 'Source',
@@ -414,7 +450,9 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
         p.name ILIKE ${searchPattern} OR
         p.name_local ILIKE ${searchPattern} OR
         p.description ILIKE ${searchPattern} OR
-        p.province ILIKE ${searchPattern}
+        p.description_en ILIKE ${searchPattern} OR
+        p.province ILIKE ${searchPattern} OR
+        p.province_en ILIKE ${searchPattern}
       )
     GROUP BY p.id
     ORDER BY p.rating DESC, p.name ASC, p.id ASC
@@ -432,7 +470,9 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
         p.name ILIKE ${searchPattern} OR
         p.name_local ILIKE ${searchPattern} OR
         p.description ILIKE ${searchPattern} OR
-        p.province ILIKE ${searchPattern}
+        p.description_en ILIKE ${searchPattern} OR
+        p.province ILIKE ${searchPattern} OR
+        p.province_en ILIKE ${searchPattern}
       )
   `;
 

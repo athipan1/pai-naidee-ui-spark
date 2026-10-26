@@ -9,7 +9,6 @@ import {
   Navigation,
   Tag,
   ChevronDown,
-  Hotel,
   ExternalLink,
   Globe,
   BookOpen,
@@ -29,8 +28,10 @@ import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
+import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
 import type { Accommodation, WikiData } from "@/shared/types/attraction";
+import { localizedProvince, localizedDescription, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
 
 const pastelVariants = [
   "pastel-blue",
@@ -42,11 +43,13 @@ const pastelVariants = [
 
 interface AttractionDetailProps {
   currentLanguage: "th" | "en";
+  onLanguageChange: (language: "th" | "en") => void;
   onBack: () => void;
 }
 
 const AttractionDetail = ({
   currentLanguage,
+  onLanguageChange,
   onBack,
 }: AttractionDetailProps) => {
   const { id } = useParams<{ id: string }>();
@@ -63,9 +66,9 @@ const AttractionDetail = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [showAccommodationModal, setShowAccommodationModal] = useState(false);
-  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
-  const [accommodationLoading, setAccommodationLoading] = useState(false);
-  const [accommodationError, setAccommodationError] = useState<string | null>(null);
+  const [accommodations] = useState<Accommodation[]>([]);
+  const [accommodationLoading] = useState(false);
+  const [accommodationError] = useState<string | null>(null);
   const [wikiData, setWikiData] = useState<WikiData | null>(null);
   const [isWikiLoading, setIsWikiLoading] = useState(false);
   const [wikiError, setWikiError] = useState<string | null>(null);
@@ -81,8 +84,8 @@ const AttractionDetail = ({
       setIsWikiLoading(false);
       return;
     }
-    fetchWikiData(attraction.nameLocal || attraction.name);
-  }, [attraction]);
+    fetchWikiData(currentLanguage === 'th' ? (attraction.nameLocal || attraction.name) : attraction.name);
+  }, [attraction, currentLanguage]);
 
   const content = {
     th: {
@@ -149,27 +152,11 @@ const AttractionDetail = ({
     // Here you would typically call an API to update favorites
   };
 
-  const handleShare = () => {
-    if (navigator.share && attraction) {
-      navigator.share({
-        title: displayName,
-        text: attraction.description,
-        url: window.location.href,
-      })
-      .catch(console.error);
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      // In a real app, you'd use a toast component here
-      alert(currentLanguage === 'th' ? 'คัดลอกลิงก์แล้ว' : 'Link copied to clipboard!');
-    }
-  };
-
   const fetchWikiData = async (placeName: string) => {
     setIsWikiLoading(true);
     setWikiError(null);
     try {
-      // Use the Thai Wikipedia endpoint
-      const response = await fetch(`https://th.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(placeName)}`);
+      const response = await fetch(`https://${currentLanguage}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(placeName)}`);
 
       // Check if the response is successful
       if (!response.ok) {
@@ -258,6 +245,7 @@ const AttractionDetail = ({
     currentLanguage === "th" && attraction.nameLocal
       ? attraction.nameLocal
       : wikiData?.title || attraction.name;
+  const displayProvince = localizedProvince(attraction, currentLanguage);
 
   // This logic correctly prioritizes the Wikipedia image if it exists.
   const displayImages = wikiData?.thumbnail?.source
@@ -280,10 +268,12 @@ const AttractionDetail = ({
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">{t.backToSearch}</span>
-              <span className="sm:hidden">Back</span>
+              <span className="sm:hidden">{t.backToSearch}</span>
             </Button>
             
             <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
+              <EnhancedLanguageToggle currentLanguage={currentLanguage}
+                onLanguageChange={onLanguageChange} variant="button" size="sm" showName={false} />
               <Button
                 variant="ghost"
                 onClick={() => refetchAttraction()}
@@ -301,7 +291,7 @@ const AttractionDetail = ({
                   >
                     <Map className="w-4 h-4" />
                     <span className="hidden md:inline">{t.mapAndNavigate}</span>
-                    <span className="md:hidden">Map</span>
+                    <span className="md:hidden">{currentLanguage === 'th' ? 'แผนที่' : 'Map'}</span>
                     <ChevronDown className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -374,7 +364,7 @@ const AttractionDetail = ({
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
-              <span>{attraction.province}</span>
+              <span>{displayProvince}</span>
             </div>
             {attraction.rating > 0 && attraction.reviewCount > 0 ? (
               <div className="flex items-center gap-1.5">
@@ -414,16 +404,16 @@ const AttractionDetail = ({
         {/* Tags Section */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Tags</h3>
+            <h3 className="text-lg font-semibold mb-4">{currentLanguage === 'th' ? 'หัวข้อ' : 'Tags'}</h3>
             <div className="flex flex-wrap gap-2">
               {attraction.tags.map((tag, index) => (
                 <Badge
                   key={index}
                   variant={pastelVariants[index % pastelVariants.length]}
                   className="cursor-pointer text-sm"
-                  onClick={() => alert(`Filtering by ${tag}`)}
+                  onClick={() => alert(currentLanguage === 'th' ? `กรองตาม: ${localizedTag(tag, currentLanguage)}` : `Filtering by ${tag}`)}
                 >
-                  {tag}
+                  {localizedTag(tag, currentLanguage)}
                 </Badge>
               ))}
             </div>
@@ -433,15 +423,15 @@ const AttractionDetail = ({
         {/* Details Section */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Details</h3>
+            <h3 className="text-lg font-semibold mb-4">{currentLanguage === 'th' ? 'รายละเอียด' : 'Details'}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
                 <div className="bg-primary/10 p-2 rounded-lg">
                   <MapPin className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-muted-foreground">Location</p>
-                  <p className="text-lg font-semibold">{attraction.province}</p>
+                  <p className="font-medium text-muted-foreground">{currentLanguage === 'th' ? 'จังหวัด' : 'Location'}</p>
+                  <p className="text-lg font-semibold">{displayProvince}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -449,8 +439,8 @@ const AttractionDetail = ({
                   <Tag className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-muted-foreground">Category</p>
-                  <p className="text-lg font-semibold">{attraction.category}</p>
+                  <p className="font-medium text-muted-foreground">{currentLanguage === 'th' ? 'หมวดหมู่' : 'Category'}</p>
+                  <p className="text-lg font-semibold">{localizedCategory(attraction.category, currentLanguage)}</p>
                 </div>
               </div>
             </div>
@@ -472,17 +462,17 @@ const AttractionDetail = ({
             ) : (
               <>
                 <p className="text-muted-foreground leading-relaxed">
-                  {wikiData?.extract || attraction.description}
+                  {wikiData?.extract || localizedDescription(attraction, currentLanguage)}
                 </p>
-                {attraction.detailedDescription?.text && (
+                {currentLanguage === 'en' && attraction.detailedDescription?.text && (
                   <div className="mt-5 rounded-lg border border-border/60 bg-muted/30 p-4" data-testid="verified-place-details">
                     <p className="font-medium mb-2">
-                      {currentLanguage === 'th' ? 'รายละเอียดเพิ่มเติมจากสารานุกรม (ภาษาอังกฤษ)' : 'More detail from the encyclopedia'}
+                      More detail from the encyclopedia
                     </p>
                     <p className="text-sm leading-relaxed text-muted-foreground">{attraction.detailedDescription.text}</p>
                     {attraction.detailedDescription.sourceUrl && (
                       <a className="mt-2 inline-block text-sm underline hover:text-primary" href={attraction.detailedDescription.sourceUrl} target="_blank" rel="noopener noreferrer">
-                        {currentLanguage === 'th' ? 'อ่านแหล่งข้อมูลต้นฉบับ' : 'Read original source'}
+                        Read original source
                       </a>
                     )}
                   </div>

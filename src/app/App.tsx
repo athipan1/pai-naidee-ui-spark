@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider } from "@/shared/contexts/UIContext";
 import { AuthProvider } from "@/shared/contexts/AuthContext";
@@ -64,7 +64,22 @@ const queryClient = new QueryClient({
 });
 
 const AppContent = () => {
-  const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">("en");
+  const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">(() => {
+    try {
+      return window.localStorage.getItem('painaidee.language') === 'th' ? 'th' : 'en';
+    } catch {
+      return 'en';
+    }
+  });
+
+  useEffect(() => {
+    document.documentElement.lang = currentLanguage;
+    try {
+      window.localStorage.setItem('painaidee.language', currentLanguage);
+    } catch {
+      // Storage may be disabled; the session's language still works.
+    }
+  }, [currentLanguage]);
 
 
   // Apply responsive text sizing for better accessibility
@@ -95,7 +110,7 @@ const AppContent = () => {
           <Route
             path="/discover"
             element={
-              <DiscoverLayout currentLanguage={currentLanguage} />
+              <DiscoverLayout currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />
             }
           />
           {/* Public launch: browsing only. Restricted routes never mount write-capable UI. */}
@@ -110,6 +125,7 @@ const AppContent = () => {
             element={
               <AttractionDetail
                 currentLanguage={currentLanguage}
+                onLanguageChange={setCurrentLanguage}
                 onBack={() => window.history.back()}
               />
             }
