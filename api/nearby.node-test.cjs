@@ -2,6 +2,20 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { parseNearbyOptions, SEED_PLACES } = require('./postgres-db.cjs');
 const latestCurated = require('./additional-curated-places-v3.cjs');
+const newestCurated = require('./additional-curated-places-v4.cjs');
+
+test('fourth curated batch adds 25 sourced Thai locations in 25 distinct provinces', () => {
+  assert.equal(newestCurated.length, 25);
+  assert.equal(new Set(newestCurated.map(place => place.id)).size, 25);
+  assert.equal(new Set(newestCurated.map(place => place.province)).size, 25);
+  for (const place of newestCurated) {
+    assert.match(place.sourceUrl, /^https:\/\//);
+    assert.ok(Number.isFinite(place.lat) && Number.isFinite(place.lng));
+    assert.equal(place.rating, 0);
+    assert.equal(place.reviewCount, 0);
+    assert.equal(place.imageUrl, null);
+  }
+});
 
 test('third curated batch adds 25 distinct sourced locations in at least 20 provinces', () => {
   assert.equal(latestCurated.length, 25);
@@ -34,7 +48,7 @@ test('nearby rejects missing or unsafe search parameters', () => {
 
 test('all new curated locations have distinct IDs, provenance, and real Thailand coordinates', () => {
   const curated = SEED_PLACES.filter(place => place.id.startsWith('curated-'));
-  assert.equal(curated.length, 79);
+  assert.equal(curated.length, 104);
   assert.equal(new Set(curated.map(place => place.id)).size, curated.length);
   for (const place of curated) {
     assert.ok(place.lat >= 5 && place.lat <= 21);
@@ -49,8 +63,8 @@ test('all new curated locations have distinct IDs, provenance, and real Thailand
 });
 
 test('expanded nationwide catalogue contains no duplicate IDs or demo ratings/photos', () => {
-  assert.equal(SEED_PLACES.length, 83);
-  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 83);
+  assert.equal(SEED_PLACES.length, 108);
+  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 108);
   for (const place of SEED_PLACES) {
     assert.equal(place.rating, 0);
     assert.equal(place.reviewCount, 0);
@@ -81,6 +95,11 @@ test('new destinations cover multiple regions and retain stable location/source 
     ['curated-ko-phayam', 'ระนอง'],
     ['curated-wat-chang-hai', 'ปัตตานี'],
     ['curated-hala-bala-wildlife-sanctuary', 'นราธิวาส'],
+    ['curated-wat-phra-si-rattana-mahathat-phitsanulok', 'พิษณุโลก'],
+    ['curated-sam-chuk-old-market', 'สุพรรณบุรี'],
+    ['curated-sirindhorn-museum', 'กาฬสินธุ์'],
+    ['curated-phra-maha-chedi-chai-mongkol', 'ร้อยเอ็ด'],
+    ['curated-aiyerweng-sea-of-mist-viewpoint', 'ยะลา'],
   ]) {
     const place = byId.get(id);
     assert.ok(place, `${id} is absent from the catalogue`);
