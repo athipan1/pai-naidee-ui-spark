@@ -36,12 +36,17 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
 });
 
 test('detail page displays Railway photo attribution, license, and sourced additional details', async ({ page }) => {
+  const photoUrl = 'https://images.painaidee.test/test-photo.png';
+  await page.route('**/test-photo.png', route => route.fulfill({
+    status: 200, contentType: 'image/png',
+    body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRLcAAAAASUVORK5CYII=', 'base64'),
+  }));
   await page.unroute('**/api/places**');
   await page.route('**/api/places/railway-test-1', route => route.fulfill({ json: {
     ...place,
-    images: ['https://thumb.wikimedia.org/wikipedia/commons/example.jpg'],
+    images: [photoUrl],
     mediaCredits: [{
-      url: 'https://thumb.wikimedia.org/wikipedia/commons/example.jpg',
+      url: photoUrl,
       photographer: 'Test Photographer', licenseName: 'CC BY-SA 4.0',
       sourcePage: 'https://commons.wikimedia.org/wiki/File:Example.jpg',
       licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0',
@@ -53,6 +58,7 @@ test('detail page displays Railway photo attribution, license, and sourced addit
   await expect(page.getByTestId('photo-attribution')).toContainText('Test Photographer');
   await expect(page.getByRole('link', { name: 'CC BY-SA 4.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0');
   await expect(page.getByTestId('verified-place-details')).toContainText('Documented history and geography');
+  await expect.poll(() => page.getByAltText('Doi Inthanon - image 1').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
 test('private and upload routes cannot mount in browse-only mode', async ({ page }) => {
