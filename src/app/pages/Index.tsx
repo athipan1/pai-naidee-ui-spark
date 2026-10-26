@@ -47,6 +47,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       rating: attraction.rating,
       reviewCount: attraction.reviewCount,
       image: getThailandPlaceImage(attraction.name, attraction.image),
+      mediaCredits: attraction.mediaCredits,
       description: attraction.description,
       tags: attraction.tags,
     }));

@@ -265,6 +265,7 @@ const AttractionDetail = ({
     : attraction.images.length > 0
     ? attraction.images
     : ['https://via.placeholder.com/400x250?text=No+Image'];
+  const mainPhotoCredit = attraction.mediaCredits?.find(credit => credit.url === displayImages[0]);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -390,6 +391,18 @@ const AttractionDetail = ({
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8 max-w-full overflow-hidden">
+        {mainPhotoCredit && (
+          <div className="mb-4 text-sm text-muted-foreground" data-testid="photo-attribution">
+            {currentLanguage === 'th' ? 'เครดิตภาพ: ' : 'Photo credit: '}
+            <a href={mainPhotoCredit.sourcePage} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              {mainPhotoCredit.photographer}
+            </a>{' · '}
+            <a href={mainPhotoCredit.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              {mainPhotoCredit.licenseName}
+            </a>
+            {' · Wikimedia Commons'}
+          </div>
+        )}
         {attraction.source?.url && (
           <p className="mb-4 text-sm text-muted-foreground">
             {currentLanguage === 'th' ? 'แหล่งอ้างอิงสถานที่: ' : 'Place source: '}
@@ -461,6 +474,19 @@ const AttractionDetail = ({
                 <p className="text-muted-foreground leading-relaxed">
                   {wikiData?.extract || attraction.description}
                 </p>
+                {attraction.detailedDescription?.text && (
+                  <div className="mt-5 rounded-lg border border-border/60 bg-muted/30 p-4" data-testid="verified-place-details">
+                    <p className="font-medium mb-2">
+                      {currentLanguage === 'th' ? 'รายละเอียดเพิ่มเติมจากสารานุกรม (ภาษาอังกฤษ)' : 'More detail from the encyclopedia'}
+                    </p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{attraction.detailedDescription.text}</p>
+                    {attraction.detailedDescription.sourceUrl && (
+                      <a className="mt-2 inline-block text-sm underline hover:text-primary" href={attraction.detailedDescription.sourceUrl} target="_blank" rel="noopener noreferrer">
+                        {currentLanguage === 'th' ? 'อ่านแหล่งข้อมูลต้นฉบับ' : 'Read original source'}
+                      </a>
+                    )}
+                  </div>
+                )}
 
                 {wikiError && !wikiData?.extract && (
                   <p className="text-sm text-yellow-600 mt-2">

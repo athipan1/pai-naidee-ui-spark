@@ -35,6 +35,26 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
 });
 
+test('detail page displays Railway photo attribution, license, and sourced additional details', async ({ page }) => {
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places/railway-test-1', route => route.fulfill({ json: {
+    ...place,
+    images: ['https://thumb.wikimedia.org/wikipedia/commons/example.jpg'],
+    mediaCredits: [{
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/example.jpg',
+      photographer: 'Test Photographer', licenseName: 'CC BY-SA 4.0',
+      sourcePage: 'https://commons.wikimedia.org/wiki/File:Example.jpg',
+      licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0',
+    }],
+    detailedDescription: { text: 'Documented history and geography of the mountain.',
+      sourceUrl: 'https://en.wikipedia.org/wiki/Doi_Inthanon' },
+  } }));
+  await page.goto('/attraction/railway-test-1');
+  await expect(page.getByTestId('photo-attribution')).toContainText('Test Photographer');
+  await expect(page.getByRole('link', { name: 'CC BY-SA 4.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0');
+  await expect(page.getByTestId('verified-place-details')).toContainText('Documented history and geography');
+});
+
 test('private and upload routes cannot mount in browse-only mode', async ({ page }) => {
   for (const path of ['/login', '/admin/dashboard', '/admin/media', '/upload', '/community/instagram']) {
     await page.goto(path);

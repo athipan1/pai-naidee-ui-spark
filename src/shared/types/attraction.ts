@@ -1,4 +1,12 @@
 // Attraction data interface
+export interface AttractionPhotoCredit {
+  url: string;
+  photographer: string;
+  licenseName: string;
+  licenseUrl: string;
+  sourcePage: string;
+}
+
 export interface AttractionDetail {
   source?: { name: string; url: string; verifiedAt?: string | null } | null;
   id: string;
@@ -9,6 +17,8 @@ export interface AttractionDetail {
   rating: number;
   reviewCount: number;
   images: string[];
+  mediaCredits?: AttractionPhotoCredit[];
+  detailedDescription?: { text: string; sourceUrl: string | null } | null;
   description: string;
   tags: string[];
   coordinates: {

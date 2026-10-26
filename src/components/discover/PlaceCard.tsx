@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, Star, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { AttractionPhotoCredit } from '@/shared/types/attraction';
 
 interface PlaceCardProps {
   id: string;
@@ -11,6 +12,7 @@ interface PlaceCardProps {
   rating: number;
   reviewCount: number;
   image: string;
+  mediaCredits?: AttractionPhotoCredit[];
   description: string;
   tags?: string[];
   isFavorite?: boolean;
@@ -28,6 +30,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
   rating,
   reviewCount,
   image,
+  mediaCredits,
   description,
   isFavorite = false,
   currentLanguage,
@@ -36,6 +39,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
   className = ''
 }) => {
   const displayName = currentLanguage === 'th' && nameLocal ? nameLocal : name;
+  const imageCredit = mediaCredits?.find(credit => credit.url === image);
 
   return (
     <div 
@@ -49,6 +53,17 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
           alt={displayName}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
+        {imageCredit && (
+          <a
+            href={imageCredit.sourcePage}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-2 right-2 z-10 max-w-[85%] truncate rounded bg-black/70 px-2 py-1 text-[10px] text-white"
+            onClick={event => event.stopPropagation()}
+          >
+            © {imageCredit.photographer} · {imageCredit.licenseName}
+          </a>
+        )}
         
         {/* Favorite Button */}
         <Button

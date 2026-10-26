@@ -24,6 +24,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
     id: item.id, name: item.name, nameLocal: item.nameLocal || item.name,
     province: item.province, category: item.category, rating: item.rating,
     reviewCount: item.reviewCount, image: getThailandPlaceImage(item.name, item.image),
+    mediaCredits: item.mediaCredits,
     description: item.description, tags: item.tags || []
   }));
   const filteredResults = railwayResults;

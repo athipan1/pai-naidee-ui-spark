@@ -15,6 +15,7 @@ import CategoryCard from "@/components/discover/CategoryCard";
 import SectionHeader from "@/components/discover/SectionHeader";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
+import type { AttractionPhotoCredit } from '@/shared/types/attraction';
 
 interface TravelPlace {
   id: string;
@@ -25,6 +26,7 @@ interface TravelPlace {
   rating: number;
   reviewCount: number;
   image: string;
+  mediaCredits?: AttractionPhotoCredit[];
   description: string;
   tags: string[];
   isTrending?: boolean;
@@ -162,6 +164,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
           rating: attraction.rating,
           reviewCount: attraction.reviewCount,
           image: getThailandPlaceImage(attraction.name, attraction.image),
+          mediaCredits: attraction.mediaCredits,
           description: attraction.description,
           tags: attraction.tags || [],
           isTrending: false // No verified trending metric in Railway data
