@@ -32,6 +32,9 @@
       "dest": "/sw.js"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

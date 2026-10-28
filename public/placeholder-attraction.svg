@@ -1,7 +1,9 @@
-<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100%" height="100%" fill="#e2e8f0"/>
-  <circle cx="200" cy="120" r="40" fill="#94a3b8"/>
-  <text x="200" y="200" font-family="Arial, sans-serif" font-size="16" fill="#64748b" text-anchor="middle">
-    No Image Available
-  </text>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Place photo pending verification">
+  <rect width="400" height="300" fill="#203044"/>
+  <circle cx="295" cy="88" r="32" fill="#577d8d" opacity=".6"/>
+  <path d="M0 247 116 112 225 229 280 166 400 285V300H0Z" fill="#36536a"/>
+  <path d="M0 276 93 187 168 244 244 193 400 280V300H0Z" fill="#4c7282"/>
+  <rect x="164" y="109" width="72" height="57" rx="9" fill="none" stroke="#a4c9cf" stroke-width="5"/>
+  <circle cx="200" cy="138" r="15" fill="none" stroke="#a4c9cf" stroke-width="5"/>
+  <path d="m176 109 6-10h35l6 10" fill="none" stroke="#a4c9cf" stroke-width="5" stroke-linejoin="round"/>
 </svg>
