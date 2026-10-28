@@ -2,29 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   getThailandPlaceImage,
   getThailandPlaceImageMeta,
-  thailandPlaceImages,
 } from "@/shared/data/thailandPlaceImages";
 
 describe("Thailand attraction image catalog", () => {
-  it("maps English and Thai aliases to the same real image", () => {
-    expect(getThailandPlaceImage("Phi Phi Islands")).toBe(
-      thailandPlaceImages.phiPhiIslands.url,
-    );
-    expect(getThailandPlaceImage("หมู่เกาะพีพี")).toBe(
-      thailandPlaceImages.phiPhiIslands.url,
-    );
-  });
-
-  it("maps named Bangkok attractions to place-specific photos", () => {
-    expect(getThailandPlaceImage("Wat Phra Kaew")).toBe(
-      thailandPlaceImages.watPhraKaew.url,
-    );
-    expect(getThailandPlaceImage("Wat Arun")).toBe(
-      thailandPlaceImages.watArun.url,
-    );
-    expect(getThailandPlaceImage("Floating Market")).toBe(
-      thailandPlaceImages.floatingMarket.url,
-    );
+  it("does not invent imagery for a named place if Railway has no verified photo", () => {
+    expect(getThailandPlaceImage("หมู่เกาะพีพี")).toBe('/placeholder-attraction.svg');
+    expect(getThailandPlaceImage("Floating Market")).toBe('/placeholder-attraction.svg');
   });
 
   it("preserves a database image for unknown places", () => {
@@ -34,14 +17,14 @@ describe("Thailand attraction image catalog", () => {
     );
   });
 
-  it("prefers a sourced Railway image over the legacy catalog for known places", () => {
+  it("always uses a Railway photo over old stock imagery for known places", () => {
     const databaseImage = "https://thumb.wikimedia.org/example.jpg";
     expect(getThailandPlaceImage("Wat Arun", databaseImage)).toBe(databaseImage);
   });
 
   it("falls back safely when no image is known", () => {
     expect(getThailandPlaceImage("Unknown Place")).toBe(
-      "/placeholder-attraction.jpg",
+      "/placeholder-attraction.svg",
     );
   });
 

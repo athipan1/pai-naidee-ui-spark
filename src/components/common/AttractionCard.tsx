@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Heart, MapPin, Star, Navigation, Share, Bookmark, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OptimizedImage from "@/components/common/OptimizedImage";
@@ -51,7 +50,6 @@ const AttractionCard = ({
   onFavoriteToggle,
   onCardClick,
 }: AttractionCardProps) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
   const imageCredit = mediaCredits?.find(credit => credit.url === image);
 
   const displayName = currentLanguage === "th" && nameLocal ? nameLocal : name;
@@ -122,15 +120,11 @@ const AttractionCard = ({
         className="relative overflow-hidden cursor-pointer z-10 aspect-[4/3]"
         onClick={() => onCardClick(id)}
       >
-        <div
-          className={`w-full h-full bg-gradient-to-br from-muted to-muted/60 loading-shimmer ${imageLoaded ? "hidden" : "block"} rounded-t-3xl`}
-        />
         <OptimizedImage
           src={image}
           alt={displayName}
           loading="lazy"
-          className={`hero-image transition-all duration-700 group-hover:scale-110 rounded-t-3xl ${imageLoaded ? "block" : "hidden"}`}
-          onLoad={() => setImageLoaded(true)}
+          className="hero-image transition-all duration-700 group-hover:scale-110 rounded-t-3xl"
           width={400}
           height={300}
         />

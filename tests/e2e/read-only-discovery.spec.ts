@@ -107,6 +107,22 @@ test('detail page displays Railway photo attribution, license, and sourced addit
   await expect.poll(() => page.getByAltText('Doi Inthanon - image 1').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
+test('incorrect Ko Chang photo is corrected with matching Wikimedia attribution', async ({ page }) => {
+  const wrongPhoto = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg';
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places/curated-ko-chang', route => route.fulfill({ json: {
+    ...place, id: 'curated-ko-chang', name: 'Ko Chang', nameLocal: 'เกาะช้าง',
+    image: wrongPhoto, images: [wrongPhoto],
+    mediaCredits: [{ url: wrongPhoto, photographer: 'Incorrect location', licenseName: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0', sourcePage: 'https://example.org/wrong' }],
+  } }));
+  await page.goto('/attraction/curated-ko-chang');
+  await expect(page.getByTestId('photo-attribution')).toContainText('Nina R');
+  await expect(page.getByTestId('photo-attribution')).not.toContainText('Incorrect location');
+  await expect(page.getByTestId('photo-attribution').getByRole('link', { name: 'Nina R' }))
+    .toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/File:Ko_Chang,_Thailand.jpg');
+});
+
 test('private and upload routes cannot mount in browse-only mode', async ({ page }) => {
   for (const path of ['/login', '/admin/dashboard', '/admin/media', '/upload', '/community/instagram']) {
     await page.goto(path);
@@ -120,6 +136,32 @@ test('API failure never substitutes sample places', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Phi Phi Islands')).toHaveCount(0);
   await expect(page.getByText('Floating Market')).toHaveCount(0);
+});
+
+test('mobile homepage renders loaded photos and honest missing-review and missing-photo states', async ({ page }) => {
+  const photoUrl = 'https://images.painaidee.test/actual-place.png';
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/actual-place.png', route => route.fulfill({
+    status: 200, contentType: 'image/png',
+    body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRLcAAAAASUVORK5CYII=', 'base64'),
+  }));
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places**', route => route.fulfill({ json: {
+    attractions: [
+      { ...place, id: 'real-photo', image: photoUrl, nameLocal: 'ดอยอินทนนท์', rating: 0, reviewCount: 0 },
+      { ...place, id: 'no-photo', name: 'No Photo Place', nameLocal: 'สถานที่ยังไม่มีรูป', image: null, rating: 0, reviewCount: 0 },
+    ],
+    total: 2, page: 1, limit: 10,
+  } }));
+  await page.goto('/');
+  const cards = page.getByTestId('attraction-card');
+  await expect(cards).toHaveCount(2);
+  const actualImage = cards.first().getByRole('img', { name: /Doi Inthanon|ดอยอินทนนท์/ });
+  await actualImage.scrollIntoViewIfNeeded();
+  await expect.poll(() => actualImage.evaluate(img => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await expect(cards.nth(1).locator('img[src="/placeholder-attraction.svg"]')).toHaveCount(1);
+  await expect(page.getByText(/ยังไม่มีคะแนนรีวิวที่ยืนยันได้|No verified reviews yet/).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
 test('legacy Explore route navigates to Discover and preserves query', async ({ page }) => {
