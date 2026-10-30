@@ -14,6 +14,8 @@ import { MapPin, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 import { isDevelopment } from "@/shared/utils/devUtils";
+import { splitHomeAttractions } from "@/shared/utils/uniqueAttractions";
+import { uniqueAttractionsById } from '@/shared/utils/uniqueAttractions';
 
 interface IndexProps {
   currentLanguage: "th" | "en";
@@ -38,7 +40,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   });
 
   // Production reads only API records; empty/error responses must never invent places.
-  const displayAttractions = (apiData?.attractions ?? []).map(attraction => ({
+  const displayAttractions = uniqueAttractionsById(apiData?.attractions ?? []).map(attraction => ({
       id: attraction.id,
       name: attraction.name,
       nameLocal: attraction.nameLocal || attraction.name,
@@ -61,6 +63,9 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
           (attraction) =>
             attraction.category.toLowerCase() === _selectedCategory.toLowerCase()
         );
+
+  const { featured: featuredAttractions, recommended: recommendedAttractions } =
+    splitHomeAttractions(filteredAttractions, _selectedCategory === "all");
 
   // Calculate category counts
   const attractionCounts = displayAttractions.reduce((counts, attraction) => {
@@ -149,19 +154,19 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
 
         {/* Enhanced Trending Destinations Section */}
         {_selectedCategory === "all" && (
-          <section className="py-8 bg-gradient-to-br from-accent/10 to-accent/5" aria-label={currentLanguage === "th" ? "สถานที่ยอดนิยม" : "Trending destinations"}>
+          <section className="py-8 bg-gradient-to-br from-accent/10 to-accent/5" aria-label={currentLanguage === "th" ? "สถานที่น่าสนใจ" : "Places to explore"}>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl md:text-3xl font-bold flex items-center">
-                  <span className="mr-3 text-2xl animate-bounce" role="img" aria-label="fire">🔥</span>
+                  <span className="mr-3 text-2xl" role="img" aria-label="compass">🧭</span>
                   <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    {currentLanguage === "th" ? "ยอดนิยมในขณะนี้" : "Trending Now"}
+                    {currentLanguage === "th" ? "สถานที่น่าสนใจ" : "Places to Explore"}
                   </span>
                 </h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6" role="list">
-                {displayAttractions.slice(0, 2).map((attraction) => (
+                {featuredAttractions.map((attraction) => (
                   <article
                     key={`trending-${attraction.id}`}
                     className="bg-card/90 backdrop-blur-sm rounded-2xl p-5 border border-border/30 shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer group hover:scale-[1.02] hover:-translate-y-1"
@@ -185,9 +190,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                           width={96}
                           height={96}
                         />
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
-                          🔥
-                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-lg md:text-xl truncate group-hover:text-primary transition-colors duration-300">
@@ -197,13 +199,19 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
                           <MapPin className="w-4 h-4 mr-2 text-primary" />
                           {attraction.province}
                         </p>
-                        <div className="flex items-center mt-2 bg-accent/20 px-3 py-1 rounded-full w-fit">
-                          <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow mr-2" />
-                          <span className="text-sm font-bold">{attraction.rating}</span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            ({attraction.reviewCount.toLocaleString()} {currentLanguage === "th" ? "รีวิว" : "reviews"})
+                        {attraction.reviewCount > 0 && attraction.rating > 0 ? (
+                          <div className="flex items-center mt-2 bg-accent/20 px-3 py-1 rounded-full w-fit">
+                            <Star className="w-4 h-4 fill-accent-yellow text-accent-yellow mr-2" />
+                            <span className="text-sm font-bold">{attraction.rating}</span>
+                            <span className="text-xs text-muted-foreground ml-2">
+                              ({attraction.reviewCount.toLocaleString()} {currentLanguage === "th" ? "รีวิว" : "reviews"})
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="mt-2 block text-xs text-muted-foreground">
+                            {currentLanguage === "th" ? "ยังไม่มีคะแนนรีวิวที่ยืนยันได้" : "No verified reviews yet"}
                           </span>
-                        </div>
+                        )}
                       </div>
                     </div>
                   </article>
@@ -245,12 +253,12 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               role="list"
               aria-label={
                 currentLanguage === "th" 
-                  ? `รายการสถานที่ท่องเที่ยว ${Math.min(filteredAttractions.length, 8)} แห่ง`
-                  : `Tourist attractions list ${Math.min(filteredAttractions.length, 8)} places`
+                  ? `รายการสถานที่ท่องเที่ยว ${recommendedAttractions.length} แห่ง`
+                  : `Tourist attractions list ${recommendedAttractions.length} places`
               }
             >
               {/* Show only first 8 items on home page */}
-              {filteredAttractions.slice(0, 8).map((attraction) => (
+              {recommendedAttractions.map((attraction) => (
                 <div key={attraction.id} role="listitem" className="h-full">
                   <AttractionCard
                     {...attraction}

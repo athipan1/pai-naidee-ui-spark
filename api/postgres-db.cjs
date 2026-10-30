@@ -4,6 +4,7 @@ const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs
 const ADDITIONAL_CURATED_PLACES_V3 = require('./additional-curated-places-v3.cjs');
 const ADDITIONAL_CURATED_PLACES_V4 = require('./additional-curated-places-v4.cjs');
 const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
+const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
 const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
 
 let sqlClient = null;
@@ -309,6 +310,40 @@ async function ensureSchema() {
           AND (detail_text IS NULL OR detail_text = '')
       `;
     }
+  }
+
+
+  // Backfill verified, licensed photographs for destinations that previously
+  // had no media. A later editor upload or earlier verification always wins.
+  for (const photo of VERIFIED_MISSING_MEDIA) {
+    await sql`
+      INSERT INTO media (
+        id, place_id, url, type, title, description,
+        creator_name, license_name, license_url, source_page
+      ) SELECT
+        ${`wikimedia:${photo.placeId}`}, p.id, ${photo.url},
+        'image', p.name, 'Photograph sourced from Wikimedia Commons',
+        ${photo.photographer}, ${photo.licenseName}, ${photo.licenseUrl}, ${photo.sourcePage}
+      FROM places p WHERE p.id = ${photo.placeId}
+      ON CONFLICT (id) DO NOTHING
+    `;
+  }
+
+  // The initial Ko Chang / Ko Kut import accidentally used a photograph of
+  // Mu Ko Ang Thong for both locations. Repair ONLY the two original seeded
+  // media rows while they still contain that exact incorrect URL; never touch
+  // another media record or a photo subsequently updated by an editor.
+  const staleAngThongUrl = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg';
+  for (const placeId of ['curated-ko-chang', 'curated-ko-kut']) {
+    const verified = VERIFIED_WIKIMEDIA_MEDIA.find((photo) => photo.placeId === placeId);
+    if (!verified) continue;
+    await sql`
+      UPDATE media SET url = ${verified.url}, title = ${verified.placeName},
+        creator_name = ${verified.photographer}, license_name = ${verified.licenseName},
+        license_url = ${verified.licenseUrl}, source_page = ${verified.sourcePage}
+      WHERE id = ${`wikimedia:${placeId}`} AND place_id = ${placeId}
+        AND url = ${staleAngThongUrl}
+    `;
   }
 }
 

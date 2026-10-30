@@ -26,6 +26,7 @@
     "test:e2e:production": "playwright test --config=playwright.production.config.ts",
     "smoke:production": "node scripts/production-smoke.mjs",
     "smoke:read-only": "node scripts/smoke-read-only.mjs",
+    "audit:places": "node scripts/audit-place-catalog.mjs",
     "build:semantic-index": "node scripts/buildSemanticIndex.cjs",
     "check:supabase": "npx tsx scripts/check-supabase.ts",
     "check:storage": "npx tsx scripts/check-storage.ts"

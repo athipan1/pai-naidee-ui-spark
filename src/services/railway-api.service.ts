@@ -1,5 +1,7 @@
 import type { AttractionDetail } from "@/shared/types/attraction";
 import type { SearchResult } from "@/shared/types/search";
+import { correctKnownIncorrectPhoto } from '@/shared/data/photoCorrections';
+import { addVerifiedPhotoIfMissing } from '@/shared/data/verifiedPlacePhotoFallbacks';
 
 const DEFAULT_API_BASE_URL = "https://painaidee-api-production.up.railway.app";
 const REQUEST_TIMEOUT_MS = 8_000;
@@ -64,13 +66,15 @@ export async function getRailwayNearbyAttractions(options: {
     radiusKm: String(options.radiusKm ?? 25),
     limit: String(options.limit ?? 30),
   });
-  return requestJson<RailwayNearbyResponse>(`/api/places/nearby?${params}`);
+  const response = await requestJson<RailwayNearbyResponse>(`/api/places/nearby?${params}`);
+  return { ...response, attractions: response.attractions.map(place => addVerifiedPhotoIfMissing(correctKnownIncorrectPhoto(place))) };
 }
 
 export async function getRailwayAttractionDetail(
   id: string,
 ): Promise<AttractionDetail> {
-  return requestJson<AttractionDetail>(`/api/places/${encodeURIComponent(id)}`);
+  const place = await requestJson<AttractionDetail>(`/api/places/${encodeURIComponent(id)}`);
+  return addVerifiedPhotoIfMissing(correctKnownIncorrectPhoto(place));
 }
 
 export async function getRailwayAttractions(options?: {
@@ -86,9 +90,10 @@ export async function getRailwayAttractions(options?: {
   if (options?.category) params.set("category", options.category);
   if (options?.search) params.set("search", options.search);
 
-  return requestJson<RailwayAttractionsResponse>(
+  const response = await requestJson<RailwayAttractionsResponse>(
     `/api/places?${params.toString()}`,
   );
+  return { ...response, attractions: response.attractions.map(place => addVerifiedPhotoIfMissing(correctKnownIncorrectPhoto(place))) };
 }
 
 export { getApiBaseUrl };

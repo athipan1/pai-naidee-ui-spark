@@ -252,7 +252,7 @@ const AttractionDetail = ({
     ? [wikiData.thumbnail.source, ...attraction.images]
     : attraction.images.length > 0
     ? attraction.images
-    : ['https://via.placeholder.com/400x250?text=No+Image'];
+    : ['/placeholder-attraction.svg'];
   const mainPhotoCredit = attraction.mediaCredits?.find(credit => credit.url === displayImages[0]);
 
   return (

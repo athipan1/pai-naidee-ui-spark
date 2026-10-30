@@ -6,6 +6,7 @@ import AttractionCard from '@/components/common/AttractionCard';
 import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 import { getThailandPlaceImage } from '@/shared/data/thailandPlaceImages';
 import { localizedCategory } from '@/shared/i18n/placeLocalization';
+import { uniqueAttractionsById } from '@/shared/utils/uniqueAttractions';
 
 interface SearchViewProps {
   currentLanguage: "th" | "en";
@@ -21,7 +22,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
   const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
   const { data, error, isLoading, refetch } = useAllAttractions({ search: query || undefined, category: category || undefined });
 
-  const railwayResults = (data?.attractions ?? []).map(item => ({
+  const railwayResults = uniqueAttractionsById(data?.attractions ?? []).map(item => ({
     id: item.id, name: item.name, nameLocal: item.nameLocal || item.name,
     province: item.province, provinceEn: item.provinceEn,
     category: item.category, rating: item.rating,

@@ -3,6 +3,7 @@ import { Heart, Star, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { AttractionPhotoCredit } from '@/shared/types/attraction';
 import { localizedProvince, localizedDescription } from '@/shared/i18n/placeLocalization';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 interface PlaceCardProps {
   id: string;
@@ -54,10 +55,12 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
     >
       {/* Image Container */}
       <div className="relative h-48 overflow-hidden rounded-t-xl">
-        <img
+        <OptimizedImage
           src={image}
           alt={displayName}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          width={400}
+          height={200}
         />
         {imageCredit && (
           <a

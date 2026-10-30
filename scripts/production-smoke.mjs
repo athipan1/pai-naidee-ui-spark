@@ -29,6 +29,12 @@ await check('frontend-home', async () => {
   const { response, body } = await get(frontend + '/');
   assert(response.ok && typeof body === 'string' && body.includes('id="root"'), `frontend HTTP ${response.status} or no root`);
 });
+await check('public-placeholder-is-an-image-not-html', async () => {
+  const { response, body } = await get(frontend + '/placeholder-attraction.svg');
+  const contentType = response.headers.get('content-type') || '';
+  assert(response.ok && contentType.includes('image/svg+xml') && typeof body === 'string' && body.includes('<svg'),
+    `placeholder asset was not served as SVG: HTTP ${response.status}, ${contentType}`);
+});
 await check('railway-health-database', async () => {
   const { response, body } = await get(api + '/api/health');
   assert(response.ok && body.status === 'ok' && body.database === 'ok', `health: ${response.status} ${body.status}`);

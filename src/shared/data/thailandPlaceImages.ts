@@ -83,12 +83,12 @@ const aliases = new Map<string, ThailandPlaceImage>([
 ]);
 
 export function getThailandPlaceImage(
-  placeName: string,
-  fallbackUrl?: string,
+  _placeName: string,
+  verifiedImageUrl?: string | null,
 ): string {
-  // Live Railway images with verified source/license take precedence over
-  // older static examples. Only use legacy imagery as a missing-data fallback.
-  return fallbackUrl || aliases.get(normalizePlaceName(placeName))?.url || "/placeholder-attraction.jpg";
+  // Do not substitute a generic stock image for a real Thai destination.
+  // A photo must come from the record's verified Railway media/credits data.
+  return verifiedImageUrl?.trim() || "/placeholder-attraction.svg";
 }
 
 export function getThailandPlaceImageMeta(

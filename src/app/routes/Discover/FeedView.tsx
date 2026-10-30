@@ -16,6 +16,7 @@ import SectionHeader from "@/components/discover/SectionHeader";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 import type { AttractionPhotoCredit } from '@/shared/types/attraction';
+import { uniqueAttractionsById } from '@/shared/utils/uniqueAttractions';
 
 interface TravelPlace {
   id: string;
@@ -209,7 +210,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
   };
 
   // Keep one card per place ID even if an API response contains duplicate rows.
-  const uniquePlaces = Array.from(new Map(places.map(place => [place.id, place])).values());
+  const uniquePlaces = uniqueAttractionsById(places);
 
   // Filter places by selected category
   const filteredPlaces = selectedCategory === "all" 

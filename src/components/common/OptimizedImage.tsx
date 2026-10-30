@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ImageOff } from "lucide-react";
 
 interface OptimizedImageProps {
@@ -35,15 +35,15 @@ const normalizeImageUrl = (src: string): string => {
 const getDefaultFallback = (alt: string): string => {
   // Use a default image based on the alt text context
   if (alt.toLowerCase().includes('beach') || alt.toLowerCase().includes('sea')) {
-    return '/placeholder-beach.jpg';
+    return '/placeholder-beach.svg';
   } else if (alt.toLowerCase().includes('temple') || alt.toLowerCase().includes('culture')) {
-    return '/placeholder-temple.jpg';
+    return '/placeholder-temple.svg';
   } else if (alt.toLowerCase().includes('mountain') || alt.toLowerCase().includes('nature')) {
-    return '/placeholder-mountain.jpg';
+    return '/placeholder-mountain.svg';
   } else if (alt.toLowerCase().includes('food') || alt.toLowerCase().includes('market')) {
-    return '/placeholder-food.jpg';
+    return '/placeholder-food.svg';
   }
-  return '/placeholder-attraction.jpg';
+  return '/placeholder-attraction.svg';
 };
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
@@ -59,7 +59,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onError,
 }) => {
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
-  const [currentSrc, setCurrentSrc] = useState(normalizeImageUrl(src));
+  const [currentSrc, setCurrentSrc] = useState(normalizeImageUrl(src || fallbackSrc || getDefaultFallback(alt)));
+
+  useEffect(() => {
+    setCurrentSrc(normalizeImageUrl(src || fallbackSrc || getDefaultFallback(alt)));
+    setImageState('loading');
+  }, [src, fallbackSrc, alt]);
 
   const handleImageLoad = () => {
     setImageState('loaded');
@@ -67,18 +72,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   const handleImageError = () => {
-    console.warn(`Failed to load image: ${currentSrc}`);
-    
-    if (fallbackSrc && currentSrc !== fallbackSrc) {
-      console.log(`Trying fallback image: ${fallbackSrc}`);
-      setCurrentSrc(fallbackSrc);
+    if (fallbackSrc && currentSrc !== normalizeImageUrl(fallbackSrc)) {
+      setCurrentSrc(normalizeImageUrl(fallbackSrc));
       return;
     }
     
     // If no custom fallback or fallback also failed, try default
     const defaultFallback = getDefaultFallback(alt);
     if (currentSrc !== defaultFallback) {
-      console.log(`Trying default fallback: ${defaultFallback}`);
       setCurrentSrc(defaultFallback);
       return;
     }
@@ -88,43 +89,31 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.();
   };
 
-  if (imageState === 'error') {
-    return (
-      <div 
-        className={`${className} bg-muted flex items-center justify-center text-muted-foreground`}
-        style={{ width, height }}
-      >
-        <div className="flex flex-col items-center justify-center p-4 text-center">
-          <ImageOff className="w-8 h-8 mb-2" />
-          <span className="text-sm">Image not available</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      {/* Loading placeholder */}
+    <div className={`relative ${className}`}>
       {imageState === 'loading' && (
-        <div 
-          className={`${className} bg-muted animate-pulse`}
-          style={{ width, height }}
+        <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
+      )}
+      {imageState === 'error' ? (
+        <div role="img" aria-label={alt} className="flex h-full min-h-24 w-full flex-col items-center justify-center gap-2 bg-muted text-muted-foreground">
+          <ImageOff className="h-8 w-8" />
+          <span className="text-xs">Image unavailable</span>
+        </div>
+      ) : (
+        // The img must not be display:none: browsers will defer a hidden lazy image indefinitely.
+        <img
+          src={currentSrc}
+          alt={alt}
+          loading={loading}
+          decoding={decoding}
+          className={`${className} ${imageState === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          width={width}
+          height={height}
         />
       )}
-      
-      {/* Keep the image in the layout while loading: display:none prevents native lazy loading. */}
-      <img
-        src={currentSrc}
-        alt={alt}
-        loading={loading}
-        decoding={decoding}
-        className={`${className} ${imageState === 'loaded' ? 'block' : 'opacity-0'}`}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-        width={width}
-        height={height}
-      />
-    </>
+    </div>
   );
 };
 
