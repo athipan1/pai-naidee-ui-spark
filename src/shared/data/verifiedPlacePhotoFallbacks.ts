@@ -161,7 +161,7 @@ export function addVerifiedPhotoIfMissing<T extends PlacePhotoRecord>(place: T):
 }
 
 // While Railway is deploying its idempotent media backfill, the primary Vercel
-// site can already show the three gallery images that the user submitted.
+// site can already show the user-submitted galleries for both temples.
 // Never replace a photo already returned by Railway or uploaded by an editor.
 export function addUserProvidedGalleryIfMissing<T extends PlacePhotoRecord>(place: T): T {
   if (place.image || place.images?.length) return place;
