@@ -19,5 +19,26 @@
     "filename": "phra-that-na-dun-03-chedi.jpg",
     "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-03-chedi.jpg",
     "title": "พระธาตุนาดูน — ภาพเพิ่มเติม 2"
+  },
+  {
+    "id": "painaidee-provided:curated-wat-phu-manorom:01",
+    "placeId": "curated-wat-phu-manorom",
+    "filename": "wat-phu-manorom-01-main.jpg",
+    "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-01-main.jpg",
+    "title": "วัดรอยพระพุทธบาทภูมโนรมย์ — ภาพหลัก"
+  },
+  {
+    "id": "painaidee-provided:curated-wat-phu-manorom:02",
+    "placeId": "curated-wat-phu-manorom",
+    "filename": "wat-phu-manorom-02-temple.jpg",
+    "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-02-temple.jpg",
+    "title": "วัดรอยพระพุทธบาทภูมโนรมย์ — ภาพเพิ่มเติม 1"
+  },
+  {
+    "id": "painaidee-provided:curated-wat-phu-manorom:03",
+    "placeId": "curated-wat-phu-manorom",
+    "filename": "wat-phu-manorom-03-hall.jpg",
+    "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-03-hall.jpg",
+    "title": "วัดรอยพระพุทธบาทภูมโนรมย์ — ภาพเพิ่มเติม 2"
   }
 ]

@@ -193,13 +193,43 @@ test('mobile Phra That Na Dun gallery loads all three submitted photos without o
   await expect(page.getByTestId('photo-attribution').getByRole('link')).toHaveCount(0);
   const gallery = page.locator('img[alt^="Phra That Na Dun - image"]');
   await expect(gallery).toHaveCount(3);
-  for (let index = 0; index < userProvidedMedia.length; index++) {
-    await expect(gallery.nth(index)).toHaveAttribute('src', userProvidedMedia[index].url);
+  const photos = userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-phra-that-na-dun');
+  for (let index = 0; index < photos.length; index++) {
+    await expect(gallery.nth(index)).toHaveAttribute('src', photos[index].url);
     await expect.poll(() => gallery.nth(index).evaluate(image =>
       (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0)).toBe(true);
-    if (index < userProvidedMedia.length - 1) {
+    if (index < photos.length - 1) {
       await page.getByRole('button', { name: 'Next slide' }).click();
     }
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});
+
+test('mobile Wat Phu Manorom gallery loads all three confirmed user photos without overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places/curated-wat-phu-manorom', route => route.fulfill({ json: {
+    ...place, id: 'curated-wat-phu-manorom', name: 'Wat Roi Phra Phutthabat Phu Manorom',
+    nameLocal: 'วัดรอยพระพุทธบาทภูมโนรมย์', province: 'มุกดาหาร', images: [], image: null,
+    mediaCredits: [],
+  } }));
+  await page.route('https://pai-naidee-ui-spark.vercel.app/place-photos/*.jpg', route => {
+    const filename = new URL(route.request().url()).pathname.split('/').at(-1)!;
+    return route.fulfill({ status: 200, contentType: 'image/jpeg',
+      path: join(process.cwd(), 'public', 'place-photos', filename) });
+  });
+
+  await page.goto('/attraction/curated-wat-phu-manorom');
+  await expect(page.getByRole('heading', { name: 'Wat Roi Phra Phutthabat Phu Manorom', exact: true })).toBeVisible();
+  await expect(page.getByTestId('photo-attribution')).toContainText('PaiNaiDee user');
+  const gallery = page.locator('img[alt^="Wat Roi Phra Phutthabat Phu Manorom - image"]');
+  const photos = userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-wat-phu-manorom');
+  await expect(gallery).toHaveCount(3);
+  for (let index = 0; index < photos.length; index++) {
+    await expect(gallery.nth(index)).toHaveAttribute('src', photos[index].url);
+    await expect.poll(() => gallery.nth(index).evaluate(image =>
+      (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0)).toBe(true);
+    if (index < photos.length - 1) await page.getByRole('button', { name: 'Next slide' }).click();
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });

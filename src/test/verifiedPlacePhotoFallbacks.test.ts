@@ -4,15 +4,19 @@ import persistedCommonsPhotos from '../../api/verified-missing-commons-media.jso
 import userProvidedMedia from '../../api/user-provided-place-media.json';
 
 describe('Verified place photo fallback catalogue', () => {
-  it('renders all three supplied photos in gallery order only while Railway has no photos', () => {
-    const place = { id: 'curated-phra-that-na-dun', image: null, images: [] as string[], mediaCredits: [] };
-    const result = addUserProvidedGalleryIfMissing(place);
-    expect(result.image).toBe(userProvidedMedia[0].url);
-    expect(result.images).toEqual(userProvidedMedia.map(photo => photo.url));
-    expect(result.mediaCredits).toHaveLength(3);
-    expect(result.mediaCredits?.every(credit => credit.kind === 'user-provided' && !credit.licenseUrl)).toBe(true);
-    const edited = { ...place, image: 'https://example.org/editor.jpg', images: ['https://example.org/editor.jpg'] };
-    expect(addUserProvidedGalleryIfMissing(edited)).toBe(edited);
+  it('renders three supplied photos per temple in order only while Railway has no photos', () => {
+    for (const id of ['curated-phra-that-na-dun', 'curated-wat-phu-manorom']) {
+      const place = { id, image: null, images: [] as string[], mediaCredits: [] };
+      const photos = userProvidedMedia.filter(photo => photo.placeId === id);
+      const result = addUserProvidedGalleryIfMissing(place);
+      expect(photos).toHaveLength(3);
+      expect(result.image).toBe(photos[0].url);
+      expect(result.images).toEqual(photos.map(photo => photo.url));
+      expect(result.mediaCredits).toHaveLength(3);
+      expect(result.mediaCredits?.every(credit => credit.kind === 'user-provided' && !credit.licenseUrl)).toBe(true);
+      const edited = { ...place, image: 'https://example.org/editor.jpg', images: ['https://example.org/editor.jpg'] };
+      expect(addUserProvidedGalleryIfMissing(edited)).toBe(edited);
+    }
     const unrelated = { id: 'unrelated', image: null };
     expect(addUserProvidedGalleryIfMissing(unrelated)).toBe(unrelated);
   });
