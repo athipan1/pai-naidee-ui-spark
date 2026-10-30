@@ -34,7 +34,9 @@ export function auditPlaces(places) {
     || p.coordinates.lat < 5 || p.coordinates.lat > 22
     || p.coordinates.lng < 97 || p.coordinates.lng > 106).map(p => p.id);
   const uncreditedPhotos = places.filter(p => p.image
-    && !p.mediaCredits?.some(credit => credit.url === p.image && credit.sourcePage && credit.licenseUrl)).map(p => p.id);
+    && !p.mediaCredits?.some(credit => credit.url === p.image && (
+      credit.kind === 'user-provided' || (credit.sourcePage && credit.licenseUrl)
+    ))).map(p => p.id);
   const missingSource = places.filter(p => !p.source?.url).map(p => p.id);
   const missingTranslations = places.filter(p => !p.nameLocal || !p.descriptionEn || !p.provinceEn).map(p => p.id);
 

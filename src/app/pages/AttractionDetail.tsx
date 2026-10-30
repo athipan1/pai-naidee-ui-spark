@@ -384,13 +384,19 @@ const AttractionDetail = ({
         {mainPhotoCredit && (
           <div className="mb-4 text-sm text-muted-foreground" data-testid="photo-attribution">
             {currentLanguage === 'th' ? 'เครดิตภาพ: ' : 'Photo credit: '}
-            <a href={mainPhotoCredit.sourcePage} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-              {mainPhotoCredit.photographer}
-            </a>{' · '}
-            <a href={mainPhotoCredit.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-              {mainPhotoCredit.licenseName}
-            </a>
-            {' · Wikimedia Commons'}
+            {mainPhotoCredit.kind === 'user-provided' ? (
+              <span>{currentLanguage === 'th' ? 'ภาพที่ผู้ใช้ส่งให้ PaiNaiDee' : 'Submitted by a PaiNaiDee user'}</span>
+            ) : (
+              <>
+                <a href={mainPhotoCredit.sourcePage} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+                  {mainPhotoCredit.photographer}
+                </a>{' · '}
+                <a href={mainPhotoCredit.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+                  {mainPhotoCredit.licenseName}
+                </a>
+                {' · Wikimedia Commons'}
+              </>
+            )}
           </div>
         )}
         {attraction.source?.url && (

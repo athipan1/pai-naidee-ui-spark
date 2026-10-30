@@ -4,6 +4,34 @@ const { parseNearbyOptions, normalizePlace, SEED_PLACES } = require('./postgres-
 const { serializePlaceDetail } = require('./railway-server.cjs');
 const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
 const verifiedMedia = require('./curated-wikimedia-media.json');
+const userProvidedMedia = require('./user-provided-place-media.json');
+const { existsSync } = require('node:fs');
+const { join } = require('node:path');
+
+test('three user-submitted Phra That Na Dun photos have ordered, local production assets', () => {
+  const placeId = 'curated-phra-that-na-dun';
+  assert.equal(userProvidedMedia.length, 3);
+  assert.equal(new Set(userProvidedMedia.map(photo => photo.id)).size, 3);
+  for (const [index, photo] of userProvidedMedia.entries()) {
+    assert.equal(photo.placeId, placeId);
+    assert.equal(photo.id, `painaidee-provided:${placeId}:0${index + 1}`);
+    assert.equal(photo.url,
+      `https://pai-naidee-ui-spark.vercel.app/place-photos/${photo.filename}`);
+    assert.ok(existsSync(join(__dirname, '..', 'public', 'place-photos', photo.filename)));
+    assert.ok(!('licenseName' in photo) && !('licenseUrl' in photo),
+      'Do not claim a license that the uploader has not supplied');
+  }
+  assert.equal(userProvidedMedia[0].filename, 'phra-that-na-dun-01-main.jpg');
+  const normalized = normalizePlace({
+    id: placeId, name: 'Phra That Na Dun', name_local: 'พระธาตุนาดูน',
+    province: 'มหาสารคาม', category: 'Culture',
+    media: userProvidedMedia.map(photo => ({ id: photo.id, url: photo.url })),
+  });
+  assert.deepEqual(normalized.images, userProvidedMedia.map(photo => photo.url));
+  assert.equal(normalized.image, userProvidedMedia[0].url);
+  assert.equal(normalized.mediaCredits[0].kind, 'user-provided');
+  assert.equal(normalized.mediaCredits[0].licenseUrl, '');
+});
 
 test('every curated attraction has an English province and reviewed English summary', () => {
   assert.equal(SEED_PLACES.length, 108);

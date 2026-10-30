@@ -1,4 +1,5 @@
 import type { AttractionPhotoCredit } from '@/shared/types/attraction';
+import userProvidedMedia from '../../../api/user-provided-place-media.json';
 
 // Hand-reviewed Commons file pages and their licensing metadata, 2026-10-29.
 // A fallback is used ONLY while the corresponding Railway place has no image.
@@ -156,5 +157,28 @@ export function addVerifiedPhotoIfMissing<T extends PlacePhotoRecord>(place: T):
     image: credit.url,
     ...(place.images ? { images: [credit.url] } : {}),
     mediaCredits: [credit, ...(place.mediaCredits ?? [])],
+  };
+}
+
+// While Railway is deploying its idempotent media backfill, the primary Vercel
+// site can already show the three gallery images that the user submitted.
+// Never replace a photo already returned by Railway or uploaded by an editor.
+export function addUserProvidedGalleryIfMissing<T extends PlacePhotoRecord>(place: T): T {
+  if (place.image || place.images?.length) return place;
+  const photos = userProvidedMedia.filter(photo => photo.placeId === place.id);
+  if (!photos.length) return place;
+  const credits: AttractionPhotoCredit[] = photos.map(photo => ({
+    url: photo.url,
+    photographer: 'PaiNaiDee user',
+    licenseName: 'User-provided photo for PaiNaiDee',
+    licenseUrl: '',
+    sourcePage: '',
+    kind: 'user-provided',
+  }));
+  return {
+    ...place,
+    image: photos[0].url,
+    ...(place.images ? { images: photos.map(photo => photo.url) } : {}),
+    mediaCredits: [...credits, ...(place.mediaCredits ?? [])],
   };
 }

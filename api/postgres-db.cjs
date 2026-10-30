@@ -5,6 +5,7 @@ const ADDITIONAL_CURATED_PLACES_V3 = require('./additional-curated-places-v3.cjs
 const ADDITIONAL_CURATED_PLACES_V4 = require('./additional-curated-places-v4.cjs');
 const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
 const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
+const USER_PROVIDED_MEDIA = require('./user-provided-place-media.json');
 const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
 
 let sqlClient = null;
@@ -329,6 +330,26 @@ async function ensureSchema() {
     `;
   }
 
+  // User-supplied photos are stored as static assets on the SINGLE production
+  // Vercel site. They do not carry a claimed Commons or Creative Commons
+  // license. Add them in gallery order only if no other photo has been entered
+  // for the place; preserve editor-created media and keep deploys idempotent.
+  for (const photo of USER_PROVIDED_MEDIA) {
+    await sql`
+      INSERT INTO media (id, place_id, url, type, title, description)
+      SELECT ${photo.id}, p.id, ${photo.url}, 'image', ${photo.title},
+        'Image supplied by a PaiNaiDee user for this destination'
+      FROM places p
+      WHERE p.id = ${photo.placeId}
+        AND NOT EXISTS (
+          SELECT 1 FROM media existing
+          WHERE existing.place_id = p.id
+            AND existing.id NOT LIKE ${`painaidee-provided:${photo.placeId}:%`}
+        )
+      ON CONFLICT (id) DO NOTHING
+    `;
+  }
+
   // The initial Ko Chang / Ko Kut import accidentally used a photograph of
   // Mu Ko Ang Thong for both locations. Repair ONLY the two original seeded
   // media rows while they still contain that exact incorrect URL; never touch
@@ -377,12 +398,16 @@ function normalizePlace(row) {
       : row.image_url
         ? [row.image_url]
         : [],
-    mediaCredits: media.filter((item) => item.sourcePage && item.licenseUrl).map((item) => ({
+    mediaCredits: media.filter((item) =>
+      (item.sourcePage && item.licenseUrl) || item.id?.startsWith('painaidee-provided:')
+    ).map((item) => ({
       url: item.url,
-      photographer: item.creatorName || 'Wikimedia Commons contributor',
-      licenseName: item.licenseName,
-      licenseUrl: item.licenseUrl,
-      sourcePage: item.sourcePage,
+      photographer: item.id?.startsWith('painaidee-provided:')
+        ? 'PaiNaiDee user' : (item.creatorName || 'Wikimedia Commons contributor'),
+      licenseName: item.licenseName || 'User-provided photo for PaiNaiDee',
+      licenseUrl: item.licenseUrl || '',
+      sourcePage: item.sourcePage || '',
+      kind: item.id?.startsWith('painaidee-provided:') ? 'user-provided' : 'commons',
     })),
     detailedDescription: row.detail_text ? {
       text: row.detail_text,

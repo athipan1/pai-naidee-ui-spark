@@ -5,6 +5,7 @@ export interface AttractionPhotoCredit {
   licenseName: string;
   licenseUrl: string;
   sourcePage: string;
+  kind?: 'commons' | 'user-provided';
 }
 
 export interface AttractionDetail {
