@@ -154,12 +154,15 @@ test('mobile homepage renders loaded photos and honest missing-review and missin
     total: 2, page: 1, limit: 10,
   } }));
   await page.goto('/');
-  const cards = page.getByTestId('attraction-card');
-  await expect(cards).toHaveCount(2);
-  const actualImage = cards.first().getByRole('img', { name: /Doi Inthanon|ดอยอินทนนท์/ });
+  // With only two destinations, both belong in the Featured section and should
+  // not be repeated in Recommended cards.
+  const featuredCards = page.locator('section[aria-label="Places to explore"] article');
+  await expect(featuredCards).toHaveCount(2);
+  await expect(page.getByTestId('attraction-card')).toHaveCount(0);
+  const actualImage = featuredCards.first().getByRole('img', { name: /Doi Inthanon|ดอยอินทนนท์/ });
   await actualImage.scrollIntoViewIfNeeded();
   await expect.poll(() => actualImage.evaluate(img => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
-  await expect(cards.nth(1).locator('img[src="/placeholder-attraction.svg"]')).toHaveCount(1);
+  await expect(featuredCards.nth(1).locator('img[src="/placeholder-attraction.svg"]')).toHaveCount(1);
   await expect(page.getByText(/ยังไม่มีคะแนนรีวิวที่ยืนยันได้|No verified reviews yet/).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
