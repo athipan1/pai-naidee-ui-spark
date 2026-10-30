@@ -1,4 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
+
+const userProvidedMedia = JSON.parse(readFileSync(
+  join(process.cwd(), 'api', 'user-provided-place-media.json'), 'utf8',
+)) as { url: string; filename: string }[];
 
 const place = {
   id: 'railway-test-1', name: 'Doi Inthanon', nameLocal: 'ดอยอินทนนท์',
@@ -165,6 +171,37 @@ test('mobile homepage renders loaded photos and honest missing-review and missin
   await expect(featuredCards.nth(1).locator('img[src="/placeholder-attraction.svg"]')).toHaveCount(1);
   await expect(page.getByText(/ยังไม่มีคะแนนรีวิวที่ยืนยันได้|No verified reviews yet/).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+test('mobile Phra That Na Dun gallery loads all three submitted photos without overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places/curated-phra-that-na-dun', route => route.fulfill({ json: {
+    ...place, id: 'curated-phra-that-na-dun', name: 'Phra That Na Dun',
+    nameLocal: 'พระธาตุนาดูน', province: 'มหาสารคาม', images: [], image: null,
+    mediaCredits: [],
+  } }));
+  await page.route('https://pai-naidee-ui-spark.vercel.app/place-photos/*.jpg', route => {
+    const filename = new URL(route.request().url()).pathname.split('/').at(-1)!;
+    return route.fulfill({ status: 200, contentType: 'image/jpeg',
+      path: join(process.cwd(), 'public', 'place-photos', filename) });
+  });
+
+  await page.goto('/attraction/curated-phra-that-na-dun');
+  await expect(page.getByRole('heading', { name: 'Phra That Na Dun', exact: true })).toBeVisible();
+  await expect(page.getByTestId('photo-attribution')).toContainText('PaiNaiDee user');
+  await expect(page.getByTestId('photo-attribution').getByRole('link')).toHaveCount(0);
+  const gallery = page.locator('img[alt^="Phra That Na Dun - image"]');
+  await expect(gallery).toHaveCount(3);
+  for (let index = 0; index < userProvidedMedia.length; index++) {
+    await expect(gallery.nth(index)).toHaveAttribute('src', userProvidedMedia[index].url);
+    await expect.poll(() => gallery.nth(index).evaluate(image =>
+      (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0)).toBe(true);
+    if (index < userProvidedMedia.length - 1) {
+      await page.getByRole('button', { name: 'Next slide' }).click();
+    }
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
 
 test('legacy Explore route navigates to Discover and preserves query', async ({ page }) => {

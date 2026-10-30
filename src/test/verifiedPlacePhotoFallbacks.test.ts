@@ -1,8 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { addVerifiedPhotoIfMissing, verifiedMissingPhotoFiles } from '@/shared/data/verifiedPlacePhotoFallbacks';
+import { addVerifiedPhotoIfMissing, addUserProvidedGalleryIfMissing, verifiedMissingPhotoFiles } from '@/shared/data/verifiedPlacePhotoFallbacks';
 import persistedCommonsPhotos from '../../api/verified-missing-commons-media.json';
+import userProvidedMedia from '../../api/user-provided-place-media.json';
 
 describe('Verified place photo fallback catalogue', () => {
+  it('renders all three supplied photos in gallery order only while Railway has no photos', () => {
+    const place = { id: 'curated-phra-that-na-dun', image: null, images: [] as string[], mediaCredits: [] };
+    const result = addUserProvidedGalleryIfMissing(place);
+    expect(result.image).toBe(userProvidedMedia[0].url);
+    expect(result.images).toEqual(userProvidedMedia.map(photo => photo.url));
+    expect(result.mediaCredits).toHaveLength(3);
+    expect(result.mediaCredits?.every(credit => credit.kind === 'user-provided' && !credit.licenseUrl)).toBe(true);
+    const edited = { ...place, image: 'https://example.org/editor.jpg', images: ['https://example.org/editor.jpg'] };
+    expect(addUserProvidedGalleryIfMissing(edited)).toBe(edited);
+    const unrelated = { id: 'unrelated', image: null };
+    expect(addUserProvidedGalleryIfMissing(unrelated)).toBe(unrelated);
+  });
   it('maps distinct real Commons files to curated places with complete rights metadata', () => {
     const filenames = Object.values(verifiedMissingPhotoFiles).map(photo => photo.filename);
     expect(filenames.length).toBeGreaterThanOrEqual(30);

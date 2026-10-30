@@ -1,0 +1,23 @@
+[
+  {
+    "id": "painaidee-provided:curated-phra-that-na-dun:01",
+    "placeId": "curated-phra-that-na-dun",
+    "filename": "phra-that-na-dun-01-main.jpg",
+    "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-01-main.jpg",
+    "title": "พระธาตุนาดูน — ภาพหลัก"
+  },
+  {
+    "id": "painaidee-provided:curated-phra-that-na-dun:02",
+    "placeId": "curated-phra-that-na-dun",
+    "filename": "phra-that-na-dun-02-buddha.jpg",
+    "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-02-buddha.jpg",
+    "title": "พระธาตุนาดูน — ภาพเพิ่มเติม 1"
+  },
+  {
+    "id": "painaidee-provided:curated-phra-that-na-dun:03",
+    "placeId": "curated-phra-that-na-dun",
+    "filename": "phra-that-na-dun-03-chedi.jpg",
+    "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-03-chedi.jpg",
+    "title": "พระธาตุนาดูน — ภาพเพิ่มเติม 2"
+  }
+]

@@ -21,4 +21,12 @@ describe('read-only production place audit', () => {
     expect(report.missingSource).toEqual(['one']);
     expect(report.uncreditedPhotos).toEqual(['one']);
   });
+
+  it('recognizes user-submitted photos without misrepresenting them as Creative Commons', () => {
+    const report = auditPlaces([{ ...place, image: 'https://example.org/user-photo.jpg',
+      mediaCredits: [{ url: 'https://example.org/user-photo.jpg', kind: 'user-provided',
+        photographer: 'PaiNaiDee user', licenseName: 'User-provided photo',
+        licenseUrl: '', sourcePage: '' }] }]);
+    expect(report.uncreditedPhotos).toHaveLength(0);
+  });
 });
