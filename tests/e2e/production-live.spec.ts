@@ -31,3 +31,19 @@ test('real map and geolocation search return places from Railway', async ({ brow
     await context.close();
   }
 });
+
+test('mobile visitor can browse without horizontal overflow and see a loaded destination photo', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.getByRole('main')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
+
+  const firstPlacePhoto = page.locator('main img[alt]').first();
+  await firstPlacePhoto.scrollIntoViewIfNeeded();
+  await expect.poll(() => firstPlacePhoto.evaluate(img =>
+    (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0,
+  )).toBe(true);
+
+  await page.goto('/discover');
+  await expect(page.getByRole('tab', { name: /Map|แผนที่/ })).toBeVisible();
+});

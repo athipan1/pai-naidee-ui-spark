@@ -14,6 +14,7 @@ import { MapPin, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 import { isDevelopment } from "@/shared/utils/devUtils";
+import { splitHomeAttractions } from "@/shared/utils/uniqueAttractions";
 import { uniqueAttractionsById } from '@/shared/utils/uniqueAttractions';
 
 interface IndexProps {
@@ -62,6 +63,9 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
           (attraction) =>
             attraction.category.toLowerCase() === _selectedCategory.toLowerCase()
         );
+
+  const { featured: featuredAttractions, recommended: recommendedAttractions } =
+    splitHomeAttractions(filteredAttractions, _selectedCategory === "all");
 
   // Calculate category counts
   const attractionCounts = displayAttractions.reduce((counts, attraction) => {
@@ -162,7 +166,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6" role="list">
-                {displayAttractions.slice(0, 2).map((attraction) => (
+                {featuredAttractions.map((attraction) => (
                   <article
                     key={`trending-${attraction.id}`}
                     className="bg-card/90 backdrop-blur-sm rounded-2xl p-5 border border-border/30 shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer group hover:scale-[1.02] hover:-translate-y-1"
@@ -249,12 +253,12 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               role="list"
               aria-label={
                 currentLanguage === "th" 
-                  ? `รายการสถานที่ท่องเที่ยว ${Math.min(filteredAttractions.length, 8)} แห่ง`
-                  : `Tourist attractions list ${Math.min(filteredAttractions.length, 8)} places`
+                  ? `รายการสถานที่ท่องเที่ยว ${recommendedAttractions.length} แห่ง`
+                  : `Tourist attractions list ${recommendedAttractions.length} places`
               }
             >
               {/* Show only first 8 items on home page */}
-              {filteredAttractions.slice(0, 8).map((attraction) => (
+              {recommendedAttractions.map((attraction) => (
                 <div key={attraction.id} role="listitem" className="h-full">
                   <AttractionCard
                     {...attraction}
