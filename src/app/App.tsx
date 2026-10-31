@@ -20,7 +20,7 @@ const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 const Index = lazy(() => import("./pages/Index"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 const AdminCms = lazy(() => import("./pages/AdminCms"));
-const AdminLogin = lazy(() => import("./pages/LoginPage"));
+const AdminLogin = lazy(() => import("./pages/RailwayLoginPage"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 

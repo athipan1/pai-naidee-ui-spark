@@ -2,6 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { cleanPlace } = require('./admin-cms.cjs');
 const { createRoleGuard } = require('./security.cjs');
+const { hashPassword, verifyPassword, hashToken } = require('./railway-admin-auth.cjs');
 
 const good = { name: 'Test Place', nameLocal: 'สถานที่ทดสอบ', province: 'มุกดาหาร', category: 'Culture', description: 'description', lat: 16.5, lng: 104.7 };
 
@@ -17,4 +18,15 @@ test('admin role guard denies anonymous access before any database interaction',
   let status = 0;
   await guard({ headers: {} }, { status: code => { status = code; return { json() {} }; } }, () => assert.fail('No anonymous access'));
   assert.equal(status, 401);
+});
+
+test('Railway passwords use salted scrypt; session secrets are hashed', () => {
+  const password = 'AnActualLongPassword123!';
+  const first = hashPassword(password);
+  const second = hashPassword(password);
+  assert.notEqual(first, second);
+  assert.equal(verifyPassword(password, first), true);
+  assert.equal(verifyPassword('wrong-password', first), false);
+  assert.equal(verifyPassword('wrong-password', undefined), false);
+  assert.notEqual(hashToken('random-token-secret'), 'random-token-secret');
 });

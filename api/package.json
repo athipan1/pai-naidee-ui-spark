@@ -8,9 +8,11 @@
     "dev": "nodemon api-server.cjs",
     "test": "node --test security.node-test.cjs nearby.node-test.cjs place-search.node-test.cjs smart-search.node-test.cjs place-quality.node-test.cjs admin-cms.node-test.cjs",
     "audit:places": "node audit-place-data.cjs",
+    "bootstrap:admin": "node bootstrap-admin.cjs",
     "start:legacy": "node api-server.cjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1161.0",
     "@supabase/supabase-js": "^2.79.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

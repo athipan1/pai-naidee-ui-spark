@@ -1,22 +1,40 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/shared/contexts/AuthContext';
 import { getApiBaseUrl } from '@/services/railway-api.service';
-import { getSupabaseClient, isSupabaseConfigured } from '@/services/supabase.service';
 
 type Draft = { id: string; status: string; payload: PlaceForm };
 type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string };
 const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '' };
 
 export default function AdminCms() {
-  const { session, isLoading, isAdmin, signOut } = useAuth();
+  const [token, setToken] = useState(() => {
+    try { return window.sessionStorage.getItem('painaidee.admin.token'); } catch { return null; }
+  });
+  const [isLoading, setIsLoading] = useState(Boolean(token));
+  const [isAdmin, setIsAdmin] = useState(false);
   const [form, setForm] = useState<PlaceForm>({ ...empty });
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const token = session?.access_token;
   const base = getApiBaseUrl();
+
+  useEffect(() => {
+    if (!token) return;
+    const controller = new AbortController();
+    void fetch(`${base}/api/admin/me`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal })
+      .then(res => { if (!res.ok) throw new Error('Session invalid'); return res.json(); })
+      .then(data => setIsAdmin(data.role === 'admin'))
+      .catch(() => { if (!controller.signal.aborted) { setIsAdmin(false); setToken(null); window.sessionStorage.removeItem('painaidee.admin.token'); } })
+      .finally(() => { if (!controller.signal.aborted) setIsLoading(false); });
+    return () => controller.abort();
+  }, [token, base]);
+
+  async function signOut() {
+    try { await api('/logout', { method: 'POST' }); } catch { /* Expired tokens are invalid regardless. */ }
+    window.sessionStorage.removeItem('painaidee.admin.token');
+    setToken(null); setIsAdmin(false);
+  }
 
   async function api(path: string, options: RequestInit = {}) {
     if (!token) throw new Error('กรุณาเข้าสู่ระบบใหม่');
@@ -77,8 +95,7 @@ export default function AdminCms() {
   }
 
   if (isLoading) return <div className="p-8">กำลังตรวจสอบสิทธิ์...</div>;
-  if (!isSupabaseConfigured()) return <div className="p-8">ยังไม่ได้ตั้งค่า Supabase Auth สำหรับแอดมิน</div>;
-  if (!session) return <div className="p-8">กรุณา <Link className="underline" to="/login">เข้าสู่ระบบแอดมิน</Link></div>;
+  if (!token) return <div className="p-8">กรุณา <Link className="underline" to="/login">เข้าสู่ระบบแอดมิน</Link></div>;
   if (!isAdmin) return <div className="p-8">บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ</div>;
 
   return <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-8">

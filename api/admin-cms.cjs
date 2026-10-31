@@ -20,7 +20,7 @@ function cleanPlace(input) {
   };
 }
 
-function registerAdminCms(app, { getSql, requireAdmin, storage, invalidateSearchIndex = () => {} }) {
+function registerAdminCms(app, { getSql, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {} }) {
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
@@ -85,21 +85,8 @@ function registerAdminCms(app, { getSql, requireAdmin, storage, invalidateSearch
 
   app.post('/api/admin/media', requireAdmin, storage.single('image'), wrap(async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'Image file required (JPEG, PNG or WebP; max 5 MB).' });
-    if (!storage.client) return res.status(503).json({ error: 'Image storage is not configured.' });
-    const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[req.file.mimetype];
-    if (!ext) return res.status(400).json({ error: 'Unsupported image format.' });
-    const bytes = req.file.buffer;
-    const valid = ext === 'jpg' ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
-      : ext === 'png' ? bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
-      : bytes.length >= 12 && bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP';
-    if (!valid) return res.status(400).json({ error: 'Image content does not match the selected type.' });
-    const path = `cms/${randomUUID()}.${ext}`;
-    const { error } = await storage.client.storage.from('place-media').upload(path, req.file.buffer, {
-      contentType: req.file.mimetype, upsert: false,
-    });
-    if (error) return res.status(503).json({ error: 'Could not store image.' });
-    const { data } = storage.client.storage.from('place-media').getPublicUrl(path);
-    res.status(201).json({ imageUrl: data.publicUrl });
+    try { res.status(201).json({ imageUrl: await uploadImage(req.file) }); }
+    catch (error) { res.status(400).json({ error: error.message }); }
   }));
 }
 

@@ -133,7 +133,7 @@ test('Railway app rejects unauthenticated place writes without contacting the da
         headers: { 'content-type': 'application/json' },
         body: method === 'DELETE' ? undefined : JSON.stringify({ name: 'should-not-be-created' }),
       });
-      assert.equal(response.status, path.startsWith('/api/admin/') ? 503 : 404);
+      assert.equal(response.status, path.startsWith('/api/admin/') ? 401 : 404);
     });
   }
 });
