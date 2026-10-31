@@ -6,6 +6,7 @@ import { getApiBaseUrl } from '@/services/railway-api.service';
 type Draft = { id: string; status: string; payload: PlaceForm; target_place_id?: string };
 type CatalogPlace = { id: string; name: string; name_local: string | null; province: string };
 type ExistingImage = { id: string; url: string; title: string };
+type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
 type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string };
 const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '' };
 const AdminCoordinatePicker = lazy(() => import('./AdminCoordinatePicker'));
@@ -31,6 +32,10 @@ export default function AdminCms() {
   const [searched, setSearched] = useState(false);
   const [brokenImage, setBrokenImage] = useState(false);
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
+  const [aliasPlace, setAliasPlace] = useState<CatalogPlace | null>(null);
+  const [placeAliases, setPlaceAliases] = useState<PlaceAlias[]>([]);
+  const [newAliasName, setNewAliasName] = useState('');
+  const [aliasLanguage, setAliasLanguage] = useState('th');
   const [loadingImages, setLoadingImages] = useState(false);
   const [geoCandidates, setGeoCandidates] = useState<GeocodeCandidate[]>([]);
   const [proposedCoordinate, setProposedCoordinate] = useState<{ lat: number; lng: number } | null>(null);
@@ -144,6 +149,40 @@ export default function AdminCms() {
     finally { setBusy(false); }
   }
 
+  async function manageAliases(place: CatalogPlace) {
+    setAliasPlace(place); setPlaceAliases([]); setMessage('');
+    try {
+      const result = await api(`/catalog/${encodeURIComponent(place.id)}/aliases`);
+      setPlaceAliases(result.aliases || []);
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'โหลดชื่อเรียกไม่สำเร็จ'); }
+  }
+
+  async function addAlias(event: FormEvent) {
+    event.preventDefault();
+    if (!aliasPlace) return;
+    setBusy(true); setMessage('');
+    try {
+      await api(`/catalog/${encodeURIComponent(aliasPlace.id)}/aliases`, { method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aliasName: newAliasName, language: aliasLanguage }) });
+      setNewAliasName('');
+      await manageAliases(aliasPlace);
+      setMessage('เพิ่มชื่อเรียกแล้ว รออนุมัติก่อนใช้ค้นหาจริง');
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'เพิ่มชื่อเรียกไม่สำเร็จ'); }
+    finally { setBusy(false); }
+  }
+
+  async function reviewAlias(alias: PlaceAlias, status: 'approved' | 'rejected') {
+    if (!aliasPlace) return;
+    setBusy(true); setMessage('');
+    try {
+      await api(`/aliases/${alias.id}/review`, { method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+      await manageAliases(aliasPlace);
+      setMessage(status === 'approved' ? 'อนุมัติชื่อเรียกแล้ว พร้อมใช้ค้นหา' : 'ปฏิเสธชื่อเรียกแล้ว');
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'ตรวจสอบชื่อเรียกไม่สำเร็จ'); }
+    finally { setBusy(false); }
+  }
+
   async function editExisting(place: CatalogPlace) {
     setBusy(true); setMessage('');
     try {
@@ -218,7 +257,14 @@ export default function AdminCms() {
         <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="เช่น วัดภูมโนรมย์" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span>พบ {catalogTotal} สถานที่ {search.trim() ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setSearched(false); }}>แสดงทั้งหมด</button></div>
         {searched && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
-        <div className="divide-y">{catalog.map(place => <div key={place.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {place.province}</p></div><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">แก้ไขสถานที่</button></div>)}</div>
+        <div className="divide-y">{catalog.map(place => <div key={place.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {place.province}</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">แก้ไขสถานที่</button></div></div>)}</div>
+        {aliasPlace && <section className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-4" aria-label="จัดการชื่อเรียกสถานที่">
+          <div className="flex items-center justify-between gap-2"><h3 className="font-semibold">ชื่อเรียกอื่น: {aliasPlace.name_local || aliasPlace.name}</h3><button type="button" className="text-sm underline" onClick={() => setAliasPlace(null)}>ปิด</button></div>
+          <p className="text-xs text-slate-600">ชื่อที่เพิ่มจะรอตรวจสอบก่อน จึงไม่กระทบผลค้นหาบนเว็บไซต์ทันที</p>
+          <form className="flex flex-wrap gap-2" onSubmit={event => void addAlias(event)}><input aria-label="เพิ่มชื่อเรียกสถานที่" value={newAliasName} onChange={event => setNewAliasName(event.target.value)} maxLength={150} required minLength={2} className="min-w-0 flex-1 rounded-lg border px-3 py-2" placeholder="เช่น ชื่อท้องถิ่น หรือชื่อภาษาอังกฤษ" /><select aria-label="ภาษาของชื่อเรียก" className="rounded-lg border px-2" value={aliasLanguage} onChange={event => setAliasLanguage(event.target.value)}><option value="th">ไทย</option><option value="en">English</option><option value="other">อื่น ๆ</option></select><button type="submit" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50">เพิ่มชื่อ</button></form>
+          {placeAliases.length === 0 && <p className="text-sm text-slate-500">ยังไม่มีชื่อเรียกเพิ่มเติม</p>}
+          <div className="space-y-2">{placeAliases.map(alias => <div key={alias.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-3"><div><p className="font-medium">{alias.alias_name}</p><p className="text-xs text-slate-500">{alias.language} · {alias.status === 'approved' ? 'อนุมัติแล้ว' : alias.status === 'rejected' ? 'ปฏิเสธแล้ว' : 'รอตรวจสอบ'}</p></div>{alias.status === 'pending' && <div className="flex gap-2"><button type="button" disabled={busy} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs text-white disabled:opacity-50" onClick={() => void reviewAlias(alias, 'approved')}>อนุมัติ</button><button type="button" disabled={busy} className="rounded-lg border px-3 py-2 text-xs disabled:opacity-50" onClick={() => void reviewAlias(alias, 'rejected')}>ปฏิเสธ</button></div>}</div>)}</div>
+        </section>}
         {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1)}>ถัดไป</button></div>}
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7">

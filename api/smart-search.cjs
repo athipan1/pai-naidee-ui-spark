@@ -8,7 +8,7 @@ function normalize(text) {
 }
 
 function placeNames(place) {
-  const names = [place.name, place.name_local || place.nameLocal, ...(PLACE_NAME_ALIASES[place.id] || [])];
+  const names = [place.name, place.name_local || place.nameLocal, ...(PLACE_NAME_ALIASES[place.id] || []), ...(place.aliases || [])];
   for (const value of [...names]) {
     const name = String(value || '');
     if (/^วัด\s*.+/u.test(name)) names.push(name.replace(/^วัด\s*/u, ''));

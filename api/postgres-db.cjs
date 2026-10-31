@@ -20,6 +20,10 @@ async function getSearchIndex() {
   if (searchIndex && Date.now() < searchIndexExpires) return searchIndex;
   const sql = getSql();
   const places = await sql`SELECT id, name, name_local, province, province_en, category, description, description_en, tags, rating FROM places`;
+  const aliases = await sql`SELECT place_id, alias_name FROM place_aliases WHERE status = 'approved'`;
+  const byId = new Map();
+  for (const alias of aliases) byId.set(alias.place_id, [...(byId.get(alias.place_id) || []), alias.alias_name]);
+  for (const place of places) place.aliases = byId.get(place.id) || [];
   searchIndex = places;
   searchIndexExpires = Date.now() + 30_000;
   return places;
@@ -273,6 +277,21 @@ async function ensureSchema() {
       expires_at TIMESTAMPTZ NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS place_aliases (
+      id TEXT PRIMARY KEY,
+      place_id TEXT NOT NULL REFERENCES places(id) ON DELETE CASCADE,
+      alias_name TEXT NOT NULL,
+      alias_key TEXT NOT NULL,
+      language TEXT NOT NULL DEFAULT 'th' CHECK (language IN ('th', 'en', 'other')),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+      created_by TEXT REFERENCES admin_users(id),
+      reviewed_by TEXT REFERENCES admin_users(id),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      reviewed_at TIMESTAMPTZ,
+      UNIQUE (place_id, alias_key)
+    );
+    CREATE INDEX IF NOT EXISTS idx_place_aliases_lookup ON place_aliases (alias_key, status);
+    CREATE INDEX IF NOT EXISTS idx_place_aliases_place ON place_aliases (place_id);
     CREATE INDEX IF NOT EXISTS idx_admin_sessions_expiry ON admin_sessions (expires_at);
 
     CREATE INDEX IF NOT EXISTS idx_places_category ON places (category);
