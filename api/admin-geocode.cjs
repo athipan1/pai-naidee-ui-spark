@@ -38,12 +38,14 @@ function isThailandCoordinate(lat, lng) {
     lng >= THAILAND_BOUNDS.west && lng <= THAILAND_BOUNDS.east;
 }
 
-async function geocodeCandidates({ name, province, listPlaces, apiKey, request = fetch }) {
+async function geocodeCandidates({ name, province, listPlaces, apiKey, request = fetch, resolveNames = async () => [] }) {
   const query = String(name || '').trim().slice(0, 120);
   const area = String(province || '').trim().slice(0, 100);
   if (query.length < 2) return { error: 'กรุณากรอกชื่อสถานที่อย่างน้อย 2 ตัวอักษร', candidates: [] };
 
-  const names = searchNames(query);
+  const resolvedNames = await resolveNames(query);
+  const names = [...new Map([...searchNames(query), ...resolvedNames].filter(Boolean)
+    .map(name => [normalized(name), name])).values()].slice(0, 6);
   const candidates = [];
   const addCandidate = candidate => {
     if (!isThailandCoordinate(candidate.lat, candidate.lng) ||
@@ -54,7 +56,7 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
     const matches = await listPlaces({ search: lookupName, province: area, limit: 10 });
     for (const place of matches.attractions || []) {
       if (area && String(place.province || '').trim().toLocaleLowerCase() !== area.toLocaleLowerCase()) continue;
-      if (!matchesPlaceName(query, [place.nameLocal, place.name])) continue;
+      if (!names.some(name => matchesPlaceName(name, [place.nameLocal, place.name]))) continue;
       addCandidate({ lat: Number(place.coordinates?.lat), lng: Number(place.coordinates?.lng),
         label: `${place.nameLocal || place.name} · ${place.province}`, source: 'PaiNaiDee' });
     }
@@ -79,7 +81,7 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
             const lng = Number(item.lon);
             if (!isThailandCoordinate(lat, lng) || item.country_code?.toLowerCase() !== 'th') continue;
             // A municipal centroid is not a match for a landmark, even in the correct province.
-            if (!matchesPlaceName(query, [item.name, item.address_line1, item.formatted])) continue;
+            if (!names.some(name => matchesPlaceName(name, [item.name, item.address_line1, item.formatted]))) continue;
             addCandidate({ lat, lng, label: String(item.formatted || item.name || lookupName).slice(0, 250), source: 'Geoapify' });
           }
         }
