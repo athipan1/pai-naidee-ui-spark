@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node railway-server.cjs",
     "dev": "nodemon api-server.cjs",
-    "test": "node --test security.node-test.cjs nearby.node-test.cjs place-search.node-test.cjs",
+    "test": "node --test security.node-test.cjs nearby.node-test.cjs place-search.node-test.cjs smart-search.node-test.cjs",
     "start:legacy": "node api-server.cjs"
   },
   "dependencies": {
