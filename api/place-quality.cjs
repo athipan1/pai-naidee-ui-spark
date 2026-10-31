@@ -56,6 +56,10 @@ function auditPlaceImport({ places, wikimediaMedia = [], missingMedia = [], user
   }
 
   const mediaUrls = new Map();
+  // Railway deploys from api/ and does not contain frontend public/ assets.
+  // CI running from the full repository must still verify each asset exists.
+  const localPhotoDirectory = join(__dirname, '..', 'public', 'place-photos');
+  const canInspectLocalPhotos = existsSync(localPhotoDirectory);
   for (const [kind, collection] of [['Wikimedia', wikimediaMedia], ['Wikimedia', missingMedia], ['user', userMedia]]) {
     if (!Array.isArray(collection)) { errors.push(`${kind}: media list is not an array`); continue; }
     for (const photo of collection) {
@@ -75,7 +79,7 @@ function auditPlaceImport({ places, wikimediaMedia = [], missingMedia = [], user
       } else {
         if (!photo?.id || !photo?.filename ||
             photo?.url !== `https://pai-naidee-ui-spark.vercel.app/place-photos/${photo.filename}` ||
-            !existsSync(join(__dirname, '..', 'public', 'place-photos', photo.filename))) {
+            (canInspectLocalPhotos && !existsSync(join(localPhotoDirectory, photo.filename)))) {
           errors.push(`${placeId}: user photo URL/local asset mismatch`);
         }
         if (photo?.licenseName || photo?.licenseUrl) warnings.push(`${placeId}: user photo license attribution needs explicit user evidence`);
@@ -87,6 +91,7 @@ function auditPlaceImport({ places, wikimediaMedia = [], missingMedia = [], user
   if (requireFullCoverage && missingProvinces.length) errors.push(`province coverage incomplete: ${missingProvinces.join(', ')}`);
   const photoPlaces = new Set([...wikimediaMedia, ...missingMedia, ...userMedia].map(photo => photo.placeId));
   const noPhoto = [...ids].filter(id => !photoPlaces.has(id));
+  if (userMedia.length && !canInspectLocalPhotos) warnings.push('Frontend public/ photo assets are unavailable in API-only deploy; CI validates files in full repository');
   if (noPhoto.length) warnings.push(`${noPhoto.length} places have no verified photograph; leave image empty until sourced`);
   return {
     errors, warnings,

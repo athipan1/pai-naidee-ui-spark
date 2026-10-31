@@ -36,6 +36,13 @@ test('incorrect photo attribution or missing user asset blocks import', () => {
   }] });
   assert.match(result.errors.join(' '), /user photo URL\/local asset mismatch/);
 });
+test('production-only package still validates the immutable user photo URL', () => {
+  const result = auditPlaceImport({ ...input(), userMedia: [{
+    id: 'bad-photo', placeId: SEED_PLACES[0].id, filename: 'missing.jpg',
+    url: 'https://example.invalid/place-photos/missing.jpg',
+  }] });
+  assert.match(result.errors.join(' '), /user photo URL\/local asset mismatch/);
+});
 test('a removed province fails complete-coverage gate', () => {
   const result = auditPlaceImport({ ...input(), places: SEED_PLACES.filter(p => p.province !== 'พิจิตร') });
   assert.match(result.errors.join(' '), /province coverage incomplete/);
