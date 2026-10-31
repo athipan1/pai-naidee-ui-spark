@@ -29,7 +29,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt }) => {
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      <Carousel className="h-full w-full overflow-hidden">
+      {/* CarouselContent adds a viewport wrapper; it must also fill the hero height. */}
+      <Carousel className="h-full w-full overflow-hidden [&>div]:h-full">
         <CarouselContent className="h-full">
           {images.map((src, index) => (
             <CarouselItem key={index} className="h-full">
