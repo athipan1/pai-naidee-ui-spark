@@ -19,6 +19,7 @@ const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 // Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
+const TripPlanner = lazy(() => import("./pages/TripPlanner"));
 const AdminCms = lazy(() => import("./pages/AdminCms"));
 const AdminLogin = lazy(() => import("./pages/RailwayLoginPage"));
 
@@ -134,6 +135,7 @@ const AppContent = () => {
             }
           />
           <Route path="/community/*" element={<Navigate to="/discover" replace />} />
+          <Route path="/trip-planner" element={<TripPlanner currentLanguage={currentLanguage} />} />
           {/* Legacy Route Redirects */}
           <Route path="/explore" element={<ExploreRedirect />} />
           <Route path="/favorites" element={<Navigate to="/discover" replace />} />
