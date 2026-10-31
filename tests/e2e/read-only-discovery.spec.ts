@@ -259,11 +259,14 @@ test('incorrect Ko Chang photo is corrected with matching Wikimedia attribution'
     .toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/File:Ko_Chang,_Thailand.jpg');
 });
 
-test('private and upload routes cannot mount in browse-only mode', async ({ page }) => {
-  for (const path of ['/login', '/admin/dashboard', '/admin/media', '/upload', '/community/instagram']) {
+test('admin routes require authentication and public upload routes remain closed', async ({ page }) => {
+  for (const path of ['/upload', '/community/instagram']) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/discover$/);
   }
+  await page.goto('/admin');
+  await expect(page.getByRole('link', { name: 'เข้าสู่ระบบแอดมิน' })).toBeVisible();
+  await expect(page.getByText('บันทึกสถานที่เป็นฉบับร่าง')).toHaveCount(0);
 });
 
 test('API failure never substitutes sample places', async ({ page }) => {

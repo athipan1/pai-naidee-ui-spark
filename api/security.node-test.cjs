@@ -93,7 +93,7 @@ test('uuid validation is strict', () => {
   assert.equal(isUuid('../etc/passwd'), false);
 });
 
-test('Railway production app exposes no place write routes', () => {
+test('Railway production app keeps public place API read-only while gating CMS writes', () => {
   const routes = railwayApp._router.stack
     .filter((layer) => layer.route)
     .map((layer) => ({
@@ -109,7 +109,8 @@ test('Railway production app exposes no place write routes', () => {
     { path: '/api/places/nearby', methods: ['get'] },
     { path: '/api/places/:placeId', methods: ['get'] },
   ]);
-  assert.equal(routes.some(({ path }) => path.startsWith('/api/admin') || path.startsWith('/api/upload')), false);
+  assert.equal(routes.some(({ path, methods }) => path === '/api/admin/places' && methods.includes('post')), true);
+  assert.equal(routes.some(({ path }) => path.startsWith('/api/upload')), false);
 });
 
 test('Railway app rejects unauthenticated place writes without contacting the database', async (t) => {
@@ -132,7 +133,7 @@ test('Railway app rejects unauthenticated place writes without contacting the da
         headers: { 'content-type': 'application/json' },
         body: method === 'DELETE' ? undefined : JSON.stringify({ name: 'should-not-be-created' }),
       });
-      assert.equal(response.status, 404);
+      assert.equal(response.status, path.startsWith('/api/admin/') ? 401 : 404);
     });
   }
 });

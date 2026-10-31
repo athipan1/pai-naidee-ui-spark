@@ -2,6 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { randomUUID } = require('node:crypto');
+const multer = require('multer');
+const { registerAdminCms } = require('./admin-cms.cjs');
+const { authRoutes } = require('./railway-admin-auth.cjs');
+const { createRailwayMediaStorage, registerRailwayMedia, uploadImage } = require('./railway-media.cjs');
 const {
   buildCorsOptions,
   createRateLimiter,
@@ -17,6 +21,8 @@ const {
   parseNearbyOptions,
   pingDatabase,
   closeDatabase,
+  getSql,
+  invalidateSearchIndex,
 } = require('./postgres-db.cjs');
 
 const app = express();
@@ -27,6 +33,20 @@ app.set('trust proxy', 1);
 app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '256kb' }));
 app.use('/api', createRateLimiter({ windowMs: 60_000, max: 180 }));
+
+const storage = createRailwayMediaStorage();
+const requireAdmin = authRoutes(app, { getSql, limitLogin: createRateLimiter({ windowMs: 15 * 60_000, max: 10, keyPrefix: 'admin-login' }) });
+const images = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)),
+});
+registerAdminCms(app, {
+  getSql,
+  requireAdmin,
+  storage: { single: images.single.bind(images) },
+  uploadImage: (file) => uploadImage(storage, file),
+  invalidateSearchIndex,
+});
+registerRailwayMedia(app, { getSql, storage });
 
 app.get('/api/places', async (req, res) => {
   try {
