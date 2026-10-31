@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { geocodeCandidates, isThailandCoordinate } = require('./admin-geocode.cjs');
+const { geocodeCandidates, isThailandCoordinate, matchesPlaceName } = require('./admin-geocode.cjs');
 
 test('geocoding searches existing Railway places without a paid provider', async () => {
   const calls = [];
@@ -39,4 +39,25 @@ test('map search accepts a place name without a province and retains candidate s
   });
   assert.equal(result.candidates.length, 1);
   assert.equal(result.candidates[0].label, 'ตลาดน้ำอัมพวา · สมุทรสงคราม');
+});
+
+test('quality gate rejects a nearby national park and city centroid for Cheow Lan Dam', async () => {
+  const result = await geocodeCandidates({ name: 'เขื่อนเชี่ยวหลาน', province: 'สุราษฎร์ธานี', apiKey: 'test-key',
+    listPlaces: async () => ({ attractions: [
+      { nameLocal: 'อุทยานแห่งชาติเขาสก', province: 'สุราษฎร์ธานี', coordinates: { lat: 8.91493, lng: 98.53017 } },
+    ] }),
+    request: async () => ({ ok: true, json: async () => ({ results: [
+      { lat: 9.14041, lon: 99.32413, country_code: 'th', formatted: 'เทศบาลนครสุราษฎร์ธานี, ประเทศไทย' },
+      { lat: 8.98, lon: 98.82, country_code: 'th', name: 'Ratchaprapha Dam', formatted: 'Ratchaprapha Dam, Surat Thani' },
+    ] }) }),
+  });
+  assert.equal(result.candidates.length, 1);
+  assert.match(result.candidates[0].label, /Ratchaprapha Dam/);
+});
+
+test('quality gate rejects unrecognised place names even if they are in the same province', async () => {
+  assert.equal(matchesPlaceName('เขื่อนเชี่ยวหลาน', ['อุทยานแห่งชาติเขาสก']), false);
+  assert.equal(matchesPlaceName('เขื่อนเชี่ยวหลาน', ['เขื่อนรัชชประภา']), true);
+  assert.equal(matchesPlaceName('เขื่อนเชี่ยวหลาน', ['เทศบาลนครสุราษฎร์ธานี']), false);
+  assert.equal(matchesPlaceName('ตลาดน้ำอัมพวา', ['ตลาดน้ำอัมพวา']), true);
 });
