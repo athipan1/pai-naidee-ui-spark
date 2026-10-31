@@ -73,6 +73,23 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
 });
 
+test('mobile search keeps filters and view controls accessible in a compact disclosure', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/discover?mode=search&q=%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88');
+  const filters = page.getByRole('button', { name: 'Filters' });
+  await expect(filters).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+  await expect(page.getByLabel('Filter province')).toBeHidden();
+  await filters.click();
+  await expect(filters).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByLabel('Filter province')).toBeVisible();
+  await expect(page.getByLabel('Filter place type')).toBeVisible();
+  await page.getByRole('button', { name: 'List view' }).click();
+  await filters.click();
+  await expect(filters).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+});
+
 test('mobile search shows one Wat Phu Manorom result for alternate Thai place names', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const temple = {
