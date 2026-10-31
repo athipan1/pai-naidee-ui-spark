@@ -333,7 +333,7 @@ const AttractionDetail = ({
       />
 
       {/* Hero Section with Image Gallery */}
-      <div className="relative h-[60vh] min-h-[400px] w-full">
+      <div className="relative h-[65svh] min-h-[430px] max-h-[760px] w-full overflow-hidden sm:h-[70vh]">
         <ImageGallery images={displayImages} alt={displayName} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
 
@@ -360,8 +360,8 @@ const AttractionDetail = ({
         </div>
 
         {/* Overlay Content */}
-        <div className="absolute bottom-6 left-6 right-6 text-white pointer-events-none">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2 drop-shadow-lg">{displayName}</h1>
+        <div className="absolute bottom-8 left-4 right-4 text-white pointer-events-none sm:bottom-10 sm:left-8 sm:right-8">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 drop-shadow-lg">{displayName}</h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
