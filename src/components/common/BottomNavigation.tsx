@@ -1,6 +1,5 @@
-import { Compass, Heart, User, Users } from "lucide-react";
+import { Compass, Sparkles } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/shared/contexts/AuthContext";
 
 interface BottomNavigationProps {
   currentLanguage: "th" | "en";
@@ -8,7 +7,6 @@ interface BottomNavigationProps {
 
 const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   const location = useLocation();
-  const { isAdmin } = useAuth();
   
   // Helper function to determine if a tab is active
   const isTabActive = (tabPath: string) => {
@@ -19,14 +17,6 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
              location.pathname.startsWith("/explore") ||
              location.pathname.startsWith("/search") ||
              location.pathname.startsWith("/map");
-    }
-    if (tabPath === "/saved") {
-      return location.pathname.startsWith("/saved") || 
-             location.pathname.startsWith("/favorites");
-    }
-    if (tabPath === "/me") {
-      return location.pathname.startsWith("/profile") || 
-             location.pathname === "/me";
     }
     return location.pathname.startsWith(tabPath);
   };
@@ -40,32 +30,19 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
       icon: Compass,
     },
     {
-      id: "community",
-      path: "/community",
-      label: { th: "ชุมชน", en: "Community" },
-      icon: Users,
-    },
-    {
-      id: "saved",
-      path: "/saved",
-      label: { th: "บันทึก", en: "Saved" },
-      icon: Heart,
-    },
-    {
-      id: "me",
-      path: "/me",
-      label: { th: "ฉัน", en: "Me" },
-      icon: User,
+      id: "trip-planner",
+      path: "/trip-planner",
+      label: { th: "AI วางแผนเที่ยว", en: "AI Trip Planner" },
+      icon: Sparkles,
     },
   ];
 
-  // Add admin tab if user is admin
-  const tabs = baseTabs.filter(tab => tab.id === 'discover');
+  const tabs = baseTabs;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-effect border-t border-white/20 safe-area-bottom">
       <div className="container mx-auto px-4">
-        <div className={`flex items-center justify-around py-2 ${isAdmin ? 'grid grid-cols-5' : ''}`}>
+        <div className="mx-auto flex max-w-sm items-center justify-center gap-5 py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = isTabActive(tab.path);
@@ -75,7 +52,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
                 key={tab.id}
                 to={tab.path}
                 className={`
-                  flex flex-col items-center space-y-1 p-3 rounded-xl transition-all duration-500 min-w-[70px] relative overflow-hidden interactive-scale
+                  flex min-w-[120px] flex-col items-center space-y-1 rounded-xl p-3 transition-all duration-300 relative overflow-hidden interactive-scale
                   ${
                     isActive
                       ? "text-primary bg-primary/20 shadow-lg"

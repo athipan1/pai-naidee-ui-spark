@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
 import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 import { createTripPlan, estimateTripBudget, mapDirectionsUrl, type TripPlanInput, type TripStyle } from '@/shared/utils/tripPlanner';
+import BottomNavigation from '@/components/common/BottomNavigation';
 
 interface Props { currentLanguage: 'th' | 'en' }
 
@@ -111,6 +112,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
         </section>}
         <p className="text-center text-xs text-muted-foreground">{th ? 'Smart Planner รุ่นเริ่มต้นใช้การจัดอันดับอัตโนมัติจากข้อมูลสถานที่จริง ยังไม่ใช่ AI สนทนาหรือการจองอัตโนมัติ' : 'This first version uses rule-based ranking of real places, not conversational AI or automated bookings.'}</p>
       </main>
+      <BottomNavigation currentLanguage={currentLanguage} />
     </div>
   );
 }
