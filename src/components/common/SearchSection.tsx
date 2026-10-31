@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import heroBeach from "@/shared/assets/hero-beach.jpg";
+import { getRailwayPlaceSuggestions, type PlaceSuggestion } from '@/services/railway-api.service';
 
 interface SearchSectionProps {
   currentLanguage: "th" | "en";
@@ -11,6 +12,21 @@ interface SearchSectionProps {
 
 const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    if (query.trim().length < 2 || !showSuggestions) return;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      getRailwayPlaceSuggestions(query).then(items => {
+        if (active) setSuggestions(items);
+      }).catch(() => {
+        if (active) setSuggestions([]);
+      });
+    }, 300);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [query, showSuggestions]);
 
   const content = {
     th: {
@@ -31,6 +47,7 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      setShowSuggestions(false);
       onSearch(query.trim());
     }
   };
@@ -59,13 +76,19 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
           </p>
 
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto animate-fade-in">
+          <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto animate-fade-in relative">
             <div className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm p-2 rounded-full">
               <Input
                 type="text"
                 placeholder={t.placeholder}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                maxLength={120}
+                autoComplete="off"
+                aria-label={t.placeholder}
+                aria-expanded={showSuggestions && suggestions.length > 0}
+                aria-controls="place-search-suggestions"
+                onFocus={() => setShowSuggestions(true)}
+                onChange={(e) => { setQuery(e.target.value); setSuggestions([]); setShowSuggestions(true); }}
                 className="flex-grow bg-transparent border-none text-white placeholder:text-white/70 focus:ring-0 text-lg py-6"
               />
               <Button type="submit" size="lg" className="rounded-full">
@@ -73,6 +96,18 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
                 {t.searchButton}
               </Button>
             </div>
+            {showSuggestions && suggestions.length > 0 && (
+              <ul id="place-search-suggestions" aria-label={currentLanguage === 'th' ? 'สถานที่แนะนำ' : 'Suggested places'} className="absolute z-30 mt-2 w-full rounded-2xl bg-white shadow-xl text-left overflow-hidden max-h-72 overflow-y-auto">
+                {suggestions.map(place => (
+                  <li key={place.id}>
+                    <button type="button" className="w-full px-5 py-3 text-slate-900 hover:bg-slate-100 focus:bg-slate-100 text-left flex justify-between gap-3 items-center" onClick={() => { setQuery(place.nameLocal || place.name); setShowSuggestions(false); onSearch(place.nameLocal || place.name); }}>
+                      <span className="font-medium truncate">{currentLanguage === 'th' ? (place.nameLocal || place.name) : place.name}</span>
+                      <span className="text-sm text-slate-500 shrink-0">{place.province}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </form>
 
           {/* Enhanced Quick Search Suggestions */}
@@ -86,6 +121,8 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
             ].map((item, index) => (
               <button
                 key={index}
+                type="button"
+                onClick={() => onSearch(currentLanguage === 'th' ? item.th : item.en)}
                 className="px-4 py-2 md:px-5 md:py-2.5 glass-effect hover:bg-white/30 backdrop-blur-md rounded-full text-white text-sm md:text-base font-medium transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation relative overflow-hidden group border border-white/20 hover:border-white/40"
                 aria-label={`Search for ${currentLanguage === "th" ? item.th : item.en}`}
               >

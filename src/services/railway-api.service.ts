@@ -58,6 +58,21 @@ export interface RailwayNearbyResponse {
   radiusKm: number;
 }
 
+export interface PlaceSuggestion {
+  id: string;
+  name: string;
+  nameLocal: string;
+  province: string;
+  category: string;
+}
+
+export async function getRailwayPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
+  if (query.trim().length < 2) return [];
+  const params = new URLSearchParams({ q: query.trim().slice(0, 120), limit: '6' });
+  const result = await requestJson<{ suggestions: PlaceSuggestion[] }>(`/api/places/suggest?${params}`);
+  return result.suggestions;
+}
+
 export async function getRailwayNearbyAttractions(options: {
   lat: number;
   lng: number;

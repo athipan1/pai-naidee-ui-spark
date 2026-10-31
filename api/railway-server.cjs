@@ -11,6 +11,7 @@ const {
   ensureSchema,
   getPlaceById,
   listPlaces,
+  suggestPlaces,
   listNearbyPlaces,
   parseNearbyOptions,
   pingDatabase,
@@ -38,6 +39,19 @@ app.get('/api/places', async (req, res) => {
   } catch (error) {
     console.error('GET /api/places failed:', error?.message || error);
     res.status(503).json({ error: 'Places database is unavailable.' });
+  }
+});
+
+app.get('/api/places/suggest', async (req, res) => {
+  const query = req.query.q;
+  if (typeof query !== 'string' || query.length > 120) {
+    return res.status(400).json({ error: 'Invalid suggestion query.' });
+  }
+  try {
+    res.json({ suggestions: await suggestPlaces(query, req.query.limit) });
+  } catch (error) {
+    console.error('GET /api/places/suggest failed:', error?.message || error);
+    res.status(503).json({ error: 'Place suggestions are unavailable.' });
   }
 });
 

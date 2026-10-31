@@ -8,8 +8,29 @@ const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
 const USER_PROVIDED_MEDIA = require('./user-provided-place-media.json');
 const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
 const { buildPlaceSearch } = require('./place-search.cjs');
+const { rankPlaces } = require('./smart-search.cjs');
 
 let sqlClient = null;
+let searchIndex = null;
+let searchIndexExpires = 0;
+
+async function getSearchIndex() {
+  if (searchIndex && Date.now() < searchIndexExpires) return searchIndex;
+  const sql = getSql();
+  const places = await sql`SELECT id, name, name_local, province, province_en, category, description, description_en, tags, rating FROM places`;
+  searchIndex = places;
+  searchIndexExpires = Date.now() + 30_000;
+  return places;
+}
+
+async function suggestPlaces(query, limit = 6) {
+  if (typeof query !== 'string' || query.trim().length < 2) return [];
+  const count = Math.min(8, Math.max(1, Number(limit) || 6));
+  return rankPlaces(await getSearchIndex(), query).slice(0, count).map(place => ({
+    id: place.id, name: place.name, nameLocal: place.name_local,
+    province: place.province, category: place.category,
+  }));
+}
 
 function getSql() {
   if (sqlClient) return sqlClient;
@@ -481,6 +502,24 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
   const safePage = Math.max(1, Number(page) || 1);
   const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
   const offset = (safePage - 1) * safeLimit;
+  if (typeof search === 'string' && search.trim()) {
+    const matches = rankPlaces(await getSearchIndex(), search, String(category || ''));
+    const ids = matches.slice(offset, offset + safeLimit).map(place => place.id);
+    if (!ids.length) return { attractions: [], total: matches.length, page: safePage, limit: safeLimit };
+    const rows = await sql`
+      SELECT p.*, COALESCE(json_agg(json_build_object(
+        'id', m.id, 'url', m.url, 'type', m.type, 'title', m.title,
+        'description', m.description, 'creatorName', m.creator_name,
+        'licenseName', m.license_name, 'licenseUrl', m.license_url,
+        'sourcePage', m.source_page
+      ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC)
+      FILTER (WHERE m.id IS NOT NULL), '[]'::json) AS media
+      FROM places p LEFT JOIN media m ON m.place_id = p.id
+      WHERE p.id IN ${sql(ids)} GROUP BY p.id
+    `;
+    const byId = new Map(rows.map(place => [place.id, normalizePlace(place)]));
+    return { attractions: ids.map(id => byId.get(id)).filter(Boolean), total: matches.length, page: safePage, limit: safeLimit };
+  }
   const categoryValue = category?.trim() || null;
   const { searchValue, searchPattern, flexibleNamePattern, aliasPlaceId } = buildPlaceSearch(search);
 
@@ -586,6 +625,8 @@ async function pingDatabase() {
 }
 
 async function closeDatabase() {
+  searchIndex = null;
+  searchIndexExpires = 0;
   if (sqlClient) {
     await sqlClient.end({ timeout: 5 });
     sqlClient = null;
@@ -597,6 +638,7 @@ module.exports = {
   ensureSchema,
   getPlaceById,
   listPlaces,
+  suggestPlaces,
   listNearbyPlaces,
   parseNearbyOptions,
   normalizePlace,

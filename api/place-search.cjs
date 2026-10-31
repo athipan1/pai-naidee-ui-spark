@@ -1,6 +1,9 @@
 // Search variants for real place names. Keep aliases tied to stable catalogue IDs,
 // so display names and image/media records never need to be changed for search.
 const PLACE_NAME_ALIASES = Object.freeze({
+  '2': ['วัดพระแก้ว', 'วัดพระศรีรัตนศาสดาราม', 'Temple of the Emerald Buddha'],
+  'curated-wat-arun': ['วัดแจ้ง', 'วัดอรุณ', 'Temple of Dawn'],
+  'curated-wat-pho': ['วัดโพธิ์', 'วัดพระเชตุพน', 'Temple of the Reclining Buddha'],
   'curated-wat-phu-manorom': [
     'วัดภูมโนรมย์',
     'ภูมโนรมย์',
