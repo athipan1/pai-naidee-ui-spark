@@ -118,6 +118,30 @@ test('mobile homepage offers Railway place suggestions and opens selected search
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
 
+test('mobile search filters Railway results by province and category and keeps shareable URL', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const temple = { ...place, id: 'temple-1', name: 'Wat Example', nameLocal: 'วัดตัวอย่าง',
+    province: 'มุกดาหาร', category: 'Culture' };
+  const locations = [temple, place];
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places**', route => {
+    const url = new URL(route.request().url());
+    const province = url.searchParams.get('province');
+    const category = url.searchParams.get('category');
+    const matches = locations.filter(item => (!province || item.province === province) &&
+      (!category || item.category === category));
+    return route.fulfill({ json: { attractions: matches, total: matches.length, page: 1, limit: 50 } });
+  });
+  await page.goto('/discover?mode=search&q=วัด');
+  await page.getByRole('combobox', { name: 'Filter province' }).selectOption('มุกดาหาร');
+  await page.getByRole('combobox', { name: 'Filter place type' }).selectOption('Culture');
+  await expect(page).toHaveURL(/prov=%E0%B8%A1%E0%B8%B8%E0%B8%81%E0%B8%94%E0%B8%B2%E0%B8%AB%E0%B8%B2%E0%B8%A3/);
+  await expect(page).toHaveURL(/cat=Culture/);
+  await expect(page.getByTestId('attraction-card')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Wat Example' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});
+
 test('feed shows each destination only once across recommendations and more places', async ({ page }) => {
   const destinations = Array.from({ length: 12 }, (_, index) => ({
     ...place,
