@@ -64,7 +64,7 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
   };
 
   // Calculate the counts using every paginated Railway result.
-  const { data: catalog } = useAllAttractions();
+  const { data: catalog } = useAllAttractions(undefined, { enabled: state.mode === 'feed' || state.mode === 'category' });
   const attractionCounts = (catalog?.attractions ?? []).reduce((counts, item) => {
     const key = item.category.toLowerCase();
     counts[key] = (counts[key] || 0) + 1;
