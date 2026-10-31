@@ -16,7 +16,13 @@ const place = {
   source: { name: 'Wikipedia: Doi Inthanon', url: 'https://en.wikipedia.org/wiki/Doi_Inthanon' },
 };
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
+  // Historical discovery assertions cover the English UI. Simulate a user
+  // who explicitly selected English; the language test below covers a new
+  // visitor without that preference, ensuring Thai remains the default.
+  if (!testInfo.title.startsWith('language choice')) {
+    await page.addInitScript(() => window.localStorage.setItem('painaidee.language', 'en'));
+  }
   await page.route('**/api/places**', async route => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/railway-test-1')) {
@@ -58,9 +64,9 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   });
   await page.goto('/search?search=เชียงใหม่');
   await expect(page).toHaveURL(/\/discover\?.*mode=search/);
-  await expect(page.getByText('ดอยอินทนนท์').first()).toBeVisible();
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
   await page.goto('/attraction/railway-test-1');
-  await expect(page.getByText('ดอยอินทนนท์').first()).toBeVisible();
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
   await expect(page.getByRole('link', { name: 'Wikipedia: Doi Inthanon' })).toBeVisible();
   expect(wikiRequests).toEqual([]);
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
