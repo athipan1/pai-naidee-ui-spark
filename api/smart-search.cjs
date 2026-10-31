@@ -43,6 +43,7 @@ const INTENTS = [
   { words: ['เกาะ', 'island'], tag: 'island', category: 'beach' },
   { words: ['พิพิธภัณฑ์', 'museum'], tag: 'museum', category: 'culture' },
   { words: ['ภูเขา', 'mountain'], tag: 'mountain', category: 'nature' },
+  { words: ['ธรรมชาติ', 'nature'], tag: 'nature', category: 'nature' },
 ];
 
 function matchesIntent(place, intent) {
@@ -52,6 +53,7 @@ function matchesIntent(place, intent) {
   if (intent.tag === 'temple') return name.includes('วัด') || /^wat/i.test(place.name || '');
   if (intent.tag === 'waterfall') return name.includes('น้ำตก');
   if (intent.tag === 'island') return name.includes('เกาะ') || /^ko\s/i.test(place.name || '');
+  if (intent.tag === 'nature') return normalize(place.category) === 'nature';
   return normalize(place.category) === intent.category && intent.tag === 'beach';
 }
 
@@ -72,7 +74,7 @@ function scoreName(query, names) {
   return score;
 }
 
-function rankPlaces(places, search, category = '') {
+function rankPlaces(places, search, category = '', provinceFilter = '') {
   const text = String(search || '').normalize('NFKC').trim().slice(0, 120);
   const query = normalize(text);
   if (!query) return [];
@@ -89,6 +91,8 @@ function rankPlaces(places, search, category = '') {
 
   return places.flatMap(place => {
     if (category && normalize(place.category) !== normalize(category)) return [];
+    if (provinceFilter && ![place.province, place.province_en || place.provinceEn]
+      .some(value => normalize(value) === normalize(provinceFilter))) return [];
     const names = placeNames(place);
     const provinceMatches = !!province && [place.province, place.province_en || place.provinceEn]
       .some(value => normalize(value) === provinceKey);
@@ -97,10 +101,12 @@ function rankPlaces(places, search, category = '') {
     const nameScore = Math.max(scoreName(query, names), scoreName(cleanedQuery, names));
     const provinceScore = provinceMatches ? 350 : 0;
     const fullProvinceSearch = provinceMatches && (query === provinceKey || query === normalize(`จังหวัด${province}`));
-    const naturalIntent = !!intent && intentMatches && (hasNaturalWords || query === normalize(intent.words[0]));
+    const naturalIntent = !!intent && intentMatches && (hasNaturalWords || !!province || query === normalize(intent.words[0]));
+    const generalProvinceDiscovery = provinceMatches && /(?:ที่เที่ยว|เที่ยว|สถานที่|แนะนำ|ไปไหนดี|attractions|places)/iu.test(text);
     let score = nameScore;
     if (fullProvinceSearch) score = Math.max(score, 360);
     else if (naturalIntent) score = Math.max(score, 300 + provinceScore);
+    else if (generalProvinceDiscovery && !intent) score = Math.max(score, 320);
     if (score === 0 && query.length >= 3 &&
       normalize(`${place.description || ''} ${place.description_en || place.descriptionEn || ''}`).includes(query)) {
       score = 180;
