@@ -18,6 +18,8 @@ export default function AdminCms() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [search, setSearch] = useState('');
   const [catalog, setCatalog] = useState<CatalogPlace[]>([]);
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogTotal, setCatalogTotal] = useState(0);
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -66,6 +68,16 @@ export default function AdminCms() {
     return () => controller.abort();
   }, [token, isAdmin, base]);
 
+  useEffect(() => {
+    if (tab !== 'existing' || !token || !isAdmin || searched) return;
+    const controller = new AbortController();
+    void fetch(`${base}/api/admin/catalog?page=1`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal })
+      .then(response => { if (!response.ok) throw new Error(`ไม่สามารถโหลดสถานที่ (${response.status})`); return response.json(); })
+      .then(data => { if (!controller.signal.aborted) { setCatalog(data.places || []); setCatalogTotal(data.total || 0); setCatalogPage(1); setSearched(true); } })
+      .catch(error => { if (!controller.signal.aborted) setMessage(error.message); });
+    return () => controller.abort();
+  }, [tab, token, isAdmin, base, searched]);
+
   async function save(event: FormEvent) {
     event.preventDefault(); setBusy(true); setMessage('');
     try {
@@ -79,10 +91,9 @@ export default function AdminCms() {
     finally { setBusy(false); }
   }
 
-  async function findPlaces() {
-    if (search.trim().length < 2) return setMessage('กรุณาพิมพ์อย่างน้อย 2 ตัวอักษร');
+  async function findPlaces(page = 1) {
     setBusy(true); setMessage('');
-    try { const result = await api(`/catalog?q=${encodeURIComponent(search.trim())}`); setCatalog(result.places); setSearched(true); }
+    try { const result = await api(`/catalog?q=${encodeURIComponent(search.trim())}&page=${page}`); setCatalog(result.places); setCatalogTotal(result.total); setCatalogPage(page); setSearched(true); }
     catch (error) { setMessage(error instanceof Error ? error.message : 'ค้นหาไม่สำเร็จ'); }
     finally { setBusy(false); }
   }
@@ -144,10 +155,12 @@ export default function AdminCms() {
       </nav>
       {message && <div role="status" aria-live="polite" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">{message}</div>}
       {tab === 'existing' && <section className="space-y-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
-        <div><h2 className="flex items-center gap-2 text-xl font-bold"><Search className="text-teal-600" /> ค้นหาสถานที่เดิม</h2><p className="mt-1 text-sm text-slate-500">ค้นหาจากชื่อสถานที่หรือจังหวัด แล้วเลือกเพื่อสร้างฉบับร่างแก้ไข</p></div>
-        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => { setSearch(e.target.value); setSearched(false); }} placeholder="เช่น วัดภูมโนรมย์" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
+        <div><h2 className="flex items-center gap-2 text-xl font-bold"><Search className="text-teal-600" /> ค้นหาสถานที่เดิม</h2><p className="mt-1 text-sm text-slate-500">แสดงสถานที่ที่มีอยู่ใน Railway และค้นหาได้ด้วยชื่อเต็ม ชื่อย่อ หรือจังหวัด</p></div>
+        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="เช่น วัดภูมโนรมย์" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span>พบ {catalogTotal} สถานที่ {search.trim() ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setSearched(false); }}>แสดงทั้งหมด</button></div>
         {searched && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
         <div className="divide-y">{catalog.map(place => <div key={place.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {place.province}</p></div><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">แก้ไขสถานที่</button></div>)}</div>
+        {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1)}>ถัดไป</button></div>}
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">ช่องที่มี * จำเป็นต้องกรอก</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { setEditing(null); setForm({ ...empty }); setBrokenImage(false); }}>เริ่มรายการใหม่</button>}</div>
