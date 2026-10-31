@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { cleanPlace } = require('./admin-cms.cjs');
+const { cleanPlace, registerAdminCms } = require('./admin-cms.cjs');
 const { createRoleGuard } = require('./security.cjs');
 const { hashPassword, verifyPassword, hashToken } = require('./railway-admin-auth.cjs');
 
@@ -11,6 +11,33 @@ test('CMS validates coordinates and HTTPS media links', () => {
   assert.ok(cleanPlace({ ...good, lat: 90 }).errors.length > 0);
   assert.ok(cleanPlace({ ...good, imageUrl: 'javascript:alert(1)' }).errors.length > 0);
   assert.ok(cleanPlace({ ...good, name: '' }).errors.length > 0);
+});
+
+test('Admin catalog reuses public smart search and supports browsing existing places', async () => {
+  const routes = new Map();
+  const app = {
+    get: (path, ...handlers) => routes.set(path, handlers.at(-1)),
+    post() {}, put() {},
+  };
+  const calls = [];
+  registerAdminCms(app, {
+    getSql: () => { throw new Error('catalog must use shared public search'); },
+    requireAdmin: (_req, _res, next) => next(),
+    storage: { single: () => (_req, _res, next) => next() },
+    uploadImage: async () => '',
+    listPlaces: async options => {
+      calls.push(options);
+      return { total: 1, attractions: [{ id: 'curated-wat-phu-manorom', name: 'Wat Roi Phra Phutthabat Phu Manorom', nameLocal: 'วัดรอยพระพุทธบาทภูมโนรมย์', province: 'มุกดาหาร' }] };
+    },
+  });
+  const route = routes.get('/api/admin/catalog');
+  let body;
+  await route({ query: { q: 'วัดภูมโนรมย์' } }, { json: value => { body = value; } });
+  assert.equal(calls[0].search, 'วัดภูมโนรมย์');
+  assert.equal(body.places[0].name_local, 'วัดรอยพระพุทธบาทภูมโนรมย์');
+  await route({ query: {} }, { json: value => { body = value; } });
+  assert.equal(calls[1].search, '');
+  assert.equal(body.total, 1);
 });
 
 test('admin role guard denies anonymous access before any database interaction', async () => {
