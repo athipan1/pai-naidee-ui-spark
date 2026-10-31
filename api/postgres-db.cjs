@@ -497,13 +497,13 @@ async function listNearbyPlaces(options) {
   };
 }
 
-async function listPlaces({ page = 1, limit = 10, category = '', search = '' } = {}) {
+async function listPlaces({ page = 1, limit = 10, category = '', province = '', search = '' } = {}) {
   const sql = getSql();
   const safePage = Math.max(1, Number(page) || 1);
   const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
   const offset = (safePage - 1) * safeLimit;
   if (typeof search === 'string' && search.trim()) {
-    const matches = rankPlaces(await getSearchIndex(), search, String(category || ''));
+    const matches = rankPlaces(await getSearchIndex(), search, String(category || ''), String(province || ''));
     const ids = matches.slice(offset, offset + safeLimit).map(place => place.id);
     if (!ids.length) return { attractions: [], total: matches.length, page: safePage, limit: safeLimit };
     const rows = await sql`
@@ -521,6 +521,7 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
     return { attractions: ids.map(id => byId.get(id)).filter(Boolean), total: matches.length, page: safePage, limit: safeLimit };
   }
   const categoryValue = category?.trim() || null;
+  const provinceValue = province?.trim() || null;
   const { searchValue, searchPattern, flexibleNamePattern, aliasPlaceId } = buildPlaceSearch(search);
 
   const rows = await sql`
@@ -544,6 +545,7 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
     LEFT JOIN media m ON m.place_id = p.id
     WHERE
       (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}))
+      AND (${provinceValue}::text IS NULL OR LOWER(p.province) = LOWER(${provinceValue}) OR LOWER(p.province_en) = LOWER(${provinceValue}))
       AND (
         ${searchValue}::text IS NULL OR
         p.id = ${aliasPlaceId} OR
@@ -567,6 +569,7 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
     FROM places p
     WHERE
       (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}))
+      AND (${provinceValue}::text IS NULL OR LOWER(p.province) = LOWER(${provinceValue}) OR LOWER(p.province_en) = LOWER(${provinceValue}))
       AND (
         ${searchValue}::text IS NULL OR
         p.id = ${aliasPlaceId} OR

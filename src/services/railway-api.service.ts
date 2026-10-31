@@ -100,6 +100,7 @@ export async function getRailwayAttractions(options?: {
   page?: number;
   limit?: number;
   category?: string;
+  province?: string;
   search?: string;
 }): Promise<RailwayAttractionsResponse> {
   const params = new URLSearchParams();
@@ -107,6 +108,7 @@ export async function getRailwayAttractions(options?: {
   params.set("limit", String(options?.limit || 10));
 
   if (options?.category) params.set("category", options.category);
+  if (options?.province) params.set("province", options.province);
   if (options?.search) params.set("search", options.search);
 
   const response = await requestJson<RailwayAttractionsResponse>(

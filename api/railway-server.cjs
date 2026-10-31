@@ -33,6 +33,7 @@ app.get('/api/places', async (req, res) => {
       page: req.query.page,
       limit: req.query.limit,
       category: req.query.category,
+      province: req.query.province,
       search: req.query.search,
     });
     res.json(result);

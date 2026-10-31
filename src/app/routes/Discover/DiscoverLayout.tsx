@@ -19,7 +19,7 @@ interface DiscoverLayoutProps {
 
 const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutProps) => {
   const navigate = useNavigate();
-  const { state, setMode, setQuery, setCategory } = useDiscoveryState();
+  const { state, setMode, setQuery, setCategory, setSearchFilters } = useDiscoveryState();
 
   const content = {
     th: {
@@ -96,6 +96,8 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
             currentLanguage={currentLanguage}
             query={state.query}
             category={state.category}
+            province={state.province}
+            onFiltersChange={setSearchFilters}
           />
         );
       case 'category':
