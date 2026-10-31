@@ -9,11 +9,11 @@ function isThailandCoordinate(lat, lng) {
 async function geocodeCandidates({ name, province, listPlaces, apiKey, request = fetch }) {
   const query = String(name || '').trim().slice(0, 120);
   const area = String(province || '').trim().slice(0, 100);
-  if (query.length < 2 || !area) return { error: 'กรุณากรอกชื่อสถานที่และจังหวัด', candidates: [] };
+  if (query.length < 2) return { error: 'กรุณากรอกชื่อสถานที่อย่างน้อย 2 ตัวอักษร', candidates: [] };
 
   const matches = await listPlaces({ search: query, province: area, limit: 10 });
   const candidates = (matches.attractions || [])
-    .filter(place => String(place.province || '').trim().toLocaleLowerCase() === area.toLocaleLowerCase())
+    .filter(place => !area || String(place.province || '').trim().toLocaleLowerCase() === area.toLocaleLowerCase())
     .map(place => ({ lat: Number(place.coordinates?.lat), lng: Number(place.coordinates?.lng),
       label: `${place.nameLocal || place.name} · ${place.province}`, source: 'PaiNaiDee' }))
     .filter(place => isThailandCoordinate(place.lat, place.lng)).slice(0, 5);
@@ -21,7 +21,7 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
   // External geocoding is opt-in, paid-provider based, and server-side only.
   // Never call the public Nominatim service from the CMS.
   if (apiKey) {
-    const params = new URLSearchParams({ text: `${query}, ${area}, Thailand`, filter: 'countrycode:th',
+    const params = new URLSearchParams({ text: [query, area, 'Thailand'].filter(Boolean).join(', '), filter: 'countrycode:th',
       lang: 'th', format: 'json', limit: '5', apiKey });
     try {
       const response = await request(`https://api.geoapify.com/v1/geocode/search?${params}`, {
