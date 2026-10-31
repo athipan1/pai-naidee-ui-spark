@@ -67,6 +67,7 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
   await page.goto('/attraction/railway-test-1');
   await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+  await page.getByTestId('attribution-details').locator('summary').click();
   await expect(page.getByRole('link', { name: 'Wikipedia: Doi Inthanon' })).toBeVisible();
   expect(wikiRequests).toEqual([]);
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
@@ -237,6 +238,7 @@ test('detail page displays Railway photo attribution, license, and sourced addit
       sourceUrl: 'https://en.wikipedia.org/wiki/Doi_Inthanon' },
   } }));
   await page.goto('/attraction/railway-test-1');
+  await page.getByTestId('attribution-details').locator('summary').click();
   await expect(page.getByTestId('photo-attribution')).toContainText('Test Photographer');
   await expect(page.getByRole('link', { name: 'CC BY-SA 4.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0');
   await expect(page.getByTestId('verified-place-details')).toContainText('Documented history and geography');
@@ -253,6 +255,7 @@ test('incorrect Ko Chang photo is corrected with matching Wikimedia attribution'
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0', sourcePage: 'https://example.org/wrong' }],
   } }));
   await page.goto('/attraction/curated-ko-chang');
+  await page.getByTestId('attribution-details').locator('summary').click();
   await expect(page.getByTestId('photo-attribution')).toContainText('Nina R');
   await expect(page.getByTestId('photo-attribution')).not.toContainText('Incorrect location');
   await expect(page.getByTestId('photo-attribution').getByRole('link', { name: 'Nina R' }))

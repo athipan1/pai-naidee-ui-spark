@@ -333,12 +333,12 @@ const AttractionDetail = ({
       />
 
       {/* Hero Section with Image Gallery */}
-      <div className="relative h-[65svh] min-h-[430px] max-h-[760px] w-full overflow-hidden sm:h-[70vh]">
+      <div className="relative h-[54svh] min-h-[350px] max-h-[620px] w-full overflow-hidden sm:h-[65vh] sm:min-h-[430px]">
         <ImageGallery images={displayImages} alt={displayName} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 via-35% to-transparent pointer-events-none" />
 
         {/* Action Buttons */}
-        <div className="absolute top-20 right-6 flex gap-2 z-10">
+        <div className="absolute top-4 right-4 flex gap-2 z-10 sm:top-8 sm:right-8">
           <Button
             variant="outline"
             size="icon"
@@ -360,8 +360,8 @@ const AttractionDetail = ({
         </div>
 
         {/* Overlay Content */}
-        <div className="absolute bottom-8 left-4 right-4 text-white pointer-events-none sm:bottom-10 sm:left-8 sm:right-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 drop-shadow-lg">{displayName}</h1>
+        <div className="absolute bottom-6 left-4 right-4 text-white pointer-events-none sm:bottom-10 sm:left-8 sm:right-8">
+          <h1 className="text-2xl leading-tight sm:text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg break-words">{displayName}</h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
@@ -381,9 +381,34 @@ const AttractionDetail = ({
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8 max-w-full overflow-hidden">
+      <div className="container mx-auto px-4 py-5 sm:py-8 max-w-full overflow-hidden">
+        <Card className="mb-5 overflow-hidden border-border/70 bg-card/95 shadow-sm sm:mb-8">
+          <CardContent className="p-5 sm:p-6">
+            <div className="mb-3 h-1 w-10 rounded-full bg-amber-400" />
+            <h2 className="text-xl font-bold sm:text-2xl">{currentLanguage === 'th' ? 'สำรวจสถานที่แห่งนี้' : 'Explore this destination'}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {displayProvince} · {localizedCategory(attraction.category, currentLanguage)}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {attraction.tags.slice(0, 3).map((tag, index) => (
+                <Badge key={`${tag}-${index}`} variant={pastelVariants[index % pastelVariants.length]}>
+                  {localizedTag(tag, currentLanguage)}
+                </Badge>
+              ))}
+            </div>
+            <Button className="mt-5 min-h-12 w-full bg-amber-500 font-semibold text-slate-950 hover:bg-amber-400" onClick={handleGoogleMapsNavigation}>
+              <Navigation className="mr-2 h-5 w-5" />
+              {currentLanguage === 'th' ? 'นำทางไปที่นี่' : 'Get directions'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {(mainPhotoCredit || attraction.source?.url) && (
+          <details className="mb-6 rounded-xl border border-border/70 bg-card/70 px-4 py-3 text-sm text-muted-foreground" data-testid="attribution-details">
+            <summary className="cursor-pointer font-medium text-foreground">{currentLanguage === 'th' ? 'เครดิตภาพและแหล่งข้อมูล' : 'Photo credits and sources'}</summary>
+            <div className="mt-3 space-y-3 break-words" data-testid="photo-attribution">
         {mainPhotoCredit && (
-          <div className="mb-4 text-sm text-muted-foreground" data-testid="photo-attribution">
+          <div>
             {currentLanguage === 'th' ? 'เครดิตภาพ: ' : 'Photo credit: '}
             {mainPhotoCredit.kind === 'user-provided' ? (
               <span>{currentLanguage === 'th' ? 'ภาพที่ผู้ใช้ส่งให้ PaiNaiDee' : 'Submitted by a PaiNaiDee user'}</span>
@@ -401,12 +426,15 @@ const AttractionDetail = ({
           </div>
         )}
         {attraction.source?.url && (
-          <p className="mb-4 text-sm text-muted-foreground">
+          <p>
             {currentLanguage === 'th' ? 'แหล่งอ้างอิงสถานที่: ' : 'Place source: '}
             <a className="underline" href={attraction.source.url} target="_blank" rel="noopener noreferrer">
               {attraction.source.name}
             </a>
           </p>
+        )}
+            </div>
+          </details>
         )}
         {/* Tags Section */}
         <Card className="mb-8">
