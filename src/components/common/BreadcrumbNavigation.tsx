@@ -78,27 +78,27 @@ const BreadcrumbNavigation = ({ currentLanguage, items }: BreadcrumbNavigationPr
 
   return (
     <nav aria-label="Breadcrumb" className="py-2 px-4 bg-background/80 backdrop-blur-sm border-b border-border/30">
-      <ol className="flex items-center space-x-2 text-sm">
+      <ol className="flex min-w-0 items-center gap-1 text-sm sm:gap-2">
         {breadcrumbItems.map((item, index) => {
           const isLast = index === breadcrumbItems.length - 1;
           const isFirst = index === 0;
 
           return (
-            <li key={index} className="flex items-center">
+            <li key={index} className={`flex min-w-0 items-center ${isLast ? 'flex-1' : 'shrink-0'}`}>
               {index > 0 && (
-                <ChevronRight className="w-4 h-4 text-muted-foreground mx-2" />
+                <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground mx-1 sm:mx-2" />
               )}
               
               {item.path && !isLast ? (
                 <Link
                   to={item.path}
-                  className="flex items-center text-muted-foreground hover:text-primary transition-colors"
+                  className="flex items-center whitespace-nowrap text-muted-foreground hover:text-primary transition-colors"
                 >
                   {isFirst && <Home className="w-4 h-4 mr-1" />}
                   {item.label}
                 </Link>
               ) : (
-                <span className={`flex items-center ${isLast ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                <span title={item.label} className={`flex min-w-0 items-center ${isLast ? 'truncate text-foreground font-medium' : 'text-muted-foreground'}`}>
                   {isFirst && <Home className="w-4 h-4 mr-1" />}
                   {item.label}
                 </span>
