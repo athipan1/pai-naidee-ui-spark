@@ -8,10 +8,23 @@ import { GlobalErrorBoundary } from './components/system/GlobalErrorBoundary';
 
 // Register service worker for PWA only in production
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  // Reload a page still controlled by an older PWA worker as soon as the
+  // updated worker takes control. This also handles older Safari sessions.
+  let reloadedForWorkerChange = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloadedForWorkerChange) return;
+    reloadedForWorkerChange = true;
+    window.location.reload();
+  });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         logger.info('Service worker registered successfully', { registration: registration.scope });
+        // Don't wait for the browser's periodic SW check. Deploys should be
+        // picked up on the next online visit, including iOS Safari.
+        void registration.update().catch(() => {
+          // Offline visitors can continue using their cached copy.
+        });
       })
       .catch((registrationError) => {
         // Log but don't throw — ensure SW failure doesn't cause blank page
