@@ -57,6 +57,19 @@ test('language choice translates the Railway feed and details and persists acros
   await expect(page.getByRole('button', { name: 'Switch to ไทย' })).toBeVisible();
 });
 
+test('mobile home navigation exposes Discover and AI Trip Planner side by side', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const bottomNav = page.locator('nav.fixed.bottom-0');
+  await expect(bottomNav.getByRole('link', { name: 'Discover' })).toBeVisible();
+  const planner = bottomNav.getByRole('link', { name: 'AI Trip Planner' });
+  await expect(planner).toBeVisible();
+  await expect(planner).toHaveAttribute('href', '/trip-planner');
+  await planner.click();
+  await expect(page).toHaveURL(/\/trip-planner$/);
+  await expect(page.getByRole('heading', { name: 'Your next trip starts here' })).toBeVisible();
+});
+
 test('search redirects and opens a Railway-backed place', async ({ page }) => {
   const wikiRequests: string[] = [];
   page.on('request', request => {
