@@ -1,4 +1,5 @@
 const { randomUUID } = require('node:crypto');
+const { geocodeCandidates } = require('./admin-geocode.cjs');
 
 function cleanPlace(input) {
   const text = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
@@ -43,6 +44,17 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     const result = await listPlaces({ search: q, page, limit: 30 });
     res.json({ places: result.attractions.map(place => ({ id: place.id, name: place.name,
       name_local: place.nameLocal, province: place.province })), total: result.total, page });
+  }));
+
+  app.get('/api/admin/geocode', requireAdmin, wrap(async (req, res) => {
+    if (typeof req.query.name !== 'string' || typeof req.query.province !== 'string' ||
+        req.query.name.length > 120 || req.query.province.length > 100) {
+      return res.status(400).json({ error: 'Invalid place name or province.' });
+    }
+    const result = await geocodeCandidates({ name: req.query.name, province: req.query.province,
+      listPlaces, apiKey: process.env.GEOAPIFY_API_KEY });
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
   }));
 
   app.get('/api/admin/catalog/:placeId/media', requireAdmin, wrap(async (req, res) => {
