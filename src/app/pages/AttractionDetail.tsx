@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
+import NearbyRealPlaces from '@/components/attraction/NearbyRealPlaces';
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
@@ -555,6 +556,13 @@ const AttractionDetail = ({
         )}
 
         {/* Reviews remain hidden until a real per-attraction source is available. */}
+
+        <NearbyRealPlaces
+          placeId={attraction.id}
+          category={attraction.category}
+          coordinates={attraction.coordinates}
+          currentLanguage={currentLanguage}
+        />
 
         {/* Nearby Activities Section */}
         <Card className="mb-8">
