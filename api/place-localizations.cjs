@@ -77,6 +77,8 @@ const PROVINCE_EN = {
   'หนองบัวลำภู': 'Nong Bua Lam Phu',
   'ชุมพร': 'Chumphon',
   'ยะลา': 'Yala',
+  'พิจิตร': 'Phichit',
+  'สิงห์บุรี': 'Sing Buri',
 };
 
 const DESCRIPTION_EN = {
@@ -188,6 +190,8 @@ const DESCRIPTION_EN = {
   'curated-wat-tham-klong-phen': 'A forest temple and meditation site among mountains in Nong Bua Lam Phu.',
   'curated-thung-wua-laen-beach': 'A long sandy beach on the Gulf of Thailand in Pathio district. The pin marks the beach area.',
   'curated-aiyerweng-sea-of-mist-viewpoint': 'A mist viewpoint in Betong district near the Aiyerweng Skywalk. Visibility depends on weather conditions.',
+  'curated-wat-tha-luang-phichit': 'A temple on the Nan River in Phichit, home to the revered Luang Pho Phet Buddha image. The pin is approximate.',
+  'curated-bang-rachan-heroes-monument': 'A memorial to the Bang Rachan heroes in Sing Buri. The pin marks the approximate memorial grounds, not an entrance.',
 };
 
 module.exports = { PROVINCE_EN, DESCRIPTION_EN };

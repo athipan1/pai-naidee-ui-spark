@@ -39,7 +39,7 @@ test('both user-submitted temple galleries have ordered, local production assets
 });
 
 test('every curated attraction has an English province and reviewed English summary', () => {
-  assert.equal(SEED_PLACES.length, 108);
+  assert.equal(SEED_PLACES.length, 110);
   assert.equal(Object.keys(DESCRIPTION_EN).length, SEED_PLACES.length);
   for (const place of SEED_PLACES) {
     const province = PROVINCE_EN[place.province];
@@ -148,7 +148,7 @@ test('nearby rejects missing or unsafe search parameters', () => {
 
 test('all new curated locations have distinct IDs, provenance, and real Thailand coordinates', () => {
   const curated = SEED_PLACES.filter(place => place.id.startsWith('curated-'));
-  assert.equal(curated.length, 104);
+  assert.equal(curated.length, 106);
   assert.equal(new Set(curated.map(place => place.id)).size, curated.length);
   for (const place of curated) {
     assert.ok(place.lat >= 5 && place.lat <= 21);
@@ -163,8 +163,8 @@ test('all new curated locations have distinct IDs, provenance, and real Thailand
 });
 
 test('expanded nationwide catalogue contains no duplicate IDs or demo ratings/photos', () => {
-  assert.equal(SEED_PLACES.length, 108);
-  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 108);
+  assert.equal(SEED_PLACES.length, 110);
+  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 110);
   for (const place of SEED_PLACES) {
     assert.equal(place.rating, 0);
     assert.equal(place.reviewCount, 0);

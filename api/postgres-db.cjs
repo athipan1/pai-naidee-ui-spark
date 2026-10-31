@@ -3,6 +3,8 @@ const ADDITIONAL_CURATED_PLACES = require('./additional-curated-places.cjs');
 const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs');
 const ADDITIONAL_CURATED_PLACES_V3 = require('./additional-curated-places-v3.cjs');
 const ADDITIONAL_CURATED_PLACES_V4 = require('./additional-curated-places-v4.cjs');
+const ADDITIONAL_CURATED_PLACES_V5 = require('./additional-curated-places-v5.cjs');
+const { assertPlaceImportReady } = require('./place-quality.cjs');
 const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
 const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
 const USER_PROVIDED_MEDIA = require('./user-provided-place-media.json');
@@ -184,6 +186,7 @@ const SEED_PLACES = [
   ...ADDITIONAL_CURATED_PLACES_V2,
   ...ADDITIONAL_CURATED_PLACES_V3,
   ...ADDITIONAL_CURATED_PLACES_V4,
+  ...ADDITIONAL_CURATED_PLACES_V5,
 ];
 
 // Only remove the original demo ratings/images if their exact unchanged seed
@@ -196,6 +199,12 @@ const LEGACY_DEMO_VALUES = [
 ];
 
 async function ensureSchema() {
+  // Fail closed before opening the DB or making any schema/seed writes.
+  assertPlaceImportReady({
+    places: SEED_PLACES, wikimediaMedia: VERIFIED_WIKIMEDIA_MEDIA,
+    missingMedia: VERIFIED_MISSING_MEDIA, userMedia: USER_PROVIDED_MEDIA,
+    requireFullCoverage: true,
+  });
   const sql = getSql();
 
   await sql.unsafe(`
