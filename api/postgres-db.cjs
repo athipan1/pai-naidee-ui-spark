@@ -7,6 +7,7 @@ const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
 const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
 const USER_PROVIDED_MEDIA = require('./user-provided-place-media.json');
 const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
+const { buildPlaceSearch } = require('./place-search.cjs');
 
 let sqlClient = null;
 
@@ -481,8 +482,7 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
   const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
   const offset = (safePage - 1) * safeLimit;
   const categoryValue = category?.trim() || null;
-  const searchValue = search?.trim() || null;
-  const searchPattern = searchValue ? `%${searchValue}%` : null;
+  const { searchValue, searchPattern, flexibleNamePattern, aliasPlaceId } = buildPlaceSearch(search);
 
   const rows = await sql`
     SELECT
@@ -507,8 +507,11 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
       (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}))
       AND (
         ${searchValue}::text IS NULL OR
+        p.id = ${aliasPlaceId} OR
         p.name ILIKE ${searchPattern} OR
         p.name_local ILIKE ${searchPattern} OR
+        p.name ILIKE ${flexibleNamePattern} OR
+        p.name_local ILIKE ${flexibleNamePattern} OR
         p.description ILIKE ${searchPattern} OR
         p.description_en ILIKE ${searchPattern} OR
         p.province ILIKE ${searchPattern} OR
@@ -527,8 +530,11 @@ async function listPlaces({ page = 1, limit = 10, category = '', search = '' } =
       (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}))
       AND (
         ${searchValue}::text IS NULL OR
+        p.id = ${aliasPlaceId} OR
         p.name ILIKE ${searchPattern} OR
         p.name_local ILIKE ${searchPattern} OR
+        p.name ILIKE ${flexibleNamePattern} OR
+        p.name_local ILIKE ${flexibleNamePattern} OR
         p.description ILIKE ${searchPattern} OR
         p.description_en ILIKE ${searchPattern} OR
         p.province ILIKE ${searchPattern} OR
