@@ -41,6 +41,7 @@ const images = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 *
 });
 registerAdminCms(app, {
   getSql,
+  listPlaces,
   requireAdmin,
   storage: { single: images.single.bind(images) },
   uploadImage: (file) => uploadImage(storage, file),

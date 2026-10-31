@@ -20,7 +20,7 @@ function cleanPlace(input) {
   };
 }
 
-function registerAdminCms(app, { getSql, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {} }) {
+function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {} }) {
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
@@ -36,14 +36,13 @@ function registerAdminCms(app, { getSql, requireAdmin, storage, uploadImage, inv
   }));
 
   app.get('/api/admin/catalog', requireAdmin, wrap(async (req, res) => {
-    const sql = getSql();
     const q = String(req.query.q || '').trim().slice(0, 100);
-    if (q.length < 2) return res.json({ places: [] });
-    const term = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
-    const places = await sql`SELECT id, name, name_local, province, category, description, lat, lng, image_url
-      FROM places WHERE name ILIKE ${term} OR name_local ILIKE ${term} OR province ILIKE ${term}
-      ORDER BY name LIMIT 30`;
-    res.json({ places });
+    const page = Math.min(100, Math.max(1, Math.trunc(Number(req.query.page) || 1)));
+    // Reuse the public search ranking, normalization and aliases so an admin
+    // can find every place that public visitors can find.
+    const result = await listPlaces({ search: q, page, limit: 30 });
+    res.json({ places: result.attractions.map(place => ({ id: place.id, name: place.name,
+      name_local: place.nameLocal, province: place.province })), total: result.total, page });
   }));
 
   app.post('/api/admin/catalog/:placeId/edit', requireAdmin, wrap(async (req, res) => {
