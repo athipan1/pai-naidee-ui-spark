@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, CloudUpload, FilePenLine, ImagePlus, LogOut, MapPin, Plus, Search, ShieldCheck } from 'lucide-react';
 import { getApiBaseUrl } from '@/services/railway-api.service';
@@ -8,6 +8,9 @@ type CatalogPlace = { id: string; name: string; name_local: string | null; provi
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string };
 const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '' };
+const AdminCoordinatePicker = lazy(() => import('./AdminCoordinatePicker'));
+type GeocodeCandidate = { lat: number; lng: number; label: string; source: string };
+const validCoordinate = (lat: number, lng: number) => Number.isFinite(lat) && Number.isFinite(lng) && lat >= 5 && lat <= 21 && lng >= 97 && lng <= 106;
 
 export default function AdminCms() {
   const [token, setToken] = useState(() => {
@@ -29,6 +32,11 @@ export default function AdminCms() {
   const [brokenImage, setBrokenImage] = useState(false);
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
+  const [geoCandidates, setGeoCandidates] = useState<GeocodeCandidate[]>([]);
+  const [proposedCoordinate, setProposedCoordinate] = useState<{ lat: number; lng: number } | null>(null);
+  const [geocodeBusy, setGeocodeBusy] = useState(false);
+  const [geocodeNote, setGeocodeNote] = useState('');
+  const lastAutoLookup = useRef('');
   const base = getApiBaseUrl();
 
   useEffect(() => {
@@ -81,6 +89,41 @@ export default function AdminCms() {
     return () => controller.abort();
   }, [tab, token, isAdmin, base, searched]);
 
+  // Search only after both fields settle. Never overwrite the administrator's coordinates.
+  useEffect(() => {
+    const name = (form.nameLocal || form.name).trim();
+    const province = form.province.trim();
+    if (tab !== 'new' || !token || !isAdmin || !name || !province || name.length < 3 ||
+        (form.lat.trim() && form.lng.trim())) return;
+    const key = `${name}|${province}`;
+    if (key === lastAutoLookup.current) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      lastAutoLookup.current = key;
+      setGeocodeBusy(true);
+      void fetch(`${base}/api/admin/geocode?name=${encodeURIComponent(name)}&province=${encodeURIComponent(province)}`, {
+        headers: { Authorization: `Bearer ${token}` }, signal: controller.signal,
+      }).then(response => { if (!response.ok) throw new Error('ค้นหาพิกัดไม่สำเร็จ'); return response.json(); })
+        .then(result => { if (!controller.signal.aborted) { setGeoCandidates(result.candidates || []); setGeocodeNote(result.candidates?.length ? 'พบพิกัดที่อาจตรงกับสถานที่ โปรดตรวจบนแผนที่' : 'ยังไม่พบพิกัดจากแหล่งข้อมูลที่เชื่อมต่อ'); } })
+        .catch(() => { if (!controller.signal.aborted) setGeocodeNote('ค้นหาพิกัดไม่สำเร็จ คุณสามารถเลือกหมุดเองได้'); })
+        .finally(() => { if (!controller.signal.aborted) setGeocodeBusy(false); });
+    }, 1000);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [form.name, form.nameLocal, form.province, form.lat, form.lng, tab, token, isAdmin, base]);
+
+  async function lookupCoordinates() {
+    const name = (form.nameLocal || form.name).trim();
+    if (name.length < 2 || !form.province.trim()) { setGeocodeNote('กรุณากรอกชื่อสถานที่และจังหวัดก่อน'); return; }
+    setGeocodeBusy(true); setGeocodeNote(''); setGeoCandidates([]);
+    try {
+      const result = await api(`/geocode?name=${encodeURIComponent(name)}&province=${encodeURIComponent(form.province.trim())}`);
+      setGeoCandidates(result.candidates || []);
+      setGeocodeNote(result.candidates?.length ? 'เลือกผลลัพธ์ด้านล่าง แล้วตรวจหมุดบนแผนที่ก่อนยืนยัน' :
+        result.providerConfigured ? 'ไม่พบตำแหน่งที่ตรงกัน ลองปรับชื่อหรือเลือกบนแผนที่' : 'ไม่พบในฐานข้อมูลเดิม หากเป็นสถานที่ใหม่สามารถเลือกหมุดเอง หรือกำหนด GEOAPIFY_API_KEY ใน Railway');
+    } catch (error) { setGeocodeNote(error instanceof Error ? error.message : 'ค้นหาพิกัดไม่สำเร็จ'); }
+    finally { setGeocodeBusy(false); }
+  }
+
   async function save(event: FormEvent) {
     event.preventDefault(); setBusy(true); setMessage('');
     try {
@@ -89,7 +132,7 @@ export default function AdminCms() {
       setDrafts(current => editing
         ? current.map(draft => draft.id === editing ? { ...draft, payload: form } : draft)
         : [{ id: data.id, status: 'draft', payload: form }, ...current]);
-      setForm({ ...empty }); setEditing(null); setTab('drafts'); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
+      setForm({ ...empty }); setEditing(null); setTab('drafts'); setProposedCoordinate(null); setGeoCandidates([]); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'บันทึกไม่สำเร็จ'); }
     finally { setBusy(false); }
   }
@@ -107,6 +150,7 @@ export default function AdminCms() {
       const draft = await api(`/catalog/${encodeURIComponent(place.id)}/edit`, { method: 'POST' });
       setDrafts(current => [draft, ...current]); setEditing(draft.id);
       setForm({ ...empty, ...draft.payload }); setCatalog([]); setTab('new'); setBrokenImage(false);
+      setProposedCoordinate(null); setGeoCandidates([]);
       void loadExistingImages(place.id);
       setMessage('สร้างฉบับร่างแก้ไขแล้ว ข้อมูลบนเว็บไซต์ยังไม่เปลี่ยนจนกว่าจะกดเผยแพร่');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -181,6 +225,16 @@ export default function AdminCms() {
         <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">ช่องที่มี * จำเป็นต้องกรอก</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { setEditing(null); setForm({ ...empty }); setBrokenImage(false); setExistingImages([]); }}>เริ่มรายการใหม่</button>}</div>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
           {(['name', 'nameLocal', 'province', 'category', 'lat', 'lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{({ name: 'ชื่อสถานที่ (หลัก)', nameLocal: 'ชื่อภาษาไทย', province: 'จังหวัด', category: 'หมวดหมู่', lat: 'ละติจูด', lng: 'ลองจิจูด' })[key]}{['name', 'province', 'category', 'lat', 'lng'].includes(key) ? ' *' : ''}</span><input className={inputStyle} value={form[key]} inputMode={key === 'lat' || key === 'lng' ? 'decimal' : 'text'} onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={['name', 'province', 'category', 'lat', 'lng'].includes(key)} /></label>)}
+        </section>
+        <section className="space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">กรอกชื่อและจังหวัดเพื่อเสนอพิกัดอัตโนมัติ แล้วตรวจตำแหน่งก่อนยืนยัน</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
+          {geocodeNote && <p aria-live="polite" className="text-sm text-slate-700">{geocodeNote}</p>}
+          {geoCandidates.length > 0 && <div className="space-y-2">{geoCandidates.map((candidate, index) => <button key={`${candidate.source}-${index}`} type="button" onClick={() => setProposedCoordinate({ lat: candidate.lat, lng: candidate.lng })} className="flex w-full items-start justify-between gap-2 rounded-lg border bg-white p-3 text-left text-sm hover:border-teal-500"><span>{candidate.label}<span className="mt-1 block text-xs text-slate-500">{candidate.source} · {candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}</span></span><MapPin size={16} className="shrink-0 text-teal-600" /></button>)}</div>}
+          <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-slate-200" />}>
+            <AdminCoordinatePicker value={proposedCoordinate || (validCoordinate(Number(form.lat), Number(form.lng)) && form.lat.trim() && form.lng.trim() ? { lat: Number(form.lat), lng: Number(form.lng) } : null)} onChange={setProposedCoordinate} />
+          </Suspense>
+          {proposedCoordinate && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-3"><span className="text-sm">หมุดที่เลือก: <strong>{proposedCoordinate.lat.toFixed(6)}, {proposedCoordinate.lng.toFixed(6)}</strong></span><button type="button" onClick={() => { setForm(current => ({ ...current, lat: proposedCoordinate.lat.toFixed(6), lng: proposedCoordinate.lng.toFixed(6) })); setProposedCoordinate(null); setGeocodeNote('ยืนยันพิกัดในแบบฟอร์มแล้ว กรุณาบันทึกฉบับร่างเพื่อเก็บการเปลี่ยนแปลง'); }} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">ยืนยันใช้พิกัดนี้</button></div>}
+          <p className="text-xs text-slate-500">พิกัดจากระบบเป็นเพียงข้อเสนอ ตรวจสอบหมุดก่อนทุกครั้ง · ยังไม่มีการบันทึกลงฐานข้อมูล</p>
         </section>
         <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
         <section className="space-y-3 rounded-xl border border-dashed border-teal-200 bg-teal-50/40 p-4">
