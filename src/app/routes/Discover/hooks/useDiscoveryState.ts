@@ -7,6 +7,7 @@ export interface DiscoveryState {
   mode: DiscoveryMode;
   query: string;
   category: string;
+  province: string;
   selectedAttractionId?: string;
   filters: {
     priceRange: string;
@@ -25,12 +26,14 @@ export const useDiscoveryState = () => {
     const mode = (searchParams.get('mode') as DiscoveryMode) || 'feed';
     const query = searchParams.get('q') || '';
     const category = searchParams.get('cat') || searchParams.get('category') || '';
+    const province = searchParams.get('prov') || '';
     const selectedAttractionId = searchParams.get('id') || undefined;
     
     return {
       mode,
       query,
       category,
+      province,
       selectedAttractionId,
       filters: {
         priceRange: searchParams.get('price') || 'all',
@@ -61,6 +64,7 @@ export const useDiscoveryState = () => {
     if (updatedState.category) {
       newParams.set('cat', updatedState.category);
     }
+    if (updatedState.province) newParams.set('prov', updatedState.province);
     
     if (updatedState.selectedAttractionId) {
       newParams.set('id', updatedState.selectedAttractionId);
@@ -96,6 +100,8 @@ export const useDiscoveryState = () => {
   const setQuery = (query: string) => updateState({ query, mode: query ? 'search' : 'feed' });
   
   const setCategory = (category: string) => updateState({ category, mode: category ? 'category' : 'feed' });
+  const setSearchFilters = (filters: { category: string; province: string }) =>
+    updateState({ ...filters, mode: 'search' });
   
   const setSelectedAttraction = (id: string | undefined) => updateState({ selectedAttractionId: id });
   
@@ -111,6 +117,7 @@ export const useDiscoveryState = () => {
       mode: 'feed',
       query: '',
       category: '',
+      province: '',
       selectedAttractionId: undefined,
       filters: {
         priceRange: 'all',
@@ -128,6 +135,7 @@ export const useDiscoveryState = () => {
     setMode,
     setQuery,
     setCategory,
+    setSearchFilters,
     setSelectedAttraction,
     updateFilters,
     resetToFeed
