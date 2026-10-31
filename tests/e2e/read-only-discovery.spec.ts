@@ -65,6 +65,37 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
 });
 
+test('mobile search shows one Wat Phu Manorom result for alternate Thai place names', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const temple = {
+    ...place,
+    id: 'curated-wat-phu-manorom',
+    name: 'Wat Roi Phra Phutthabat Phu Manorom',
+    nameLocal: 'วัดรอยพระพุทธบาทภูมโนรมย์',
+    province: 'มุกดาหาร',
+    category: 'Culture',
+  };
+  const queries = ['วัดภูมโนรมย์', 'ภูมโนรมย์', 'วัดพระพุทธบาท ภูมโนรมย์'];
+
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places**', route => {
+    const url = new URL(route.request().url());
+    const query = url.searchParams.get('search');
+    const matched = query !== null && queries.includes(query);
+    return route.fulfill({ json: {
+      attractions: matched ? [temple] : [], total: matched ? 1 : 0, page: 1, limit: 50,
+    } });
+  });
+
+  for (const query of queries) {
+    await page.goto(`/search?search=${encodeURIComponent(query)}`);
+    await expect(page).toHaveURL(/\/discover\?.*mode=search/);
+    await expect(page.getByTestId('attraction-card')).toHaveCount(1);
+    await expect(page.getByText(/1 results|พบ 1 รายการ/)).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  }
+});
+
 test('feed shows each destination only once across recommendations and more places', async ({ page }) => {
   const destinations = Array.from({ length: 12 }, (_, index) => ({
     ...place,
