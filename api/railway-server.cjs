@@ -2,9 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { randomUUID } = require('node:crypto');
+const multer = require('multer');
+const { createClient } = require('@supabase/supabase-js');
+const { registerAdminCms } = require('./admin-cms.cjs');
 const {
   buildCorsOptions,
   createRateLimiter,
+  createRoleGuard,
   validateTalkPayload,
 } = require('./security.cjs');
 const {
@@ -17,6 +21,8 @@ const {
   parseNearbyOptions,
   pingDatabase,
   closeDatabase,
+  getSql,
+  invalidateSearchIndex,
 } = require('./postgres-db.cjs');
 
 const app = express();
@@ -27,6 +33,21 @@ app.set('trust proxy', 1);
 app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '256kb' }));
 app.use('/api', createRateLimiter({ windowMs: 60_000, max: 180 }));
+
+const authUrl = process.env.SUPABASE_URL;
+const authKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+const authClient = authUrl && authKey ? createClient(authUrl, authKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+}) : null;
+const images = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)),
+});
+registerAdminCms(app, {
+  getSql,
+  requireAdmin: createRoleGuard(authClient, ['admin']),
+  storage: { single: images.single.bind(images), client: authClient },
+  invalidateSearchIndex,
+});
 
 app.get('/api/places', async (req, res) => {
   try {

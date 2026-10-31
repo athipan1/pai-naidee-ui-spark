@@ -246,6 +246,16 @@ async function ensureSchema() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS place_drafts (
+      id TEXT PRIMARY KEY,
+      payload JSONB NOT NULL,
+      author_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+      published_place_id TEXT REFERENCES places(id),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
     CREATE INDEX IF NOT EXISTS idx_places_category ON places (category);
     CREATE INDEX IF NOT EXISTS idx_places_province ON places (province);
     CREATE INDEX IF NOT EXISTS idx_places_name_lower ON places (LOWER(name));
@@ -654,6 +664,8 @@ async function closeDatabase() {
 }
 
 module.exports = {
+  getSql,
+  invalidateSearchIndex: () => { searchIndex = null; searchIndexExpires = 0; },
   closeDatabase,
   ensureSchema,
   getPlaceById,

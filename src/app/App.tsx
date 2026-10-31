@@ -19,6 +19,8 @@ const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 // Keep existing essential routes
 const Index = lazy(() => import("./pages/Index"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
+const AdminCms = lazy(() => import("./pages/AdminCms"));
+const AdminLogin = lazy(() => import("./pages/LoginPage"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -117,8 +119,8 @@ const AppContent = () => {
           {/* Public launch: browsing only. Restricted routes never mount write-capable UI. */}
           <Route path="/saved" element={<Navigate to="/discover" replace />} />
           <Route path="/me" element={<Navigate to="/discover" replace />} />
-          <Route path="/login" element={<Navigate to="/discover" replace />} />
-          <Route path="/admin/*" element={<Navigate to="/discover" replace />} />
+          <Route path="/login" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<AdminCms />} />
           <Route path="/upload/*" element={<Navigate to="/discover" replace />} />
           {/* Existing Essential Routes */}
           <Route
