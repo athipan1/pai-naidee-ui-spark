@@ -340,7 +340,7 @@ const AttractionDetail = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 via-35% to-transparent pointer-events-none" />
 
         {/* Action Buttons */}
-        <div className="absolute top-4 right-4 flex gap-2 z-10 sm:top-8 sm:right-8">
+        <div className="absolute top-8 right-8 z-10 hidden gap-2 md:flex">
           <Button
             variant="outline"
             size="icon"
