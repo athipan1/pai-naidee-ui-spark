@@ -28,3 +28,15 @@ test('geocoding excludes wrong-country and out-of-bounds coordinates', async () 
   assert.deepEqual(result.candidates.map(item => item.label), ['Thai temple']);
   assert.equal(isThailandCoordinate(90, 100), false);
 });
+
+test('map search accepts a place name without a province and retains candidate selection', async () => {
+  const result = await geocodeCandidates({ name: 'ตลาดน้ำอัมพวา',
+    listPlaces: async options => {
+      assert.equal(options.province, '');
+      return { attractions: [{ nameLocal: 'ตลาดน้ำอัมพวา', province: 'สมุทรสงคราม',
+        coordinates: { lat: 13.42479, lng: 99.9556 } }] };
+    }, request: () => assert.fail('Provider requires an API key'),
+  });
+  assert.equal(result.candidates.length, 1);
+  assert.equal(result.candidates[0].label, 'ตลาดน้ำอัมพวา · สมุทรสงคราม');
+});
