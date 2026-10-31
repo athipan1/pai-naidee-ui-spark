@@ -31,8 +31,35 @@ function registerAdminCms(app, { getSql, requireAdmin, storage, uploadImage, inv
 
   app.get('/api/admin/places', requireAdmin, wrap(async (_req, res) => {
     const sql = getSql();
-    const drafts = await sql`SELECT id, payload, status, created_at, updated_at FROM place_drafts ORDER BY updated_at DESC LIMIT 100`;
+    const drafts = await sql`SELECT id, payload, status, target_place_id, created_at, updated_at FROM place_drafts ORDER BY updated_at DESC LIMIT 100`;
     res.json({ drafts });
+  }));
+
+  app.get('/api/admin/catalog', requireAdmin, wrap(async (req, res) => {
+    const sql = getSql();
+    const q = String(req.query.q || '').trim().slice(0, 100);
+    if (q.length < 2) return res.json({ places: [] });
+    const term = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
+    const places = await sql`SELECT id, name, name_local, province, category, description, lat, lng, image_url
+      FROM places WHERE name ILIKE ${term} OR name_local ILIKE ${term} OR province ILIKE ${term}
+      ORDER BY name LIMIT 30`;
+    res.json({ places });
+  }));
+
+  app.post('/api/admin/catalog/:placeId/edit', requireAdmin, wrap(async (req, res) => {
+    const sql = getSql();
+    const rows = await sql`SELECT id, name, name_local, province, category, description, lat, lng, image_url, updated_at
+      FROM places WHERE id = ${req.params.placeId}`;
+    const place = rows[0];
+    if (!place) return res.status(404).json({ error: 'Place not found.' });
+    const existing = await sql`SELECT id FROM place_drafts WHERE target_place_id = ${place.id} AND status = 'draft' LIMIT 1`;
+    if (existing.length) return res.status(409).json({ error: 'An edit draft already exists for this place.' });
+    const id = randomUUID();
+    const payload = { name: place.name, nameLocal: place.name_local || '', province: place.province,
+      category: place.category, description: place.description || '', lat: place.lat, lng: place.lng, imageUrl: place.image_url || '' };
+    await sql`INSERT INTO place_drafts (id, payload, author_id, target_place_id, target_updated_at)
+      VALUES (${id}, ${sql.json(payload)}, ${req.auth.user.id}, ${place.id}, ${place.updated_at})`;
+    res.status(201).json({ id, status: 'draft', target_place_id: place.id, payload });
   }));
 
   app.post('/api/admin/places', requireAdmin, wrap(async (req, res) => {
@@ -65,6 +92,21 @@ function registerAdminCms(app, { getSql, requireAdmin, storage, uploadImage, inv
       const parsed = cleanPlace(draft.payload);
       if (parsed.errors.length) return { status: 400, errors: parsed.errors };
       const p = parsed.value;
+      if (draft.target_place_id) {
+        const current = await tx`SELECT id, updated_at, image_url FROM places WHERE id = ${draft.target_place_id} FOR UPDATE`;
+        if (!current.length) return { status: 404, error: 'Original place no longer exists.' };
+        if (new Date(current[0].updated_at).getTime() !== new Date(draft.target_updated_at).getTime())
+          return { status: 409, error: 'Place changed since this draft was created. Review the latest place before updating.' };
+        await tx`UPDATE places SET name = ${p.name}, name_local = ${p.nameLocal}, province = ${p.province},
+          category = ${p.category}, description = ${p.description}, lat = ${p.lat}, lng = ${p.lng},
+          image_url = ${p.imageUrl || null}, updated_at = NOW() WHERE id = ${draft.target_place_id}`;
+        if (p.imageUrl && p.imageUrl !== current[0].image_url) {
+          await tx`INSERT INTO media (id, place_id, url, type, title)
+            VALUES (${`cms-media:${randomUUID()}`}, ${draft.target_place_id}, ${p.imageUrl}, 'image', ${p.name})`;
+        }
+        await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${draft.target_place_id}, updated_at = NOW() WHERE id = ${draft.id}`;
+        return { status: 200, placeId: draft.target_place_id, published: true, updated: true };
+      }
       // Cross-check against existing names and near-identical coordinates, including seed data.
       const duplicates = await tx`SELECT id, name FROM places WHERE
         (LOWER(TRIM(name)) = LOWER(${p.name}) OR (name_local IS NOT NULL AND LOWER(TRIM(name_local)) = LOWER(${p.nameLocal || p.name})))

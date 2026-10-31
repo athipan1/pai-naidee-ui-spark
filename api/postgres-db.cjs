@@ -255,6 +255,8 @@ async function ensureSchema() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    ALTER TABLE place_drafts ADD COLUMN IF NOT EXISTS target_place_id TEXT REFERENCES places(id);
+    ALTER TABLE place_drafts ADD COLUMN IF NOT EXISTS target_updated_at TIMESTAMPTZ;
 
     CREATE TABLE IF NOT EXISTS admin_users (
       id TEXT PRIMARY KEY,
