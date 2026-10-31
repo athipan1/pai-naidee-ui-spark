@@ -12,15 +12,22 @@ interface SearchViewProps {
   currentLanguage: "th" | "en";
   query: string;
   category?: string;
+  province?: string;
+  onFiltersChange?: (filters: { category: string; province: string }) => void;
 }
 
 type ViewMode = 'grid' | 'list';
 
-const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
+const SearchView = ({ currentLanguage, query, category = '', province = '', onFiltersChange }: SearchViewProps) => {
   const navigate = useNavigate();
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
-  const { data, error, isLoading, refetch } = useAllAttractions({ search: query || undefined, category: category || undefined });
+  const { data, error, isLoading, refetch } = useAllAttractions({ search: query || undefined, category: category || undefined, province: province || undefined });
+  const { data: catalogue } = useAllAttractions();
+  const provinces = React.useMemo(() => [...new Set((catalogue?.attractions ?? []).map(place => place.province).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'th')), [catalogue]);
+  const categories = React.useMemo(() => [...new Set((catalogue?.attractions ?? []).map(place => place.category).filter(Boolean))]
+    .sort(), [catalogue]);
 
   const railwayResults = uniqueAttractionsById(data?.attractions ?? []).map(item => ({
     id: item.id, name: item.name, nameLocal: item.nameLocal || item.name,
@@ -57,8 +64,8 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
                 {query && (
                   <p className="text-muted-foreground">
                     {currentLanguage === 'th' 
-                      ? `ค้นหา: "${query}" พบ ${filteredResults.length} รายการ`
-                      : `Search: "${query}" - ${filteredResults.length} results`
+                      ? `ค้นหา: "${query}" พบ ${data?.total ?? 0} รายการ`
+                      : `Search: "${query}" - ${data?.total ?? 0} results`
                     }
                   </p>
                 )}
@@ -75,8 +82,22 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
 
             {/* Filters and Controls */}
             <div className="space-y-4">
-              {/* View Mode Controls */}
-              <div className="flex items-center justify-end">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+                <label className="text-sm font-medium flex flex-col gap-1">
+                  {currentLanguage === 'th' ? 'จังหวัด' : 'Province'}
+                  <select aria-label={currentLanguage === 'th' ? 'กรองจังหวัด' : 'Filter province'} value={province} onChange={event => onFiltersChange?.({ province: event.target.value, category })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-foreground">
+                    <option value="">{currentLanguage === 'th' ? 'ทุกจังหวัด' : 'All provinces'}</option>
+                    {provinces.map(name => <option key={name} value={name}>{name}</option>)}
+                  </select>
+                </label>
+                <label className="text-sm font-medium flex flex-col gap-1">
+                  {currentLanguage === 'th' ? 'ประเภทสถานที่' : 'Place type'}
+                  <select aria-label={currentLanguage === 'th' ? 'กรองประเภทสถานที่' : 'Filter place type'} value={category} onChange={event => onFiltersChange?.({ province, category: event.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-foreground">
+                    <option value="">{currentLanguage === 'th' ? 'ทุกประเภท' : 'All types'}</option>
+                    {categories.map(name => <option key={name} value={name}>{localizedCategory(name, currentLanguage)}</option>)}
+                  </select>
+                </label>
+                <div className="flex items-center justify-end">
                 <div className="flex border border-border rounded-md" role="group" aria-label={currentLanguage === 'th' ? 'รูปแบบการแสดงผล' : 'View mode'}>
                   <Button
                     variant={viewMode === 'grid' ? "default" : "ghost"}
@@ -96,6 +117,7 @@ const SearchView = ({ currentLanguage, query, category }: SearchViewProps) => {
                   >
                     <List className="w-4 h-4" />
                   </Button>
+                </div>
                 </div>
               </div>
             </div>
