@@ -31,6 +31,7 @@ const getAttractions = async (options?: {
   page?: number;
   limit?: number;
   category?: string;
+  province?: string;
   search?: string;
 }): Promise<{
   attractions: SearchResult[];
@@ -46,6 +47,7 @@ const getAttractions = async (options?: {
       page,
       limit,
       category: options?.category,
+      province: options?.province,
       search: options?.search,
     });
   } catch (error) {
