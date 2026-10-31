@@ -16,7 +16,13 @@ const place = {
   source: { name: 'Wikipedia: Doi Inthanon', url: 'https://en.wikipedia.org/wiki/Doi_Inthanon' },
 };
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
+  // Historical discovery assertions cover the English UI. Simulate a user
+  // who explicitly selected English; the language test below covers a new
+  // visitor without that preference, ensuring Thai remains the default.
+  if (!testInfo.title.startsWith('language choice')) {
+    await page.addInitScript(() => window.localStorage.setItem('painaidee.language', 'en'));
+  }
   await page.route('**/api/places**', async route => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/railway-test-1')) {
@@ -30,12 +36,10 @@ test.beforeEach(async ({ page }) => {
 
 test('language choice translates the Railway feed and details and persists across navigation and reload', async ({ page }) => {
   await page.goto('/discover?mode=feed');
-  await expect(page.getByText('A scenic mountain destination in Chiang Mai province.').first()).toBeVisible();
-  await expect(page.getByText('Chiang Mai').first()).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Switch to ไทย' })).toBeVisible();
-  await page.getByRole('button', { name: 'Switch to ไทย' }).click();
   await expect(page.getByText('สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่').first()).toBeVisible();
   await expect(page.getByText('เชียงใหม่').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Switch to English' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'th');
   await page.reload();
   await expect(page.getByRole('button', { name: 'Switch to English' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'th');
@@ -48,6 +52,9 @@ test('language choice translates the Railway feed and details and persists acros
   await expect(page.getByRole('heading', { name: 'About this place' })).toBeVisible();
   await expect(page.getByText('A scenic mountain destination in Chiang Mai province.').first()).toBeVisible();
   await expect(page.getByText('Chiang Mai').first()).toBeVisible();
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.getByRole('button', { name: 'Switch to ไทย' })).toBeVisible();
 });
 
 test('search redirects and opens a Railway-backed place', async ({ page }) => {

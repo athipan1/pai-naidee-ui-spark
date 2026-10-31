@@ -11,6 +11,7 @@ import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
+import { getInitialLanguage } from "@/shared/i18n/initialLanguage";
 
 // Lazy load new consolidated routes
 const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
@@ -66,9 +67,9 @@ const queryClient = new QueryClient({
 const AppContent = () => {
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">(() => {
     try {
-      return window.localStorage.getItem('painaidee.language') === 'th' ? 'th' : 'en';
+      return getInitialLanguage(window.localStorage);
     } catch {
-      return 'en';
+      return 'th';
     }
   });
 
