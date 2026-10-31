@@ -19,6 +19,7 @@ const Header = ({ currentLanguage, onLanguageChange }: HeaderProps) => {
   const menuItems = [
     { label: currentLanguage === "th" ? "หน้าแรก" : "Home", href: "/" },
     { label: currentLanguage === "th" ? "สำรวจ" : "Explore", href: "/explore" },
+    { label: currentLanguage === "th" ? "AI วางแผนเที่ยว" : "Trip Planner", href: "/trip-planner" },
   ];
 
   // Helper function to check if route is active
