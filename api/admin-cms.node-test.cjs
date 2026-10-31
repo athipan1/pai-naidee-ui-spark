@@ -40,6 +40,22 @@ test('Admin catalog reuses public smart search and supports browsing existing pl
   assert.equal(body.total, 1);
 });
 
+test('Admin media preview includes existing media and main image without duplicates', async () => {
+  const routes = new Map();
+  registerAdminCms({
+    get: (path, ...handlers) => routes.set(path, handlers.at(-1)), post() {}, put() {},
+  }, {
+    getSql: () => async (strings) => strings[0].includes('SELECT image_url')
+      ? [{ image_url: 'https://example.com/main.jpg' }]
+      : [{ id: 'media-1', url: 'https://example.com/main.jpg', title: 'Same' }, { id: 'media-2', url: 'https://example.com/side.jpg', title: 'Side' }],
+    listPlaces: async () => ({ attractions: [], total: 0 }),
+    requireAdmin: (_req, _res, next) => next(), storage: { single: () => (_req, _res, next) => next() }, uploadImage: async () => '',
+  });
+  let body;
+  await routes.get('/api/admin/catalog/:placeId/media')({ params: { placeId: 'known' } }, { json: value => { body = value; } });
+  assert.deepEqual(body.images.map(image => image.url), ['https://example.com/main.jpg', 'https://example.com/side.jpg']);
+});
+
 test('admin role guard denies anonymous access before any database interaction', async () => {
   const guard = createRoleGuard({ auth: { getUser: () => { throw new Error('must not call auth without token'); } } }, ['admin']);
   let status = 0;

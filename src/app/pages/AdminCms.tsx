@@ -5,6 +5,7 @@ import { getApiBaseUrl } from '@/services/railway-api.service';
 
 type Draft = { id: string; status: string; payload: PlaceForm; target_place_id?: string };
 type CatalogPlace = { id: string; name: string; name_local: string | null; province: string };
+type ExistingImage = { id: string; url: string; title: string };
 type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string };
 const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '' };
 
@@ -26,6 +27,8 @@ export default function AdminCms() {
   const [tab, setTab] = useState<'new' | 'existing' | 'drafts'>('new');
   const [searched, setSearched] = useState(false);
   const [brokenImage, setBrokenImage] = useState(false);
+  const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
+  const [loadingImages, setLoadingImages] = useState(false);
   const base = getApiBaseUrl();
 
   useEffect(() => {
@@ -104,10 +107,22 @@ export default function AdminCms() {
       const draft = await api(`/catalog/${encodeURIComponent(place.id)}/edit`, { method: 'POST' });
       setDrafts(current => [draft, ...current]); setEditing(draft.id);
       setForm({ ...empty, ...draft.payload }); setCatalog([]); setTab('new'); setBrokenImage(false);
+      void loadExistingImages(place.id);
       setMessage('สร้างฉบับร่างแก้ไขแล้ว ข้อมูลบนเว็บไซต์ยังไม่เปลี่ยนจนกว่าจะกดเผยแพร่');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) { setMessage(error instanceof Error ? error.message : 'สร้างฉบับร่างไม่สำเร็จ'); }
     finally { setBusy(false); }
+  }
+
+  async function loadExistingImages(placeId?: string) {
+    setExistingImages([]);
+    if (!placeId) return;
+    setLoadingImages(true);
+    try {
+      const result = await api(`/catalog/${encodeURIComponent(placeId)}/media`);
+      setExistingImages(result.images || []);
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'โหลดภาพเดิมไม่สำเร็จ'); }
+    finally { setLoadingImages(false); }
   }
 
   async function upload(file: File) {
@@ -163,13 +178,16 @@ export default function AdminCms() {
         {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1)}>ถัดไป</button></div>}
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">ช่องที่มี * จำเป็นต้องกรอก</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { setEditing(null); setForm({ ...empty }); setBrokenImage(false); }}>เริ่มรายการใหม่</button>}</div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">ช่องที่มี * จำเป็นต้องกรอก</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { setEditing(null); setForm({ ...empty }); setBrokenImage(false); setExistingImages([]); }}>เริ่มรายการใหม่</button>}</div>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
           {(['name', 'nameLocal', 'province', 'category', 'lat', 'lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{({ name: 'ชื่อสถานที่ (หลัก)', nameLocal: 'ชื่อภาษาไทย', province: 'จังหวัด', category: 'หมวดหมู่', lat: 'ละติจูด', lng: 'ลองจิจูด' })[key]}{['name', 'province', 'category', 'lat', 'lng'].includes(key) ? ' *' : ''}</span><input className={inputStyle} value={form[key]} inputMode={key === 'lat' || key === 'lng' ? 'decimal' : 'text'} onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={['name', 'province', 'category', 'lat', 'lng'].includes(key)} /></label>)}
         </section>
         <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
         <section className="space-y-3 rounded-xl border border-dashed border-teal-200 bg-teal-50/40 p-4">
           <h3 className="flex items-center gap-2 font-semibold"><ImagePlus size={19} className="text-teal-700" /> รูปภาพสถานที่</h3>
+          {loadingImages && <p className="text-sm text-slate-500">กำลังโหลดรูปภาพที่มีอยู่...</p>}
+          {existingImages.length > 0 && <div className="space-y-3 rounded-xl bg-white p-3"><div><h4 className="font-semibold">รูปภาพที่ใช้อยู่บนเว็บไซต์ ({existingImages.length})</h4><p className="text-xs text-slate-500">แตะรูปเพื่อเลือกเป็นรูปหลักในฉบับร่าง รูปอื่นยังคงอยู่ ไม่ถูกลบ</p></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{existingImages.map(image => <button key={image.id} type="button" onClick={() => { setForm(current => ({ ...current, imageUrl: image.url })); setBrokenImage(false); }} className={`min-w-0 overflow-hidden rounded-xl border-2 text-left transition ${form.imageUrl === image.url ? 'border-teal-600 ring-2 ring-teal-100' : 'border-slate-200 hover:border-teal-300'}`}><img src={image.url} alt={image.title || 'รูปสถานที่เดิม'} className="aspect-[4/3] w-full bg-slate-100 object-cover" loading="lazy" /><span className="block truncate p-2 text-xs text-slate-600">{form.imageUrl === image.url ? '✓ เลือกเป็นรูปหลัก' : image.title || 'รูปเดิม'}</span></button>)}</div></div>}
+          {editing && !loadingImages && existingImages.length === 0 && <p className="rounded-lg bg-white p-3 text-sm text-slate-600">ไม่พบรูปเดิมในคลังภาพของสถานที่นี้ คุณสามารถอัปโหลดรูปใหม่ได้</p>}
           {form.imageUrl && !brokenImage && <img src={form.imageUrl} alt="ตัวอย่างภาพสถานที่" className="h-48 w-full rounded-xl bg-slate-100 object-cover sm:h-64" onError={() => setBrokenImage(true)} />}
           {form.imageUrl && brokenImage && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">ไม่สามารถแสดงตัวอย่างภาพได้ กรุณาตรวจสอบ URL</p>}
           <label className="block cursor-pointer rounded-xl border border-teal-200 bg-white px-4 py-5 text-center text-sm text-teal-800"><CloudUpload className="mx-auto mb-2" /><span className="font-semibold">เลือกภาพจากอุปกรณ์</span><span className="mt-1 block text-xs text-slate-500">JPG, PNG, WebP ไม่เกิน 5 MB</span><input className="mt-3 block w-full min-w-0 text-xs" type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ''; }} /></label>
@@ -179,7 +197,7 @@ export default function AdminCms() {
       </form>}
       {tab === 'drafts' && <section className="space-y-4"><div><h2 className="text-xl font-bold">รายการฉบับร่างและการเผยแพร่</h2><p className="mt-1 text-sm text-slate-500">ตรวจสอบและแก้ไขข้อมูลให้ถูกต้องก่อนเผยแพร่</p></div>
         {!drafts.length && <div className="rounded-2xl border bg-white p-10 text-center text-sm text-slate-500">ยังไม่มีฉบับร่าง เริ่มเพิ่มสถานที่ใหม่ได้เลย</div>}
-        {drafts.map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'รอเผยแพร่' : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}</p>{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => { setEditing(draft.id); setForm({ ...empty, ...draft.payload }); setBrokenImage(false); setTab('new'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button></div>}</article>)}
+        {drafts.map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'รอเผยแพร่' : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}</p>{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => { setEditing(draft.id); setForm({ ...empty, ...draft.payload }); setBrokenImage(false); void loadExistingImages(draft.target_place_id); setTab('new'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button></div>}</article>)}
       </section>}
     </div>
   </main>;

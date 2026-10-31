@@ -45,6 +45,18 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       name_local: place.nameLocal, province: place.province })), total: result.total, page });
   }));
 
+  app.get('/api/admin/catalog/:placeId/media', requireAdmin, wrap(async (req, res) => {
+    const sql = getSql();
+    const rows = await sql`SELECT image_url FROM places WHERE id = ${req.params.placeId}`;
+    if (!rows.length) return res.status(404).json({ error: 'Place not found.' });
+    const media = await sql`SELECT id, url, title FROM media
+      WHERE place_id = ${req.params.placeId} AND type = 'image' ORDER BY created_at ASC LIMIT 50`;
+    const seen = new Set();
+    const images = [rows[0].image_url && { id: 'main', url: rows[0].image_url, title: 'รูปภาพหลัก' }, ...media]
+      .filter(item => item && item.url && !seen.has(item.url) && seen.add(item.url));
+    res.json({ images });
+  }));
+
   app.post('/api/admin/catalog/:placeId/edit', requireAdmin, wrap(async (req, res) => {
     const sql = getSql();
     const rows = await sql`SELECT id, name, name_local, province, category, description, lat, lng, image_url, updated_at
@@ -100,7 +112,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           category = ${p.category}, description = ${p.description}, lat = ${p.lat}, lng = ${p.lng},
           image_url = ${p.imageUrl || null}, updated_at = NOW() WHERE id = ${draft.target_place_id}`;
         if (p.imageUrl && p.imageUrl !== current[0].image_url) {
-          await tx`INSERT INTO media (id, place_id, url, type, title)
+          const alreadySaved = await tx`SELECT id FROM media WHERE place_id = ${draft.target_place_id} AND url = ${p.imageUrl} LIMIT 1`;
+          if (!alreadySaved.length) await tx`INSERT INTO media (id, place_id, url, type, title)
             VALUES (${`cms-media:${randomUUID()}`}, ${draft.target_place_id}, ${p.imageUrl}, 'image', ${p.name})`;
         }
         await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${draft.target_place_id}, updated_at = NOW() WHERE id = ${draft.id}`;
