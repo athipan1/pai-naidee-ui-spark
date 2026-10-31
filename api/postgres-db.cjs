@@ -32,6 +32,14 @@ async function suggestPlaces(query, limit = 6) {
   }));
 }
 
+async function listPlaceFacets() {
+  const places = await getSearchIndex();
+  return {
+    provinces: [...new Set(places.map(place => place.province).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th')),
+    categories: [...new Set(places.map(place => place.category).filter(Boolean))].sort(),
+  };
+}
+
 function getSql() {
   if (sqlClient) return sqlClient;
 
@@ -641,6 +649,7 @@ module.exports = {
   ensureSchema,
   getPlaceById,
   listPlaces,
+  listPlaceFacets,
   suggestPlaces,
   listNearbyPlaces,
   parseNearbyOptions,

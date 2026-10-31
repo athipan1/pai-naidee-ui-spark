@@ -67,9 +67,10 @@ export const useAttractions = (filters?: {
 
 // Fetch the complete matching catalogue across the Railway API's 50-row pages.
 // This avoids silently hiding newer destinations in maps, categories and search.
-export const useAllAttractions = (filters?: { category?: string; province?: string; search?: string }) => {
+export const useAllAttractions = (filters?: { category?: string; province?: string; search?: string }, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: [...attractionKeys.lists(), 'all-pages', filters || {}],
+    enabled: options?.enabled !== false,
     queryFn: async () => {
       const limit = 50;
       const first = await attractionAPI.attractionService.getAttractions({ ...filters, page: 1, limit });

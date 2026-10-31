@@ -1,9 +1,11 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Grid3X3, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AttractionCard from '@/components/common/AttractionCard';
-import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
+import { useAttractions } from '@/shared/hooks/useAttractionQueries';
+import { getRailwayPlaceFacets } from '@/services/railway-api.service';
 import { getThailandPlaceImage } from '@/shared/data/thailandPlaceImages';
 import { localizedCategory } from '@/shared/i18n/placeLocalization';
 import { uniqueAttractionsById } from '@/shared/utils/uniqueAttractions';
@@ -19,15 +21,21 @@ interface SearchViewProps {
 type ViewMode = 'grid' | 'list';
 
 const SearchView = ({ currentLanguage, query, category = '', province = '', onFiltersChange }: SearchViewProps) => {
+  const pageSize = 20;
   const navigate = useNavigate();
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
-  const { data, error, isLoading, refetch } = useAllAttractions({ search: query || undefined, category: category || undefined, province: province || undefined });
-  const { data: catalogue } = useAllAttractions();
-  const provinces = React.useMemo(() => [...new Set((catalogue?.attractions ?? []).map(place => place.province).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, 'th')), [catalogue]);
-  const categories = React.useMemo(() => [...new Set((catalogue?.attractions ?? []).map(place => place.category).filter(Boolean))]
-    .sort(), [catalogue]);
+  const [page, setPage] = React.useState(1);
+  React.useEffect(() => setPage(1), [query, category, province]);
+  const { data, error, isLoading, refetch } = useAttractions({
+    page, limit: pageSize, search: query || undefined,
+    category: category || undefined, province: province || undefined,
+  });
+  const facets = useQuery({ queryKey: ['places', 'facets'], queryFn: getRailwayPlaceFacets, staleTime: 5 * 60_000 });
+  const provinces = facets.data?.provinces ?? [];
+  const categories = facets.data?.categories ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.ceil(total / pageSize);
 
   const railwayResults = uniqueAttractionsById(data?.attractions ?? []).map(item => ({
     id: item.id, name: item.name, nameLocal: item.nameLocal || item.name,
@@ -177,6 +185,19 @@ const SearchView = ({ currentLanguage, query, category = '', province = '', onFi
           </section>
         )}
       </main>
+      {totalPages > 1 && !error && (
+        <nav aria-label={currentLanguage === 'th' ? 'หน้าผลการค้นหา' : 'Search result pages'} className="flex justify-center items-center gap-3 p-6">
+          <Button variant="outline" disabled={page <= 1 || isLoading} onClick={() => setPage(value => Math.max(1, value - 1))}>
+            {currentLanguage === 'th' ? 'ก่อนหน้า' : 'Previous'}
+          </Button>
+          <span className="text-sm text-muted-foreground" aria-live="polite">
+            {currentLanguage === 'th' ? `หน้า ${page} จาก ${totalPages}` : `Page ${page} of ${totalPages}`}
+          </span>
+          <Button variant="outline" disabled={page >= totalPages || isLoading} onClick={() => setPage(value => Math.min(totalPages, value + 1))}>
+            {currentLanguage === 'th' ? 'ถัดไป' : 'Next'}
+          </Button>
+        </nav>
+      )}
     </div>
   );
 };

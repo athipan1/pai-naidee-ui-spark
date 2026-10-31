@@ -11,6 +11,7 @@ const {
   ensureSchema,
   getPlaceById,
   listPlaces,
+  listPlaceFacets,
   suggestPlaces,
   listNearbyPlaces,
   parseNearbyOptions,
@@ -53,6 +54,15 @@ app.get('/api/places/suggest', async (req, res) => {
   } catch (error) {
     console.error('GET /api/places/suggest failed:', error?.message || error);
     res.status(503).json({ error: 'Place suggestions are unavailable.' });
+  }
+});
+
+app.get('/api/places/facets', async (_req, res) => {
+  try {
+    res.json(await listPlaceFacets());
+  } catch (error) {
+    console.error('GET /api/places/facets failed:', error?.message || error);
+    res.status(503).json({ error: 'Place filters are unavailable.' });
   }
 });
 

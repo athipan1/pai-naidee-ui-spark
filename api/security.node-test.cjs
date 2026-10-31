@@ -105,6 +105,7 @@ test('Railway production app exposes no place write routes', () => {
   assert.deepEqual(placeRoutes, [
     { path: '/api/places', methods: ['get'] },
     { path: '/api/places/suggest', methods: ['get'] },
+    { path: '/api/places/facets', methods: ['get'] },
     { path: '/api/places/nearby', methods: ['get'] },
     { path: '/api/places/:placeId', methods: ['get'] },
   ]);
