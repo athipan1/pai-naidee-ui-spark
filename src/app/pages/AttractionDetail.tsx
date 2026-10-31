@@ -322,15 +322,17 @@ const AttractionDetail = ({
         </div>
       </div>
 
-      {/* Breadcrumb Navigation */}
-      <BreadcrumbNavigation 
+      {/* Keep desktop breadcrumbs for navigation; free mobile space for the hero. */}
+      <div className="hidden md:block">
+        <BreadcrumbNavigation 
         currentLanguage={currentLanguage} 
         items={[
           { label: currentLanguage === 'th' ? 'หน้าแรก' : 'Home', path: '/' },
           { label: currentLanguage === 'th' ? 'สถานที่ท่องเที่ยว' : 'Attractions', path: '/' },
           { label: displayName }
         ]}
-      />
+        />
+      </div>
 
       {/* Hero Section with Image Gallery */}
       <div className="relative h-[54svh] min-h-[350px] max-h-[620px] w-full overflow-hidden sm:h-[65vh] sm:min-h-[430px]">
