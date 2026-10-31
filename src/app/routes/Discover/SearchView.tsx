@@ -1,8 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Grid3X3, List } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Grid3X3, List, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SearchSection from '@/components/common/SearchSection';
+import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
 import AttractionCard from '@/components/common/AttractionCard';
 import { useAttractions } from '@/shared/hooks/useAttractionQueries';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
@@ -12,6 +14,8 @@ import { uniqueAttractionsById } from '@/shared/utils/uniqueAttractions';
 
 interface SearchViewProps {
   currentLanguage: "th" | "en";
+  onLanguageChange: (language: "th" | "en") => void;
+  onSearch: (query: string) => void;
   query: string;
   category?: string;
   province?: string;
@@ -20,11 +24,12 @@ interface SearchViewProps {
 
 type ViewMode = 'grid' | 'list';
 
-const SearchView = ({ currentLanguage, query, category = '', province = '', onFiltersChange }: SearchViewProps) => {
+const SearchView = ({ currentLanguage, onLanguageChange, onSearch, query, category = '', province = '', onFiltersChange }: SearchViewProps) => {
   const pageSize = 20;
   const navigate = useNavigate();
   const [favorites, setFavorites] = React.useState<string[]>([]);
   const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
   const [page, setPage] = React.useState(1);
   React.useEffect(() => setPage(1), [query, category, province]);
   const { data, error, isLoading, refetch } = useAttractions({
@@ -59,12 +64,40 @@ const SearchView = ({ currentLanguage, query, category = '', province = '', onFi
 
   return (
     <div className="h-full bg-background">
+      <div className="border-b border-border/50 px-4 py-3 md:hidden">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label={currentLanguage === 'th' ? 'ย้อนกลับ' : 'Go back'}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="min-w-0 flex-1" aria-live="polite">
+            <p className="truncate text-sm font-semibold">{query || (currentLanguage === 'th' ? 'ผลการค้นหา' : 'Search results')}</p>
+            <p className="text-xs text-muted-foreground">{currentLanguage === 'th' ? `${total} รายการ` : `${total} results`}</p>
+          </div>
+          <EnhancedLanguageToggle currentLanguage={currentLanguage} onLanguageChange={onLanguageChange} variant="button" size="sm" showName={false} />
+          <Button
+            variant="outline"
+            size="sm"
+            aria-expanded={mobileFiltersOpen}
+            aria-controls="mobile-search-filters"
+            onClick={() => setMobileFiltersOpen(open => !open)}
+          >
+            <SlidersHorizontal className="mr-1 h-4 w-4" />
+            {currentLanguage === 'th' ? 'ตัวกรอง' : 'Filters'}
+            <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${mobileFiltersOpen ? 'rotate-180' : ''}`} />
+          </Button>
+        </div>
+        {mobileFiltersOpen && (
+          <div className="mt-4 space-y-3" id="mobile-search-filters">
+            <SearchSection currentLanguage={currentLanguage} onSearch={onSearch} />
+          </div>
+        )}
+      </div>
       {/* Search Header */}
-      <header className="border-b border-border/30 bg-card/50 backdrop-blur-sm mb-6">
+      <header className={`${mobileFiltersOpen ? 'block' : 'hidden'} md:block border-b border-border/30 bg-card/50 backdrop-blur-sm mb-6`}>
         <div className="p-4">
           <div className="flex flex-col space-y-4">
             {/* Query and Results Count */}
-            <div className="flex items-center justify-between">
+            <div className="hidden md:flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">
                   {currentLanguage === 'th' ? 'ผลการค้นหา' : 'Search Results'}

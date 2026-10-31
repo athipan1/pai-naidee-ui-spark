@@ -94,6 +94,8 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
         return (
           <SearchView
             currentLanguage={currentLanguage}
+            onLanguageChange={onLanguageChange}
+            onSearch={handleSearch}
             query={state.query}
             category={state.category}
             province={state.province}
@@ -127,7 +129,7 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+      <header className={`${state.mode === 'search' ? 'hidden md:block' : ''} sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50`}>
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -193,7 +195,7 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
       )}
 
       {/* Mobile Mode Switcher */}
-      <div className="md:hidden border-b border-border/30 bg-card/30">
+      <div className={`${state.mode === 'search' ? 'hidden' : ''} md:hidden border-b border-border/30 bg-card/30`}>
         <div className="container mx-auto px-4">
           <Tabs value={state.mode} onValueChange={(value) => setMode(value as DiscoveryMode)}>
             <TabsList className="grid w-full grid-cols-5 h-12">

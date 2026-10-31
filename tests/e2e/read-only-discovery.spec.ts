@@ -73,6 +73,23 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
 });
 
+test('mobile search keeps filters and view controls accessible in a compact disclosure', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/discover?mode=search&q=%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88');
+  const filters = page.getByRole('button', { name: 'Filters' });
+  await expect(filters).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+  await expect(page.getByLabel('Filter province')).toBeHidden();
+  await filters.click();
+  await expect(filters).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByLabel('Filter province')).toBeVisible();
+  await expect(page.getByLabel('Filter place type')).toBeVisible();
+  await page.getByRole('button', { name: 'List view' }).click();
+  await filters.click();
+  await expect(filters).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+});
+
 test('mobile search shows one Wat Phu Manorom result for alternate Thai place names', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const temple = {
@@ -99,7 +116,7 @@ test('mobile search shows one Wat Phu Manorom result for alternate Thai place na
     await page.goto(`/search?search=${encodeURIComponent(query)}`);
     await expect(page).toHaveURL(/\/discover\?.*mode=search/);
     await expect(page.getByTestId('attraction-card')).toHaveCount(1);
-    await expect(page.getByText(/1 results|พบ 1 รายการ/)).toBeVisible();
+    await expect(page.getByText(/1 results|พบ 1 รายการ/).first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   }
 });
@@ -144,6 +161,7 @@ test('mobile search filters Railway results by province and category and keeps s
     return route.fulfill({ json: { attractions: matches, total: matches.length, page: 1, limit: 50 } });
   });
   await page.goto('/discover?mode=search&q=วัด');
+  await page.getByRole('button', { name: 'Filters' }).click();
   await page.getByRole('combobox', { name: 'Filter province' }).selectOption('มุกดาหาร');
   await page.getByRole('combobox', { name: 'Filter place type' }).selectOption('Culture');
   await expect(page).toHaveURL(/prov=%E0%B8%A1%E0%B8%B8%E0%B8%81%E0%B8%94%E0%B8%B2%E0%B8%AB%E0%B8%B2%E0%B8%A3/);
