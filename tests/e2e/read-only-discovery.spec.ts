@@ -126,6 +126,9 @@ test('mobile search filters Railway results by province and category and keeps s
   await page.unroute('**/api/places**');
   await page.route('**/api/places**', route => {
     const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/facets')) return route.fulfill({ json: {
+      provinces: ['เชียงใหม่', 'มุกดาหาร'], categories: ['Culture', 'Nature'],
+    } });
     const province = url.searchParams.get('province');
     const category = url.searchParams.get('category');
     const matches = locations.filter(item => (!province || item.province === province) &&
@@ -140,6 +143,49 @@ test('mobile search filters Railway results by province and category and keeps s
   await expect(page.getByTestId('attraction-card')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: 'Wat Example' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});
+
+test('search requests only one page at a time and navigates the catalogue without duplication', async ({ page }) => {
+  const requestedPages: number[] = [];
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places**', route => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/facets')) return route.fulfill({ json: { provinces: ['เชียงใหม่'], categories: ['Nature'] } });
+    const pageNumber = Number(url.searchParams.get('page') || 1);
+    requestedPages.push(pageNumber);
+    const start = (pageNumber - 1) * 20;
+    const locations = Array.from({ length: Math.min(20, 45 - start) }, (_, index) => ({
+      ...place, id: `item-${start + index}`, name: `Place ${start + index}`,
+      nameLocal: `สถานที่ ${start + index}`,
+    }));
+    return route.fulfill({ json: { attractions: locations, total: 45, page: pageNumber, limit: 20 } });
+  });
+  await page.goto('/discover?mode=search&q=เชียงใหม่');
+  await expect(page.getByTestId('attraction-card')).toHaveCount(20);
+  await expect(page.getByRole('navigation', { name: 'Search result pages' })).toContainText('Page 1 of 3');
+  expect(requestedPages).toEqual([1]);
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByRole('heading', { name: 'Place 20' })).toBeVisible();
+  await expect(page.getByTestId('attraction-card')).toHaveCount(20);
+  expect(requestedPages).toEqual([1, 2]);
+});
+
+test('detail page recommends only real nearby places and never itself', async ({ page }) => {
+  const neighbor = { ...place, id: 'nearby-2', name: 'Nearby Scenic Place',
+    nameLocal: 'สถานที่ใกล้เคียง', distanceKm: 12.4 };
+  await page.unroute('**/api/places**');
+  await page.route('**/api/places**', route => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/nearby')) return route.fulfill({ json: {
+      attractions: [{ ...place, distanceKm: 0 }, neighbor], center: { lat: 18.59, lng: 98.49 }, radiusKm: 100,
+    } });
+    return route.fulfill({ json: place });
+  });
+  await page.goto('/attraction/railway-test-1');
+  const section = page.getByTestId('real-nearby-places');
+  await expect(section.getByRole('link', { name: /Nearby Scenic Place/ })).toHaveCount(1);
+  await expect(section).toContainText('12.4 km');
+  await expect(section.getByRole('link', { name: /Doi Inthanon/ })).toHaveCount(0);
 });
 
 test('feed shows each destination only once across recommendations and more places', async ({ page }) => {
@@ -332,7 +378,7 @@ test('map uses Railway places and requests consent for real near-me search', asy
   await expect(page.getByText('Phi Phi Islands')).toHaveCount(0);
 });
 
-test('map, search, and category browse beyond the Railway 50-place page limit', async ({ page }) => {
+test('map and category load all pages while search uses explicit pagination', async ({ page }) => {
   const places = Array.from({ length: 125 }, (_, index) => ({
     ...place,
     id: `railway-page-${index + 1}`,
@@ -345,13 +391,14 @@ test('map, search, and category browse beyond the Railway 50-place page limit', 
   await page.route('**/api/places**', route => {
     const url = new URL(route.request().url());
     const currentPage = Number(url.searchParams.get('page') || 1);
+    const requestedLimit = Number(url.searchParams.get('limit') || 50);
     requestedPages.push(currentPage);
     const matching = url.searchParams.has('search') && url.searchParams.get('search') !== 'Destination'
       ? [] : places;
-    const start = (currentPage - 1) * 50;
+    const start = (currentPage - 1) * requestedLimit;
     return route.fulfill({ json: {
-      attractions: matching.slice(start, start + 50), total: matching.length,
-      page: currentPage, limit: 50,
+      attractions: matching.slice(start, start + requestedLimit), total: matching.length,
+      page: currentPage, limit: requestedLimit,
     } });
   });
   await page.goto('/discover?mode=map');
@@ -359,6 +406,8 @@ test('map, search, and category browse beyond the Railway 50-place page limit', 
   expect(requestedPages).toContain(2);
   expect(requestedPages).toContain(3);
   await page.goto('/discover?mode=search&q=Destination');
+  await expect(page.getByTestId('attraction-card')).toHaveCount(20);
+  for (let index = 0; index < 6; index++) await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByText('Destination 125').first()).toBeVisible();
   await page.goto('/discover?mode=category&category=Nature');
   await expect(page.getByText('Destination 125').first()).toBeVisible();
