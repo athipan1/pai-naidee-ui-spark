@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { geocodeCandidates, isThailandCoordinate, matchesPlaceName } = require('./admin-geocode.cjs');
+const { geocodeCandidates, isThailandCoordinate, matchesPlaceName, searchNames } = require('./admin-geocode.cjs');
 
 test('geocoding searches existing Railway places without a paid provider', async () => {
   const calls = [];
@@ -60,4 +60,41 @@ test('quality gate rejects unrecognised place names even if they are in the same
   assert.equal(matchesPlaceName('เขื่อนเชี่ยวหลาน', ['เขื่อนรัชชประภา']), true);
   assert.equal(matchesPlaceName('เขื่อนเชี่ยวหลาน', ['เทศบาลนครสุราษฎร์ธานี']), false);
   assert.equal(matchesPlaceName('ตลาดน้ำอัมพวา', ['ตลาดน้ำอัมพวา']), true);
+});
+
+test('fallback name search resolves Cheow Lan through the Ratchaprapha alternate name', async () => {
+  const requested = [];
+  const result = await geocodeCandidates({ name: 'เขื่อนเชี่ยวหลาน', province: 'สุราษฎร์ธานี', apiKey: 'test-key',
+    listPlaces: async options => ({ attractions: options.search === 'เขื่อนรัชชประภา' ? [
+      { nameLocal: 'เขื่อนรัชชประภา', province: 'สุราษฎร์ธานี', coordinates: { lat: 8.99, lng: 98.81 } },
+    ] : [] }),
+    request: async url => {
+      const text = new URL(url).searchParams.get('text');
+      requested.push(text);
+      return { ok: true, json: async () => ({ results: text.startsWith('เขื่อนรัชชประภา') ? [
+        { lat: 8.99, lon: 98.81, country_code: 'th', formatted: 'เขื่อนรัชชประภา, ประเทศไทย' },
+      ] : [{ lat: 9.14, lon: 99.32, country_code: 'th', formatted: 'เทศบาลนครสุราษฎร์ธานี' }] }) };
+    },
+  });
+  assert.equal(result.candidates.length, 1);
+  assert.equal(result.candidates[0].source, 'PaiNaiDee');
+  assert.equal(requested.length, 1); // Already verified from Railway, no unnecessary alias requests.
+});
+
+test('Geoapify retries alternate names after an unrelated first response', async () => {
+  const queried = [];
+  const result = await geocodeCandidates({ name: 'เขื่อนเชี่ยวหลาน', province: 'สุราษฎร์ธานี', apiKey: 'test-key',
+    listPlaces: async () => ({ attractions: [] }),
+    request: async url => {
+      const text = new URL(url).searchParams.get('text');
+      queried.push(text);
+      return { ok: true, json: async () => ({ results: text.startsWith('เขื่อนรัชชประภา') ? [
+        { lat: 8.99, lon: 98.81, country_code: 'th', name: 'เขื่อนรัชชประภา', formatted: 'เขื่อนรัชชประภา, สุราษฎร์ธานี' },
+      ] : [{ lat: 9.14, lon: 99.32, country_code: 'th', formatted: 'เทศบาลนครสุราษฎร์ธานี' }] }) };
+    },
+  });
+  assert.equal(result.candidates.length, 1);
+  assert.equal(result.candidates[0].source, 'Geoapify');
+  assert.equal(queried.length, 2);
+  assert.deepEqual(searchNames('ตลาดน้ำอัมพวา'), ['ตลาดน้ำอัมพวา']);
 });
