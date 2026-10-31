@@ -66,6 +66,15 @@ export interface PlaceSuggestion {
   category: string;
 }
 
+export interface PlaceFacets {
+  provinces: string[];
+  categories: string[];
+}
+
+export function getRailwayPlaceFacets(): Promise<PlaceFacets> {
+  return requestJson<PlaceFacets>('/api/places/facets');
+}
+
 export async function getRailwayPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
   if (query.trim().length < 2) return [];
   const params = new URLSearchParams({ q: query.trim().slice(0, 120), limit: '6' });
