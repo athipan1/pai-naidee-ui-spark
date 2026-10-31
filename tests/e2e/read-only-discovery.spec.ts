@@ -116,7 +116,7 @@ test('mobile search shows one Wat Phu Manorom result for alternate Thai place na
     await page.goto(`/search?search=${encodeURIComponent(query)}`);
     await expect(page).toHaveURL(/\/discover\?.*mode=search/);
     await expect(page.getByTestId('attraction-card')).toHaveCount(1);
-    await expect(page.getByText(/1 results|พบ 1 รายการ/)).toBeVisible();
+    await expect(page.getByText(/1 results|พบ 1 รายการ/).first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   }
 });
@@ -161,6 +161,7 @@ test('mobile search filters Railway results by province and category and keeps s
     return route.fulfill({ json: { attractions: matches, total: matches.length, page: 1, limit: 50 } });
   });
   await page.goto('/discover?mode=search&q=วัด');
+  await page.getByRole('button', { name: 'Filters' }).click();
   await page.getByRole('combobox', { name: 'Filter province' }).selectOption('มุกดาหาร');
   await page.getByRole('combobox', { name: 'Filter place type' }).selectOption('Culture');
   await expect(page).toHaveURL(/prov=%E0%B8%A1%E0%B8%B8%E0%B8%81%E0%B8%94%E0%B8%B2%E0%B8%AB%E0%B8%B2%E0%B8%A3/);
