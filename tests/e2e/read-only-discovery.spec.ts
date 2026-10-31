@@ -265,7 +265,7 @@ test('admin routes require authentication and public upload routes remain closed
     await expect(page).toHaveURL(/\/discover$/);
   }
   await page.goto('/admin');
-  await expect(page.getByText(/กรุณาเข้าสู่ระบบแอดมิน|ยังไม่ได้ตั้งค่า Supabase Auth/)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'เข้าสู่ระบบแอดมิน' })).toBeVisible();
   await expect(page.getByText('บันทึกสถานที่เป็นฉบับร่าง')).toHaveCount(0);
 });
 
