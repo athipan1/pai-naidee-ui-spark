@@ -19,7 +19,10 @@ Blocking checks: unique IDs and normalized Thai/English names within the same
 province, known province/category, usable description, HTTPS source and source
 name, numeric Thailand-bounded coordinates, zero unverified seed ratings and
 review counts, valid image URLs, linked place IDs, Wikimedia credit/license
-metadata, and existence of local user-provided gallery files. All 77 provinces
+metadata, and existence of local user-provided gallery files **when the web
+assets are present** (full-repository CI). API-only Railway deploys verify the
+strict approved production URL and filename, as the public assets are hosted
+separately on Vercel. All 77 provinces
 must be represented. Warnings include approximate pins reused by different
 records and places without verified photographs.
 
