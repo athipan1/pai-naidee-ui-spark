@@ -1,5 +1,6 @@
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
+const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
 function cleanPlace(input) {
   const text = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
@@ -52,9 +53,61 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       return res.status(400).json({ error: 'Invalid place name or province.' });
     }
     const result = await geocodeCandidates({ name: req.query.name, province: req.query.province,
-      listPlaces, apiKey: process.env.GEOAPIFY_API_KEY });
+      listPlaces, apiKey: process.env.GEOAPIFY_API_KEY,
+      resolveNames: async name => {
+        const sql = getSql();
+        const rows = await sql`SELECT p.name, p.name_local FROM place_aliases a JOIN places p ON p.id = a.place_id
+          WHERE a.alias_key = ${aliasKey(name)} AND a.status = 'approved' LIMIT 5`;
+        return rows.flatMap(row => [row.name, row.name_local].filter(Boolean));
+      },
+    });
     if (result.error) return res.status(400).json({ error: result.error });
     res.json(result);
+  }));
+
+  app.get('/api/admin/catalog/:placeId/aliases', requireAdmin, wrap(async (req, res) => {
+    const sql = getSql();
+    const rows = await sql`SELECT id, alias_name, language, status, created_at FROM place_aliases
+      WHERE place_id = ${req.params.placeId} ORDER BY created_at DESC LIMIT 100`;
+    res.json({ aliases: rows });
+  }));
+
+  app.post('/api/admin/catalog/:placeId/aliases', requireAdmin, wrap(async (req, res) => {
+    const parsed = validateAlias(req.body);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    const sql = getSql();
+    const places = await sql`SELECT id, name, name_local FROM places WHERE id = ${req.params.placeId}`;
+    if (!places.length) return res.status(404).json({ error: 'Place not found.' });
+    if ([places[0].name, places[0].name_local].some(name => name && aliasKey(name) === parsed.key))
+      return res.status(409).json({ error: 'Already a primary place name.' });
+    const existing = await sql`SELECT id FROM place_aliases WHERE place_id = ${req.params.placeId} AND alias_key = ${parsed.key}`;
+    if (existing.length) return res.status(409).json({ error: 'Alias already exists.' });
+    const id = randomUUID();
+    await sql`INSERT INTO place_aliases (id, place_id, alias_name, alias_key, language, created_by)
+      VALUES (${id}, ${req.params.placeId}, ${parsed.name}, ${parsed.key}, ${parsed.language}, ${req.auth.user.id})`;
+    res.status(201).json({ id, status: 'pending' });
+  }));
+
+  app.post('/api/admin/aliases/:aliasId/review', requireAdmin, wrap(async (req, res) => {
+    if (!['approved', 'rejected'].includes(req.body?.status))
+      return res.status(400).json({ error: 'Invalid review status.' });
+    const sql = getSql();
+    if (req.body.status === 'approved') {
+      const conflicts = await sql`SELECT a.id FROM place_aliases candidate
+        JOIN place_aliases a ON a.alias_key = candidate.alias_key AND a.place_id <> candidate.place_id
+        WHERE candidate.id = ${req.params.aliasId} AND a.status = 'approved' LIMIT 1`;
+      if (conflicts.length) return res.status(409).json({ error: 'This alias already belongs to another approved place.' });
+      const primaryConflicts = await sql`SELECT p.id FROM place_aliases candidate JOIN places p
+        ON p.id <> candidate.place_id AND (
+          LOWER(TRIM(p.name)) = LOWER(candidate.alias_name) OR LOWER(TRIM(p.name_local)) = LOWER(candidate.alias_name))
+        WHERE candidate.id = ${req.params.aliasId} LIMIT 1`;
+      if (primaryConflicts.length) return res.status(409).json({ error: 'This alias matches another place’s primary name.' });
+    }
+    const rows = await sql`UPDATE place_aliases SET status = ${req.body.status}, reviewed_by = ${req.auth.user.id},
+      reviewed_at = NOW() WHERE id = ${req.params.aliasId} AND status = 'pending' RETURNING id`;
+    if (!rows.length) return res.status(404).json({ error: 'Pending alias not found.' });
+    invalidateSearchIndex();
+    res.json({ id: rows[0].id, status: req.body.status });
   }));
 
   app.get('/api/admin/catalog/:placeId/media', requireAdmin, wrap(async (req, res) => {
