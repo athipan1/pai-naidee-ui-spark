@@ -30,3 +30,33 @@ test('checks finish reason, schema, candidate IDs and model usage',()=>{
  assert.throws(()=>parseOpenRouterResponse(make('{"days":[]}'),ctx),{code:'INVALID_SCHEMA'});
  assert.throws(()=>parseOpenRouterResponse(make(null),ctx),{code:'EMPTY_CONTENT'});
 });
+
+test('enforces nature-only stops and verified road travel limits',async()=>{
+ const {requestPreferences,matchesStyle,enforceTripConstraints}=require('./ai-trip-plan.cjs');
+ const prefs=requestPreferences('เที่ยวธรรมชาติ ไม่อยากขับรถไกล');
+ const mk=(id,category)=>({id,name:id,nameLocal:id,category,tags:[category],coordinates:{lat:18.8,lng:98.9}});
+ const a=mk('nature-a','Nature'),b=mk('temple','Culture'),c=mk('nature-b','Nature');
+ assert.equal(matchesStyle(b,prefs),false);
+ const input={days:1,transport:'car'};
+ const prepared=[{day:1,stops:[a,b,c],legs:[]}];
+ const checked=await enforceTripConstraints(prepared,new Map([a,b,c].map(p=>[p.id,p])),input,prefs,{
+  route:async()=>({status:'verified_route',distanceKm:18,durationMinutes:50}),
+  hours:async()=>({status:'unverified'})
+ });
+ assert.deepEqual(checked.days[0].stops.map(p=>p.id),['nature-a']);
+ assert.ok(checked.warnings.some(w=>w.includes('road-travel')));
+ assert.ok(checked.warnings.some(w=>w.includes('style')));
+});
+test('allows documented hours only for named source matches and respects route limit',async()=>{
+ const {placeNameMatches,enforceTripConstraints,requestPreferences}=require('./ai-trip-plan.cjs');
+ assert.equal(placeNameMatches('Wat Phra Singh','Wat Phra Singh'),true);
+ assert.equal(placeNameMatches('Doi Inthanon','Wat Phra Singh'),false);
+ const a={id:'one',name:'Nature One',category:'Nature',tags:[],coordinates:{lat:18.8,lng:98.9}};
+ const b={id:'two',name:'Nature Two',category:'Nature',tags:[],coordinates:{lat:18.81,lng:98.91}};
+ const data=await enforceTripConstraints([{day:1,stops:[a,b]}],new Map([a,b].map(p=>[p.id,p])),{days:1,transport:'car'},requestPreferences('ธรรมชาติ ไม่ขับรถไกล'),{
+ route:async()=>({status:'verified_route',distanceKm:10,durationMinutes:20}),
+ hours:async()=>({status:'sourced',value:'Mo-Fr 09:00-17:00',source:'Geoapify Place Details'})
+ });
+ assert.equal(data.days[0].stops.length,2);
+ assert.equal(data.days[0].stops[0].openingHours.status,'sourced');
+});

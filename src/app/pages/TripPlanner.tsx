@@ -114,7 +114,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
             <h3 className="font-semibold">{th ? 'แผนจาก AI (ฉบับร่าง)' : 'AI itinerary (draft)'}</h3>
             {aiPlan.days?.map((day: any) => <div key={day.day} className="rounded-xl border p-3">
               <p className="font-semibold">{th ? 'วันที่' : 'Day'} {day.day}</p>
-              {day.stops?.map((stop: any) => <p key={stop.id}>• {stop.name} · {th ? 'เวลาทำการยังไม่ยืนยัน' : 'Hours unverified'}</p>)}
+              {day.stops?.map((stop: any) => <p key={stop.id}>• {stop.name} · {stop.openingHours?.status === 'sourced' ? `${stop.openingHours.value} (${stop.openingHours.source})` : (th ? 'เวลาทำการยังไม่ยืนยัน' : 'Hours unverified')}</p>)}
               {day.legs?.map((leg: any, i: number) => <p className="text-xs text-muted-foreground" key={i}>
                 {leg.road?.status === 'verified_route'
                   ? `${leg.road.distanceKm} km / ${leg.road.durationMinutes} min (Geoapify)`
