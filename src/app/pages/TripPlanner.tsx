@@ -25,6 +25,28 @@ export default function TripPlanner({ currentLanguage }: Props) {
   const [generated, setGenerated] = useState(false);
   const [request, setRequest] = useState('');
   const [intent, setIntent] = useState<TripIntent | null>(null);
+  const [aiPlan, setAiPlan] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const requestAiPlan = async () => {
+    if (!request.trim() || !province || !days || !people) return;
+    setAiLoading(true); setAiError(''); setAiPlan(null);
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 45000);
+      try {
+        const response = await fetch('https://painaidee-api-production.up.railway.app/api/ai/trip-plan', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({ message: request, province, days, people,
+            budget: intent?.totalBudget ?? days * people * dailyBudgetPerPerson, transport }),
+        });
+        if (!response.ok) throw Error('AI planning unavailable (' + response.status + ')');
+        setAiPlan(await response.json());
+      } finally { clearTimeout(timer); }
+    } catch { setAiError(th ? 'AI ยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง' : 'AI planner unavailable. Try later.'); }
+    finally { setAiLoading(false); }
+  };
 
   const facets = useQuery({ queryKey: ['places', 'facets'], queryFn: getRailwayPlaceFacets, staleTime: 5 * 60_000 });
   const places = useAllAttractions({ province }, { enabled: !!province });
@@ -83,7 +105,26 @@ export default function TripPlanner({ currentLanguage }: Props) {
               : <p>{th ? `เข้าใจคำขอ: ${intent.province} · ${intent.days} วัน · ${intent.people} คน · งบรวม ${currency(intent.totalBudget!)} · ${intent.avoidLongDrives ? 'จำกัดช่วงระหว่างจุดแวะไม่เกิน 30 กม. (เส้นตรง)' : 'วางแผนตามระยะทาง'}`
                 : `Interpreted: ${intent.province}, ${intent.days} days, ${intent.people} people, total budget ${currency(intent.totalBudget!)}`}</p>}
           </div>}
-          <p className="text-xs text-muted-foreground">{th ? 'รุ่นนี้ตีความด้วยกฎภาษาไทยและตรวจเงื่อนไขอย่างเป็นระบบ ยังไม่ใช้โมเดลภาษา AI ออนไลน์ และไม่ส่งข้อความของคุณไปยังผู้ให้บริการ AI ภายนอก' : 'This version uses local language rules and validation, not a hosted language model. Your request is not sent to an external AI provider.'}</p>
+          <Button type="button" variant="outline" onClick={requestAiPlan}
+            disabled={aiLoading || !request.trim() || !province}>
+            {aiLoading ? (th ? 'AI กำลังวางแผน...' : 'AI is planning...') : (th ? 'สร้างแผนด้วย OpenRouter AI' : 'Generate with OpenRouter AI')}
+          </Button>
+          {aiError && <p role="alert" className="text-sm text-red-400">{aiError}</p>}
+          {aiPlan && <section className="space-y-3" aria-label="Verified AI draft">
+            <h3 className="font-semibold">{th ? 'แผนจาก AI (ฉบับร่าง)' : 'AI itinerary (draft)'}</h3>
+            {aiPlan.days?.map((day: any) => <div key={day.day} className="rounded-xl border p-3">
+              <p className="font-semibold">{th ? 'วันที่' : 'Day'} {day.day}</p>
+              {day.stops?.map((stop: any) => <p key={stop.id}>• {stop.name} · {th ? 'เวลาทำการยังไม่ยืนยัน' : 'Hours unverified'}</p>)}
+              {day.legs?.map((leg: any, i: number) => <p className="text-xs text-muted-foreground" key={i}>
+                {leg.road?.status === 'verified_route'
+                  ? `${leg.road.distanceKm} km / ${leg.road.durationMinutes} min (Geoapify)`
+                  : (th ? 'เส้นทางถนนยังไม่ยืนยัน' : 'Road route unverified')}
+              </p>)}
+            </div>)}
+            <p>{th ? 'งบประมาณคร่าว ๆ' : 'Estimated budget'}: {currency(aiPlan.budget?.estimatedTotal ?? 0)}</p>
+            {aiPlan.validation?.warnings?.map((warning: string) => <p key={warning} className="text-xs text-amber-500">⚠ {warning}</p>)}
+          </section>}
+          <p className="text-xs text-muted-foreground">{th ? 'โหมดแผนพื้นฐานด้านล่างใช้กฎภาษาไทยและตรวจเงื่อนไขอย่างเป็นระบบ ส่วนปุ่ม OpenRouter AI จะส่งคำขอไปยังโมเดลภายนอกผ่าน Railway' : 'The basic mode uses local rules. OpenRouter AI sends your request to an external model via Railway.'}</p>
         </CardContent></Card>
 
         <Card><CardContent className="space-y-5 p-5 sm:p-7">
