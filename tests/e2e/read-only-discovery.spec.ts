@@ -63,7 +63,8 @@ test('discover feed hides the duplicate home search hero but keeps detailed sear
   await expect(page.getByRole('heading', { name: 'Discover' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: /Where do you want to go/ })).toHaveCount(0);
   await page.getByRole('tab', { name: 'Search' }).click();
-  await expect(page.getByRole('textbox', { name: /Where do you want to go|Search/ }).first()).toBeVisible();
+  await expect(page).toHaveURL(/mode=search/);
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
 });
 
 test('mobile home navigation exposes Discover and AI Trip Planner side by side', async ({ page }) => {
