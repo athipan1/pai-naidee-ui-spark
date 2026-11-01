@@ -17,7 +17,7 @@ function resolveModelConfig(env = process.env) {
   const paidEnabled = env.AI_ALLOW_PAID_MODELS === 'true';
   if (!paidEnabled && model !== 'openrouter/free' && !model.endsWith(':free'))
     throw new Error('PAID_MODEL_NOT_ENABLED');
-  const maxOutputTokens = Number(env.AI_MAX_OUTPUT_TOKENS || 1200);
+  const maxOutputTokens = Number(env.AI_MAX_OUTPUT_TOKENS || 2400);
   if (!Number.isInteger(maxOutputTokens) || maxOutputTokens < 300 || maxOutputTokens > 4000)
     throw new Error('INVALID_AI_TOKEN_LIMIT');
   const structuredOutput = env.AI_STRUCTURED_OUTPUT === 'true';
