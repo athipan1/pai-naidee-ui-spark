@@ -20,6 +20,7 @@ const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 const Index = lazy(() => import("./pages/Index"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 const TripPlanner = lazy(() => import("./pages/TripPlanner"));
+const Profile = lazy(() => import("./pages/Profile"));
 const AdminCms = lazy(() => import("./pages/AdminCms"));
 const AdminLogin = lazy(() => import("./pages/RailwayLoginPage"));
 
@@ -119,7 +120,7 @@ const AppContent = () => {
           />
           {/* Public launch: browsing only. Restricted routes never mount write-capable UI. */}
           <Route path="/saved" element={<Navigate to="/discover" replace />} />
-          <Route path="/me" element={<Navigate to="/discover" replace />} />
+          <Route path="/me" element={<Navigate to="/profile" replace />} />
           <Route path="/login" element={<AdminLogin />} />
           <Route path="/admin/*" element={<AdminCms />} />
           <Route path="/upload/*" element={<Navigate to="/discover" replace />} />
@@ -144,7 +145,7 @@ const AppContent = () => {
           <Route path="/ai-assistant" element={<AIAssistantRedirect />} />
           <Route path="/admin-panel" element={<Navigate to="/discover" replace />} />
           <Route path="/dashboard" element={<Navigate to="/discover" replace />} />
-          <Route path="/profile" element={<Navigate to="/discover" replace />} />
+          <Route path="/profile" element={<Profile currentLanguage={currentLanguage} />} />
           <Route
             path="/category/:categoryName"
             element={<CategoryRedirect />}
