@@ -2,7 +2,6 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import SearchSection from "@/components/common/SearchSection";
 import CategoryFilter from "@/components/common/CategoryFilter";
 import { useDiscoveryState, DiscoveryMode } from "./hooks/useDiscoveryState";
 import FeedView from "./FeedView";
@@ -176,15 +175,10 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
         </div>
       </header>
 
-      {/* Search and Filter Section - only show for feed and category modes */}
+      {/* Compact category filters; the large search hero belongs on Home only. */}
       {shouldShowSearchAndFilter && (
         <div className="border-b border-border/30 bg-card/30">
           <div className="container mx-auto px-4 py-4 space-y-4">
-            <SearchSection
-              currentLanguage={currentLanguage}
-              onSearch={handleSearch}
-            />
-            
             <CategoryFilter
               currentLanguage={currentLanguage}
               selectedCategory={state.category || "all"}
