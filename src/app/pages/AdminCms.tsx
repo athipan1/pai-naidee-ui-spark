@@ -332,6 +332,7 @@ export default function AdminCms() {
         {aiMessage&&<p role="status" className="text-sm text-slate-700">{aiMessage}</p>}
         {aiResult&&<div className="rounded-xl bg-slate-50 p-3 text-sm" aria-live="polite">
           <p>สถานะ: {String(aiResult.status||'unknown')}</p>
+          <p>Validation Error: {String(aiResult.errorCode ?? 'ไม่มี')}</p>
           <p>Provider Error: {String(aiResult.providerErrorType ?? 'ไม่รายงาน')}</p>
           <p>Provider Code: {String(aiResult.providerErrorCode ?? 'ไม่รายงาน')}</p>
           <p>Request ID: {String(aiResult.requestId ?? 'ไม่รายงาน')}</p>
