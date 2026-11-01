@@ -57,6 +57,16 @@ test('language choice translates the Railway feed and details and persists acros
   await expect(page.getByRole('button', { name: 'Switch to ไทย' })).toBeVisible();
 });
 
+test('discover feed hides the duplicate home search hero but keeps detailed search available', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/discover?mode=feed');
+  await expect(page.getByRole('heading', { name: 'Discover' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: /Where do you want to go/ })).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Search' }).click();
+  await expect(page).toHaveURL(/mode=search/);
+  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+});
+
 test('mobile home navigation exposes Discover and AI Trip Planner side by side', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
