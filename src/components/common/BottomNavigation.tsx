@@ -1,4 +1,4 @@
-import { Compass, House, Sparkles } from "lucide-react";
+import { Compass, House, Sparkles, UserRound } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface BottomNavigationProps {
@@ -43,6 +43,12 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
       label: { th: "AI วางแผนเที่ยว", en: "AI Trip Planner" },
       icon: Sparkles,
     },
+    {
+      id: "profile",
+      path: "/profile",
+      label: { th: "โปรไฟล์", en: "Profile" },
+      icon: UserRound,
+    },
   ];
 
   const tabs = baseTabs;
@@ -50,7 +56,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-effect border-t border-white/20 safe-area-bottom">
       <div className="container mx-auto px-4">
-        <div className="mx-auto grid w-full max-w-md grid-cols-3 items-stretch gap-2 py-2">
+        <div className="mx-auto grid w-full max-w-md grid-cols-4 items-stretch gap-1 py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = isTabActive(tab.path);
