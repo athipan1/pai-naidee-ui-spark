@@ -2,15 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchSection from "@/components/common/SearchSection";
-import CategoryFilter from "@/components/common/CategoryFilter";
 import AttractionCard from "@/components/common/AttractionCard";
 import BottomNavigation from "@/components/common/BottomNavigation";
 import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import SupabaseSetupGuide from "@/components/common/SupabaseSetupGuide";
-import { SearchResult } from "@/shared/types/search";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
-import { MapPin, Star, ArrowRight } from "lucide-react";
+import { MapPin, Star, ArrowRight, Compass, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 import { isDevelopment } from "@/shared/utils/devUtils";
@@ -24,7 +22,6 @@ interface IndexProps {
 
 const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   const navigate = useNavigate();
-  const [_selectedCategory, _setSelectedCategory] = useState("all");
   const [favorites, setFavorites] = useState<string[]>([]);
 
   // Try to fetch real data first, fallback to mock data
@@ -36,7 +33,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
   } = useAttractions({
     page: 1,
     limit: 10,
-    category: _selectedCategory === "all" ? undefined : _selectedCategory
   });
 
   // Production reads only API records; empty/error responses must never invent places.
@@ -56,26 +52,10 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
       tags: attraction.tags,
     }));
 
-  const filteredAttractions =
-    _selectedCategory === "all"
-      ? displayAttractions
-      : displayAttractions.filter(
-          (attraction) =>
-            attraction.category.toLowerCase() === _selectedCategory.toLowerCase()
-        );
-
   const { featured: featuredAttractions, recommended: recommendedAttractions } =
-    splitHomeAttractions(filteredAttractions, _selectedCategory === "all");
+    splitHomeAttractions(displayAttractions, true);
 
-  // Calculate category counts
-  const attractionCounts = displayAttractions.reduce((counts, attraction) => {
-    const category = attraction.category.toLowerCase();
-    counts[category] = (counts[category] || 0) + 1;
-    counts.all = displayAttractions.length;
-    return counts;
-  }, {} as { [key: string]: number });
-
-  const handleSearch = (query: string, _results?: SearchResult[]) => {
+  const handleSearch = (query: string) => {
     // Navigate to our new contextual search results page
     const searchParams = new URLSearchParams();
     searchParams.set('q', query);
@@ -90,17 +70,6 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
 
   const handleCardClick = (id: string) => {
     navigate(`/attraction/${id}`);
-  };
-
-  const _handleCategoryChange = (category: string) => {
-    if (category === "all") {
-      navigate("/discover");
-    } else {
-      const searchParams = new URLSearchParams();
-      searchParams.set('mode', 'category');
-      searchParams.set('cat', category);
-      navigate(`/discover?${searchParams.toString()}`);
-    }
   };
 
   const handleViewMore = () => {
@@ -145,15 +114,21 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
           onSearch={handleSearch}
         />
 
-        <CategoryFilter
-          currentLanguage={currentLanguage}
-          selectedCategory={_selectedCategory}
-          onCategoryChange={_handleCategoryChange}
-          attractionCounts={attractionCounts}
-        />
+        <section className="border-b border-border/30 bg-card/30 py-6" aria-label={currentLanguage === "th" ? "เริ่มต้นท่องเที่ยว" : "Start exploring"}>
+          <div className="container mx-auto flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-bold">{currentLanguage === "th" ? "เริ่มต้นทริปที่ใช่สำหรับคุณ" : "Find your next memorable trip"}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{currentLanguage === "th" ? "ดูสถานที่แนะนำที่นี่ หรือไปหน้าสำรวจเพื่อค้นหา กรอง และดูแผนที่อย่างละเอียด" : "Browse highlights here, or use Discover for detailed search, filters, and maps."}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => navigate("/discover")} variant="outline"><Compass className="mr-2 h-4 w-4" />{currentLanguage === "th" ? "สำรวจทั้งหมด" : "Explore all"}</Button>
+              <Button onClick={() => navigate("/trip-planner")}><Sparkles className="mr-2 h-4 w-4" />{currentLanguage === "th" ? "AI วางแผนเที่ยว" : "AI Trip Planner"}</Button>
+            </div>
+          </div>
+        </section>
 
         {/* Enhanced Trending Destinations Section */}
-        {_selectedCategory === "all" && (
+        {(
           <section className="py-8 bg-gradient-to-br from-accent/10 to-accent/5" aria-label={currentLanguage === "th" ? "สถานที่น่าสนใจ" : "Places to explore"}>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-6">
@@ -271,7 +246,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
               ))}
             </div>
 
-            {filteredAttractions.length === 0 && (
+            {displayAttractions.length === 0 && (
               <div className="text-center py-16" role="status" aria-live="polite">
                 <div className="max-w-md mx-auto">
                   <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-muted to-muted/50 rounded-full flex items-center justify-center">
