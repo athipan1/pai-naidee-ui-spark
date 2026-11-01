@@ -49,7 +49,7 @@ function styleScore(place: AttractionDetail, style: TripStyle): number {
   return terms.some(term => text.includes(term)) ? 3 : 0;
 }
 
-export function createTripPlan(places: AttractionDetail[], input: TripPlanInput): TripStop[] {
+export function createTripPlan(places: AttractionDetail[], input: TripPlanInput, maxLegKm?: number): TripStop[] {
   const days = Math.max(1, Math.min(5, Math.floor(input.days)));
   const candidates = [...new Map(places.filter(isValidCoordinate).map(p => [p.id, p])).values()];
   const used = new Set<string>();
@@ -58,7 +58,8 @@ export function createTripPlan(places: AttractionDetail[], input: TripPlanInput)
 
   for (let day = 1; day <= days; day++) {
     for (let order = 1; order <= 3; order++) {
-      const available = candidates.filter(p => !used.has(p.id));
+      const available = candidates.filter(p => !used.has(p.id) &&
+        (order === 1 || !previous || maxLegKm === undefined || distanceKm(previous, p) <= maxLegKm));
       if (available.length === 0) break;
       available.sort((a, b) => {
         const score = (p: AttractionDetail) => styleScore(p, input.style)
@@ -73,6 +74,32 @@ export function createTripPlan(places: AttractionDetail[], input: TripPlanInput)
     }
   }
   return stops;
+}
+
+export interface TripRouteAudit {
+  validCoordinates: boolean;
+  overDistanceLimit: boolean;
+  legs: Array<{ from: string; to: string; straightLineKm: number }>;
+  openingHoursStatus: 'unverified';
+}
+
+/** Road distance and opening hours cannot be inferred from coordinates alone. */
+export function auditTripRoute(stops: TripStop[], maxStraightLineLegKm: number): TripRouteAudit {
+  const legs: TripRouteAudit['legs'] = [];
+  for (let i = 1; i < stops.length; i++) {
+    if (stops[i].day !== stops[i - 1].day) continue;
+    legs.push({
+      from: stops[i - 1].place.nameLocal || stops[i - 1].place.name,
+      to: stops[i].place.nameLocal || stops[i].place.name,
+      straightLineKm: Math.round(distanceKm(stops[i - 1].place, stops[i].place) * 10) / 10,
+    });
+  }
+  return {
+    validCoordinates: stops.every(stop => isValidCoordinate(stop.place)),
+    overDistanceLimit: legs.some(leg => leg.straightLineKm > maxStraightLineLegKm),
+    legs,
+    openingHoursStatus: 'unverified',
+  };
 }
 
 export function estimateTripBudget(input: TripPlanInput): TripBudget {
