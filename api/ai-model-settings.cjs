@@ -17,10 +17,10 @@ async function ensureAiSettings(getSql) {
 }
 async function getAiSettings(getSql) {
   const sql=getSql();
-  const rows=await sql`SELECT model_id,structured_output FROM ai_planner_settings WHERE id=1`;
+  const rows=await sql`SELECT model_id,structured_output,updated_at FROM ai_planner_settings WHERE id=1`;
   const saved=rows[0];
-  if(saved && allowedIds.has(saved.model_id)) return {model:saved.model_id,structuredOutput:saved.structured_output===true,source:'admin'};
-  return {model:process.env.OPENROUTER_MODEL,structuredOutput:process.env.AI_STRUCTURED_OUTPUT==='true',source:'railway'};
+  if(saved && allowedIds.has(saved.model_id)) return {model:saved.model_id,structuredOutput:saved.structured_output===true,source:'postgresql',updatedAt:saved.updated_at instanceof Date?saved.updated_at.toISOString():saved.updated_at||null};
+  return {model:process.env.OPENROUTER_MODEL,structuredOutput:process.env.AI_STRUCTURED_OUTPUT==='true',source:'railway',updatedAt:null};
 }
 async function getActiveAiConfig(getSql) {
   const settings=await getAiSettings(getSql);
@@ -47,7 +47,7 @@ async function checkOpenRouterModel(model,structuredOutput,request=fetch) {
 function registerAiSettingsRoutes(app,{requireAdmin,getSql}) {
   app.get('/api/admin/ai/models',requireAdmin,async(_req,res)=>{
     res.set('Cache-Control','no-store');
-    try {res.json({options:MODEL_OPTIONS,selected:await getAiSettings(getSql),paidModelsAllowed:false});}
+    try {res.json({options:MODEL_OPTIONS,selected:await getAiSettings(getSql),paidModelsAllowed:false,backendCommit:process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0,12)||null});}
     catch {res.status(503).json({error:'Cannot load AI model settings.'});}
   });
   app.get('/api/admin/ai/models/validate',requireAdmin,async(req,res)=>{
@@ -70,7 +70,7 @@ function registerAiSettingsRoutes(app,{requireAdmin,getSql}) {
       await sql`INSERT INTO ai_planner_settings(id,model_id,structured_output,updated_at)
       VALUES (1,${model},${structuredOutput},NOW())
       ON CONFLICT(id) DO UPDATE SET model_id=EXCLUDED.model_id,structured_output=EXCLUDED.structured_output,updated_at=NOW()`;
-      res.json({selected:{model,structuredOutput,source:'admin'},requiresHealthCheck:true});
+      res.json({selected:await getAiSettings(getSql),requiresHealthCheck:true});
     } catch {res.status(503).json({error:'Could not save AI model settings.'});}
   });
 }

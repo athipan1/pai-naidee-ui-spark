@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
   const isProd = mode === 'production';
 
   return {
+    define: { __PAINAIDEE_BUILD__: JSON.stringify((process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || 'unknown').slice(0,12)) },
     base: '/',
     test: {
       globals: true,

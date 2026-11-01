@@ -1,3 +1,4 @@
+declare const __PAINAIDEE_BUILD__: string;
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, CloudUpload, FilePenLine, ImagePlus, LogOut, MapPin, Plus, Search, ShieldCheck } from 'lucide-react';
@@ -47,7 +48,8 @@ export default function AdminCms() {
   const [aiBusy,setAiBusy] = useState(false);
   const [aiMessage,setAiMessage] = useState('');
   const [aiResult,setAiResult] = useState<Record<string,unknown>|null>(null);
-  const [aiSaved,setAiSaved] = useState<{model:string;structuredOutput:boolean}|null>(null);
+  const [aiSaved,setAiSaved] = useState<{model:string;structuredOutput:boolean;source?:string;updatedAt?:string|null}|null>(null);
+  const [aiBackendCommit,setAiBackendCommit] = useState<string|null>(null);
   const [aiValidated,setAiValidated] = useState(false);
   const lastAutoLookup = useRef('');
   const base = getApiBaseUrl();
@@ -108,7 +110,8 @@ export default function AdminCms() {
       setAiModels(data.options || []);
       setAiModel(data.selected?.model || '');
       setAiStructured(Boolean(data.selected?.structuredOutput));
-      setAiSaved({model:data.selected?.model || '',structuredOutput:Boolean(data.selected?.structuredOutput)});
+      setAiSaved({model:data.selected?.model || '',structuredOutput:Boolean(data.selected?.structuredOutput),source:data.selected?.source,updatedAt:data.selected?.updatedAt});
+      setAiBackendCommit(data.backendCommit || null);
     }).catch(()=>setAiMessage('ไม่สามารถโหลดการตั้งค่า AI'));
   }, [isAdmin,token]);
 
@@ -118,7 +121,9 @@ export default function AdminCms() {
     try {
       await api('/ai/models',{method:'PUT',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:aiModel,structuredOutput:aiStructured})});
-      setAiSaved({model:aiModel,structuredOutput:aiStructured});setAiResult(null);
+      const confirmed=await api('/ai/models');
+      setAiSaved({model:confirmed.selected?.model||'',structuredOutput:Boolean(confirmed.selected?.structuredOutput),source:confirmed.selected?.source,updatedAt:confirmed.selected?.updatedAt});
+      setAiBackendCommit(confirmed.backendCommit||null);setAiResult(null);
       setAiMessage('บันทึกโมเดลสำเร็จ กรุณากดทดสอบ AI ก่อนใช้งานจริง');
     } catch(e){setAiMessage(e instanceof Error?e.message:'บันทึกไม่ได้');}
     finally{setAiBusy(false);}
@@ -311,6 +316,12 @@ export default function AdminCms() {
           <input type="checkbox" checked={aiStructured} onChange={e=>{setAiStructured(e.target.checked);setAiValidated(false);setAiResult(null);setAiMessage("");}}/>
           ใช้ Strict JSON Schema (เฉพาะโมเดลที่รองรับ)
         </label>
+        <div className="rounded-xl bg-slate-100 p-3 text-xs text-slate-700">
+          <p>Frontend Build: {__PAINAIDEE_BUILD__}</p>
+          <p>Backend Build: {aiBackendCommit || 'ไม่ทราบ'}</p>
+          <p>แหล่งตั้งค่า: {aiSaved?.source || 'ยังไม่ทราบ'}</p>
+          <p>บันทึกล่าสุด: {aiSaved?.updatedAt ? new Date(aiSaved.updatedAt).toLocaleString('th-TH') : 'ไม่ได้บันทึกใน PostgreSQL หรือยังไม่มีข้อมูล'}</p>
+        </div>
         <p className="text-sm text-teal-900">โมเดลที่ใช้งานจริง: <strong>{aiSaved?.model || 'ยังไม่ทราบ'}</strong> · Strict JSON: {aiSaved?.structuredOutput?'เปิด':'ปิด'}</p>
         <p className="text-sm text-slate-600">โมเดลที่กำลังเลือก: {aiModel || 'ยังไม่เลือก'} {aiValidated?'· ตรวจ Catalog แล้ว':'· ยังไม่ตรวจ Catalog'}</p>
         <div className="flex flex-wrap gap-2">
