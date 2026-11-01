@@ -30,3 +30,9 @@ test('rejects bad model IDs and token limits',()=>{
  assert.throws(()=>resolveModelConfig({OPENROUTER_MODEL:'invalid model'}),/INVALID_AI_MODEL/);
  assert.throws(()=>resolveModelConfig({OPENROUTER_MODEL:'openrouter/free',AI_MAX_OUTPUT_TOKENS:'100000'}),/INVALID_AI_TOKEN_LIMIT/);
 });
+
+test('trip planning uses 2400 tokens by default while health check remains 1200',()=>{
+ const config=resolveModelConfig({OPENROUTER_MODEL:'provider/model:free'});
+ assert.equal(config.maxOutputTokens,2400);
+ assert.equal(buildModelPayload(config,[]).max_tokens,2400);
+});
