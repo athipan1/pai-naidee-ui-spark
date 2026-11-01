@@ -1,6 +1,7 @@
 'use strict';
 const { createRateLimiter } = require('./security.cjs');
 const { resolveModelConfig, buildModelPayload } = require('./ai-model-gateway.cjs');
+const { fetchOpenRouter, logProviderError } = require('./ai-upstream-diagnostics.cjs');
 
 function validCoord(p) {
   const lat = Number(p?.coordinates?.lat), lng = Number(p?.coordinates?.lng);
@@ -78,7 +79,7 @@ async function proposePlan({message,province,days,people,budget,places}) {
   const endpoint=process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
   // The URL is fixed to the provider domain; never accept user-supplied provider URLs.
   if(!/^https:\/\/openrouter\.ai\/api\/v1\/?$/.test(endpoint)) throw new Error('Invalid OpenRouter URL');
-  const r=await fetchJson(endpoint.replace(/\/$/,'')+'/chat/completions',{
+  const r=await fetchOpenRouter(endpoint.replace(/\/$/,'')+'/chat/completions',{
     method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json',
       'HTTP-Referer':'https://pai-naidee-ui-spark.vercel.app','X-Title':'PaiNaiDee'},
     body:JSON.stringify(buildModelPayload(config,[
@@ -195,7 +196,7 @@ function registerAiTripRoutes(app,{listPlaces}) {
       if(!candidates.length) return res.status(422).json({error:'No validated places available for this province.'});
       let proposed;
       try {proposed=await proposePlan({...input,places:candidates});}
-      catch(error){const code=typeof error.code==='string'&&/^[A-Z_]{3,40}$/.test(error.code)?error.code:'UPSTREAM_FAILURE';logAiEvent(code,error.meta||{model:process.env.OPENROUTER_MODEL});return res.status(503).json({error:code==='INCOMPLETE_RESPONSE'?'The AI response was cut short. Please retry or use the basic planner.':'AI could not create a verified itinerary. Please retry or use the basic planner.',code});}
+      catch(error){if(error.code==='UPSTREAM_FAILURE') logProviderError(error,process.env.OPENROUTER_MODEL);const code=typeof error.code==='string'&&/^[A-Z_]{3,40}$/.test(error.code)?error.code:'UPSTREAM_FAILURE';logAiEvent(code,error.meta||{model:process.env.OPENROUTER_MODEL});return res.status(503).json({error:code==='INCOMPLETE_RESPONSE'?'The AI response was cut short. Please retry or use the basic planner.':'AI could not create a verified itinerary. Please retry or use the basic planner.',code});}
       const lookup=new Map(candidates.map(p=>[String(p.id),p]));
       const seen=new Set(), itinerary=[];
       for(let day=1;day<=input.days;day++){
