@@ -6,16 +6,16 @@ import DiscoverLayout from '@/app/routes/Discover/DiscoverLayout';
 vi.mock('@/shared/hooks/useAttractionQueries', () => ({
   useAllAttractions: () => ({ data: { attractions: [] } }),
 }));
-vi.mock('@/components/common/SearchSection', () => ({
-  default: ({ onSearch }: { onSearch: (query: string) => void }) => (
-    <button onClick={() => onSearch('อัมพวา')}>Search for Amphawa</button>
-  ),
-}));
 vi.mock('@/components/common/CategoryFilter', () => ({ default: () => null }));
 vi.mock('@/components/common/EnhancedLanguageToggle', () => ({ default: () => null }));
 vi.mock('@/app/routes/Discover/FeedView', () => ({ default: () => <p>Feed</p> }));
 vi.mock('@/app/routes/Discover/SearchView', () => ({
-  default: ({ query }: { query: string }) => <p>Search query: {query}</p>,
+  default: ({ query, onSearch }: { query: string; onSearch: (query: string) => void }) => (
+    <>
+      <button onClick={() => onSearch('อัมพวา')}>Search for Amphawa</button>
+      <p>Search query: {query}</p>
+    </>
+  ),
 }));
 vi.mock('@/app/routes/Discover/CategoryView', () => ({ default: () => null }));
 vi.mock('@/app/routes/Discover/MapView', () => ({ default: () => null }));
@@ -26,7 +26,7 @@ function CurrentUrl() {
 }
 
 describe('Discover search flow', () => {
-  it('preserves the entered query when switching from Feed to Search', () => {
+  it('keeps search available through the Search tab after removing the feed hero', () => {
     render(
       <MemoryRouter initialEntries={['/discover']}>
         <DiscoverLayout currentLanguage="th" onLanguageChange={vi.fn()} />
@@ -34,6 +34,8 @@ describe('Discover search flow', () => {
       </MemoryRouter>,
     );
 
+    expect(screen.queryByRole('button', { name: 'Search for Amphawa' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('tab', { name: 'ค้นหา' })[0]);
     fireEvent.click(screen.getByRole('button', { name: 'Search for Amphawa' }));
 
     expect(screen.getByText('Search query: อัมพวา')).toBeInTheDocument();
