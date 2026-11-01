@@ -35,7 +35,7 @@ describe('Discover search flow', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'Search for Amphawa' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole('tab', { name: 'ค้นหา' })[0]);
+    fireEvent.click(screen.getAllByRole('tab', { name: 'ค้นหา' })[1]);
     fireEvent.click(screen.getByRole('button', { name: 'Search for Amphawa' }));
 
     expect(screen.getByText('Search query: อัมพวา')).toBeInTheDocument();
