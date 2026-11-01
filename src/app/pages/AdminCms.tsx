@@ -120,12 +120,23 @@ export default function AdminCms() {
     finally{setAiBusy(false);}
   }
   async function testAi() {
-    setAiBusy(true);setAiMessage('');setAiResult(null);
+    if (!token) return;
+    setAiBusy(true); setAiMessage(''); setAiResult(null);
     try {
-      const result=await api('/ai/health-check',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
-      setAiResult(result);setAiMessage('ทดสอบ AI สำเร็จ');
-    } catch(e){setAiMessage(e instanceof Error?e.message:'ทดสอบ AI ไม่สำเร็จ');}
-    finally{setAiBusy(false);}
+      const response = await fetch(`${base}/api/admin/ai/health-check`, {
+        method:'POST',
+        headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+        body:'{}',
+      });
+      const result = await response.json();
+      setAiResult(result);
+      if (response.ok && result.status === 'ok') setAiMessage('ทดสอบ AI สำเร็จ');
+      else if (response.status === 429) setAiMessage(result.status === 'cooldown'
+        ? `โปรดรออีก ${result.retryAfterSeconds || 300} วินาทีก่อนทดสอบใหม่`
+        : 'มีการทดสอบ AI กำลังทำงานอยู่');
+      else setAiMessage(`ทดสอบ AI ไม่ผ่าน: ${result.status || 'unknown'} (HTTP ${response.status})`);
+    } catch {setAiMessage('ไม่สามารถติดต่อ Backend ได้ กรุณาลองใหม่');}
+    finally {setAiBusy(false);}
   }
 
   // Search only after both fields settle. Never overwrite the administrator's coordinates.
@@ -295,6 +306,11 @@ export default function AdminCms() {
         {aiMessage&&<p role="status" className="text-sm text-slate-700">{aiMessage}</p>}
         {aiResult&&<div className="rounded-xl bg-slate-50 p-3 text-sm" aria-live="polite">
           <p>สถานะ: {String(aiResult.status||'unknown')}</p>
+          <p>Provider Error: {String(aiResult.providerErrorType ?? 'ไม่รายงาน')}</p>
+          <p>Provider Code: {String(aiResult.providerErrorCode ?? 'ไม่รายงาน')}</p>
+          <p>Request ID: {String(aiResult.requestId ?? 'ไม่รายงาน')}</p>
+          <p>Finish Reason: {String(aiResult.finishReason ?? 'ไม่รายงาน')}</p>
+          {typeof aiResult.retryAfterSeconds === 'number' && <p>รออีก {aiResult.retryAfterSeconds} วินาที</p>}
           <p>โมเดล: {String(aiResult.model||'unknown')}</p>
           <p>HTTP OpenRouter: {String(aiResult.upstreamHttpStatus??'ไม่ทราบ')}</p>
           <p>Tokens: {String((aiResult.usage as {totalTokens?:number|null}|undefined)?.totalTokens??'ไม่ทราบ')}</p>
