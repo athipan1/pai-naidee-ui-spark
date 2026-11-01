@@ -10,6 +10,7 @@ import SearchView from "./SearchView";
 import CategoryView from "./CategoryView";
 import MapView from "./MapView";
 import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
+import BottomNavigation from "@/components/common/BottomNavigation";
 import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
 
 interface DiscoverLayoutProps {
@@ -127,7 +128,7 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
   const shouldShowSearchAndFilter = state.mode === 'feed' || state.mode === 'category';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className={`${state.mode === 'search' ? 'hidden md:block' : ''} sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50`}>
         <div className="container mx-auto px-4 py-3">
@@ -213,6 +214,7 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
       <main className="flex-1">
         {renderContent()}
       </main>
+      <BottomNavigation currentLanguage={currentLanguage} />
     </div>
   );
 };
