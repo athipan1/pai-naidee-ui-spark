@@ -1,713 +1,98 @@
-import { useState, useEffect } from "react";
-import {
-  ArrowLeft,
-  Edit,
-  LogOut,
-  User,
-  Play,
-  MessageSquare,
-  Calendar,
-  CreditCard,
-  Camera,
-  Facebook,
-  Instagram,
-  Youtube,
-  MapPin,
-  Star,
-  Eye,
-  Heart,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import OptimizedImage from "@/components/common/OptimizedImage";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ArrowLeft, Compass, Heart, LogOut, MapPin, Settings, Sparkles, UserRound } from "lucide-react";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import BottomNavigation from "@/components/common/BottomNavigation";
+import { useAuth } from "@/shared/contexts/AuthContext";
 
 interface ProfileProps {
   currentLanguage: "th" | "en";
-  onLanguageChange: (lang: "th" | "en") => void;
-  onBack: () => void;
 }
 
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-  bio: string;
-  location: string;
-  joinDate: string;
-  socialLinks: {
-    facebook?: string;
-    instagram?: string;
-    youtube?: string;
-  };
-  stats: {
-    videos: number;
-    reviews: number;
-    followers: number;
-  };
-}
+export default function Profile({ currentLanguage }: ProfileProps) {
+  const { user, isAuthenticated, isLoading, signOut } = useAuth();
+  const th = currentLanguage === "th";
+  const displayName = typeof user?.user_metadata?.full_name === "string"
+    ? user.user_metadata.full_name
+    : user?.email?.split("@")[0] || (th ? "นักเดินทาง" : "Traveler");
 
-interface UserVideo {
-  id: string;
-  title: string;
-  thumbnail: string;
-  views: number;
-  likes: number;
-  duration: string;
-  uploadDate: string;
-}
-
-interface UserReview {
-  id: string;
-  placeName: string;
-  placeImage: string;
-  rating: number;
-  comment: string;
-  date: string;
-  likes: number;
-}
-
-const Profile = ({
-  currentLanguage,
-  onLanguageChange: _onLanguageChange,
-  onBack,
-}: ProfileProps) => {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [userVideos, setUserVideos] = useState<UserVideo[]>([]);
-  const [userReviews, setUserReviews] = useState<UserReview[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("videos");
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  const content = {
-    th: {
-      profile: "โปรไฟล์",
-      editProfile: "แก้ไขโปรไฟล์",
-      accountSettings: "ตั้งค่าบัญชี",
-      logout: "ออกจากระบบ",
-      myVideos: "วิดีโอของฉัน",
-      myReviews: "รีวิวของฉัน",
-      paymentInfo: "ข้อมูลการชำระเงิน",
-      privacy: "ความเป็นส่วนตัว",
-      language: "ภาษา",
-      paymentManagement: "จัดการการชำระเงิน",
-      deleteAccount: "ลบบัญชี",
-      memberSince: "สมาชิกตั้งแต่",
-      followers: "ผู้ติดตาม",
-      videos: "วิดีโอ",
-      reviews: "รีวิว",
-      noVideos: "ยังไม่มีวิดีโอ",
-      noReviews: "ยังไม่มีรีวิว",
-      uploadVideo: "อัปโหลดวิดีโอ",
-      writeReview: "เขียนรีวิว",
-      views: "ครั้ง",
-      likes: "ถูกใจ",
-      name: "ชื่อ",
-      email: "อีเมล",
-      bio: "แนะนำตัว",
-      location: "ที่อยู่",
-      socialLinks: "ลิงก์โซเชียล",
-      save: "บันทึก",
-      cancel: "ยกเลิก",
-      publicProfile: "โปรไฟล์สาธารณะ",
-      privateProfile: "โปรไฟล์ส่วนตัว",
-      deleteAccountWarning: "คุณแน่ใจหรือไม่ที่จะลบบัญชี?",
-      deleteAccountDesc:
-        "การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูลทั้งหมดจะถูกลบอย่างถาวร",
-      delete: "ลบ",
-      logoutConfirm: "คุณต้องการออกจากระบบหรือไม่?",
-    },
-    en: {
-      profile: "Profile",
-      editProfile: "Edit Profile",
-      accountSettings: "Account Settings",
-      logout: "Logout",
-      myVideos: "My Videos",
-      myReviews: "My Reviews",
-      paymentInfo: "Payment Information",
-      privacy: "Privacy",
-      language: "Language",
-      paymentManagement: "Payment Management",
-      deleteAccount: "Delete Account",
-      memberSince: "Member since",
-      followers: "Followers",
-      videos: "Videos",
-      reviews: "Reviews",
-      noVideos: "No videos yet",
-      noReviews: "No reviews yet",
-      uploadVideo: "Upload Video",
-      writeReview: "Write Review",
-      views: "views",
-      likes: "likes",
-      name: "Name",
-      email: "Email",
-      bio: "Bio",
-      location: "Location",
-      socialLinks: "Social Links",
-      save: "Save",
-      cancel: "Cancel",
-      publicProfile: "Public Profile",
-      privateProfile: "Private Profile",
-      deleteAccountWarning: "Are you sure you want to delete your account?",
-      deleteAccountDesc:
-        "This action cannot be undone. All your data will be permanently deleted.",
-      delete: "Delete",
-      logoutConfirm: "Do you want to logout?",
-    },
-  };
-
-  const t = content[currentLanguage];
-
-  // Mock data - ในการใช้งานจริงจะดึงจาก API
-  useEffect(() => {
-    const mockProfile: UserProfile = {
-      id: "1",
-      name: currentLanguage === "th" ? "สมชาย ใจดี" : "John Doe",
-      email: "john.doe@example.com",
-      avatar: "/placeholder-avatar.jpg",
-      bio:
-        currentLanguage === "th"
-          ? "รักการเที่ยว ชอบถ่ายรูป และแชร์ประสบการณ์ดีๆ ให้เพื่อนๆ"
-          : "Love traveling, photography, and sharing great experiences with friends",
-      location:
-        currentLanguage === "th" ? "กรุงเทพฯ, ประเทศไทย" : "Bangkok, Thailand",
-      joinDate: "2023-01-15",
-      socialLinks: {
-        facebook: "https://facebook.com/johndoe",
-        instagram: "https://instagram.com/johndoe",
-        youtube: "https://youtube.com/@johndoe",
-      },
-      stats: {
-        videos: 12,
-        reviews: 28,
-        followers: 1247,
-      },
-    };
-
-    const mockVideos: UserVideo[] = [
-      {
-        id: "1",
-        title:
-          currentLanguage === "th"
-            ? "เที่ยวเกาะพีพี สวยงาม"
-            : "Beautiful Phi Phi Islands",
-        thumbnail:
-          "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400",
-        views: 15420,
-        likes: 892,
-        duration: "5:32",
-        uploadDate: "2024-01-10",
-      },
-      {
-        id: "2",
-        title:
-          currentLanguage === "th"
-            ? "วัดพระแก้ว ความงดงาม"
-            : "Wat Phra Kaew Beauty",
-        thumbnail:
-          "https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=400",
-        views: 8765,
-        likes: 543,
-        duration: "3:45",
-        uploadDate: "2024-01-05",
-      },
-    ];
-
-    const mockReviews: UserReview[] = [
-      {
-        id: "1",
-        placeName:
-          currentLanguage === "th" ? "หมู่เกาะพีพี" : "Phi Phi Islands",
-        placeImage:
-          "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=400",
-        rating: 5,
-        comment:
-          currentLanguage === "th"
-            ? "สวยมากจริงๆ น้ำใสมาก แนะนำให้ไปช่วงเช้าจะได้ถ่ายรูปสวยๆ"
-            : "Absolutely beautiful! Crystal clear water. Recommend going in the morning for great photos.",
-        date: "2024-01-12",
-        likes: 23,
-      },
-      {
-        id: "2",
-        placeName: currentLanguage === "th" ? "วัดพระแก้ว" : "Wat Phra Kaew",
-        placeImage:
-          "https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=400",
-        rating: 4,
-        comment:
-          currentLanguage === "th"
-            ? "สถานที่ศักดิ์สิทธิ์ สถาปัตยกรรมสวยงาม แต่คนเยอะมาก"
-            : "Sacred place with beautiful architecture, but very crowded.",
-        date: "2024-01-08",
-        likes: 15,
-      },
-    ];
-
-    setTimeout(() => {
-      setUserProfile(mockProfile);
-      setUserVideos(mockVideos);
-      setUserReviews(mockReviews);
-      setLoading(false);
-    }, 1000);
-  }, [currentLanguage]);
-
-  const handleLogout = () => {
-    // Clear JWT/localStorage
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userProfile");
-    // Redirect to login or home
-    window.location.href = "/";
-  };
-
-  const _handleDeleteAccount = async () => {
+  const handleSignOut = async () => {
     try {
-      // API call to delete account
-      // await fetch(`/api/users/${userProfile?.id}/delete`, { method: 'POST' });
-      localStorage.clear();
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Failed to delete account:", error);
+      await signOut();
+      toast.success(th ? "ออกจากระบบแล้ว" : "Signed out");
+    } catch {
+      toast.error(th ? "ออกจากระบบไม่สำเร็จ กรุณาลองอีกครั้ง" : "Could not sign out. Please try again.");
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return currentLanguage === "th"
-      ? date.toLocaleDateString("th-TH")
-      : date.toLocaleDateString("en-US");
-  };
-
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
-    return num.toString();
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-muted-foreground">กำลังโหลด...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!userProfile) return null;
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="icon" onClick={onBack}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-bold text-foreground">
-              👤 {t.profile}
-            </h1>
-          </div>
+    <div className="min-h-screen bg-background pb-28 text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4">
+          <Link to="/" aria-label={th ? "กลับหน้าหลัก" : "Back home"} className="rounded-xl p-2 hover:bg-muted">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-lg font-bold">{th ? "โปรไฟล์ของฉัน" : "My profile"}</h1>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        {/* User Info Section */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-              {/* Avatar */}
-              <div className="relative">
-                <Avatar className="w-24 h-24">
-                  <AvatarImage
-                    src={userProfile.avatar}
-                    alt={userProfile.name}
-                  />
-                  <AvatarFallback>
-                    <User className="w-12 h-12" />
-                  </AvatarFallback>
-                </Avatar>
-                <Button
-                  size="icon"
-                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full"
-                  onClick={() => setIsEditModalOpen(true)}
-                >
-                  <Camera className="w-4 h-4" />
-                </Button>
-              </div>
-
-              {/* User Details */}
-              <div className="flex-1 text-center md:text-left">
-                <h2 className="text-2xl font-bold mb-2">{userProfile.name}</h2>
-                <p className="text-muted-foreground mb-2">
-                  {userProfile.email}
-                </p>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {userProfile.bio}
-                </p>
-
-                <div className="flex items-center justify-center md:justify-start space-x-4 text-sm text-muted-foreground mb-4">
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>{userProfile.location}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>
-                      {t.memberSince} {formatDate(userProfile.joinDate)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Social Links */}
-                <div className="flex items-center justify-center md:justify-start space-x-3 mb-4">
-                  {userProfile.socialLinks.facebook && (
-                    <a
-                      href={userProfile.socialLinks.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button variant="outline" size="icon" className="w-8 h-8">
-                        <Facebook className="w-4 h-4" />
-                      </Button>
-                    </a>
-                  )}
-                  {userProfile.socialLinks.instagram && (
-                    <a
-                      href={userProfile.socialLinks.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button variant="outline" size="icon" className="w-8 h-8">
-                        <Instagram className="w-4 h-4" />
-                      </Button>
-                    </a>
-                  )}
-                  {userProfile.socialLinks.youtube && (
-                    <a
-                      href={userProfile.socialLinks.youtube}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button variant="outline" size="icon" className="w-8 h-8">
-                        <Youtube className="w-4 h-4" />
-                      </Button>
-                    </a>
-                  )}
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {formatNumber(userProfile.stats.followers)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t.followers}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {userProfile.stats.videos}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t.videos}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {userProfile.stats.reviews}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t.reviews}
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <main className="mx-auto max-w-3xl space-y-7 px-4 py-6">
+        <section className="rounded-3xl border border-teal-400/30 bg-gradient-to-br from-teal-500/20 via-card to-sky-500/10 p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-teal-400/50 bg-teal-400/15">
+              <UserRound className="h-10 w-10 text-teal-400" />
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
-              <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>{t.editProfile}</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>{t.editProfile}</DialogTitle>
-                    <DialogDescription>
-                      แก้ไขข้อมูลโปรไฟล์ของคุณ
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">{t.name}</Label>
-                      <Input id="name" defaultValue={userProfile.name} />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">{t.email}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        defaultValue={userProfile.email}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="bio">{t.bio}</Label>
-                      <Textarea id="bio" defaultValue={userProfile.bio} />
-                    </div>
-                    <div>
-                      <Label htmlFor="location">{t.location}</Label>
-                      <Input
-                        id="location"
-                        defaultValue={userProfile.location}
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditModalOpen(false)}
-                      >
-                        {t.cancel}
-                      </Button>
-                      <Button onClick={() => setIsEditModalOpen(false)}>
-                        {t.save}
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center space-x-2 text-destructive hover:text-destructive"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>{t.logout}</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t.logoutConfirm}</AlertDialogTitle>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLogout}>
-                      {t.logout}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold tracking-wider text-teal-500">PAINAIDEE TRAVELER</p>
+              <h2 className="mt-1 truncate text-2xl font-bold">{isLoading ? (th ? "กำลังโหลด..." : "Loading...") : isAuthenticated ? displayName : (th ? "ยินดีต้อนรับ นักเดินทาง!" : "Welcome, traveler!")}</h2>
+              <p className="mt-1 break-all text-sm text-muted-foreground">{isAuthenticated ? user?.email : (th ? "ยังไม่ได้เข้าสู่ระบบ" : "Not signed in")}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          {!isLoading && !isAuthenticated && (
+            <p className="mt-5 rounded-2xl bg-background/70 p-4 text-sm text-muted-foreground">
+              {th ? "คุณกำลังใช้งานแบบผู้เยี่ยมชม ระบบบัญชีสมาชิกสำหรับบันทึกสถานที่โปรดและซิงก์ทริปยังไม่เปิดให้บริการ" : "You are browsing as a guest. Member accounts for favorites and trip syncing are not available yet."}
+            </p>
+          )}
+        </section>
 
-        {/* Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="videos" className="flex items-center space-x-2">
-              <Play className="w-4 h-4" />
-              <span>{t.myVideos}</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="reviews"
-              className="flex items-center space-x-2"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>{t.myReviews}</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="payment"
-              className="flex items-center space-x-2"
-            >
-              <CreditCard className="w-4 h-4" />
-              <span>{t.paymentInfo}</span>
-            </TabsTrigger>
-          </TabsList>
+        <section>
+          <h3 className="mb-3 font-semibold">{th ? "ออกเดินทางกันเลย" : "Explore your world"}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Link to="/trip-planner" className="rounded-2xl border bg-card p-5 transition hover:border-teal-400/70">
+              <Sparkles className="mb-3 h-7 w-7 text-teal-400" />
+              <p className="font-semibold">{th ? "AI วางแผนเที่ยว" : "AI trip planner"}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{th ? "วางเส้นทางและประเมินงบ" : "Plan routes and budgets"}</p>
+            </Link>
+            <Link to="/discover" className="rounded-2xl border bg-card p-5 transition hover:border-teal-400/70">
+              <Compass className="mb-3 h-7 w-7 text-sky-400" />
+              <p className="font-semibold">{th ? "สำรวจสถานที่" : "Discover places"}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{th ? "หาที่เที่ยวใหม่ ๆ" : "Find new destinations"}</p>
+            </Link>
+          </div>
+        </section>
 
-          {/* My Videos Tab */}
-          <TabsContent value="videos" className="space-y-4">
-            {userVideos.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Play className="w-12 h-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">{t.noVideos}</h3>
-                  <Button>
-                    <Camera className="w-4 h-4 mr-2" />
-                    {t.uploadVideo}
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {userVideos.map((video) => (
-                  <Card
-                    key={video.id}
-                    className="overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <div className="relative">
-                      <OptimizedImage
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="w-full h-48 object-cover"
-                        width="100%"
-                        height="192"
-                      />
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                        {video.duration}
-                      </div>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold line-clamp-2 mb-2">
-                        {video.title}
-                      </h3>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center space-x-1">
-                            <Eye className="w-3 h-3" />
-                            <span>{formatNumber(video.views)}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Heart className="w-3 h-3" />
-                            <span>{formatNumber(video.likes)}</span>
-                          </div>
-                        </div>
-                        <span>{formatDate(video.uploadDate)}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+        <section>
+          <h3 className="mb-3 font-semibold">{th ? "ข้อมูลและการตั้งค่า" : "Your account"}</h3>
+          <div className="divide-y rounded-2xl border bg-card">
+            {[
+              { icon: Heart, title: th ? "สถานที่โปรด" : "Favorites", detail: th ? "ระบบซิงก์รายการโปรดยังไม่เปิดใช้งาน" : "Favorites syncing is not available yet" },
+              { icon: MapPin, title: th ? "ทริปที่บันทึก" : "Saved trips", detail: th ? "ยังไม่รองรับการจัดเก็บทริปในบัญชี" : "Account trip storage is not available yet" },
+              { icon: Settings, title: th ? "แก้ไขโปรไฟล์" : "Edit profile", detail: th ? "ฟังก์ชันจัดการบัญชีกำลังพัฒนา" : "Account management is coming soon" },
+            ].map(({ icon: Icon, title, detail }) => (
+              <div key={title} className="flex items-center gap-3 p-4">
+                <Icon className="h-5 w-5 shrink-0 text-teal-400" />
+                <div><p className="font-medium">{title}</p><p className="text-xs text-muted-foreground">{detail}</p></div>
               </div>
-            )}
-          </TabsContent>
+            ))}
+          </div>
+        </section>
 
-          {/* My Reviews Tab */}
-          <TabsContent value="reviews" className="space-y-4">
-            {userReviews.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">{t.noReviews}</h3>
-                  <Button>
-                    <Edit className="w-4 h-4 mr-2" />
-                    {t.writeReview}
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {userReviews.map((review) => (
-                  <Card key={review.id}>
-                    <CardContent className="p-4">
-                      <div className="flex space-x-4">
-                        <OptimizedImage
-                          src={review.placeImage}
-                          alt={review.placeName}
-                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                          width={64}
-                          height={64}
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold">
-                              {review.placeName}
-                            </h3>
-                            <div className="flex items-center space-x-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {review.comment}
-                          </p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{formatDate(review.date)}</span>
-                            <div className="flex items-center space-x-1">
-                              <Heart className="w-3 h-3" />
-                              <span>{review.likes}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Payment Info Tab */}
-          <TabsContent value="payment" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <CreditCard className="w-5 h-5" />
-                  <span>{t.paymentManagement}</span>
-                </CardTitle>
-                <CardDescription>
-                  จัดการข้อมูลการชำระเงินและประวัติการทำรายการ
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    ฟีเจอร์นี้จะเชื่อมต่อกับระบบ Payment Gateway
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    (Stripe, QR Code, PromptPay, etc.)
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+        {isAuthenticated && (
+          <button type="button" onClick={() => void handleSignOut()} className="flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/30 p-3 text-destructive hover:bg-destructive/10">
+            <LogOut className="h-4 w-4" />{th ? "ออกจากระบบ" : "Sign out"}
+          </button>
+        )}
+      </main>
+      <BottomNavigation currentLanguage={currentLanguage} />
     </div>
   );
-};
-
-export default Profile;
+}
