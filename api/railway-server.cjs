@@ -4,6 +4,7 @@ const cors = require('cors');
 const { randomUUID } = require('node:crypto');
 const multer = require('multer');
 const { registerAdminCms } = require('./admin-cms.cjs');
+const { registerAiTripRoutes } = require('./ai-trip-plan.cjs');
 const { authRoutes } = require('./railway-admin-auth.cjs');
 const { createRailwayMediaStorage, registerRailwayMedia, uploadImage } = require('./railway-media.cjs');
 const {
@@ -48,6 +49,7 @@ registerAdminCms(app, {
   invalidateSearchIndex,
 });
 registerRailwayMedia(app, { getSql, storage });
+registerAiTripRoutes(app, { listPlaces });
 
 app.get('/api/places', async (req, res) => {
   try {
