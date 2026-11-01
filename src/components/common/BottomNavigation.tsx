@@ -42,7 +42,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-effect border-t border-white/20 safe-area-bottom">
       <div className="container mx-auto px-4">
-        <div className="mx-auto flex max-w-sm items-center justify-center gap-5 py-2">
+        <div className="mx-auto grid w-full max-w-sm grid-cols-2 items-stretch gap-2 py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = isTabActive(tab.path);
@@ -52,7 +52,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
                 key={tab.id}
                 to={tab.path}
                 className={`
-                  flex min-w-[120px] flex-col items-center space-y-1 rounded-xl p-3 transition-all duration-300 relative overflow-hidden interactive-scale
+                  flex min-w-0 w-full flex-col items-center justify-center space-y-1 rounded-xl px-2 py-3 transition-all duration-300 relative overflow-hidden interactive-scale
                   ${
                     isActive
                       ? "text-primary bg-primary/20 shadow-lg"
@@ -64,7 +64,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
                 <div className={`nav-icon transition-all duration-300 ${isActive ? "scale-110 animate-bounce" : ""}`}>
                   <Icon className={`w-6 h-6 ${isActive ? "drop-shadow-md" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`} />
                 </div>
-                <span className={`text-xs font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`}>
+                <span className={`text-xs text-center whitespace-nowrap font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`}>
                   {tab.label[currentLanguage]}
                 </span>
 
