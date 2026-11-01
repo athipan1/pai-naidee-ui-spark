@@ -2,6 +2,7 @@
 const { buildModelPayload } = require('./ai-model-gateway.cjs');
 const { getActiveAiConfig } = require('./ai-model-settings.cjs');
 const { fetchOpenRouter, ProviderError } = require('./ai-upstream-diagnostics.cjs');
+const { parseAiJson, validateAiPlan } = require('./ai-trip-plan.cjs');
 
 const PROBE_COOLDOWN_MS = 5 * 60_000;
 let lastProbe = 0;
@@ -54,16 +55,19 @@ function registerAiHealthRoutes(app,{requireAdmin,getSql,request=fetchOpenRouter
       if(!choice?.message || !['stop','end_turn'].includes(choice.finish_reason)) {
         return res.status(502).json({status:'model_incomplete',model:clean(body?.model)||config.model,finishReason:clean(choice?.finish_reason),usage:usageOf(body?.usage)});
       }
-      const raw=choice.message.content;
-      let parsed=null;
-      try { parsed=JSON.parse(typeof raw==='string'?raw:''); } catch {}
-      const valid=parsed && typeof parsed==='object' && !Array.isArray(parsed)
-        && Array.isArray(parsed.days) && parsed.days.length===1
-        && parsed.days[0]?.day===1
-        && Array.isArray(parsed.days[0]?.placeIds) && parsed.days[0].placeIds.length===1
-        && parsed.days[0].placeIds[0]==='test-place';
-      return res.status(valid?200:502).json({
-        status:valid?'ok':'invalid_structured_output',upstreamHttpStatus:200,
+      const content=choice.message.content;
+      const raw=Array.isArray(content)?content.filter(p=>p?.type==='text'&&typeof p.text==='string').map(p=>p.text).join('\n'):content;
+      let code='ok';
+      try {
+        const parsed=parseAiJson(raw);
+        validateAiPlan(parsed,1,[{id:'test-place'}]);
+        if(parsed.days.length!==1||parsed.days[0].placeIds.length!==1||parsed.days[0].placeIds[0]!=='test-place')code='INVALID_SCHEMA';
+      } catch(error) {
+        code=['INVALID_JSON','INVALID_SCHEMA','INVALID_PLACE_IDS','EMPTY_CONTENT','OUTPUT_TOO_LARGE'].includes(error?.code)?error.code:'INVALID_SCHEMA';
+      }
+      console.info('ai_health_validation',JSON.stringify({type:code,model:clean(body?.model)||config.model,finishReason:clean(choice.finish_reason),usage:usageOf(body?.usage)}));
+      return res.status(code==='ok'?200:502).json({
+        status:code==='ok'?'ok':'validation_failed',errorCode:code==='ok'?null:code,upstreamHttpStatus:200,
         model:clean(body?.model)||config.model,finishReason:clean(choice.finish_reason),usage:usageOf(body?.usage),
         structuredOutputEnabled:config.structuredOutput,
       });
