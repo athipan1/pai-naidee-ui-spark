@@ -6,6 +6,7 @@ const multer = require('multer');
 const { registerAdminCms } = require('./admin-cms.cjs');
 const { registerAiTripRoutes } = require('./ai-trip-plan.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
+const { ensureAiSettings,registerAiSettingsRoutes } = require('./ai-model-settings.cjs');
 const { authRoutes } = require('./railway-admin-auth.cjs');
 const { createRailwayMediaStorage, registerRailwayMedia, uploadImage } = require('./railway-media.cjs');
 const {
@@ -50,8 +51,9 @@ registerAdminCms(app, {
   invalidateSearchIndex,
 });
 registerRailwayMedia(app, { getSql, storage });
-registerAiTripRoutes(app, { listPlaces });
-registerAiHealthRoutes(app, { requireAdmin });
+registerAiTripRoutes(app, { listPlaces,getSql });
+registerAiHealthRoutes(app, { requireAdmin,getSql });
+registerAiSettingsRoutes(app, { requireAdmin,getSql });
 
 app.get('/api/places', async (req, res) => {
   try {
@@ -229,6 +231,7 @@ app.use((error, _req, res, _next) => {
 
 async function start() {
   await ensureSchema();
+  await ensureAiSettings(getSql);
   const server = app.listen(PORT, () => {
     console.log(`PaiNaiDee Railway API listening on port ${PORT}`);
   });
