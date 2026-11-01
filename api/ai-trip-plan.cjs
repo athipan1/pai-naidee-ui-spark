@@ -15,6 +15,60 @@ async function fetchJson(url, options, timeout=12000) {
   if(!res.ok) throw new Error('Upstream status '+res.status);
   return res.json();
 }
+
+class AiResponseError extends Error { constructor(code, meta={}) { super(code); this.code=code; this.meta=meta; } }
+function parseAiJson(content) {
+  if(typeof content!=='string'||!content.trim()) throw new AiResponseError('EMPTY_CONTENT');
+  if(content.length>20000) throw new AiResponseError('OUTPUT_TOO_LARGE');
+  const fence=String.fromCharCode(96).repeat(3);
+  const versions=[content.trim()];
+  const fenced=content.match(new RegExp(fence+'(?:json)?\\s*([\\s\\S]*?)'+fence,'i'));
+  if(fenced) versions.push(fenced[1].trim());
+  const start=content.indexOf('{'),end=content.lastIndexOf('}');
+  if(start>=0&&end>start) versions.push(content.slice(start,end+1));
+  for(const v of versions) {try{return JSON.parse(v);}catch{}}
+  throw new AiResponseError('INVALID_JSON');
+}
+function validateAiPlan(plan, days, places) {
+  if(!plan||typeof plan!=='object'||Array.isArray(plan)||!Array.isArray(plan.days)||!plan.days.length||plan.days.length>days)
+    throw new AiResponseError('INVALID_SCHEMA');
+  const valid=new Set(places.map(p=>String(p.id))), used=new Set(), seenDays=new Set();
+  for(const day of plan.days) {
+    if(!day||!Number.isInteger(day.day)||day.day<1||day.day>days||seenDays.has(day.day)
+      ||!Array.isArray(day.placeIds)||!day.placeIds.length||day.placeIds.length>3)
+      throw new AiResponseError('INVALID_SCHEMA');
+    seenDays.add(day.day);
+    for(const id of day.placeIds) {
+      if(typeof id!=='string'||!valid.has(id)||used.has(id)) throw new AiResponseError('INVALID_PLACE_IDS');
+      used.add(id);
+    }
+  }
+  if(plan.notes!==undefined&&(!Array.isArray(plan.notes)||plan.notes.length>10||plan.notes.some(x=>typeof x!=='string'||x.length>400)))
+    throw new AiResponseError('INVALID_SCHEMA');
+  return plan;
+}
+function parseOpenRouterResponse(response,{days,places,model}) {
+  const choice=response?.choices?.[0], u=response?.usage;
+  const meta={model:typeof response?.model==='string'?response.model.slice(0,120):model,
+    finishReason:typeof choice?.finish_reason==='string'?choice.finish_reason:'missing',
+    usage:u&&typeof u==='object'?{
+      promptTokens:Number.isFinite(u.prompt_tokens)?u.prompt_tokens:null,
+      completionTokens:Number.isFinite(u.completion_tokens)?u.completion_tokens:null,
+      totalTokens:Number.isFinite(u.total_tokens)?u.total_tokens:null,
+      cost:Number.isFinite(u.cost)?u.cost:null}:null};
+  try {
+    if(!choice?.message||typeof choice.message!=='object') throw new AiResponseError('MISSING_MESSAGE');
+    if(!['stop','end_turn'].includes(meta.finishReason)) throw new AiResponseError('INCOMPLETE_RESPONSE');
+    const content=choice.message.content;
+    const text=Array.isArray(content)?content.filter(p=>p?.type==='text'&&typeof p.text==='string').map(p=>p.text).join('\n'):content;
+    return {plan:validateAiPlan(parseAiJson(text),days,places),meta};
+  } catch(e) {throw new AiResponseError(e.code||'INVALID_SCHEMA',meta);}
+}
+function logAiEvent(type,meta={}) {
+  // Do not log prompts, model content, visitors, auth headers, or API keys.
+  console.info('ai_trip_event',JSON.stringify({type,model:meta.model||'unknown',finishReason:meta.finishReason||'unknown',usage:meta.usage||null}));
+}
+
 async function proposePlan({message,province,days,people,budget,places}) {
   const model=process.env.OPENROUTER_MODEL;
   const key=process.env.OPENROUTER_API_KEY;
@@ -30,11 +84,9 @@ async function proposePlan({message,province,days,people,budget,places}) {
       {role:'user',content:JSON.stringify({request:message,province,days,people,budget,candidates:places.map(p=>({id:p.id,name:p.nameLocal||p.name,category:p.category,tags:(p.tags||[]).slice(0,6)}))})}
     ]})
   },20000);
-  const content=r?.choices?.[0]?.message?.content;
-  if(typeof content!=='string') throw new Error('Invalid model response');
-  const cleaned=content.trim().replace(/^\x60\x60\x60(?:json)?\s*/,'').replace(/\s*\x60\x60\x60$/,'');
-  if(cleaned.length>20000) throw new Error('Model output too large');
-  return JSON.parse(cleaned);
+  const parsed=parseOpenRouterResponse(r,{days,places,model});
+  logAiEvent('success',parsed.meta);
+  return parsed.plan;
 }
 async function roadLeg(a,b,mode) {
   const key=process.env.GEOAPIFY_API_KEY;
@@ -70,7 +122,7 @@ function registerAiTripRoutes(app,{listPlaces}) {
       if(!candidates.length) return res.status(422).json({error:'No validated places available for this province.'});
       let proposed;
       try {proposed=await proposePlan({...input,places:candidates});}
-      catch(error){console.error('AI trip proposal failed:',error.message);return res.status(503).json({error:'AI planner unavailable. Please retry later.'});}
+      catch(error){logAiEvent(error.code||'UPSTREAM_FAILURE',error.meta||{model:process.env.OPENROUTER_MODEL});return res.status(503).json({error:'AI could not create a verified itinerary. Please retry or use the basic planner.',code:error.code||'UPSTREAM_FAILURE'});}
       const lookup=new Map(candidates.map(p=>[String(p.id),p]));
       const seen=new Set(), itinerary=[];
       for(let day=1;day<=input.days;day++){
@@ -107,4 +159,4 @@ function registerAiTripRoutes(app,{listPlaces}) {
     }catch(error){console.error('AI trip API error:',error.message);return res.status(503).json({error:'Trip planning service unavailable.'});}
   });
 }
-module.exports={registerAiTripRoutes,validateRequest,validCoord,haversine};
+module.exports={registerAiTripRoutes,validateRequest,validCoord,haversine,parseAiJson,validateAiPlan,parseOpenRouterResponse,AiResponseError};
