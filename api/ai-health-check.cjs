@@ -1,5 +1,6 @@
 'use strict';
-const { resolveModelConfig, buildModelPayload } = require('./ai-model-gateway.cjs');
+const { buildModelPayload } = require('./ai-model-gateway.cjs');
+const { getActiveAiConfig } = require('./ai-model-settings.cjs');
 const { fetchOpenRouter, ProviderError } = require('./ai-upstream-diagnostics.cjs');
 
 const PROBE_COOLDOWN_MS = 5 * 60_000;
@@ -23,14 +24,14 @@ function probeRequest(config) {
   // Never test a paid model or enable fallback for diagnostics.
   return base;
 }
-function registerAiHealthRoutes(app,{requireAdmin,request=fetchOpenRouter,now=Date.now}) {
+function registerAiHealthRoutes(app,{requireAdmin,getSql,request=fetchOpenRouter,now=Date.now}) {
   app.post('/api/admin/ai/health-check',requireAdmin,async(req,res)=>{
     res.set('Cache-Control','no-store');
     if(inFlight) return res.status(429).json({status:'busy',error:'An AI diagnostic is already running.'});
     if(now()-lastProbe<PROBE_COOLDOWN_MS) return res.status(429).json({status:'cooldown',retryAfterSeconds:Math.ceil((PROBE_COOLDOWN_MS-(now()-lastProbe))/1000)});
     let config;
     try {
-      config=resolveModelConfig();
+      config=await getActiveAiConfig(getSql);
       if(config.paidEnabled) return res.status(403).json({status:'blocked',error:'Health checks for paid models are disabled.'});
       if(!process.env.OPENROUTER_API_KEY) return res.status(503).json({status:'not_configured'});
     } catch {

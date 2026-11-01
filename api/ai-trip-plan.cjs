@@ -1,6 +1,7 @@
 'use strict';
 const { createRateLimiter } = require('./security.cjs');
-const { resolveModelConfig, buildModelPayload } = require('./ai-model-gateway.cjs');
+const { buildModelPayload } = require('./ai-model-gateway.cjs');
+const { getActiveAiConfig } = require('./ai-model-settings.cjs');
 const { fetchOpenRouter, logProviderError } = require('./ai-upstream-diagnostics.cjs');
 
 function validCoord(p) {
@@ -71,8 +72,8 @@ function logAiEvent(type,meta={}) {
   console.info('ai_trip_event',JSON.stringify({type,model:meta.model||'unknown',finishReason:meta.finishReason||'unknown',usage:meta.usage||null}));
 }
 
-async function proposePlan({message,province,days,people,budget,places}) {
-  const config=resolveModelConfig();
+async function proposePlan({message,province,days,people,budget,places,getSql}) {
+  const config=await getActiveAiConfig(getSql);
   const model=config.model;
   const key=process.env.OPENROUTER_API_KEY;
   if(!key) throw new Error('OPENROUTER_NOT_CONFIGURED');
@@ -182,7 +183,7 @@ async function enforceTripConstraints(itinerary,lookup,input,preferences,{route=
   return {days,warnings,rejected};
 }
 
-function registerAiTripRoutes(app,{listPlaces}) {
+function registerAiTripRoutes(app,{listPlaces,getSql}) {
   const limiter=createRateLimiter({windowMs:60_000,max:3,keyPrefix:'ai-trip'});
   app.post('/api/ai/trip-plan',limiter,async(req,res)=>{
     const input=validateRequest(req.body);
@@ -195,7 +196,7 @@ function registerAiTripRoutes(app,{listPlaces}) {
         .sort((a,b)=>(Number(b.rating)||0)-(Number(a.rating)||0)).slice(0,Math.min(15,Math.max(6,input.days*3+3)));
       if(!candidates.length) return res.status(422).json({error:'No validated places available for this province.'});
       let proposed;
-      try {proposed=await proposePlan({...input,places:candidates});}
+      try {proposed=await proposePlan({...input,places:candidates,getSql});}
       catch(error){if(error.code==='UPSTREAM_FAILURE') logProviderError(error,process.env.OPENROUTER_MODEL);const code=typeof error.code==='string'&&/^[A-Z_]{3,40}$/.test(error.code)?error.code:'UPSTREAM_FAILURE';logAiEvent(code,error.meta||{model:process.env.OPENROUTER_MODEL});return res.status(503).json({error:code==='INCOMPLETE_RESPONSE'?'The AI response was cut short. Please retry or use the basic planner.':'AI could not create a verified itinerary. Please retry or use the basic planner.',code});}
       const lookup=new Map(candidates.map(p=>[String(p.id),p]));
       const seen=new Set(), itinerary=[];

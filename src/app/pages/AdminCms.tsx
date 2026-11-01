@@ -41,6 +41,12 @@ export default function AdminCms() {
   const [proposedCoordinate, setProposedCoordinate] = useState<{ lat: number; lng: number } | null>(null);
   const [geocodeBusy, setGeocodeBusy] = useState(false);
   const [geocodeNote, setGeocodeNote] = useState('');
+  const [aiModels,setAiModels] = useState<{id:string;label:string}[]>([]);
+  const [aiModel,setAiModel] = useState('');
+  const [aiStructured,setAiStructured] = useState(false);
+  const [aiBusy,setAiBusy] = useState(false);
+  const [aiMessage,setAiMessage] = useState('');
+  const [aiResult,setAiResult] = useState<Record<string,unknown>|null>(null);
   const lastAutoLookup = useRef('');
   const base = getApiBaseUrl();
 
@@ -93,6 +99,34 @@ export default function AdminCms() {
       .catch(error => { if (!controller.signal.aborted) setMessage(error.message); });
     return () => controller.abort();
   }, [tab, token, isAdmin, base, searched]);
+
+  useEffect(() => {
+    if(!isAdmin || !token) return;
+    void api('/ai/models').then(data=>{
+      setAiModels(data.options || []);
+      setAiModel(data.selected?.model || '');
+      setAiStructured(Boolean(data.selected?.structuredOutput));
+    }).catch(()=>setAiMessage('ไม่สามารถโหลดการตั้งค่า AI'));
+  }, [isAdmin,token]);
+
+  async function saveAiModel() {
+    if(!window.confirm('ยืนยันเปลี่ยนโมเดล AI สำหรับผู้ใช้ทุกคนหรือไม่?')) return;
+    setAiBusy(true);setAiMessage('');setAiResult(null);
+    try {
+      await api('/ai/models',{method:'PUT',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:aiModel,structuredOutput:aiStructured})});
+      setAiMessage('บันทึกโมเดลสำเร็จ กรุณากดทดสอบ AI ก่อนใช้งานจริง');
+    } catch(e){setAiMessage(e instanceof Error?e.message:'บันทึกไม่ได้');}
+    finally{setAiBusy(false);}
+  }
+  async function testAi() {
+    setAiBusy(true);setAiMessage('');setAiResult(null);
+    try {
+      const result=await api('/ai/health-check',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+      setAiResult(result);setAiMessage('ทดสอบ AI สำเร็จ');
+    } catch(e){setAiMessage(e instanceof Error?e.message:'ทดสอบ AI ไม่สำเร็จ');}
+    finally{setAiBusy(false);}
+  }
 
   // Search only after both fields settle. Never overwrite the administrator's coordinates.
   useEffect(() => {
@@ -243,6 +277,31 @@ export default function AdminCms() {
         <button type="button" className="inline-flex items-center gap-2 rounded-xl border border-white/40 px-3 py-2 text-sm hover:bg-white/10" onClick={() => void signOut()}><LogOut size={16} /> ออกจากระบบ</button>
       </header>
       <div className="flex flex-wrap items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><ShieldCheck size={18} className="shrink-0" /> การเปลี่ยนแปลงจะไม่ขึ้นเว็บไซต์จนกว่าจะกดเผยแพร่</div>
+      <section className="space-y-3 rounded-2xl border border-teal-200 bg-white p-4 sm:p-6" aria-label="AI Model Management">
+        <h2 className="text-lg font-bold">จัดการ AI วางแผนเที่ยว</h2>
+        <p className="text-sm text-slate-600">เลือกโมเดลฟรีที่อนุญาต และทดสอบกับ OpenRouter ผ่าน Backend โดยใช้บัญชี Admin ที่ล็อกอินอยู่</p>
+        <label className="block text-sm font-medium" htmlFor="ai-model-picker">โมเดล AI</label>
+        <select id="ai-model-picker" className="w-full rounded-xl border border-slate-300 bg-white p-3" value={aiModel} onChange={e=>setAiModel(e.target.value)}>
+          {aiModels.map(model=><option key={model.id} value={model.id}>{model.label}</option>)}
+        </select>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={aiStructured} onChange={e=>setAiStructured(e.target.checked)}/>
+          ใช้ Strict JSON Schema (เฉพาะโมเดลที่รองรับ)
+        </label>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" disabled={aiBusy||!aiModel} onClick={()=>void saveAiModel()} className="rounded-xl bg-teal-700 px-4 py-3 font-semibold text-white disabled:opacity-50">บันทึกโมเดล</button>
+          <button type="button" disabled={aiBusy} onClick={()=>void testAi()} className="rounded-xl border border-teal-700 px-4 py-3 font-semibold text-teal-800 disabled:opacity-50">ทดสอบ AI</button>
+        </div>
+        {aiMessage&&<p role="status" className="text-sm text-slate-700">{aiMessage}</p>}
+        {aiResult&&<div className="rounded-xl bg-slate-50 p-3 text-sm" aria-live="polite">
+          <p>สถานะ: {String(aiResult.status||'unknown')}</p>
+          <p>โมเดล: {String(aiResult.model||'unknown')}</p>
+          <p>HTTP OpenRouter: {String(aiResult.upstreamHttpStatus??'ไม่ทราบ')}</p>
+          <p>Tokens: {String((aiResult.usage as {totalTokens?:number|null}|undefined)?.totalTokens??'ไม่ทราบ')}</p>
+          <p>ค่าใช้จ่าย USD: {String((aiResult.usage as {costUsd?:number|null}|undefined)?.costUsd??'ไม่รายงาน')}</p>
+        </div>}
+        <p className="text-xs text-slate-500">เปลี่ยนโมเดลมีผลต่อคำขอใหม่ทันที ไม่เรียกโมเดลเสียเงินโดยอัตโนมัติ และ Health Check จำกัดทุก 5 นาที</p>
+      </section>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="rounded-xl border bg-white p-4"><p className="text-xs text-slate-500">รอดำเนินการ</p><p className="mt-1 text-2xl font-bold text-teal-700">{activeDrafts.length}</p><p className="text-xs text-slate-500">ฉบับร่าง</p></div>
         <div className="rounded-xl border bg-white p-4"><p className="text-xs text-slate-500">เผยแพร่ผ่าน CMS</p><p className="mt-1 text-2xl font-bold">{drafts.filter(d => d.status === 'published').length}</p><p className="text-xs text-slate-500">รายการ</p></div>
