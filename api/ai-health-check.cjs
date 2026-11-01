@@ -17,7 +17,7 @@ const usageOf = value => {
   };
 };
 function probeRequest(config) {
-  const base = buildModelPayload({...config,maxOutputTokens: Math.min(config.maxOutputTokens,256)}, [
+  const base = buildModelPayload({...config,maxOutputTokens: 1200}, [
     {role:'system',content:'Return only the required JSON object. No prose, no Markdown.'},
     {role:'user',content:'Test structured output: return days containing day 1 and placeIds ["test-place"].'},
   ]);
