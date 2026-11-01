@@ -50,6 +50,7 @@ function registerAiHealthRoutes(app,{requireAdmin,getSql,request=fetchOpenRouter
         body:JSON.stringify(probeRequest(config)),
       },12000);
       const choice=body?.choices?.[0];
+      console.info('ai_health_probe',JSON.stringify({status:'response',model:clean(body?.model)||config.model,finishReason:clean(choice?.finish_reason),usage:usageOf(body?.usage)}));
       if(!choice?.message || !['stop','end_turn'].includes(choice.finish_reason)) {
         return res.status(502).json({status:'model_incomplete',model:clean(body?.model)||config.model,finishReason:clean(choice?.finish_reason),usage:usageOf(body?.usage)});
       }
@@ -68,6 +69,7 @@ function registerAiHealthRoutes(app,{requireAdmin,getSql,request=fetchOpenRouter
       });
     } catch(err) {
       const d=err instanceof ProviderError?err.details:{};
+      console.warn('ai_health_probe',JSON.stringify({status:'upstream_failure',upstreamHttpStatus:Number.isInteger(d.upstreamStatus)?d.upstreamStatus:null,providerErrorCode:clean(d.providerErrorCode),providerErrorType:clean(d.providerErrorType),requestId:clean(d.requestId),model:config.model}));
       return res.status(502).json({
         status:'upstream_failure',upstreamHttpStatus:Number.isInteger(d.upstreamStatus)?d.upstreamStatus:null,
         providerErrorCode:clean(d.providerErrorCode),providerErrorType:clean(d.providerErrorType),
