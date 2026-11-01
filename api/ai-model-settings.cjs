@@ -26,17 +26,44 @@ async function getActiveAiConfig(getSql) {
   const settings=await getAiSettings(getSql);
   return resolveModelConfig({...process.env,OPENROUTER_MODEL:settings.model,AI_STRUCTURED_OUTPUT:String(settings.structuredOutput)});
 }
+
+async function checkOpenRouterModel(model,structuredOutput,request=fetch) {
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),6500);
+  try {
+    const response=await request('https://openrouter.ai/api/v1/models',{signal:controller.signal,headers:{Accept:'application/json'}});
+    if(!response.ok) return {ok:false,reason:'CATALOG_UNAVAILABLE'};
+    const data=await response.json();
+    const found=Array.isArray(data?.data)?data.data.find(item=>item?.id===model):null;
+    if(!found) return {ok:false,reason:'MODEL_NOT_FOUND'};
+    const supported=Array.isArray(found.supported_parameters)?found.supported_parameters:[];
+    if(structuredOutput && !supported.includes('structured_outputs') && !supported.includes('response_format'))
+      return {ok:false,reason:'STRUCTURED_OUTPUT_NOT_ADVERTISED'};
+    return {ok:true,reason:'CATALOG_MATCHED',model:found.id,structuredOutputAdvertised:supported.includes('structured_outputs')||supported.includes('response_format')};
+  } catch {return {ok:false,reason:'CATALOG_UNAVAILABLE'};}
+  finally {clearTimeout(timer);}
+}
+
 function registerAiSettingsRoutes(app,{requireAdmin,getSql}) {
   app.get('/api/admin/ai/models',requireAdmin,async(_req,res)=>{
     res.set('Cache-Control','no-store');
     try {res.json({options:MODEL_OPTIONS,selected:await getAiSettings(getSql),paidModelsAllowed:false});}
     catch {res.status(503).json({error:'Cannot load AI model settings.'});}
   });
+  app.get('/api/admin/ai/models/validate',requireAdmin,async(req,res)=>{
+    res.set('Cache-Control','no-store');
+    const model=String(req.query.model||''),structuredOutput=req.query.structuredOutput==='true';
+    if(!allowedIds.has(model))return res.status(400).json({ok:false,reason:'MODEL_NOT_ALLOWED'});
+    const result=await checkOpenRouterModel(model,structuredOutput);
+    return res.status(result.ok?200:422).json(result);
+  });
   app.put('/api/admin/ai/models',requireAdmin,async(req,res)=>{
     res.set('Cache-Control','no-store');
     const {model,structuredOutput}=req.body||{};
     if(!allowedIds.has(model)||typeof structuredOutput!=='boolean') return res.status(400).json({error:'Only approved free models and boolean structured-output flags are allowed.'});
     try {
+      const validation=await checkOpenRouterModel(model,structuredOutput);
+      if(!validation.ok)return res.status(422).json({error:'Model validation failed: '+validation.reason,reason:validation.reason});
       const config=resolveModelConfig({...process.env,OPENROUTER_MODEL:model,AI_STRUCTURED_OUTPUT:String(structuredOutput)});
       if(config.paidEnabled) return res.status(403).json({error:'Paid models cannot be selected here.'});
       const sql=getSql();
@@ -47,4 +74,4 @@ function registerAiSettingsRoutes(app,{requireAdmin,getSql}) {
     } catch {res.status(503).json({error:'Could not save AI model settings.'});}
   });
 }
-module.exports={MODEL_OPTIONS,allowedIds,ensureAiSettings,getAiSettings,getActiveAiConfig,registerAiSettingsRoutes};
+module.exports={MODEL_OPTIONS,allowedIds,ensureAiSettings,getAiSettings,getActiveAiConfig,registerAiSettingsRoutes,checkOpenRouterModel};
