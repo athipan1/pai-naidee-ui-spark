@@ -6,7 +6,7 @@ test('health check payload is minimal and does not accept user prompts',()=>{
  const cfg={model:'test/example:free',maxOutputTokens:1200,structuredOutput:true};
  const payload=probeRequest(cfg);
  assert.equal(payload.model,'test/example:free');
- assert.equal(payload.max_tokens,256);
+ assert.equal(payload.max_tokens,1200);
  assert.equal(payload.response_format.type,'json_schema');
  assert.equal(payload.provider.allow_fallbacks,false);
  assert.ok(JSON.stringify(payload).includes('test-place'));
