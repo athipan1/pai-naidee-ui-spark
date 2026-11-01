@@ -61,6 +61,7 @@ test('mobile home navigation exposes Discover and AI Trip Planner side by side',
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   const bottomNav = page.locator('nav.fixed.bottom-0');
+  await expect(bottomNav.getByRole('link', { name: 'Home' })).toBeVisible();
   await expect(bottomNav.getByRole('link', { name: 'Discover' })).toBeVisible();
   const planner = bottomNav.getByRole('link', { name: 'AI Trip Planner' });
   await expect(planner).toBeVisible();
