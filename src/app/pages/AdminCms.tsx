@@ -47,6 +47,8 @@ export default function AdminCms() {
   const [aiBusy,setAiBusy] = useState(false);
   const [aiMessage,setAiMessage] = useState('');
   const [aiResult,setAiResult] = useState<Record<string,unknown>|null>(null);
+  const [aiSaved,setAiSaved] = useState<{model:string;structuredOutput:boolean}|null>(null);
+  const [aiValidated,setAiValidated] = useState(false);
   const lastAutoLookup = useRef('');
   const base = getApiBaseUrl();
 
@@ -106,6 +108,7 @@ export default function AdminCms() {
       setAiModels(data.options || []);
       setAiModel(data.selected?.model || '');
       setAiStructured(Boolean(data.selected?.structuredOutput));
+      setAiSaved({model:data.selected?.model || '',structuredOutput:Boolean(data.selected?.structuredOutput)});
     }).catch(()=>setAiMessage('ไม่สามารถโหลดการตั้งค่า AI'));
   }, [isAdmin,token]);
 
@@ -115,8 +118,17 @@ export default function AdminCms() {
     try {
       await api('/ai/models',{method:'PUT',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:aiModel,structuredOutput:aiStructured})});
+      setAiSaved({model:aiModel,structuredOutput:aiStructured});setAiResult(null);
       setAiMessage('บันทึกโมเดลสำเร็จ กรุณากดทดสอบ AI ก่อนใช้งานจริง');
     } catch(e){setAiMessage(e instanceof Error?e.message:'บันทึกไม่ได้');}
+    finally{setAiBusy(false);}
+  }
+  async function validateAiSelection() {
+    setAiBusy(true);setAiMessage('');setAiResult(null);setAiValidated(false);
+    try {
+      const data=await api('/ai/models/validate?model='+encodeURIComponent(aiModel)+'&structuredOutput='+String(aiStructured));
+      setAiValidated(Boolean(data.ok));setAiMessage(data.ok?'พบ Model ID ใน OpenRouter Catalog (ยังไม่ยืนยันว่า Provider พร้อมตอบ)':'ไม่ผ่านการตรวจสอบโมเดล');
+    } catch(e){setAiMessage(e instanceof Error?e.message:'ไม่สามารถตรวจสอบโมเดลได้');}
     finally{setAiBusy(false);}
   }
   async function testAi() {
@@ -292,16 +304,19 @@ export default function AdminCms() {
         <h2 className="text-lg font-bold">จัดการ AI วางแผนเที่ยว</h2>
         <p className="text-sm text-slate-600">เลือกโมเดลฟรีที่อนุญาต และทดสอบกับ OpenRouter ผ่าน Backend โดยใช้บัญชี Admin ที่ล็อกอินอยู่</p>
         <label className="block text-sm font-medium" htmlFor="ai-model-picker">โมเดล AI</label>
-        <select id="ai-model-picker" className="w-full rounded-xl border border-slate-300 bg-white p-3" value={aiModel} onChange={e=>setAiModel(e.target.value)}>
+        <select id="ai-model-picker" className="w-full rounded-xl border border-slate-300 bg-white p-3" value={aiModel} onChange={e=>{setAiModel(e.target.value);setAiValidated(false);setAiResult(null);setAiMessage("");}}>
           {aiModels.map(model=><option key={model.id} value={model.id}>{model.label}</option>)}
         </select>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={aiStructured} onChange={e=>setAiStructured(e.target.checked)}/>
+          <input type="checkbox" checked={aiStructured} onChange={e=>{setAiStructured(e.target.checked);setAiValidated(false);setAiResult(null);setAiMessage("");}}/>
           ใช้ Strict JSON Schema (เฉพาะโมเดลที่รองรับ)
         </label>
+        <p className="text-sm text-teal-900">โมเดลที่ใช้งานจริง: <strong>{aiSaved?.model || 'ยังไม่ทราบ'}</strong> · Strict JSON: {aiSaved?.structuredOutput?'เปิด':'ปิด'}</p>
+        <p className="text-sm text-slate-600">โมเดลที่กำลังเลือก: {aiModel || 'ยังไม่เลือก'} {aiValidated?'· ตรวจ Catalog แล้ว':'· ยังไม่ตรวจ Catalog'}</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={aiBusy||!aiModel} onClick={()=>void saveAiModel()} className="rounded-xl bg-teal-700 px-4 py-3 font-semibold text-white disabled:opacity-50">บันทึกโมเดล</button>
-          <button type="button" disabled={aiBusy} onClick={()=>void testAi()} className="rounded-xl border border-teal-700 px-4 py-3 font-semibold text-teal-800 disabled:opacity-50">ทดสอบ AI</button>
+          <button type="button" disabled={aiBusy||!aiModel} onClick={()=>void validateAiSelection()} className="rounded-xl border border-slate-400 px-4 py-3">ตรวจ Model ID</button>
+          <button type="button" disabled={aiBusy||!aiModel||!aiValidated} onClick={()=>void saveAiModel()} className="rounded-xl bg-teal-700 px-4 py-3 font-semibold text-white disabled:opacity-50">บันทึกโมเดล</button>
+          <button type="button" disabled={aiBusy||!aiSaved||aiSaved.model!==aiModel||aiSaved.structuredOutput!==aiStructured} onClick={()=>void testAi()} className="rounded-xl border border-teal-700 px-4 py-3 font-semibold text-teal-800 disabled:opacity-50">ทดสอบ AI</button>
         </div>
         {aiMessage&&<p role="status" className="text-sm text-slate-700">{aiMessage}</p>}
         {aiResult&&<div className="rounded-xl bg-slate-50 p-3 text-sm" aria-live="polite">
