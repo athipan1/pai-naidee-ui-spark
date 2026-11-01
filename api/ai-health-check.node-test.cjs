@@ -25,3 +25,12 @@ test('health endpoint requires admin guard and does not mount publicly',()=>{
  assert.equal(registered[0][0],'/api/admin/ai/health-check');
  assert.equal(registered[0][1],guard);
 });
+
+test('shared travel planner parser accepts fenced JSON and rejects invented place IDs',()=>{
+ const {parseAiJson,validateAiPlan}=require('./ai-trip-plan.cjs');
+ const payload='Here is JSON:\n'+String.fromCharCode(96).repeat(3)+'json\n{"days":[{"day":1,"placeIds":["test-place"]}]}\n'+String.fromCharCode(96).repeat(3);
+ assert.equal(validateAiPlan(parseAiJson(payload),1,[{id:'test-place'}]).days[0].placeIds[0],'test-place');
+ assert.throws(()=>parseAiJson('not json'),e=>e.code==='INVALID_JSON');
+ assert.throws(()=>validateAiPlan({days:[{day:1,placeIds:['fake']}]},1,[{id:'test-place'}]),e=>e.code==='INVALID_PLACE_IDS');
+ assert.throws(()=>validateAiPlan({days:'bad'},1,[{id:'test-place'}]),e=>e.code==='INVALID_SCHEMA');
+});
