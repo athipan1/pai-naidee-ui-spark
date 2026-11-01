@@ -1,4 +1,4 @@
-import { Compass, Sparkles } from "lucide-react";
+import { Compass, House, Sparkles } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface BottomNavigationProps {
@@ -10,9 +10,11 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   
   // Helper function to determine if a tab is active
   const isTabActive = (tabPath: string) => {
+    if (tabPath === "/") {
+      return location.pathname === "/";
+    }
     if (tabPath === "/discover") {
-      return location.pathname === "/" || 
-             location.pathname === "/discover" || 
+      return location.pathname === "/discover" || 
              location.pathname.startsWith("/category") ||
              location.pathname.startsWith("/explore") ||
              location.pathname.startsWith("/search") ||
@@ -23,6 +25,12 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
 
   // Base navigation tabs - minimal set
   const baseTabs = [
+    {
+      id: "home",
+      path: "/",
+      label: { th: "หน้าหลัก", en: "Home" },
+      icon: House,
+    },
     {
       id: "discover",
       path: "/discover",
@@ -42,7 +50,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-effect border-t border-white/20 safe-area-bottom">
       <div className="container mx-auto px-4">
-        <div className="mx-auto grid w-full max-w-sm grid-cols-2 items-stretch gap-2 py-2">
+        <div className="mx-auto grid w-full max-w-md grid-cols-3 items-stretch gap-2 py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = isTabActive(tab.path);
@@ -64,7 +72,7 @@ const BottomNavigation = ({ currentLanguage }: BottomNavigationProps) => {
                 <div className={`nav-icon transition-all duration-300 ${isActive ? "scale-110 animate-bounce" : ""}`}>
                   <Icon className={`w-6 h-6 ${isActive ? "drop-shadow-md" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`} />
                 </div>
-                <span className={`text-xs text-center whitespace-nowrap font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`}>
+                <span className={`text-[11px] sm:text-xs text-center leading-tight font-medium transition-all duration-300 ${isActive ? "font-semibold" : ""} ${tab.id === "admin" ? "text-orange-600" : ""}`}>
                   {tab.label[currentLanguage]}
                 </span>
 
