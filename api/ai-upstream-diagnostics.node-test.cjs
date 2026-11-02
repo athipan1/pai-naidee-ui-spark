@@ -38,3 +38,20 @@ test('classifies upstream stream-read failure',async()=>{
  const request=async()=>({ok:true,status:200,headers:{get:()=>null},json:async()=>{throw new TypeError('private response stream');}});
  await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),err=>err.details.providerErrorType==='response_read_failure');
 });
+
+test('distinguishes header abort from network failure',async()=>{
+ const request=async()=>{const e=new Error('private');e.name='AbortError';throw e;};
+ await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),e=>e.details.providerErrorType==='headers_aborted'&&Number.isInteger(e.details.headersMs));
+});
+test('distinguishes interrupted response body from malformed JSON',async()=>{
+ const request=async()=>({ok:true,status:200,headers:{get:k=>k==='content-type'?'application/json':null},json:async()=>{const e=new Error('private body');e.name='AbortError';throw e;}});
+ await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),e=>e.details.providerErrorType==='body_aborted'&&Number.isInteger(e.details.bodyMs)&&Number.isInteger(e.details.headersMs)&&!JSON.stringify(e.details).includes('private body'));
+});
+test('diagnoses body stream truncation separately',async()=>{
+ const request=async()=>({ok:true,status:200,headers:{get:()=>null},json:async()=>{throw new TypeError('stream truncated');}});
+ await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),e=>e.details.providerErrorType==='response_stream_failure'&&e.details.bodyMs>=0);
+});
+test('detects timeout while waiting for headers',async()=>{
+ const request=async(_url,{signal})=>new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(signal.reason),{once:true}));
+ await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},10,request),e=>e.details.providerErrorType==='headers_timeout');
+});
