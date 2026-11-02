@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
 import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
-import { auditTripRoute, createTripPlan, estimateTripBudget, mapDirectionsUrl, type TripPlanInput, type TripStyle } from '@/shared/utils/tripPlanner';
+import { auditTripRoute, estimateTripBudget, mapDirectionsUrl, type TripPlanInput, type TripStyle } from '@/shared/utils/tripPlanner';
 import { parseTripIntent, type TripIntent } from '@/shared/utils/tripIntent';
 import BottomNavigation from '@/components/common/BottomNavigation';
 import TripTimelineMap from './TripTimelineMap';
@@ -62,10 +62,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
   const facets = useQuery({ queryKey: ['places', 'facets'], queryFn: getRailwayPlaceFacets, staleTime: 5 * 60_000 });
   const places = useAllAttractions({ province }, { enabled: !!province });
   const input: TripPlanInput = { days, people, dailyBudgetPerPerson, style, transport };
-  const stops = useMemo(() => generated && province && places.data
-    ? createTripPlan(places.data.attractions.map(p => ({ ...p, images: p.images ?? [], coordinates: p.coordinates, tags: p.tags ?? [] })), input, intent?.avoidLongDrives ? intent.maxLegKm : undefined)
-    : [], [generated, province, places.data, days, people, dailyBudgetPerPerson, style, transport, intent]);
-  const roadStops = useMemo(() => roadPlan?.stops.map(item=>({place:item.place,day:item.day,order:item.order})) ?? [],[roadPlan]);
+  const roadStops = useMemo(() => roadPlan?.stops.map(item=>({place:{...item.place,images:item.place.images??[],tags:item.place.tags??[]},day:item.day,order:item.order})) ?? [],[roadPlan]);
   const displayedStops = editedStops ?? roadStops;
   const roadVerified = Boolean(roadPlan) && !editedStops && roadStops.length === roadPlan!.stops.length;
   const budget = estimateTripBudget(input);
