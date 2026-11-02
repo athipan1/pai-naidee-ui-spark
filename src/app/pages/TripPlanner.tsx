@@ -95,7 +95,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
   const updateInput = (setter: () => void) => { setter(); setGenerated(false); setIntent(null); setEditedStops(null); setRoadPlan(null); };
 
   return (
-    <div className="min-h-screen w-full min-w-0 overflow-x-clip bg-background pb-36 sm:pb-28">
+    <div className="min-h-screen min-w-0 overflow-x-clip w-full min-w-0 overflow-x-clip bg-background pb-36 sm:pb-28">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-lg">
         <div className="container mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
           <Link to="/" aria-label={th ? 'กลับหน้าแรก' : 'Back home'} className="rounded-lg p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Link>
@@ -182,8 +182,9 @@ export default function TripPlanner({ currentLanguage }: Props) {
               <p className="mt-1 text-sm text-muted-foreground">{th ? `วางแผนได้ ${aiPlan.completeness?.plannedDays ?? aiPlan.days?.length ?? 0} จาก ${aiPlan.completeness?.requestedDays ?? days} วัน` : `Planned ${aiPlan.completeness?.plannedDays ?? aiPlan.days?.length ?? 0} of ${aiPlan.completeness?.requestedDays ?? days} days`}</p>
               {aiPlan.completeness?.status !== 'complete' && <p className="mt-2 text-sm">{th ? 'ลองเพิ่มสถานที่หรือขยายระยะเดินทางที่ยอมรับได้ แล้วกดสร้างแผนใหม่ หรือใช้แผนพื้นฐานด้านล่าง' : 'Try relaxing the travel distance or adding more places, then regenerate, or use the basic planner below.'}</p>}
             </div>
+            {aiPlan.recovery && <p className="text-sm text-amber-600">{aiPlan.recovery.status==='verified_road_recovery'?(th?'AI จัดทริปไม่ครบ ระบบจึงเติมแผนด้วยเส้นทางถนนที่ตรวจสอบแล้ว':'AI draft was incomplete; verified road recovery filled the days'):(th?'ยังจัดทริปไม่ครบ เนื่องจากสถานที่หรือเส้นทางถนนที่ผ่านเกณฑ์มีไม่เพียงพอ':'Insufficient verified places or road routes')}</p>}
             <TripTimelineMap days={days} th={th} stops={(aiPlan.days ?? []).flatMap((day: any) => (day.stops ?? []).map((stop: any, i: number) => {
-              const place=places.data?.attractions.find(p=>String(p.id)===String(stop.id));
+              const place=places.data?.attractions.find(p=>String(p.id)===String(stop.id)) ?? (stop.coordinates ? { ...stop, name:stop.name, nameLocal:stop.nameLocal||stop.name, category:stop.category||'Place', province:stop.province||province, rating:0, reviewCount:0, description:'', images:[], tags:[] } : null);
               return place ? {place:{...place,images:place.images??[],tags:place.tags??[]},day:day.day,order:i+1} : null;
             }).filter(Boolean))} available={[]} />
             <p>{th ? 'งบประมาณคร่าว ๆ' : 'Estimated budget'}: {currency(aiPlan.budget?.estimatedTotal ?? 0)}</p>
