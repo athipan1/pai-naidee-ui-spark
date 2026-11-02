@@ -53,5 +53,7 @@ test('diagnoses body stream truncation separately',async()=>{
 });
 test('detects timeout while waiting for headers',async()=>{
  const request=async(_url,{signal})=>new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(signal.reason),{once:true}));
- await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},10,request),e=>e.details.providerErrorType==='headers_timeout');
+ const keepAlive=setTimeout(()=>{},100);
+ try {await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},10,request),e=>e.details.providerErrorType==='headers_timeout');}
+ finally {clearTimeout(keepAlive);}
 });
