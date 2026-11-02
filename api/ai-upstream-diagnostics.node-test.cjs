@@ -36,7 +36,7 @@ test('classifies invalid JSON envelope without logging response content',async()
 });
 test('classifies upstream stream-read failure',async()=>{
  const request=async()=>({ok:true,status:200,headers:{get:()=>null},json:async()=>{throw new TypeError('private response stream');}});
- await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),err=>err.details.providerErrorType==='response_read_failure');
+ await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),err=>err.details.providerErrorType==='response_stream_failure');
 });
 
 test('distinguishes header abort from network failure',async()=>{
