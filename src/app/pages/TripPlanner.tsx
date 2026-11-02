@@ -9,6 +9,7 @@ import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 import { auditTripRoute, createTripPlan, estimateTripBudget, mapDirectionsUrl, type TripPlanInput, type TripStyle } from '@/shared/utils/tripPlanner';
 import { parseTripIntent, type TripIntent } from '@/shared/utils/tripIntent';
 import BottomNavigation from '@/components/common/BottomNavigation';
+import TripTimelineMap from './TripTimelineMap';
 
 interface Props { currentLanguage: 'th' | 'en' }
 
@@ -23,6 +24,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
   const [style, setStyle] = useState<TripStyle>('balanced');
   const [transport, setTransport] = useState<'car' | 'public'>('car');
   const [generated, setGenerated] = useState(false);
+  const [editedStops, setEditedStops] = useState<import('@/shared/utils/tripPlanner').TripStop[] | null>(null);
   const [request, setRequest] = useState('');
   const [intent, setIntent] = useState<TripIntent | null>(null);
   const [aiPlan, setAiPlan] = useState<any>(null);
@@ -60,14 +62,16 @@ export default function TripPlanner({ currentLanguage }: Props) {
   const stops = useMemo(() => generated && province && places.data
     ? createTripPlan(places.data.attractions.map(p => ({ ...p, images: p.images ?? [], coordinates: p.coordinates, tags: p.tags ?? [] })), input, intent?.avoidLongDrives ? intent.maxLegKm : undefined)
     : [], [generated, province, places.data, days, people, dailyBudgetPerPerson, style, transport, intent]);
+  const displayedStops = editedStops ?? stops;
   const budget = estimateTripBudget(input);
-  const routeAudit = useMemo(() => auditTripRoute(stops, intent?.maxLegKm ?? 100), [stops, intent]);
+  const routeAudit = useMemo(() => auditTripRoute(displayedStops, intent?.maxLegKm ?? 100), [displayedStops, intent]);
   const exceedsBudget = intent?.totalBudget !== null && intent?.totalBudget !== undefined && budget.total > intent.totalBudget;
 
   const interpretRequest = () => {
     const parsed = parseTripIntent(request, facets.data?.provinces ?? []);
     setIntent(parsed);
     setGenerated(false);
+    setEditedStops(null);
     if (parsed.issues.length) return;
     setProvince(parsed.province);
     setDays(parsed.days);
@@ -78,8 +82,8 @@ export default function TripPlanner({ currentLanguage }: Props) {
     setGenerated(true);
   };
 
-  const generate = () => setGenerated(true);
-  const updateInput = (setter: () => void) => { setter(); setGenerated(false); setIntent(null); };
+  const generate = () => { setEditedStops(null); setGenerated(true); };
+  const updateInput = (setter: () => void) => { setter(); setGenerated(false); setIntent(null); setEditedStops(null); };
 
   return (
     <div className="min-h-screen w-full min-w-0 overflow-x-clip bg-background pb-36 sm:pb-28">
@@ -168,15 +172,10 @@ export default function TripPlanner({ currentLanguage }: Props) {
               <p className="mt-1 text-sm text-muted-foreground">{th ? `วางแผนได้ ${aiPlan.completeness?.plannedDays ?? aiPlan.days?.length ?? 0} จาก ${aiPlan.completeness?.requestedDays ?? days} วัน` : `Planned ${aiPlan.completeness?.plannedDays ?? aiPlan.days?.length ?? 0} of ${aiPlan.completeness?.requestedDays ?? days} days`}</p>
               {aiPlan.completeness?.status !== 'complete' && <p className="mt-2 text-sm">{th ? 'ลองเพิ่มสถานที่หรือขยายระยะเดินทางที่ยอมรับได้ แล้วกดสร้างแผนใหม่ หรือใช้แผนพื้นฐานด้านล่าง' : 'Try relaxing the travel distance or adding more places, then regenerate, or use the basic planner below.'}</p>}
             </div>
-            {aiPlan.days?.map((day: any) => <div key={day.day} className="rounded-xl border p-3">
-              <p className="font-semibold">{th ? 'วันที่' : 'Day'} {day.day}</p>
-              {day.stops?.map((stop: any) => <p key={stop.id}>• {stop.name} · {stop.openingHours?.status === 'sourced' ? `${stop.openingHours.value} (${stop.openingHours.source})` : (th ? 'เวลาทำการยังไม่ยืนยัน' : 'Hours unverified')}</p>)}
-              {day.legs?.map((leg: any, i: number) => <p className="text-xs text-muted-foreground" key={i}>
-                {leg.road?.status === 'verified_route'
-                  ? `${leg.road.distanceKm} km / ${leg.road.durationMinutes} min (Geoapify)`
-                  : (th ? 'เส้นทางถนนยังไม่ยืนยัน' : 'Road route unverified')}
-              </p>)}
-            </div>)}
+            <TripTimelineMap days={days} th={th} stops={(aiPlan.days ?? []).flatMap((day: any) => (day.stops ?? []).map((stop: any, i: number) => {
+              const place=places.data?.attractions.find(p=>String(p.id)===String(stop.id));
+              return place ? {place:{...place,images:place.images??[],tags:place.tags??[]},day:day.day,order:i+1} : null;
+            }).filter(Boolean))} available={[]} />
             <p>{th ? 'งบประมาณคร่าว ๆ' : 'Estimated budget'}: {currency(aiPlan.budget?.estimatedTotal ?? 0)}</p>
             {aiPlan.validation?.warnings?.map((warning: string) => <p key={warning} className="text-xs text-amber-500">⚠ {warning}</p>)}
           </section>}
@@ -193,20 +192,14 @@ export default function TripPlanner({ currentLanguage }: Props) {
             <p className="text-xs text-muted-foreground">{th ? 'ระยะเส้นตรงไม่ใช่ระยะถนนหรือเวลาเดินทางจริง แผนนี้ยังเป็นฉบับร่าง ไม่ใช่แผนที่ยืนยันเวลาทำการแล้ว' : 'Straight-line distance is not driving distance or travel time. This is a draft, not an hours-verified itinerary.'}</p>
           </CardContent></Card>
           {stops.length === 0 ? <Card><CardContent className="p-5">{th ? 'จังหวัดนี้ยังไม่มีสถานที่พร้อมพิกัดเพียงพอสำหรับจัดทริป' : 'No verified coordinates available for this destination yet.'}</CardContent></Card> : <>
-            <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-2xl font-bold">{th ? `ทริป ${province} ${days} วัน` : `${province}: ${days}-day trip`}</h2><p className="text-sm text-muted-foreground">{th ? `${stops.length} สถานที่ · ${people} คน` : `${stops.length} places · ${people} travelers`}</p></div></div>
+            <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-2xl font-bold">{th ? `ทริป ${province} ${days} วัน` : `${province}: ${days}-day trip`}</h2><p className="text-sm text-muted-foreground">{th ? `${displayedStops.length} สถานที่ · ${people} คน` : `${displayedStops.length} places · ${people} travelers`}</p></div></div>
             <Card><CardContent className="p-5"><h3 className="mb-3 flex items-center gap-2 text-lg font-semibold"><Wallet className="h-5 w-5 text-amber-400" />{th ? 'ประมาณการงบทั้งทริป' : 'Estimated trip budget'}</h3>
               <p className="text-3xl font-bold text-amber-400">{currency(budget.total)}</p><p className="mb-4 text-sm text-muted-foreground">{th ? `เฉลี่ย ${currency(budget.perPerson)} ต่อคน` : `${currency(budget.perPerson)} per person`}</p>
               <div className="grid grid-cols-2 gap-3 text-sm">{([[th ? 'อาหาร' : 'Meals', budget.meals], [th ? 'เดินทาง' : 'Transport', budget.transport], [th ? 'ที่พัก' : 'Accommodation', budget.accommodation], [th ? 'กิจกรรม' : 'Activities', budget.activities]] as const).map(([label, amount]) => <div key={label} className="rounded-xl bg-muted/60 p-3"><span className="text-muted-foreground">{label}</span><p className="mt-1 font-semibold">{currency(amount)}</p></div>)}</div>
               <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{th ? 'ตัวเลขนี้เป็นการแบ่งงบตามสมมติฐานเพื่อวางแผน ไม่ใช่ราคาโรงแรม ค่าเข้าชม ค่าเดินทางจริง หรือใบเสนอราคา โปรดตรวจสอบราคาและเวลาทำการก่อนเดินทาง' : 'Indicative allocations only, not live hotel, transport or admission prices. Verify actual prices and opening hours before traveling.'}</p>
             </CardContent></Card>
-            {Array.from({ length: days }, (_, i) => i + 1).map(day => {
-              const daily = stops.filter(s => s.day === day);
-              if (!daily.length) return null;
-              const url = mapDirectionsUrl(daily);
-              return <Card key={day}><CardContent className="space-y-3 p-5"><div className="flex items-center justify-between gap-2"><h3 className="text-lg font-semibold">{th ? `วันที่ ${day}` : `Day ${day}`}</h3>{url && <a className="inline-flex items-center gap-1 text-sm text-teal-400 underline" href={url} target="_blank" rel="noopener noreferrer"><Navigation className="h-4 w-4" />{th ? 'เปิดเส้นทาง' : 'Open route'}</a>}</div>
-                <ol className="space-y-3">{daily.map((stop, i) => <li key={stop.place.id} className="flex items-start gap-3 rounded-xl border border-border/60 p-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-sm font-bold text-teal-400">{i + 1}</span><div className="min-w-0 flex-1"><Link className="font-semibold hover:underline" to={`/attraction/${stop.place.id}`}>{th ? stop.place.nameLocal || stop.place.name : stop.place.name}</Link><p className="text-xs text-muted-foreground">{stop.place.category} · {stop.place.province}</p></div></li>)}</ol>
-              </CardContent></Card>;
-            })}
+            <TripTimelineMap stops={displayedStops} available={(places.data?.attractions??[]).map(p=>({...p,images:p.images??[],tags:p.tags??[]}))} days={days} th={th} onChange={setEditedStops}/>
+            {editedStops && <p role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm">{th?'คุณแก้ไขลำดับหรือจุดแวะแล้ว ต้องตรวจสอบเส้นทางถนน เวลาเปิดปิด และความเหมาะสมอีกครั้งก่อนเดินทาง':'You edited the itinerary. Road routes, opening hours and constraints must be revalidated.'}</p>}
             {routeAudit.legs.length > 0 && <Card><CardContent className="space-y-2 p-5"><h3 className="font-semibold">{th ? 'ตรวจระยะทางระหว่างจุดแวะ (เส้นตรง)' : 'Straight-line legs'}</h3>{routeAudit.legs.map((leg, i) => <p key={i} className="text-sm text-muted-foreground">{leg.from} → {leg.to}: {leg.straightLineKm} กม.</p>)}</CardContent></Card>}
             <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground"><MapPinned className="h-4 w-4 shrink-0" />{th ? 'ลำดับจุดแวะคำนวณจากความใกล้เคียงและประเภทสถานที่ ไม่ใช่เวลาเดินทางจากการจราจรจริง เส้นทาง Google Maps ใช้สำหรับตรวจสอบและปรับแผนก่อนออกเดินทาง' : 'Stops are ordered by proximity and category, not live traffic. Check routes in Google Maps before leaving.'}</p>
           </>}
