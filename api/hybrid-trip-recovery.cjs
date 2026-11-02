@@ -1,6 +1,5 @@
 'use strict';
 const {roadLeg}=require('./ai-trip-plan.cjs');
-const {rankRoadStops}=require('./basic-trip-road.cjs');
 function verifiedDay(day,lookup){
  if(!day||!Number.isInteger(day.day)||!Array.isArray(day.stops)||day.stops.length<2||!Array.isArray(day.legs)||day.legs.length!==day.stops.length-1)return false;
  const ids=day.stops.map(p=>String(p.id));
@@ -56,7 +55,7 @@ async function recoverIncrementally({days,requestedDays,candidates,lookup,transp
   if(chosen.length>=2&&legs.length===chosen.length-1){
    recovered.push({day,stops:chosen,legs});for(const s of chosen)reserved.add(String(s.id));sources[day]=prefix.length?'hybrid':'smart';
   }else{
-   if(original?.stops?.length)recovered.push(original);
+   if(prefix.length)recovered.push({day,stops:prefix,legs:(original?.legs||[]).slice(0,Math.max(0,prefix.length-1))});
    diagnostics.push({day,reason:available.length?'ROUTE_UNVERIFIED':'INSUFFICIENT_PLACES'});
    sources[day]='partial';
   }
