@@ -34,20 +34,20 @@ function parseAiJson(content) {
 }
 function validateAiPlan(plan, days, places) {
   if(!plan||typeof plan!=='object'||Array.isArray(plan)||!Array.isArray(plan.days)||!plan.days.length||plan.days.length>days)
-    throw new AiResponseError('INVALID_SCHEMA');
+    throw new AiResponseError('INVALID_SCHEMA',{reason:'days_missing_or_invalid'});
   const valid=new Set(places.map(p=>String(p.id))), used=new Set(), seenDays=new Set();
   for(const day of plan.days) {
     if(!day||!Number.isInteger(day.day)||day.day<1||day.day>days||seenDays.has(day.day)
       ||!Array.isArray(day.placeIds)||!day.placeIds.length||day.placeIds.length>3)
-      throw new AiResponseError('INVALID_SCHEMA');
+      throw new AiResponseError('INVALID_SCHEMA',{reason:'day_shape_invalid'});
     seenDays.add(day.day);
     for(const id of day.placeIds) {
-      if(typeof id!=='string'||!valid.has(id)||used.has(id)) throw new AiResponseError('INVALID_PLACE_IDS');
+      if(typeof id!=='string'||!valid.has(id)||used.has(id)) throw new AiResponseError('INVALID_PLACE_IDS',{reason:'place_id_unknown_or_duplicate'});
       used.add(id);
     }
   }
   if(plan.notes!==undefined&&(!Array.isArray(plan.notes)||plan.notes.length>10||plan.notes.some(x=>typeof x!=='string'||x.length>400)))
-    throw new AiResponseError('INVALID_SCHEMA');
+    throw new AiResponseError('INVALID_SCHEMA',{reason:'notes_shape_invalid'});
   return plan;
 }
 function parseOpenRouterResponse(response,{days,places,model}) {
@@ -65,7 +65,7 @@ function parseOpenRouterResponse(response,{days,places,model}) {
     const content=choice.message.content;
     const text=Array.isArray(content)?content.filter(p=>p?.type==='text'&&typeof p.text==='string').map(p=>p.text).join('\n'):content;
     return {plan:validateAiPlan(parseAiJson(text),days,places),meta};
-  } catch(e) {throw new AiResponseError(e.code||'INVALID_SCHEMA',meta);}
+  } catch(e) {throw new AiResponseError(e.code||'INVALID_SCHEMA',{...meta,reason:e.meta?.reason||null});}
 }
 function logAiEvent(type,meta={}) {
   // Do not log prompts, model content, visitors, auth headers, or API keys.
