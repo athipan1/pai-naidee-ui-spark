@@ -84,7 +84,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
     setDailyBudgetPerPerson(Math.floor(parsed.totalBudget! / parsed.days / parsed.people));
     setStyle(parsed.style);
     setTransport(parsed.transport);
-    void generate();
+    setRoadPlan(null);setGenerated(false);
   };
 
   async function generate() {
