@@ -23,3 +23,18 @@ test('accepts valid non-error responses',async()=>{
  const result=await fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request);
  assert.equal(result.choices[0].message.content,'{}');
 });
+
+test('classifies invalid JSON envelope without logging response content',async()=>{
+ const request=async()=>({ok:true,status:200,headers:{get:key=>key==='content-type'?'text/html':key==='content-length'?'87':null},json:async()=>{throw new SyntaxError('private upstream body');}});
+ await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),err=>{
+  assert.equal(err.details.providerErrorType,'invalid_json_envelope');
+  assert.equal(err.details.contentType,'text');
+  assert.equal(err.details.responseBytes,87);
+  assert.ok(!JSON.stringify(err.details).includes('private upstream body'));
+  return true;
+ });
+});
+test('classifies upstream stream-read failure',async()=>{
+ const request=async()=>({ok:true,status:200,headers:{get:()=>null},json:async()=>{throw new TypeError('private response stream');}});
+ await assert.rejects(fetchOpenRouter('https://openrouter.ai/api/v1/chat/completions',{},100,request),err=>err.details.providerErrorType==='response_read_failure');
+});
