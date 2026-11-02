@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Wallet, Navigation, Users, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Wallet, Navigation, Users, SlidersHorizontal, LoaderCircle, RotateCcw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
@@ -97,13 +97,13 @@ export default function TripPlanner({ currentLanguage }: Props) {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{th ? 'เลือกจุดหมายและสไตล์การเที่ยว เราจะจัดสถานที่จริงเป็นทริปรายวัน พร้อมประเมินงบและลิงก์เส้นทางให้' : 'Choose a destination and travel style to create a day-by-day plan from real places, with budget estimates and route links.'}</p>
         </section>
 
-        <Card><CardContent className="min-w-0 space-y-4 overflow-hidden p-4 sm:p-7">
+        <Card><CardContent className="min-w-0 space-y-5 overflow-hidden p-4 sm:p-7">
           <h2 className="flex items-center gap-2 text-xl font-semibold"><Sparkles className="h-5 w-5 text-teal-400" />{th ? 'เล่าทริปที่อยากไป' : 'Describe your ideal trip'}</h2>
           <label htmlFor="trip-request" className="block text-sm text-muted-foreground">{th ? 'ระบุจังหวัด จำนวนวัน งบรวม และความชอบด้วยภาษาธรรมชาติ' : 'Include province, days, total budget and preferences'}</label>
           <textarea id="trip-request" rows={3} maxLength={500} value={request} onChange={e => { setRequest(e.target.value); setIntent(null); setGenerated(false); }}
             placeholder={th ? 'อยากเที่ยวเชียงใหม่ 3 วัน งบ 6,000 บาท ชอบธรรมชาติ ไม่อยากขับรถไกล' : 'Chiang Mai 3 days budget 6000 baht, nature and short drives'}
-            className="block w-full min-w-0 max-w-full resize-y rounded-xl border border-input bg-background p-3 text-base" />
-          <Button type="button" onClick={interpretRequest} disabled={!request.trim() || facets.isLoading || !facets.data} className="w-full bg-teal-400 text-slate-950 hover:bg-teal-300">
+            className="block w-full min-w-0 max-w-full resize-y rounded-2xl border border-input bg-background p-4 text-base leading-7 shadow-sm transition focus-visible:border-teal-400 focus-visible:ring-2 focus-visible:ring-teal-400/30" />
+          <Button type="button" onClick={interpretRequest} disabled={!request.trim() || facets.isLoading || !facets.data} className="min-h-12 w-full rounded-xl bg-teal-400 font-semibold text-slate-950 shadow-sm transition hover:bg-teal-300">
             <Sparkles className="mr-2 h-4 w-4" />{th ? 'ตีความและสร้างแผนเบื้องต้น' : 'Interpret and draft itinerary'}
           </Button>
           {intent && <div aria-live="polite" className="min-w-0 space-y-2 break-words rounded-xl bg-muted/60 p-4 text-sm">
@@ -111,11 +111,12 @@ export default function TripPlanner({ currentLanguage }: Props) {
               : <p>{th ? `เข้าใจคำขอ: ${intent.province} · ${intent.days} วัน · ${intent.people} คน · งบรวม ${currency(intent.totalBudget!)} · ${intent.avoidLongDrives ? 'จำกัดช่วงระหว่างจุดแวะไม่เกิน 30 กม. (เส้นตรง)' : 'วางแผนตามระยะทาง'}`
                 : `Interpreted: ${intent.province}, ${intent.days} days, ${intent.people} people, total budget ${currency(intent.totalBudget!)}`}</p>}
           </div>}
-          <Button type="button" variant="outline" onClick={requestAiPlan}
+          <Button type="button" variant="outline" onClick={requestAiPlan} className="min-h-12 w-full rounded-xl border-teal-500/30 font-semibold sm:w-auto"
             disabled={aiLoading || !request.trim() || !province}>
             {aiLoading ? (th ? 'AI กำลังวางแผน...' : 'AI is planning...') : (th ? 'สร้างแผนด้วย OpenRouter AI' : 'Generate with OpenRouter AI')}
           </Button>
-          {aiError && <p role="alert" className="text-sm text-red-400">{aiError}</p>}
+          {aiLoading && <div role="status" aria-live="polite" className="flex items-center gap-3 rounded-xl border border-teal-400/20 bg-teal-400/5 p-3 text-sm text-muted-foreground"><LoaderCircle className="h-5 w-5 shrink-0 animate-spin text-teal-400" />{th ? 'กำลังตรวจสถานที่และสร้างเส้นทาง โปรดรอสักครู่' : 'Checking places and preparing your route…'}</div>}
+          {aiError && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-400/30 bg-red-500/5 p-4"><span className="flex min-w-0 items-start gap-2 text-sm text-red-500"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{aiError}</span><Button size="sm" variant="outline" disabled={aiLoading} onClick={requestAiPlan} className="gap-2 rounded-lg"><RotateCcw className="h-4 w-4" />{th ? 'ลองอีกครั้ง' : 'Retry'}</Button></div>}
           {aiPlan && <section className="min-w-0 space-y-3 break-words" aria-label="Verified AI draft">
             <h3 className="font-semibold">{th ? 'แผนจาก AI (ฉบับร่าง)' : 'AI itinerary (draft)'}</h3>
             {aiPlan.days?.map((day: any) => <div key={day.day} className="rounded-xl border p-3">
