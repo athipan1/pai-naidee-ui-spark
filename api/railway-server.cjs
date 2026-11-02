@@ -5,6 +5,7 @@ const { randomUUID } = require('node:crypto');
 const multer = require('multer');
 const { registerAdminCms } = require('./admin-cms.cjs');
 const { registerAiTripRoutes } = require('./ai-trip-plan.cjs');
+const { registerBasicTripRoadRoutes } = require('./basic-trip-road.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
 const { ensureAiSettings,registerAiSettingsRoutes } = require('./ai-model-settings.cjs');
 const { authRoutes } = require('./railway-admin-auth.cjs');
@@ -52,6 +53,7 @@ registerAdminCms(app, {
 });
 registerRailwayMedia(app, { getSql, storage });
 registerAiTripRoutes(app, { listPlaces,getSql });
+registerBasicTripRoadRoutes(app, { listPlaces });
 registerAiHealthRoutes(app, { requireAdmin,getSql });
 registerAiSettingsRoutes(app, { requireAdmin,getSql });
 
