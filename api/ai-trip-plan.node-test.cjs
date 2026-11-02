@@ -79,3 +79,14 @@ test('trip completeness gate rejects missing days, insufficient stops and unveri
  assert.equal(partial.status,'partial');assert.ok(partial.reasons.includes('MISSING_DAYS'));assert.ok(partial.reasons.includes('INSUFFICIENT_STOPS'));assert.ok(partial.reasons.includes('UNVERIFIED_ROUTES'));
  assert.ok(evaluateTripCompleteness([day(1,['a','unknown'])],1,lookup).reasons.includes('UNVERIFIED_PLACES'));
 });
+
+test('candidate coverage selects valid unique nature places across clusters',()=>{
+ const {selectTripCandidates,requestPreferences}=require('./ai-trip-plan.cjs');
+ const p=(id,lat,lng,province='เชียงใหม่',category='Nature')=>({id,province,category,tags:[category],rating:5,coordinates:{lat,lng}});
+ const records=[...Array.from({length:50},(_,i)=>p('cluster-a-'+i,18.8+i*.0001,98.9)),p('cluster-b',19.4,99.4),p('wrong-province',19.5,99.5,'ภูเก็ต'),p('wrong-style',18.3,98.3,'เชียงใหม่','Culture'),p('bad-coord',50,50),p('cluster-b',19.4,99.4)];
+ const result=selectTripCandidates(records,{province:'เชียงใหม่',days:3},requestPreferences('ธรรมชาติ ไม่ขับรถไกล'));
+ assert.equal(result.length,18);
+ assert.ok(result.some(x=>x.id==='cluster-b'));
+ assert.ok(result.every(x=>x.province==='เชียงใหม่'&&x.category==='Nature'));
+ assert.equal(new Set(result.map(x=>x.id)).size,result.length);
+});
