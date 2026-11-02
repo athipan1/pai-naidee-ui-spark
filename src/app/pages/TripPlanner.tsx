@@ -92,6 +92,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
           <Link to="/" aria-label={th ? 'กลับหน้าแรก' : 'Back home'} className="rounded-lg p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Link>
           <Sparkles className="h-6 w-6 text-teal-400" />
           <span className="font-semibold">{th ? 'AI วางแผนเที่ยว' : 'Smart Trip Planner'}</span>
+          <span className="ml-auto text-[10px] text-muted-foreground" aria-label="Frontend build">v{__PAINAIDEE_BUILD__}</span>
         </div>
       </header>
       <main className="container mx-auto w-full min-w-0 max-w-5xl space-y-6 overflow-x-clip px-4 py-5 sm:px-4 sm:py-7">
