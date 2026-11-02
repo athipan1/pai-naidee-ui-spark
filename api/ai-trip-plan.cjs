@@ -195,17 +195,42 @@ function evaluateTripCompleteness(days,requestedDays,lookup) {
   if(days.some(d=>d.legs.length!==Math.max(0,d.stops.length-1)||d.legs.some(l=>l.road?.status!=='verified_route'))) reasons.push('UNVERIFIED_ROUTES');
   return {status:reasons.length?'partial':'complete',requestedDays,plannedDays:indices.size,verifiedPlaces:ids.length,reasons};
 }
+function selectTripCandidates(places,input,preferences) {
+  const seen=new Set();
+  const valid=(places||[]).filter(p=>{
+    const id=String(p?.id??'');
+    if(!id||seen.has(id)||!validCoord(p)||String(p.province).toLocaleLowerCase()!==input.province.toLocaleLowerCase()||!matchesStyle(p,preferences))return false;
+    seen.add(id);return true;
+  }).sort((a,b)=>(Number(b.rating)||0)-(Number(a.rating)||0));
+  // Prefer coverage across nearby geographic clusters, not only globally top-rated places.
+  const groups=new Map();
+  for(const p of valid){
+    const key=Math.floor(Number(p.coordinates.lat)*10)+':'+Math.floor(Number(p.coordinates.lng)*10);
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(p);
+  }
+  const selected=[],cap=Math.min(24,Math.max(9,input.days*6));
+  while(selected.length<cap&&Array.from(groups.values()).some(g=>g.length)){
+    for(const group of groups.values()){if(group.length&&selected.length<cap)selected.push(group.shift());}
+  }
+  return selected;
+}
 function registerAiTripRoutes(app,{listPlaces,getSql}) {
   const limiter=createRateLimiter({windowMs:60_000,max:3,keyPrefix:'ai-trip'});
   app.post('/api/ai/trip-plan',limiter,async(req,res)=>{
     const input=validateRequest(req.body);
     if(!input) return res.status(400).json({error:'Invalid trip request.'});
     try {
-      const result=await listPlaces({province:input.province,limit:50,page:1});
       const preferences=requestPreferences(input.message);
-      const candidates=(result.attractions||[]).filter(p=>validCoord(p)&&
-        String(p.province).toLocaleLowerCase()===input.province.toLocaleLowerCase() && matchesStyle(p,preferences))
-        .sort((a,b)=>(Number(b.rating)||0)-(Number(a.rating)||0)).slice(0,Math.min(15,Math.max(6,input.days*3+3)));
+      // Read up to three bounded pages, avoiding a ranking-only first-page bottleneck.
+      const pages=[];
+      for(let page=1;page<=3;page++){
+        const result=await listPlaces({province:input.province,limit:50,page});
+        const items=Array.isArray(result.attractions)?result.attractions:[];
+        pages.push(...items);
+        if(items.length<50)break;
+      }
+      const candidates=selectTripCandidates(pages,input,preferences);
       if(!candidates.length) return res.status(422).json({error:'No validated places available for this province.'});
       let proposed;
       try {proposed=await proposePlan({...input,places:candidates,getSql});}
@@ -241,4 +266,4 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
     }catch(error){console.error('AI trip API error:',error.message);return res.status(503).json({error:'Trip planning service unavailable.'});}
   });
 }
-module.exports={registerAiTripRoutes,validateRequest,validCoord,haversine,parseAiJson,validateAiPlan,parseOpenRouterResponse,AiResponseError,requestPreferences,matchesStyle,placeNameMatches,enforceTripConstraints,evaluateTripCompleteness};
+module.exports={registerAiTripRoutes,validateRequest,validCoord,haversine,parseAiJson,validateAiPlan,parseOpenRouterResponse,AiResponseError,requestPreferences,matchesStyle,placeNameMatches,enforceTripConstraints,evaluateTripCompleteness,selectTripCandidates};
