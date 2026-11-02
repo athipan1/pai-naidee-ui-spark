@@ -38,7 +38,8 @@ test('full backend integration: selected free model -> JSON -> places -> road ->
   const output='Here is your itinerary:\n'+String.fromCharCode(96).repeat(3)+'json\n'+JSON.stringify({days:[1,2,3].map(day=>({day,placeIds:['nature-'+(day*2-1),'nature-'+day*2]}))})+'\n'+String.fromCharCode(96).repeat(3);
   const {res,calls}=await invoke(output);
   assert.equal(res.statusCode,200,JSON.stringify(res.body));
-  assert.equal(res.body.status,'draft');
+  assert.equal(res.body.status,'complete');
+  assert.equal(res.body.completeness.status,'complete');
   assert.equal(res.body.days.length,3);
   assert.ok(res.body.days.every(day=>day.stops.length===2));
   assert.ok(res.body.days.every(day=>day.legs.length===1&&day.legs[0].road.status==='verified_route'));
