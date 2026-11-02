@@ -13,8 +13,8 @@ async function rankRoadStops(places, {days, maxRoadMinutes=90, mode='car'}, rout
       if(!available.length) break;
       if(!prev){const first=available[0];output.push({id:first.id,day,order});used.add(first.id);prev=first;continue;}
       const evaluated=[];
-      for(const candidate of available.slice(0,8)){
-        if(calls>=48) break;
+      for(const candidate of available.slice(0,3)){
+        if(calls>=9) break;
         calls++;
         const road=await route(prev,candidate,mode);
         if(road.status==='verified_route' && Number.isFinite(road.durationMinutes) && road.durationMinutes<=maxRoadMinutes && Number.isFinite(road.distanceKm)){
