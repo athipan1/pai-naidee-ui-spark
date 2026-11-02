@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Wallet, Navigation, Users, SlidersHorizontal, LoaderCircle, RotateCcw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Wallet, Navigation, Users, SlidersHorizontal, LoaderCircle, RotateCcw, AlertCircle, Compass, Trees, Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
@@ -82,7 +82,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
   const updateInput = (setter: () => void) => { setter(); setGenerated(false); setIntent(null); };
 
   return (
-    <div className="min-h-screen w-full min-w-0 overflow-x-clip bg-background pb-28">
+    <div className="min-h-screen w-full min-w-0 overflow-x-clip bg-background pb-36 sm:pb-28">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-lg">
         <div className="container mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
           <Link to="/" aria-label={th ? 'กลับหน้าแรก' : 'Back home'} className="rounded-lg p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Link>
@@ -90,12 +90,57 @@ export default function TripPlanner({ currentLanguage }: Props) {
           <span className="font-semibold">{th ? 'AI วางแผนเที่ยว' : 'Smart Trip Planner'}</span>
         </div>
       </header>
-      <main className="container mx-auto w-full min-w-0 max-w-5xl space-y-6 overflow-x-clip px-3 py-5 sm:px-4 sm:py-7">
-        <section className="min-w-0 overflow-hidden rounded-3xl border border-teal-500/20 bg-gradient-to-br from-teal-500/15 via-background to-amber-500/10 p-4 sm:p-9">
+      <main className="container mx-auto w-full min-w-0 max-w-5xl space-y-6 overflow-x-clip px-4 py-5 sm:px-4 sm:py-7">
+        <section className="min-w-0 overflow-hidden rounded-3xl border border-teal-500/20 bg-gradient-to-br from-teal-500/15 via-background to-amber-500/10 p-5 shadow-sm sm:p-9">
+          <a href="#trip-customizer" className="float-right rounded-full border border-teal-400/30 px-3 py-2 text-xs font-semibold text-teal-600 dark:text-teal-300 hover:bg-teal-500/10">{th ? 'เริ่มวางแผน' : 'Start planning'}</a>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-400"><Sparkles className="h-4 w-4" /> PaiNaiDee Smart Planner</div>
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl">{th ? 'ทริปในฝัน เริ่มได้ที่นี่' : 'Your next trip starts here'}</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{th ? 'เลือกจุดหมายและสไตล์การเที่ยว เราจะจัดสถานที่จริงเป็นทริปรายวัน พร้อมประเมินงบและลิงก์เส้นทางให้' : 'Choose a destination and travel style to create a day-by-day plan from real places, with budget estimates and route links.'}</p>
         </section>
+
+        <Card id="trip-customizer" className="scroll-mt-24 border-teal-500/20 shadow-sm"><CardContent className="min-w-0 space-y-5 overflow-hidden p-4 sm:p-7">
+          <h2 className="flex items-center gap-2 text-xl font-semibold"><SlidersHorizontal className="h-5 w-5 text-teal-400" />{th ? 'ออกแบบทริปของคุณ' : 'Customize your trip'}</h2>
+          <p className="text-sm leading-6 text-muted-foreground">{th ? 'เลือกจังหวัด วันเดินทาง ผู้เดินทาง และงบประมาณได้ในไม่กี่ขั้นตอน' : 'Choose your destination, days, travelers and budget in a few steps.'}</p>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <label className="min-w-0 space-y-2 text-sm font-medium">{th ? 'จังหวัดปลายทาง' : 'Destination province'}
+              <select aria-label={th ? 'จังหวัดปลายทาง' : 'Destination province'} className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={province} onChange={e => updateInput(() => setProvince(e.target.value))}>
+                <option value="">{th ? 'เลือกจังหวัด' : 'Select province'}</option>
+                {(facets.data?.provinces ?? []).map(name => <option key={name} value={name}>{name}</option>)}
+              </select>
+            </label>
+            <label className="min-w-0 space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />{th ? 'จำนวนวัน' : 'Days'}</span>
+              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={days} onChange={e => updateInput(() => setDays(Number(e.target.value)))}>
+                {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} {th ? 'วัน' : 'days'}</option>)}
+              </select>
+            </label>
+            <label className="min-w-0 space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><Users className="h-4 w-4" />{th ? 'ผู้เดินทาง' : 'Travelers'}</span>
+              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={people} onChange={e => updateInput(() => setPeople(Number(e.target.value)))}>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n} {th ? 'คน' : 'people'}</option>)}
+              </select>
+            </label>
+            <label className="min-w-0 space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><Wallet className="h-4 w-4" />{th ? 'งบต่อคนต่อวัน' : 'Budget per person/day'}</span>
+              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={dailyBudgetPerPerson} onChange={e => updateInput(() => setDailyBudgetPerPerson(Number(e.target.value)))}>
+                {![500, 800, 1000, 1500, 2000, 3000, 5000].includes(dailyBudgetPerPerson) && <option value={dailyBudgetPerPerson}>{currency(dailyBudgetPerPerson)}</option>}
+                {[500, 800, 1000, 1500, 2000, 3000, 5000].map(n => <option key={n} value={n}>{currency(n)}</option>)}
+              </select>
+            </label>
+            <label className="min-w-0 space-y-2 text-sm font-medium">{th ? 'สไตล์ท่องเที่ยว' : 'Travel style'}
+              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={style} onChange={e => updateInput(() => setStyle(e.target.value as TripStyle))}>
+                <option value="balanced">{th ? 'หลากหลาย' : 'Balanced'}</option><option value="nature">{th ? 'ธรรมชาติ' : 'Nature'}</option><option value="culture">{th ? 'วัฒนธรรม' : 'Culture'}</option>
+              </select>
+            </label>
+            <label className="min-w-0 space-y-2 text-sm font-medium">{th ? 'การเดินทาง' : 'Transport'}
+              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={transport} onChange={e => updateInput(() => setTransport(e.target.value as 'car' | 'public'))}>
+                <option value="car">{th ? 'รถยนต์' : 'Car'}</option><option value="public">{th ? 'ขนส่งสาธารณะ' : 'Public transport'}</option>
+              </select>
+            </label>
+          </div>
+          <div className="rounded-xl bg-muted/60 px-4 py-3 flex flex-wrap items-center justify-between gap-2"><span className="text-sm text-muted-foreground">{th ? 'งบประมาณรวมโดยประมาณ' : 'Estimated total budget'}</span><strong className="text-lg text-teal-700 dark:text-teal-300">{currency(days * people * dailyBudgetPerPerson)}</strong></div>
+          <Button disabled={!province || places.isLoading || !places.data || !!places.error} onClick={generate} className="min-h-12 w-full rounded-xl bg-teal-400 font-semibold text-slate-950 shadow-sm hover:bg-teal-300">
+            <Sparkles className="mr-2 h-5 w-5" />{places.isLoading ? (th ? 'กำลังโหลดสถานที่...' : 'Loading places...') : (th ? 'สร้างทริปของฉัน' : 'Build my trip')}
+          </Button>
+          {places.error && <p role="alert" className="text-sm text-red-400">{th ? 'โหลดข้อมูลสถานที่ไม่ได้ กรุณาลองใหม่ภายหลัง' : 'Could not load places. Please try later.'}</p>}
+        </CardContent></Card>
 
         <Card><CardContent className="min-w-0 space-y-5 overflow-hidden p-4 sm:p-7">
           <h2 className="flex items-center gap-2 text-xl font-semibold"><Sparkles className="h-5 w-5 text-teal-400" />{th ? 'เล่าทริปที่อยากไป' : 'Describe your ideal trip'}</h2>
@@ -136,48 +181,6 @@ export default function TripPlanner({ currentLanguage }: Props) {
             {aiPlan.validation?.warnings?.map((warning: string) => <p key={warning} className="text-xs text-amber-500">⚠ {warning}</p>)}
           </section>}
           <p className="text-xs text-muted-foreground">{th ? 'โหมดแผนพื้นฐานด้านล่างใช้กฎภาษาไทยและตรวจเงื่อนไขอย่างเป็นระบบ ส่วนปุ่ม OpenRouter AI จะส่งคำขอไปยังโมเดลภายนอกผ่าน Railway' : 'The basic mode uses local rules. OpenRouter AI sends your request to an external model via Railway.'}</p>
-        </CardContent></Card>
-
-        <Card><CardContent className="min-w-0 space-y-5 overflow-hidden p-4 sm:p-7">
-          <h2 className="flex items-center gap-2 text-xl font-semibold"><SlidersHorizontal className="h-5 w-5 text-teal-400" />{th ? 'ออกแบบทริปของคุณ' : 'Customize your trip'}</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium">{th ? 'จังหวัดปลายทาง' : 'Destination province'}
-              <select aria-label={th ? 'จังหวัดปลายทาง' : 'Destination province'} className="h-12 w-full rounded-lg border border-input bg-background px-3" value={province} onChange={e => updateInput(() => setProvince(e.target.value))}>
-                <option value="">{th ? 'เลือกจังหวัด' : 'Select province'}</option>
-                {(facets.data?.provinces ?? []).map(name => <option key={name} value={name}>{name}</option>)}
-              </select>
-            </label>
-            <label className="space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />{th ? 'จำนวนวัน' : 'Days'}</span>
-              <select className="h-12 w-full rounded-lg border border-input bg-background px-3" value={days} onChange={e => updateInput(() => setDays(Number(e.target.value)))}>
-                {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} {th ? 'วัน' : 'days'}</option>)}
-              </select>
-            </label>
-            <label className="space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><Users className="h-4 w-4" />{th ? 'ผู้เดินทาง' : 'Travelers'}</span>
-              <select className="h-12 w-full rounded-lg border border-input bg-background px-3" value={people} onChange={e => updateInput(() => setPeople(Number(e.target.value)))}>
-                {Array.from({ length: 10 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n} {th ? 'คน' : 'people'}</option>)}
-              </select>
-            </label>
-            <label className="space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><Wallet className="h-4 w-4" />{th ? 'งบต่อคนต่อวัน' : 'Budget per person/day'}</span>
-              <select className="h-12 w-full rounded-lg border border-input bg-background px-3" value={dailyBudgetPerPerson} onChange={e => updateInput(() => setDailyBudgetPerPerson(Number(e.target.value)))}>
-                {![500, 800, 1000, 1500, 2000, 3000, 5000].includes(dailyBudgetPerPerson) && <option value={dailyBudgetPerPerson}>{currency(dailyBudgetPerPerson)}</option>}
-                {[500, 800, 1000, 1500, 2000, 3000, 5000].map(n => <option key={n} value={n}>{currency(n)}</option>)}
-              </select>
-            </label>
-            <label className="space-y-2 text-sm font-medium">{th ? 'สไตล์ท่องเที่ยว' : 'Travel style'}
-              <select className="h-12 w-full rounded-lg border border-input bg-background px-3" value={style} onChange={e => updateInput(() => setStyle(e.target.value as TripStyle))}>
-                <option value="balanced">{th ? 'หลากหลาย' : 'Balanced'}</option><option value="nature">{th ? 'ธรรมชาติ' : 'Nature'}</option><option value="culture">{th ? 'วัฒนธรรม' : 'Culture'}</option>
-              </select>
-            </label>
-            <label className="space-y-2 text-sm font-medium">{th ? 'การเดินทาง' : 'Transport'}
-              <select className="h-12 w-full rounded-lg border border-input bg-background px-3" value={transport} onChange={e => updateInput(() => setTransport(e.target.value as 'car' | 'public'))}>
-                <option value="car">{th ? 'รถยนต์' : 'Car'}</option><option value="public">{th ? 'ขนส่งสาธารณะ' : 'Public transport'}</option>
-              </select>
-            </label>
-          </div>
-          <Button disabled={!province || places.isLoading || !places.data || !!places.error} onClick={generate} className="h-12 w-full bg-teal-400 font-semibold text-slate-950 hover:bg-teal-300">
-            <Sparkles className="mr-2 h-5 w-5" />{places.isLoading ? (th ? 'กำลังโหลดสถานที่...' : 'Loading places...') : (th ? 'สร้างทริปของฉัน' : 'Build my trip')}
-          </Button>
-          {places.error && <p role="alert" className="text-sm text-red-400">{th ? 'โหลดข้อมูลสถานที่ไม่ได้ กรุณาลองใหม่ภายหลัง' : 'Could not load places. Please try later.'}</p>}
         </CardContent></Card>
 
         {generated && <section className="space-y-5" aria-live="polite">
