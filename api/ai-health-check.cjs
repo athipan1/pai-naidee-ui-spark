@@ -57,17 +57,18 @@ function registerAiHealthRoutes(app,{requireAdmin,getSql,request=fetchOpenRouter
       }
       const content=choice.message.content;
       const raw=Array.isArray(content)?content.filter(p=>p?.type==='text'&&typeof p.text==='string').map(p=>p.text).join('\n'):content;
-      let code='ok';
+      let code='ok',reason=null;
       try {
         const parsed=parseAiJson(raw);
         validateAiPlan(parsed,1,[{id:'test-place'}]);
-        if(parsed.days.length!==1||parsed.days[0].placeIds.length!==1||parsed.days[0].placeIds[0]!=='test-place')code='INVALID_SCHEMA';
+        if(parsed.days.length!==1||parsed.days[0].placeIds.length!==1||parsed.days[0].placeIds[0]!=='test-place'){code='INVALID_SCHEMA';reason='probe_shape_invalid';}
       } catch(error) {
         code=['INVALID_JSON','INVALID_SCHEMA','INVALID_PLACE_IDS','EMPTY_CONTENT','OUTPUT_TOO_LARGE'].includes(error?.code)?error.code:'INVALID_SCHEMA';
+        reason=error?.meta?.reason || (code==='INVALID_JSON'?'json_parse_failed':null);
       }
-      console.info('ai_health_validation',JSON.stringify({type:code,model:clean(body?.model)||config.model,finishReason:clean(choice.finish_reason),usage:usageOf(body?.usage)}));
+      console.info('ai_health_validation',JSON.stringify({type:code,reason,model:clean(body?.model)||config.model,finishReason:clean(choice.finish_reason),usage:usageOf(body?.usage)}));
       return res.status(code==='ok'?200:502).json({
-        status:code==='ok'?'ok':'validation_failed',errorCode:code==='ok'?null:code,upstreamHttpStatus:200,
+        status:code==='ok'?'ok':'validation_failed',errorCode:code==='ok'?null:code,errorReason:code==='ok'?null:reason,upstreamHttpStatus:200,
         model:clean(body?.model)||config.model,finishReason:clean(choice.finish_reason),usage:usageOf(body?.usage),
         structuredOutputEnabled:config.structuredOutput,
       });

@@ -76,7 +76,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
   const updateInput = (setter: () => void) => { setter(); setGenerated(false); setIntent(null); };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen w-full min-w-0 overflow-x-clip bg-background pb-28">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-lg">
         <div className="container mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
           <Link to="/" aria-label={th ? 'กลับหน้าแรก' : 'Back home'} className="rounded-lg p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Link>
@@ -84,23 +84,23 @@ export default function TripPlanner({ currentLanguage }: Props) {
           <span className="font-semibold">{th ? 'AI วางแผนเที่ยว' : 'Smart Trip Planner'}</span>
         </div>
       </header>
-      <main className="container mx-auto max-w-5xl space-y-6 px-4 py-7">
-        <section className="rounded-3xl border border-teal-500/20 bg-gradient-to-br from-teal-500/15 via-background to-amber-500/10 p-6 sm:p-9">
+      <main className="container mx-auto w-full min-w-0 max-w-5xl space-y-6 overflow-x-clip px-3 py-5 sm:px-4 sm:py-7">
+        <section className="min-w-0 overflow-hidden rounded-3xl border border-teal-500/20 bg-gradient-to-br from-teal-500/15 via-background to-amber-500/10 p-4 sm:p-9">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-400"><Sparkles className="h-4 w-4" /> PaiNaiDee Smart Planner</div>
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl">{th ? 'ทริปในฝัน เริ่มได้ที่นี่' : 'Your next trip starts here'}</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{th ? 'เลือกจุดหมายและสไตล์การเที่ยว เราจะจัดสถานที่จริงเป็นทริปรายวัน พร้อมประเมินงบและลิงก์เส้นทางให้' : 'Choose a destination and travel style to create a day-by-day plan from real places, with budget estimates and route links.'}</p>
         </section>
 
-        <Card><CardContent className="space-y-4 p-5 sm:p-7">
+        <Card><CardContent className="min-w-0 space-y-4 overflow-hidden p-4 sm:p-7">
           <h2 className="flex items-center gap-2 text-xl font-semibold"><Sparkles className="h-5 w-5 text-teal-400" />{th ? 'เล่าทริปที่อยากไป' : 'Describe your ideal trip'}</h2>
           <label htmlFor="trip-request" className="block text-sm text-muted-foreground">{th ? 'ระบุจังหวัด จำนวนวัน งบรวม และความชอบด้วยภาษาธรรมชาติ' : 'Include province, days, total budget and preferences'}</label>
           <textarea id="trip-request" rows={3} maxLength={500} value={request} onChange={e => { setRequest(e.target.value); setIntent(null); setGenerated(false); }}
             placeholder={th ? 'อยากเที่ยวเชียงใหม่ 3 วัน งบ 6,000 บาท ชอบธรรมชาติ ไม่อยากขับรถไกล' : 'Chiang Mai 3 days budget 6000 baht, nature and short drives'}
-            className="w-full rounded-xl border border-input bg-background p-3 text-base" />
+            className="block w-full min-w-0 max-w-full resize-y rounded-xl border border-input bg-background p-3 text-base" />
           <Button type="button" onClick={interpretRequest} disabled={!request.trim() || facets.isLoading || !facets.data} className="w-full bg-teal-400 text-slate-950 hover:bg-teal-300">
             <Sparkles className="mr-2 h-4 w-4" />{th ? 'ตีความและสร้างแผนเบื้องต้น' : 'Interpret and draft itinerary'}
           </Button>
-          {intent && <div aria-live="polite" className="space-y-2 rounded-xl bg-muted/60 p-4 text-sm">
+          {intent && <div aria-live="polite" className="min-w-0 space-y-2 break-words rounded-xl bg-muted/60 p-4 text-sm">
             {intent.issues.length ? <ul className="list-disc space-y-1 pl-5 text-amber-500">{intent.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>
               : <p>{th ? `เข้าใจคำขอ: ${intent.province} · ${intent.days} วัน · ${intent.people} คน · งบรวม ${currency(intent.totalBudget!)} · ${intent.avoidLongDrives ? 'จำกัดช่วงระหว่างจุดแวะไม่เกิน 30 กม. (เส้นตรง)' : 'วางแผนตามระยะทาง'}`
                 : `Interpreted: ${intent.province}, ${intent.days} days, ${intent.people} people, total budget ${currency(intent.totalBudget!)}`}</p>}
@@ -110,7 +110,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
             {aiLoading ? (th ? 'AI กำลังวางแผน...' : 'AI is planning...') : (th ? 'สร้างแผนด้วย OpenRouter AI' : 'Generate with OpenRouter AI')}
           </Button>
           {aiError && <p role="alert" className="text-sm text-red-400">{aiError}</p>}
-          {aiPlan && <section className="space-y-3" aria-label="Verified AI draft">
+          {aiPlan && <section className="min-w-0 space-y-3 break-words" aria-label="Verified AI draft">
             <h3 className="font-semibold">{th ? 'แผนจาก AI (ฉบับร่าง)' : 'AI itinerary (draft)'}</h3>
             {aiPlan.days?.map((day: any) => <div key={day.day} className="rounded-xl border p-3">
               <p className="font-semibold">{th ? 'วันที่' : 'Day'} {day.day}</p>
@@ -127,7 +127,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
           <p className="text-xs text-muted-foreground">{th ? 'โหมดแผนพื้นฐานด้านล่างใช้กฎภาษาไทยและตรวจเงื่อนไขอย่างเป็นระบบ ส่วนปุ่ม OpenRouter AI จะส่งคำขอไปยังโมเดลภายนอกผ่าน Railway' : 'The basic mode uses local rules. OpenRouter AI sends your request to an external model via Railway.'}</p>
         </CardContent></Card>
 
-        <Card><CardContent className="space-y-5 p-5 sm:p-7">
+        <Card><CardContent className="min-w-0 space-y-5 overflow-hidden p-4 sm:p-7">
           <h2 className="flex items-center gap-2 text-xl font-semibold"><SlidersHorizontal className="h-5 w-5 text-teal-400" />{th ? 'ออกแบบทริปของคุณ' : 'Customize your trip'}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="space-y-2 text-sm font-medium">{th ? 'จังหวัดปลายทาง' : 'Destination province'}
