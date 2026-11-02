@@ -90,3 +90,18 @@ test('candidate coverage selects valid unique nature places across clusters',()=
  assert.ok(result.every(x=>x.province==='เชียงใหม่'&&x.category==='Nature'));
  assert.equal(new Set(result.map(x=>x.id)).size,result.length);
 });
+
+test('AI missing day is marked partial, not silently complete',()=>{
+ const {evaluateTripCompleteness}=require('./ai-trip-plan.cjs');
+ const lookup=new Map([['a',{id:'a'}],['b',{id:'b'}]]);
+ const one=[{day:1,stops:[{id:'a'},{id:'b'}],legs:[{road:{status:'verified_route'}}]}];
+ const result=evaluateTripCompleteness(one,2,lookup);
+ assert.equal(result.status,'partial');assert.ok(result.reasons.includes('MISSING_DAYS'));
+});
+test('road recovery can supply 2 missing days without invented distances',async()=>{
+ const {rankRoadStops}=require('./basic-trip-road.cjs');
+ const places=Array.from({length:6},(_,i)=>({id:'p'+i,name:'P'+i,province:'กาญจนบุรี',coordinates:{lat:14+i*.001,lng:99+i*.001}}));
+ const result=await rankRoadStops(places,{days:2,maxRoadMinutes:45},async()=>({status:'verified_route',distanceKm:5,durationMinutes:10}));
+ assert.equal(result.status,'complete');assert.deepEqual([...new Set(result.stops.map(s=>s.day))],[1,2]);
+ assert.ok(result.legs.every(l=>l.status==='verified_route'));
+});

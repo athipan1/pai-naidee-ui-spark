@@ -249,7 +249,21 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
         if(stops.length) itinerary.push({day,stops,legs:[]});
       }
       if(!itinerary.length) return res.status(422).json({error:'AI returned no verifiable places.'});
-      const checked=await enforceTripConstraints(itinerary,lookup,input,preferences);
+      let checked=await enforceTripConstraints(itinerary,lookup,input,preferences);
+      // OpenRouter may return fewer days than requested. Recover with independently
+      // road-verified deterministic stops; never claim unverified legs as complete.
+      let recovery=null;
+      const originalCompleteness=evaluateTripCompleteness(checked.days,input.days,lookup);
+      if(originalCompleteness.status!=='complete'&&input.transport==='car'){
+        const {rankRoadStops}=require('./basic-trip-road.cjs');
+        const ranked=await rankRoadStops(candidates,{days:input.days,maxRoadMinutes:preferences.avoidLong?preferences.maxRoadMinutes:120,mode:'car'});
+        if(ranked.status==='complete'){
+          const legsByDay=new Map();
+          for(const leg of ranked.legs){if(!legsByDay.has(leg.day))legsByDay.set(leg.day,[]);legsByDay.get(leg.day).push({from:leg.from,to:leg.to,road:{status:leg.status,distanceKm:leg.distanceKm,durationMinutes:leg.durationMinutes}});}
+          checked={days:Array.from({length:input.days},(_,i)=>({day:i+1,stops:ranked.stops.filter(stop=>stop.day===i+1).map(stop=>({...stop.place,openingHours:{status:'unverified'}})),legs:legsByDay.get(i+1)||[]})),warnings:[...checked.warnings,'AI draft was incomplete; verified road-based recovery used.'],rejected:checked.rejected};
+          recovery={status:'verified_road_recovery',originalReasons:originalCompleteness.reasons};
+        }else recovery={status:'recovery_partial',originalReasons:originalCompleteness.reasons,roadRejectedCounts:ranked.rejectedCounts};
+      }
       if(!checked.days.length) return res.status(422).json({error:'No itinerary meets the requested style and travel constraints.',code:'NO_VERIFIED_ITINERARY'});
       // Explicitly label allocations as assumptions, never claim merchant quotes.
       const estimated={meals:Math.round(input.budget*.3),transport:Math.round(input.budget*.3),
@@ -260,7 +274,7 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
       if(checked.days.some(d=>d.legs.some(l=>l.road.status!=='verified_route'))) warnings.push('Some road routes could not be verified.');
       if(total>input.budget) warnings.push('Estimated budget exceeds requested cap.');
       const completeness=evaluateTripCompleteness(checked.days,input.days,lookup);
-      return res.json({status:completeness.status,completeness,provider:'openrouter',province:input.province,days:checked.days,
+      return res.json({status:completeness.status,completeness,provider:recovery?.status==='verified_road_recovery'?'openrouter_with_road_recovery':'openrouter',recovery,province:input.province,days:checked.days,
         budget:{requested:input.budget,estimatedTotal:total,categories:estimated,verifiedPrices:false},
         validation:{coordinates:'verified_bounds',openingHours:checked.days.every(d=>d.stops.every(s=>s.openingHours.status==='sourced'))?'sourced':'partially_unverified',warnings}});
     }catch(error){console.error('AI trip API error:',error.message);return res.status(503).json({error:'Trip planning service unavailable.'});}
