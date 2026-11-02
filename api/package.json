@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node railway-server.cjs",
     "dev": "nodemon api-server.cjs",
-    "test": "node --test security.node-test.cjs nearby.node-test.cjs place-search.node-test.cjs smart-search.node-test.cjs place-quality.node-test.cjs admin-cms.node-test.cjs ai-trip-plan.node-test.cjs ai-model-gateway.node-test.cjs ai-upstream-diagnostics.node-test.cjs ai-health-check.node-test.cjs ai-model-settings.node-test.cjs",
+    "test": "node --test security.node-test.cjs nearby.node-test.cjs place-search.node-test.cjs smart-search.node-test.cjs place-quality.node-test.cjs admin-cms.node-test.cjs ai-trip-plan.node-test.cjs ai-model-gateway.node-test.cjs ai-upstream-diagnostics.node-test.cjs ai-health-check.node-test.cjs ai-model-settings.node-test.cjs ai-trip-full-chain.node-test.cjs",
     "audit:places": "node audit-place-data.cjs",
     "bootstrap:admin": "node bootstrap-admin.cjs",
     "start:legacy": "node api-server.cjs"
