@@ -266,4 +266,4 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
     }catch(error){console.error('AI trip API error:',error.message);return res.status(503).json({error:'Trip planning service unavailable.'});}
   });
 }
-module.exports={registerAiTripRoutes,validateRequest,validCoord,haversine,parseAiJson,validateAiPlan,parseOpenRouterResponse,AiResponseError,requestPreferences,matchesStyle,placeNameMatches,enforceTripConstraints,evaluateTripCompleteness,selectTripCandidates};
+module.exports={roadLeg,registerAiTripRoutes,validateRequest,validCoord,haversine,parseAiJson,validateAiPlan,parseOpenRouterResponse,AiResponseError,requestPreferences,matchesStyle,placeNameMatches,enforceTripConstraints,evaluateTripCompleteness,selectTripCandidates};
