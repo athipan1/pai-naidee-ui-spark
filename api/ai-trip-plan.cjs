@@ -185,6 +185,16 @@ async function enforceTripConstraints(itinerary,lookup,input,preferences,{route=
   return {days,warnings,rejected};
 }
 
+function evaluateTripCompleteness(days,requestedDays,lookup) {
+  const reasons=[];
+  const indices=new Set(days.map(d=>d.day));
+  if(indices.size!==requestedDays||Array.from({length:requestedDays},(_,i)=>i+1).some(n=>!indices.has(n))) reasons.push('MISSING_DAYS');
+  if(days.some(d=>d.stops.length<2)) reasons.push('INSUFFICIENT_STOPS');
+  const ids=days.flatMap(d=>d.stops.map(p=>String(p.id)));
+  if(new Set(ids).size!==ids.length||ids.some(id=>!lookup.has(id))) reasons.push('UNVERIFIED_PLACES');
+  if(days.some(d=>d.legs.length!==Math.max(0,d.stops.length-1)||d.legs.some(l=>l.road?.status!=='verified_route'))) reasons.push('UNVERIFIED_ROUTES');
+  return {status:reasons.length?'partial':'complete',requestedDays,plannedDays:indices.size,verifiedPlaces:ids.length,reasons};
+}
 function registerAiTripRoutes(app,{listPlaces,getSql}) {
   const limiter=createRateLimiter({windowMs:60_000,max:3,keyPrefix:'ai-trip'});
   app.post('/api/ai/trip-plan',limiter,async(req,res)=>{
@@ -224,10 +234,11 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
       if(checked.days.some(d=>d.stops.some(s=>s.openingHours.status!=='sourced'))) warnings.push('Some opening hours are unverified.');
       if(checked.days.some(d=>d.legs.some(l=>l.road.status!=='verified_route'))) warnings.push('Some road routes could not be verified.');
       if(total>input.budget) warnings.push('Estimated budget exceeds requested cap.');
-      return res.json({status:'draft',provider:'openrouter',province:input.province,days:checked.days,
+      const completeness=evaluateTripCompleteness(checked.days,input.days,lookup);
+      return res.json({status:completeness.status,completeness,provider:'openrouter',province:input.province,days:checked.days,
         budget:{requested:input.budget,estimatedTotal:total,categories:estimated,verifiedPrices:false},
         validation:{coordinates:'verified_bounds',openingHours:checked.days.every(d=>d.stops.every(s=>s.openingHours.status==='sourced'))?'sourced':'partially_unverified',warnings}});
     }catch(error){console.error('AI trip API error:',error.message);return res.status(503).json({error:'Trip planning service unavailable.'});}
   });
 }
-module.exports={registerAiTripRoutes,validateRequest,validCoord,haversine,parseAiJson,validateAiPlan,parseOpenRouterResponse,AiResponseError,requestPreferences,matchesStyle,placeNameMatches,enforceTripConstraints};
+module.exports={registerAiTripRoutes,validateRequest,validCoord,haversine,parseAiJson,validateAiPlan,parseOpenRouterResponse,AiResponseError,requestPreferences,matchesStyle,placeNameMatches,enforceTripConstraints,evaluateTripCompleteness};
