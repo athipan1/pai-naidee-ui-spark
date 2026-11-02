@@ -37,9 +37,15 @@ export default defineConfig(({ mode }) => {
         // Inline registration avoids /registerSW.js being rewritten to index.html on Vercel.
         injectRegister: 'inline',
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg}'],
+          globPatterns: ['**/*.{js,css,ico,png,jpg,jpeg,svg}'],
+          navigateFallback: null,
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit
           runtimeCaching: [
+            {
+              urlPattern: ({ request }) => request.mode === 'navigate',
+              handler: 'NetworkFirst',
+              options: { cacheName: 'page-navigation-v2', networkTimeoutSeconds: 5, expiration: { maxEntries: 20, maxAgeSeconds: 86400 } }
+            },
             {
               urlPattern: /^https:\/\/api\./i,
               handler: 'NetworkFirst',
