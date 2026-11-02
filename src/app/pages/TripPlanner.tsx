@@ -33,7 +33,7 @@ export default function TripPlanner({ currentLanguage }: Props) {
     setAiLoading(true); setAiError(''); setAiPlan(null);
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 45000);
+      const timer = setTimeout(() => controller.abort(), 60000);
       try {
         const response = await fetch('https://painaidee-api-production.up.railway.app/api/ai/trip-plan', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },

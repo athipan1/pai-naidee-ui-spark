@@ -60,3 +60,11 @@ test('allows documented hours only for named source matches and respects route l
  assert.equal(data.days[0].stops.length,2);
  assert.equal(data.days[0].stops[0].openingHours.status,'sourced');
 });
+
+test('trip provider timeout remains 45 seconds independently from health probe',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const trip=fs.readFileSync(path.join(__dirname,'ai-trip-plan.cjs'),'utf8');
+ const health=fs.readFileSync(path.join(__dirname,'ai-health-check.cjs'),'utf8');
+ assert.match(trip,/\},45000\); \}/);
+ assert.match(health,/\},12000\);/);
+});
