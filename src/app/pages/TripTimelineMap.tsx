@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from 'react-leaflet';
 import { ArrowDown, ArrowUp, MapPinned, Navigation, Plus, Trash2, ImageOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -11,7 +11,7 @@ const valid = (p: AttractionDetail) => Number.isFinite(p.coordinates?.lat) && Nu
 function FocusMap({ points }: { points: [number,number][] }) {
   const map=useMap();
   // The map remounts when selected day changes, so a one-time initial fit is sufficient.
-  useMemo(()=>{if(points.length>1)map.fitBounds(points,{padding:[26,26]});else if(points.length===1)map.setView(points[0],12);},[map,points]);
+  useEffect(()=>{if(points.length>1)map.fitBounds(points,{padding:[26,26]});else if(points.length===1)map.setView(points[0],12);},[map,points]);
   return null;
 }
 export default function TripTimelineMap({stops,available,days,th,onChange,verifiedRoad=false}:Props){
