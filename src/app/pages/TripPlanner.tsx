@@ -41,10 +41,16 @@ export default function TripPlanner({ currentLanguage }: Props) {
           body: JSON.stringify({ message: request, province, days, people,
             budget: intent?.totalBudget ?? days * people * dailyBudgetPerPerson, transport }),
         });
-        if (!response.ok) throw Error('AI planning unavailable (' + response.status + ')');
+        if (!response.ok) {
+          const payload: { code?: string } = await response.json().catch(() => ({}));
+          const messages: Record<string, string> = th
+            ? { UPSTREAM_FAILURE: 'ผู้ให้บริการ AI ส่งคำตอบที่ระบบอ่านไม่ได้ กรุณาลองใหม่ภายหลัง', INVALID_JSON: 'AI ส่ง JSON ไม่ถูกต้อง กรุณาลองใหม่', INVALID_SCHEMA: 'รูปแบบแผนจาก AI ไม่ผ่านการตรวจสอบ', INVALID_PLACE_IDS: 'AI ระบุสถานที่ที่ไม่ได้อยู่ในฐานข้อมูล', INCOMPLETE_RESPONSE: 'คำตอบ AI ถูกตัดก่อนจบ กรุณาลองใหม่' }
+            : { UPSTREAM_FAILURE: 'AI provider returned an unreadable response. Try again later.', INVALID_JSON: 'Invalid AI JSON response.', INVALID_SCHEMA: 'AI itinerary failed validation.', INVALID_PLACE_IDS: 'AI referenced unknown places.', INCOMPLETE_RESPONSE: 'AI output was cut short.' };
+          throw Error(messages[payload.code ?? ''] || (th ? 'AI ยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง' : 'AI planner unavailable. Try later.'));
+        }
         setAiPlan(await response.json());
       } finally { clearTimeout(timer); }
-    } catch { setAiError(th ? 'AI ยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง' : 'AI planner unavailable. Try later.'); }
+    } catch (error) { setAiError(error instanceof Error && error.name !== 'AbortError' ? error.message : (th ? 'การเชื่อมต่อ AI หมดเวลา กรุณาลองใหม่' : 'AI request timed out.')); }
     finally { setAiLoading(false); }
   };
 
