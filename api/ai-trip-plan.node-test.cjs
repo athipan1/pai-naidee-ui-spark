@@ -68,3 +68,14 @@ test('trip provider timeout remains 45 seconds independently from health probe',
  assert.match(trip,/\},45000\); \}/);
  assert.match(health,/\},12000\);/);
 });
+
+test('trip completeness gate rejects missing days, insufficient stops and unverified roads',()=>{
+ const {evaluateTripCompleteness}=require('./ai-trip-plan.cjs');
+ const lookup=new Map(['a','b','c','d','e','f'].map(id=>[id,{id}]));
+ const day=(n,ids,route='verified_route')=>({day:n,stops:ids.map(id=>({id})),legs:ids.slice(1).map((id,i)=>({from:ids[i],to:id,road:{status:route}}))});
+ const complete=evaluateTripCompleteness([day(1,['a','b']),day(2,['c','d']),day(3,['e','f'])],3,lookup);
+ assert.equal(complete.status,'complete');assert.equal(complete.verifiedPlaces,6);
+ const partial=evaluateTripCompleteness([day(1,['a']),day(2,['c','d'],'unverified')],3,lookup);
+ assert.equal(partial.status,'partial');assert.ok(partial.reasons.includes('MISSING_DAYS'));assert.ok(partial.reasons.includes('INSUFFICIENT_STOPS'));assert.ok(partial.reasons.includes('UNVERIFIED_ROUTES'));
+ assert.ok(evaluateTripCompleteness([day(1,['a','unknown'])],1,lookup).reasons.includes('UNVERIFIED_PLACES'));
+});
