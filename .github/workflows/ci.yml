@@ -48,11 +48,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium for Playwright
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium and WebKit for Playwright mobile tests
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Test read-only discovery, routing, and PWA
         run: npm run test:e2e:read-only -- --config=playwright.read-only.config.ts
+
+      - name: Test Android Chrome and iPhone Safari trip planning
+        run: npm run test:e2e:trip-planner
 
   security-audit:
     name: Security Audit

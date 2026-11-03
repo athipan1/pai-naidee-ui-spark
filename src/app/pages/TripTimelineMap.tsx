@@ -10,13 +10,19 @@ type Props = { stops: TripStop[]; available: AttractionDetail[]; days: number; t
 const valid = (p: AttractionDetail) => Number.isFinite(p.coordinates?.lat) && Number.isFinite(p.coordinates?.lng) && p.coordinates.lat >= 5 && p.coordinates.lat <= 21 && p.coordinates.lng >= 97 && p.coordinates.lng <= 106;
 function FocusMap({ points }: { points: [number,number][] }) {
   const map=useMap();
-  // The map remounts when selected day changes, so a one-time initial fit is sufficient.
-  useEffect(()=>{if(points.length>1)map.fitBounds(points,{padding:[26,26]});else if(points.length===1)map.setView(points[0],12);},[map,points]);
+  // Reuse the map when switching days. Animating an about-to-unmount map can
+  // leave pending Leaflet frame callbacks accessing a removed pane in Safari.
+  useEffect(()=>{
+    map.stop();
+    if(points.length>1)map.fitBounds(points,{padding:[26,26],animate:false});
+    else if(points.length===1)map.setView(points[0],12,{animate:false});
+  },[map,points]);
   return null;
 }
 export default function TripTimelineMap({stops,available,days,th,onChange,verifiedRoad=false}:Props){
   const [selectedDay,setSelectedDay]=useState(1);
   const [addId,setAddId]=useState('');
+  const [mapExpanded,setMapExpanded]=useState(false);
   const daily=stops.filter(s=>s.day===selectedDay).sort((a,b)=>a.order-b.order);
   const points=useMemo<[number,number][]>(()=>daily.filter(s=>valid(s.place)).map(s=>[s.place.coordinates.lat,s.place.coordinates.lng]),[stops,selectedDay]);
   const availablePlaces=available.filter(p=>valid(p)&&!stops.some(s=>s.place.id===p.id));
@@ -50,7 +56,7 @@ export default function TripTimelineMap({stops,available,days,th,onChange,verifi
       <div className="min-w-0 max-w-full space-y-3">
         <button type="button" onClick={()=>setMapExpanded(value=>!value)} aria-expanded={mapExpanded} className="flex w-full items-center justify-between rounded-xl border px-3 py-2 text-sm font-medium"><span className="flex items-center gap-2"><MapPinned size={16}/>{th?'แผนที่เส้นทาง':'Route map'}</span><ChevronDown size={16} className={mapExpanded?'rotate-180':''}/></button>
         {mapExpanded&&<div className="w-full min-w-0 overflow-hidden rounded-2xl border">
-          {points.length>0?<MapContainer key={selectedDay} center={points[0]} zoom={11} scrollWheelZoom={false} className="h-52 w-full sm:h-80" style={{zIndex:0}}>
+          {points.length>0?<MapContainer center={points[0]} zoom={11} zoomAnimation={false} fadeAnimation={false} markerZoomAnimation={false} scrollWheelZoom={false} className="h-52 w-full sm:h-80" style={{zIndex:0}}>
             <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
             <FocusMap points={points}/>
             {points.map((point,i)=><CircleMarker key={i} center={point} radius={9} pathOptions={{color:'#0d9488',fillColor:'#14b8a6',fillOpacity:.9}}><Popup>{daily[i]?.place.nameLocal||daily[i]?.place.name}</Popup></CircleMarker>)}
