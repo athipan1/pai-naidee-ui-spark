@@ -4,6 +4,7 @@ const { buildModelPayload } = require('./ai-model-gateway.cjs');
 const { getActiveAiConfig } = require('./ai-model-settings.cjs');
 const { fetchOpenRouter, logProviderError } = require('./ai-upstream-diagnostics.cjs');
 const { googleTripEnabled, searchGoogleTripPlaces, mergeTripCandidates, createTripRoute, isGooglePlace } = require('./google-trip-places.cjs');
+const { reserveGoogleDailyQuota } = require('./google-daily-usage.cjs');
 
 function validCoord(p) {
   const lat = Number(p?.coordinates?.lat), lng = Number(p?.coordinates?.lng);
@@ -216,7 +217,7 @@ function selectTripCandidates(places,input,preferences) {
   }
   return selected;
 }
-function registerAiTripRoutes(app,{listPlaces,getSql}) {
+function registerAiTripRoutes(app,{listPlaces,getSql,reserveGoogleQuota = kind => reserveGoogleDailyQuota(kind,getSql)}) {
   const limiter=createRateLimiter({windowMs:60_000,max:3,keyPrefix:'ai-trip'});
   app.post('/api/ai/trip-plan',limiter,async(req,res)=>{
     const input=validateRequest(req.body);
@@ -279,12 +280,12 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
       // after that step, on demand, and recover missing days deterministically.
       // Never persist Google result content or send it back to OpenRouter.
       if(input.transport==='car'&&googleTripEnabled()&&evaluateTripCompleteness(checked.days,input.days,lookup).status!=='complete'){
-        const google=await searchGoogleTripPlaces({province:input.province,nature:preferences.nature});
+        const google=await searchGoogleTripPlaces({province:input.province,nature:preferences.nature},fetch,reserveGoogleQuota);
         if(google.length){
           const combined=mergeTripCandidates(candidates,google);
           lookup=new Map(combined.map(p=>[String(p.id),p]));
           const {recoverIncrementally}=require('./hybrid-trip-recovery.cjs');
-          const supplemented=await recoverIncrementally({days:checked.days,requestedDays:input.days,candidates:combined,lookup,transport:input.transport,maxRoadMinutes:preferences.maxRoadMinutes,maxStopsPerDay:2},createTripRoute(roadLeg));
+          const supplemented=await recoverIncrementally({days:checked.days,requestedDays:input.days,candidates:combined,lookup,transport:input.transport,maxRoadMinutes:preferences.maxRoadMinutes,maxStopsPerDay:2},createTripRoute(roadLeg,reserveGoogleQuota));
           checked={...checked,days:supplemented.days};
           const sources={...supplemented.sources};
           for(const day of supplemented.days){

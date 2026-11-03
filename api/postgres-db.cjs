@@ -290,6 +290,14 @@ async function ensureSchema() {
       reviewed_at TIMESTAMPTZ,
       UNIQUE (place_id, alias_key)
     );
+    -- A shared quota ledger for all API instances. No Google content is stored.
+    CREATE TABLE IF NOT EXISTS google_api_daily_usage (
+      usage_day DATE NOT NULL,
+      api_name TEXT NOT NULL CHECK (api_name IN ('places_search', 'routes_compute')),
+      request_count INTEGER NOT NULL DEFAULT 0 CHECK (request_count >= 0),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (usage_day, api_name)
+    );
     CREATE INDEX IF NOT EXISTS idx_place_aliases_lookup ON place_aliases (alias_key, status);
     CREATE INDEX IF NOT EXISTS idx_place_aliases_place ON place_aliases (place_id);
     CREATE INDEX IF NOT EXISTS idx_admin_sessions_expiry ON admin_sessions (expires_at);
