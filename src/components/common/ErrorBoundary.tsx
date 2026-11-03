@@ -3,6 +3,8 @@ import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+declare const __PAINAIDEE_BUILD__: string;
+
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
@@ -48,13 +50,28 @@ class ErrorBoundary extends Component<Props, State> {
     // this.logErrorToService(error, errorInfo);
   }
 
-  private handleRetry = () => {
-    this.setState({ 
-      hasError: false, 
-      error: undefined, 
-      errorInfo: undefined,
-      errorId: undefined 
-    });
+  private handleRetry = async () => {
+    // Resetting the React state alone can repeat the same crash if an older
+    // service worker served a stale app shell after a Vercel deployment.
+    // Clear only navigation HTML caches; leave user data and images untouched.
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames
+          .filter(name => name.startsWith('page-navigation-'))
+          .map(name => caches.delete(name)));
+      }
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        await Promise.race([
+          registration?.update() ?? Promise.resolve(),
+          new Promise<void>(resolve => window.setTimeout(resolve, 3000)),
+        ]);
+      }
+    } catch {
+      // A fresh navigation is still the safest recovery if cache APIs fail.
+    }
+    window.location.reload();
   };
 
   private handleReportError = () => {
@@ -122,6 +139,7 @@ class ErrorBoundary extends Component<Props, State> {
                   <p className="text-sm text-muted-foreground">
                     Error ID: <code className="bg-muted px-2 py-1 rounded text-xs">{errorId}</code>
                   </p>
+                  <p className="mt-2 text-xs text-muted-foreground">Build: {__PAINAIDEE_BUILD__}</p>
                 </div>
               )}
 

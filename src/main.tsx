@@ -16,15 +16,24 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     reloadedForWorkerChange = true;
     window.location.reload();
   });
+  const refreshServiceWorker = () => {
+    void navigator.serviceWorker.getRegistration()
+      .then(registration => registration?.update())
+      .catch(() => {
+        // Offline sessions keep their cached assets until online again.
+      });
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshServiceWorker();
+  });
+  window.addEventListener('online', refreshServiceWorker);
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         logger.info('Service worker registered successfully', { registration: registration.scope });
         // Don't wait for the browser's periodic SW check. Deploys should be
         // picked up on the next online visit, including iOS Safari.
-        void registration.update().catch(() => {
-          // Offline visitors can continue using their cached copy.
-        });
+        refreshServiceWorker();
       })
       .catch((registrationError) => {
         // Log but don't throw — ensure SW failure doesn't cause blank page
