@@ -27,6 +27,17 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/ai/trip-plan', route => route.fulfill({ json: chiangMaiPlan }));
 });
 
+test('legal pages are public and reachable from trip planner on mobile', async ({ page }) => {
+  await page.goto('/trip-planner');
+  await page.getByRole('link', { name: 'Privacy Policy' }).click();
+  await expect(page).toHaveURL(/\/privacy$/);
+  await expect(page.getByRole('heading', { name: /นโยบายความเป็นส่วนตัว/ })).toBeVisible();
+  await page.getByRole('link', { name: 'Terms of Use' }).first().click();
+  await expect(page).toHaveURL(/\/terms$/);
+  await expect(page.getByRole('heading', { name: /ข้อกำหนดการใช้งาน/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'ข้อกำหนด Google Maps Platform' })).toHaveAttribute('href', 'https://cloud.google.com/maps-platform/terms');
+});
+
 test('complete Chiang Mai prompt renders three-day itinerary and expandable map without crashing', async ({ page }) => {
   const browserErrors: string[] = [];
   page.on('pageerror', error => browserErrors.push(error.message));

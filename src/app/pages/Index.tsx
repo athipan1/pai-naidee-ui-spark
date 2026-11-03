@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchSection from "@/components/common/SearchSection";
 import AttractionCard from "@/components/common/AttractionCard";
@@ -274,6 +274,11 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
           </div>
         </section>
       </main>
+
+      <footer className="mx-auto flex max-w-4xl justify-center gap-5 px-4 py-5 text-xs text-muted-foreground">
+        <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+        <Link to="/terms" className="hover:underline">Terms of Use</Link>
+      </footer>
 
       <BottomNavigation currentLanguage={currentLanguage} />
     </div>

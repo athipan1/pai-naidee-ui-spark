@@ -20,6 +20,7 @@ const DiscoverLayout = lazy(() => import("./routes/Discover/DiscoverLayout"));
 const Index = lazy(() => import("./pages/Index"));
 const AttractionDetail = lazy(() => import("./pages/AttractionDetail"));
 const TripPlanner = lazy(() => import("./pages/TripPlanner"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 const Profile = lazy(() => import("./pages/Profile"));
 const AdminCms = lazy(() => import("./pages/AdminCms"));
 const AdminLogin = lazy(() => import("./pages/RailwayLoginPage"));
@@ -137,6 +138,8 @@ const AppContent = () => {
           />
           <Route path="/community/*" element={<Navigate to="/discover" replace />} />
           <Route path="/trip-planner" element={<TripPlanner currentLanguage={currentLanguage} />} />
+          <Route path="/privacy" element={<LegalPage kind="privacy" />} />
+          <Route path="/terms" element={<LegalPage kind="terms" />} />
           {/* Legacy Route Redirects */}
           <Route path="/explore" element={<ExploreRedirect />} />
           <Route path="/favorites" element={<Navigate to="/discover" replace />} />

@@ -9,6 +9,8 @@ const ROUTE_FIELDS = 'routes.duration,routes.distanceMeters';
 const VALID_PLACE_ID = /^[A-Za-z0-9_-]{8,180}$/;
 let budgetWindowStart = Date.now();
 let budgetUsed = 0;
+let routeWindowStart = Date.now();
+let routeUsed = 0;
 
 function googleTripEnabled() {
   return process.env.GOOGLE_PLACES_ENABLED === 'true' && Boolean(process.env.GOOGLE_PLACES_API_KEY);
@@ -21,9 +23,23 @@ function spendSearchAllowance() {
     budgetUsed = 0;
   }
   // Per-instance backstop, in addition to the endpoint's per-IP rate limit.
-  const limit = Math.min(60, Math.max(0, Number(process.env.GOOGLE_PLACES_MAX_SEARCHES_PER_HOUR) || 20));
+  const configured = Number(process.env.GOOGLE_PLACES_MAX_SEARCHES_PER_HOUR);
+  const limit = Math.min(60, Math.max(0, Number.isFinite(configured) && process.env.GOOGLE_PLACES_MAX_SEARCHES_PER_HOUR !== undefined ? configured : 20));
   if (budgetUsed >= limit) return false;
   budgetUsed++;
+  return true;
+}
+
+function spendRouteAllowance() {
+  const now = Date.now();
+  if (now - routeWindowStart >= 60 * 60 * 1000) {
+    routeWindowStart = now;
+    routeUsed = 0;
+  }
+  const configured = Number(process.env.GOOGLE_ROUTES_MAX_CALLS_PER_HOUR);
+  const limit = Math.min(120, Math.max(0, Number.isFinite(configured) && process.env.GOOGLE_ROUTES_MAX_CALLS_PER_HOUR !== undefined ? configured : 40));
+  if (routeUsed >= limit) return false;
+  routeUsed++;
   return true;
 }
 
@@ -100,6 +116,9 @@ function mergeTripCandidates(local, google) {
 async function googleRoadLeg(a, b, mode, fetchImpl = fetch) {
   if (!googleTripEnabled()) return {status: 'unverified', reason: 'google_routes_not_configured'};
   if (mode === 'public') return {status: 'unverified', reason: 'public_transport_not_supported'};
+  // This process-local backstop does not replace a Google Cloud quota (which
+  // applies across all Railway instances) or a billing alert.
+  if (!spendRouteAllowance()) return {status: 'unverified', reason: 'google_routes_hourly_limit'};
   try {
     const response = await fetchImpl(ROUTE_URL, {
       method: 'POST', signal: AbortSignal.timeout(7000),
