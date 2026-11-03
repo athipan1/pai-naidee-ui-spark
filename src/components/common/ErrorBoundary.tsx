@@ -142,6 +142,11 @@ class ErrorBoundary extends Component<Props, State> {
                   <p className="mt-2 text-xs text-muted-foreground">Build: {__PAINAIDEE_BUILD__}</p>
                 </div>
               )}
+              {new URLSearchParams(window.location.search).has('temporary-diagnostics') && error && (
+                <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded border p-3 text-xs">
+                  {error.message}{'\n'}{error.stack?.slice(0, 1600)}
+                </pre>
+              )}
 
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
