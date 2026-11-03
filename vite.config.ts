@@ -44,7 +44,10 @@ export default defineConfig(({ mode }) => {
             {
               urlPattern: ({ request }) => request.mode === 'navigate',
               handler: 'NetworkFirst',
-              options: { cacheName: 'page-navigation-v2', networkTimeoutSeconds: 5, expiration: { maxEntries: 20, maxAgeSeconds: 86400 } }
+              // Slow mobile connections must not serve old HTML while online:
+              // that can mix cached JS chunks with a new Vercel deployment.
+              // NetworkFirst still falls back to cache on a real network error.
+              options: { cacheName: 'page-navigation-v3', expiration: { maxEntries: 20, maxAgeSeconds: 86400 } }
             },
             {
               urlPattern: /^https:\/\/api\./i,
