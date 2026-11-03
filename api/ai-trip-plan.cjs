@@ -3,6 +3,7 @@ const { createRateLimiter } = require('./security.cjs');
 const { buildModelPayload } = require('./ai-model-gateway.cjs');
 const { getActiveAiConfig } = require('./ai-model-settings.cjs');
 const { fetchOpenRouter, logProviderError } = require('./ai-upstream-diagnostics.cjs');
+const { googleTripEnabled, searchGoogleTripPlaces, mergeTripCandidates, createTripRoute, isGooglePlace } = require('./google-trip-places.cjs');
 
 function validCoord(p) {
   const lat = Number(p?.coordinates?.lat), lng = Number(p?.coordinates?.lng);
@@ -220,6 +221,8 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
   app.post('/api/ai/trip-plan',limiter,async(req,res)=>{
     const input=validateRequest(req.body);
     if(!input) return res.status(400).json({error:'Invalid trip request.'});
+    // Google Places content, if present, must not be held by intermediary caches.
+    res.set?.('Cache-Control','no-store');
     try {
       const preferences=requestPreferences(input.message);
       // Read up to three bounded pages, avoiding a ranking-only first-page bottleneck.
@@ -235,7 +238,7 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
       let proposed;
       try {proposed=await proposePlan({...input,places:candidates,getSql});}
       catch(error){if(error.code==='UPSTREAM_FAILURE') logProviderError(error,error.meta?.model||null);const code=typeof error.code==='string'&&/^[A-Z_]{3,40}$/.test(error.code)?error.code:'UPSTREAM_FAILURE';logAiEvent(code,error.meta||{model:'unknown'});return res.status(503).json({error:code==='INCOMPLETE_RESPONSE'?'The AI response was cut short. Please retry or use the basic planner.':'AI could not create a verified itinerary. Please retry or use the basic planner.',code});}
-      const lookup=new Map(candidates.map(p=>[String(p.id),p]));
+      let lookup=new Map(candidates.map(p=>[String(p.id),p]));
       const seen=new Set(), itinerary=[];
       for(let day=1;day<=input.days;day++){
         const modelDay=Array.isArray(proposed?.days)?proposed.days.find(d=>d?.day===day):null;
@@ -258,6 +261,26 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
         const hybrid=await recoverIncrementally({days:checked.days,requestedDays:input.days,candidates,lookup,transport:input.transport,maxRoadMinutes:preferences.maxRoadMinutes});
         checked={...checked,days:hybrid.days,warnings:[...checked.warnings,hybrid.status==='complete'?'Smart Planner filled missing days without replacing verified AI days.':'Some days could not be filled with verified road routes.']};
         recovery={status:hybrid.status==='complete'?'incremental_complete':'incremental_partial',originalReasons:originalCompleteness.reasons,keptDays:hybrid.keptDays,filledDays:hybrid.filledDays,sources:hybrid.sources,diagnostics:hybrid.diagnostics};
+      }
+      // The LLM sees only first-party/licensed candidates. Search Google Places
+      // after that step, on demand, and recover missing days deterministically.
+      // Never persist Google result content or send it back to OpenRouter.
+      if(input.transport==='car'&&googleTripEnabled()&&evaluateTripCompleteness(checked.days,input.days,lookup).status!=='complete'){
+        const google=await searchGoogleTripPlaces({province:input.province,nature:preferences.nature});
+        if(google.length){
+          const combined=mergeTripCandidates(candidates,google);
+          lookup=new Map(combined.map(p=>[String(p.id),p]));
+          const {recoverIncrementally}=require('./hybrid-trip-recovery.cjs');
+          const supplemented=await recoverIncrementally({days:checked.days,requestedDays:input.days,candidates:combined,lookup,transport:input.transport,maxRoadMinutes:preferences.maxRoadMinutes,maxStopsPerDay:2},createTripRoute(roadLeg));
+          checked={...checked,days:supplemented.days};
+          const sources={...supplemented.sources};
+          for(const day of supplemented.days){
+            const usesGoogle=day.stops.some(isGooglePlace);
+            if(usesGoogle)sources[day.day]='google';
+            else if(recovery?.sources?.[day.day])sources[day.day]=recovery.sources[day.day];
+          }
+          recovery={status:supplemented.status==='complete'?'incremental_complete':'incremental_partial',originalReasons:originalCompleteness.reasons,keptDays:supplemented.keptDays,filledDays:supplemented.filledDays,sources,diagnostics:supplemented.diagnostics,googlePlacesUsed:supplemented.days.flatMap(d=>d.stops).filter(isGooglePlace).length};
+        }
       }
       if(!checked.days.length) return res.status(422).json({error:'No itinerary meets the requested style and travel constraints.',code:'NO_VERIFIED_ITINERARY'});
       // Explicitly label allocations as assumptions, never claim merchant quotes.
