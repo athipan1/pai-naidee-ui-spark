@@ -142,7 +142,6 @@ class ErrorBoundary extends Component<Props, State> {
                   <p className="mt-2 text-xs text-muted-foreground">Build: {__PAINAIDEE_BUILD__}</p>
                 </div>
               )}
-
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button 
