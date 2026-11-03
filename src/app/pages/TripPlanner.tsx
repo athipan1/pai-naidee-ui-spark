@@ -70,21 +70,21 @@ export default function TripPlanner({currentLanguage}:Props){
   }catch(error){add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
   finally{setPending(false);}
  };
- return <div className="flex h-[100dvh] min-h-0 w-full min-w-0 flex-col overflow-hidden bg-background">
-  <header className="z-20 flex shrink-0 items-center gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
-   <Link to="/" aria-label={th?'กลับหน้าแรก':'Home'} className="rounded-full p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5"/></Link>
+ return <div className="relative flex h-[100dvh] min-h-0 w-full max-w-full min-w-0 flex-col overflow-hidden bg-background">
+  <header className="z-20 flex w-full min-w-0 shrink-0 items-center gap-2 border-b bg-background/95 px-3 py-3 backdrop-blur sm:gap-3 sm:px-4">
+   <Link to="/" aria-label={th?'กลับหน้าแรก':'Home'} className="shrink-0 rounded-full p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5"/></Link>
    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Sparkles className="h-5 w-5"/></span>
    <div className="min-w-0 flex-1"><h1 className="font-semibold">PaiNaiDee AI</h1><p className="text-xs text-muted-foreground">{th?'ผู้ช่วยวางแผนเที่ยวส่วนตัว':'Your personal trip planner'}</p></div>
-   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="rounded-full border p-2"><Plus className="h-5 w-5"/></button>
+   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="shrink-0 rounded-full border p-2"><Plus className="h-5 w-5"/></button>
   </header>
-  <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-5 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
-   <div className="mx-auto flex max-w-3xl flex-col gap-5">
+  <main className="min-h-0 min-w-0 w-full flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2 py-4 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
+   <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4">
     {!messages.length&&<div className="space-y-4 py-10 text-center"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-500/10 text-teal-500"><Sparkles className="h-8 w-8"/></span><h2 className="text-2xl font-bold">{th?'อยากไปเที่ยวที่ไหน?':'Where would you like to go?'}</h2><p className="text-sm text-muted-foreground">{th?'บอกจังหวัด จำนวนวัน งบรวม และสไตล์ที่ชอบได้เลย':'Tell me your destination, days, budget and travel style'}</p><button type="button" onClick={()=>submit(th?'อยากเที่ยวเชียงใหม่ 3 วัน งบ 6000 บาท เน้นธรรมชาติ ไม่อยากขับรถไกล':'Chiang Mai 3 days budget 6000 baht nature short drives')} className="rounded-2xl border px-4 py-3 text-left text-sm hover:bg-muted">{th?'ลอง: เชียงใหม่ 3 วัน งบ 6,000 บาท เน้นธรรมชาติ':'Try: Chiang Mai, 3 days, ฿6,000, nature'}</button></div>}
-    {messages.map(message=><div key={message.id} className={message.role==='user'?'flex justify-end':'flex items-start gap-2'}>
+    {messages.map(message=><div key={message.id} className={message.role==='user'?'flex min-w-0 justify-end':'flex min-w-0 items-start gap-1.5 sm:gap-2'}>
      {message.role==='assistant'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Bot className="h-4 w-4"/></span>}
-     <div className={`min-w-0 max-w-[88%] break-words rounded-2xl px-4 py-3 text-sm leading-7 whitespace-pre-line ${message.role==='user'?'rounded-br-sm bg-teal-500/15':'rounded-bl-sm border bg-card'}`}>
+     <div className={`min-w-0 max-w-[calc(100%-2.5rem)] break-words rounded-2xl px-3 py-3 text-sm leading-6 whitespace-pre-line sm:max-w-[88%] sm:px-4 ${message.role==='user'?'rounded-br-sm bg-teal-500/15':'rounded-bl-sm border bg-card'}`}>
       {message.text}
-      {message.plan&&<div className="mt-4 min-w-0 space-y-3 border-t pt-3"><p className="font-semibold">{th?'แผนเที่ยวรายวัน':'Day-by-day itinerary'}</p><TripTimelineMap key={message.id} th={th} days={message.plan.completeness?.requestedDays??message.plan.days?.length??1} stops={planStops(message.plan)} available={[]} verifiedRoad={message.plan.completeness?.status==='complete'}/>{message.plan.recovery?.sources&&<p className="text-xs text-muted-foreground">{Object.entries(message.plan.recovery.sources as Record<string,string>).map(([d,s])=>`${th?'วันที่':'Day'} ${d}: ${s==='ai'?'AI':s==='smart'?'Smart Planner':s==='hybrid'?'AI + Smart Planner':'Partial'}`).join(' · ')}</p>}</div>}
+      {message.plan&&<div className="mt-4 w-full min-w-0 max-w-full space-y-3 overflow-hidden border-t pt-3"><p className="font-semibold">{th?'แผนเที่ยวรายวัน':'Day-by-day itinerary'}</p><TripTimelineMap key={message.id} th={th} days={message.plan.completeness?.requestedDays??message.plan.days?.length??1} stops={planStops(message.plan)} available={[]} verifiedRoad={message.plan.completeness?.status==='complete'}/>{message.plan.recovery?.sources&&<p className="text-xs text-muted-foreground">{Object.entries(message.plan.recovery.sources as Record<string,string>).map(([d,s])=>`${th?'วันที่':'Day'} ${d}: ${s==='ai'?'AI':s==='smart'?'Smart Planner':s==='hybrid'?'AI + Smart Planner':'Partial'}`).join(' · ')}</p>}</div>}
      </div>
      {message.role==='user'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted"><UserRound className="h-4 w-4"/></span>}
     </div>)}
@@ -92,8 +92,8 @@ export default function TripPlanner({currentLanguage}:Props){
     <div ref={bottom}/>
    </div>
   </main>
-  <form onSubmit={e=>{e.preventDefault();void submit();}} className="z-20 shrink-0 border-t bg-background px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-   <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-3xl border bg-card p-2 shadow-sm">
+  <form onSubmit={e=>{e.preventDefault();void submit();}} className="z-30 w-full min-w-0 shrink-0 border-t bg-background px-2 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-3">
+   <div className="mx-auto flex w-full min-w-0 max-w-3xl items-end gap-2 rounded-3xl border bg-card p-2 shadow-sm">
     <textarea aria-label={th?'ข้อความถึง PaiNaiDee AI':'Message PaiNaiDee AI'} rows={1} maxLength={500} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void submit();}}} placeholder={th?'ถามเรื่องทริปหรือบอกสถานที่ที่อยากไป...':'Ask about your next trip...'} className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-base outline-none"/>
     <button type="submit" disabled={pending||!draft.trim()||facets.isLoading} aria-label={th?'ส่งข้อความ':'Send'} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-500 text-slate-950 disabled:opacity-40"><Send className="h-5 w-5"/></button>
    </div>
