@@ -57,7 +57,7 @@ export default function TripTimelineMap({stops,available,days,th,onChange,verifi
             {points.length>1&&<Polyline positions={points} pathOptions={{color:'#0d9488',weight:3,dashArray:'6 8'}}/>}
           </MapContainer>:<div className="flex h-52 items-center justify-center gap-2 bg-muted text-sm text-muted-foreground"><MapPinned size={18}/>{th?'เพิ่มสถานที่เพื่อดูแผนที่':'Add places to view map'}</div>}
         </div>
-        {mapExpanded&&<p className="text-xs leading-5 text-muted-foreground">{th?'เส้นประบนแผนที่แสดงการเชื่อมจุดตามลำดับ ไม่ใช่เส้นทางถนนที่ยืนยันแล้ว':'Dashed lines connect stops, not verified road routes.'}{verifiedRoad?'':''}</p>
+        {mapExpanded&&<p className="text-xs leading-5 text-muted-foreground">{th?'เส้นประบนแผนที่แสดงการเชื่อมจุดตามลำดับ ไม่ใช่เส้นทางถนนที่ยืนยันแล้ว':'Dashed lines connect stops, not verified road routes.'}{verifiedRoad?'':''}</p>}
         {directions&&<a href={directions} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 font-semibold text-white"><Navigation size={18}/>{th?'เปิดเส้นทางใน Google Maps':'Open in Google Maps'}</a>}
       </div>
     </div>
