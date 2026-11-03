@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Send, Sparkles, LoaderCircle, RotateCcw, Plus, Bot, UserRound } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, LoaderCircle, Plus, Bot, UserRound } from 'lucide-react';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
 import { parseTripIntent, type TripIntent } from '@/shared/utils/tripIntent';
-import BottomNavigation from '@/components/common/BottomNavigation';
 import TripTimelineMap from './TripTimelineMap';
 import type { TripStop } from '@/shared/utils/tripPlanner';
 
@@ -32,7 +31,6 @@ export default function TripPlanner({currentLanguage}:Props){
  const [messages,setMessages]=useState<Message[]>([]);
  const [pending,setPending]=useState(false);
  const [context,setContext]=useState('');
- const [latestRequest,setLatestRequest]=useState('');
  const bottom=useRef<HTMLDivElement>(null);
  const facets=useQuery({queryKey:['places','facets'],queryFn:getRailwayPlaceFacets,staleTime:300000});
  useEffect(()=>bottom.current?.scrollIntoView({behavior:'smooth',block:'end'}),[messages,pending]);
@@ -44,7 +42,7 @@ export default function TripPlanner({currentLanguage}:Props){
   // Follow-up answers fill missing slots; a new full request starts a new plan.
   const full=/\d+\s*(วัน|days?)/i.test(value)&&/(เที่ยว|trip|จังหวัด|งบ)/i.test(value)?value:[context,value].filter(Boolean).join(' ');
   const parsed=parseTripIntent(full,facets.data?.provinces??[]);
-  setContext(full);setLatestRequest(full);
+  setContext(full);
   const question=missingPrompt(parsed,th);
   if(question){add('assistant',question);return;}
   setPending(true);
@@ -77,7 +75,7 @@ export default function TripPlanner({currentLanguage}:Props){
    <Link to="/" aria-label={th?'กลับหน้าแรก':'Home'} className="rounded-full p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5"/></Link>
    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Sparkles className="h-5 w-5"/></span>
    <div className="min-w-0 flex-1"><h1 className="font-semibold">PaiNaiDee AI</h1><p className="text-xs text-muted-foreground">{th?'ผู้ช่วยวางแผนเที่ยวส่วนตัว':'Your personal trip planner'}</p></div>
-   <button type="button" onClick={()=>{setMessages([]);setContext('');setLatestRequest('');setDraft('');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="rounded-full border p-2"><Plus className="h-5 w-5"/></button>
+   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="rounded-full border p-2"><Plus className="h-5 w-5"/></button>
   </header>
   <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-5 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
    <div className="mx-auto flex max-w-3xl flex-col gap-5">
