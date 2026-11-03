@@ -1,227 +1,103 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Wallet, Navigation, Users, SlidersHorizontal, LoaderCircle, RotateCcw, AlertCircle, Compass, Trees, Landmark } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Send, Sparkles, LoaderCircle, Plus, Bot, UserRound } from 'lucide-react';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
-import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
-import { auditTripRoute, estimateTripBudget, mapDirectionsUrl, type TripPlanInput, type TripStyle } from '@/shared/utils/tripPlanner';
 import { parseTripIntent, type TripIntent } from '@/shared/utils/tripIntent';
-import BottomNavigation from '@/components/common/BottomNavigation';
 import TripTimelineMap from './TripTimelineMap';
+import type { TripStop } from '@/shared/utils/tripPlanner';
 
 interface Props { currentLanguage: 'th' | 'en' }
-
-const currency = (value: number) => `฿${value.toLocaleString('th-TH')}`;
-
-export default function TripPlanner({ currentLanguage }: Props) {
-  const th = currentLanguage === 'th';
-  const [province, setProvince] = useState('');
-  const [days, setDays] = useState(2);
-  const [people, setPeople] = useState(2);
-  const [dailyBudgetPerPerson, setDailyBudgetPerPerson] = useState(1500);
-  const [style, setStyle] = useState<TripStyle>('balanced');
-  const [transport, setTransport] = useState<'car' | 'public'>('car');
-  const [generated, setGenerated] = useState(false);
-  const [roadPlan, setRoadPlan] = useState<{status:string;stops:Array<{id:string;day:number;order:number;place:import('@/shared/types/attraction').AttractionDetail}>;legs:Array<{day:number;from:string;to:string;distanceKm:number;durationMinutes:number}>}|null>(null);
-  const [roadLoading, setRoadLoading] = useState(false);
-  const [roadError, setRoadError] = useState('');
-  const [editedStops, setEditedStops] = useState<import('@/shared/utils/tripPlanner').TripStop[] | null>(null);
-  const [request, setRequest] = useState('');
-  const [intent, setIntent] = useState<TripIntent | null>(null);
-  const [aiPlan, setAiPlan] = useState<any>(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState('');
-  const requestAiPlan = async () => {
-    if (!request.trim() || !province || !days || !people) return;
-    setAiLoading(true); setAiError(''); setAiPlan(null);
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 60000);
-      try {
-        const response = await fetch('https://painaidee-api-production.up.railway.app/api/ai/trip-plan', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({ message: request, province, days, people,
-            budget: intent?.totalBudget ?? days * people * dailyBudgetPerPerson, transport }),
-        });
-        if (!response.ok) {
-          const payload: { code?: string } = await response.json().catch(() => ({}));
-          const messages: Record<string, string> = th
-            ? { UPSTREAM_FAILURE: 'ผู้ให้บริการ AI ส่งคำตอบที่ระบบอ่านไม่ได้ กรุณาลองใหม่ภายหลัง', INVALID_JSON: 'AI ส่ง JSON ไม่ถูกต้อง กรุณาลองใหม่', INVALID_SCHEMA: 'รูปแบบแผนจาก AI ไม่ผ่านการตรวจสอบ', INVALID_PLACE_IDS: 'AI ระบุสถานที่ที่ไม่ได้อยู่ในฐานข้อมูล', INCOMPLETE_RESPONSE: 'คำตอบ AI ถูกตัดก่อนจบ กรุณาลองใหม่' }
-            : { UPSTREAM_FAILURE: 'AI provider returned an unreadable response. Try again later.', INVALID_JSON: 'Invalid AI JSON response.', INVALID_SCHEMA: 'AI itinerary failed validation.', INVALID_PLACE_IDS: 'AI referenced unknown places.', INCOMPLETE_RESPONSE: 'AI output was cut short.' };
-          throw Error(messages[payload.code ?? ''] || (th ? 'AI ยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง' : 'AI planner unavailable. Try later.'));
-        }
-        setAiPlan(await response.json());
-      } finally { clearTimeout(timer); }
-    } catch (error) { setAiError(error instanceof Error && error.name !== 'AbortError' ? error.message : (th ? 'การเชื่อมต่อ AI หมดเวลา กรุณาลองใหม่' : 'AI request timed out.')); }
-    finally { setAiLoading(false); }
-  };
-
-  const facets = useQuery({ queryKey: ['places', 'facets'], queryFn: getRailwayPlaceFacets, staleTime: 5 * 60_000 });
-  const places = useAllAttractions({ province }, { enabled: !!province });
-  const input: TripPlanInput = { days, people, dailyBudgetPerPerson, style, transport };
-  const roadStops = useMemo(() => roadPlan?.stops.map(item=>({place:{...item.place,images:item.place.images??[],tags:item.place.tags??[]},day:item.day,order:item.order})) ?? [],[roadPlan]);
-  const displayedStops = editedStops ?? roadStops;
-  const roadVerified = Boolean(roadPlan) && !editedStops && roadStops.length === roadPlan!.stops.length;
-  const budget = estimateTripBudget(input);
-  const routeAudit = useMemo(() => auditTripRoute(displayedStops, intent?.maxLegKm ?? 100), [displayedStops, intent]);
-  const exceedsBudget = intent?.totalBudget !== null && intent?.totalBudget !== undefined && budget.total > intent.totalBudget;
-
-  const interpretRequest = () => {
-    const parsed = parseTripIntent(request, facets.data?.provinces ?? []);
-    setIntent(parsed);
-    setGenerated(false);
-    setEditedStops(null);
-    if (parsed.issues.length) return;
-    setProvince(parsed.province);
-    setDays(parsed.days);
-    setPeople(parsed.people);
-    setDailyBudgetPerPerson(Math.floor(parsed.totalBudget! / parsed.days / parsed.people));
-    setStyle(parsed.style);
-    setTransport(parsed.transport);
-    setRoadPlan(null);setGenerated(false);
-  };
-
-  async function generate() {
-    if (!province || roadLoading) return;
-    setEditedStops(null);setRoadPlan(null);setRoadError('');setGenerated(false);setRoadLoading(true);
-    try {
-      const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),60000);
-      try {const response=await fetch('https://painaidee-api-production.up.railway.app/api/trips/basic-road-plan',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({province,days,transport,maxRoadMinutes:intent?.avoidLongDrives?45:90})});if(!response.ok)throw Error('ROAD_GATE_UNAVAILABLE');const plan=await response.json();if(!Array.isArray(plan.stops)||!Array.isArray(plan.legs))throw Error('INVALID_ROUTE_RESULT');if(plan.stops.some((stop:{id:string;place?:{id:string}})=>!stop.place||stop.id!==stop.place.id))throw Error('INVALID_PLACE_IDS');setRoadPlan(plan);setGenerated(true);}finally{clearTimeout(timer);}
-    }catch{setRoadError(th?'ยังตรวจสอบเส้นทางถนนไม่ได้ กรุณาลองใหม่ภายหลัง':'Road verification unavailable. Please retry.' );setGenerated(true);}finally{setRoadLoading(false);}
-  };
-  const updateInput = (setter: () => void) => { setter(); setGenerated(false); setIntent(null); setEditedStops(null); setRoadPlan(null); };
-
-  return (
-    <div className="min-h-screen min-w-0 overflow-x-clip w-full min-w-0 overflow-x-clip bg-background pb-36 sm:pb-28">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-lg">
-        <div className="container mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-          <Link to="/" aria-label={th ? 'กลับหน้าแรก' : 'Back home'} className="rounded-lg p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Link>
-          <Sparkles className="h-6 w-6 text-teal-400" />
-          <span className="font-semibold">{th ? 'AI วางแผนเที่ยว' : 'Smart Trip Planner'}</span>
-          <span className="ml-auto text-[10px] text-muted-foreground" aria-label="Frontend build">v{__PAINAIDEE_BUILD__}</span>
-        </div>
-      </header>
-      <main className="container mx-auto w-full min-w-0 max-w-5xl space-y-6 overflow-x-clip px-4 py-5 sm:px-4 sm:py-7">
-        <section className="min-w-0 overflow-hidden rounded-3xl border border-teal-500/20 bg-gradient-to-br from-teal-500/15 via-background to-amber-500/10 p-5 shadow-sm sm:p-9">
-          <a href="#trip-customizer" className="float-right rounded-full border border-teal-400/30 px-3 py-2 text-xs font-semibold text-teal-600 dark:text-teal-300 hover:bg-teal-500/10">{th ? 'เริ่มวางแผน' : 'Start planning'}</a>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-400"><Sparkles className="h-4 w-4" /> PaiNaiDee Smart Planner</div>
-          <h1 className="text-3xl font-bold leading-tight sm:text-4xl">{th ? 'ทริปในฝัน เริ่มได้ที่นี่' : 'Your next trip starts here'}</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{th ? 'เลือกจุดหมายและสไตล์การเที่ยว เราจะจัดสถานที่จริงเป็นทริปรายวัน พร้อมประเมินงบและลิงก์เส้นทางให้' : 'Choose a destination and travel style to create a day-by-day plan from real places, with budget estimates and route links.'}</p>
-        </section>
-
-        <Card id="trip-customizer" className="scroll-mt-24 border-teal-500/20 shadow-sm"><CardContent className="min-w-0 space-y-5 overflow-hidden p-4 sm:p-7">
-          <h2 className="flex items-center gap-2 text-xl font-semibold"><SlidersHorizontal className="h-5 w-5 text-teal-400" />{th ? 'ออกแบบทริปของคุณ' : 'Customize your trip'}</h2>
-          <p className="text-sm leading-6 text-muted-foreground">{th ? 'เลือกจังหวัด วันเดินทาง ผู้เดินทาง และงบประมาณได้ในไม่กี่ขั้นตอน' : 'Choose your destination, days, travelers and budget in a few steps.'}</p>
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-            <label className="min-w-0 space-y-2 text-sm font-medium">{th ? 'จังหวัดปลายทาง' : 'Destination province'}
-              <select aria-label={th ? 'จังหวัดปลายทาง' : 'Destination province'} className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={province} onChange={e => updateInput(() => setProvince(e.target.value))}>
-                <option value="">{th ? 'เลือกจังหวัด' : 'Select province'}</option>
-                {(facets.data?.provinces ?? []).map(name => <option key={name} value={name}>{name}</option>)}
-              </select>
-            </label>
-            <label className="min-w-0 space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />{th ? 'จำนวนวัน' : 'Days'}</span>
-              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={days} onChange={e => updateInput(() => setDays(Number(e.target.value)))}>
-                {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} {th ? 'วัน' : 'days'}</option>)}
-              </select>
-            </label>
-            <label className="min-w-0 space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><Users className="h-4 w-4" />{th ? 'ผู้เดินทาง' : 'Travelers'}</span>
-              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={people} onChange={e => updateInput(() => setPeople(Number(e.target.value)))}>
-                {Array.from({ length: 10 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n} {th ? 'คน' : 'people'}</option>)}
-              </select>
-            </label>
-            <label className="min-w-0 space-y-2 text-sm font-medium"><span className="flex items-center gap-2"><Wallet className="h-4 w-4" />{th ? 'งบต่อคนต่อวัน' : 'Budget per person/day'}</span>
-              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={dailyBudgetPerPerson} onChange={e => updateInput(() => setDailyBudgetPerPerson(Number(e.target.value)))}>
-                {![500, 800, 1000, 1500, 2000, 3000, 5000].includes(dailyBudgetPerPerson) && <option value={dailyBudgetPerPerson}>{currency(dailyBudgetPerPerson)}</option>}
-                {[500, 800, 1000, 1500, 2000, 3000, 5000].map(n => <option key={n} value={n}>{currency(n)}</option>)}
-              </select>
-            </label>
-            <label className="min-w-0 space-y-2 text-sm font-medium">{th ? 'สไตล์ท่องเที่ยว' : 'Travel style'}
-              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={style} onChange={e => updateInput(() => setStyle(e.target.value as TripStyle))}>
-                <option value="balanced">{th ? 'หลากหลาย' : 'Balanced'}</option><option value="nature">{th ? 'ธรรมชาติ' : 'Nature'}</option><option value="culture">{th ? 'วัฒนธรรม' : 'Culture'}</option>
-              </select>
-            </label>
-            <label className="min-w-0 space-y-2 text-sm font-medium">{th ? 'การเดินทาง' : 'Transport'}
-              <select className="h-12 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-teal-400/40" value={transport} onChange={e => updateInput(() => setTransport(e.target.value as 'car' | 'public'))}>
-                <option value="car">{th ? 'รถยนต์' : 'Car'}</option><option value="public">{th ? 'ขนส่งสาธารณะ' : 'Public transport'}</option>
-              </select>
-            </label>
-          </div>
-          <div className="rounded-xl bg-muted/60 px-4 py-3 flex flex-wrap items-center justify-between gap-2"><span className="text-sm text-muted-foreground">{th ? 'งบประมาณรวมโดยประมาณ' : 'Estimated total budget'}</span><strong className="text-lg text-teal-700 dark:text-teal-300">{currency(days * people * dailyBudgetPerPerson)}</strong></div>
-          <Button disabled={!province || roadLoading} onClick={generate} className="min-h-12 w-full rounded-xl bg-teal-400 font-semibold text-slate-950 shadow-sm hover:bg-teal-300">
-            <Sparkles className="mr-2 h-5 w-5" />{places.isLoading ? (th ? 'กำลังโหลดสถานที่...' : 'Loading places...') : (th ? 'สร้างทริปของฉัน' : 'Build my trip')}
-          </Button>
-          {places.error && <p role="alert" className="text-sm text-red-400">{th ? 'โหลดข้อมูลสถานที่ไม่ได้ กรุณาลองใหม่ภายหลัง' : 'Could not load places. Please try later.'}</p>}
-        </CardContent></Card>
-
-        <Card><CardContent className="min-w-0 space-y-5 overflow-hidden p-4 sm:p-7">
-          <h2 className="flex items-center gap-2 text-xl font-semibold"><Sparkles className="h-5 w-5 text-teal-400" />{th ? 'เล่าทริปที่อยากไป' : 'Describe your ideal trip'}</h2>
-          <label htmlFor="trip-request" className="block text-sm text-muted-foreground">{th ? 'ระบุจังหวัด จำนวนวัน งบรวม และความชอบด้วยภาษาธรรมชาติ' : 'Include province, days, total budget and preferences'}</label>
-          <textarea id="trip-request" rows={3} maxLength={500} value={request} onChange={e => { setRequest(e.target.value); setIntent(null); setGenerated(false); }}
-            placeholder={th ? 'อยากเที่ยวเชียงใหม่ 3 วัน งบ 6,000 บาท ชอบธรรมชาติ ไม่อยากขับรถไกล' : 'Chiang Mai 3 days budget 6000 baht, nature and short drives'}
-            className="block w-full min-w-0 max-w-full resize-y rounded-2xl border border-input bg-background p-4 text-base leading-7 shadow-sm transition focus-visible:border-teal-400 focus-visible:ring-2 focus-visible:ring-teal-400/30" />
-          <Button type="button" onClick={interpretRequest} disabled={!request.trim() || facets.isLoading || !facets.data} className="min-h-12 w-full rounded-xl bg-teal-400 font-semibold text-slate-950 shadow-sm transition hover:bg-teal-300">
-            <Sparkles className="mr-2 h-4 w-4" />{th ? 'ตีความและสร้างแผนเบื้องต้น' : 'Interpret and draft itinerary'}
-          </Button>
-          {intent && <div aria-live="polite" className="min-w-0 space-y-2 break-words rounded-xl bg-muted/60 p-4 text-sm">
-            {intent.issues.length ? <ul className="list-disc space-y-1 pl-5 text-amber-500">{intent.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>
-              : <p>{th ? `เข้าใจคำขอ: ${intent.province} · ${intent.days} วัน · ${intent.people} คน · งบรวม ${currency(intent.totalBudget!)} · ${intent.avoidLongDrives ? 'จำกัดช่วงระหว่างจุดแวะไม่เกิน 30 กม. (เส้นตรง)' : 'วางแผนตามระยะทาง'}`
-                : `Interpreted: ${intent.province}, ${intent.days} days, ${intent.people} people, total budget ${currency(intent.totalBudget!)}`}</p>}
-          </div>}
-          <Button type="button" variant="outline" onClick={requestAiPlan} className="min-h-12 w-full rounded-xl border-teal-500/30 font-semibold sm:w-auto"
-            disabled={aiLoading || !request.trim() || !province}>
-            {aiLoading ? (th ? 'AI กำลังวางแผน...' : 'AI is planning...') : (th ? 'สร้างแผนด้วย OpenRouter AI' : 'Generate with OpenRouter AI')}
-          </Button>
-          {aiLoading && <div role="status" aria-live="polite" className="flex items-center gap-3 rounded-xl border border-teal-400/20 bg-teal-400/5 p-3 text-sm text-muted-foreground"><LoaderCircle className="h-5 w-5 shrink-0 animate-spin text-teal-400" />{th ? 'กำลังตรวจสถานที่และสร้างเส้นทาง โปรดรอสักครู่' : 'Checking places and preparing your route…'}</div>}
-          {aiError && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-400/30 bg-red-500/5 p-4"><span className="flex min-w-0 items-start gap-2 text-sm text-red-500"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{aiError}</span><Button size="sm" variant="outline" disabled={aiLoading} onClick={requestAiPlan} className="gap-2 rounded-lg"><RotateCcw className="h-4 w-4" />{th ? 'ลองอีกครั้ง' : 'Retry'}</Button></div>}
-          {aiPlan && <section className="min-w-0 space-y-3 break-words" aria-label="Verified AI draft">
-            <div role="status" className={`rounded-xl border p-4 ${aiPlan.completeness?.status === 'complete' ? 'border-teal-500/40 bg-teal-500/10' : 'border-amber-500/40 bg-amber-500/10'}`}>
-              <h3 className="font-semibold">{aiPlan.completeness?.status === 'complete' ? (th ? 'แผนครบตามเงื่อนไขที่ตรวจสอบ' : 'Complete verified itinerary') : (th ? 'แผนบางส่วน ยังไม่ครบตามเงื่อนไข' : 'Partial itinerary: some requirements unmet')}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{th ? `วางแผนได้ ${aiPlan.completeness?.plannedDays ?? aiPlan.days?.length ?? 0} จาก ${aiPlan.completeness?.requestedDays ?? days} วัน` : `Planned ${aiPlan.completeness?.plannedDays ?? aiPlan.days?.length ?? 0} of ${aiPlan.completeness?.requestedDays ?? days} days`}</p>
-              {aiPlan.completeness?.status !== 'complete' && <p className="mt-2 text-sm">{th ? 'ลองเพิ่มสถานที่หรือขยายระยะเดินทางที่ยอมรับได้ แล้วกดสร้างแผนใหม่ หรือใช้แผนพื้นฐานด้านล่าง' : 'Try relaxing the travel distance or adding more places, then regenerate, or use the basic planner below.'}</p>}
-            </div>
-            {aiPlan.recovery && <p className="text-sm text-amber-600">{aiPlan.recovery.status==='incremental_complete'?(th?'AI จัดทริปไม่ครบ Smart Planner เติมเฉพาะวันที่ขาด โดยเก็บวันที่ AI ผ่านเกณฑ์ไว้':'Smart Planner filled missing days while preserving verified AI days'):(th?'ยังจัดทริปไม่ครบ เนื่องจากสถานที่หรือเส้นทางถนนที่ผ่านเกณฑ์มีไม่เพียงพอ':'Insufficient verified places or road routes')}</p>}
-            {aiPlan.recovery?.sources && <p className="text-sm text-muted-foreground">{Object.entries(aiPlan.recovery.sources as Record<string,string>).map(([day,source])=>`วันที่ ${day}: ${source==='ai'?'AI':source==='hybrid'?'AI + Smart Planner':source==='smart'?'Smart Planner':'ยังไม่ครบ'}`).join(' · ')}</p>}
-            <TripTimelineMap days={days} th={th} stops={(aiPlan.days ?? []).flatMap((day: any) => (day.stops ?? []).map((stop: any, i: number) => {
-              const place=places.data?.attractions.find(p=>String(p.id)===String(stop.id)) ?? (stop.coordinates ? { ...stop, name:stop.name, nameLocal:stop.nameLocal||stop.name, category:stop.category||'Place', province:stop.province||province, rating:0, reviewCount:0, description:'', images:[], tags:[] } : null);
-              return place ? {place:{...place,images:place.images??[],tags:place.tags??[]},day:day.day,order:i+1} : null;
-            }).filter(Boolean))} available={[]} />
-            <p>{th ? 'งบประมาณคร่าว ๆ' : 'Estimated budget'}: {currency(aiPlan.budget?.estimatedTotal ?? 0)}</p>
-            {aiPlan.validation?.warnings?.map((warning: string) => <p key={warning} className="text-xs text-amber-500">⚠ {warning}</p>)}
-          </section>}
-          <p className="text-xs text-muted-foreground">{th ? 'โหมดแผนพื้นฐานด้านล่างใช้กฎภาษาไทยและตรวจเงื่อนไขอย่างเป็นระบบ ส่วนปุ่ม OpenRouter AI จะส่งคำขอไปยังโมเดลภายนอกผ่าน Railway' : 'The basic mode uses local rules. OpenRouter AI sends your request to an external model via Railway.'}</p>
-        </CardContent></Card>
-
-        {generated && <section className="space-y-5" aria-live="polite">
-          <Card><CardContent className="space-y-2 p-5 text-sm">
-            <h3 className="font-semibold">{th ? 'ผลตรวจความพร้อมของแผน' : 'Itinerary validation'}</h3>
-            <p>{roadVerified && roadPlan?.status==='complete'?'✅':'⚠️'} {roadVerified && roadPlan?.status==='complete'?(th?'เส้นทางถนนผ่าน Geoapify':'Geoapify road routes verified'):(th?'แผนบางส่วน: เส้นทางหรือจำนวนจุดแวะยังไม่ครบ':'Partial plan: routes or stops not fully verified')}</p>
-            {roadError && <p role="alert">{roadError}</p>}
-            <p>{routeAudit.validCoordinates?'✅':'⚠️'} {th ? 'พิกัด' : 'Coordinates'}: {routeAudit.validCoordinates ? (th ? 'ผ่านการตรวจขอบเขตไทย' : 'Valid Thailand bounds') : (th ? 'ไม่มีจุดแวะที่ผ่านเกณฑ์' : 'No valid stops')}</p>
-            <p>{routeAudit.overDistanceLimit ? '⚠️' : '✅'} {th ? 'ระยะระหว่างจุดแวะ' : 'Inter-stop distance'}: {routeAudit.overDistanceLimit ? (th ? 'เกินข้อจำกัด' : 'Exceeds limit') : (th ? 'ไม่เกินข้อจำกัดที่กำหนด (วัดระยะเส้นตรง)' : 'Within straight-line limit')}</p>
-            <p>⚠️ {th ? 'เวลาทำการ: ยังไม่ยืนยันจากแหล่งข้อมูลทางการ โปรดตรวจสอบแต่ละสถานที่ก่อนเดินทาง' : 'Opening hours: unverified; check each place before traveling'}</p>
-            <p>{exceedsBudget ? '⚠️' : '✅'} {th ? 'งบประมาณ' : 'Budget'}: {exceedsBudget ? (th ? 'เกินวงเงินที่ร้องขอ' : 'Over requested budget') : (th ? 'อยู่ภายในวงเงินประมาณการ' : 'Within estimated cap')}</p>
-            <p className="text-xs text-muted-foreground">{th ? 'ระยะเส้นตรงไม่ใช่ระยะถนนหรือเวลาเดินทางจริง แผนนี้ยังเป็นฉบับร่าง ไม่ใช่แผนที่ยืนยันเวลาทำการแล้ว' : 'Straight-line distance is not driving distance or travel time. This is a draft, not an hours-verified itinerary.'}</p>
-          </CardContent></Card>
-          {displayedStops.length === 0 ? <Card><CardContent className="p-5">{th ? 'จังหวัดนี้ยังไม่มีสถานที่พร้อมพิกัดเพียงพอสำหรับจัดทริป' : 'No verified coordinates available for this destination yet.'}</CardContent></Card> : <>
-            <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-2xl font-bold">{th ? `ทริป ${province} ${days} วัน` : `${province}: ${days}-day trip`}</h2><p className="text-sm text-muted-foreground">{th ? `${displayedStops.length} สถานที่ · ${people} คน` : `${displayedStops.length} places · ${people} travelers`}</p></div></div>
-            <Card><CardContent className="p-5"><h3 className="mb-3 flex items-center gap-2 text-lg font-semibold"><Wallet className="h-5 w-5 text-amber-400" />{th ? 'ประมาณการงบทั้งทริป' : 'Estimated trip budget'}</h3>
-              <p className="text-3xl font-bold text-amber-400">{currency(budget.total)}</p><p className="mb-4 text-sm text-muted-foreground">{th ? `เฉลี่ย ${currency(budget.perPerson)} ต่อคน` : `${currency(budget.perPerson)} per person`}</p>
-              <div className="grid grid-cols-2 gap-3 text-sm">{([[th ? 'อาหาร' : 'Meals', budget.meals], [th ? 'เดินทาง' : 'Transport', budget.transport], [th ? 'ที่พัก' : 'Accommodation', budget.accommodation], [th ? 'กิจกรรม' : 'Activities', budget.activities]] as const).map(([label, amount]) => <div key={label} className="rounded-xl bg-muted/60 p-3"><span className="text-muted-foreground">{label}</span><p className="mt-1 font-semibold">{currency(amount)}</p></div>)}</div>
-              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{th ? 'ตัวเลขนี้เป็นการแบ่งงบตามสมมติฐานเพื่อวางแผน ไม่ใช่ราคาโรงแรม ค่าเข้าชม ค่าเดินทางจริง หรือใบเสนอราคา โปรดตรวจสอบราคาและเวลาทำการก่อนเดินทาง' : 'Indicative allocations only, not live hotel, transport or admission prices. Verify actual prices and opening hours before traveling.'}</p>
-            </CardContent></Card>
-            <TripTimelineMap stops={displayedStops} available={(places.data?.attractions??[]).map(p=>({...p,images:p.images??[],tags:p.tags??[]}))} days={days} th={th} onChange={setEditedStops} verifiedRoad={roadVerified}/>
-            {editedStops && <p role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm">{th?'คุณแก้ไขลำดับหรือจุดแวะแล้ว ต้องตรวจสอบเส้นทางถนน เวลาเปิดปิด และความเหมาะสมอีกครั้งก่อนเดินทาง':'You edited the itinerary. Road routes, opening hours and constraints must be revalidated.'}</p>}
-            {roadVerified && roadPlan!.legs.length>0 && <Card><CardContent className="space-y-2 p-5"><h3 className="font-semibold">{th?'ระยะถนนและเวลาเดินทาง (Geoapify)':'Verified road legs (Geoapify)'}</h3>{roadPlan!.legs.map((leg,i)=><p key={i} className="text-sm">{leg.distanceKm} กม. · {leg.durationMinutes} นาที</p>)}</CardContent></Card>}
-            {routeAudit.legs.length > 0 && <Card><CardContent className="space-y-2 p-5"><h3 className="font-semibold">{th ? 'ตรวจระยะทางระหว่างจุดแวะ (เส้นตรง)' : 'Straight-line legs'}</h3>{routeAudit.legs.map((leg, i) => <p key={i} className="text-sm text-muted-foreground">{leg.from} → {leg.to}: {leg.straightLineKm} กม.</p>)}</CardContent></Card>}
-            <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground"><MapPinned className="h-4 w-4 shrink-0" />{th ? 'ลำดับจุดแวะคำนวณจากความใกล้เคียงและประเภทสถานที่ ไม่ใช่เวลาเดินทางจากการจราจรจริง เส้นทาง Google Maps ใช้สำหรับตรวจสอบและปรับแผนก่อนออกเดินทาง' : 'Stops are ordered by proximity and category, not live traffic. Check routes in Google Maps before leaving.'}</p>
-          </>}
-        </section>}
-        <p className="text-center text-xs text-muted-foreground">{th ? 'Smart Planner รุ่นเริ่มต้นใช้การจัดอันดับอัตโนมัติจากข้อมูลสถานที่จริง ยังไม่ใช่ AI สนทนาหรือการจองอัตโนมัติ' : 'This first version uses rule-based ranking of real places, not conversational AI or automated bookings.'}</p>
-      </main>
-      <BottomNavigation currentLanguage={currentLanguage} />
-    </div>
-  );
+type Message = {id:number;role:'user'|'assistant';text:string;plan?:any};
+const API='https://painaidee-api-production.up.railway.app';
+const money=(n:number)=>'฿'+n.toLocaleString('th-TH');
+const missingPrompt=(intent:TripIntent,th:boolean)=>{
+  if(!intent.province)return th?'อยากไปเที่ยวจังหวัดไหนครับ?':'Which province would you like to visit?';
+  if(!intent.days||intent.days>5)return th?'อยากเที่ยวกี่วันครับ? (1–5 วัน)':'How many days? (1–5)';
+  if(intent.totalBudget===null)return th?'ตั้งงบประมาณรวมไว้กี่บาทครับ?':'What is your total budget in baht?';
+  if(intent.issues.length)return intent.issues.join(' · ');
+  return '';
+};
+function planStops(plan:any):TripStop[]{
+ return (plan?.days??[]).flatMap((day:any)=>(day.stops??[]).flatMap((stop:any,index:number)=>{
+  if(!stop?.coordinates||!stop?.id)return [];
+  const place={...stop,name:stop.name||stop.nameLocal||'สถานที่ท่องเที่ยว',nameLocal:stop.nameLocal||stop.name||'สถานที่ท่องเที่ยว',province:stop.province||plan.province,category:stop.category||'Place',rating:stop.rating||0,reviewCount:stop.reviewCount||0,images:stop.images||[],tags:stop.tags||[]};
+  return [{place,day:day.day,order:index+1}];
+ }));
+}
+export default function TripPlanner({currentLanguage}:Props){
+ const th=currentLanguage==='th';
+ const [draft,setDraft]=useState('');
+ const [messages,setMessages]=useState<Message[]>([]);
+ const [pending,setPending]=useState(false);
+ const [context,setContext]=useState('');
+ const bottom=useRef<HTMLDivElement>(null);
+ const facets=useQuery({queryKey:['places','facets'],queryFn:getRailwayPlaceFacets,staleTime:300000});
+ useEffect(()=>bottom.current?.scrollIntoView({behavior:'smooth',block:'end'}),[messages,pending]);
+ const add=(role:Message['role'],text:string,plan?:any)=>setMessages(m=>[...m,{id:Date.now()+Math.random(),role,text,plan}]);
+ const submit=async(textOverride?:string)=>{
+  const value=(textOverride??draft).trim();
+  if(!value||pending)return;
+  setDraft('');add('user',value);
+  // Follow-up answers fill missing slots; a new full request starts a new plan.
+  const full=/\d+\s*(วัน|days?)/i.test(value)&&/(เที่ยว|trip|จังหวัด|งบ)/i.test(value)?value:[context,value].filter(Boolean).join(' ');
+  const parsed=parseTripIntent(full,facets.data?.provinces??[]);
+  setContext(full);
+  const question=missingPrompt(parsed,th);
+  if(question){add('assistant',question);return;}
+  setPending(true);
+  try{
+   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),65000);
+   let result:any=null;let usedFallback=false;
+   try{
+    const response=await fetch(API+'/api/ai/trip-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,province:parsed.province,days:parsed.days,people:parsed.people,budget:parsed.totalBudget,transport:parsed.transport}),signal:controller.signal});
+    if(response.ok)result=await response.json();
+    else{
+     const body=await response.json().catch(()=>({}));
+     if(response.status===429)throw Error(th?'มีคำขอมากเกินไป กรุณารอสักครู่':'Too many requests. Please wait.');
+     if(response.status>=500||response.status===422){usedFallback=true;}else throw Error(body.error||'Unable to plan this trip');
+    }
+    if(usedFallback){
+     const fallback=await fetch(API+'/api/trips/basic-road-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province:parsed.province,days:parsed.days,transport:parsed.transport,maxRoadMinutes:parsed.avoidLongDrives?45:90}),signal:controller.signal});
+     if(!fallback.ok)throw Error(th?'ยังไม่สามารถตรวจเส้นทางได้ กรุณาลองใหม่':'Road verification is unavailable.');
+     const basic=await fallback.json();
+     result={province:parsed.province,days:Array.from({length:parsed.days},(_,i)=>({day:i+1,stops:(basic.stops||[]).filter((s:any)=>s.day===i+1).map((s:any)=>s.place)})),completeness:{status:basic.status,requestedDays:parsed.days,plannedDays:new Set((basic.stops||[]).map((s:any)=>s.day)).size},provider:'smart_fallback',budget:{estimatedTotal:parsed.totalBudget}};
+    }
+   }finally{clearTimeout(timeout);}
+   const complete=result?.completeness?.status==='complete';
+   const source=usedFallback?(th?'OpenRouter AI ไม่พร้อม จึงใช้ Smart Planner ตรวจเส้นทางแทน':'AI unavailable; Smart Planner checked the roads instead'):result?.recovery?(th?'AI + Smart Planner เติมเฉพาะส่วนที่ขาด':'AI + Smart Planner filled missing parts'):(th?'AI จัดแผนและตรวจเงื่อนไขแล้ว':'AI planned and checked the trip');
+   add('assistant',`${source}\n${complete?(th?'จัดแผนครบตามจำนวนวันที่ขอ':'All requested days planned'):(th?'แผนบางส่วน: ยังมีวันที่หรือเส้นทางที่ตรวจสอบไม่ครบ':'Partial plan: some days or roads remain unverified')}\n${parsed.province} · ${parsed.days} ${th?'วัน':'days'} · ${money(parsed.totalBudget!)} ${th?'งบที่ระบุ':'requested budget'}`,result);
+  }catch(error){add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
+  finally{setPending(false);}
+ };
+ return <div className="flex h-[100dvh] min-h-0 w-full min-w-0 flex-col overflow-hidden bg-background">
+  <header className="z-20 flex shrink-0 items-center gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
+   <Link to="/" aria-label={th?'กลับหน้าแรก':'Home'} className="rounded-full p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5"/></Link>
+   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Sparkles className="h-5 w-5"/></span>
+   <div className="min-w-0 flex-1"><h1 className="font-semibold">PaiNaiDee AI</h1><p className="text-xs text-muted-foreground">{th?'ผู้ช่วยวางแผนเที่ยวส่วนตัว':'Your personal trip planner'}</p></div>
+   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="rounded-full border p-2"><Plus className="h-5 w-5"/></button>
+  </header>
+  <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-5 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
+   <div className="mx-auto flex max-w-3xl flex-col gap-5">
+    {!messages.length&&<div className="space-y-4 py-10 text-center"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-500/10 text-teal-500"><Sparkles className="h-8 w-8"/></span><h2 className="text-2xl font-bold">{th?'อยากไปเที่ยวที่ไหน?':'Where would you like to go?'}</h2><p className="text-sm text-muted-foreground">{th?'บอกจังหวัด จำนวนวัน งบรวม และสไตล์ที่ชอบได้เลย':'Tell me your destination, days, budget and travel style'}</p><button type="button" onClick={()=>submit(th?'อยากเที่ยวเชียงใหม่ 3 วัน งบ 6000 บาท เน้นธรรมชาติ ไม่อยากขับรถไกล':'Chiang Mai 3 days budget 6000 baht nature short drives')} className="rounded-2xl border px-4 py-3 text-left text-sm hover:bg-muted">{th?'ลอง: เชียงใหม่ 3 วัน งบ 6,000 บาท เน้นธรรมชาติ':'Try: Chiang Mai, 3 days, ฿6,000, nature'}</button></div>}
+    {messages.map(message=><div key={message.id} className={message.role==='user'?'flex justify-end':'flex items-start gap-2'}>
+     {message.role==='assistant'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Bot className="h-4 w-4"/></span>}
+     <div className={`min-w-0 max-w-[88%] break-words rounded-2xl px-4 py-3 text-sm leading-7 whitespace-pre-line ${message.role==='user'?'rounded-br-sm bg-teal-500/15':'rounded-bl-sm border bg-card'}`}>
+      {message.text}
+      {message.plan&&<div className="mt-4 min-w-0 space-y-3 border-t pt-3"><p className="font-semibold">{th?'แผนเที่ยวรายวัน':'Day-by-day itinerary'}</p><TripTimelineMap key={message.id} th={th} days={message.plan.completeness?.requestedDays??message.plan.days?.length??1} stops={planStops(message.plan)} available={[]} verifiedRoad={message.plan.completeness?.status==='complete'}/>{message.plan.recovery?.sources&&<p className="text-xs text-muted-foreground">{Object.entries(message.plan.recovery.sources as Record<string,string>).map(([d,s])=>`${th?'วันที่':'Day'} ${d}: ${s==='ai'?'AI':s==='smart'?'Smart Planner':s==='hybrid'?'AI + Smart Planner':'Partial'}`).join(' · ')}</p>}</div>}
+     </div>
+     {message.role==='user'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted"><UserRound className="h-4 w-4"/></span>}
+    </div>)}
+    {pending&&<div role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><LoaderCircle className="h-4 w-4 animate-spin"/>{th?'กำลังจัดทริปและตรวจเส้นทางถนน...':'Planning and verifying road routes...'}</div>}
+    <div ref={bottom}/>
+   </div>
+  </main>
+  <form onSubmit={e=>{e.preventDefault();void submit();}} className="z-20 shrink-0 border-t bg-background px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+   <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-3xl border bg-card p-2 shadow-sm">
+    <textarea aria-label={th?'ข้อความถึง PaiNaiDee AI':'Message PaiNaiDee AI'} rows={1} maxLength={500} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void submit();}}} placeholder={th?'ถามเรื่องทริปหรือบอกสถานที่ที่อยากไป...':'Ask about your next trip...'} className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-base outline-none"/>
+    <button type="submit" disabled={pending||!draft.trim()||facets.isLoading} aria-label={th?'ส่งข้อความ':'Send'} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-500 text-slate-950 disabled:opacity-40"><Send className="h-5 w-5"/></button>
+   </div>
+   {facets.isError&&<p className="mx-auto mt-1 max-w-3xl text-xs text-red-500">{th?'ไม่สามารถโหลดรายชื่อจังหวัดได้ กรุณาลองใหม่':'Unable to load provinces. Please retry.'}</p>}
+  </form>
+ </div>;
 }
