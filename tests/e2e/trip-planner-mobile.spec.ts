@@ -54,9 +54,11 @@ test('complete Chiang Mai prompt renders three-day itinerary and expandable map 
   await mapToggle.click();
   await expect(mapToggle).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('.leaflet-container')).toBeVisible();
+  expect(browserErrors).toEqual([]);
 
   await page.getByRole('tab', { name: 'วันที่ 2' }).click();
   await expect(page.getByText('ดอยอินทนนท์').first()).toBeVisible();
+  expect(browserErrors).toEqual([]);
   await mapToggle.click();
   await expect(mapToggle).toHaveAttribute('aria-expanded', 'false');
 
