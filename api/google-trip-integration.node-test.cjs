@@ -4,14 +4,14 @@ const assert=require('node:assert/strict');
 const {registerAiTripRoutes}=require('./ai-trip-plan.cjs');
 
 test('incomplete local trip adds ephemeral Google stops only after the LLM step, with verified Google routes',async()=>{
-  const keys=['OPENROUTER_API_KEY','OPENROUTER_MODEL','GEOAPIFY_API_KEY','AI_MAX_OUTPUT_TOKENS','GOOGLE_PLACES_API_KEY','GOOGLE_PLACES_ENABLED'];
+  const keys=['OPENROUTER_API_KEY','OPENROUTER_MODEL','GEOAPIFY_API_KEY','AI_MAX_OUTPUT_TOKENS','GOOGLE_PLACES_API_KEY','GOOGLE_PLACES_ENABLED','GOOGLE_PLACES_PILOT_EXPIRES_AT'];
   const previous=Object.fromEntries(keys.map(key=>[key,process.env[key]]));
   const originalFetch=global.fetch;
   try {
-    Object.assign(process.env,{OPENROUTER_API_KEY:'stub',OPENROUTER_MODEL:'nvidia/nemotron-3.5-lightning:free',GEOAPIFY_API_KEY:'stub',GOOGLE_PLACES_API_KEY:'stub',GOOGLE_PLACES_ENABLED:'true',AI_MAX_OUTPUT_TOKENS:'2400'});
+    Object.assign(process.env,{OPENROUTER_API_KEY:'stub',OPENROUTER_MODEL:'nvidia/nemotron-3.5-lightning:free',GEOAPIFY_API_KEY:'stub',GOOGLE_PLACES_API_KEY:'stub',GOOGLE_PLACES_ENABLED:'true',GOOGLE_PLACES_PILOT_EXPIRES_AT:'2099-01-01T00:00:00+07:00',AI_MAX_OUTPUT_TOKENS:'2400'});
     const local=[1,2].map(i=>({id:'local-'+i,name:'Local '+i,nameLocal:'Local '+i,province:'เชียงราย',category:'Nature',tags:['Nature'],rating:4,coordinates:{lat:19.90+i*.001,lng:99.80+i*.001}}));
     let route;
-    registerAiTripRoutes({post:(_path,_limiter,handler)=>{route=handler;}},{listPlaces:async()=>({attractions:local}),getSql:()=>async()=>[{model_id:'nvidia/nemotron-3.5-lightning:free',structured_output:false,updated_at:new Date()}]});
+    registerAiTripRoutes({post:(_path,_limiter,handler)=>{route=handler;}},{listPlaces:async()=>({attractions:local}),getSql:()=>async()=>[{model_id:'nvidia/nemotron-3.5-lightning:free',structured_output:false,updated_at:new Date()}],reserveGoogleQuota:async()=>true});
     const calls=[];
     const ok=data=>({ok:true,status:200,headers:{get:()=>null},json:async()=>data});
     global.fetch=async(url,options={})=>{

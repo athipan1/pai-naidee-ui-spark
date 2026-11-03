@@ -6,16 +6,16 @@ const {registerAiTripRoutes}=require('./ai-trip-plan.cjs');
 const local=Array.from({length:7},(_,i)=>({id:'local-'+i,name:'Local '+i,nameLocal:'Local '+i,province:'เชียงใหม่',category:'Nature',tags:[],rating:4,coordinates:{lat:18.75+i*.002,lng:98.95+i*.002}}));
 const ok=body=>({ok:true,status:200,headers:{get:()=>null},json:async()=>body});
 async function run({places,googleEnabled,aiInvalid,days,province,dbError=false}){
-  const names=['OPENROUTER_API_KEY','OPENROUTER_MODEL','GEOAPIFY_API_KEY','AI_MAX_OUTPUT_TOKENS','GOOGLE_PLACES_API_KEY','GOOGLE_PLACES_ENABLED'];
+  const names=['OPENROUTER_API_KEY','OPENROUTER_MODEL','GEOAPIFY_API_KEY','AI_MAX_OUTPUT_TOKENS','GOOGLE_PLACES_API_KEY','GOOGLE_PLACES_ENABLED','GOOGLE_PLACES_PILOT_EXPIRES_AT'];
   const previous=Object.fromEntries(names.map(name=>[name,process.env[name]]));
   const oldFetch=global.fetch,calls=[];
   try {
-    Object.assign(process.env,{OPENROUTER_API_KEY:'stub',OPENROUTER_MODEL:'nvidia/nemotron-3.5-lightning:free',GEOAPIFY_API_KEY:'stub',AI_MAX_OUTPUT_TOKENS:'2400',GOOGLE_PLACES_API_KEY:'stub',GOOGLE_PLACES_ENABLED:String(googleEnabled)});
+    Object.assign(process.env,{OPENROUTER_API_KEY:'stub',OPENROUTER_MODEL:'nvidia/nemotron-3.5-lightning:free',GEOAPIFY_API_KEY:'stub',AI_MAX_OUTPUT_TOKENS:'2400',GOOGLE_PLACES_API_KEY:'stub',GOOGLE_PLACES_ENABLED:String(googleEnabled),GOOGLE_PLACES_PILOT_EXPIRES_AT:'2099-01-01T00:00:00+07:00'});
     let handler;
     registerAiTripRoutes({post:(_path,_limiter,callback)=>{handler=callback;}},{listPlaces:async()=>{
       if(dbError)throw Error('DATABASE_UNAVAILABLE');
       return {attractions:places};
-    },getSql:()=>async()=>[{model_id:'nvidia/nemotron-3.5-lightning:free',structured_output:false,updated_at:new Date()}]});
+    },getSql:()=>async()=>[{model_id:'nvidia/nemotron-3.5-lightning:free',structured_output:false,updated_at:new Date()}],reserveGoogleQuota:async()=>!dbError});
     global.fetch=async(url,options={})=>{
       const target=String(url);calls.push(target);
       if(target.includes('openrouter.ai')){
@@ -59,10 +59,11 @@ test('empty local catalog recovers Chiang Rai 4 days with opt-in Google Places a
   assert.ok(!calls.some(c=>c.includes('openrouter.ai')));
 });
 
-test('database unavailable also recovers with opt-in Google',async()=>{
-  const {res}=await run({places:[],googleEnabled:true,days:3,province:'เชียงราย',dbError:true});
-  assert.equal(res.statusCode,200,JSON.stringify(res.body));
-  assert.equal(res.body.days.length,3);
+test('database unavailable must not bypass shared quota even with opt-in Google',async()=>{
+  const {res,calls}=await run({places:[],googleEnabled:true,days:3,province:'เชียงราย',dbError:true});
+  assert.equal(res.statusCode,422,JSON.stringify(res.body));
+  assert.equal(res.body.code,'NO_VERIFIED_ITINERARY');
+  assert.ok(!calls.some(c=>c.includes('googleapis.com')));
 });
 
 test('empty catalog with Google disabled responds safely without inventing stops or using a billable API',async()=>{

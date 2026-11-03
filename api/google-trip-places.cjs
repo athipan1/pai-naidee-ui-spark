@@ -13,7 +13,12 @@ let routeWindowStart = Date.now();
 let routeUsed = 0;
 
 function googleTripEnabled() {
-  return process.env.GOOGLE_PLACES_ENABLED === 'true' && Boolean(process.env.GOOGLE_PLACES_API_KEY);
+  // Pilot must expire without operator intervention. A missing/invalid expiry
+  // leaves Google disabled, even when a Railway flag was accidentally left on.
+  const expiresAt = Date.parse(process.env.GOOGLE_PLACES_PILOT_EXPIRES_AT || '');
+  return process.env.GOOGLE_PLACES_ENABLED === 'true' &&
+    Boolean(process.env.GOOGLE_PLACES_API_KEY) &&
+    Number.isFinite(expiresAt) && Date.now() < expiresAt;
 }
 
 function spendSearchAllowance() {
@@ -66,10 +71,11 @@ function normalizeGooglePlace(item, province) {
   };
 }
 
-async function searchGoogleTripPlaces({province, nature}, fetchImpl = fetch) {
+async function searchGoogleTripPlaces({province, nature}, fetchImpl = fetch, reserveQuota = async () => false) {
   // Province is validated upstream; never accept a full arbitrary LLM prompt here.
   if (typeof province !== 'string' || province.length > 80 || !province.trim()) return [];
   if (!googleTripEnabled() || !spendSearchAllowance()) return [];
+  if (!await reserveQuota('places_search')) return [];
   const textQuery = (nature ? 'แหล่งท่องเที่ยวธรรมชาติ ' : 'สถานที่ท่องเที่ยว ') + 'จังหวัด' + province + ' ประเทศไทย';
   try {
     const response = await fetchImpl(SEARCH_URL, {
@@ -113,12 +119,13 @@ function mergeTripCandidates(local, google) {
   return result;
 }
 
-async function googleRoadLeg(a, b, mode, fetchImpl = fetch) {
+async function googleRoadLeg(a, b, mode, fetchImpl = fetch, reserveQuota = async () => false) {
   if (!googleTripEnabled()) return {status: 'unverified', reason: 'google_routes_not_configured'};
   if (mode === 'public') return {status: 'unverified', reason: 'public_transport_not_supported'};
   // This process-local backstop does not replace a Google Cloud quota (which
   // applies across all Railway instances) or a billing alert.
   if (!spendRouteAllowance()) return {status: 'unverified', reason: 'google_routes_hourly_limit'};
+  if (!await reserveQuota('routes_compute')) return {status: 'unverified', reason: 'google_routes_daily_limit'};
   try {
     const response = await fetchImpl(ROUTE_URL, {
       method: 'POST', signal: AbortSignal.timeout(7000),
@@ -145,12 +152,12 @@ async function googleRoadLeg(a, b, mode, fetchImpl = fetch) {
   }
 }
 
-function createTripRoute(legacyRoute) {
+function createTripRoute(legacyRoute, reserveQuota = async () => false) {
   let googleCalls = 0;
   return (a, b, mode) => {
     if (!isGooglePlace(a) && !isGooglePlace(b)) return legacyRoute(a, b, mode);
     if (googleCalls++ >= 12) return {status: 'unverified', reason: 'google_routes_budget_exceeded'};
-    return googleRoadLeg(a, b, mode);
+    return googleRoadLeg(a, b, mode, fetch, reserveQuota);
   };
 }
 
