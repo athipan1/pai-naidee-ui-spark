@@ -56,7 +56,14 @@ describe('Verified place photo fallback catalogue', () => {
       expect(photo.filename).toBe(corresponding.filename);
       expect(photo.photographer).toBe(corresponding.photographer);
       expect(photo.licenseName).toBe(corresponding.licenseName);
-      const frontendPhoto = addVerifiedPhotoIfMissing({ id: photo.placeId, image: null });
+      const frontendPhoto = addVerifiedPhotoIfMissing({
+        id: photo.placeId,
+        image: null,
+      } as {
+        id: string;
+        image: null;
+        mediaCredits?: import('@/shared/types/attraction').AttractionPhotoCredit[];
+      });
       expect(photo.url).toBe(frontendPhoto.image);
       expect(frontendPhoto.mediaCredits?.[0]).toEqual(expect.objectContaining({
         licenseUrl: photo.licenseUrl, sourcePage: photo.sourcePage,

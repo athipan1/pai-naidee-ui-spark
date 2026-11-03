@@ -17,6 +17,7 @@ function FocusMap({ points }: { points: [number,number][] }) {
 export default function TripTimelineMap({stops,available,days,th,onChange,verifiedRoad=false}:Props){
   const [selectedDay,setSelectedDay]=useState(1);
   const [addId,setAddId]=useState('');
+  const [mapExpanded,setMapExpanded]=useState(false);
   const daily=stops.filter(s=>s.day===selectedDay).sort((a,b)=>a.order-b.order);
   const points=useMemo<[number,number][]>(()=>daily.filter(s=>valid(s.place)).map(s=>[s.place.coordinates.lat,s.place.coordinates.lng]),[stops,selectedDay]);
   const availablePlaces=available.filter(p=>valid(p)&&!stops.some(s=>s.place.id===p.id));
