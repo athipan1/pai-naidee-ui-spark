@@ -3,6 +3,7 @@ const { createRateLimiter } = require('./security.cjs');
 const { buildModelPayload } = require('./ai-model-gateway.cjs');
 const { getActiveAiConfig } = require('./ai-model-settings.cjs');
 const { fetchOpenRouter, logProviderError } = require('./ai-upstream-diagnostics.cjs');
+const { googleTripEnabled, searchGoogleTripPlaces, mergeTripCandidates, createTripRoute, isGooglePlace } = require('./google-trip-places.cjs');
 
 function validCoord(p) {
   const lat = Number(p?.coordinates?.lat), lng = Number(p?.coordinates?.lng);
@@ -220,22 +221,35 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
   app.post('/api/ai/trip-plan',limiter,async(req,res)=>{
     const input=validateRequest(req.body);
     if(!input) return res.status(400).json({error:'Invalid trip request.'});
+    // Google Places content, if present, must not be held by intermediary caches.
+    res.set?.('Cache-Control','no-store');
     try {
       const preferences=requestPreferences(input.message);
       // Read up to three bounded pages, avoiding a ranking-only first-page bottleneck.
       const pages=[];
+      let catalogUnavailable=false;
       for(let page=1;page<=3;page++){
-        const result=await listPlaces({province:input.province,limit:50,page});
+        let result;
+        try {result=await listPlaces({province:input.province,limit:50,page});}
+        catch {catalogUnavailable=true;break;}
         const items=Array.isArray(result.attractions)?result.attractions:[];
         pages.push(...items);
         if(items.length<50)break;
       }
       const candidates=selectTripCandidates(pages,input,preferences);
-      if(!candidates.length) return res.status(422).json({error:'No validated places available for this province.'});
-      let proposed;
-      try {proposed=await proposePlan({...input,places:candidates,getSql});}
-      catch(error){if(error.code==='UPSTREAM_FAILURE') logProviderError(error,error.meta?.model||null);const code=typeof error.code==='string'&&/^[A-Z_]{3,40}$/.test(error.code)?error.code:'UPSTREAM_FAILURE';logAiEvent(code,error.meta||{model:'unknown'});return res.status(503).json({error:code==='INCOMPLETE_RESPONSE'?'The AI response was cut short. Please retry or use the basic planner.':'AI could not create a verified itinerary. Please retry or use the basic planner.',code});}
-      const lookup=new Map(candidates.map(p=>[String(p.id),p]));
+      // An empty local catalog or a malformed/unavailable AI response must not
+      // prevent the verified Smart Planner (and opt-in Google supplement) from
+      // attempting an itinerary. Never pass Google content to the LLM.
+      let proposed=null,aiFailure=null;
+      if(candidates.length){
+        try {proposed=await proposePlan({...input,places:candidates,getSql});}
+        catch(error){
+          if(error.code==='UPSTREAM_FAILURE')logProviderError(error,error.meta?.model||null);
+          aiFailure=typeof error.code==='string'&&/^[A-Z_]{3,40}$/.test(error.code)?error.code:'UPSTREAM_FAILURE';
+          logAiEvent(aiFailure,error.meta||{model:'unknown'});
+        }
+      }
+      let lookup=new Map(candidates.map(p=>[String(p.id),p]));
       const seen=new Set(), itinerary=[];
       for(let day=1;day<=input.days;day++){
         const modelDay=Array.isArray(proposed?.days)?proposed.days.find(d=>d?.day===day):null;
@@ -248,18 +262,40 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
         }
         if(stops.length) itinerary.push({day,stops,legs:[]});
       }
-      if(!itinerary.length) return res.status(422).json({error:'AI returned no verifiable places.'});
-      let checked=await enforceTripConstraints(itinerary,lookup,input,preferences);
+      let checked=itinerary.length?await enforceTripConstraints(itinerary,lookup,input,preferences):{days:[],warnings:[],rejected:[]};
+      if(aiFailure)checked.warnings.push('AI was unavailable or returned invalid data; Smart Planner attempted a verified itinerary instead.');
+      if(catalogUnavailable)checked.warnings.push('The local place catalog could not be reached; available external destinations were checked instead.');
+      if(!candidates.length)checked.warnings.push('No validated local destinations were found; external places are used only if enabled and verified.');
       // Preserve verified AI days; Smart Planner fills only missing or invalid days.
       let recovery=null;
       const originalCompleteness=evaluateTripCompleteness(checked.days,input.days,lookup);
       if(originalCompleteness.status!=='complete'&&input.transport==='car'){
         const {recoverIncrementally}=require('./hybrid-trip-recovery.cjs');
-        const hybrid=await recoverIncrementally({days:checked.days,requestedDays:input.days,candidates,lookup,transport:input.transport,maxRoadMinutes:preferences.maxRoadMinutes});
+        const hybrid=await recoverIncrementally({days:checked.days,requestedDays:input.days,candidates,lookup,transport:input.transport,maxRoadMinutes:preferences.maxRoadMinutes,maxStopsPerDay:proposed?3:2});
         checked={...checked,days:hybrid.days,warnings:[...checked.warnings,hybrid.status==='complete'?'Smart Planner filled missing days without replacing verified AI days.':'Some days could not be filled with verified road routes.']};
         recovery={status:hybrid.status==='complete'?'incremental_complete':'incremental_partial',originalReasons:originalCompleteness.reasons,keptDays:hybrid.keptDays,filledDays:hybrid.filledDays,sources:hybrid.sources,diagnostics:hybrid.diagnostics};
       }
-      if(!checked.days.length) return res.status(422).json({error:'No itinerary meets the requested style and travel constraints.',code:'NO_VERIFIED_ITINERARY'});
+      // The LLM sees only first-party/licensed candidates. Search Google Places
+      // after that step, on demand, and recover missing days deterministically.
+      // Never persist Google result content or send it back to OpenRouter.
+      if(input.transport==='car'&&googleTripEnabled()&&evaluateTripCompleteness(checked.days,input.days,lookup).status!=='complete'){
+        const google=await searchGoogleTripPlaces({province:input.province,nature:preferences.nature});
+        if(google.length){
+          const combined=mergeTripCandidates(candidates,google);
+          lookup=new Map(combined.map(p=>[String(p.id),p]));
+          const {recoverIncrementally}=require('./hybrid-trip-recovery.cjs');
+          const supplemented=await recoverIncrementally({days:checked.days,requestedDays:input.days,candidates:combined,lookup,transport:input.transport,maxRoadMinutes:preferences.maxRoadMinutes,maxStopsPerDay:2},createTripRoute(roadLeg));
+          checked={...checked,days:supplemented.days};
+          const sources={...supplemented.sources};
+          for(const day of supplemented.days){
+            const usesGoogle=day.stops.some(isGooglePlace);
+            if(usesGoogle)sources[day.day]='google';
+            else if(recovery?.sources?.[day.day])sources[day.day]=recovery.sources[day.day];
+          }
+          recovery={status:supplemented.status==='complete'?'incremental_complete':'incremental_partial',originalReasons:originalCompleteness.reasons,keptDays:supplemented.keptDays,filledDays:supplemented.filledDays,sources,diagnostics:supplemented.diagnostics,googlePlacesUsed:supplemented.days.flatMap(d=>d.stops).filter(isGooglePlace).length};
+        }
+      }
+      if(!checked.days.length) return res.status(422).json({error:'Not enough verified places or road routes are available for this province. Try another destination or relax the travel constraints.',code:'NO_VERIFIED_ITINERARY',requestedDays:input.days,plannedDays:0});
       // Explicitly label allocations as assumptions, never claim merchant quotes.
       const estimated={meals:Math.round(input.budget*.3),transport:Math.round(input.budget*.3),
         accommodation:Math.round(input.budget*.25),activities:Math.round(input.budget*.15)};
@@ -269,7 +305,7 @@ function registerAiTripRoutes(app,{listPlaces,getSql}) {
       if(checked.days.some(d=>d.legs.some(l=>l.road.status!=='verified_route'))) warnings.push('Some road routes could not be verified.');
       if(total>input.budget) warnings.push('Estimated budget exceeds requested cap.');
       const completeness=evaluateTripCompleteness(checked.days,input.days,lookup);
-      return res.json({status:completeness.status,completeness,provider:recovery?'hybrid_ai_smart':'openrouter',recovery,province:input.province,days:checked.days,
+      return res.json({status:completeness.status,completeness,provider:aiFailure||!proposed?'smart_fallback':recovery?'hybrid_ai_smart':'openrouter',recovery,province:input.province,days:checked.days,
         budget:{requested:input.budget,estimatedTotal:total,categories:estimated,verifiedPrices:false},
         validation:{coordinates:'verified_bounds',openingHours:checked.days.every(d=>d.stops.every(s=>s.openingHours.status==='sourced'))?'sourced':'partially_unverified',warnings}});
     }catch(error){console.error('AI trip API error:',error.message);return res.status(503).json({error:'Trip planning service unavailable.'});}

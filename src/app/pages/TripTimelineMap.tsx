@@ -24,6 +24,7 @@ export default function TripTimelineMap({stops,available,days,th,onChange,verifi
   const [addId,setAddId]=useState('');
   const [mapExpanded,setMapExpanded]=useState(false);
   const daily=stops.filter(s=>s.day===selectedDay).sort((a,b)=>a.order-b.order);
+  const usesGooglePlaces=daily.some(s=>(s.place as AttractionDetail & {source?: string}).source==='google_places');
   const points=useMemo<[number,number][]>(()=>daily.filter(s=>valid(s.place)).map(s=>[s.place.coordinates.lat,s.place.coordinates.lng]),[stops,selectedDay]);
   const availablePlaces=available.filter(p=>valid(p)&&!stops.some(s=>s.place.id===p.id));
   const updateDay=(nextDay:TripStop[])=>onChange?.([...stops.filter(s=>s.day!==selectedDay),...nextDay.map((s,i)=>({...s,day:selectedDay,order:i+1}))]);
@@ -44,7 +45,12 @@ export default function TripTimelineMap({stops,available,days,th,onChange,verifi
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:gap-3">
                 {stop.place.images?.[0]?<img src={stop.place.images[0]} alt="" loading="lazy" className="h-24 w-full max-w-full rounded-xl object-cover sm:h-20 sm:w-24 sm:shrink-0" referrerPolicy="no-referrer"/>:<div className="flex h-20 w-full max-w-full items-center justify-center rounded-xl bg-muted sm:w-24 sm:shrink-0"><ImageOff className="h-5 w-5 text-muted-foreground"/></div>}
-                <div className="min-w-0 break-words"><Link to={`/attraction/${encodeURIComponent(stop.place.id)}`} className="break-words font-semibold hover:underline">{th?stop.place.nameLocal||stop.place.name:stop.place.name}</Link><p className="mt-1 text-xs text-muted-foreground">{stop.place.category} · {stop.place.province}</p><p className="mt-1 text-xs text-amber-600">{th?'เวลาเปิดปิดยังไม่ยืนยัน':'Opening hours unverified'}</p></div>
+                <div className="min-w-0 break-words">{(stop.place as AttractionDetail & {source?: string;googleMapsUri?: string}).source==='google_places'?
+                  <a href={(stop.place as AttractionDetail & {googleMapsUri?: string}).googleMapsUri||mapDirectionsUrl([stop])} target="_blank" rel="noopener noreferrer" className="break-words font-semibold hover:underline">{th?stop.place.nameLocal||stop.place.name:stop.place.name}</a>:
+                  <Link to={`/attraction/${encodeURIComponent(stop.place.id)}`} className="break-words font-semibold hover:underline">{th?stop.place.nameLocal||stop.place.name:stop.place.name}</Link>}
+                  <p className="mt-1 text-xs text-muted-foreground">{stop.place.category} · {stop.place.province}</p>
+                  {(stop.place as AttractionDetail & {source?: string}).source==='google_places'&&<p className="mt-1 text-xs text-muted-foreground">{th?'ข้อมูลสถานที่จาก ':'Place data from '}<span translate="no" className="whitespace-nowrap font-normal text-[#5e5e5e] dark:text-white">Google Maps</span></p>}
+                  <p className="mt-1 text-xs text-amber-600">{th?'เวลาเปิดปิดยังไม่ยืนยัน':'Opening hours unverified'}</p></div>
               </div>
               {i>0&&<p className="text-xs text-muted-foreground">{th?'ระยะเส้นตรงจากจุดก่อนหน้า':'Straight-line from previous'}: {audit.legs[i-1]?.straightLineKm??'–'} km · {th?'เวลาเดินทางยังไม่ยืนยัน':'Travel time unverified'}</p>}
               {onChange&&<div className="flex flex-wrap gap-2"><button aria-label={th?'เลื่อนขึ้น':'Move up'} disabled={i===0} onClick={()=>move(i,-1)} className="rounded-lg border p-2 disabled:opacity-30"><ArrowUp size={16}/></button><button aria-label={th?'เลื่อนลง':'Move down'} disabled={i===daily.length-1} onClick={()=>move(i,1)} className="rounded-lg border p-2 disabled:opacity-30"><ArrowDown size={16}/></button><button onClick={()=>updateDay(daily.filter(s=>s.place.id!==stop.place.id))} className="flex items-center gap-1 rounded-lg border border-red-500/30 px-3 py-2 text-xs text-red-600"><Trash2 size={14}/>{th?'นำออก':'Remove'}</button></div>}
@@ -56,14 +62,15 @@ export default function TripTimelineMap({stops,available,days,th,onChange,verifi
       <div className="min-w-0 max-w-full space-y-3">
         <button type="button" onClick={()=>setMapExpanded(value=>!value)} aria-expanded={mapExpanded} className="flex w-full items-center justify-between rounded-xl border px-3 py-2 text-sm font-medium"><span className="flex items-center gap-2"><MapPinned size={16}/>{th?'แผนที่เส้นทาง':'Route map'}</span><ChevronDown size={16} className={mapExpanded?'rotate-180':''}/></button>
         {mapExpanded&&<div className="w-full min-w-0 overflow-hidden rounded-2xl border">
-          {points.length>0?<MapContainer center={points[0]} zoom={11} zoomAnimation={false} fadeAnimation={false} markerZoomAnimation={false} scrollWheelZoom={false} className="h-52 w-full sm:h-80" style={{zIndex:0}}>
+          {usesGooglePlaces?<div className="flex min-h-36 flex-col items-center justify-center gap-3 bg-muted/30 p-4 text-center text-sm"><MapPinned size={20}/><p>{th?'วันที่มีข้อมูลสถานที่ Google Maps ให้เปิดดูเส้นทางบน Google Maps โดยตรง':'For Google Maps places, view the route on Google Maps.'}</p><span translate="no" className="text-xs font-normal text-[#5e5e5e] dark:text-white">Google Maps</span></div>:
+          points.length>0?<MapContainer center={points[0]} zoom={11} zoomAnimation={false} fadeAnimation={false} markerZoomAnimation={false} scrollWheelZoom={false} className="h-52 w-full sm:h-80" style={{zIndex:0}}>
             <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
             <FocusMap points={points}/>
             {points.map((point,i)=><CircleMarker key={i} center={point} radius={9} pathOptions={{color:'#0d9488',fillColor:'#14b8a6',fillOpacity:.9}}><Popup>{daily[i]?.place.nameLocal||daily[i]?.place.name}</Popup></CircleMarker>)}
             {points.length>1&&<Polyline positions={points} pathOptions={{color:'#0d9488',weight:3,dashArray:'6 8'}}/>}
           </MapContainer>:<div className="flex h-52 items-center justify-center gap-2 bg-muted text-sm text-muted-foreground"><MapPinned size={18}/>{th?'เพิ่มสถานที่เพื่อดูแผนที่':'Add places to view map'}</div>}
         </div>}
-        {mapExpanded&&<p className="text-xs leading-5 text-muted-foreground">{th?'เส้นประบนแผนที่แสดงการเชื่อมจุดตามลำดับ ไม่ใช่เส้นทางถนนที่ยืนยันแล้ว':'Dashed lines connect stops, not verified road routes.'}{verifiedRoad?'':''}</p>}
+        {mapExpanded&&!usesGooglePlaces&&<p className="text-xs leading-5 text-muted-foreground">{th?'เส้นประบนแผนที่แสดงการเชื่อมจุดตามลำดับ ไม่ใช่เส้นทางถนนที่ยืนยันแล้ว':'Dashed lines connect stops, not verified road routes.'}{verifiedRoad?'':''}</p>}
         {directions&&<a href={directions} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 font-semibold text-white"><Navigation size={18}/>{th?'เปิดเส้นทางใน Google Maps':'Open in Google Maps'}</a>}
       </div>
     </div>

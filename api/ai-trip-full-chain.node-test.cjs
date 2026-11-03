@@ -49,12 +49,14 @@ test('full backend integration: selected free model -> JSON -> places -> road ->
   assert.ok(calls.some(url=>url.includes('geoapify.com/v1/routing')));
  } finally {global.fetch=originalFetch;for(const [key,value] of Object.entries(originals))value===undefined?delete process.env[key]:process.env[key]=value;}
 });
-test('full backend rejects hallucinated candidate IDs without rendering an invented itinerary',async()=>{
- process.env.OPENROUTER_API_KEY='stub-not-real';process.env.OPENROUTER_MODEL='nvidia/nemotron-3.5-lightning:free';process.env.AI_MAX_OUTPUT_TOKENS='2400';
+test('full backend rejects hallucinated IDs and recovers with verified Smart Planner places',async()=>{
+ process.env.OPENROUTER_API_KEY='stub-not-real';process.env.OPENROUTER_MODEL='nvidia/nemotron-3.5-lightning:free';process.env.AI_MAX_OUTPUT_TOKENS='2400';process.env.GEOAPIFY_API_KEY='stub-not-real';
  try {
   const {res}=await invoke(JSON.stringify({days:[{day:1,placeIds:['invented-id']}]}));
-  assert.equal(res.statusCode,503);
-  assert.equal(res.body.code,'INVALID_PLACE_IDS');
-  assert.equal(res.body.days,undefined);
+  assert.equal(res.statusCode,200,JSON.stringify(res.body));
+  assert.equal(res.body.provider,'smart_fallback');
+  assert.equal(res.body.status,'complete');
+  assert.equal(res.body.days.length,3);
+  assert.ok(res.body.days.every(day=>day.stops.every(stop=>stop.id!=='invented-id')));
  } finally {global.fetch=originalFetch;for(const [key,value] of Object.entries(originals))value===undefined?delete process.env[key]:process.env[key]=value;}
 });

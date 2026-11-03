@@ -5,7 +5,7 @@ function verifiedDay(day,lookup){
  const ids=day.stops.map(p=>String(p.id));
  return new Set(ids).size===ids.length&&ids.every(id=>lookup.has(id))&&day.legs.every((leg,i)=>leg.from===day.stops[i].id&&leg.to===day.stops[i+1].id&&leg.road?.status==='verified_route'&&Number.isFinite(leg.road.durationMinutes));
 }
-async function recoverIncrementally({days,requestedDays,candidates,lookup,transport,maxRoadMinutes},route=roadLeg){
+async function recoverIncrementally({days,requestedDays,candidates,lookup,transport,maxRoadMinutes,maxStopsPerDay=3},route=roadLeg){
  const kept=[],reserved=new Set(),sources={};
  for(let day=1;day<=requestedDays;day++){
   const current=days.find(d=>d.day===day);
@@ -32,7 +32,7 @@ async function recoverIncrementally({days,requestedDays,candidates,lookup,transp
   const available=candidates.filter(p=>!reserved.has(String(p.id))&&!prefix.some(s=>String(s.id)===String(p.id)));
   const chosen=[...prefix],legs=(original?.legs||[]).slice(0,Math.max(0,prefix.length-1));
   const localCache=new Map();let calls=0;
-  while(chosen.length<3&&available.length){
+  while(chosen.length<maxStopsPerDay&&available.length){
    const previous=chosen[chosen.length-1];
    if(!previous){
     // Seed a missing day using Smart Planner ranking.

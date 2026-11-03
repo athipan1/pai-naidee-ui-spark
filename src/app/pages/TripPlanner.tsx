@@ -68,13 +68,13 @@ export default function TripPlanner({currentLanguage}:Props){
     }
     if(usedFallback){
      const fallback=await fetch(API+'/api/trips/basic-road-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province:parsed.province,days:parsed.days,transport:parsed.transport,maxRoadMinutes:parsed.avoidLongDrives?45:90}),signal:controller.signal});
-     if(!fallback.ok)throw Error(th?'ยังไม่สามารถตรวจเส้นทางได้ กรุณาลองใหม่':'Road verification is unavailable.');
+     if(!fallback.ok)throw Error(th?`ยังไม่มีสถานที่หรือเส้นทางที่ตรวจสอบได้ครบสำหรับ ${parsed.province} ลองเปลี่ยนจังหวัดหรือปรับเงื่อนไขการเดินทาง`:`There are not enough verified places or roads for ${parsed.province}. Try another province or adjust your constraints.`);
      const basic=await fallback.json();
      result={province:parsed.province,days:Array.from({length:parsed.days},(_,i)=>({day:i+1,stops:(basic.stops||[]).filter((s:any)=>s.day===i+1).map((s:any)=>s.place)})),completeness:{status:basic.status,requestedDays:parsed.days,plannedDays:new Set((basic.stops||[]).map((s:any)=>s.day)).size},provider:'smart_fallback',budget:{estimatedTotal:parsed.totalBudget}};
     }
    }finally{clearTimeout(timeout);}
    const complete=result?.completeness?.status==='complete';
-   const source=usedFallback?(th?'OpenRouter AI ไม่พร้อม จึงใช้ Smart Planner ตรวจเส้นทางแทน':'AI unavailable; Smart Planner checked the roads instead'):result?.recovery?(th?'AI + Smart Planner เติมเฉพาะส่วนที่ขาด':'AI + Smart Planner filled missing parts'):(th?'AI จัดแผนและตรวจเงื่อนไขแล้ว':'AI planned and checked the trip');
+   const source=usedFallback||result?.provider==='smart_fallback'?(th?'Smart Planner สร้างแผนจากสถานที่และเส้นทางที่ตรวจสอบได้':'Smart Planner used checked destinations and roads'):result?.recovery?.googlePlacesUsed?(th?'AI + Smart Planner เสริมสถานที่จาก Google Maps':'AI + Smart Planner supplemented by Google Maps'):result?.recovery?(th?'AI + Smart Planner เติมเฉพาะส่วนที่ขาด':'AI + Smart Planner filled missing parts'):(th?'AI จัดแผนและตรวจเงื่อนไขแล้ว':'AI planned and checked the trip');
    add('assistant',`${source}\n${complete?(th?'จัดแผนครบตามจำนวนวันที่ขอ':'All requested days planned'):(th?'แผนบางส่วน: ยังมีวันที่หรือเส้นทางที่ตรวจสอบไม่ครบ':'Partial plan: some days or roads remain unverified')}\n${parsed.province} · ${parsed.days} ${th?'วัน':'days'} · ${money(parsed.totalBudget!)} ${th?'งบที่ระบุ':'requested budget'}`,result);
   }catch(error){add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
   finally{setPending(false);}
@@ -93,7 +93,7 @@ export default function TripPlanner({currentLanguage}:Props){
      {message.role==='assistant'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Bot className="h-4 w-4"/></span>}
      <div className={`min-w-0 max-w-[calc(100%-2.5rem)] break-words rounded-2xl px-3 py-3 text-sm leading-6 whitespace-pre-line sm:max-w-[88%] sm:px-4 ${message.role==='user'?'rounded-br-sm bg-teal-500/15':'rounded-bl-sm border bg-card'}`}>
       {message.text}
-      {message.plan&&<div className="mt-4 w-full min-w-0 max-w-full space-y-3 overflow-hidden border-t pt-3"><p className="font-semibold">{th?'แผนเที่ยวรายวัน':'Day-by-day itinerary'}</p><TripTimelineMap key={message.id} th={th} days={message.plan.completeness?.requestedDays??message.plan.days?.length??1} stops={planStops(message.plan)} available={[]} verifiedRoad={message.plan.completeness?.status==='complete'}/>{message.plan.recovery?.sources&&<p className="text-xs text-muted-foreground">{Object.entries(message.plan.recovery.sources as Record<string,string>).map(([d,s])=>`${th?'วันที่':'Day'} ${d}: ${s==='ai'?'AI':s==='smart'?'Smart Planner':s==='hybrid'?'AI + Smart Planner':'Partial'}`).join(' · ')}</p>}</div>}
+      {message.plan&&<div className="mt-4 w-full min-w-0 max-w-full space-y-3 overflow-hidden border-t pt-3"><p className="font-semibold">{th?'แผนเที่ยวรายวัน':'Day-by-day itinerary'}</p><TripTimelineMap key={message.id} th={th} days={message.plan.completeness?.requestedDays??message.plan.days?.length??1} stops={planStops(message.plan)} available={[]} verifiedRoad={message.plan.completeness?.status==='complete'}/>{message.plan.recovery?.sources&&<p className="text-xs text-muted-foreground">{Object.entries(message.plan.recovery.sources as Record<string,string>).map(([d,s])=>`${th?'วันที่':'Day'} ${d}: ${s==='ai'?'AI':s==='smart'?'Smart Planner':s==='hybrid'?'AI + Smart Planner':s==='google'?'Google Maps':'Partial'}`).join(' · ')}</p>}</div>}
      </div>
      {message.role==='user'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted"><UserRound className="h-4 w-4"/></span>}
     </div>)}
@@ -107,6 +107,7 @@ export default function TripPlanner({currentLanguage}:Props){
     <button type="submit" disabled={pending||!draft.trim()||facets.isLoading} aria-label={th?'ส่งข้อความ':'Send'} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-500 text-slate-950 disabled:opacity-40"><Send className="h-5 w-5"/></button>
    </div>
    {facets.isError&&<p className="mx-auto mt-1 max-w-3xl text-xs text-red-500">{th?'ไม่สามารถโหลดรายชื่อจังหวัดได้ กรุณาลองใหม่':'Unable to load provinces. Please retry.'}</p>}
+   <div className="mx-auto mt-1 flex max-w-3xl items-center justify-center gap-4 text-[11px] text-muted-foreground"><Link to="/privacy" className="hover:underline">Privacy Policy</Link><Link to="/terms" className="hover:underline">Terms of Use</Link></div>
   </form>
  </div>;
 }
