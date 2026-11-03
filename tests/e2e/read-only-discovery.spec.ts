@@ -78,7 +78,8 @@ test('mobile home navigation exposes Discover and AI Trip Planner side by side',
   await expect(planner).toHaveAttribute('href', '/trip-planner');
   await planner.click();
   await expect(page).toHaveURL(/\/trip-planner$/);
-  await expect(page.getByRole('heading', { name: 'Your next trip starts here' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'PaiNaiDee AI' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Message PaiNaiDee AI' })).toBeVisible();
 });
 
 test('search redirects and opens a Railway-backed place', async ({ page }) => {
