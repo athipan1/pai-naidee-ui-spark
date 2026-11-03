@@ -78,6 +78,24 @@ test('missing budget is requested in chat instead of crashing the page', async (
   await expect(page.getByText('Oops! Something went wrong')).toHaveCount(0);
 });
 
+test('new chat and greeting survive non-function scrollIntoView returns', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(Element.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: () => Promise.resolve(),
+    });
+  });
+
+  await page.goto('/trip-planner');
+  await page.getByRole('button', { name: 'เริ่มแชตใหม่' }).click();
+  await expect(page.getByRole('heading', { name: 'อยากไปเที่ยวที่ไหน?' })).toBeVisible();
+
+  await page.getByRole('textbox', { name: 'ข้อความถึง PaiNaiDee AI' }).fill('สวัสดี');
+  await page.getByRole('button', { name: 'ส่งข้อความ' }).click();
+  await expect(page.getByText('อยากไปเที่ยวจังหวัดไหนครับ?')).toBeVisible();
+  await expect(page.getByText('Oops! Something went wrong')).toHaveCount(0);
+});
+
 test('real-shaped partial hybrid AI response renders safely with incomplete days', async ({ page }) => {
   const browserErrors: string[] = [];
   page.on('pageerror', error => browserErrors.push(error.message));

@@ -33,7 +33,16 @@ export default function TripPlanner({currentLanguage}:Props){
  const [context,setContext]=useState('');
  const bottom=useRef<HTMLDivElement>(null);
  const facets=useQuery({queryKey:['places','facets'],queryFn:getRailwayPlaceFacets,staleTime:300000});
- useEffect(()=>bottom.current?.scrollIntoView({behavior:'smooth',block:'end'}),[messages,pending]);
+ useEffect(()=>{
+  // Effects must return only a cleanup function or undefined. Some browser
+  // implementations return a non-function value from scrollIntoView; returning
+  // it implicitly makes React try to call that value on the next chat update.
+  try{
+   bottom.current?.scrollIntoView({behavior:'smooth',block:'end'});
+  }catch{
+   // Scrolling is optional; a browser quirk must never crash the chat.
+  }
+ },[messages,pending]);
  const add=(role:Message['role'],text:string,plan?:any)=>setMessages(m=>[...m,{id:Date.now()+Math.random(),role,text,plan}]);
  const submit=async(textOverride?:string)=>{
   const value=(textOverride??draft).trim();
