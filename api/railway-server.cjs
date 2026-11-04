@@ -29,6 +29,7 @@ const {
   invalidateSearchIndex,
 } = require('./postgres-db.cjs');
 
+const { livePlacePreview } = require('./google-place-preview.cjs');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
@@ -134,6 +135,16 @@ function serializePlaceDetail(place) {
       source: place.source,
   };
 }
+
+// Explicit on-demand preview: no Google request during normal page navigation.
+app.get('/api/places/:placeId/google-preview', createRateLimiter({ windowMs: 60_000, max: 2, keyPrefix: 'google-detail' }), async (req, res) => {
+  res.set('Cache-Control', 'private, no-store, max-age=0');
+  try {
+    const place = await getPlaceById(req.params.placeId);
+    if (!place) return res.status(404).json({status:'not_found'});
+    res.json(await livePlacePreview(place,getSql));
+  } catch {res.status(503).json({status:'unavailable'});}
+});
 
 app.get('/api/places/:placeId', async (req, res) => {
   try {
