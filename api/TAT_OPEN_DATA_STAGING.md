@@ -91,3 +91,8 @@ The third review window (source index 124, next index 174) is documented in
 [TAT_OPEN_DATA_RELEASE_BATCH_003.md](./TAT_OPEN_DATA_RELEASE_BATCH_003.md).
 Only three corroborated candidates are selected; the other 22 remain staged
 without publication.
+
+The fourth review window (source index 174, next index 218) is documented in
+[TAT_OPEN_DATA_RELEASE_BATCH_004.md](./TAT_OPEN_DATA_RELEASE_BATCH_004.md).
+Only four separately corroborated attractions are selected; the other 21
+staged candidates remain unpublished.
