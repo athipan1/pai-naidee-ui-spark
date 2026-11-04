@@ -13,6 +13,7 @@ import {
 import PlaceCard from "@/components/discover/PlaceCard";
 import CategoryCard from "@/components/discover/CategoryCard";
 import SectionHeader from "@/components/discover/SectionHeader";
+import { Button } from '@/components/ui/button';
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import { getThailandPlaceImage } from "@/shared/data/thailandPlaceImages";
 import type { AttractionPhotoCredit } from '@/shared/types/attraction';
@@ -46,9 +47,10 @@ interface Category {
 
 interface FeedViewProps {
   currentLanguage: "th" | "en";
+  onBrowseAll: () => void;
 }
 
-const FeedView = ({ currentLanguage }: FeedViewProps) => {
+const FeedView = ({ currentLanguage, onBrowseAll }: FeedViewProps) => {
   const navigate = useNavigate();
   const [places, setPlaces] = useState<TravelPlace[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -205,10 +207,6 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
     }
   };
 
-  const handleViewAll = (section: string) => {
-    navigate(`/discover?section=${section}`);
-  };
-
   // Keep one card per place ID even if an API response contains duplicate rows.
   const uniquePlaces = uniqueAttractionsById(places);
 
@@ -282,7 +280,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
               subtitle={currentLanguage === "th" ? "สถานที่ที่กำลังมาแรงในขณะนี้" : "Places that are popular right now"}
               icon={TrendingUp}
               showViewAll={true}
-              onViewAll={() => handleViewAll("trending")}
+              onViewAll={onBrowseAll}
               currentLanguage={currentLanguage}
             />
             
@@ -317,7 +315,7 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
             subtitle={currentLanguage === "th" ? "สถานที่ที่แนะนำสำหรับคุณ" : "Places recommended for you"}
             icon={Star}
             showViewAll={true}
-            onViewAll={() => handleViewAll("recommended")}
+            onViewAll={onBrowseAll}
             currentLanguage={currentLanguage}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -371,6 +369,11 @@ const FeedView = ({ currentLanguage }: FeedViewProps) => {
             </div>
           )}
         </section>}
+        <div className="flex justify-center pb-8">
+          <Button variant="outline" onClick={onBrowseAll}>
+            {currentLanguage === 'th' ? 'ดูสถานที่ทั้งหมดในฐานข้อมูล' : 'Browse all catalogued places'}
+          </Button>
+        </div>
       </div>
     </div>
   );

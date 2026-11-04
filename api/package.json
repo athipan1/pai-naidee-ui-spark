@@ -8,6 +8,7 @@
     "dev": "nodemon api-server.cjs",
     "test": "node --test *.node-test.cjs",
     "audit:places": "node audit-place-data.cjs",
+    "stage:tat": "node stage-tat-open-data.cjs",
     "bootstrap:admin": "node bootstrap-admin.cjs",
     "start:legacy": "node api-server.cjs"
   },
