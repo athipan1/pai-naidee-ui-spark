@@ -1,7 +1,8 @@
 # Nationwide place seed import gate
 
 The curated seed is a minimum coverage catalogue, **not** an exhaustive list of
-Thai attractions. The current baseline is 110 locations in all 77 provinces.
+Thai attractions. The baseline before TAT release 001 was 110 locations in all
+77 provinces; the release raises the total to 115, still covering 77 provinces.
 
 Before changing or deploying the bundled seed, run:
 
@@ -37,3 +38,11 @@ bulk external import, stage and review the source records, verify real-world
 identities and images manually, then pass the final normalized batch through
 this gate before any production write. Never delete or overwrite editorial
 records because a seed differs.
+# TAT Open Data incremental release
+
+On 2026-11-04 the first five separately reviewed TAT Open Data records were
+added as `api/additional-tat-open-data-batch-001.cjs`, bringing the bundled
+catalogue to **115 places covering all 77 provinces**. See the independent
+source and location evidence in `TAT_OPEN_DATA_RELEASE_BATCH_001.md`. All
+remaining source records require staged QA; do not mass-seed the TAT CSV.
+

@@ -117,10 +117,10 @@ const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutPro
           />
         );
       case 'trending':
-        return <FeedView currentLanguage={currentLanguage} />;
+        return <FeedView currentLanguage={currentLanguage} onBrowseAll={() => setMode('search')} />;
       case 'feed':
       default:
-        return <FeedView currentLanguage={currentLanguage} />;
+        return <FeedView currentLanguage={currentLanguage} onBrowseAll={() => setMode('search')} />;
     }
   };
 
