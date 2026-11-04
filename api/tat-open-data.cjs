@@ -75,7 +75,30 @@ function pick(record, ...names) {
 }
 
 function cleaned(value, maxLength = 1200) {
-  return String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, maxLength);
+  const htmlEntities = { nbsp: ' ', quot: '"', amp: '&', apos: "'", lt: '<', gt: '>',
+    ndash: '–', mdash: '—', hellip: '…', ldquo: '“', rdquo: '”', lsquo: '‘', rsquo: '’' };
+  return String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&(#(?:x[0-9a-f]+|[0-9]+)|[a-z]+);/gi, (match, entity) => {
+      if (entity.startsWith('#')) {
+        const code = entity[1]?.toLowerCase() === 'x'
+          ? Number.parseInt(entity.slice(2), 16) : Number.parseInt(entity.slice(1), 10);
+        return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff)
+          ? String.fromCodePoint(code) : match;
+      }
+      return htmlEntities[entity.toLowerCase()] ?? match;
+    })
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ').trim().slice(0, maxLength);
+}
+
+function distanceKm(a, b) {
+  const radians = degrees => degrees * Math.PI / 180;
+  const latDifference = radians(b.lat - a.lat);
+  const lngDifference = radians(b.lng - a.lng);
+  const haversine = Math.sin(latDifference / 2) ** 2 +
+    Math.cos(radians(a.lat)) * Math.cos(radians(b.lat)) * Math.sin(lngDifference / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(haversine)));
 }
 
 function normalizeProvince(value) {
@@ -151,6 +174,13 @@ function stageBatch({ records, inputSha256, startIndex = 0, maxBatchSize = MAX_B
   if (province && !PROVINCES.has(province)) throw new Error('Unknown province filter');
   const keys = new Set(existingPlaces.map(place => `${place.province}:${normalizeName(place.nameLocal || place.name)}`));
   const englishKeys = new Set(existingPlaces.map(place => `${place.province}:${normalizeName(place.name)}`));
+  const provinceReferencePoints = new Map();
+  for (const existing of existingPlaces) {
+    if (!PROVINCES.has(existing.province) || !Number.isFinite(existing.lat) || !Number.isFinite(existing.lng)) continue;
+    const points = provinceReferencePoints.get(existing.province) || [];
+    points.push({ lat: existing.lat, lng: existing.lng });
+    provinceReferencePoints.set(existing.province, points);
+  }
   const ids = new Set(existingPlaces.map(place => place.id));
   const candidates = [];
   const rejected = [];
@@ -165,6 +195,12 @@ function stageBatch({ records, inputSha256, startIndex = 0, maxBatchSize = MAX_B
     const key = place ? `${place.province}:${normalizeName(place.nameLocal)}` : '';
     const englishKey = place ? `${place.province}:${normalizeName(place.name)}` : '';
     if (!reason && (keys.has(key) || englishKeys.has(englishKey) || ids.has(place.id))) reason = 'duplicate_in_seed_or_batch';
+    // A coarse outlier gate, not an administrative-boundary test. If a TAT
+    // coordinate is >200 km from *every* existing verified point in its
+    // claimed province, leave it for manual geolocation verification.
+    const references = place ? provinceReferencePoints.get(place.province) || [] : [];
+    if (!reason && references.length && references.every(ref => distanceKm(place, ref) > 200))
+      reason = 'province_location_outlier';
     if (reason) {
       rejected.push({ row: index + 1, reason });
       reasons[reason] = (reasons[reason] || 0) + 1;

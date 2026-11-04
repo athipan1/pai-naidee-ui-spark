@@ -42,6 +42,20 @@ test('recognizes verified TAT ATT_LOCATION lat-long format without swapping coor
   assert.equal(normalizeRecord({ ...row, ATT_LOCATION: '6.61, 100.06, 12' }).reason, 'missing_or_invalid_coordinates');
 });
 
+test('decodes TAT HTML entities to ordinary text without introducing HTML markup', () => {
+  const result = normalizeRecord(record({ ATT_DETAIL_TH: '&quot;น้ำตก&quot;&nbsp;มีธรรมชาติ &ndash; และการเดินป่า <b>สวยงาม</b>' }));
+  assert.equal(result.place.description, '"น้ำตก" มีธรรมชาติ – และการเดินป่า สวยงาม');
+});
+
+test('rejects suspicious coordinates far from every existing point in the asserted province', () => {
+  const digest = sha256('official');
+  const wrongProvinceLocation = record({ ATT_ID: 'wrong-province', PROVINCE_NAME_TH: 'พิษณุโลก', LATITUDE: '14.71793', LONGITUDE: '103.39879' });
+  const batch = stageBatch({ records: [wrongProvinceLocation], inputSha256: digest,
+    existingPlaces: [{ id: 'known-phitsanulok', nameLocal: 'สถานที่อ้างอิงพิษณุโลก', name: 'Phitsanulok reference', province: 'พิษณุโลก', lat: 16.82, lng: 100.26 }] });
+  assert.equal(batch.candidates.length, 0);
+  assert.equal(batch.rejectionCounts.province_location_outlier, 1);
+});
+
 test('blocks rows without independently verifiable province, description, coordinates or classification', () => {
   assert.equal(normalizeRecord(record({ PROVINCE_NAME_TH: '', ATT_PROVINCE_ID: '1058' })).reason, 'missing_or_unknown_province');
   assert.equal(normalizeRecord(record({ ATT_DETAIL_TH: '-' })).reason, 'insufficient_description');

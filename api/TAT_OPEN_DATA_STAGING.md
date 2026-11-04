@@ -42,6 +42,9 @@ refuses to overwrite an existing review file.
    verified reference mapping. Other rows are rejected with specific reasons.
    The official 2026 CSV represents coordinates in `ATT_LOCATION` as the
    `latitude, longitude` decimal pair; ambiguous or reversed values are blocked.
+   A second coarse gate flags points more than 200 km from every existing
+   verified point in the named province. This can reject legitimate remote
+   destinations and **does not replace** a proper province-boundary check.
 2. Category rules are conservative: known beach type 19, nature category 1,
    culture category 2, and already named categories. Unsupported category
    codes go to review rather than an arbitrary category.
