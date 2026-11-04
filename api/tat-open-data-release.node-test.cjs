@@ -13,7 +13,7 @@ test('first approved TAT release is an exactly enumerated five-place batch', () 
     'tat-20260209144621001',
   ]);
   assert.equal(new Set(batch.map(place => place.province)).size, 5);
-  assert.equal(SEED_PLACES.length, 127);
+  assert.equal(SEED_PLACES.length, 130);
   assert.equal(auditPlaceImport({ places: SEED_PLACES }).errors.length, 0);
 });
 
