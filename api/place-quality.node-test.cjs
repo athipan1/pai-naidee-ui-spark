@@ -1,1 +1,50 @@
-Y29uc3QgdGVzdCA9IHJlcXVpcmUoJ25vZGU6dGVzdCcpOwpjb25zdCBhc3NlcnQgPSByZXF1aXJlKCdub2RlOmFzc2VydC9zdHJpY3QnKTsKY29uc3QgeyBTRUVEX1BMQUNFUyB9ID0gcmVxdWlyZSgnLi9wb3N0Z3Jlcy1kYi5janMnKTsKY29uc3QgeyBhdWRpdFBsYWNlSW1wb3J0LCBhc3NlcnRQbGFjZUltcG9ydFJlYWR5IH0gPSByZXF1aXJlKCcuL3BsYWNlLXF1YWxpdHkuY2pzJyk7CmNvbnN0IGlucHV0ID0gKCkgPT4gKHsKICBwbGFjZXM6IFNFRURfUExBQ0VTLAogIHdpa2ltZWRpYU1lZGlhOiByZXF1aXJlKCcuL2N1cmF0ZWQtd2lraW1lZGlhLW1lZGlhLmpzb24nKSwKICBtaXNzaW5nTWVkaWE6IHJlcXVpcmUoJy4vdmVyaWZpZWQtbWlzc2luZy1jb21tb25zLW1lZGlhLmpzb24nKSwKICB1c2VyTWVkaWE6IHJlcXVpcmUoJy4vdXNlci1wcm92aWRlZC1wbGFjZS1tZWRpYS5qc29uJyksCiAgcmVxdWlyZUZ1bGxDb3ZlcmFnZTogdHJ1ZSwKfSk7Cgp0ZXN0KCduYXRpb253aWRlIGNhdGFsb2d1ZSBwYXNzZXMgc3RyaWN0IGNoZWNrcyBiZWZvcmUgUmFpbHdheSB3cml0ZXMnLCAoKSA9PiB7CiAgY29uc3QgcmVzdWx0ID0gYXNzZXJ0UGxhY2VJbXBvcnRSZWFkeShpbnB1dCgpKTsKICBhc3NlcnQuZXF1YWwocmVzdWx0LmNvdmVyYWdlLnRvdGFsUHJvdmluY2VzLCA3Nyk7CiAgYXNzZXJ0LmVxdWFsKHJlc3VsdC5jb3ZlcmFnZS5wcm92aW5jZXMsIDc3KTsKICBhc3NlcnQuZXF1YWwocmVzdWx0LmNvdmVyYWdlLnBsYWNlcywgMTMwKTsKICBhc3NlcnQuZGVlcEVxdWFsKHJlc3VsdC5jb3ZlcmFnZS5taXNzaW5nUHJvdmluY2VzLCBbXSk7Cn0pOwp0ZXN0KCdkdXBsaWNhdGUgSUQgb3IgcGxhY2UgbmFtZSBibG9ja3MgaW1wb3J0JywgKCkgPT4gewogIGNvbnN0IGNvcHkgPSB7IC4uLlNFRURfUExBQ0VTWzBdLCBpZDogJ2Fub3RoZXItaWQnIH07CiAgY29uc3QgcmVzdWx0ID0gYXVkaXRQbGFjZUltcG9ydCh7IC4uLmlucHV0KCksIHBsYWNlczogWy4uLlNFRURfUExBQ0VTLCBjb3B5XSB9KTsKICBhc3NlcnQubWF0Y2gocmVzdWx0LmVycm9ycy5qb2luKCcgJyksIC9kdXBsaWNhdGUgVGhhaSBuYW1lLyk7Cn0pOwp0ZXN0KCdiYWQgZ2VvY29vcmRpbmF0ZXMsIHNvdXJjZXMsIGFuZCB1bmtub3duIHByb3ZpbmNlcyBibG9jayBpbXBvcnQnLCAoKSA9PiB7CiAgY29uc3QgbWFsZm9ybWVkID0geyAuLi5TRUVEX1BMQUNFU1swXSwgbGF0OiAwLCBsbmc6IDAsIHNvdXJjZVVybDogJ2h0dHA6Ly9pbnZhbGlkJywgcHJvdmluY2U6ICfguYTguKHguYjguKHguLXguIjguLHguIfguKvguKfguLHguJTguJnguLXguYknIH07CiAgY29uc3QgcmVzdWx0ID0gYXVkaXRQbGFjZUltcG9ydCh7IC4uLmlucHV0KCksIHBsYWNlczogW21hbGZvcm1lZCwgLi4uU0VFRF9QTEFDRVMuc2xpY2UoMSldIH0pOwogIGFzc2VydC5tYXRjaChyZXN1bHQuZXJyb3JzLmpvaW4oJyAnKSwgL2Nvb3JkaW5hdGVzIG91dHNpZGUgVGhhaWxhbmQvKTsKICBhc3NlcnQubWF0Y2gocmVzdWx0LmVycm9ycy5qb2luKCcgJyksIC9pbnZhbGlkIEhUVFBTIHByb3ZlbmFuY2UvKTsKICBhc3NlcnQubWF0Y2gocmVzdWx0LmVycm9ycy5qb2luKCcgJyksIC91bmtub3duIHByb3ZpbmNlLyk7Cn0pOwp0ZXN0KCdpbmNvcnJlY3QgcGhvdG8gYXR0cmlidXRpb24gb3IgbWlzc2luZyB1c2VyIGFzc2V0IGJsb2NrcyBpbXBvcnQnLCAoKSA9PiB7CiAgY29uc3QgcmVzdWx0ID0gYXVkaXRQbGFjZUltcG9ydCh7IC4uLmlucHV0KCksIHVzZXJNZWRpYTogW3sKICAgIGlkOiAnYmFkLXBob3RvJywgcGxhY2VJZDogU0VFRF9QTEFDRVNbMF0uaWQsIGZpbGVuYW1lOiAnbWlzc2luZy1waG90by5qcGcnLAogICAgdXJsOiAnaHR0cHM6Ly9wYWktbmFpZGVlLXVpLXNwYXJrLnZlcmNlbC5hcHAvcGxhY2UtcGhvdG9zL21pc3NpbmctcGhvdG8uanBnJywKICB9XSB9KTsKICBhc3NlcnQubWF0Y2gocmVzdWx0LmVycm9ycy5qb2luKCcgJyksIC91c2VyIHBob3RvIFVSTFwvbG9jYWwgYXNzZXQgbWlzbWF0Y2gvKTsKfSk7CnRlc3QoJ3Byb2R1Y3Rpb24tb25seSBwYWNrYWdlIHN0aWxsIHZhbGlkYXRlcyB0aGUgaW1tdXRhYmxlIHVzZXIgcGhvdG8gVVJMJywgKCkgPT4gewogIGNvbnN0IHJlc3VsdCA9IGF1ZGl0UGxhY2VJbXBvcnQoeyAuLi5pbnB1dCgpLCB1c2VyTWVkaWE6IFt7CiAgICBpZDogJ2JhZC1waG90bycsIHBsYWNlSWQ6IFNFRURfUExBQ0VTWzBdLmlkLCBmaWxlbmFtZTogJ21pc3NpbmcuanBnJywKICAgIHVybDogJ2h0dHBzOi8vZXhhbXBsZS5pbnZhbGlkL3BsYWNlLXBob3Rvcy9taXNzaW5nLmpwZycsCiAgfV0gfSk7CiAgYXNzZXJ0Lm1hdGNoKHJlc3VsdC5lcnJvcnMuam9pbignICcpLCAvdXNlciBwaG90byBVUkxcL2xvY2FsIGFzc2V0IG1pc21hdGNoLyk7Cn0pOwp0ZXN0KCdhIHJlbW92ZWQgcHJvdmluY2UgZmFpbHMgY29tcGxldGUtY292ZXJhZ2UgZ2F0ZScsICgpID0+IHsKICBjb25zdCByZXN1bHQgPSBhdWRpdFBsYWNlSW1wb3J0KHsgLi4uaW5wdXQoKSwgcGxhY2VzOiBTRUVEX1BMQUNFUy5maWx0ZXIocCA9PiBwLnByb3ZpbmNlICE9PSAn4Lie4Li04LiI4Li04LiV4LijJykgfSk7CiAgYXNzZXJ0Lm1hdGNoKHJlc3VsdC5lcnJvcnMuam9pbignICcpLCAvcHJvdmluY2UgY292ZXJhZ2UgaW5jb21wbGV0ZS8pOwogIGFzc2VydC5kZWVwRXF1YWwocmVzdWx0LmNvdmVyYWdlLm1pc3NpbmdQcm92aW5jZXMsIFsn4Lie4Li04LiI4Li04LiV4LijJ10pOwp9KTsK
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { SEED_PLACES } = require('./postgres-db.cjs');
+const { auditPlaceImport, assertPlaceImportReady } = require('./place-quality.cjs');
+const input = () => ({
+  places: SEED_PLACES,
+  wikimediaMedia: require('./curated-wikimedia-media.json'),
+  missingMedia: require('./verified-missing-commons-media.json'),
+  userMedia: require('./user-provided-place-media.json'),
+  requireFullCoverage: true,
+});
+
+test('nationwide catalogue passes strict checks before Railway writes', () => {
+  const result = assertPlaceImportReady(input());
+  assert.equal(result.coverage.totalProvinces, 77);
+  assert.equal(result.coverage.provinces, 77);
+  assert.equal(result.coverage.places, 130);
+  assert.deepEqual(result.coverage.missingProvinces, []);
+});
+test('duplicate ID or place name blocks import', () => {
+  const copy = { ...SEED_PLACES[0], id: 'another-id' };
+  const result = auditPlaceImport({ ...input(), places: [...SEED_PLACES, copy] });
+  assert.match(result.errors.join(' '), /duplicate Thai name/);
+});
+test('bad geocoordinates, sources, and unknown provinces block import', () => {
+  const malformed = { ...SEED_PLACES[0], lat: 0, lng: 0, sourceUrl: 'http://invalid', province: 'ไม่มีจังหวัดนี้' };
+  const result = auditPlaceImport({ ...input(), places: [malformed, ...SEED_PLACES.slice(1)] });
+  assert.match(result.errors.join(' '), /coordinates outside Thailand/);
+  assert.match(result.errors.join(' '), /invalid HTTPS provenance/);
+  assert.match(result.errors.join(' '), /unknown province/);
+});
+test('incorrect photo attribution or missing user asset blocks import', () => {
+  const result = auditPlaceImport({ ...input(), userMedia: [{
+    id: 'bad-photo', placeId: SEED_PLACES[0].id, filename: 'missing-photo.jpg',
+    url: 'https://pai-naidee-ui-spark.vercel.app/place-photos/missing-photo.jpg',
+  }] });
+  assert.match(result.errors.join(' '), /user photo URL\/local asset mismatch/);
+});
+test('production-only package still validates the immutable user photo URL', () => {
+  const result = auditPlaceImport({ ...input(), userMedia: [{
+    id: 'bad-photo', placeId: SEED_PLACES[0].id, filename: 'missing.jpg',
+    url: 'https://example.invalid/place-photos/missing.jpg',
+  }] });
+  assert.match(result.errors.join(' '), /user photo URL\/local asset mismatch/);
+});
+test('a removed province fails complete-coverage gate', () => {
+  const result = auditPlaceImport({ ...input(), places: SEED_PLACES.filter(p => p.province !== 'พิจิตร') });
+  assert.match(result.errors.join(' '), /province coverage incomplete/);
+  assert.deepEqual(result.coverage.missingProvinces, ['พิจิตร']);
+});
