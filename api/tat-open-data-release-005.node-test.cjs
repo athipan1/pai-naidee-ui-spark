@@ -1,1 +1,38 @@
-Y29uc3QgdGVzdCA9IHJlcXVpcmUoJ25vZGU6dGVzdCcpOwpjb25zdCBhc3NlcnQgPSByZXF1aXJlKCdub2RlOmFzc2VydC9zdHJpY3QnKTsKY29uc3QgYmF0Y2ggPSByZXF1aXJlKCcuL2FkZGl0aW9uYWwtdGF0LW9wZW4tZGF0YS1iYXRjaC0wMDUuY2pzJyk7CmNvbnN0IHsgU0VFRF9QTEFDRVMgfSA9IHJlcXVpcmUoJy4vcG9zdGdyZXMtZGIuY2pzJyk7CmNvbnN0IHsgYXVkaXRQbGFjZUltcG9ydCB9ID0gcmVxdWlyZSgnLi9wbGFjZS1xdWFsaXR5LmNqcycpOwoKdGVzdCgnQ2hvbiBCdXJpIGJhdGNoIDAwNSBhZGRzIG9ubHkgdGhyZWUgc291cmNlLXZlcmlmaWVkIHBsYWNlcycsICgpID0+IHsKICBhc3NlcnQuZGVlcEVxdWFsKGJhdGNoLm1hcChwbGFjZSA9PiBwbGFjZS5pZCksIFsKICAgICd0YXQtMjAyMTEyMjEyMzAwMzQ3MzQyODMnLCAndGF0LTIwMTYwNTI4MTY1MjMxMDA4NTYwJywgJ3RhdC0yMDE2MDUyODE3MDIyNjAwODU2MycsCiAgXSk7CiAgYXNzZXJ0LmVxdWFsKFNFRURfUExBQ0VTLmxlbmd0aCwgMTMwKTsKICBhc3NlcnQuZXF1YWwobmV3IFNldChTRUVEX1BMQUNFUy5tYXAocCA9PiBwLmlkKSkuc2l6ZSwgMTMwKTsKICBhc3NlcnQuZXF1YWwoYXVkaXRQbGFjZUltcG9ydCh7IHBsYWNlczogU0VFRF9QTEFDRVMgfSkuZXJyb3JzLmxlbmd0aCwgMCk7CiAgZm9yIChjb25zdCBwIG9mIGJhdGNoKSB7CiAgICBhc3NlcnQuZXF1YWwocC5wcm92aW5jZSwgJ+C4iuC4peC4muC4uOC4o+C4tScpOwogICAgYXNzZXJ0Lm9rKHAubmFtZUxvY2FsICYmIHAuZGVzY3JpcHRpb24gJiYgcC5uYW1lTG9jYWwgIT09ICfguYTguKHguYjguKHguLUnKTsKICAgIGFzc2VydC5lcXVhbChwLnJhdGluZywgMCk7CiAgICBhc3NlcnQuZXF1YWwocC5yZXZpZXdDb3VudCwgMCk7CiAgICBhc3NlcnQuZXF1YWwocC5pbWFnZVVybCwgbnVsbCk7CiAgICBhc3NlcnQuZXF1YWwocC52ZXJpZmllZEF0LCBudWxsKTsKICAgIGFzc2VydC5vayhwLmxhdCA+IDEyICYmIHAubGF0IDwgMTQpOwogICAgYXNzZXJ0Lm9rKHAubG5nID4gMTAwICYmIHAubG5nIDwgMTAyKTsKICB9Cn0pOwoKdGVzdCgnQ2hvbiBCdXJpIHNvdXJjZSBJRHMgYW5kIGNvb3JkaW5hdGVzIHJlbWFpbiBleGFjdCcsICgpID0+IHsKICBmb3IgKGNvbnN0IFtpZCwgdGhhaU5hbWUsIGxhdCwgbG5nXSBvZiBbCiAgICBbJ3RhdC0yMDIxMTIyMTIzMDAzNDczNDI4MycsICfguYHguIHguKPguJnguJTguYzguYHguITguJnguKLguK3guJnguITguLXguKPguLUnLCAxMy4zMjE2NDI4LCAxMDAuOTgwMDU1Nl0sCiAgICBbJ3RhdC0yMDE2MDUyODE2NTIzMTAwODU2MCcsICfguK3guLjguJfguKLguLLguJnguKPguLHguIfguKrguKPguKPguITguYzguJnguKfguLHguJXguIHguKPguKPguKHguK3guKfguIHguLLguKggKOC4quC5gOC4m+C4iyDguK3guLTguJnguKrguYTguJvguYDguKXguLXguKLguKEpJywgMTMuMTAyNjE0NiwgMTAwLjkzMDQ1MjNdLAogICAgWyd0YXQtMjAxNjA1MjgxNzAyMjYwMDg1NjMnLCAn4Lib4LmI4Liy4Liq4Li04Lij4Li04LmA4LiI4Lij4Li04LiN4Lin4Lij4Lij4LipJywgMTIuNzU5NjgwNywgMTAwLjk4MDAxODZdLAogIF0pIHsKICAgIGNvbnN0IHBsYWNlID0gU0VFRF9QTEFDRVMuZmluZChwID0+IHAuaWQgPT09IGlkKTsKICAgIGFzc2VydC5vayhwbGFjZSk7CiAgICBhc3NlcnQuZXF1YWwocGxhY2UubmFtZUxvY2FsLCB0aGFpTmFtZSk7CiAgICBhc3NlcnQuZXF1YWwocGxhY2UubGF0LCBsYXQpOwogICAgYXNzZXJ0LmVxdWFsKHBsYWNlLmxuZywgbG5nKTsKICB9Cn0pOwo=
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const batch = require('./additional-tat-open-data-batch-005.cjs');
+const { SEED_PLACES } = require('./postgres-db.cjs');
+const { auditPlaceImport } = require('./place-quality.cjs');
+
+test('Chon Buri batch 005 adds only three source-verified places', () => {
+  assert.deepEqual(batch.map(place => place.id), [
+    'tat-20211221230034734283', 'tat-20160528165231008560', 'tat-20160528170226008563',
+  ]);
+  assert.equal(SEED_PLACES.length, 130);
+  assert.equal(new Set(SEED_PLACES.map(p => p.id)).size, 130);
+  assert.equal(auditPlaceImport({ places: SEED_PLACES }).errors.length, 0);
+  for (const p of batch) {
+    assert.equal(p.province, 'ชลบุรี');
+    assert.ok(p.nameLocal && p.description && p.nameLocal !== 'ไม่มี');
+    assert.equal(p.rating, 0);
+    assert.equal(p.reviewCount, 0);
+    assert.equal(p.imageUrl, null);
+    assert.equal(p.verifiedAt, null);
+    assert.ok(p.lat > 12 && p.lat < 14);
+    assert.ok(p.lng > 100 && p.lng < 102);
+  }
+});
+
+test('Chon Buri source IDs and coordinates remain exact', () => {
+  for (const [id, thaiName, lat, lng] of [
+    ['tat-20211221230034734283', 'แกรนด์แคนยอนคีรี', 13.3216428, 100.9800556],
+    ['tat-20160528165231008560', 'อุทยานรังสรรค์นวัตกรรมอวกาศ (สเปซ อินสไปเลียม)', 13.1026146, 100.9304523],
+    ['tat-20160528170226008563', 'ป่าสิริเจริญวรรษ', 12.7596807, 100.9800186],
+  ]) {
+    const place = SEED_PLACES.find(p => p.id === id);
+    assert.ok(place);
+    assert.equal(place.nameLocal, thaiName);
+    assert.equal(place.lat, lat);
+    assert.equal(place.lng, lng);
+  }
+});
