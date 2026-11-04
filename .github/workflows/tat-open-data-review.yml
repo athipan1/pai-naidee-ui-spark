@@ -11,7 +11,7 @@ on:
       start_index:
         description: 'Continue from nextIndex in the previous report'
         required: false
-        default: '0'
+        default: '79'
         type: string
       batch_size:
         description: 'Maximum reviewed candidates; hard limit 25'
@@ -21,6 +21,7 @@ on:
   push:
     branches:
       - feature/tat-open-data-staged-import
+      - feature/tat-open-data-batch-002
     paths:
       - 'api/tat-open-data.cjs'
       - 'api/stage-tat-open-data.cjs'
@@ -38,7 +39,7 @@ jobs:
     env:
       TAT_CSV_URL: 'https://datacatalog.tat.or.th/dataset/87442079-88ec-42eb-b507-dcf135fc4301/resource/e3774497-a9d4-46f1-a3db-172d0aed5237/download/attraction.csv'
       REVIEW_PROVINCE: ${{ inputs.province || '' }}
-      REVIEW_START: ${{ inputs.start_index || '0' }}
+      REVIEW_START: ${{ inputs.start_index || '79' }}
       REVIEW_SIZE: ${{ inputs.batch_size || '25' }}
     steps:
       - uses: actions/checkout@v4
