@@ -86,3 +86,8 @@ The second review window (source index 79, next index 124) is documented in
 [TAT_OPEN_DATA_RELEASE_BATCH_002.md](./TAT_OPEN_DATA_RELEASE_BATCH_002.md).
 Only its five individually sourced locations are permitted in release 002;
 the other 20 remain unpublished.
+
+The third review window (source index 124, next index 174) is documented in
+[TAT_OPEN_DATA_RELEASE_BATCH_003.md](./TAT_OPEN_DATA_RELEASE_BATCH_003.md).
+Only three corroborated candidates are selected; the other 22 remain staged
+without publication.
