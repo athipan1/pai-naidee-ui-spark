@@ -81,3 +81,8 @@ daily guards and the user's **฿500/month** spending objective remain unchanged
 The first five individually checked records have a separate, explicitly
 enumerated publication review in [TAT_OPEN_DATA_RELEASE_BATCH_001.md](./TAT_OPEN_DATA_RELEASE_BATCH_001.md).
 The regular staging workflow still never publishes the remaining candidates.
+
+The second review window (source index 79, next index 124) is documented in
+[TAT_OPEN_DATA_RELEASE_BATCH_002.md](./TAT_OPEN_DATA_RELEASE_BATCH_002.md).
+Only its five individually sourced locations are permitted in release 002;
+the other 20 remain unpublished.
