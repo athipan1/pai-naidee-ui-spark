@@ -303,11 +303,15 @@ async function ensureSchema() {
     -- A shared quota ledger for all API instances. No Google content is stored.
     CREATE TABLE IF NOT EXISTS google_api_daily_usage (
       usage_day DATE NOT NULL,
-      api_name TEXT NOT NULL CHECK (api_name IN ('places_search', 'routes_compute')),
+      api_name TEXT NOT NULL CHECK (api_name IN ('places_search', 'routes_compute', 'places_detail', 'places_photo')),
       request_count INTEGER NOT NULL DEFAULT 0 CHECK (request_count >= 0),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       PRIMARY KEY (usage_day, api_name)
     );
+    -- Existing production check constraints must also accept the new kinds.
+    ALTER TABLE google_api_daily_usage DROP CONSTRAINT IF EXISTS google_api_daily_usage_api_name_check;
+    ALTER TABLE google_api_daily_usage ADD CONSTRAINT google_api_daily_usage_api_name_check
+      CHECK (api_name IN ('places_search', 'routes_compute', 'places_detail', 'places_photo'));
     CREATE INDEX IF NOT EXISTS idx_place_aliases_lookup ON place_aliases (alias_key, status);
     CREATE INDEX IF NOT EXISTS idx_place_aliases_place ON place_aliases (place_id);
     CREATE INDEX IF NOT EXISTS idx_admin_sessions_expiry ON admin_sessions (expires_at);
