@@ -14,7 +14,7 @@ test('nationwide catalogue passes strict checks before Railway writes', () => {
   const result = assertPlaceImportReady(input());
   assert.equal(result.coverage.totalProvinces, 77);
   assert.equal(result.coverage.provinces, 77);
-  assert.equal(result.coverage.places, 120);
+  assert.equal(result.coverage.places, 123);
   assert.deepEqual(result.coverage.missingProvinces, []);
 });
 test('duplicate ID or place name blocks import', () => {

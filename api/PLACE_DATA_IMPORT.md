@@ -2,8 +2,8 @@
 
 The curated seed is a minimum coverage catalogue, **not** an exhaustive list of
 Thai attractions. The baseline before TAT release 001 was 110 locations in all
-77 provinces; release 001 raised this to 115, and release 002 raises it to
-120, still covering 77 provinces.
+77 provinces; release 001 raised this to 115, release 002 raised it to 120,
+and the individually checked release 003 raises it to 123, still covering 77 provinces.
 
 Before changing or deploying the bundled seed, run:
 
@@ -51,4 +51,8 @@ The second separately sourced five-place release is
 `api/additional-tat-open-data-batch-002.cjs`; its official source cross-checks,
 corrected English title, and deliberately withheld wrong-province English
 description are documented in `TAT_OPEN_DATA_RELEASE_BATCH_002.md`.
+
+The third three-place release from source rows 124–173 is
+`api/additional-tat-open-data-batch-003.cjs`, documented with independent
+public-sector corroboration in `TAT_OPEN_DATA_RELEASE_BATCH_003.md`.
 
