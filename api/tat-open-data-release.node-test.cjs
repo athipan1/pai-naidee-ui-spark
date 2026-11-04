@@ -1,1 +1,49 @@
-Y29uc3QgdGVzdCA9IHJlcXVpcmUoJ25vZGU6dGVzdCcpOwpjb25zdCBhc3NlcnQgPSByZXF1aXJlKCdub2RlOmFzc2VydC9zdHJpY3QnKTsKY29uc3QgeyBTRUVEX1BMQUNFUyB9ID0gcmVxdWlyZSgnLi9wb3N0Z3Jlcy1kYi5janMnKTsKY29uc3QgYmF0Y2ggPSByZXF1aXJlKCcuL2FkZGl0aW9uYWwtdGF0LW9wZW4tZGF0YS1iYXRjaC0wMDEuY2pzJyk7CmNvbnN0IHsgYXVkaXRQbGFjZUltcG9ydCB9ID0gcmVxdWlyZSgnLi9wbGFjZS1xdWFsaXR5LmNqcycpOwoKdGVzdCgnZmlyc3QgYXBwcm92ZWQgVEFUIHJlbGVhc2UgaXMgYW4gZXhhY3RseSBlbnVtZXJhdGVkIGZpdmUtcGxhY2UgYmF0Y2gnLCAoKSA9PiB7CiAgYXNzZXJ0LmRlZXBFcXVhbChiYXRjaC5tYXAocGxhY2UgPT4gcGxhY2UuaWQpLnNvcnQoKSwgWwogICAgJ3RhdC0yMDI2MDEyNjE0NTUwOTAwMScsCiAgICAndGF0LTIwMjYwMjAzMTIwMjE0MDAxJywKICAgICd0YXQtMjAyNjAyMDMxNDM1MTIwMDEnLAogICAgJ3RhdC0yMDI2MDIwNDE0MTA1MjAwMScsCiAgICAndGF0LTIwMjYwMjA5MTQ0NjIxMDAxJywKICBdKTsKICBhc3NlcnQuZXF1YWwobmV3IFNldChiYXRjaC5tYXAocGxhY2UgPT4gcGxhY2UucHJvdmluY2UpKS5zaXplLCA1KTsKICBhc3NlcnQuZXF1YWwoU0VFRF9QTEFDRVMubGVuZ3RoLCAxMzApOwogIGFzc2VydC5lcXVhbChhdWRpdFBsYWNlSW1wb3J0KHsgcGxhY2VzOiBTRUVEX1BMQUNFUyB9KS5lcnJvcnMubGVuZ3RoLCAwKTsKfSk7Cgp0ZXN0KCdUQVQgcHJvdmVuYW5jZSBhbmQgdW52ZXJpZmllZCBmaWVsZHMgcmVtYWluIGhvbmVzdCcsICgpID0+IHsKICBmb3IgKGNvbnN0IHBsYWNlIG9mIGJhdGNoKSB7CiAgICBhc3NlcnQuZXF1YWwocGxhY2Uuc291cmNlTmFtZSwgJ1RvdXJpc20gQXV0aG9yaXR5IG9mIFRoYWlsYW5kIOKAlCBPcGVuIERhdGEnKTsKICAgIGFzc2VydC5lcXVhbChwbGFjZS5zb3VyY2VVcmwsICdodHRwczovL2RhdGFjYXRhbG9nLnRhdC5vci50aC9kYXRhc2V0L3RvdXJpc3QtYXR0cmFjdGlvbicpOwogICAgYXNzZXJ0LmVxdWFsKHBsYWNlLnJhdGluZywgMCk7CiAgICBhc3NlcnQuZXF1YWwocGxhY2UucmV2aWV3Q291bnQsIDApOwogICAgYXNzZXJ0LmVxdWFsKHBsYWNlLmltYWdlVXJsLCBudWxsKTsKICAgIGFzc2VydC5lcXVhbChwbGFjZS52ZXJpZmllZEF0LCBudWxsLCAnRG8gbm90IGZha2UgYSB2ZXJpZmljYXRpb24gdGltZXN0YW1wJyk7CiAgICBhc3NlcnQuZGVlcEVxdWFsKHBsYWNlLnRhZ3MsIFtdKTsKICAgIGFzc2VydC5vayhwbGFjZS5kZXNjcmlwdGlvbi5sZW5ndGggPj0gNTApOwogIH0KfSk7Cgp0ZXN0KCdmaXJzdCBUQVQgcmVsZWFzZSByZXRhaW5zIHRoZSBvZmZpY2lhbCBUaGFpIG5hbWVzIGFuZCBzb3VyY2UgY29vcmRpbmF0ZXMnLCAoKSA9PiB7CiAgY29uc3QgYnlJZCA9IG5ldyBNYXAoYmF0Y2gubWFwKHBsYWNlID0+IFtwbGFjZS5pZCwgcGxhY2VdKSk7CiAgZm9yIChjb25zdCBbaWQsIG5hbWVMb2NhbCwgcHJvdmluY2UsIGxhdCwgbG5nXSBvZiBbCiAgICBbJ3RhdC0yMDI2MDIwOTE0NDYyMTAwMScsICfguYDguKHguLfguK3guIfguYDguIHguYjguLLguKrguJXguLnguKUnLCAn4Liq4LiV4Li54LilJywgNi42MTM2MDM2OTExNDA1ODIsIDEwMC4wNjYyMjMxNDQ1MzEyNV0sCiAgICBbJ3RhdC0yMDI2MDIwNDE0MTA1MjAwMScsICfguKjguLnguJnguKLguYzguYDguKPguLXguKLguJnguKPguLnguYnguYLguK7guIfguK7guK3guKHguJzguI3guYvguLIg4Lil4LmJ4Liy4LiZ4LiZ4LiyJywgJ+C5gOC4iuC4teC4ouC4h+C4o+C4suC4oicsIDIwLjAzNDQyNTQsIDk5Ljg1NTk2NDUwMDAwMDAxXSwKICAgIFsndGF0LTIwMjYwMjAzMTQzNTEyMDAxJywgJ+C4reC4uOC4l+C4ouC4suC4meC5geC4q+C5iOC4h+C4iuC4suC4leC4tOC5gOC4guC4suC4nuC4meC4oeC5gOC4muC4jeC4iOC4sicsICfguIHguKPguLDguJrguLXguYgnLCA4LjI0MDE2MzU5OTk5OTk5OSwgOTguOTE0MTQ3Mzk5OTk5OTldLAogICAgWyd0YXQtMjAyNjAyMDMxMjAyMTQwMDEnLCAn4LiK4Li44Lih4LiK4LiZ4Lir4LiZ4Lit4LiH4Lib4Lil4Liy4LmE4Lir4LilJywgJ+C4iuC4peC4muC4uOC4o+C4tScsIDEyLjk3OTExOTUsIDEwMC45NjAxMzM5XSwKICAgIFsndGF0LTIwMjYwMTI2MTQ1NTA5MDAxJywgJ+C4iuC4uOC4oeC4iuC4meC4muC5ieC4suC4meC4reC4reC4meC5g+C4leC5iScsICfguYDguIrguLXguKLguIfguYPguKvguKHguYgnLCAxOC43Mzc2NDAxLCA5OS4yMzMyNF0sCiAgXSkgewogICAgY29uc3QgcGxhY2UgPSBieUlkLmdldChpZCk7CiAgICBhc3NlcnQub2socGxhY2UsIGlkKTsKICAgIGFzc2VydC5lcXVhbChwbGFjZS5uYW1lTG9jYWwsIG5hbWVMb2NhbCk7CiAgICBhc3NlcnQuZXF1YWwocGxhY2UucHJvdmluY2UsIHByb3ZpbmNlKTsKICAgIGFzc2VydC5lcXVhbChwbGFjZS5sYXQsIGxhdCk7CiAgICBhc3NlcnQuZXF1YWwocGxhY2UubG5nLCBsbmcpOwogIH0KfSk7Cg==
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { SEED_PLACES } = require('./postgres-db.cjs');
+const batch = require('./additional-tat-open-data-batch-001.cjs');
+const { auditPlaceImport } = require('./place-quality.cjs');
+
+test('first approved TAT release is an exactly enumerated five-place batch', () => {
+  assert.deepEqual(batch.map(place => place.id).sort(), [
+    'tat-20260126145509001',
+    'tat-20260203120214001',
+    'tat-20260203143512001',
+    'tat-20260204141052001',
+    'tat-20260209144621001',
+  ]);
+  assert.equal(new Set(batch.map(place => place.province)).size, 5);
+  assert.equal(SEED_PLACES.length, 130);
+  assert.equal(auditPlaceImport({ places: SEED_PLACES }).errors.length, 0);
+});
+
+test('TAT provenance and unverified fields remain honest', () => {
+  for (const place of batch) {
+    assert.equal(place.sourceName, 'Tourism Authority of Thailand — Open Data');
+    assert.equal(place.sourceUrl, 'https://datacatalog.tat.or.th/dataset/tourist-attraction');
+    assert.equal(place.rating, 0);
+    assert.equal(place.reviewCount, 0);
+    assert.equal(place.imageUrl, null);
+    assert.equal(place.verifiedAt, null, 'Do not fake a verification timestamp');
+    assert.deepEqual(place.tags, []);
+    assert.ok(place.description.length >= 50);
+  }
+});
+
+test('first TAT release retains the official Thai names and source coordinates', () => {
+  const byId = new Map(batch.map(place => [place.id, place]));
+  for (const [id, nameLocal, province, lat, lng] of [
+    ['tat-20260209144621001', 'เมืองเก่าสตูล', 'สตูล', 6.613603691140582, 100.06622314453125],
+    ['tat-20260204141052001', 'ศูนย์เรียนรู้โฮงฮอมผญ๋า ล้านนา', 'เชียงราย', 20.0344254, 99.85596450000001],
+    ['tat-20260203143512001', 'อุทยานแห่งชาติเขาพนมเบญจา', 'กระบี่', 8.240163599999999, 98.91414739999999],
+    ['tat-20260203120214001', 'ชุมชนหนองปลาไหล', 'ชลบุรี', 12.9791195, 100.9601339],
+    ['tat-20260126145509001', 'ชุมชนบ้านออนใต้', 'เชียงใหม่', 18.7376401, 99.23324],
+  ]) {
+    const place = byId.get(id);
+    assert.ok(place, id);
+    assert.equal(place.nameLocal, nameLocal);
+    assert.equal(place.province, province);
+    assert.equal(place.lat, lat);
+    assert.equal(place.lng, lng);
+  }
+});
