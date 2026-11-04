@@ -76,6 +76,7 @@ test('CLI produces a review-only manifest and refuses to overwrite a previous ba
     assert.equal(batch.candidates.length, 1);
     assert.equal(batch.status, 'requires_manual_review');
     assert.equal(JSON.parse(readFileSync(output, 'utf8')).source.columns.length, 9);
+    assert.deepEqual(JSON.parse(readFileSync(output, 'utf8')).source.locationSamples, []);
     assert.throws(() => main(['--input', source, '--output', output]), /EEXIST/);
   } finally { process.stdout.write = originalWrite; }
 });

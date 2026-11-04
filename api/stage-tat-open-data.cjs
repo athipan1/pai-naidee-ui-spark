@@ -34,6 +34,17 @@ function main(argv = process.argv.slice(2)) {
   batch.source.filename = extname(input).toLowerCase() === '.csv' ? 'attraction.csv' : 'attraction.json';
   batch.source.recordCount = records.length;
   batch.source.columns = records[0] && typeof records[0] === 'object' ? Object.keys(records[0]) : [];
+  // Public-source schema diagnostics only (no contact fields / photos / keys).
+  // These samples help review coordinates before changing the parser.
+  batch.source.locationSamples = records
+    .filter(row => row && typeof row === 'object' && String(row.ATT_LOCATION || '').trim())
+    .slice(0, 8)
+    .map(row => ({ location: String(row.ATT_LOCATION).slice(0, 160),
+      category: String(row.ATT_CATEGORY || '').slice(0, 32),
+      categoryLabel: String(row.ATT_CATEGORY_LABEL || '').slice(0, 100),
+      type: String(row.ATT_TYPE || '').slice(0, 32),
+      typeLabel: String(row.ATT_TYPE_LABEL || '').slice(0, 100),
+      province: String(row.PROVINCE_NAME_TH || '').slice(0, 100) }));
   // wx makes accidental overwriting of an earlier reviewed batch impossible.
   writeFileSync(output, `${JSON.stringify(batch, null, 2)}\n`, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
   process.stdout.write(`${JSON.stringify({ status: batch.status, output, sha256: digest,
