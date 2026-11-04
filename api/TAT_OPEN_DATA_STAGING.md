@@ -77,3 +77,7 @@ is **not** sufficient to publish. No database writer is included in phase 1.
 
 No new Google Places requests are part of this pipeline. Existing Places/Routes
 daily guards and the user's **฿500/month** spending objective remain unchanged.
+
+The first five individually checked records have a separate, explicitly
+enumerated publication review in [TAT_OPEN_DATA_RELEASE_BATCH_001.md](./TAT_OPEN_DATA_RELEASE_BATCH_001.md).
+The regular staging workflow still never publishes the remaining candidates.

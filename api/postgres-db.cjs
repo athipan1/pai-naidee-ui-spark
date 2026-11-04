@@ -4,6 +4,7 @@ const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs
 const ADDITIONAL_CURATED_PLACES_V3 = require('./additional-curated-places-v3.cjs');
 const ADDITIONAL_CURATED_PLACES_V4 = require('./additional-curated-places-v4.cjs');
 const ADDITIONAL_CURATED_PLACES_V5 = require('./additional-curated-places-v5.cjs');
+const TAT_OPEN_DATA_BATCH_001 = require('./additional-tat-open-data-batch-001.cjs');
 const { assertPlaceImportReady } = require('./place-quality.cjs');
 const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
 const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
@@ -191,6 +192,7 @@ const SEED_PLACES = [
   ...ADDITIONAL_CURATED_PLACES_V3,
   ...ADDITIONAL_CURATED_PLACES_V4,
   ...ADDITIONAL_CURATED_PLACES_V5,
+  ...TAT_OPEN_DATA_BATCH_001,
 ];
 
 // Only remove the original demo ratings/images if their exact unchanged seed
@@ -330,7 +332,7 @@ async function ensureSchema() {
         ${place.category}, ${place.rating}, ${place.reviewCount},
         ${place.imageUrl}, ${place.description}, ${JSON.stringify(place.tags)}::jsonb,
         ${place.lat}, ${place.lng}, ${place.sourceName || null}, ${place.sourceUrl || null},
-        ${place.sourceUrl ? '2026-10-25T00:00:00.000Z' : null}::timestamptz
+        ${place.verifiedAt === null ? null : place.sourceUrl ? '2026-10-25T00:00:00.000Z' : null}::timestamptz
       )
       ON CONFLICT (id) DO NOTHING
     `;
@@ -354,7 +356,7 @@ async function ensureSchema() {
     province_th: place.province,
     province_en: PROVINCE_EN[place.province],
     description_th: place.description,
-    description_en: DESCRIPTION_EN[place.id],
+    description_en: place.descriptionEn || DESCRIPTION_EN[place.id] || null,
   }));
   await sql`
     UPDATE places AS p
