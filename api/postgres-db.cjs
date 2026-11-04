@@ -7,6 +7,7 @@ const ADDITIONAL_CURATED_PLACES_V5 = require('./additional-curated-places-v5.cjs
 const TAT_OPEN_DATA_BATCH_001 = require('./additional-tat-open-data-batch-001.cjs');
 const TAT_OPEN_DATA_BATCH_002 = require('./additional-tat-open-data-batch-002.cjs');
 const TAT_OPEN_DATA_BATCH_003 = require('./additional-tat-open-data-batch-003.cjs');
+const TAT_OPEN_DATA_BATCH_004 = require('./additional-tat-open-data-batch-004.cjs');
 const { assertPlaceImportReady } = require('./place-quality.cjs');
 const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
 const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
@@ -197,6 +198,7 @@ const SEED_PLACES = [
   ...TAT_OPEN_DATA_BATCH_001,
   ...TAT_OPEN_DATA_BATCH_002,
   ...TAT_OPEN_DATA_BATCH_003,
+  ...TAT_OPEN_DATA_BATCH_004,
 ];
 
 // Only remove the original demo ratings/images if their exact unchanged seed
