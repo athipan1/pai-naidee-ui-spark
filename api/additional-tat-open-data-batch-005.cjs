@@ -1,1 +1,31 @@
-Ly8gQ2hvbiBCdXJpLW9ubHkgcmVsZWFzZTogaW5kaXZpZHVhbCBvZmZpY2lhbC1zb3VyY2UgcmV2aWV3LCBub3QgYW4gYXV0b21hdGljIGltcG9ydC4KLy8gU291cmNlIENTViBTSEEtMjU2OiAyYjhkMzViYmNiNThjMTJiNWM1N2Y3ZjUyZTk1ZDQxODg2N2Q0ODkyYTk2MjM2MjU2N2MwZDI4YTViZTUxMzY2Ci8vIEV2aWRlbmNlOiBUQVRfT1BFTl9EQVRBX1JFTEVBU0VfQkFUQ0hfMDA1Lm1kCmNvbnN0IFNPVVJDRSA9ICdodHRwczovL2RhdGFjYXRhbG9nLnRhdC5vci50aC9kYXRhc2V0L3RvdXJpc3QtYXR0cmFjdGlvbic7Cgpjb25zdCBQTEFDRVMgPSBbCiAgewogICAgaWQ6ICd0YXQtMjAyMTEyMjEyMzAwMzQ3MzQyODMnLCBuYW1lOiAnR3JhbmQgQ2FueW9uIENob25idXJpIChLSVJJKScsCiAgICBuYW1lTG9jYWw6ICfguYHguIHguKPguJnguJTguYzguYHguITguJnguKLguK3guJnguITguLXguKPguLUnLCBwcm92aW5jZTogJ+C4iuC4peC4muC4uOC4o+C4tScsIGNhdGVnb3J5OiAnTmF0dXJlJywKICAgIGRlc2NyaXB0aW9uOiAn4LmB4LiB4Lij4LiZ4LiU4LmM4LmB4LiE4LiZ4Lii4Lit4LiZ4LiE4Li14Lij4Li14LmA4Lib4LmH4LiZ4Lia4LmI4Lit4LiU4Li04LiZ4Lil4Li54LiB4Lij4Lix4LiH4LmA4LiB4LmI4Liy4LmD4LiZ4Lit4Liz4LmA4Lig4Lit4LmA4Lih4Li34Lit4LiH4LiK4Lil4Lia4Li44Lij4Li1IOC4oeC4teC4muC5iOC4reC4meC5ieC4s+C5geC4peC4sOC4oOC4ueC4oeC4tOC4l+C4seC4qOC4meC5jOC5gOC4meC4tOC4meC4lOC4tOC4meC4quC4teC4reC5iOC4reC4mScsCiAgICBkZXNjcmlwdGlvbkVuOiBudWxsLCBsYXQ6IDEzLjMyMTY0MjgsIGxuZzogMTAwLjk4MDA1NTYsCiAgfSwKICB7CiAgICBpZDogJ3RhdC0yMDE2MDUyODE2NTIzMTAwODU2MCcsIG5hbWU6ICdTcGFjZSBJbnNwaXJpdW0nLAogICAgbmFtZUxvY2FsOiAn4Lit4Li44LiX4Lii4Liy4LiZ4Lij4Lix4LiH4Liq4Lij4Lij4LiE4LmM4LiZ4Lin4Lix4LiV4LiB4Lij4Lij4Lih4Lit4Lin4LiB4Liy4LioICjguKrguYDguJvguIsg4Lit4Li04LiZ4Liq4LmE4Lib4LmA4Lil4Li14Lii4LihKScsIHByb3ZpbmNlOiAn4LiK4Lil4Lia4Li44Lij4Li1JywgY2F0ZWdvcnk6ICdDdWx0dXJlJywKICAgIGRlc2NyaXB0aW9uOiAn4Liq4LmA4Lib4LiLIOC4reC4tOC4meC4quC5hOC4m+C5gOC4peC4teC4ouC4oeC5gOC4m+C5h+C4meC5geC4q+C4peC5iOC4h+C5gOC4o+C4teC4ouC4meC4o+C4ueC5ieC4lOC5ieC4suC4meC4reC4p+C4geC4suC4qOC5geC4peC4sOC4oOC4ueC4oeC4tOC4quC4suC4o+C4quC4meC5gOC4l+C4qOC5g+C4meC4reC4s+C5gOC4oOC4reC4qOC4o+C4teC4o+C4suC4iuC4siDguJTguLPguYDguJnguLTguJnguIfguLLguJnguYLguJTguKIgR0lTVERBJywKICAgIGRlc2NyaXB0aW9uRW46IG51bGwsIGxhdDogMTMuMTAyNjE0NiwgbG5nOiAxMDAuOTMwNDUyMywKICB9LAogIHsKICAgIGlkOiAndGF0LTIwMTYwNTI4MTcwMjI2MDA4NTYzJywgbmFtZTogJ1NpcmkgQ2hhcm9lbndhdCBGb3Jlc3QgUGxhbnRhdGlvbicsCiAgICBuYW1lTG9jYWw6ICfguJvguYjguLLguKrguLTguKPguLTguYDguIjguKPguLTguI3guKfguKPguKPguKknLCBwcm92aW5jZTogJ+C4iuC4peC4muC4uOC4o+C4tScsIGNhdGVnb3J5OiAnTmF0dXJlJywKICAgIGRlc2NyaXB0aW9uOiAn4LmC4LiE4Lij4LiH4LiB4Liy4Lij4Lib4LmI4Liy4Liq4Li04Lij4Li04LmA4LiI4Lij4Li04LiN4Lin4Lij4Lij4Lip4Lit4Lix4LiZ4LmA4LiZ4Li34LmI4Lit4LiH4Lih4Liy4LiI4Liy4LiB4Lie4Lij4Liw4Lij4Liy4LiK4LiU4Liz4Lij4Li04LmA4Lib4LmH4LiZ4Lie4Li34LmJ4LiZ4LiX4Li14LmI4Lit4LiZ4Li44Lij4Lix4LiB4Lip4LmM4LmB4Lil4Liw4LmA4Lij4Li14Lii4LiZ4Lij4Li54LmJ4LiU4LmJ4Liy4LiZ4Lib4LmI4Liy4LmE4Lih4LmJ4LmD4LiZ4Lit4Liz4LmA4Lig4Lit4Liq4Lix4LiV4Lir4Li14LiaIOC4iOC4seC4h+C4q+C4p+C4seC4lOC4iuC4peC4muC4uOC4o+C4tScsCiAgICBkZXNjcmlwdGlvbkVuOiBudWxsLCBsYXQ6IDEyLjc1OTY4MDcsIGxuZzogMTAwLjk4MDAxODYsCiAgfSwKXTsKCm1vZHVsZS5leHBvcnRzID0gUExBQ0VTLm1hcChwbGFjZSA9PiAoewogIC4uLnBsYWNlLCByYXRpbmc6IDAsIHJldmlld0NvdW50OiAwLCBpbWFnZVVybDogbnVsbCwgdGFnczogW10sCiAgc291cmNlTmFtZTogJ1RvdXJpc20gQXV0aG9yaXR5IG9mIFRoYWlsYW5kIOKAlCBPcGVuIERhdGEnLCBzb3VyY2VVcmw6IFNPVVJDRSwKICB2ZXJpZmllZEF0OiBudWxsLAp9KSk7Cg==
+// Chon Buri-only release: individual official-source review, not an automatic import.
+// Source CSV SHA-256: 2b8d35bbcb58c12b5c57f7f52e95d418867d4892a962362567c0d28a5be51366
+// Evidence: TAT_OPEN_DATA_RELEASE_BATCH_005.md
+const SOURCE = 'https://datacatalog.tat.or.th/dataset/tourist-attraction';
+
+const PLACES = [
+  {
+    id: 'tat-20211221230034734283', name: 'Grand Canyon Chonburi (KIRI)',
+    nameLocal: 'แกรนด์แคนยอนคีรี', province: 'ชลบุรี', category: 'Nature',
+    description: 'แกรนด์แคนยอนคีรีเป็นบ่อดินลูกรังเก่าในอำเภอเมืองชลบุรี มีบ่อน้ำและภูมิทัศน์เนินดินสีอ่อน',
+    descriptionEn: null, lat: 13.3216428, lng: 100.9800556,
+  },
+  {
+    id: 'tat-20160528165231008560', name: 'Space Inspirium',
+    nameLocal: 'อุทยานรังสรรค์นวัตกรรมอวกาศ (สเปซ อินสไปเลียม)', province: 'ชลบุรี', category: 'Culture',
+    description: 'สเปซ อินสไปเลียมเป็นแหล่งเรียนรู้ด้านอวกาศและภูมิสารสนเทศในอำเภอศรีราชา ดำเนินงานโดย GISTDA',
+    descriptionEn: null, lat: 13.1026146, lng: 100.9304523,
+  },
+  {
+    id: 'tat-20160528170226008563', name: 'Siri Charoenwat Forest Plantation',
+    nameLocal: 'ป่าสิริเจริญวรรษ', province: 'ชลบุรี', category: 'Nature',
+    description: 'โครงการป่าสิริเจริญวรรษอันเนื่องมาจากพระราชดำริเป็นพื้นที่อนุรักษ์และเรียนรู้ด้านป่าไม้ในอำเภอสัตหีบ จังหวัดชลบุรี',
+    descriptionEn: null, lat: 12.7596807, lng: 100.9800186,
+  },
+];
+
+module.exports = PLACES.map(place => ({
+  ...place, rating: 0, reviewCount: 0, imageUrl: null, tags: [],
+  sourceName: 'Tourism Authority of Thailand — Open Data', sourceUrl: SOURCE,
+  verifiedAt: null,
+}));
