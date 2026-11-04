@@ -61,6 +61,14 @@ jobs:
           --max-filesize 50000000
           --output "$RUNNER_TEMP/attraction.csv"
           "$TAT_CSV_URL"
+      # The staging candidate set must use the already-published catalogue.
+      # A feature branch may contain its proposed release; including those
+      # additions in duplicate detection would incorrectly skip every new ID.
+      - name: Compare candidates against published main seed
+        shell: bash
+        run: |
+          git fetch --depth=1 origin main
+          git show FETCH_HEAD:api/postgres-db.cjs > api/postgres-db.cjs
       - name: Audit and stage first batch (no Railway credentials)
         shell: bash
         run: |
