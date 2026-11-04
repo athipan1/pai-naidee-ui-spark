@@ -31,6 +31,17 @@ test('accepts sourced Thai place without fabricating rating, media or translatio
   assert.match(result.place.sourceUrl, /^https:\/\/datacatalog\.tat\.or\.th\//);
 });
 
+test('recognizes verified TAT ATT_LOCATION lat-long format without swapping coordinates', () => {
+  const row = record({ ATT_LOCATION: '6.613603691140582, 100.06622314453125' });
+  delete row.LATITUDE;
+  delete row.LONGITUDE;
+  const normalized = normalizeRecord(row);
+  assert.equal(normalized.place.lat, 6.613603691140582);
+  assert.equal(normalized.place.lng, 100.06622314453125);
+  assert.equal(normalizeRecord({ ...row, ATT_LOCATION: '100.06, 6.61' }).reason, 'missing_or_invalid_coordinates');
+  assert.equal(normalizeRecord({ ...row, ATT_LOCATION: '6.61, 100.06, 12' }).reason, 'missing_or_invalid_coordinates');
+});
+
 test('blocks rows without independently verifiable province, description, coordinates or classification', () => {
   assert.equal(normalizeRecord(record({ PROVINCE_NAME_TH: '', ATT_PROVINCE_ID: '1058' })).reason, 'missing_or_unknown_province');
   assert.equal(normalizeRecord(record({ ATT_DETAIL_TH: '-' })).reason, 'insufficient_description');

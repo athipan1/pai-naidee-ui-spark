@@ -40,6 +40,8 @@ refuses to overwrite an existing review file.
    list, meaningful sourced description, and coordinates in Thailand. Do not
    turn numeric province IDs into province names without an independently
    verified reference mapping. Other rows are rejected with specific reasons.
+   The official 2026 CSV represents coordinates in `ATT_LOCATION` as the
+   `latitude, longitude` decimal pair; ambiguous or reversed values are blocked.
 2. Category rules are conservative: known beach type 19, nature category 1,
    culture category 2, and already named categories. Unsupported category
    codes go to review rather than an arbitrary category.

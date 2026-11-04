@@ -111,8 +111,13 @@ function normalizeRecord(record) {
   const descriptionEn = cleaned(pick(record, 'ATT_DETAIL_EN', 'DETAIL_EN', 'descriptionEN'), 1200);
   const category = mapCategory(record);
   const location = record.gpsLocation && typeof record.gpsLocation === 'object' ? record.gpsLocation : {};
-  const latitude = pick(record, 'ATT_LATITUDE', 'ATT_GPS_LATITUDE', 'GPS_LATITUDE', 'LATITUDE', 'LAT', 'GPS_LAT') ?? location.latitude;
-  const longitude = pick(record, 'ATT_LONGITUDE', 'ATT_GPS_LONGITUDE', 'GPS_LONGITUDE', 'LONGITUDE', 'LNG', 'LON', 'GPS_LNG') ?? location.longitude;
+  // Official 2026 TAT CSV uses ATT_LOCATION = "latitude, longitude".
+  // Require exactly two decimal numbers; reject anything ambiguous rather
+  // than geocoding from a guessed province or reversing their order.
+  const sourceLocation = String(pick(record, 'ATT_LOCATION') || '');
+  const locationPair = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/.exec(sourceLocation);
+  const latitude = pick(record, 'ATT_LATITUDE', 'ATT_GPS_LATITUDE', 'GPS_LATITUDE', 'LATITUDE', 'LAT', 'GPS_LAT') ?? location.latitude ?? locationPair?.[1];
+  const longitude = pick(record, 'ATT_LONGITUDE', 'ATT_GPS_LONGITUDE', 'GPS_LONGITUDE', 'LONGITUDE', 'LNG', 'LON', 'GPS_LNG') ?? location.longitude ?? locationPair?.[2];
   const lat = latitude === null || latitude === undefined ? NaN : Number(latitude);
   const lng = longitude === null || longitude === undefined ? NaN : Number(longitude);
 
