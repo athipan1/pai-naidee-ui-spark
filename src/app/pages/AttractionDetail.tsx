@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import MapModal from "@/components/attraction/MapModal";
 import AccommodationModal from "@/components/attraction/AccommodationModal";
 import ImageGallery from "@/components/attraction/ImageGallery";
+import GooglePlacePreview from "@/components/attraction/GooglePlacePreview";
 import NearbyRealPlaces from '@/components/attraction/NearbyRealPlaces';
 import BreadcrumbNavigation from "@/components/common/BreadcrumbNavigation";
 import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
@@ -384,6 +385,7 @@ const AttractionDetail = ({
 
       {/* Content */}
       <div className="container mx-auto px-4 py-5 sm:py-8 max-w-full overflow-hidden">
+        <GooglePlacePreview placeId={attraction.id} province={attraction.province} language={currentLanguage} />
         <Card className="mb-5 overflow-hidden border-border/70 bg-card/95 shadow-sm sm:mb-8">
           <CardContent className="p-5 sm:p-6">
             <div className="mb-3 h-1 w-10 rounded-full bg-amber-400" />
