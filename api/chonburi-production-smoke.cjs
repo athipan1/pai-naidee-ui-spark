@@ -16,6 +16,7 @@ const required=[
  'tat-2015120421550718297','tat-2015120421550717971',
  'tat-2012080610583316342','tat-20100518224629568',
  'tat-201005182246293332',
+ 'tat-201005182246293051','tat-201005182246293199','tat-2015120421550718116',
 ];
 async function get(url){
  const r=await fetch(url,{signal:AbortSignal.timeout(15000),headers:{Accept:'application/json'},cache:'no-store'});
@@ -24,7 +25,7 @@ async function get(url){
  return v;
 }
 async function main(){
- const items=[],expectedMin=187,pageSize=50;
+ const items=[],expectedMin=190,pageSize=50;
  let total=null;
  for(let page=1;page<=20;page++){
    const data=await get(BASE+'?page='+page+'&limit='+pageSize);
@@ -33,10 +34,10 @@ async function main(){
    if(items.length>=total)break;
  }
  assert.equal(items.length,total,'pagination mismatch');
- assert.ok(total>=expectedMin,'Expected at least 187 published places; got '+total);
+ assert.ok(total>=expectedMin,'Expected at least 190 published places; got '+total);
  assert.equal(new Set(items.map(x=>x.id)).size,items.length,'duplicate location IDs');
  const chon=items.filter(x=>x.province==='ชลบุรี');
- assert.ok(chon.length>=64,'Expected >=64 published Chon Buri; got '+chon.length);
+ assert.ok(chon.length>=67,'Expected >=67 published Chon Buri; got '+chon.length);
  const ids=new Set(chon.map(x=>x.id));
  for(const id of required)assert.ok(ids.has(id),'Missing Chon Buri batch 007/008 place '+id);
  console.log('CHONBURI_LIVE_AUDIT '+JSON.stringify({
