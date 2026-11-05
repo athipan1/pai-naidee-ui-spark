@@ -14,9 +14,9 @@ const ids = [
 
 test('Chon Buri batch 007 contains only the 17 separately selected and corroborated TAT IDs',()=>{
   assert.deepEqual(batch.map(p=>p.id),ids);
-  assert.equal(SEED_PLACES.length,190);
-  assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,190);
-  assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,67);
+  assert.equal(SEED_PLACES.length,193);
+  assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,193);
+  assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,70);
   assert.equal(new Set(SEED_PLACES.map(p=>p.province)).size,77);
   assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
 });

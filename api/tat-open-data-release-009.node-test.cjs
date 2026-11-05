@@ -10,9 +10,9 @@ const ids=[
 'tat-201005182246293417'];
 test('Chon Buri 009 releases exactly ten chosen TAT records',()=>{
   assert.deepEqual(batch.map(p=>p.id),ids);
-  assert.equal(SEED_PLACES.length,190);
-  assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,67);
-  assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,190);
+  assert.equal(SEED_PLACES.length,193);
+  assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,70);
+  assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,193);
   assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
 });
 test('no invented photos, user ratings, hours, translations or timestamps',()=>{

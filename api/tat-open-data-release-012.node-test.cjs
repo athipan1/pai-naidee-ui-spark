@@ -10,9 +10,9 @@ const expected=[
 ];
 test('batch 012 adds exactly three corroborated Chon Buri attractions',()=>{
  assert.deepEqual(batch.map(p=>p.id),expected.map(x=>x[0]));
- assert.equal(SEED_PLACES.length,190);
- assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,67);
- assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,190);
+ assert.equal(SEED_PLACES.length,193);
+ assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,70);
+ assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,193);
  assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
  assert.equal(SEED_PLACES.filter(p=>p.id==='tat-2015120421550718071').length,0,
     'the Viharn Sien duplicate must never be separately published');
