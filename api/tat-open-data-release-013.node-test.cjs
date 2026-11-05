@@ -5,7 +5,7 @@ const {SEED_PLACES}=require('./postgres-db.cjs');
 const {auditPlaceImport}=require('./place-quality.cjs');
 const expected=[
  ['tat-201005182246293428','อ่าวดงตาล',12.6554581,100.922451],
- ['tat-2015120421550718119','หาดเทียนทะเล',12.8139169,100.9168171],
+ ['tat-2015120421550718119','หาดเทียนทะเล',12.643518498083282,100.92836536539475],
  ['tat-201005182246293336','เมืองพระรถ',13.4669973,101.164865],
 ];
 test('batch 013 publishes only the 3 approved Chon Buri source sites',()=>{
@@ -15,7 +15,7 @@ test('batch 013 publishes only the 3 approved Chon Buri source sites',()=>{
  assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,193);
  assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
 });
-test('preserve TAT identity and exact pins; no invented media, opening hours or prices',()=>{
+test('preserve TAT IDs and documented GPS correction; no invented fields',()=>{
  for(const [id,thai,lat,lng] of expected){
   const p=batch.find(p=>p.id===id);
   assert.ok(p,id);assert.equal(p.nameLocal,thai);
@@ -26,4 +26,13 @@ test('preserve TAT identity and exact pins; no invented media, opening hours or 
   assert.ok(!('openingHours' in p)&&!('price' in p));
   assert.equal(p.sourceUrl,'https://datacatalog.tat.or.th/dataset/tourist-attraction');
  }
+});
+
+test('official DMR UTM replacement prevents out-of-area TAT Thian Talay pin',()=>{
+ const x=batch.find(p=>p.id==='tat-2015120421550718119');
+ // Government source UTM WGS84 zone 47N: E709445 N1398486.
+ // EPSG:32647 -> EPSG:4326; reject old TAT latitude 12.8139169.
+ assert.ok(Math.abs(x.lat-12.643518498083282)<0.00000001);
+ assert.ok(Math.abs(x.lng-100.92836536539475)<0.00000001);
+ assert.ok(Math.abs(x.lat-12.8139169)>0.15,'Old source pin points ~19 km north');
 });
