@@ -11,9 +11,9 @@ const expected=[
 'tat-2015120421550718120','tat-2010120911214113305'];
 test('Chon Buri batch 008 publishes 14 vetted and distinct source IDs only',()=>{
   assert.deepEqual(batch.map(x=>x.id),expected);
-  assert.equal(SEED_PLACES.length,164);
-  assert.equal(SEED_PLACES.filter(x=>x.province==='ชลบุรี').length,41);
-  assert.equal(new Set(SEED_PLACES.map(x=>x.id)).size,164);
+  assert.equal(SEED_PLACES.length,174);
+  assert.equal(SEED_PLACES.filter(x=>x.province==='ชลบุรี').length,51);
+  assert.equal(new Set(SEED_PLACES.map(x=>x.id)).size,174);
   assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
 });
 test('batch 008 preserves source pins and zero-fabrication policy',()=>{
