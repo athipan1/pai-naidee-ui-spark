@@ -41,6 +41,10 @@ async function main(){
  assert.ok(chon.length>=70,'Expected >=70 published Chon Buri; got '+chon.length);
  const ids=new Set(chon.map(x=>x.id));
  for(const id of required)assert.ok(ids.has(id),'Missing Chon Buri batch 007/008 place '+id);
+ const beach=chon.find(x=>x.id==='tat-2015120421550718119');
+ assert.ok(beach,'Missing corrected Thian Talay Beach');
+ assert.ok(Math.abs(beach.coordinates?.lat-12.643518498083282)<0.000001,'Thian Talay live pin latitude incorrect');
+ assert.ok(Math.abs(beach.coordinates?.lng-100.92836536539475)<0.000001,'Thian Talay live pin longitude incorrect');
  console.log('CHONBURI_LIVE_AUDIT '+JSON.stringify({
    status:'success',total,chonburi:chon.length,uniqueIds:items.length,reviewedIdsChecked:required.length,
    provinceCoverage:new Set(items.map(x=>x.province)).size,
