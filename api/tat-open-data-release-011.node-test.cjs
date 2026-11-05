@@ -12,9 +12,9 @@ const expected=[
 ];
 test('Chon Buri batch 011 releases exactly five selected distinct TAT source records',()=>{
  assert.deepEqual(batch.map(p=>p.id),expected.map(x=>x[0]));
- assert.equal(SEED_PLACES.length,187);
- assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,64);
- assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,187);
+ assert.equal(SEED_PLACES.length,190);
+ assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,67);
+ assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,190);
  assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
 });
 test('source records preserve original TAT coordinates and zero-fabrication requirements',()=>{
