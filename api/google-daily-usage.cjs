@@ -7,15 +7,15 @@ const QUOTAS = Object.freeze({
   places_search: {variable: 'GOOGLE_PLACES_DAILY_LIMIT', maximum: 5},
   routes_compute: {variable: 'GOOGLE_ROUTES_DAILY_LIMIT', maximum: 25},
   // Independent, deliberately small ceilings for the detail/photo pilot.
-  places_detail: {variable: 'GOOGLE_PLACE_DETAIL_DAILY_LIMIT', maximum: 2},
-  places_photo: {variable: 'GOOGLE_PLACE_PHOTO_DAILY_LIMIT', maximum: 2},
+  places_detail: {variable: 'GOOGLE_PLACE_DETAIL_DAILY_LIMIT', maximum: 2, defaultLimit: 0},
+  places_photo: {variable: 'GOOGLE_PLACE_PHOTO_DAILY_LIMIT', maximum: 2, defaultLimit: 0},
 });
 
 function dailyLimit(kind) {
   const policy = QUOTAS[kind];
   if (!policy) return 0;
   const value = process.env[policy.variable];
-  if (value === undefined || value === '') return policy.maximum;
+  if (value === undefined || value === '') return policy.defaultLimit ?? policy.maximum;
   // An invalid or negative value must never silently expand the allowance.
   if (!/^\d+$/.test(value.trim())) return 0;
   return Math.min(Number(value), policy.maximum);
