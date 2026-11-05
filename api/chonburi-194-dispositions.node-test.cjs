@@ -25,8 +25,8 @@ test('all 194 TAT Chon Buri source rows have a documented provisional dispositio
     if(status==='published_seed')published.add(id);
   }
   assert.deepEqual(statuses,{
-    published_seed:58,pending_category_location_review:76,
-    missing_usable_thai_name:2,pending_individual_verification:58
+    published_seed:63,pending_category_location_review:76,
+    missing_usable_thai_name:2,pending_individual_verification:53
   });
   const ids=new Set(SEED_PLACES.map(p=>p.id));
   for(const id of published){
