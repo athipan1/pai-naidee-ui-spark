@@ -8,8 +8,8 @@ test('fourth TAT release is limited to four reviewed IDs, with no fabricated dat
     'tat-20250815163438001', 'tat-20250701101935001',
     'tat-20250620154151001', 'tat-20250620152816001',
   ]);
-  assert.equal(SEED_PLACES.length, 182);
-  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 182);
+  assert.equal(SEED_PLACES.length, 187);
+  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 187);
   for (const p of batch) {
     assert.ok(p.nameLocal && p.province && p.description);
     assert.equal(p.rating, 0);

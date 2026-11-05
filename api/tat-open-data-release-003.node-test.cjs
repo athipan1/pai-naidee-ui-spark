@@ -9,7 +9,7 @@ test('third TAT release is explicitly limited to three independently checked IDs
     'tat-20250922135409001',
     'tat-20250916103852001',
   ]);
-  assert.equal(SEED_PLACES.length, 182);
+  assert.equal(SEED_PLACES.length, 187);
   assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, SEED_PLACES.length);
   for (const place of batch) {
     assert.ok(place.nameLocal && place.description && place.province);
