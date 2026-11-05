@@ -15,9 +15,9 @@ const expected=[
 ];
 test('batch 010 releases exactly eight verified Chon Buri TAT source records',()=>{
   assert.deepEqual(batch.map(x=>x.id),expected.map(x=>x[0]));
-  assert.equal(SEED_PLACES.length,182);
-  assert.equal(SEED_PLACES.filter(x=>x.province==='ชลบุรี').length,59);
-  assert.equal(new Set(SEED_PLACES.map(x=>x.id)).size,182);
+  assert.equal(SEED_PLACES.length,187);
+  assert.equal(SEED_PLACES.filter(x=>x.province==='ชลบุรี').length,64);
+  assert.equal(new Set(SEED_PLACES.map(x=>x.id)).size,187);
   assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
 });
 test('batch 010 preserves original names, exact TAT pins and no fabricated data',()=>{
