@@ -8,8 +8,8 @@ test('Chon Buri batch 005 adds only three source-verified places', () => {
   assert.deepEqual(batch.map(place => place.id), [
     'tat-20211221230034734283', 'tat-20160528165231008560', 'tat-20160528170226008563',
   ]);
-  assert.equal(SEED_PLACES.length, 150);
-  assert.equal(new Set(SEED_PLACES.map(p => p.id)).size, 150);
+  assert.equal(SEED_PLACES.length, 164);
+  assert.equal(new Set(SEED_PLACES.map(p => p.id)).size, 164);
   assert.equal(auditPlaceImport({ places: SEED_PLACES }).errors.length, 0);
   for (const p of batch) {
     assert.equal(p.province, 'ชลบุรี');
