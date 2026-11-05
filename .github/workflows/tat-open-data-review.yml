@@ -25,11 +25,13 @@ on:
       - feature/tat-open-data-batch-003
       - feature/tat-open-data-batch-004
       - feature/tat-chonburi-full-inventory-qa
+      - feature/chonburi-live-api-verification
     paths:
       - 'api/tat-open-data.cjs'
       - 'api/stage-tat-open-data.cjs'
       - 'api/tat-open-data.node-test.cjs'
       - 'api/chonburi-tat-inventory.cjs'
+      - 'api/chonburi-production-smoke.cjs'
       - '.github/workflows/tat-open-data-review.yml'
 
 permissions:
@@ -56,6 +58,9 @@ jobs:
         run: npm ci --prefix api --no-audit --no-fund
       - name: Test validation rules
         run: node --test api/tat-open-data.node-test.cjs
+      - name: Verify Chon Buri production API counts (read-only)
+        if: github.ref_name == 'feature/chonburi-live-api-verification'
+        run: node api/chonburi-production-smoke.cjs
       - name: Download publicly licensed TAT CSV (read-only)
         run: >-
           curl --fail --location --show-error --silent
