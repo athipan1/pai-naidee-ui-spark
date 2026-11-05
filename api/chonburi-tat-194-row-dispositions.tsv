@@ -60,10 +60,10 @@ csv_row	tat_id	thai_name	original_category	original_type	district	latitude	longi
 3647	tat-2015120421550718118	พิพิธภัณฑ์การขนส่งทางน้ำเฉลิมพระเกียรติสมเด็จพระนางเจ้าสิริกิติ์พระบรมราชินีนาถ	2	พิพิธภัณฑ์	ศรีราชา	13.07047	100.90802	pending_individual_verification	not approved for publication
 3648	tat-2015120421550718117	พิพิธภัณฑ์แบรนด์เพื่อสุขภาพ	3	ศูนย์วิจัย (เกษตร)/สถานีทดลอง (เกษตร)	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
 3649	tat-2015120421550718116	พิพิธภัณฑ์เรือนไทย	2	พิพิธภัณฑ์	เมืองชลบุรี	13.4377257	101.0526614	pending_individual_verification	not approved for publication
-3670	tat-2015120421550718083	วัดตาลล้อม	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เมืองชลบุรี	13.272151	100.9407247	pending_individual_verification	not approved for publication
-3671	tat-2015120421550718080	วัดชัยมงคล	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9259664	100.8765398	pending_individual_verification	not approved for publication
+3670	tat-2015120421550718083	วัดตาลล้อม	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เมืองชลบุรี	13.272151	100.9407247	published_seed	batch 010 TAT source and independent government tourism evidence
+3671	tat-2015120421550718080	วัดชัยมงคล	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9259664	100.8765398	published_seed	batch 010 TAT source and independent government tourism evidence
 3672	tat-2015120421550718079	วัดช่องแสมสาร	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	สัตหีบ	12.6014032	100.9576018	published_seed	seed ID or exact-name match
-3673	tat-2015120421550718078	วัดใต้ต้นลาน	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	พนัสนิคม	13.4914767	101.1814865	pending_individual_verification	not approved for publication
+3673	tat-2015120421550718078	วัดใต้ต้นลาน	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	พนัสนิคม	13.4914767	101.1814865	published_seed	batch 010 TAT source and independent government tourism evidence
 3674	tat-2015120421550718076	วัดเทพพุทธาราม	2	ประวัติความเป็นมา	เมืองชลบุรี	13.3693951	100.9932576	pending_individual_verification	not approved for publication
 3675	tat-2015120421550718075	วัดเขาบ่อกวางทอง	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	บ่อทอง	13.3242485	101.3090737	pending_individual_verification	not approved for publication
 3676	tat-2015120421550718074	วัดเกาะลอย	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	ศรีราชา	13.1738115	100.9194861	pending_individual_verification	not approved for publication
@@ -124,26 +124,26 @@ csv_row	tat_id	thai_name	original_category	original_type	district	latitude	longi
 6340	tat-2010120911214113296	สนามแข่งรถเล็ก เค อาร์ โกคาร์ท กรังปรีซ์	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
 6341	tat-2010120911214113294	แฟร์เท็กซ์ สปอร์ต คลับ แอนด์ โฮเท็ล	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
 6342	tat-2010120911214113289	สถาบันวิทยาศาสตร์ทางทะเล	3	ศูนย์วิจัย (เกษตร)/สถานีทดลอง (เกษตร)	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
-6343	tat-2010120911214113286	แหลมแท่น	1	จุดชมวิว	เมืองชลบุรี	13.3022007	100.897683	pending_individual_verification	not approved for publication
+6343	tat-2010120911214113286	แหลมแท่น	1	จุดชมวิว	เมืองชลบุรี	13.3022007	100.897683	published_seed	batch 010 TAT source and independent government tourism evidence
 6344	tat-2010120911214113284	วิหารเทพสถิตพระกิติเฉลิม	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เมืองชลบุรี	13.3286704	100.923325	published_seed	seed ID or exact-name match
-6345	tat-2010120911214113283	ศูนย์ศึกษาธรรมชาติและอนุรักษ์ป่าชายเลนเพื่อการท่องเที่ยวเชิงนิเวศ	1	จุดชมวิว	เมืองชลบุรี	13.3421159	100.9427898	pending_individual_verification	not approved for publication
+6345	tat-2010120911214113283	ศูนย์ศึกษาธรรมชาติและอนุรักษ์ป่าชายเลนเพื่อการท่องเที่ยวเชิงนิเวศ	1	จุดชมวิว	เมืองชลบุรี	13.3421159	100.9427898	published_seed	batch 010 TAT source and independent government tourism evidence
 6663	tat-2010120911214112697	สวนจุลกาลสถิตสถานบรรพชนสยาม	2	ศูนย์ศึกษาประวัติศาสตร์	สัตหีบ	12.6836578	100.901604	pending_individual_verification	not approved for publication
 6664	tat-2010120911214112696	ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ	1	เขตรักษาพันธุ์สัตว์ป่า	สัตหีบ	12.6368819	100.9261747	published_seed	seed ID or exact-name match
 6665	tat-2010120911214112695	เรือรบหลวงจักรีนฤเบศร์	2	ประวัติความเป็นมา	สัตหีบ	12.6259684	100.9137149	published_seed	seed ID or exact-name match
 6666	tat-2010120911214112694	หาดนางรอง	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.6154691	100.9222223	published_seed	seed ID or exact-name match
-6667	tat-2010120911214112692	วัดสัตหีบ	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	สัตหีบ	12.6636495	100.898163	pending_individual_verification	not approved for publication
+6667	tat-2010120911214112692	วัดสัตหีบ	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	สัตหีบ	12.6636495	100.898163	published_seed	batch 010 TAT source and independent government tourism evidence
 6668	tat-2010120911214112687	สวนสนุกพัทยาปาร์ค	3	สวนสนุก/สวนน้ำ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
 6742	tat-20100518224629991	พระพุทธมิ่งเมือง	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	พนัสนิคม	13.4523732	101.1789006	published_seed	seed ID or exact-name match
 6820	tat-20100518224629889	ชุมชนบ้านบางเสร่	2	หมู่บ้าน	สัตหีบ	12.7581387	100.9023686	pending_individual_verification	not approved for publication
 6964	tat-20100518224629675	ทิฟฟานี โชว์	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
 6992	tat-20100518224629631	ศาลเจ้าพ่อเขาใหญ่	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เกาะสีชัง	13.1682022	100.8066827	published_seed	seed ID or exact-name match
 7033	tat-20100518224629568	ถ้ำเขาชะอางค์โอน	1	ถ้ำ	บ่อทอง	13.2088719	101.6516234	pending_individual_verification	not approved for publication
-7094	tat-20100518224629483	ถ้ำเขาชะอางค์ห้ายอด	1	ถ้ำ	บ่อทอง	13.161556	101.5975857	pending_individual_verification	not approved for publication
+7094	tat-20100518224629483	ถ้ำเขาชะอางค์ห้ายอด	1	ถ้ำ	บ่อทอง	13.161556	101.5975857	published_seed	batch 010 TAT source and independent government tourism evidence
 7256	tat-20100518224629350	ถ้ำจักรพงษ์	1	ถ้ำ	เกาะสีชัง	13.1577158	100.8061617	published_seed	seed ID or exact-name match
 7311	tat-201005182246293428	อ่าวดงตาล	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.6554581	100.922451	pending_individual_verification	not approved for publication
 7313	tat-201005182246293423	หาดนางรำ	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.6197852	100.9194303	published_seed	seed ID or exact-name match
 7318	tat-201005182246293417	อ่างเก็บน้ำบางพระ	1	เขื่อน/อ่างเก็บน้ำ	ศรีราชา	13.208179	100.9750484	published_seed	seed ID or exact-name match
-7333	tat-201005182246293395	เขาพระตำหนัก	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9211051	100.8667178	pending_individual_verification	not approved for publication
+7333	tat-201005182246293395	เขาพระตำหนัก	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9211051	100.8667178	published_seed	batch 010 TAT source and independent government tourism evidence
 7349	tat-201005182246293377	หาดถ้ำเขาพัง	1	อ่าว/หาดทราย/ชายทะเล	เกาะสีชัง	13.1455084	100.8065832	published_seed	seed ID or exact-name match
 7369	tat-201005182246293342	เลค แลนด์ วอเตอร์ เคเบิ้ล สกี	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
 7372	tat-201005182246293336	เมืองพระรถ	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	พนัสนิคม	13.4669973	101.164865	pending_individual_verification	not approved for publication
