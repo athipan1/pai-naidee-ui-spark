@@ -24,10 +24,12 @@ on:
       - feature/tat-open-data-batch-002
       - feature/tat-open-data-batch-003
       - feature/tat-open-data-batch-004
+      - feature/tat-chonburi-full-inventory-qa
     paths:
       - 'api/tat-open-data.cjs'
       - 'api/stage-tat-open-data.cjs'
       - 'api/tat-open-data.node-test.cjs'
+      - 'api/chonburi-tat-inventory.cjs'
       - '.github/workflows/tat-open-data-review.yml'
 
 permissions:
@@ -75,6 +77,21 @@ jobs:
           args=(--input "$RUNNER_TEMP/attraction.csv" --output "$RUNNER_TEMP/tat-review-batch.json" --start-index "$REVIEW_START" --limit "$REVIEW_SIZE")
           if [[ -n "$REVIEW_PROVINCE" ]]; then args+=(--province "$REVIEW_PROVINCE"); fi
           node api/stage-tat-open-data.cjs "${args[@]}"
+      - name: Review all Chon Buri source rows (no publication)
+        if: github.ref_name == 'feature/tat-chonburi-full-inventory-qa'
+        run: >-
+          node api/chonburi-tat-inventory.cjs
+          "$RUNNER_TEMP/attraction.csv"
+          "$RUNNER_TEMP/chonburi-full-inventory.json"
+          2b8d35bbcb58c12b5c57f7f52e95d418867d4892a962362567c0d28a5be51366
+      - name: Attach full Chon Buri inventory
+        if: always() && github.ref_name == 'feature/tat-chonburi-full-inventory-qa'
+        uses: actions/upload-artifact@v4
+        with:
+          name: chonburi-full-inventory-${{ github.run_id }}
+          path: ${{ runner.temp }}/chonburi-full-inventory.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Attach review manifest
         if: always()
         uses: actions/upload-artifact@v4
