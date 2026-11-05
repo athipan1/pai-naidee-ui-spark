@@ -13,7 +13,7 @@ test('TAT second publication is limited to five independently cross-checked plac
     'tat-20251225110647001',
   ]);
   assert.equal(new Set(batch.map(place => place.province)).size, 5);
-  assert.equal(SEED_PLACES.length, 182);
+  assert.equal(SEED_PLACES.length, 187);
   assert.equal(auditPlaceImport({ places: SEED_PLACES }).errors.length, 0);
 });
 
