@@ -1,0 +1,198 @@
+# Official TAT CSV provenance SHA-256: 2b8d35bbcb58c12b5c57f7f52e95d418867d4892a962362567c0d28a5be51366
+# Row-level provisional disposition based on source records and current approved seed IDs; NOT independent real-world verification of every source row.
+# pending_* means deliberately NOT published. Use manual review with corroborating sources before changing status.
+csv_row	tat_id	thai_name	original_category	original_type	district	latitude	longitude	disposition	comment
+59	tat-20260203120214001	ชุมชนหนองปลาไหล	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	บางละมุง	12.9791195	100.9601339	published_seed	seed ID or exact-name match
+69	tat-20260126142352001	คุซัทสึออนเซ็น ชลบุรี	3	สุขภาพและความงาม	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+70	tat-20260126141630001	โอเอซิสสปา พัทยา	3	สุขภาพและความงาม	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+74	tat-20260122144119001	เล็ทส์ รีแลกซ์ เทอร์มินอล 21 พัทยา	3	สุขภาพและความงาม	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+197	tat-20250815162030001	อรุณฟาร์มวิลเลจ	3	ไร่/สวนเกษตร (ฟาร์มสัตว์/ประมง)	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+199	tat-20250814095440001	PADO Media Art Space	3	ธีมปาร์ค (Theme Park)	บางละมุง			missing_usable_thai_name	no validated Thai attraction name
+247	tat-20250613150315001	วิสาหกิจชุมชนท่องเที่ยวตำบลตะเคียนเตี้ย	2	ศูนย์การเรียนรู้ฯ (เกี่ยวกับกิจกรรม ผลิตภัณฑ์ และภูมิปัญญาในท้องถิ่น)	บางละมุง	13.017288	100.9767228	pending_individual_verification	not approved for publication
+413	tat-20241220131515001	ทิฟฟานี่โชว์ พัทยา	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+414	tat-20241220131453001	Tiffany&#8217;s Show Pattaya	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			missing_usable_thai_name	no validated Thai attraction name
+415	tat-20241220130749001	ทิฟฟานี่โชว์ พัทยา	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+745	tat-20231226111449001	สวนไดโนเสาร์พัทยา	3	ธีมปาร์ค (Theme Park)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+746	tat-20231219100551001	เกรทแอนด์แกรนด์ สวีท เดสติเนชั่น	3	ธีมปาร์ค (Theme Park)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+1085	tat-20220407161259738109	พัทยา ดอลฟินาเรียม	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+1086	tat-20220407154405738108	ฟรอสท์ เมืองน้ำแข็ง พัทยา	3	ธีมปาร์ค (Theme Park)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+1169	tat-20211221230034734283	แกรนด์แคนยอนคีรี	1	จุดชมวิว	เมืองชลบุรี	13.3216428	100.9800556	published_seed	seed ID or exact-name match
+1170	tat-20211221223109734282	เลค แลนด์ วอเตอร์ เคเบิ้ล สกี	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+1433	tat-20200908183352469711	ชุมชนเก่าชายทะเล (หมู่ 4 บ้านตลาดบางเสร่)	2	วิถีชีวิตความเป็นอยู่ (ชุมชน)	สัตหีบ	12.7631974	100.8896373	published_seed	seed ID or exact-name match
+1622	tat-20190715150713435976	เลเจนด์ สยาม	3	ธีมปาร์ค (Theme Park)	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+2003	tat-20160528174922008571	โคลัมเบีย พิคเจอร์ส อควาเวิร์ส	3	สวนสนุก/สวนน้ำ	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+2004	tat-20160528172408008569	อเมซิ่ง อาร์ท	3	โรงภาพยนต์โบราณ (โรงหนังเก่า)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+2005	tat-20160528171507008566	สวนน้ำรามายณะ	3	สวนสนุก/สวนน้ำ	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+2006	tat-20160528170226008563	ป่าสิริเจริญวรรษ	1	ศูนย์ศึกษาธรรมชาติ/พิพิธภัณธ์ธรรมชาติ (พืชพันธุ์)	สัตหีบ	12.7596807	100.9800186	published_seed	seed ID or exact-name match
+2007	tat-20160528165231008560	อุทยานรังสรรค์นวัตกรรมอวกาศ (สเปซ อินสไปเลียม)	3	โรงละคร/โรงมหรสพ (โชว์)	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+2062	tat-2016010510155820163	ชุมชนตะเคียนเตี้ย	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	บางละมุง	13.0187322	100.9326826	published_seed	seed ID or exact-name match
+2199	tat-2015120914171819998	พิพิธภัณฑ์พุทธศิลปะ	2	พิพิธภัณฑ์	บางละมุง	12.9114116	100.9441371	pending_individual_verification	not approved for publication
+3500	tat-2015120421550718315	พัทยาชู้ทติ้งปาร์ค	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3501	tat-2015120421550718312	พระตำหนักมหาราช	2	พระตำหนัก/วัง/พระราชวัง	เมืองชลบุรี	13.3392663	100.926949	pending_individual_verification	not approved for publication
+3502	tat-2015120421550718311	ปีโป้ โพนี คลับ พัทยา	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3503	tat-2015120421550718308	บิ๊กบี ฟาร์ม	3	ไร่/สวนเกษตร (ฟาร์มสัตว์/ประมง)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3504	tat-2015120421550718307	น้ำตกอ่างผักหนาม	1	เขตรักษาพันธุ์สัตว์ป่า	บ่อทอง	13.2634284	101.6420207	pending_individual_verification	not approved for publication
+3505	tat-2015120421550718306	ท่าเรือแสมสารฟิชชิ่ง บริดจ์	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+3506	tat-2015120421550718304	ถนนคนเดินบางแสน	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+3507	tat-2015120421550718303	ถนนคนเดินพัทยา	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3508	tat-2015120421550718302	ตลาดสะพานปลาอ่างศิลา	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+3509	tat-2015120421550718301	ตลาดประมงท่าเรือพลี	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+3510	tat-2015120421550718300	ตลาดนินจาอมตะ	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+3511	tat-2015120421550718298	ซันเซ็ทฟาร์มหอยหวาน	3	ไร่/สวนเกษตร (ฟาร์มสัตว์/ประมง)	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+3512	tat-2015120421550718297	ชมรมส่งเสริมการท่องเที่ยวโดยชุมชนบ้านชากแง้ว	2	ศูนย์วัฒนธรรม	บางละมุง	12.8322221	100.9662213	pending_individual_verification	not approved for publication
+3513	tat-2015120421550718296	คริสตัล เบย์ กอล์ฟ คลับ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+3514	tat-2015120421550718292	โคลอสเซียม โชว์ พัทยา	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3515	tat-2015120421550718291	หมู่บ้านช้าง พัทยา	2	พิพิธภัณฑ์	บางละมุง	12.881491	100.928367	pending_individual_verification	not approved for publication
+3516	tat-2015120421550718290	แฟร์เท๊กซ์ เทพประสิทธิมวยไทย สเตเดียม	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3634	tat-2015120421550718134	อีซี่คาร์ท พัทยา	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3635	tat-2015120421550718131	อ่าวทุ่งโปร่ง	1	พรุ/ป่าชายเลน/พื้นที่ชุ่มน้ำ	สัตหีบ	12.6923084	100.8561248	pending_individual_verification	not approved for publication
+3636	tat-2015120421550718130	อ่างเก็บน้ำมาบประชัน	1	เขื่อน/อ่างเก็บน้ำ	บางละมุง	12.9210966	100.9565116	pending_individual_verification	not approved for publication
+3637	tat-2015120421550718129	อนุสาวรีย์สมเด็จพระเจ้าตากสิน	2	อนุสาวรีย์/อนุสรณ์สถาน	บางละมุง	12.9662568	100.8986233	pending_individual_verification	not approved for publication
+3638	tat-2015120421550718128	หินระฆัง	1	จุดชมวิว	เกาะสีชัง	13.147251578241946	100.81644385174907	pending_individual_verification	not approved for publication
+3639	tat-2015120421550718127	หาดสอ	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.7075513	100.8397504	pending_individual_verification	not approved for publication
+3640	tat-2015120421550718125	หาดวงศ์อมาตย์	1	อ่าว/หาดทราย/ชายทะเล	บางละมุง	12.9592572	100.8846511	published_seed	seed ID or exact-name match
+3641	tat-2015120421550718124	หาดบ้านอำเภอ	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.8105494	100.9128112	published_seed	seed ID or exact-name match
+3642	tat-2015120421550718123	หาดน้ำใส	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.6041741	100.9442161	published_seed	seed ID or exact-name match
+3643	tat-2015120421550718122	หาดท่ายายทิม	1	จุดชมวิว	เกาะสีชัง	13.127441	100.811555	pending_individual_verification	not approved for publication
+3644	tat-2015120421550718121	หาดทรายแก้ว	1	หมู่เกาะ	สัตหีบ	12.7420875	100.8408871	published_seed	seed ID or exact-name match
+3645	tat-2015120421550718120	หาดแสม	1	อ่าว/หาดทราย/ชายทะเล	บางละมุง	12.9128462	100.7688194	published_seed	seed ID or exact-name match
+3646	tat-2015120421550718119	หาดเทียนทะเล	1	หมู่เกาะ	สัตหีบ	12.8139169	100.9168171	pending_individual_verification	not approved for publication
+3647	tat-2015120421550718118	พิพิธภัณฑ์การขนส่งทางน้ำเฉลิมพระเกียรติสมเด็จพระนางเจ้าสิริกิติ์พระบรมราชินีนาถ	2	พิพิธภัณฑ์	ศรีราชา	13.07047	100.90802	pending_individual_verification	not approved for publication
+3648	tat-2015120421550718117	พิพิธภัณฑ์แบรนด์เพื่อสุขภาพ	3	ศูนย์วิจัย (เกษตร)/สถานีทดลอง (เกษตร)	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+3649	tat-2015120421550718116	พิพิธภัณฑ์เรือนไทย	2	พิพิธภัณฑ์	เมืองชลบุรี	13.4377257	101.0526614	pending_individual_verification	not approved for publication
+3670	tat-2015120421550718083	วัดตาลล้อม	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เมืองชลบุรี	13.272151	100.9407247	pending_individual_verification	not approved for publication
+3671	tat-2015120421550718080	วัดชัยมงคล	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9259664	100.8765398	pending_individual_verification	not approved for publication
+3672	tat-2015120421550718079	วัดช่องแสมสาร	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	สัตหีบ	12.6014032	100.9576018	published_seed	seed ID or exact-name match
+3673	tat-2015120421550718078	วัดใต้ต้นลาน	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	พนัสนิคม	13.4914767	101.1814865	pending_individual_verification	not approved for publication
+3674	tat-2015120421550718076	วัดเทพพุทธาราม	2	ประวัติความเป็นมา	เมืองชลบุรี	13.3693951	100.9932576	pending_individual_verification	not approved for publication
+3675	tat-2015120421550718075	วัดเขาบ่อกวางทอง	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	บ่อทอง	13.3242485	101.3090737	pending_individual_verification	not approved for publication
+3676	tat-2015120421550718074	วัดเกาะลอย	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	ศรีราชา	13.1738115	100.9194861	pending_individual_verification	not approved for publication
+3677	tat-2015120421550718073	วังสามเซียน	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9166551	100.8684174	pending_individual_verification	not approved for publication
+3678	tat-2015120421550718072	วนอุทยานน้ำตกเขาเจ้าบ่อทอง	1	เขตรักษาพันธุ์สัตว์ป่า	บ่อทอง	13.2507528	101.3769082	pending_individual_verification	not approved for publication
+3679	tat-2015120421550718071	มูลนิธิอเนกกุศลศาลาในพระสังฆราชูปถัมภ์	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.787814517385169	100.95534158357069	pending_individual_verification	not approved for publication
+3680	tat-2015120421550718069	มายากลทักซิโด้ พัทยา	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3681	tat-2015120421550718067	มณฑปรอยพระพุทธบาท	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	เกาะสีชัง	13.1690831	100.8054641	published_seed	seed ID or exact-name match
+3682	tat-2015120421550718066	ฟาร์มแกะ พัทยา	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3683	tat-2015120421550718065	พิพิธภัณฑ์สมเด็จพระศรีสวรินทิราบรมราชเทวี พระพันวัสสา อัยยิกาเจ้า	2	ประวัติความเป็นมา	ศรีราชา	13.14249	101.048549	pending_individual_verification	not approved for publication
+3684	tat-2015120421550718064	พิพิธภัณฑ์มรดกวัฒนธรรมโคกพนมดี	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	พนัสนิคม	13.5853509	101.1408144	pending_individual_verification	not approved for publication
+3685	tat-2015120421550718063	พิพิธภัณฑ์ทหารนาวิกโยธิน	2	พิพิธภัณฑ์	สัตหีบ	12.6634884	100.8623598	published_seed	seed ID or exact-name match
+3686	tat-2015120421550718062	พิพิธภัณฑ์ชลทัศนสถาน	2	พิพิธภัณฑ์	เกาะสีชัง	13.1518938	100.8145425	pending_individual_verification	not approved for publication
+3694	tat-2015120421550718054	เพนท์ บอล พาร์ค	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3695	tat-2015120421550718053	เดอะฮอร์สชูพ้อยท์	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3696	tat-2015120421550718052	เจ้าพ่อกวนอูหยกขาว	2	ประวัติความเป็นมา	ศรีราชา	13.3618793	100.9791097	pending_individual_verification	not approved for publication
+3697	tat-2015120421550718051	เจ้าแม่กวนอิมทองคำใหญ่ที่สุดในโลก จ.ชลบุรี	2	อนุสาวรีย์/อนุสรณ์สถาน	ศรีราชา	13.1672053	100.9298708	pending_individual_verification	not approved for publication
+3698	tat-2015120421550718050	เจ ปาร์ค	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+3699	tat-2015120421550718049	เขตห้ามล่าสัตว์ป่าอ่างเก็บน้ำบางพระ	1	เขตห้ามล่าสัตว์ป่า	ศรีราชา	13.2304961	100.9962874	pending_individual_verification	not approved for publication
+3700	tat-2015120421550718048	เกาะสีชังโฮมสเตย์	2	วิถีชีวิตความเป็นอยู่ (ชุมชน)	เกาะสีชัง	13.1612408	100.8102468	pending_individual_verification	not approved for publication
+3701	tat-2015120421550718047	เกาะแสมสาร	1	หมู่เกาะ	สัตหีบ	12.5770042	100.949619	published_seed	seed ID or exact-name match
+3702	tat-2015120421550718046	เกาะเกล็ดแก้ว	1	หมู่เกาะ	สัตหีบ	12.7424217	100.9863525	pending_individual_verification	not approved for publication
+3703	tat-2015120421550718045	เกรต้า ฟาร์ม	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+3739	tat-2015120421550718003	หาดเตยงาม	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.7111914	100.8908161	published_seed	seed ID or exact-name match
+3740	tat-2015120421550718002	หอศิลปและวัฒนธรรมภาคตะวันออก	2	ศูนย์การเรียนรู้ฯ (เกี่ยวกับกิจกรรม ผลิตภัณฑ์ และภูมิปัญญาในท้องถิ่น)	เมืองชลบุรี	13.285890371829522	100.92562563243175	pending_individual_verification	not approved for publication
+3741	tat-2015120421550718001	หมู่บ้านจักรสาน พนัสนิคม	2	ศูนย์การเรียนรู้ฯ (เกี่ยวกับกิจกรรม ผลิตภัณฑ์ และภูมิปัญญาในท้องถิ่น)	พนัสนิคม	13.4870514	101.2078151	pending_individual_verification	not approved for publication
+3742	tat-2015120421550717997	สะพานอัษฎางค์	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	เกาะสีชัง	13.1504566	100.818051	published_seed	seed ID or exact-name match
+3743	tat-2015120421550717996	สวนสุเทพผลไม้ไทย	3	ไร่/สวนเกษตร (ฟาร์มสัตว์/ประมง)	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+3744	tat-2015120421550717994	สวนสาธารณะเกาะลอย	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+3745	tat-2015120421550717993	สวนรุกขชาติหนองตาอยู่	1	สวนรุกชาติ	ศรีราชา	13.1553811	100.994721	pending_individual_verification	not approved for publication
+3746	tat-2015120421550717990	สวนน้ำการ์ตูนเน็ทเวิร์ค อเมโซน	3	สวนสนุก/สวนน้ำ	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+3747	tat-2015120421550717988	สวนไดโนเสาร์	3	ธีมปาร์ค (Theme Park)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3748	tat-2015120421550717987	สยามโปโล ปาร์ค	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3749	tat-2015120421550717985	สถานีวิจัยเพาะเลี้ยงสัตว์ป่าบางละมุง	3	ศูนย์วิจัย (เกษตร)/สถานีทดลอง (เกษตร)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+3750	tat-2015120421550717984	สโมสรเรือใบกองเรือยุทธการ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+3751	tat-2015120421550717983	ศูนย์วิทยาศาสตร์ ดาราศาสตร์	3	ศูนย์ประชุมฯ	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+3752	tat-2015120421550717982	ศูนย์แสดงเรือพระราชพิธีจำลอง 4 มิติ	2	พิพิธภัณฑ์	บางละมุง	12.9192949	100.9580947	pending_individual_verification	not approved for publication
+3753	tat-2015120421550717981	ศาลมิตร ชัยบัญชา	2	อนุสาวรีย์/อนุสรณ์สถาน	บางละมุง	12.8997981	100.8712208	pending_individual_verification	not approved for publication
+3754	tat-2015120421550717979	ศาลเจ้าตั้วเล่าเอี้ย	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เมืองชลบุรี	13.330243524256025	100.9771085879118	pending_individual_verification	not approved for publication
+3755	tat-2015120421550717978	วันเดอร์ฟาร์ม	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+3756	tat-2015120421550717971	วัดพระใหญ่	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9143312	100.8685384	pending_individual_verification	not approved for publication
+4955	tat-2012080610583316342	พิพิธภัณฑ์ภาพวาด 3 มิติ	2	พิพิธภัณฑ์	บางละมุง	12.9291169	100.9218676	pending_individual_verification	not approved for publication
+5511	tat-2011032413571115426	อุทยานสามก๊ก	2	ประวัติความเป็นมา	บางละมุง	12.9052601	100.9757004	pending_individual_verification	not approved for publication
+5512	tat-2011032413512715425	หมู่บ้านช้างพัทยา	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+5513	tat-2011032413454815424	ตลาดน้ำสี่ภาคพัทยา	2	ศูนย์หัตถกรรม	บางละมุง	12.8684	100.9043884	published_seed	seed ID or exact-name match
+5517	tat-2011032410463615418	ปราสาทสัจธรรม	2	พิพิธภัณฑ์	บางละมุง	12.9697449	100.8909783	published_seed	seed ID or exact-name match
+5518	tat-2011032410341715417	บ้านสุขาวดี	2	ประวัติความเป็นมา	บางละมุง	12.9817724	100.9184517	pending_individual_verification	not approved for publication
+5519	tat-2011032410271315416	ช้างสยามกระทิงลายและมอนสเตอร์เวิล์ด	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+5520	tat-2011032410133215415	อันเดอร์วอเตอร์เวิลด์ พัทยา	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+5761	tat-2010120911214114470	ตลาดเก่าอ่างศิลา	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	เมืองชลบุรี	13.3355193	100.9245667	published_seed	seed ID or exact-name match
+6333	tat-2010120911214113309	เพอคูล่าฟาร์ม	3	ไร่/สวนเกษตร (ฟาร์มสัตว์/ประมง)	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+6334	tat-2010120911214113308	อุทยานใต้ทะเลเกาะขาม	1	หมู่เกาะ	สัตหีบ	12.573091	100.9330413	published_seed	seed ID or exact-name match
+6335	tat-2010120911214113306	พิพิธภัณฑ์ธรรมชาติวิทยาเกาะและทะเลไทย	1	ศูนย์ศึกษาธรรมชาติ/พิพิธภัณธ์ธรรมชาติ (พืชพันธุ์)	สัตหีบ	12.6027587	100.9501253	published_seed	seed ID or exact-name match
+6336	tat-2010120911214113305	เกาะขามใหญ่	1	หมู่เกาะ	เกาะสีชัง	13.1677778	100.8241667	published_seed	seed ID or exact-name match
+6337	tat-2010120911214113304	น้ำตกชันตาเถร	1	เขตรักษาพันธุ์สัตว์ป่า	ศรีราชา	13.2421847	101.0454846	published_seed	seed ID or exact-name match
+6338	tat-2010120911214113303	ตำหนักหลวงปู่มังกรขาว หรือ ถ้ำมังกรขาว	1	จุดชมวิว	เมืองชลบุรี	13.1586708	100.9575732	pending_individual_verification	not approved for publication
+6339	tat-2010120911214113302	เกาะค้างคาว	1	หมู่เกาะ	เกาะสีชัง	13.1147222	100.8072222	pending_individual_verification	not approved for publication
+6340	tat-2010120911214113296	สนามแข่งรถเล็ก เค อาร์ โกคาร์ท กรังปรีซ์	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+6341	tat-2010120911214113294	แฟร์เท็กซ์ สปอร์ต คลับ แอนด์ โฮเท็ล	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+6342	tat-2010120911214113289	สถาบันวิทยาศาสตร์ทางทะเล	3	ศูนย์วิจัย (เกษตร)/สถานีทดลอง (เกษตร)	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+6343	tat-2010120911214113286	แหลมแท่น	1	จุดชมวิว	เมืองชลบุรี	13.3022007	100.897683	pending_individual_verification	not approved for publication
+6344	tat-2010120911214113284	วิหารเทพสถิตพระกิติเฉลิม	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เมืองชลบุรี	13.3286704	100.923325	published_seed	seed ID or exact-name match
+6345	tat-2010120911214113283	ศูนย์ศึกษาธรรมชาติและอนุรักษ์ป่าชายเลนเพื่อการท่องเที่ยวเชิงนิเวศ	1	จุดชมวิว	เมืองชลบุรี	13.3421159	100.9427898	pending_individual_verification	not approved for publication
+6663	tat-2010120911214112697	สวนจุลกาลสถิตสถานบรรพชนสยาม	2	ศูนย์ศึกษาประวัติศาสตร์	สัตหีบ	12.6836578	100.901604	pending_individual_verification	not approved for publication
+6664	tat-2010120911214112696	ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ	1	เขตรักษาพันธุ์สัตว์ป่า	สัตหีบ	12.6368819	100.9261747	published_seed	seed ID or exact-name match
+6665	tat-2010120911214112695	เรือรบหลวงจักรีนฤเบศร์	2	ประวัติความเป็นมา	สัตหีบ	12.6259684	100.9137149	published_seed	seed ID or exact-name match
+6666	tat-2010120911214112694	หาดนางรอง	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.6154691	100.9222223	published_seed	seed ID or exact-name match
+6667	tat-2010120911214112692	วัดสัตหีบ	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	สัตหีบ	12.6636495	100.898163	pending_individual_verification	not approved for publication
+6668	tat-2010120911214112687	สวนสนุกพัทยาปาร์ค	3	สวนสนุก/สวนน้ำ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+6742	tat-20100518224629991	พระพุทธมิ่งเมือง	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	พนัสนิคม	13.4523732	101.1789006	published_seed	seed ID or exact-name match
+6820	tat-20100518224629889	ชุมชนบ้านบางเสร่	2	หมู่บ้าน	สัตหีบ	12.7581387	100.9023686	pending_individual_verification	not approved for publication
+6964	tat-20100518224629675	ทิฟฟานี โชว์	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+6992	tat-20100518224629631	ศาลเจ้าพ่อเขาใหญ่	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	เกาะสีชัง	13.1682022	100.8066827	published_seed	seed ID or exact-name match
+7033	tat-20100518224629568	ถ้ำเขาชะอางค์โอน	1	ถ้ำ	บ่อทอง	13.2088719	101.6516234	pending_individual_verification	not approved for publication
+7094	tat-20100518224629483	ถ้ำเขาชะอางค์ห้ายอด	1	ถ้ำ	บ่อทอง	13.161556	101.5975857	pending_individual_verification	not approved for publication
+7256	tat-20100518224629350	ถ้ำจักรพงษ์	1	ถ้ำ	เกาะสีชัง	13.1577158	100.8061617	published_seed	seed ID or exact-name match
+7311	tat-201005182246293428	อ่าวดงตาล	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.6554581	100.922451	pending_individual_verification	not approved for publication
+7313	tat-201005182246293423	หาดนางรำ	1	อ่าว/หาดทราย/ชายทะเล	สัตหีบ	12.6197852	100.9194303	published_seed	seed ID or exact-name match
+7318	tat-201005182246293417	อ่างเก็บน้ำบางพระ	1	เขื่อน/อ่างเก็บน้ำ	ศรีราชา	13.208179	100.9750484	published_seed	seed ID or exact-name match
+7333	tat-201005182246293395	เขาพระตำหนัก	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9211051	100.8667178	pending_individual_verification	not approved for publication
+7349	tat-201005182246293377	หาดถ้ำเขาพัง	1	อ่าว/หาดทราย/ชายทะเล	เกาะสีชัง	13.1455084	100.8065832	published_seed	seed ID or exact-name match
+7369	tat-201005182246293342	เลค แลนด์ วอเตอร์ เคเบิ้ล สกี	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7372	tat-201005182246293336	เมืองพระรถ	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	พนัสนิคม	13.4669973	101.164865	pending_individual_verification	not approved for publication
+7374	tat-201005182246293332	เมืองจำลอง	2	พิพิธภัณฑ์	บางละมุง	12.9551857	100.9088535	pending_individual_verification	not approved for publication
+7383	tat-201005182246293319	เค อาร์ โกคาร์ท	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7385	tat-201005182246293316	เขาสามมุข	1	จุดชมวิว	เมืองชลบุรี	13.3046183	100.9025866	published_seed	seed ID or exact-name match
+7398	tat-201005182246293300	เขาพระบาท	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	บางละมุง	12.9206144	100.8667139	pending_individual_verification	not approved for publication
+7407	tat-201005182246293289	เกาะไผ่	1	หมู่เกาะ	บางละมุง	12.9173831	101.0033112	pending_individual_verification	not approved for publication
+7420	tat-201005182246293275	เกาะสีชัง	1	หมู่เกาะ	เกาะสีชัง	13.161954907759235	100.8105880598108	published_seed	seed ID or exact-name match
+7427	tat-201005182246293266	เกาะสาก	1	หมู่เกาะ	บางละมุง	12.942854	100.790758	published_seed	seed ID or exact-name match
+7432	tat-201005182246293259	เกาะล้าน	1	หมู่เกาะ	บางละมุง	12.9143218	100.7843215	published_seed	seed ID or exact-name match
+7436	tat-201005182246293252	เกาะลอยศรีราชา	1	จุดชมวิว	ศรีราชา	13.173935	100.9203128	published_seed	seed ID or exact-name match
+7452	tat-201005182246293235	เกาะมารวิชัย	1	หมู่เกาะ	สัตหีบ	12.875932	100.673384	pending_individual_verification	not approved for publication
+7455	tat-201005182246293232	เกาะครก	1	หมู่เกาะ	บางละมุง	12.9281801	100.805294	published_seed	seed ID or exact-name match
+7475	tat-201005182246293207	อ่างศิลาหรืออ่างหิน	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	เมืองชลบุรี	13.3155105	100.9564597	pending_individual_verification	not approved for publication
+7479	tat-201005182246293199	อเนกกุศลศาลา	2	พิพิธภัณฑ์	สัตหีบ	12.78782568844963	100.95535709942023	pending_individual_verification	not approved for publication
+7496	tat-201005182246293179	อุทยานหินล้านปีและฟาร์มจระเข้พัทยา	3	สวนสาธารณะ/สวนหย่อม	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7503	tat-201005182246293172	อัลคาซาร์ คาบาร์เร่ต์	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7515	tat-201005182246293155	หาดวงพระจันทร์	1	อ่าว/หาดทราย/ชายทะเล	บางละมุง	12.9520065	100.9110052	pending_individual_verification	not approved for publication
+7521	tat-201005182246293148	หาดพัทยา	1	อ่าว/หาดทราย/ชายทะเล	บางละมุง	12.9365663	100.8860361	published_seed	seed ID or exact-name match
+7539	tat-201005182246293122	หาดบางแสน	1	จุดชมวิว	เมืองชลบุรี	13.2884469	100.9112799	published_seed	seed ID or exact-name match
+7552	tat-201005182246293101	หาดจอมเทียน	1	อ่าว/หาดทราย/ชายทะเล	บางละมุง	12.8901483	100.8745	published_seed	seed ID or exact-name match
+7578	tat-201005182246293057	ศูนย์พัฒนาขยายงานจักสานไม้ไผ่	2	พิพิธภัณฑ์	พนัสนิคม	13.4895485	101.1819545	pending_individual_verification	not approved for publication
+7583	tat-201005182246293051	หอพระพุทธสิหิงค์มิ่งมงคลสิรินาถ	2	ศูนย์ศึกษาประวัติศาสตร์	เมืองชลบุรี	13.3685335	100.9868746	pending_individual_verification	not approved for publication
+7606	tat-201005182246293007	หอพระพนัสบดี	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	พนัสนิคม	13.4517979	101.1769884	published_seed	seed ID or exact-name match
+7629	tat-201005182246292956	หมู่บ้านช่องแสมสาร	2	วิถีชีวิตความเป็นอยู่ (ชุมชน)	สัตหีบ	12.603013	100.96122	pending_individual_verification	not approved for publication
+7653	tat-201005182246292905	สวนสัตว์เปิดเขาเขียว	3	สวนสัตว์/ศูนย์ฝึกสัตว์/พิพิธภัณฑ์สัตว์	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+7671	tat-201005182246292876	สวนป่าพนารักษ์	3	สวนสาธารณะ/สวนหย่อม	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7694	tat-201005182246292827	สวนนงนุช	1	สวนพฤกษศาสตร์	สัตหีบ	12.765497	100.9351314	published_seed	seed ID or exact-name match
+7714	tat-201005182246292797	สวนกล้วยไม้ศิริพร	3	ไร่/สวนเกษตร (ฟาร์มสัตว์/ประมง)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7744	tat-201005182246292742	สยามคันทรีคลับ พัทยา โอลด์ คอร์ส	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7765	tat-201005182246292702	สนามไดร์ฟกอล์ฟ กรีนเวย์	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7778	tat-201005182246292674	พีระอินเตอร์เนชั่นแนลเซอร์กิต พัทยา	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+7791	tat-20100518224629266	ตลาดจักรสาร	2	ศูนย์การเรียนรู้ฯ (เกี่ยวกับกิจกรรม ผลิตภัณฑ์ และภูมิปัญญาในท้องถิ่น)	พนัสนิคม	13.4513707	101.1796212	pending_individual_verification	not approved for publication
+7824	tat-201005182246292604	สนามกอล์ฟแหลมฉบัง อินเตอร์เนชั่นเนล คันทรีคลับ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+7873	tat-201005182246292525	เม้าท์เท้น ชาโดว์ กอล์ฟ คลับ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+7904	tat-201005182246292476	สนามกอล์ฟ เขาเขียว คันทรี คลับ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+7935	tat-201005182246292425	สนามกอล์ฟ ศรีราชา อินเตอร์เนชั่นแนล กอล์ฟคลับ	2	เหมือง/ประวัติศาสตร์การทำเหมือง	ศรีราชา	13.100417	101.041848	pending_individual_verification	not approved for publication
+7945	tat-201005182246292400	สนามกอล์ฟพัทยาคันทรีคลับ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+8006	tat-201005182246292306	บางพระ อินเตอร์เนชั่นแนล กอล์ฟ คลับ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	ศรีราชา			pending_category_location_review	may have missing coordinates or an unsupported category
+8040	tat-201005182246292266	สนามกอล์ฟ ปัตตาเวีย เซ็นจูรี่ กอล์ฟ คลับ (ชลบุรี เซ็นจูรี่)	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บ้านบึง			pending_category_location_review	may have missing coordinates or an unsupported category
+8069	tat-201005182246292224	ฟีนิกซ์ โกลด์ กอล์ฟ แอนด์ คันทรี คลับ	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+8095	tat-201005182246292170	สนามกอล์ฟศูนย์พัฒนากีฬาราชนาวีพลูตาหลวง	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	สัตหีบ			pending_category_location_review	may have missing coordinates or an unsupported category
+8218	tat-201005182246291963	วัดใหญ่อินทราราม (พระอารามหลวง)	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	เมืองชลบุรี	13.3637625	100.9882191	published_seed	seed ID or exact-name match
+8268	tat-20100518224629189	ตลาดหนองมน	3	ห้างสรรพสินค้า/แหล่งช้อปปิ้ง/ตลาดสด/ตลาดนัด/ถนนคนเดิน	เมืองชลบุรี			pending_category_location_review	may have missing coordinates or an unsupported category
+8360	tat-201005182246291737	วัดเขาพระพุทธบาทบางทราย	2	ชุมชนโบราณ/โบราณสถาน/โบราณวัตถุ	เมืองชลบุรี	13.3927964	100.9885299	published_seed	seed ID or exact-name match
+8494	tat-201005182246291544	วัดญาณสังวรารามวรมหาวิหาร	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	สัตหีบ	12.7918292	100.9566809	published_seed	seed ID or exact-name match
+8659	tat-201005182246291280	พิพิธภัณฑ์ ริบลี่ส์ เชื่อหรือไม่! พัทยา	3	โรงละคร/โรงมหรสพ (โชว์)	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+8692	tat-201005182246291222	พัทยาคาร์ทสปีดเวย์	3	ศูนย์กีฬา/สนามกีฬาสถานที่ทางการกีฬาทางบก/ทางน้ำ/ทางอากาศ	บางละมุง			pending_category_location_review	may have missing coordinates or an unsupported category
+8711	tat-20100518224629120	ช่องเขาขาด	1	จุดชมวิว	เกาะสีชัง	13.1633042	100.8004481	published_seed	seed ID or exact-name match
+8728	tat-201005182246291174	พิพิธภัณฑ์พระจุฑาธุชราชฐาน	2	พระตำหนัก/วัง/พระราชวัง	เกาะสีชัง	13.1484592	100.8176024	published_seed	seed ID or exact-name match
+8781	tat-201005182246291103	พระพุทธรูปแกะสลักเขาชีจรรย์	2	ศาสนสถาน (วัด/โบสถ์/มัสยิด ฯลฯ)	สัตหีบ	12.7646977	100.9560315	published_seed	seed ID or exact-name match
