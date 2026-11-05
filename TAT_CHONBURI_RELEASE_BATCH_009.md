@@ -24,3 +24,18 @@ Previous production: **164 nationwide / 41 Chon Buri / 77 provinces**. Expected 
 The source-wide census in PR #356 counted 194 TAT source rows from Chon Buri: nine previously published TAT rows, 107 initial candidates, 76 other-category rows, and two rows without usable Thai names. Batches 007/008/009 add 41 source records after the earlier baseline of ten published places; a **source record is not necessarily a unique, open destination**. Remaining records require disposition: already-published/alias, reviewed and publishable, closed or uncertain status, unrelated commercial category, or source-data problem. Review explicitly for potentially repeated labels (e.g. วัดเกาะลอย versus เกาะลอย, อ่างเก็บน้ำบางพระ versus its wildlife sanctuary, and multiple show/waterpark names).
 
 Only the existing importer and CI are used; Railway editor changes are preserved through `ON CONFLICT DO NOTHING`. No Google Places API calls or credentials are needed.
+
+
+### Full 194-row provisional disposition manifest (batch 009)
+
+The source-wide row accounting in `api/chonburi-tat-194-row-dispositions.tsv` is locked by `api/chonburi-194-dispositions.node-test.cjs`, with one row per official TAT source record:
+
+| Provisional status | Count |
+| --- | ---: |
+| Already published or newly approved across batches 005–009 | 50 TAT source rows |
+| Pending individual verification | 66 |
+| Pending category mapping and possible missing coordinates | 76 |
+| Missing usable Thai attraction name | 2 |
+| **Total source rows** | **194** |
+
+These 50 published source rows are not the same as the **51** distinct Chon Buri places in the seeded app: one legacy curated attraction does not correspond to its own independent source row in this census. Records in the pending groups are **not** being published, and the source may contain duplicates or closed operators. “ครบ” requires every row to have an evidence-backed final disposition; these initial statuses are deliberately provisional.
