@@ -76,6 +76,12 @@ jobs:
         run: |
           git fetch --depth=1 origin main
           git show FETCH_HEAD:api/postgres-db.cjs > api/postgres-db.cjs
+          # This verification branch predates batches 007–009. Import their
+          # immutable modules from the SAME published main snapshot, so the
+          # read-only stage doesn't load a newer postgres-db without deps.
+          for path in api/additional-tat-open-data-batch-00{7,8,9}.cjs; do
+            git show "FETCH_HEAD:$path" > "$path"
+          done
       - name: Audit and stage first batch (no Railway credentials)
         shell: bash
         run: |
