@@ -107,6 +107,7 @@ test('Railway production app keeps public place API read-only while gating CMS w
     { path: '/api/places/suggest', methods: ['get'] },
     { path: '/api/places/facets', methods: ['get'] },
     { path: '/api/places/nearby', methods: ['get'] },
+    { path: '/api/places/:placeId/google-preview', methods: ['get'] },
     { path: '/api/places/:placeId', methods: ['get'] },
   ]);
   assert.equal(routes.some(({ path, methods }) => path === '/api/admin/places' && methods.includes('post')), true);
