@@ -1,4 +1,7 @@
 // Chon Buri TAT release batch 013. Verified sources in TAT_CHONBURI_RELEASE_BATCH_013.md.
+// Hat Thian Talay TAT pin (12.8139169,100.9168171) is wrong (~19km north).
+// Corrected from DMR official UTM zone 47P WGS84 (E709445 N1398486),
+// transformed EPSG:32647 -> EPSG:4326. See batch 013 evidence.
 // Original TAT CSV sha256 2b8d35bbcb58c12b5c57f7f52e95d418867d4892a962362567c0d28a5be51366
 module.exports = [
   {
@@ -26,8 +29,8 @@ module.exports = [
     "province": "ชลบุรี",
     "category": "Beach",
     "description": "หาดเทียนทะเลตั้งอยู่ในเขตหน่วยบัญชาการต่อสู้อากาศยานและรักษาฝั่ง กองทัพเรือ อำเภอสัตหีบ มีชายหาดสลับโขดหินและพื้นที่ธรรมชาติริมทะเล การเข้าพื้นที่เป็นไปตามข้อกำหนดของหน่วยงาน",
-    "lat": 12.8139169,
-    "lng": 100.9168171,
+    "lat": 12.643518498083282,
+    "lng": 100.92836536539475,
     "rating": 0,
     "reviewCount": 0,
     "imageUrl": null,
