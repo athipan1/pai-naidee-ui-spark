@@ -16,19 +16,24 @@ test('all 194 TAT Chon Buri source rows have a documented provisional dispositio
     const a=line.split('\t');
     assert.equal(a.length,header.length,'invalid TSV width');
     const id=a[index.tat_id],status=a[index.disposition];
+    assert.ok(a[index.review_action], 'missing follow-up action '+id);
+    assert.ok(a[index.review_evidence_or_blocker], 'missing evidence or blocker '+id);
     assert.match(id,/^tat-[A-Za-z0-9_-]+$/);
     assert.ok(!seenIds.has(id),'duplicate TAT source id '+id);
     seenIds.add(id);
     assert.ok(['published_seed','pending_individual_verification',
-      'pending_category_location_review','missing_usable_thai_name'].includes(status));
+      'pending_category_location_review','missing_usable_thai_name',
+      'duplicate_alias_of_published'].includes(status));
     statuses[status]=(statuses[status]||0)+1;
     if(status==='published_seed')published.add(id);
   }
   assert.deepEqual(statuses,{
-    published_seed:63,pending_category_location_review:76,
-    missing_usable_thai_name:2,pending_individual_verification:53
+    published_seed:66,duplicate_alias_of_published:1,pending_category_location_review:76,
+    missing_usable_thai_name:2,pending_individual_verification:49
   });
   const ids=new Set(SEED_PLACES.map(p=>p.id));
+  assert.ok(ids.has('tat-201005182246293199'), 'Canonical Viharn Sien must exist');
+  assert.ok(!ids.has('tat-2015120421550718071'), 'Viharn Sien duplicate must not be inserted');
   for(const id of published){
     if(ids.has(id))continue;
     // Some source records were already published under earlier manually curated
