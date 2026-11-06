@@ -49,6 +49,7 @@ jobs:
         run: npm ci
 
       - name: Install Chromium and WebKit for Playwright mobile tests
+        timeout-minutes: 5
         run: npx playwright install --with-deps chromium webkit
 
       - name: Test read-only discovery, routing, and PWA
