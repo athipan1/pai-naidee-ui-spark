@@ -85,13 +85,14 @@ jobs:
       - name: Enforce Backend production dependency audit
         run: npm audit --prefix api --omit=dev --audit-level=low
 
-      - name: Generate full dependency audit report
-        run: |
-          echo "Generating npm audit report for analysis..."
-          npm audit --json > audit-report.json || true
-          echo "Audit report generated. Check artifacts for details."
-          
+      - name: Enforce full frontend dependency audit
+        run: npm audit --audit-level=high --json > audit-report.json
+
+      - name: Enforce full Backend dependency audit
+        run: npm audit --prefix api --audit-level=high
+
       - name: Upload npm audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: npm-audit-report
