@@ -61,7 +61,7 @@ export function formatCurrency(
       minimumFractionDigits: 0,
       maximumFractionDigits: 2
     }).format(amount);
-  } catch (error) {
+  } catch {
     // Fallback for unsupported locales/currencies
     return `฿${formatNumber(amount)}`;
   }
@@ -282,7 +282,7 @@ export function formatDate(
   
   try {
     return new Intl.DateTimeFormat(locale, options).format(targetDate);
-  } catch (error) {
+  } catch {
     // Fallback formatting
     return targetDate.toLocaleDateString();
   }

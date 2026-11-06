@@ -60,7 +60,7 @@ export const gestureTransitions = {
 };
 
 // Performance optimization utilities
-export const calculateLOD = (distance: number, screenSize: number): number => {
+export const calculateLOD = (distance: number, _screenSize: number): number => {
   if (distance < 3) return 0; // Highest detail
   if (distance < 6) return 1; // Medium detail
   return 2; // Lowest detail

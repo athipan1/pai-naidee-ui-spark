@@ -1,9 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CategoryView from './CategoryView';
+import type { ComponentProps } from 'react';
+import type AttractionCard from '@/components/common/AttractionCard';
 import * as AttractionService from '@/services/attraction.service';
 
 // Mock the attractionService specifically, providing a mock implementation
@@ -18,8 +20,10 @@ vi.mock('@/components/common/LoadingSpinner', () => ({
   default: () => <div data-testid="loading-spinner">Loading...</div>,
 }));
 
+type CardStubProps = Pick<ComponentProps<typeof AttractionCard>, 'name' | 'nameLocal' | 'currentLanguage' | 'onCardClick' | 'id'>;
+
 vi.mock('@/components/common/AttractionCard', () => ({
-  default: ({ name, nameLocal, currentLanguage, onCardClick, id }: any) => (
+  default: ({ name, nameLocal, currentLanguage, onCardClick, id }: CardStubProps) => (
     <div data-testid="attraction-card" onClick={() => onCardClick(id)}>
       {currentLanguage === 'th' ? nameLocal : name}
     </div>
@@ -39,6 +43,8 @@ const mockAttractionsResponse = {
       image: 'phi_phi_islands.jpg',
       description: 'Beautiful islands.',
       tags: ['Beach', 'Snorkeling'],
+      confidence: 1,
+      matchedTerms: [],
     },
     {
       id: '5',
@@ -51,6 +57,8 @@ const mockAttractionsResponse = {
       image: 'phuket_beach.jpg',
       description: 'A famous beach.',
       tags: ['Beach', 'Sunset'],
+      confidence: 1,
+      matchedTerms: [],
     },
   ],
   total: 2,
@@ -110,7 +118,7 @@ describe('CategoryView Component', () => {
   });
 
   it('should display attraction cards in English when data is fetched successfully', async () => {
-    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse as any);
+    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse);
 
     renderWithProviders(
       <CategoryView currentLanguage="en" category="Beach" />,
@@ -124,7 +132,7 @@ describe('CategoryView Component', () => {
   });
 
   it('should display attraction cards in Thai when data is fetched successfully', async () => {
-    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse as any);
+    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse);
 
     renderWithProviders(
       <CategoryView currentLanguage="th" category="Beach" />,
@@ -148,7 +156,7 @@ describe('CategoryView Component', () => {
 
   it('should navigate to the attraction detail page when an attraction card is clicked', async () => {
     const user = userEvent.setup();
-    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse as any);
+    mockedAttractionService.getAttractions.mockResolvedValue(mockAttractionsResponse);
 
     renderWithProviders(
       <CategoryView currentLanguage="en" category="Beach" />,

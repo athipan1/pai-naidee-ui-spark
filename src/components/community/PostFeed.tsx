@@ -1,18 +1,16 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { PostCard } from './PostCard';
 import { PostDetail } from './PostDetail';
 import { CreatePost } from './CreatePost';
 import { FloatingPostButton } from './FloatingPostButton';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, RefreshCw, AlertCircle, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFeed, useLikePost, useAddComment, useCreatePost } from '@/shared/hooks/useCommunityQueries';
-import { usePostContext } from '@/shared/contexts/PostContext';
 import { useMedia } from '@/shared/contexts/MediaProvider';
 import { cn } from '@/shared/lib/utils';
 import { CreatePostData, Post } from '@/shared/types/community';
-import { PostCardSkeleton, ErrorState, EmptyState, LoadingSpinner } from '@/components/common/LoadingStates';
+import { PostCardSkeleton, EmptyState } from '@/components/common/LoadingStates';
 
 interface PostFeedProps {
   /** Custom className */
@@ -35,7 +33,6 @@ export const PostFeed: React.FC<PostFeedProps> = ({
   enablePullToRefresh = true
 }) => {
   const { isMobile } = useMedia();
-  const { feedFilter } = usePostContext();
   
   // Hooks for posts and interactions
   const { data: posts = [], isLoading, isError, error, refetch: refresh, isRefetching } = useFeed();

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 interface CSS3DAvatarProps {
   status: string;
   statusColor: string;
-  messages: any[];
+  messages: Array<{ sender: string; text: string; timestamp: Date }>;
 }
 
 const CSS3DAvatar: React.FC<CSS3DAvatarProps> = ({ status, statusColor, messages }) => {

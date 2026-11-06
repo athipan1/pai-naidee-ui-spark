@@ -2,13 +2,6 @@
 
 // Centralized model configuration. No keys, model names or prices originate from the client.
 const MODEL_ID = /^[a-zA-Z0-9][a-zA-Z0-9._:/+-]{2,150}$/;
-const intEnv = (name, fallback, min, max) => {
-  const raw = process.env[name];
-  if (raw === undefined || raw === '') return fallback;
-  const n = Number(raw);
-  if (!Number.isInteger(n) || n < min || n > max) throw new Error('INVALID_AI_CONFIG');
-  return n;
-};
 function resolveModelConfig(env = process.env) {
   const model = env.OPENROUTER_MODEL;
   if (typeof model !== 'string' || !MODEL_ID.test(model)) throw new Error('INVALID_AI_MODEL');

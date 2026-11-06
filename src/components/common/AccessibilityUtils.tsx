@@ -96,8 +96,7 @@ export const Landmark = ({
   ariaLabel?: string;
   ariaLabelledBy?: string;
   children: React.ReactNode;
-  [key: string]: any;
-}) => (
+} & React.HTMLAttributes<Element>) => (
   <Component
     role={role}
     aria-label={ariaLabel}
@@ -130,8 +129,7 @@ export const AccessibleButton = ({
   disabled?: boolean;
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
-  [key: string]: any;
-}) => (
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     aria-label={ariaLabel}
     aria-pressed={ariaPressed}
@@ -157,7 +155,7 @@ export const AccessibleButton = ({
 export const getContrastRatio = (color1: string, color2: string): number => {
   // Simple contrast ratio calculation
   // In a real app, you'd use a proper color contrast library
-  const getLuminance = (color: string): number => {
+  const getLuminance = (_color: string): number => {
     // Simplified luminance calculation
     // This is a placeholder - use a proper color library in production
     return 0.5;
@@ -216,8 +214,7 @@ export const AccessibleInput = ({
   error?: string;
   required?: boolean;
   description?: string;
-  [key: string]: any;
-}) => {
+} & React.InputHTMLAttributes<HTMLInputElement>) => {
   const id = props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
   const errorId = error ? `${id}-error` : undefined;
   const descriptionId = description ? `${id}-description` : undefined;

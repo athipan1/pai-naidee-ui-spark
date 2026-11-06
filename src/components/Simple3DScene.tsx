@@ -1,6 +1,7 @@
 import React, { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, type ThreeElements } from '@react-three/fiber';
 import { OrbitControls, Text, Html } from '@react-three/drei';
+import type { Group } from 'three';
 
 interface AnimationMultipliers {
   rotationSpeed: number;
@@ -18,7 +19,7 @@ const Simple3DAvatar: React.FC<{
   animationMultipliers, 
   statusColor 
 }) => {
-  const meshRef = useRef<any>(null);
+  const meshRef = useRef<Group>(null);
   
   // Memoize colors to prevent recreation on every render
   const materialColor = useMemo(() => statusColor, [statusColor]);
@@ -35,32 +36,34 @@ const Simple3DAvatar: React.FC<{
   return (
     <group ref={meshRef}>
       {/* Simple head sphere */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[1, 32, 32]} />
+      <mesh {...({ position: [0, 0, 0] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [1, 32, 32] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial 
           color={materialColor}
-          emissive={emissiveColor}
-          emissiveIntensity={animationMultipliers.glowIntensity * 0.1}
+          {...({
+            emissive: emissiveColor,
+            emissiveIntensity: animationMultipliers.glowIntensity * 0.1,
+          } satisfies ThreeElements['meshStandardMaterial'])}
         />
       </mesh>
       
       {/* Simple eyes */}
-      <mesh position={[-0.3, 0.2, 0.8]}>
-        <sphereGeometry args={[0.1, 8, 8]} />
+      <mesh {...({ position: [-0.3, 0.2, 0.8] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.1, 8, 8] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="white" />
       </mesh>
-      <mesh position={[0.3, 0.2, 0.8]}>
-        <sphereGeometry args={[0.1, 8, 8]} />
+      <mesh {...({ position: [0.3, 0.2, 0.8] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.1, 8, 8] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="white" />
       </mesh>
       
       {/* Pupils */}
-      <mesh position={[-0.3, 0.2, 0.85]}>
-        <sphereGeometry args={[0.05, 8, 8]} />
+      <mesh {...({ position: [-0.3, 0.2, 0.85] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.05, 8, 8] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="black" />
       </mesh>
-      <mesh position={[0.3, 0.2, 0.85]}>
-        <sphereGeometry args={[0.05, 8, 8]} />
+      <mesh {...({ position: [0.3, 0.2, 0.85] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.05, 8, 8] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="black" />
       </mesh>
       
@@ -99,8 +102,8 @@ const Simple3DScene: React.FC<Simple3DSceneProps> = ({
   return (
     <div className="w-full h-full">
       <Canvas camera={{ position: [0, 0, 4], fov: 75 }}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 5, 5]} intensity={0.8} />
+        <ambientLight {...({ intensity: 0.6 } satisfies ThreeElements['ambientLight'])} />
+        <directionalLight {...({ position: [5, 5, 5], intensity: 0.8 } satisfies ThreeElements['directionalLight'])} />
         <Simple3DAvatar 
           status={status}
           animationMultipliers={animationMultipliers}

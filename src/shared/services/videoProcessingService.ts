@@ -40,6 +40,13 @@ export interface ProcessedVideoResult {
   originalPreviewUrl: string;
 }
 
+interface VideoAnalysis {
+  duration: number;
+  resolution: VideoQualityMetrics['originalResolution'];
+  bitrate: number;
+  format: string;
+}
+
 class VideoProcessingService {
   private progressCallback?: (progress: ProcessingProgress) => void;
 
@@ -53,12 +60,7 @@ class VideoProcessingService {
   /**
    * Analyze video file and get basic metrics
    */
-  async analyzeVideo(file: File): Promise<{ 
-    duration: number; 
-    resolution: { width: number; height: number };
-    bitrate: number;
-    format: string;
-  }> {
+  async analyzeVideo(file: File): Promise<VideoAnalysis> {
     return new Promise((resolve) => {
       const video = document.createElement('video');
       video.preload = 'metadata';
@@ -89,7 +91,7 @@ class VideoProcessingService {
   /**
    * Get optimal processing options based on video analysis
    */
-  getOptimalSettings(videoAnalysis: any): VideoProcessingOptions {
+  getOptimalSettings(videoAnalysis: Pick<VideoAnalysis, 'resolution' | 'duration'>): VideoProcessingOptions {
     const { resolution, duration } = videoAnalysis;
     
     // Auto-determine best settings based on input

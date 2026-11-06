@@ -235,7 +235,7 @@ const VideoProcessingProgressComponent: React.FC<VideoProcessingProgressProps> =
           {/* Processing Stages Indicator */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              {(['analyzing', 'compressing', 'upscaling', 'enhancing', 'finalizing', 'complete'] as const).map((stage, index) => {
+              {(['analyzing', 'compressing', 'upscaling', 'enhancing', 'finalizing', 'complete'] as const).map(stage => {
                 const isActive = stage === progress.stage;
                 const isCompleted = ['analyzing', 'compressing', 'upscaling', 'enhancing', 'finalizing'].indexOf(progress.stage) > 
                                    ['analyzing', 'compressing', 'upscaling', 'enhancing', 'finalizing'].indexOf(stage) ||

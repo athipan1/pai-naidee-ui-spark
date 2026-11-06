@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AIAssistantConfig, defaultConfig, getResponsiveConfig, validateConfig } from '../config/AIAssistantConfig';
+import { AIAssistantConfig, getResponsiveConfig, validateConfig } from '../config/AIAssistantConfig';
 
 export interface GestureState {
   current: string;

@@ -148,13 +148,15 @@ export function createAPIEndpointBuilder(baseUrl?: string): APIEndpointBuilder {
   if (typeof window !== 'undefined') {
     try {
       // Use globalThis to safely access import.meta
-      const importMeta = (globalThis as any).import?.meta;
+      const importMeta = (globalThis as typeof globalThis & {
+        import?: { meta?: { env?: Record<string, string | undefined> } };
+      }).import?.meta;
       if (importMeta?.env) {
         apiBaseUrl = importMeta.env.VITE_HF_BACKEND_URL || 
                      importMeta.env.VITE_API_BASE_URL || 
                      importMeta.env.NEXT_PUBLIC_API_BASE_URL;
       }
-    } catch (e) {
+    } catch {
       // Ignore errors in import.meta access
     }
   }

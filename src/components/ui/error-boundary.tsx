@@ -64,7 +64,7 @@ class ErrorBoundary extends Component<Props, State> {
                 Oops! Something went wrong
               </h1>
               <p className="text-muted-foreground">
-                We're sorry, but something unexpected happened. Please try again.
+                We&apos;re sorry, but something unexpected happened. Please try again.
               </p>
             </div>
 
