@@ -7,6 +7,7 @@ const draftVersion = value => typeof value === 'string' && /^\d{1,12}\.\d{6}$/.t
 
 function validateImageUrl(imageUrl) {
   if (!imageUrl) return null;
+  if (!/^https:\/\//i.test(imageUrl)) return 'Image URL must be HTTPS.';
   try {
     const url = new URL(imageUrl);
     if (url.protocol !== 'https:' || url.username || url.password || /[\s<>]/.test(imageUrl)) throw new Error();

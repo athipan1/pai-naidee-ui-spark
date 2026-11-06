@@ -8,8 +8,13 @@ const good = { name: 'Test Place', nameLocal: 'สถานที่ทดสอ
 
 test('CMS validates coordinates and HTTPS media links', () => {
   assert.equal(cleanPlace(good).errors.length, 0);
-  assert.ok(cleanPlace({ ...good, lat: 90 }).errors.length > 0);
+  assert.equal(cleanPlace({ ...good, lat: ' 16.5 ', lng: '104.7' }).errors.length, 0);
+  for (const lat of [90, null, undefined, '', ' ', [16.5]]) {
+    assert.ok(cleanPlace({ ...good, lat }).errors.length > 0);
+  }
   assert.ok(cleanPlace({ ...good, imageUrl: 'javascript:alert(1)' }).errors.length > 0);
+  assert.ok(cleanPlace({ ...good, imageUrl: 'https:example.test/image.png' }).errors.length > 0);
+  assert.match(cleanPlace({ ...good, imageUrl: 'https://lh3.googleusercontent.com/places/example' }).errors[0], /Google Places/);
   assert.ok(cleanPlace({ ...good, name: '' }).errors.length > 0);
 });
 
