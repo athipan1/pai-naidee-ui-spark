@@ -28,8 +28,8 @@ test('all 194 TAT Chon Buri source rows have a documented provisional dispositio
     if(status==='published_seed')published.add(id);
   }
   assert.deepEqual(statuses,{
-    published_seed:69,duplicate_alias_of_published:1,pending_category_location_review:76,
-    missing_usable_thai_name:2,pending_individual_verification:46
+    published_seed:70,duplicate_alias_of_published:1,pending_category_location_review:76,
+    missing_usable_thai_name:2,pending_individual_verification:45
   });
   const ids=new Set(SEED_PLACES.map(p=>p.id));
   assert.ok(ids.has('tat-201005182246293199'), 'Canonical Viharn Sien must exist');
