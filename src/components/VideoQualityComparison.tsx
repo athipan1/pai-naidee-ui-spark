@@ -46,7 +46,6 @@ const VideoQualityComparison: React.FC<VideoQualityComparisonProps> = ({
   const [activeVideo, setActiveVideo] = useState<'original' | 'processed'>('processed');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [currentTime, setCurrentTime] = useState(0);
   
   const originalVideoRef = useRef<HTMLVideoElement>(null);
   const processedVideoRef = useRef<HTMLVideoElement>(null);
@@ -250,15 +249,13 @@ const VideoQualityComparison: React.FC<VideoQualityComparisonProps> = ({
               src={originalVideoUrl}
               className={`w-full h-64 object-contain ${activeVideo === 'original' ? 'block' : 'hidden'}`}
               muted={isMuted}
-              onTimeUpdate={(e) => setCurrentTime((e.target as HTMLVideoElement).currentTime)}
-            />
+              />
             <video
               ref={processedVideoRef}
               src={processedVideoUrl}
               className={`w-full h-64 object-contain ${activeVideo === 'processed' ? 'block' : 'hidden'}`}
               muted={isMuted}
-              onTimeUpdate={(e) => setCurrentTime((e.target as HTMLVideoElement).currentTime)}
-            />
+              />
             
             {/* Video Controls */}
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">

@@ -1,32 +1,38 @@
 import { describe, expect, it } from 'vitest';
 import { canManageContent, getAppRole, isAdminRole } from '@/shared/auth/roles';
+import type { User } from '@supabase/supabase-js';
+
+const userIdentity = { id: 'test-user', aud: 'authenticated', created_at: '2026-01-01T00:00:00Z' };
 
 describe('authorization role helpers', () => {
   it('trusts admin role only from app_metadata', () => {
-    const user = {
+    const user: User = {
+      ...userIdentity,
       app_metadata: { role: 'admin' },
       user_metadata: { role: 'viewer' },
-    } as any;
+    };
 
     expect(getAppRole(user)).toBe('admin');
     expect(isAdminRole(getAppRole(user))).toBe(true);
   });
 
   it('never grants privileges from user_metadata', () => {
-    const user = {
+    const user: User = {
+      ...userIdentity,
       app_metadata: {},
       user_metadata: { role: 'admin' },
-    } as any;
+    };
 
     expect(getAppRole(user)).toBe('viewer');
     expect(isAdminRole(getAppRole(user))).toBe(false);
   });
 
   it('fails closed for unknown roles', () => {
-    const user = {
+    const user: User = {
+      ...userIdentity,
       app_metadata: { role: 'superuser' },
       user_metadata: {},
-    } as any;
+    };
 
     expect(getAppRole(user)).toBe('viewer');
     expect(canManageContent(getAppRole(user))).toBe(false);

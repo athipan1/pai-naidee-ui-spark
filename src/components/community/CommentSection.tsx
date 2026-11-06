@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,7 +9,6 @@ import {
   Reply,
   Verified
 } from 'lucide-react';
-import { Comment } from '@/shared/types/community';
 import { useComments, useAddComment } from '@/shared/hooks/useCommunityQueries';
 import { cn } from '@/shared/lib/utils';
 

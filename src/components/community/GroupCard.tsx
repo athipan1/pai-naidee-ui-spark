@@ -121,7 +121,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
               <span>ผู้ดูแลกลุ่ม</span>
             </div>
             <div className="flex items-center space-x-2">
-              {group.moderators.slice(0, 3).map((moderator, index) => (
+              {group.moderators.slice(0, 3).map(moderator => (
                 <Avatar key={moderator.id} className="h-6 w-6">
                   <AvatarImage src={moderator.avatar} alt={moderator.displayName} />
                   <AvatarFallback className="text-xs">{moderator.displayName[0]}</AvatarFallback>

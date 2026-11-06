@@ -6,9 +6,23 @@ import { getRailwayPlaceFacets } from '@/services/railway-api.service';
 import { parseTripIntent, type TripIntent } from '@/shared/utils/tripIntent';
 import TripTimelineMap from './TripTimelineMap';
 import type { TripStop } from '@/shared/utils/tripPlanner';
+import type { AttractionDetail } from '@/shared/types/attraction';
 
 interface Props { currentLanguage: 'th' | 'en' }
-type Message = {id:number;role:'user'|'assistant';text:string;plan?:any};
+type TripPlanPlace = Pick<AttractionDetail, 'id' | 'coordinates' | 'description'> & Partial<AttractionDetail>;
+type TripPlanResponse = {
+  province: string;
+  days?: Array<{ day: number; stops?: Array<TripPlanPlace | null> }>;
+  completeness?: { status: string; requestedDays: number; plannedDays: number };
+  provider?: string;
+  recovery?: { googlePlacesUsed?: boolean; sources?: Record<string, string> };
+  budget?: { estimatedTotal: number };
+};
+type BasicTripPlanResponse = {
+  status: string;
+  stops?: Array<{ day: number; place: TripPlanPlace }>;
+};
+type Message = { id: number; role: 'user' | 'assistant'; text: string; plan?: TripPlanResponse };
 const API='https://painaidee-api-production.up.railway.app';
 const money=(n:number)=>'฿'+n.toLocaleString('th-TH');
 const missingPrompt=(intent:TripIntent,th:boolean)=>{
@@ -18,8 +32,8 @@ const missingPrompt=(intent:TripIntent,th:boolean)=>{
   if(intent.issues.length)return intent.issues.join(' · ');
   return '';
 };
-function planStops(plan:any):TripStop[]{
- return (plan?.days??[]).flatMap((day:any)=>(day.stops??[]).flatMap((stop:any,index:number)=>{
+function planStops(plan: TripPlanResponse): TripStop[] {
+ return (plan?.days??[]).flatMap(day=>(day.stops??[]).flatMap((stop,index)=>{
   if(!stop?.coordinates||!stop?.id)return [];
   const place={...stop,name:stop.name||stop.nameLocal||'สถานที่ท่องเที่ยว',nameLocal:stop.nameLocal||stop.name||'สถานที่ท่องเที่ยว',province:stop.province||plan.province,category:stop.category||'Place',rating:stop.rating||0,reviewCount:stop.reviewCount||0,images:stop.images||[],tags:stop.tags||[]};
   return [{place,day:day.day,order:index+1}];
@@ -43,7 +57,7 @@ export default function TripPlanner({currentLanguage}:Props){
    // Scrolling is optional; a browser quirk must never crash the chat.
   }
  },[messages,pending]);
- const add=(role:Message['role'],text:string,plan?:any)=>setMessages(m=>[...m,{id:Date.now()+Math.random(),role,text,plan}]);
+ const add=(role:Message['role'],text:string,plan?:TripPlanResponse)=>setMessages(m=>[...m,{id:Date.now()+Math.random(),role,text,plan}]);
  const submit=async(textOverride?:string)=>{
   const value=(textOverride??draft).trim();
   if(!value||pending)return;
@@ -57,7 +71,7 @@ export default function TripPlanner({currentLanguage}:Props){
   setPending(true);
   try{
    const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),65000);
-   let result:any=null;let usedFallback=false;
+   let result: TripPlanResponse | null = null;let usedFallback=false;
    try{
     const response=await fetch(API+'/api/ai/trip-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,province:parsed.province,days:parsed.days,people:parsed.people,budget:parsed.totalBudget,transport:parsed.transport}),signal:controller.signal});
     if(response.ok)result=await response.json();
@@ -69,8 +83,8 @@ export default function TripPlanner({currentLanguage}:Props){
     if(usedFallback){
      const fallback=await fetch(API+'/api/trips/basic-road-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province:parsed.province,days:parsed.days,transport:parsed.transport,maxRoadMinutes:parsed.avoidLongDrives?45:90}),signal:controller.signal});
      if(!fallback.ok)throw Error(th?`ยังไม่มีสถานที่หรือเส้นทางที่ตรวจสอบได้ครบสำหรับ ${parsed.province} ลองเปลี่ยนจังหวัดหรือปรับเงื่อนไขการเดินทาง`:`There are not enough verified places or roads for ${parsed.province}. Try another province or adjust your constraints.`);
-     const basic=await fallback.json();
-     result={province:parsed.province,days:Array.from({length:parsed.days},(_,i)=>({day:i+1,stops:(basic.stops||[]).filter((s:any)=>s.day===i+1).map((s:any)=>s.place)})),completeness:{status:basic.status,requestedDays:parsed.days,plannedDays:new Set((basic.stops||[]).map((s:any)=>s.day)).size},provider:'smart_fallback',budget:{estimatedTotal:parsed.totalBudget}};
+     const basic: BasicTripPlanResponse = await fallback.json();
+     result={province:parsed.province,days:Array.from({length:parsed.days},(_,i)=>({day:i+1,stops:(basic.stops||[]).filter(s=>s.day===i+1).map(s=>s.place)})),completeness:{status:basic.status,requestedDays:parsed.days,plannedDays:new Set((basic.stops||[]).map(s=>s.day)).size},provider:'smart_fallback',budget:{estimatedTotal:parsed.totalBudget}};
     }
    }finally{clearTimeout(timeout);}
    const complete=result?.completeness?.status==='complete';
@@ -93,7 +107,7 @@ export default function TripPlanner({currentLanguage}:Props){
      {message.role==='assistant'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Bot className="h-4 w-4"/></span>}
      <div className={`min-w-0 max-w-[calc(100%-2.5rem)] break-words rounded-2xl px-3 py-3 text-sm leading-6 whitespace-pre-line sm:max-w-[88%] sm:px-4 ${message.role==='user'?'rounded-br-sm bg-teal-500/15':'rounded-bl-sm border bg-card'}`}>
       {message.text}
-      {message.plan&&<div className="mt-4 w-full min-w-0 max-w-full space-y-3 overflow-hidden border-t pt-3"><p className="font-semibold">{th?'แผนเที่ยวรายวัน':'Day-by-day itinerary'}</p><TripTimelineMap key={message.id} th={th} days={message.plan.completeness?.requestedDays??message.plan.days?.length??1} stops={planStops(message.plan)} available={[]} verifiedRoad={message.plan.completeness?.status==='complete'}/>{message.plan.recovery?.sources&&<p className="text-xs text-muted-foreground">{Object.entries(message.plan.recovery.sources as Record<string,string>).map(([d,s])=>`${th?'วันที่':'Day'} ${d}: ${s==='ai'?'AI':s==='smart'?'Smart Planner':s==='hybrid'?'AI + Smart Planner':s==='google'?'Google Maps':'Partial'}`).join(' · ')}</p>}</div>}
+      {message.plan&&<div className="mt-4 w-full min-w-0 max-w-full space-y-3 overflow-hidden border-t pt-3"><p className="font-semibold">{th?'แผนเที่ยวรายวัน':'Day-by-day itinerary'}</p><TripTimelineMap key={message.id} th={th} days={message.plan.completeness?.requestedDays??message.plan.days?.length??1} stops={planStops(message.plan)} available={[]} verifiedRoad={message.plan.completeness?.status==='complete'}/>{message.plan.recovery?.sources&&<p className="text-xs text-muted-foreground">{Object.entries(message.plan.recovery.sources).map(([d,s])=>`${th?'วันที่':'Day'} ${d}: ${s==='ai'?'AI':s==='smart'?'Smart Planner':s==='hybrid'?'AI + Smart Planner':s==='google'?'Google Maps':'Partial'}`).join(' · ')}</p>}</div>}
      </div>
      {message.role==='user'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted"><UserRound className="h-4 w-4"/></span>}
     </div>)}

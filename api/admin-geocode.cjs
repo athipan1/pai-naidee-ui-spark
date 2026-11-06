@@ -85,7 +85,7 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
             addCandidate({ lat, lng, label: String(item.formatted || item.name || lookupName).slice(0, 250), source: 'Geoapify' });
           }
         }
-      } catch (_) {
+      } catch {
         // Verified database candidates are still usable during provider outages.
       }
       if (candidates.length) break;

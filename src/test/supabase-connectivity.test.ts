@@ -1,6 +1,6 @@
 // Tests for Supabase connectivity verification
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { 
   verifySupabaseConnection, 
   testTableAccess, 
@@ -8,6 +8,21 @@ import {
   getSupabaseFullStatus,
   generateSupabaseReport
 } from '@/services/supabase-connectivity.service';
+
+vi.mock('@/services/supabase.service', () => ({
+  getSupabaseClient: () => ({
+    auth: { getSession: async () => ({ data: { session: null }, error: null }) },
+    from: () => ({
+      select: () => ({ limit: async () => ({ data: [{ id: 'fixture' }], error: null, count: 1 }) }),
+    }),
+  }),
+}));
+
+beforeEach(() => {
+  vi.stubEnv('VITE_SUPABASE_URL', 'https://fixture.example.test');
+  vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'local-test-fixture');
+});
+afterEach(() => vi.unstubAllEnvs());
 
 describe('Supabase Connectivity Tests', () => {
   it('should export all required functions', async () => {
@@ -40,31 +55,18 @@ describe('Supabase Connectivity Tests', () => {
     const result = await verifySupabaseConnection();
     
     expect(result).toHaveProperty('isConnected');
-    expect(typeof result.isConnected).toBe('boolean');
-    
-    // If connection fails, should have error message
-    if (!result.isConnected) {
-      expect(result).toHaveProperty('error');
-      expect(typeof result.error).toBe('string');
-    }
-  }, 10000); // 10 second timeout for network operations
+    expect(result.isConnected).toBe(true);
+  });
 
   it('should test table access for places table', async () => {
     const result = await testTableAccess('places', 3);
     
     expect(result).toHaveProperty('tableName', 'places');
     expect(result).toHaveProperty('isAccessible');
-    expect(typeof result.isAccessible).toBe('boolean');
-    
-    if (result.isAccessible) {
-      expect(result).toHaveProperty('recordCount');
-      expect(result).toHaveProperty('sampleData');
-      expect(Array.isArray(result.sampleData)).toBe(true);
-    } else {
-      expect(result).toHaveProperty('error');
-      expect(typeof result.error).toBe('string');
-    }
-  }, 10000);
+    expect(result.isAccessible).toBe(true);
+    expect(result.recordCount).toBe(1);
+    expect(result.sampleData).toEqual([{ id: 'fixture' }]);
+  });
 
   it('should generate comprehensive status report', async () => {
     const status = await getSupabaseFullStatus();
@@ -81,8 +83,6 @@ describe('Supabase Connectivity Tests', () => {
     expect(typeof report).toBe('string');
     expect(report.length).toBeGreaterThan(0);
     expect(report).toContain('SUPABASE CONNECTIVITY REPORT');
-    
-    // Log the report for manual inspection
-    console.log('\n' + report);
-  }, 15000);
+
+  });
 });

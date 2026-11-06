@@ -21,7 +21,10 @@ const AIAssistantAdmin: React.FC<AIAssistantAdminProps> = ({
 }) => {
   const [localConfig, setLocalConfig] = useState<AIAssistantConfig>(config);
 
-  const updateConfig = (section: keyof AIAssistantConfig, updates: any) => {
+  const updateConfig = <Section extends Exclude<keyof AIAssistantConfig, 'enabled' | 'interactivity'>>(
+    section: Section,
+    updates: Partial<AIAssistantConfig[Section]>,
+  ) => {
     const currentSection = localConfig[section];
     if (typeof currentSection === 'object' && currentSection !== null) {
       const newConfig = {
@@ -75,7 +78,7 @@ const AIAssistantAdmin: React.FC<AIAssistantAdminProps> = ({
                   <Label>Horizontal Position</Label>
                   <Select 
                     value={localConfig.model.position.x} 
-                    onValueChange={(value) => updateConfig('model', { 
+                    onValueChange={(value: AIAssistantConfig['model']['position']['x']) => updateConfig('model', {
                       position: { ...localConfig.model.position, x: value } 
                     })}
                   >
@@ -94,7 +97,7 @@ const AIAssistantAdmin: React.FC<AIAssistantAdminProps> = ({
                   <Label>Vertical Position</Label>
                   <Select 
                     value={localConfig.model.position.y} 
-                    onValueChange={(value) => updateConfig('model', { 
+                    onValueChange={(value: AIAssistantConfig['model']['position']['y']) => updateConfig('model', {
                       position: { ...localConfig.model.position, y: value } 
                     })}
                   >
@@ -214,7 +217,7 @@ const AIAssistantAdmin: React.FC<AIAssistantAdminProps> = ({
                   <Label>Animation Quality</Label>
                   <Select 
                     value={localConfig.animations.quality} 
-                    onValueChange={(value) => updateConfig('animations', { quality: value })}
+                    onValueChange={(value: AIAssistantConfig['animations']['quality']) => updateConfig('animations', { quality: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />

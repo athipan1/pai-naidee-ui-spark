@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   MapPin, 
-  Clock, 
   MessageCircle, 
   Share2, 
   Bookmark,
@@ -24,7 +23,6 @@ import { InspirationRating } from './InspirationRating';
 import { MapViewModal } from './MapViewModal';
 import { CommentSection } from './CommentSection';
 import { cn } from '@/shared/lib/utils';
-import { useSeasonalTheme } from './SeasonalThemeProvider';
 
 interface TravelStoryCardProps {
   post: Post;
@@ -41,14 +39,12 @@ export const TravelStoryCard: React.FC<TravelStoryCardProps> = ({
   onInspire,
   onSave,
   onShare,
-  onComment,
   className,
   currentLanguage
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
-  const { themeConfig } = useSeasonalTheme();
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();

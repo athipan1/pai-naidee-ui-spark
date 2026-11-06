@@ -1,6 +1,5 @@
 // Run only in an authenticated, interactive Railway service shell.
 // Requires DATABASE_URL, creates first admin without echoing the password.
-const readline = require('node:readline');
 const { randomUUID } = require('node:crypto');
 const { hashPassword } = require('./railway-admin-auth.cjs');
 const { getSql, closeDatabase } = require('./postgres-db.cjs');

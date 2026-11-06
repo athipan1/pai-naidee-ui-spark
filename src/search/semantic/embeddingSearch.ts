@@ -2,7 +2,6 @@
 
 import type { 
   EmbeddingVector, 
-  SemanticDocumentMeta, 
   SemanticIndex, 
   SemanticSearchResult 
 } from './types';

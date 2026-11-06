@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, MapPin, Image as ImageIcon, Video, Save, Upload, Trash2, Edit, X, Compass, GripVertical, AlertTriangle, PackageOpen, ChevronsUpDown } from 'lucide-react';
+import { Search, Plus, Image as ImageIcon, Save, Upload, Trash2, Edit, PackageOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/shared/utils/cn';
@@ -17,19 +15,15 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog"
 
 interface AttractionManagerProps {

@@ -3,11 +3,7 @@ import {
   MapPin, 
   Map, 
   Star, 
-  Navigation, 
-  Camera, 
-  Utensils,
-  Mountain,
-  Waves
+  Utensils
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

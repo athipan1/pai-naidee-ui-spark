@@ -47,7 +47,7 @@ export enum TestStatus {
 }
 
 export interface TestConfig {
-  [key: string]: any;
+  [key: string]: unknown;
   timeout?: number;
   retries?: number;
   concurrency?: number;

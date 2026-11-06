@@ -127,7 +127,7 @@ class MediaManagementService {
           const fileExt = mediaItem.file.name.split('.').pop();
           const fileName = `${place.id}/${Date.now()}.${fileExt}`;
           
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const { error: uploadError } = await supabase.storage
             .from('place-media')
             .upload(fileName, mediaItem.file);
 
@@ -181,7 +181,8 @@ class MediaManagementService {
     await this.assertCanManageContent();
     const supabase = this.getSupabase();
     
-    const dbUpdate: any = {
+    const dbUpdate: Partial<Pick<PlaceWithMedia, 'name' | 'name_local' | 'province' | 'category' | 'description'>>
+      & { lat?: number; lng?: number } = {
       name: updateData.name,
       name_local: updateData.name_local,
       province: updateData.province,
@@ -226,7 +227,7 @@ class MediaManagementService {
         const fileExt = mediaItem.file.name.split('.').pop();
         const fileName = `${placeId}/${Date.now()}.${fileExt}`;
         
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('place-media')
           .upload(fileName, mediaItem.file);
 

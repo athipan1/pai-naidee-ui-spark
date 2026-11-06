@@ -18,13 +18,8 @@ import {
   X, 
   Plus,
   ArrowLeft,
-  Eye,
   Send,
-  Smile,
-  Search,
   Loader2,
-  CheckCircle,
-  FileText,
   Globe
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';

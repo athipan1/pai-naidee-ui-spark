@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/shared/hooks/use-toast";
 import { 
   Upload, 
@@ -23,7 +22,6 @@ import {
   Sparkles,
   Video,
   Camera,
-  Settings,
   Wand2,
   ArrowRight
 } from "lucide-react";
@@ -321,7 +319,7 @@ const EnhancedVideoUpload: React.FC<EnhancedVideoUploadProps> = ({
       const result = await videoProcessingService.processVideo(videoFile, processingOptions);
       setProcessedResult(result);
       setCurrentStep('comparison');
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to process video. Please try again.",
@@ -395,7 +393,7 @@ const EnhancedVideoUpload: React.FC<EnhancedVideoUploadProps> = ({
 
       resetForm();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: t.uploadError,
@@ -871,10 +869,10 @@ const EnhancedVideoUpload: React.FC<EnhancedVideoUploadProps> = ({
               type="button"
               variant="outline"
               onClick={() => {
-                const steps = ['upload', 'settings', 'processing', 'comparison', 'details'];
+                const steps = ['upload', 'settings', 'processing', 'comparison', 'details'] as const;
                 const currentIndex = steps.indexOf(currentStep);
                 if (currentIndex > 0) {
-                  setCurrentStep(steps[currentIndex - 1] as any);
+                  setCurrentStep(steps[currentIndex - 1]);
                 }
               }}
               disabled={isUploading}

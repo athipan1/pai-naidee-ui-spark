@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   ImagePlus, 
-  Video, 
   MapPin, 
   Building2, 
   X, 
@@ -17,7 +16,6 @@ import {
   Lock,
   Hash,
   Camera,
-  Folder,
   ChevronDown
 } from 'lucide-react';
 import {
@@ -138,24 +136,6 @@ export const CreatePost: React.FC<CreatePostProps> = ({
     setPrivacy('public');
   };
 
-  const getPrivacyIcon = (privacyType: string) => {
-    switch (privacyType) {
-      case 'public': return <Globe className="h-4 w-4" />;
-      case 'friends': return <Users className="h-4 w-4" />;
-      case 'private': return <Lock className="h-4 w-4" />;
-      default: return <Globe className="h-4 w-4" />;
-    }
-  };
-
-  const getPrivacyText = (privacyType: string) => {
-    switch (privacyType) {
-      case 'public': return 'สาธารณะ';
-      case 'friends': return 'เฉพาะเพื่อน';
-      case 'private': return 'ส่วนตัว';
-      default: return 'สาธารณะ';
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
 <DialogContent className="sm:max-w-2xl w-full h-full sm:h-auto sm:max-h-[90vh] flex flex-col p-0 rounded-none sm:rounded-lg">
@@ -177,7 +157,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
             </Avatar>
             <div>
               <p className="font-medium">คุณผู้ใช้</p>
-              <Select value={privacy} onValueChange={(value: any) => setPrivacy(value)}>
+              <Select value={privacy} onValueChange={(value: typeof privacy) => setPrivacy(value)}>
                 <SelectTrigger className="w-auto h-auto p-1 border-0 text-xs text-muted-foreground">
                   <SelectValue />
                 </SelectTrigger>

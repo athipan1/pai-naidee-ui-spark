@@ -126,5 +126,5 @@ export interface PerformanceMetrics {
   networkUsage?: number; // bytes
   success: boolean;
   error?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

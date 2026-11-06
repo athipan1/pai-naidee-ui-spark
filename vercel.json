@@ -1,4 +1,5 @@
 {
+  "git": { "deploymentEnabled": { "fix/lint-baseline-production-readiness": false } },
   "builds": [
     {
       "src": "api/api-server.cjs",

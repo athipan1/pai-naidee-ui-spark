@@ -1,23 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
 import AttractionCard from "@/components/common/AttractionCard";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// The Attraction type should ideally come from a shared location,
-// but we're defining it here to match the expected data structure.
-interface Attraction {
-  id: string;
-  name: string;
-  nameLocal?: string;
-  province: string;
-  category: string;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  description: string;
-  tags: string[];
-}
 
 interface CategoryViewProps {
   currentLanguage: "th" | "en";

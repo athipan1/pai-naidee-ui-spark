@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
-import APIErrorDisplay from "@/components/common/APIErrorDisplay";
 import AttractionCard from "@/components/common/AttractionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AttractionCardSkeleton, ErrorState, EmptyState } from "@/components/common/LoadingStates";

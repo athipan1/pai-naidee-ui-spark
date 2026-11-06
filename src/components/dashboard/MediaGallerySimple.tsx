@@ -81,7 +81,7 @@ const MediaGallerySimple = ({
         title: "Success",
         description: t.deleteSuccess
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: t.deleteError,

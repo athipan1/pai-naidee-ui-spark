@@ -40,8 +40,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({
   onOpenChange,
   onLike,
   onSave,
-  onShare,
-  onComment
+  onShare
 }) => {
   const { isMobile } = useMedia();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);

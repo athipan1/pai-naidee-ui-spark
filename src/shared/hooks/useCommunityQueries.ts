@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { communityService } from '@/shared/services/community.service';
-import { Post, Comment, CreatePostData } from '@/shared/types/community';
+import { CreatePostData } from '@/shared/types/community';
 
 export const communityKeys = {
   all: ['community'] as const,
