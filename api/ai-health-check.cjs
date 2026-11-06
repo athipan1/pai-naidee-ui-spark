@@ -5,8 +5,6 @@ const { fetchOpenRouter, ProviderError } = require('./ai-upstream-diagnostics.cj
 const { parseAiJson, validateAiPlan } = require('./ai-trip-plan.cjs');
 
 const PROBE_COOLDOWN_MS = 5 * 60_000;
-let lastProbe = 0;
-let inFlight = false;
 const clean = value => typeof value === 'string' && /^[a-zA-Z0-9_.:\/-]{1,150}$/.test(value) ? value : null;
 const usageOf = value => {
   const u = value && typeof value === 'object' ? value : {};
@@ -26,27 +24,30 @@ function probeRequest(config) {
   return base;
 }
 function registerAiHealthRoutes(app,{requireAdmin,getSql,request=fetchOpenRouter,now=Date.now}) {
-  app.post('/api/admin/ai/health-check',requireAdmin,async(req,res)=>{
+  let lastProbe = null;
+  let inFlight = false;
+  app.post('/api/admin/ai/health-check',requireAdmin,async(_req,res)=>{
     res.set('Cache-Control','no-store');
     if(inFlight) return res.status(429).json({status:'busy',error:'An AI diagnostic is already running.'});
-    if(now()-lastProbe<PROBE_COOLDOWN_MS) return res.status(429).json({status:'cooldown',retryAfterSeconds:Math.ceil((PROBE_COOLDOWN_MS-(now()-lastProbe))/1000)});
+    const elapsed = lastProbe === null ? PROBE_COOLDOWN_MS : now() - lastProbe;
+    if (elapsed < PROBE_COOLDOWN_MS) return res.status(429).json({status:'cooldown',retryAfterSeconds:Math.ceil((PROBE_COOLDOWN_MS-elapsed)/1000)});
+    inFlight = true;
     let config;
     try {
-      config=await getActiveAiConfig(getSql);
-      if(config.paidEnabled) return res.status(403).json({status:'blocked',error:'Health checks for paid models are disabled.'});
-      if(!process.env.OPENROUTER_API_KEY) return res.status(503).json({status:'not_configured'});
-    } catch {
-      return res.status(503).json({status:'invalid_configuration'});
-    }
-    lastProbe=now(); inFlight=true;
-    const endpoint=process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
-    if(!/^https:\/\/openrouter\.ai\/api\/v1\/?$/.test(endpoint)) {
-      inFlight=false;return res.status(503).json({status:'invalid_configuration'});
-    }
-    try {
+      try {
+        config = await getActiveAiConfig(getSql);
+      } catch {
+        return res.status(503).json({status:'invalid_configuration'});
+      }
+      if (config.paidEnabled) return res.status(403).json({status:'blocked',error:'Health checks for paid models are disabled.'});
+      const apiKey = process.env.OPENROUTER_API_KEY;
+      if (!apiKey) return res.status(503).json({status:'not_configured'});
+      const endpoint = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+      if (!/^https:\/\/openrouter\.ai\/api\/v1\/?$/.test(endpoint)) return res.status(503).json({status:'invalid_configuration'});
+      lastProbe = now();
       const body=await request(endpoint.replace(/\/$/,'')+'/chat/completions',{
         method:'POST',
-        headers:{Authorization:'Bearer '+process.env.OPENROUTER_API_KEY,'Content-Type':'application/json',
+        headers:{Authorization:'Bearer '+apiKey,'Content-Type':'application/json',
           'HTTP-Referer':'https://pai-naidee-ui-spark.vercel.app','X-Title':'PaiNaiDee Health Check'},
         body:JSON.stringify(probeRequest(config)),
       },12000);
@@ -74,7 +75,7 @@ function registerAiHealthRoutes(app,{requireAdmin,getSql,request=fetchOpenRouter
       });
     } catch(err) {
       const d=err instanceof ProviderError?err.details:{};
-      console.warn('ai_health_probe',JSON.stringify({status:'upstream_failure',upstreamHttpStatus:Number.isInteger(d.upstreamStatus)?d.upstreamStatus:null,providerErrorCode:clean(d.providerErrorCode),providerErrorType:clean(d.providerErrorType),requestId:clean(d.requestId),model:config.model}));
+      console.warn('ai_health_probe',JSON.stringify({status:'upstream_failure',upstreamHttpStatus:Number.isInteger(d.upstreamStatus)?d.upstreamStatus:null,model:config.model}));
       return res.status(502).json({
         status:'upstream_failure',upstreamHttpStatus:Number.isInteger(d.upstreamStatus)?d.upstreamStatus:null,
         providerErrorCode:clean(d.providerErrorCode),providerErrorType:clean(d.providerErrorType),

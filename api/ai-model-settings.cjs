@@ -44,7 +44,7 @@ async function checkOpenRouterModel(model,structuredOutput,request=fetch) {
   finally {clearTimeout(timer);}
 }
 
-function registerAiSettingsRoutes(app,{requireAdmin,getSql}) {
+function registerAiSettingsRoutes(app,{requireAdmin,getSql,checkModel=checkOpenRouterModel}) {
   app.get('/api/admin/ai/models',requireAdmin,async(_req,res)=>{
     res.set('Cache-Control','no-store');
     try {res.json({options:MODEL_OPTIONS,selected:await getAiSettings(getSql),paidModelsAllowed:false,backendCommit:process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0,12)||null});}
@@ -54,7 +54,7 @@ function registerAiSettingsRoutes(app,{requireAdmin,getSql}) {
     res.set('Cache-Control','no-store');
     const model=String(req.query.model||''),structuredOutput=req.query.structuredOutput==='true';
     if(!allowedIds.has(model))return res.status(400).json({ok:false,reason:'MODEL_NOT_ALLOWED'});
-    const result=await checkOpenRouterModel(model,structuredOutput);
+    const result=await checkModel(model,structuredOutput);
     return res.status(result.ok?200:422).json(result);
   });
   app.put('/api/admin/ai/models',requireAdmin,async(req,res)=>{
@@ -62,7 +62,7 @@ function registerAiSettingsRoutes(app,{requireAdmin,getSql}) {
     const {model,structuredOutput}=req.body||{};
     if(!allowedIds.has(model)||typeof structuredOutput!=='boolean') return res.status(400).json({error:'Only approved free models and boolean structured-output flags are allowed.'});
     try {
-      const validation=await checkOpenRouterModel(model,structuredOutput);
+      const validation=await checkModel(model,structuredOutput);
       if(!validation.ok)return res.status(422).json({error:'Model validation failed: '+validation.reason,reason:validation.reason});
       const config=resolveModelConfig({...process.env,OPENROUTER_MODEL:model,AI_STRUCTURED_OUTPUT:String(structuredOutput)});
       if(config.paidEnabled) return res.status(403).json({error:'Paid models cannot be selected here.'});

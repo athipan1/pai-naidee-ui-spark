@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -34,10 +34,9 @@ export default function AdminCoordinatePicker({ value, onChange, onSearch }: Pro
   const [results, setResults] = useState<SearchResult['candidates']>([]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
-  const center = useMemo<[number, number]>(() => value && validThaiCoordinate(value)
-    ? [value.lat, value.lng] : [13.7367, 100.5231], []);
-  async function search(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const [center] = useState<[number, number]>(() => value && validThaiCoordinate(value)
+    ? [value.lat, value.lng] : [13.7367, 100.5231]);
+  async function search() {
     if (query.trim().length < 2) { setNotice('กรุณาพิมพ์ชื่อสถานที่อย่างน้อย 2 ตัวอักษร'); return; }
     setBusy(true);
     setNotice('');
@@ -55,14 +54,19 @@ export default function AdminCoordinatePicker({ value, onChange, onSearch }: Pro
   }
   return <div className="overflow-hidden rounded-xl border border-slate-200">
     <div className="space-y-2 bg-white p-3">
-      <form onSubmit={search} className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input aria-label="ค้นหาชื่อสถานที่บนแผนที่" type="search" value={query} onChange={event => setQuery(event.target.value)}
+          onKeyDown={event => {
+            if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
+            event.preventDefault();
+            if (!busy) void search();
+          }}
           placeholder="พิมพ์ชื่อสถานที่ เช่น ตลาดน้ำอัมพวา" maxLength={120}
           className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100" />
-        <button type="submit" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
+        <button type="button" onClick={() => void search()} disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
           {busy ? 'กำลังค้นหา...' : 'ค้นหาบนแผนที่'}
         </button>
-      </form>
+      </div>
       {notice && <p role="status" aria-live="polite" className="text-xs text-slate-600">{notice}</p>}
       {results.length > 0 && <div aria-label="ผลการค้นหาสถานที่" className="max-h-52 space-y-1 overflow-y-auto">
         {results.map((result, index) => <button type="button" key={`${result.source}-${result.lat}-${result.lng}-${index}`}

@@ -14,17 +14,23 @@ export default function RailwayLoginPage() {
   const [error, setError] = useState('');
 
   async function handleLogin(event: FormEvent) {
-    event.preventDefault(); setIsLoading(true); setError('');
+    event.preventDefault();
+    if (isLoading) return;
+    setIsLoading(true);
+    setError('');
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/admin/login`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await response.json();
-      if (!response.ok || typeof data.token !== 'string') throw new Error(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
+      const data = await response.json().catch(() => null);
+      if (!response.ok || typeof data?.token !== 'string' || data.role !== 'admin') {
+        setError(data?.error || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');
+        return;
+      }
       window.sessionStorage.setItem('painaidee.admin.token', data.token);
-      navigate('/admin');
-    } catch (err) { setError(err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ'); }
+      navigate('/admin', { replace: true });
+    } catch { setError('ไม่สามารถเริ่มเซสชันได้ กรุณาลองใหม่'); }
     finally { setIsLoading(false); setPassword(''); }
   }
 
