@@ -128,7 +128,7 @@ class ErrorBoundary extends Component<Props, State> {
                 Oops! Something went wrong
               </CardTitle>
               <CardDescription className="text-base">
-                We're sorry for the inconvenience. An unexpected error occurred while loading this page.
+                We&apos;re sorry for the inconvenience. An unexpected error occurred while loading this page.
               </CardDescription>
             </CardHeader>
             

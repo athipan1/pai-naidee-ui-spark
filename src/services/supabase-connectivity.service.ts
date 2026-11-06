@@ -1,17 +1,23 @@
 // Supabase Connectivity Verification Service
 import { getSupabaseClient } from './supabase.service';
 
-export interface ConnectivityResult {
-  isConnected: boolean;
-  error?: string;
-  details?: any;
-}
+export type ConnectivityResult =
+  | {
+      isConnected: true;
+      error?: never;
+      details?: {
+        hasActiveSession?: boolean;
+        sessionUser?: string | null;
+        configurationStatus?: SupabaseStatus['configurationStatus'];
+      };
+    }
+  | { isConnected: false; error?: string; details?: unknown };
 
 export interface TableDataResult {
   tableName: string;
   isAccessible: boolean;
   recordCount?: number;
-  sampleData?: any[];
+  sampleData?: Record<string, unknown>[];
   error?: string;
 }
 
@@ -121,8 +127,11 @@ export const checkSupabaseConfiguration = () => {
     }
     
     // Node.js context (via global mock setup in scripts)
-    if (typeof globalThis !== 'undefined' && (globalThis as any).import?.meta?.env) {
-      return (globalThis as any).import.meta.env[key];
+    if (typeof globalThis !== 'undefined') {
+      const mockEnv = (globalThis as typeof globalThis & {
+        import?: { meta?: { env?: Record<string, string | undefined> } };
+      }).import?.meta?.env;
+      if (mockEnv) return mockEnv[key];
     }
     
     // Direct Node.js environment access
@@ -211,7 +220,7 @@ export const generateSupabaseReport = (status: SupabaseStatus): string => {
   
   // Connection Status
   report += '🔗 CONNECTION STATUS:\n';
-  if (status.connection.isConnected) {
+  if (status.connection.isConnected === true) {
     report += '• Connection: ✅ SUCCESSFUL\n';
     if (status.connection.details?.hasActiveSession) {
       report += `• Active Session: ✅ User ID: ${status.connection.details.sessionUser}\n`;

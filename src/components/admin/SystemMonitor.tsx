@@ -14,7 +14,6 @@ interface SystemMonitorProps {
 
 const SystemMonitor = ({ currentLanguage }: SystemMonitorProps) => {
   const [supabaseStatus, setSupabaseStatus] = useState<ConnectionStatus>('checking');
-  const [supabaseError, setSupabaseError] = useState<string | null>(null);
 
   const content = {
     th: {
@@ -47,7 +46,6 @@ const SystemMonitor = ({ currentLanguage }: SystemMonitorProps) => {
 
   const handleCheckSupabaseStatus = async () => {
     setSupabaseStatus('checking');
-    setSupabaseError(null);
     console.log('Checking Supabase connection...');
     const result = await checkSupabaseConnection();
     if (result.ok) {
@@ -55,7 +53,6 @@ const SystemMonitor = ({ currentLanguage }: SystemMonitorProps) => {
       console.log('Supabase connection successful.');
     } else {
       setSupabaseStatus('error');
-      setSupabaseError(result.error || 'An unknown error occurred.');
       console.error('Supabase connection failed:', result.error);
     }
   };

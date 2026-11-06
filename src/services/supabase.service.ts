@@ -11,8 +11,11 @@ function getEnvVar(key: string, fallback: string = ''): string {
   }
   
   // Node.js context (via global mock setup in scripts)
-  if (typeof globalThis !== 'undefined' && (globalThis as any).import?.meta?.env) {
-    return (globalThis as any).import.meta.env[key] || fallback;
+  if (typeof globalThis !== 'undefined') {
+    const mockEnv = (globalThis as typeof globalThis & {
+      import?: { meta?: { env?: Record<string, string | undefined> } };
+    }).import?.meta?.env;
+    if (mockEnv) return mockEnv[key] || fallback;
   }
   
   // Direct Node.js environment access
@@ -82,10 +85,7 @@ interface PlaceRecord {
   amenities?: string[];
   created_at?: string;
   updated_at?: string;
-  details?: any;
-  external_links?: any;
-  coordinates?: any;
-  media?: { url: string; [key: string]: any }[];
+  media?: { url: string }[];
 }
 
 /**

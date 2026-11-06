@@ -39,7 +39,7 @@ export interface BadgeProps
   asChild?: boolean;
 }
 
-function Badge({ className, variant, asChild, ...props }: BadgeProps) {
+function Badge({ className, variant, asChild: _asChild, ...props }: BadgeProps) {
   const Comp = "div";
   return (
     <Comp

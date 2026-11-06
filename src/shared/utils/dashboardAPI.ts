@@ -89,7 +89,7 @@ export async function getRunningProcesses(): Promise<unknown[]> {
 export async function getSystemLogs(
   level?: string,
   source?: string,
-  limit: number = 100
+  _limit: number = 100
 ): Promise<LogEntry[]> {
   return logAndReject(`/dashboard/logs`);
 }
@@ -104,7 +104,7 @@ export async function getSystemMetrics(): Promise<SystemMetricsResponse> {
 /**
  * Trigger a system maintenance task
  */
-export async function triggerMaintenanceTask(taskType: string): Promise<{ success: boolean; message: string; taskId: string }> {
+export async function triggerMaintenanceTask(_taskType: string): Promise<{ success: boolean; message: string; taskId: string }> {
   return logAndReject('/dashboard/maintenance');
 }
 
@@ -118,7 +118,7 @@ export async function getApplicationHealth(): Promise<{ status: string; componen
 /**
  * Export logs as file
  */
-export async function exportLogs(format: 'json' | 'csv' = 'json', filters?: {
+export async function exportLogs(_format: 'json' | 'csv' = 'json', _filters?: {
   level?: string;
   source?: string;
   startDate?: string;

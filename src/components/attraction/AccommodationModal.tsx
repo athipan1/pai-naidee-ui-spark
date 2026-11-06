@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { Star, MapPin, ExternalLink, X, Hotel } from "lucide-react";
+import { Star, MapPin, ExternalLink, Hotel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";

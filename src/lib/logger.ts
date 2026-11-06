@@ -19,7 +19,7 @@ function base(level: LogLevel, ...args: unknown[]): void {
   
   // Keep using console to ensure error/warn are visible in production
   const consoleMethod = level === 'debug' ? 'log' : level;
-  (console as any)[consoleMethod](tag, ...args);
+  console[consoleMethod](tag, ...args);
 }
 
 export const logger = {

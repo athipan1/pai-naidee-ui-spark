@@ -1,3 +1,5 @@
+import { AttractionCardSkeleton, AttractionListSkeleton } from './SkeletonLoader';
+
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
   text?: string;
@@ -23,8 +25,6 @@ const LoadingSpinner = ({
 
   // Show skeleton loader instead of spinner for better UX
   if (useSkeletonLoader) {
-    const { AttractionListSkeleton, AttractionCardSkeleton } = require('./SkeletonLoader');
-    
     if (skeletonType === 'list') {
       return <AttractionListSkeleton count={skeletonCount} className={className} />;
     }

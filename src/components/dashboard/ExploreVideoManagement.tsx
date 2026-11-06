@@ -2,10 +2,9 @@ import { useState } from "react";
 import { Upload, Play, Trash2, Edit, Eye, Calendar, MapPin, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -64,7 +63,6 @@ const ExploreVideoManagement = ({ currentLanguage }: ExploreVideoManagementProps
     }
   ]);
 
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editingVideo, setEditingVideo] = useState<VideoPost | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -167,7 +165,6 @@ const ExploreVideoManagement = ({ currentLanguage }: ExploreVideoManagementProps
 
     setVideos(prev => [newVideo, ...prev]);
     setFormData({ title: "", location: "", province: "", hashtags: "", videoFile: null });
-    setShowUploadDialog(false);
     toast.success(t.uploadSuccess);
   };
 

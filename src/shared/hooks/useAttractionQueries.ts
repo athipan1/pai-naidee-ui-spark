@@ -1,5 +1,5 @@
 // React Query hooks for attraction data management
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as attractionAPI from '@/services/attraction.service';
 import { getRailwayNearbyAttractions } from '@/services/railway-api.service';
 import { AttractionDetail } from '@/shared/types/attraction';

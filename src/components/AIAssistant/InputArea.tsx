@@ -72,7 +72,7 @@ const InputArea: React.FC<InputAreaProps> = ({
             </span>
           </div>
           {transcript && (
-            <p className="text-sm text-travel-green-600 mt-1 italic">"{transcript}"</p>
+            <p className="text-sm text-travel-green-600 mt-1 italic">&quot;{transcript}&quot;</p>
           )}
         </div>
       )}

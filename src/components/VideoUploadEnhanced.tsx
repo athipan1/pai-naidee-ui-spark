@@ -18,7 +18,6 @@ import {
   Pause,
   Volume2,
   VolumeX,
-  RotateCcw,
   Check,
   AlertCircle
 } from "lucide-react";
@@ -297,7 +296,7 @@ const VideoUploadEnhanced: React.FC<VideoUploadEnhancedProps> = ({
 
       resetForm();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: t.uploadError,

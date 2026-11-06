@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Html } from '@react-three/drei';
+import { Canvas, useFrame, type ThreeElements } from '@react-three/fiber';
+import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface AnimationMultipliers {
@@ -52,40 +52,42 @@ const Avatar3D: React.FC<{
   return (
     <group ref={meshRef}>
       {/* Main head */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[1, 32, 32]} />
+      <mesh {...({ position: [0, 0, 0] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [1, 32, 32] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial 
           color={new THREE.Color(statusColor)}
-          transparent
+          {...({ transparent: true } satisfies ThreeElements['meshStandardMaterial'])}
           opacity={0.8}
-          emissive={new THREE.Color(statusColor)}
-          emissiveIntensity={animationMultipliers.glowIntensity * 0.2}
+          {...({
+            emissive: new THREE.Color(statusColor),
+            emissiveIntensity: animationMultipliers.glowIntensity * 0.2,
+          } satisfies ThreeElements['meshStandardMaterial'])}
         />
       </mesh>
       
       {/* Eyes */}
-      <mesh ref={eyeLeftRef} position={[-0.3, 0.2, 0.8]}>
-        <sphereGeometry args={[0.15, 16, 16]} />
+      <mesh ref={eyeLeftRef} {...({ position: [-0.3, 0.2, 0.8] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.15, 16, 16] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      <mesh ref={eyeRightRef} position={[0.3, 0.2, 0.8]}>
-        <sphereGeometry args={[0.15, 16, 16]} />
+      <mesh ref={eyeRightRef} {...({ position: [0.3, 0.2, 0.8] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.15, 16, 16] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
       
       {/* Eye pupils */}
-      <mesh position={[-0.3, 0.2, 0.9]}>
-        <sphereGeometry args={[0.08, 16, 16]} />
+      <mesh {...({ position: [-0.3, 0.2, 0.9] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.08, 16, 16] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="#000000" />
       </mesh>
-      <mesh position={[0.3, 0.2, 0.9]}>
-        <sphereGeometry args={[0.08, 16, 16]} />
+      <mesh {...({ position: [0.3, 0.2, 0.9] } satisfies ThreeElements['mesh'])}>
+        <sphereGeometry {...({ args: [0.08, 16, 16] } satisfies ThreeElements['sphereGeometry'])} />
         <meshStandardMaterial color="#000000" />
       </mesh>
       
       {/* Mouth */}
-      <mesh ref={mouthRef} position={[0, -0.3, 0.8]}>
-        <boxGeometry args={[0.3, 0.1, 0.1]} />
+      <mesh ref={mouthRef} {...({ position: [0, -0.3, 0.8] } satisfies ThreeElements['mesh'])}>
+        <boxGeometry {...({ args: [0.3, 0.1, 0.1] } satisfies ThreeElements['boxGeometry'])} />
         <meshStandardMaterial color="#ff4444" />
       </mesh>
       
@@ -117,8 +119,8 @@ const ThreeJSScene: React.FC<ThreeJSSceneProps> = ({
   return (
     <div className="w-full h-full">
       <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
+        <ambientLight {...({ intensity: 0.5 } satisfies ThreeElements['ambientLight'])} />
+        <pointLight {...({ position: [10, 10, 10] } satisfies ThreeElements['pointLight'])} />
         <Avatar3D 
           status={status}
           animationMultipliers={animationMultipliers}

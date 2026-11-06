@@ -65,7 +65,7 @@ const ContentManagement = ({ currentLanguage }: ContentManagementProps) => {
         title: "Success",
         description: t.uploadSuccess
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: t.uploadError,

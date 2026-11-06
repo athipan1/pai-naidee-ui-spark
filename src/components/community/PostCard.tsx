@@ -4,10 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  Bookmark,
   MapPin,
   Building2,
   MoreHorizontal,
@@ -36,13 +32,11 @@ export const PostCard: React.FC<PostCardProps> = ({
   onLike,
   onSave,
   onShare,
-  onComment,
   onOpenDetail,
   isLoading = false,
   className
 }) => {
   const [showComments, setShowComments] = useState(false);
-  const [imageIndex, setImageIndex] = useState(0);
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();

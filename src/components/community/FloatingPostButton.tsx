@@ -23,10 +23,6 @@ interface FloatingPostButtonProps {
 
 export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
   onCreatePost,
-  onPhotoPost,
-  onVideoPost,
-  onStoryPost,
-  onLocationPost,
   className
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -89,7 +85,7 @@ export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
     }
   };
 
-  const handlePostSubmit = (postData: any) => {
+  const handlePostSubmit = (postData: unknown) => {
     // Handle the post submission
     console.log('Post data:', postData);
     onCreatePost();
@@ -108,7 +104,7 @@ export const FloatingPostButton: React.FC<FloatingPostButtonProps> = ({
               exit={{ opacity: 0 }}
               className="absolute bottom-16 right-0 space-y-3"
             >
-              {quickActions.map((action, index) => (
+              {quickActions.map(action => (
                 <motion.div
                   key={action.label}
                   initial={{ opacity: 0, y: 20, scale: 0.8 }}

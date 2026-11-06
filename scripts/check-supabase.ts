@@ -37,11 +37,7 @@ loadEnvFile(join(projectRoot, '.env'));
 
 // Mock import.meta.env for Node.js context
 if (typeof globalThis !== 'undefined') {
-  (globalThis as any).import = {
-    meta: {
-      env: process.env
-    }
-  };
+  Object.assign(globalThis, { import: { meta: { env: process.env } } });
 }
 
 import { 

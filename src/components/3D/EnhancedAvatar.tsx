@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, type ThreeElements } from '@react-three/fiber';
 import { Mesh, Group } from 'three';
 import { Sphere, Box, Cylinder } from '@react-three/drei';
 import { GestureState } from './hooks/useEnhancedAIAssistant';
@@ -287,12 +287,12 @@ const EnhancedAvatar: React.FC<EnhancedAvatarProps> = ({
     >
       {/* Body */}
       <Cylinder ref={bodyRef} args={[0.6, 0.8, 1.5, boxDetail]} position={[0, -0.75, 0]}>
-        <primitive object={createOptimizedMaterial(statusColor, quality)} />
+        <primitive {...({ object: createOptimizedMaterial(statusColor, quality) } satisfies ThreeElements['primitive'])} />
       </Cylinder>
 
       {/* Head */}
       <Sphere ref={headRef} args={[0.8, sphereDetail, sphereDetail]} position={[0, 0.5, 0]}>
-        <primitive object={createOptimizedMaterial(statusColor, quality)} />
+        <primitive {...({ object: createOptimizedMaterial(statusColor, quality) } satisfies ThreeElements['primitive'])} />
       </Sphere>
 
       {/* Eyes */}
@@ -317,15 +317,15 @@ const EnhancedAvatar: React.FC<EnhancedAvatarProps> = ({
       </Box>
 
       {/* Arms */}
-      <group ref={leftArmRef} position={[-0.9, 0, 0]}>
+      <group ref={leftArmRef} {...({ position: [-0.9, 0, 0] } satisfies ThreeElements['group'])}>
         <Cylinder args={[0.15, 0.15, 1, boxDetail]} rotation={[0, 0, Math.PI / 2]}>
-          <primitive object={createOptimizedMaterial(statusColor, quality)} />
+          <primitive {...({ object: createOptimizedMaterial(statusColor, quality) } satisfies ThreeElements['primitive'])} />
         </Cylinder>
       </group>
       
-      <group ref={rightArmRef} position={[0.9, 0, 0]}>
+      <group ref={rightArmRef} {...({ position: [0.9, 0, 0] } satisfies ThreeElements['group'])}>
         <Cylinder args={[0.15, 0.15, 1, boxDetail]} rotation={[0, 0, Math.PI / 2]}>
-          <primitive object={createOptimizedMaterial(statusColor, quality)} />
+          <primitive {...({ object: createOptimizedMaterial(statusColor, quality) } satisfies ThreeElements['primitive'])} />
         </Cylinder>
       </group>
 
@@ -334,9 +334,7 @@ const EnhancedAvatar: React.FC<EnhancedAvatarProps> = ({
         <Sphere args={[1.2, 16, 16]} position={[0, 0, 0]}>
           <meshStandardMaterial 
             color={statusColor} 
-            transparent 
-            opacity={0.1} 
-            wireframe 
+            {...({ transparent: true, opacity: 0.1, wireframe: true } satisfies ThreeElements['meshStandardMaterial'])}
           />
         </Sphere>
       )}
@@ -345,9 +343,7 @@ const EnhancedAvatar: React.FC<EnhancedAvatarProps> = ({
         <Sphere args={[1.5, 16, 16]} position={[0, 0, 0]}>
           <meshStandardMaterial 
             color="#ffffff" 
-            transparent 
-            opacity={0.3} 
-            wireframe 
+            {...({ transparent: true, opacity: 0.3, wireframe: true } satisfies ThreeElements['meshStandardMaterial'])}
           />
         </Sphere>
       )}

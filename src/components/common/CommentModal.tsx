@@ -28,7 +28,6 @@ interface CommentModalProps {
 const CommentModal = ({
   isOpen,
   onClose,
-  videoId,
   currentLanguage,
 }: CommentModalProps) => {
   const [comments, setComments] = useState<Comment[]>([

@@ -29,7 +29,7 @@ const getErrorType = (error: Error | null): "network" | "server" | "not_found" |
   return "generic";
 };
 
-const getErrorMessages = (errorType: string, currentLanguage: "th" | "en" = "en") => {
+const getErrorMessages = (errorType: string) => {
   const messages = {
     network: {
       th: {
@@ -95,7 +95,7 @@ export const APIErrorDisplay: React.FC<APIErrorDisplayProps> = ({
   if (!error && !fallbackMessage) return null;
   
   const errorType = getErrorType(error);
-  const messages = getErrorMessages(errorType, currentLanguage);
+  const messages = getErrorMessages(errorType);
   
   const getIcon = () => {
     switch (errorType) {

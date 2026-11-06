@@ -156,12 +156,6 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const validateFile = (file: File) => {
     const validTypes = ['video/mp4', 'video/mov', 'video/quicktime', 'video/avi'];
     const maxSize = 100 * 1024 * 1024; // 100MB
@@ -315,7 +309,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
 
       resetForm();
       onOpenChange(false);
-    } catch (_error) {
+    } catch {
       toast({
         title: "Error",
         description: t.uploadError,
@@ -489,12 +483,6 @@ const VideoUpload: React.FC<VideoUploadProps> = ({
                         src={videoPreview}
                         className="w-full h-48 object-contain"
                         muted={isMuted}
-                        onLoadedMetadata={() => {
-                          if (videoRef.current) {
-                            // Duration logging for debugging
-                            // console.log("Duration:", formatDuration(videoRef.current.duration));
-                          }
-                        }}
                       />
                       <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
