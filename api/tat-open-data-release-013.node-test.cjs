@@ -10,9 +10,9 @@ const expected=[
 ];
 test('batch 013 publishes only the 3 approved Chon Buri source sites',()=>{
  assert.deepEqual(batch.map(p=>p.id),expected.map(r=>r[0]));
- assert.equal(SEED_PLACES.length,193);
- assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,70);
- assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,193);
+ assert.equal(SEED_PLACES.length,194);
+ assert.equal(SEED_PLACES.filter(p=>p.province==='ชลบุรี').length,71);
+ assert.equal(new Set(SEED_PLACES.map(p=>p.id)).size,194);
  assert.deepEqual(auditPlaceImport({places:SEED_PLACES}).errors,[]);
 });
 test('preserve TAT IDs and documented GPS correction; no invented fields',()=>{
