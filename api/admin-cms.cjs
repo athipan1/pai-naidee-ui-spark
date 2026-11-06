@@ -280,7 +280,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     if (!req.file) return res.status(400).json({ error: 'Image file required (JPEG, PNG or WebP; max 5 MB).' });
     try { res.status(201).json({ imageUrl: await uploadImage(req.file) }); }
     catch (error) {
-      if (error instanceof InvalidImageError) return res.status(400).json({ error: error.message });
+      if (error instanceof InvalidImageError) return res.status(error.status).json({ error: error.message });
       throw error;
     }
   }));

@@ -18,7 +18,12 @@ function createRailwayMediaStorage(env = process.env) {
 const IMAGE_TYPES = Object.freeze({ jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' });
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const filenamePattern = /^[a-f0-9-]{36}\.(jpg|png|webp)$/;
-class InvalidImageError extends Error {}
+class InvalidImageError extends Error {
+  constructor(message, status = 400) {
+    super(message);
+    this.status = status;
+  }
+}
 
 function createImageUpload() {
   return multer({
@@ -66,7 +71,8 @@ async function uploadImage(storage, file) {
   const ext = Object.keys(IMAGE_TYPES).find(key => IMAGE_TYPES[key] === file.mimetype);
   if (!ext) throw new InvalidImageError('Unsupported image format.');
   const bytes = file.buffer;
-  if (!Buffer.isBuffer(bytes) || bytes.length > MAX_IMAGE_BYTES) throw new InvalidImageError('Image must be at most 5 MB.');
+  if (!Buffer.isBuffer(bytes)) throw new InvalidImageError('Image bytes are missing.');
+  if (bytes.length > MAX_IMAGE_BYTES) throw new InvalidImageError('Image must be at most 5 MB.', 413);
   const valid = ext === 'jpg' ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
     : ext === 'png' ? bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
     : bytes.length >= 12 && bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP';
