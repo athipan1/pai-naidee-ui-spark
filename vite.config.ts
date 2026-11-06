@@ -42,6 +42,10 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit
           runtimeCaching: [
             {
+              urlPattern: ({ url }) => /^\/(?:api\/admin|admin|login)(?:\/|$)/.test(url.pathname),
+              handler: 'NetworkOnly',
+            },
+            {
               urlPattern: ({ request }) => request.mode === 'navigate',
               handler: 'NetworkFirst',
               // Slow mobile connections must not serve old HTML while online:

@@ -1,4 +1,5 @@
 {
+  "git": { "deploymentEnabled": { "fix/admin-cms-production-validation": false } },
   "builds": [
     {
       "src": "api/api-server.cjs",

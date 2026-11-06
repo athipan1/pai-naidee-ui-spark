@@ -10,6 +10,20 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    services:
+      cms-postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: cms_test
+          POSTGRES_DB: painaidee_cms_test
+          POSTGRES_PASSWORD: cms_local_fixture
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U cms_test -d painaidee_cms_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,6 +45,11 @@ jobs:
 
       - name: Run API security tests
         run: npm test --prefix api
+
+      - name: Run Admin CMS integration tests against isolated PostgreSQL
+        env:
+          CMS_TEST_DATABASE_PORT: ${{ job.services.cms-postgres.ports[5432] }}
+        run: node --test api/admin-cms.integration.cjs
 
   read-only-e2e:
     name: Read-Only E2E (Production Build)
@@ -56,6 +75,18 @@ jobs:
 
       - name: Test Android Chrome and iPhone Safari trip planning
         run: npm run test:e2e:trip-planner
+
+      - name: Test Admin CMS in Chrome and iPhone Safari with mocked APIs
+        run: npx playwright test --config=playwright.admin-cms.config.ts
+
+      - name: Upload Admin CMS screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-cms-screenshots
+          path: test-results/admin-cms/**/admin-cms.png
+          if-no-files-found: ignore
+          retention-days: 14
 
   security-audit:
     name: Security Audit

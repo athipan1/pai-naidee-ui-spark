@@ -2,14 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { randomUUID } = require('node:crypto');
-const multer = require('multer');
 const { registerAdminCms } = require('./admin-cms.cjs');
 const { registerAiTripRoutes } = require('./ai-trip-plan.cjs');
 const { registerBasicTripRoadRoutes } = require('./basic-trip-road.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
 const { ensureAiSettings,registerAiSettingsRoutes } = require('./ai-model-settings.cjs');
 const { authRoutes } = require('./railway-admin-auth.cjs');
-const { createRailwayMediaStorage, registerRailwayMedia, uploadImage } = require('./railway-media.cjs');
+const { createRailwayMediaStorage, registerRailwayMedia, uploadImage, createImageUpload } = require('./railway-media.cjs');
 const {
   buildCorsOptions,
   createRateLimiter,
@@ -41,18 +40,15 @@ app.use('/api', createRateLimiter({ windowMs: 60_000, max: 180 }));
 
 const storage = createRailwayMediaStorage();
 const requireAdmin = authRoutes(app, { getSql, limitLogin: createRateLimiter({ windowMs: 15 * 60_000, max: 10, keyPrefix: 'admin-login' }) });
-const images = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)),
-});
 registerAdminCms(app, {
   getSql,
   listPlaces,
   requireAdmin,
-  storage: { single: images.single.bind(images) },
+  storage: createImageUpload(),
   uploadImage: (file) => uploadImage(storage, file),
   invalidateSearchIndex,
 });
-registerRailwayMedia(app, { getSql, storage });
+registerRailwayMedia(app, { getSql, storage, requireAdmin });
 registerAiTripRoutes(app, { listPlaces,getSql });
 registerBasicTripRoadRoutes(app, { listPlaces });
 registerAiHealthRoutes(app, { requireAdmin,getSql });
@@ -231,6 +227,9 @@ app.get('/api/health', async (_req, res) => {
 });
 
 app.use((error, _req, res, _next) => {
+  if (error?.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Invalid JSON body.' });
+  }
   if (error?.type === 'entity.too.large') {
     return res.status(413).json({ error: 'Request body is too large.' });
   }

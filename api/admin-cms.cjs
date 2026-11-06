@@ -1,19 +1,59 @@
+const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
+
+const draftVersion = value => typeof value === 'string' && /^\d{1,12}\.\d{6}$/.test(value);
+
+function validateImageUrl(imageUrl) {
+  if (!imageUrl) return null;
+  try {
+    const url = new URL(imageUrl);
+    if (url.protocol !== 'https:' || url.username || url.password || /[\s<>]/.test(imageUrl)) throw new Error();
+    const host = url.hostname.replace(/\.$/, '');
+    const googlePhotoHost = /(^|\.)(googleusercontent\.com|ggpht\.com|gstatic\.com|googleapis\.com)$/.test(host);
+    const googleMapsLink = /(^|\.)google\.(com|co\.th)$/.test(host) && url.pathname.startsWith('/maps');
+    if (googlePhotoHost || googleMapsLink || /\/google-preview(?:\/|$)/i.test(url.pathname)) {
+      return 'Google Places images cannot be saved in the CMS.';
+    }
+    return null;
+  } catch {
+    return 'Image URL must be HTTPS.';
+  }
+}
+
+async function findDuplicates(tx, p, targetId) {
+  const local = p.nameLocal || p.name;
+  return tx`SELECT id, name FROM places WHERE id IS DISTINCT FROM ${targetId} AND (
+    (LOWER(TRIM(province)) = LOWER(${p.province}) AND (
+      LOWER(TRIM(name)) IN (LOWER(${p.name}), LOWER(${local})) OR
+      LOWER(TRIM(name_local)) IN (LOWER(${p.name}), LOWER(${local}))
+    )) OR (ABS(lat - ${p.lat}) < 0.0003 AND ABS(lng - ${p.lng}) < 0.0003)
+  ) LIMIT 3`;
+}
+
+async function preservePlaceImage(tx, placeId, url, title) {
+  if (!url) return;
+  const existing = await tx`SELECT id FROM media WHERE place_id = ${placeId} AND url = ${url} AND type = 'image' LIMIT 1`;
+  if (!existing.length) await tx`INSERT INTO media (id, place_id, url, type, title)
+    VALUES (${`cms-media:${randomUUID()}`}, ${placeId}, ${url}, 'image', ${title})`;
+}
 
 function cleanPlace(input) {
   const text = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
   const name = text(input?.name, 200);
   const province = text(input?.province, 120);
   const category = text(input?.category, 120);
-  const lat = Number(input?.lat);
-  const lng = Number(input?.lng);
+  const number = value => typeof value === 'number' || (typeof value === 'string' && value.trim())
+    ? Number(value) : NaN;
+  const lat = number(input?.lat);
+  const lng = number(input?.lng);
   const imageUrl = text(input?.imageUrl, 2000);
   const errors = [];
   if (!name || !province || !category) errors.push('Name, province and category are required.');
-  if (input?.lat === '' || input?.lng === '' || !Number.isFinite(lat) || !Number.isFinite(lng) || lat < 5 || lat > 21 || lng < 97 || lng > 106) errors.push('Coordinates must be within Thailand.');
-  if (imageUrl && (!/^https:\/\//i.test(imageUrl) || /[\s<>]/.test(imageUrl))) errors.push('Image URL must be HTTPS.');
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < 5 || lat > 21 || lng < 97 || lng > 106) errors.push('Coordinates must be within Thailand.');
+  const imageError = validateImageUrl(imageUrl);
+  if (imageError) errors.push(imageError);
   if (typeof input?.description === 'string' && input.description.length > 10000) errors.push('Description is too long.');
   return {
     errors,
@@ -25,15 +65,16 @@ function cleanPlace(input) {
 function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {} }) {
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
-    catch (error) {
-      console.error('Admin CMS failed:', error?.message);
+    catch {
+      console.error('Admin CMS failed.');
       res.status(503).json({ error: 'Admin CMS is unavailable.' });
     }
   };
 
   app.get('/api/admin/places', requireAdmin, wrap(async (_req, res) => {
     const sql = getSql();
-    const drafts = await sql`SELECT id, payload, status, target_place_id, created_at, updated_at FROM place_drafts ORDER BY updated_at DESC LIMIT 100`;
+    const drafts = await sql`SELECT id, payload, status, target_place_id, created_at, updated_at,
+      EXTRACT(EPOCH FROM updated_at)::text AS version FROM place_drafts ORDER BY updated_at DESC LIMIT 100`;
     res.json({ drafts });
   }));
 
@@ -80,34 +121,38 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     if (!places.length) return res.status(404).json({ error: 'Place not found.' });
     if ([places[0].name, places[0].name_local].some(name => name && aliasKey(name) === parsed.key))
       return res.status(409).json({ error: 'Already a primary place name.' });
-    const existing = await sql`SELECT id FROM place_aliases WHERE place_id = ${req.params.placeId} AND alias_key = ${parsed.key}`;
-    if (existing.length) return res.status(409).json({ error: 'Alias already exists.' });
     const id = randomUUID();
-    await sql`INSERT INTO place_aliases (id, place_id, alias_name, alias_key, language, created_by)
-      VALUES (${id}, ${req.params.placeId}, ${parsed.name}, ${parsed.key}, ${parsed.language}, ${req.auth.user.id})`;
+    const inserted = await sql`INSERT INTO place_aliases (id, place_id, alias_name, alias_key, language, created_by)
+      VALUES (${id}, ${req.params.placeId}, ${parsed.name}, ${parsed.key}, ${parsed.language}, ${req.auth.user.id})
+      ON CONFLICT (place_id, alias_key) DO NOTHING RETURNING id`;
+    if (!inserted.length) return res.status(409).json({ error: 'Alias already exists.' });
     res.status(201).json({ id, status: 'pending' });
   }));
 
   app.post('/api/admin/aliases/:aliasId/review', requireAdmin, wrap(async (req, res) => {
     if (!['approved', 'rejected'].includes(req.body?.status))
       return res.status(400).json({ error: 'Invalid review status.' });
-    const sql = getSql();
-    if (req.body.status === 'approved') {
-      const conflicts = await sql`SELECT a.id FROM place_aliases candidate
-        JOIN place_aliases a ON a.alias_key = candidate.alias_key AND a.place_id <> candidate.place_id
-        WHERE candidate.id = ${req.params.aliasId} AND a.status = 'approved' LIMIT 1`;
-      if (conflicts.length) return res.status(409).json({ error: 'This alias already belongs to another approved place.' });
-      const primaryConflicts = await sql`SELECT p.id FROM place_aliases candidate JOIN places p
-        ON p.id <> candidate.place_id AND (
-          LOWER(TRIM(p.name)) = LOWER(candidate.alias_name) OR LOWER(TRIM(p.name_local)) = LOWER(candidate.alias_name))
-        WHERE candidate.id = ${req.params.aliasId} LIMIT 1`;
-      if (primaryConflicts.length) return res.status(409).json({ error: 'This alias matches another place’s primary name.' });
-    }
-    const rows = await sql`UPDATE place_aliases SET status = ${req.body.status}, reviewed_by = ${req.auth.user.id},
-      reviewed_at = NOW() WHERE id = ${req.params.aliasId} AND status = 'pending' RETURNING id`;
-    if (!rows.length) return res.status(404).json({ error: 'Pending alias not found.' });
+    const result = await getSql().begin(async tx => {
+      if (req.body.status === 'approved') {
+        // Serialize approvals so two candidates cannot claim the same alias concurrently.
+        await tx`LOCK TABLE place_aliases IN SHARE ROW EXCLUSIVE MODE`;
+        const conflicts = await tx`SELECT a.id FROM place_aliases candidate
+          JOIN place_aliases a ON a.alias_key = candidate.alias_key AND a.place_id <> candidate.place_id
+          WHERE candidate.id = ${req.params.aliasId} AND a.status = 'approved' LIMIT 1`;
+        if (conflicts.length) return { code: 409, error: 'This alias already belongs to another approved place.' };
+        const primaryConflicts = await tx`SELECT p.id FROM place_aliases candidate JOIN places p
+          ON p.id <> candidate.place_id AND (
+            LOWER(TRIM(p.name)) = LOWER(candidate.alias_name) OR LOWER(TRIM(p.name_local)) = LOWER(candidate.alias_name))
+          WHERE candidate.id = ${req.params.aliasId} LIMIT 1`;
+        if (primaryConflicts.length) return { code: 409, error: 'This alias matches another place’s primary name.' };
+      }
+      const [row] = await tx`UPDATE place_aliases SET status = ${req.body.status}, reviewed_by = ${req.auth.user.id},
+        reviewed_at = NOW() WHERE id = ${req.params.aliasId} AND status = 'pending' RETURNING id`;
+      return row ? { code: 200, id: row.id } : { code: 404, error: 'Pending alias not found.' };
+    });
+    if (result.error) return res.status(result.code).json({ error: result.error });
     invalidateSearchIndex();
-    res.json({ id: rows[0].id, status: req.body.status });
+    res.json({ id: result.id, status: req.body.status });
   }));
 
   app.get('/api/admin/catalog/:placeId/media', requireAdmin, wrap(async (req, res) => {
@@ -123,89 +168,121 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   }));
 
   app.post('/api/admin/catalog/:placeId/edit', requireAdmin, wrap(async (req, res) => {
-    const sql = getSql();
-    const rows = await sql`SELECT id, name, name_local, province, category, description, lat, lng, image_url, updated_at
-      FROM places WHERE id = ${req.params.placeId}`;
-    const place = rows[0];
-    if (!place) return res.status(404).json({ error: 'Place not found.' });
-    const existing = await sql`SELECT id FROM place_drafts WHERE target_place_id = ${place.id} AND status = 'draft' LIMIT 1`;
-    if (existing.length) return res.status(409).json({ error: 'An edit draft already exists for this place.' });
-    const id = randomUUID();
-    const payload = { name: place.name, nameLocal: place.name_local || '', province: place.province,
-      category: place.category, description: place.description || '', lat: place.lat, lng: place.lng, imageUrl: place.image_url || '' };
-    await sql`INSERT INTO place_drafts (id, payload, author_id, target_place_id, target_updated_at)
-      VALUES (${id}, ${sql.json(payload)}, ${req.auth.user.id}, ${place.id}, ${place.updated_at})`;
-    res.status(201).json({ id, status: 'draft', target_place_id: place.id, payload });
+    const result = await getSql().begin(async tx => {
+      const [place] = await tx`SELECT id, name, name_local, province, category, description, lat, lng, image_url
+        FROM places WHERE id = ${req.params.placeId} FOR UPDATE`;
+      if (!place) return { code: 404, error: 'Place not found.' };
+      const existing = await tx`SELECT id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version
+        FROM place_drafts WHERE target_place_id = ${place.id} AND status = 'draft' ORDER BY updated_at DESC LIMIT 1`;
+      if (existing.length) return { code: 200, draft: existing[0] };
+      const id = randomUUID();
+      const payload = { name: place.name, nameLocal: place.name_local || '', province: place.province,
+        category: place.category, description: place.description || '', lat: place.lat, lng: place.lng, imageUrl: place.image_url || '' };
+      const [draft] = await tx`INSERT INTO place_drafts (id, payload, author_id, target_place_id, target_updated_at)
+        SELECT ${id}, ${tx.json(payload)}, ${req.auth.user.id}, id, updated_at FROM places WHERE id = ${place.id}
+        RETURNING id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version`;
+      return { code: 201, draft };
+    });
+    res.status(result.code).json(result.draft || { error: result.error });
   }));
 
   app.post('/api/admin/places', requireAdmin, wrap(async (req, res) => {
     const parsed = cleanPlace(req.body);
     if (parsed.errors.length) return res.status(400).json({ errors: parsed.errors });
     const sql = getSql();
-    const { value } = parsed;
-    // Drafts are isolated from public catalog. Publication is explicit.
     const id = randomUUID();
-    await sql`INSERT INTO place_drafts (id, payload, author_id) VALUES (${id}, ${sql.json(value)}, ${req.auth.user.id})`;
-    res.status(201).json({ id, status: 'draft' });
+    const [draft] = await sql`INSERT INTO place_drafts (id, payload, author_id)
+      VALUES (${id}, ${sql.json(parsed.value)}, ${req.auth.user.id})
+      RETURNING id, status, payload, EXTRACT(EPOCH FROM updated_at)::text AS version`;
+    res.status(201).json(draft);
   }));
 
   app.put('/api/admin/places/:draftId', requireAdmin, wrap(async (req, res) => {
     const parsed = cleanPlace(req.body);
     if (parsed.errors.length) return res.status(400).json({ errors: parsed.errors });
+    const version = req.body?.version;
+    if (!draftVersion(version)) return res.status(400).json({ error: 'Draft version required. Reload the draft.' });
     const sql = getSql();
-    const rows = await sql`UPDATE place_drafts SET payload = ${sql.json(parsed.value)}, updated_at = NOW()
-      WHERE id = ${req.params.draftId} AND status = 'draft' RETURNING id`;
-    if (!rows.length) return res.status(404).json({ error: 'Editable draft not found.' });
-    res.json({ id: rows[0].id, status: 'draft' });
+    const result = await sql.begin(async tx => {
+      const [draft] = await tx`SELECT status, EXTRACT(EPOCH FROM updated_at)::text AS version
+        FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
+      if (!draft) return { code: 404, error: 'Editable draft not found.' };
+      if (draft.status !== 'draft' || draft.version !== version) return { code: 409, error: 'Draft changed. Reload it before saving.' };
+      const [saved] = await tx`UPDATE place_drafts SET payload = ${tx.json(parsed.value)},
+        updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
+        WHERE id = ${req.params.draftId}
+        RETURNING id, status, payload, target_place_id, EXTRACT(EPOCH FROM updated_at)::text AS version`;
+      return { code: 200, draft: saved };
+    });
+    res.status(result.code).json(result.draft || { error: result.error });
   }));
 
   app.post('/api/admin/places/:draftId/publish', requireAdmin, wrap(async (req, res) => {
     const sql = getSql();
     const result = await sql.begin(async tx => {
-      const rows = await tx`SELECT * FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
-      const draft = rows[0];
-      if (!draft || draft.status !== 'draft') return { status: 404, error: 'Draft not found.' };
+      const [draft] = await tx`SELECT *, EXTRACT(EPOCH FROM updated_at)::text AS version
+        FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
+      if (!draft) return { status: 404, error: 'Draft not found.' };
+      if (draft.status === 'published') return { status: 200, placeId: draft.published_place_id, published: true };
+      if (!draftVersion(req.body?.version)) return { status: 400, error: 'Draft version required. Reload the draft.' };
+      if (draft.version !== req.body.version) return { status: 409, error: 'Draft changed. Reload it before publishing.' };
       const parsed = cleanPlace(draft.payload);
       if (parsed.errors.length) return { status: 400, errors: parsed.errors };
       const p = parsed.value;
+      // Serialize the duplicate check and write, including publications of different drafts.
+      await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
       if (draft.target_place_id) {
-        const current = await tx`SELECT id, updated_at, image_url FROM places WHERE id = ${draft.target_place_id} FOR UPDATE`;
-        if (!current.length) return { status: 404, error: 'Original place no longer exists.' };
-        if (new Date(current[0].updated_at).getTime() !== new Date(draft.target_updated_at).getTime())
+        const [current] = await tx`SELECT id, name, name_local, province, lat, lng, image_url,
+          updated_at IS NOT DISTINCT FROM (SELECT target_updated_at FROM place_drafts WHERE id = ${draft.id}) AS version_matches
+          FROM places WHERE id = ${draft.target_place_id} FOR UPDATE`;
+        if (!current) return { status: 404, error: 'Original place no longer exists.' };
+        if (!current.version_matches)
           return { status: 409, error: 'Place changed since this draft was created. Review the latest place before updating.' };
+        const identityChanged = p.name !== current.name || p.nameLocal !== (current.name_local || '') ||
+          p.province !== current.province || p.lat !== current.lat || p.lng !== current.lng;
+        if (identityChanged) {
+          const duplicates = await findDuplicates(tx, p, current.id);
+          if (duplicates.length) return { status: 409, error: 'Possible duplicate place.', duplicates };
+        }
         await tx`UPDATE places SET name = ${p.name}, name_local = ${p.nameLocal}, province = ${p.province},
           category = ${p.category}, description = ${p.description}, lat = ${p.lat}, lng = ${p.lng},
-          image_url = ${p.imageUrl || null}, updated_at = NOW() WHERE id = ${draft.target_place_id}`;
-        if (p.imageUrl && p.imageUrl !== current[0].image_url) {
-          const alreadySaved = await tx`SELECT id FROM media WHERE place_id = ${draft.target_place_id} AND url = ${p.imageUrl} LIMIT 1`;
-          if (!alreadySaved.length) await tx`INSERT INTO media (id, place_id, url, type, title)
-            VALUES (${`cms-media:${randomUUID()}`}, ${draft.target_place_id}, ${p.imageUrl}, 'image', ${p.name})`;
+          image_url = ${p.imageUrl || null}, updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
+          WHERE id = ${draft.target_place_id}`;
+        if ((p.imageUrl || null) !== current.image_url) {
+          await preservePlaceImage(tx, current.id, current.image_url, current.name);
+          await preservePlaceImage(tx, current.id, p.imageUrl, p.name);
         }
-        await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${draft.target_place_id}, updated_at = NOW() WHERE id = ${draft.id}`;
-        return { status: 200, placeId: draft.target_place_id, published: true, updated: true };
+        await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${current.id}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
+        return { status: 200, placeId: current.id, published: true, updated: true };
       }
-      // Cross-check against existing names and near-identical coordinates, including seed data.
-      const duplicates = await tx`SELECT id, name FROM places WHERE
-        (LOWER(TRIM(name)) = LOWER(${p.name}) OR (name_local IS NOT NULL AND LOWER(TRIM(name_local)) = LOWER(${p.nameLocal || p.name})))
-        AND LOWER(TRIM(province)) = LOWER(${p.province})
-        OR (ABS(lat - ${p.lat}) < 0.0003 AND ABS(lng - ${p.lng}) < 0.0003) LIMIT 3`;
+      const duplicates = await findDuplicates(tx, p, null);
       if (duplicates.length) return { status: 409, error: 'Possible duplicate place.', duplicates };
       const placeId = `cms:${draft.id}`;
       await tx`INSERT INTO places (id, name, name_local, province, category, description, lat, lng, image_url, source_name)
         VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${p.description}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, 'PaiNaiDee Admin CMS')`;
       if (p.imageUrl) await tx`INSERT INTO media (id, place_id, url, type, title)
         VALUES (${`cms-media:${draft.id}`}, ${placeId}, ${p.imageUrl}, 'image', ${p.name})`;
-      await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = NOW() WHERE id = ${draft.id}`;
+      await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
       return { status: 200, placeId, published: true };
     });
     if (result.published) invalidateSearchIndex();
     res.status(result.status).json(result);
   }));
 
-  app.post('/api/admin/media', requireAdmin, storage.single('image'), wrap(async (req, res) => {
+  const parseImage = storage.single('image');
+  app.post('/api/admin/media', requireAdmin, (req, res, next) => {
+    parseImage(req, res, error => {
+      if (!error) return next();
+      if (error.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: 'Image must be at most 5 MB.' });
+      res.status(400).json({ error: 'Invalid image upload.' });
+    });
+  }, wrap(async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'Image file required (JPEG, PNG or WebP; max 5 MB).' });
     try { res.status(201).json({ imageUrl: await uploadImage(req.file) }); }
-    catch (error) { res.status(400).json({ error: error.message }); }
+    catch (error) {
+      if (error instanceof InvalidImageError) return res.status(400).json({ error: error.message });
+      throw error;
+    }
   }));
 }
 

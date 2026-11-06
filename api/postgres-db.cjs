@@ -228,15 +228,7 @@ const LEGACY_DEMO_VALUES = [
   ['4', 4.5, 3156, 'https://images.unsplash.com/photo-1590118432058-f2744d6897db?auto=format&fit=crop&w=1200&q=80'],
 ];
 
-async function ensureSchema() {
-  // Fail closed before opening the DB or making any schema/seed writes.
-  assertPlaceImportReady({
-    places: SEED_PLACES, wikimediaMedia: VERIFIED_WIKIMEDIA_MEDIA,
-    missingMedia: VERIFIED_MISSING_MEDIA, userMedia: USER_PROVIDED_MEDIA,
-    requireFullCoverage: true,
-  });
-  const sql = getSql();
-
+async function ensureSchemaTables(sql) {
   await sql.unsafe(`
     CREATE TABLE IF NOT EXISTS places (
       id TEXT PRIMARY KEY,
@@ -349,6 +341,17 @@ async function ensureSchema() {
     ALTER TABLE media ADD COLUMN IF NOT EXISTS source_page TEXT;
     CREATE INDEX IF NOT EXISTS idx_places_coordinates ON places (lat, lng);
   `);
+}
+
+async function ensureSchema() {
+  // Fail closed before opening the DB or making any schema/seed writes.
+  assertPlaceImportReady({
+    places: SEED_PLACES, wikimediaMedia: VERIFIED_WIKIMEDIA_MEDIA,
+    missingMedia: VERIFIED_MISSING_MEDIA, userMedia: USER_PROVIDED_MEDIA,
+    requireFullCoverage: true,
+  });
+  const sql = getSql();
+  await ensureSchemaTables(sql);
 
   for (const place of SEED_PLACES) {
     await sql`
@@ -508,6 +511,8 @@ function normalizeJsonArray(value) {
 
 function normalizePlace(row) {
   const media = normalizeJsonArray(row.media);
+  const mainIndex = media.findIndex(item => item.url === row.image_url);
+  if (mainIndex > 0) media.unshift(...media.splice(mainIndex, 1));
   return {
     id: row.id,
     name: row.name,
@@ -744,6 +749,7 @@ module.exports = {
   invalidateSearchIndex: () => { searchIndex = null; searchIndexExpires = 0; },
   closeDatabase,
   ensureSchema,
+  ensureSchemaTables,
   getPlaceById,
   listPlaces,
   listPlaceFacets,
