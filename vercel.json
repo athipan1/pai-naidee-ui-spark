@@ -1,5 +1,5 @@
 {
-  "git": { "deploymentEnabled": { "fix/admin-cms-production-validation": false } },
+  "git": { "deploymentEnabled": { "fix/admin-cms-production-validation": false, "fix/lint-baseline-production-readiness": false } },
   "builds": [
     {
       "src": "api/api-server.cjs",
