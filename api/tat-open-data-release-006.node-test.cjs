@@ -10,8 +10,8 @@ test('sixth TAT release is limited to three Chon Buri places', () => {
     'tat-20200908183352469711',
     'tat-201005182246293275',
   ]);
-  assert.equal(SEED_PLACES.length, 193);
-  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 193);
+  assert.equal(SEED_PLACES.length, 194);
+  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 194);
   assert.deepEqual(auditPlaceImport({ places: SEED_PLACES }).errors, []);
   for (const place of batch) {
     assert.equal(place.province, 'ชลบุรี');

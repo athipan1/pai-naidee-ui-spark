@@ -164,8 +164,8 @@ test('all new curated locations have distinct IDs, provenance, and real Thailand
 });
 
 test('expanded nationwide catalogue contains no duplicate IDs or demo ratings/photos', () => {
-  assert.equal(SEED_PLACES.length, 193);
-  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 193);
+  assert.equal(SEED_PLACES.length, 194);
+  assert.equal(new Set(SEED_PLACES.map(place => place.id)).size, 194);
   for (const place of SEED_PLACES) {
     assert.equal(place.rating, 0);
     assert.equal(place.reviewCount, 0);
