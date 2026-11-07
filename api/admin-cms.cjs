@@ -63,6 +63,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
+      if(error?.code==='23503' && req.method === 'DELETE') return res.status(409).json({error:'This draft has linked review or import history and cannot be deleted safely.'});
       if(error?.code==='PUBLICATION_DUPLICATE')return res.status(409).json({error:'External identity already belongs to another place.'});
       console.error('Admin CMS failed.');
       res.status(503).json({ error: 'Admin CMS is unavailable.' });
