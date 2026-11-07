@@ -105,20 +105,6 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   const signIn = async () => { token = (await write('/login', { email, password })).token; };
   const makeDraft = fields => write('/places', { ...fixture, ...fields }, 201);
   const publish = (draft,status=200) => write(`/places/${draft.id}/publish`,{version:draft.version},status);
-  async function approve(draft,extraEvidence={}) {
-    const current=await (await admin(`/places/${draft.id}/review`)).json();
-    if(current.state==='PUBLISHED'||current.state==='APPROVED')return;
-    const evidence={source:{namespace:'fixture',id:draft.target_place_id||draft.id,name:'Isolated fixture source',url:'https://fixture.example.test/place',licenseName:'Operator permission',permissionUrl:'https://fixture.example.test/permission',checkedAt:new Date().toISOString()},
-      coordinate:{sourceUrl:'https://fixture.example.test/entrance',licenseName:'Operator permission',permissionUrl:'https://fixture.example.test/permission',kind:'vehicle_entrance',publicAccessUrl:'https://fixture.example.test/access',checkedAt:new Date().toISOString()},detailSourceUrl:'https://fixture.example.test/place',
-      media:draft.payload.imageUrl?{url:draft.payload.imageUrl,photographer:'Fixture photographer',sourcePage:'https://fixture.example.test/photo',licenseName:'Operator permission',permissionUrl:'https://fixture.example.test/permission'}:{}};
-    let review=await write(`/places/${draft.id}/evidence`,{version:draft.version,revision:current.revision,evidence:{...evidence,...extraEvidence}},200,'PUT');
-    if(draft.payload.imageUrl)review=await write(`/places/${draft.id}/probe-media`,{revision:review.revision});
-    for(const action of ['verify','request_review','approve']) {
-      review=await write(`/places/${draft.id}/review-transition`,{action,revision:review.revision});
-      assert.deepEqual(review.report.holds,[],JSON.stringify(review));
-    }
-    assert.equal(review.state,'APPROVED');
-  }
   const upload = (type, bytes, status = 201) => {
     const body = new FormData();
     body.set('image', new Blob([bytes], { type }), 'fixture.image');
