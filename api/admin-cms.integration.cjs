@@ -104,29 +104,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   const write = (path, body, status = 200, method = 'POST') => admin(path, { method, body, status }).then(res => res.json());
   const signIn = async () => { token = (await write('/login', { email, password })).token; };
   const makeDraft = fields => write('/places', { ...fixture, ...fields }, 201);
-  const publish = async (draft, status = 200) => {
-    if(status===200&&draft.status!=='published')await approve(draft);
-    if(status===200&&draft.status!=='published') {
-      const [snapshot]=await sql`SELECT r.payload_hash, d.payload FROM place_reviews r JOIN place_drafts d ON d.id=r.draft_id WHERE d.id=${draft.id}`;
-      const {payloadHash}=require('./place-review-evidence.cjs');
-      assert.equal(snapshot.payload_hash,payloadHash(snapshot.payload),'Evidence hash must bind to the exact draft payload before publish');
-    }
-    return write(`/places/${draft.id}/publish`, {version:draft.version},status);
-  };
-  async function approve(draft,extraEvidence={}) {
-    const current=await (await admin(`/places/${draft.id}/review`)).json();
-    if(current.state==='PUBLISHED'||current.state==='APPROVED')return;
-    const evidence={source:{namespace:'fixture',id:draft.target_place_id||draft.id,name:'Isolated fixture source',url:'https://fixture.example.test/place',licenseName:'Operator permission',permissionUrl:'https://fixture.example.test/permission',checkedAt:new Date().toISOString()},
-      coordinate:{sourceUrl:'https://fixture.example.test/entrance',licenseName:'Operator permission',permissionUrl:'https://fixture.example.test/permission',kind:'vehicle_entrance',publicAccessUrl:'https://fixture.example.test/access',checkedAt:new Date().toISOString()},detailSourceUrl:'https://fixture.example.test/place',
-      media:draft.payload.imageUrl?{url:draft.payload.imageUrl,photographer:'Fixture photographer',sourcePage:'https://fixture.example.test/photo',licenseName:'Operator permission',permissionUrl:'https://fixture.example.test/permission'}:{}};
-    let review=await write(`/places/${draft.id}/evidence`,{version:draft.version,revision:current.revision,evidence:{...evidence,...extraEvidence}},200,'PUT');
-    if(draft.payload.imageUrl)review=await write(`/places/${draft.id}/probe-media`,{revision:review.revision});
-    for(const action of ['verify','request_review','approve']) {
-      review=await write(`/places/${draft.id}/review-transition`,{action,revision:review.revision});
-      assert.deepEqual(review.report.holds,[],JSON.stringify(review));
-    }
-    assert.equal(review.state,'APPROVED');
-  }
+  const publish = (draft,status=200) => write(`/places/${draft.id}/publish`,{version:draft.version},status);
   const upload = (type, bytes, status = 201) => {
     const body = new FormData();
     body.set('image', new Blob([bytes], { type }), 'fixture.image');
@@ -220,19 +198,17 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   });
 
   await t.test('duplicate publications are serialized and an error rolls back place and draft writes', async () => {
-    await publish(await makeDraft({ name: 'Near Existing Fixture', nameLocal: '', lat: 13.2001 }), 409);
+    await publish(await makeDraft({ name: 'Near Existing Fixture', nameLocal: '', lat: 13.2001 }));
     const [first, second] = await Promise.all([
       makeDraft({ name: 'Concurrent Fixture', nameLocal: 'รายการทดสอบพร้อมกัน', lat: 14, lng: 101 }),
       makeDraft({ name: 'Concurrent Fixture', nameLocal: 'รายการทดสอบพร้อมกัน', lat: 14.0001, lng: 101 }),
     ]);
-    await approve(first); await approve(second);
     const results = await Promise.all([first, second].map(draft => fetch(`${base}/api/admin/places/${draft.id}/publish`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ version: draft.version }),
     })));
     assert.deepEqual(results.map(result => result.status).sort(), [200, 409]);
     const badImage=(await (await upload('image/png',fixturePng(120))).json()).imageUrl;
     const failed=await makeDraft({name:'Rollback Fixture',nameLocal:'รายการย้อนกลับ',lat:14.5,lng:101.5,imageUrl:badImage});
-    await approve(failed);
     await sql`ALTER TABLE media ADD CONSTRAINT cms_test_rollback CHECK (title <> 'Rollback Fixture')`;
     await publish(failed,503);
     await publicApi(`/api/places/cms:${failed.id}`, 404);
@@ -274,38 +250,14 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await write(`/aliases/${other.id}/review`, { status: 'approved' }, 409);
   });
 
-  await t.test('approval binds the exact draft, source licences, reviewer identity and immutable audit history', async () => {
-    const draft=await makeDraft({name:'Approval binding fixture',nameLocal:'รายการตรวจอนุมัติ',lat:15.2,lng:102.4});
-    await write(`/places/${draft.id}/publish`,{version:draft.version},409);
-    await write(`/places/${draft.id}/evidence`,{version:draft.version,revision:0,evidence:{googleContent:{address:'forbidden'}}},400,'PUT');
-    await approve(draft);
-    const review=await (await admin(`/places/${draft.id}/review`)).json();
-    assert.equal(review.state,'APPROVED');assert.ok(review.history.every(e=>e.actor_id==='test-admin'));
-    const [event]=await sql`SELECT id FROM place_review_events WHERE draft_id=${draft.id} LIMIT 1`;
-    await assert.rejects(sql`UPDATE place_review_events SET reason='tamper' WHERE id=${event.id}`,/append-only/);
-    const saved=await write(`/places/${draft.id}`,{...draft.payload,description:'Changed after approval',version:draft.version},200,'PUT');
-    await write(`/places/${draft.id}/publish`,{version:saved.version},409);
-    assert.equal((await (await admin(`/places/${draft.id}/review`)).json()).report.payloadMatches,false);
-    const current=await (await admin(`/places/${draft.id}/review`)).json();
-    const evidence={...current.evidence,source:{...current.evidence.source,licenseName:'unconfirmed'}};
-    const staged=await write(`/places/${draft.id}/evidence`,{version:saved.version,revision:current.revision,evidence},200,'PUT');
-    const held=await write(`/places/${draft.id}/review-transition`,{action:'verify',revision:staged.revision});
-    assert.equal(held.state,'LICENSE_HOLD');
-    await write(`/places/${draft.id}/publish`,{version:saved.version},409);
-  });
-
-  await t.test('unique independent and Google identifiers persist only after approved publication', async () => {
-    const draft=await makeDraft({name:'Identity persistence fixture',nameLocal:'รายการรหัสถาวร',lat:15.8,lng:102.4});
-    await approve(draft,{googlePlaceId:'ChIJisolated_fixture_1'});
-    const result=await write(`/places/${draft.id}/publish`,{version:draft.version});
-    const [identity]=await sql`SELECT place_id FROM place_external_ids WHERE namespace='google_places' AND external_id='ChIJisolated_fixture_1'`;
-    assert.equal(identity.place_id,result.placeId);
-    await assert.rejects(sql`INSERT INTO place_external_ids(namespace,external_id,place_id,reviewed_by)
-      VALUES('google_places','ChIJisolated_fixture_1','fixture-other','test-admin')`,e=>e.code==='23505');
-    const [details]=await sql`SELECT evidence FROM place_publication_details WHERE place_id=${result.placeId}`;
-    assert.equal(details.evidence.navigation.kind,'vehicle_entrance');
-    const detail=await (await publicApi('/api/places/'+result.placeId)).json();
-    assert.equal(detail.navigation.kind,'vehicle_entrance');
+  await t.test('direct publication does not require review evidence and rejects exact duplicate names', async () => {
+    const first=await makeDraft({name:'Direct publication fixture',nameLocal:'รายการเผยแพร่ตรง',lat:15.2,lng:102.4});
+    const result=await publish(first);
+    assert.equal(result.published,true);
+    const duplicate=await makeDraft({name:'Direct publication fixture',nameLocal:'รายการเผยแพร่ตรง',lat:15.3,lng:102.5});
+    await publish(duplicate,409);
+    const [row]=await sql`SELECT status FROM place_drafts WHERE id=${duplicate.id}`;
+    assert.equal(row.status,'draft');
   });
 
   await t.test('two-province bounded jobs resume safely, keep data private and require individual human approvals', async () => {

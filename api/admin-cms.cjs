@@ -2,7 +2,7 @@ const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
-const { assertApprovedPublication, finishPublication } = require('./place-review-workflow.cjs');
+
 
 const draftVersion = value => typeof value === 'string' && /^\d{1,12}\.\d{6}$/.test(value);
 
@@ -224,8 +224,16 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       const p = parsed.value;
       // Serialize the duplicate check and write, including publications of different drafts.
       await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
-      const approval=await assertApprovedPublication(tx,{...draft,_publishingActorId:req.auth.user.id});
-      if(!approval.ok)return {status:409,error:approval.error,holds:approval.holds};
+      // Direct admin publication: retain auth, payload validation and duplicate protection.
+      // An exact normalized name in the same province must not create a second place.
+      if (!draft.target_place_id) {
+        const duplicates = await tx`SELECT id FROM places
+          WHERE LOWER(TRIM(province)) = LOWER(TRIM(${p.province}))
+          AND (LOWER(TRIM(name)) IN (LOWER(TRIM(${p.name})), LOWER(TRIM(${p.nameLocal || p.name})))
+            OR LOWER(TRIM(COALESCE(name_local,''))) IN (LOWER(TRIM(${p.name})), LOWER(TRIM(${p.nameLocal || p.name}))))
+          LIMIT 1`;
+        if (duplicates.length) return {status:409,error:'A place with this name already exists in this province. Edit the existing place instead.'};
+      }
       if (draft.target_place_id) {
         const [current] = await tx`SELECT id, name, name_local, province, lat, lng, image_url,
           updated_at IS NOT DISTINCT FROM (SELECT target_updated_at FROM place_drafts WHERE id = ${draft.id}) AS version_matches
@@ -242,7 +250,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           await preservePlaceImage(tx, current.id, p.imageUrl, p.name);
         }
         await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${current.id}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
-        await finishPublication(tx,draft,current.id,req.auth.user.id,approval);
+
         return { status: 200, placeId: current.id, published: true, updated: true };
       }
       const placeId = `cms:${draft.id}`;
@@ -251,7 +259,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (p.imageUrl) await tx`INSERT INTO media (id, place_id, url, type, title)
         VALUES (${`cms-media:${draft.id}`}, ${placeId}, ${p.imageUrl}, 'image', ${p.name})`;
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
-      await finishPublication(tx,draft,placeId,req.auth.user.id,approval);
+
       return { status: 200, placeId, published: true };
     });
     if (result.published) invalidateSearchIndex();
