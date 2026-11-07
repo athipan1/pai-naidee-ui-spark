@@ -14,6 +14,7 @@ type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'ima
 };
 type Draft = { id: string; status: string; payload: DraftPayload; version: string; target_place_id?: string };
 type CatalogPlace = { id: string; name: string; name_local: string | null; province: string };
+type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; placeUpdatedAt: string; fields: string[] };
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
 type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
@@ -71,6 +72,7 @@ export default function AdminCms() {
   const [privatePreview, setPrivatePreview] = useState<{ url: string; src: string } | null>(null);
   const [brokenImage, setBrokenImage] = useState(false);
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
+  const [reconcile, setReconcile] = useState<{ draftId: string; data: ReconcileData; selected: string[]; retainGallery: boolean } | null>(null);
   const [aliasPlace, setAliasPlace] = useState<CatalogPlace | null>(null);
   const [placeAliases, setPlaceAliases] = useState<PlaceAlias[]>([]);
   const [newAliasName, setNewAliasName] = useState('');
@@ -338,6 +340,35 @@ export default function AdminCms() {
     finally { setBusy(false); }
   }
 
+  async function loadReconciliation(draft: Draft) {
+    setBusy(true); setMessage('');
+    try {
+      const data: ReconcileData = await api(`/places/${encodeURIComponent(draft.id)}/reconcile`);
+      setReconcile({ draftId: draft.id, data, selected: [], retainGallery: false });
+      setTab('drafts');
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'โหลดข้อมูลล่าสุดไม่สำเร็จ'); }
+    finally { setBusy(false); }
+  }
+
+  async function confirmReconciliation() {
+    if (!reconcile) return;
+    if (!window.confirm('ยืนยันใช้ข้อมูลล่าสุด และเก็บเฉพาะรายการแก้ไขที่เลือกหรือไม่?')) return;
+    setBusy(true); setMessage('');
+    try {
+      const draft: Draft = await api(`/places/${encodeURIComponent(reconcile.draftId)}/reconcile`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ version: reconcile.data.version,
+          expectedPlaceUpdatedAt: reconcile.data.placeUpdatedAt,
+          selectedFields: reconcile.selected, retainGallery: reconcile.retainGallery }),
+      });
+      setDrafts(current => current.map(item => item.id === draft.id ? draft : item));
+      setReconcile(null);
+      setMessage('ปรับฉบับร่างตามข้อมูลล่าสุดแล้ว กรุณาตรวจสอบก่อนเผยแพร่');
+      openDraft(draft);
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'ปรับฉบับร่างไม่สำเร็จ กรุณาโหลดข้อมูลล่าสุดอีกครั้ง'); }
+    finally { setBusy(false); }
+  }
+
   async function editExisting(place: CatalogPlace) {
     setBusy(true); setMessage('');
     try {
@@ -350,6 +381,7 @@ export default function AdminCms() {
   }
 
   function openDraft(draft: Draft) {
+    setReconcile(null);
     setEditing({ id: draft.id, version: draft.version });
     setForm(toPlaceForm(draft.payload));
     setTab('new');
@@ -499,7 +531,7 @@ export default function AdminCms() {
         <div className="col-span-2 flex items-center gap-3 rounded-xl border bg-white p-4 sm:col-span-1"><CheckCircle2 className="text-emerald-600" /><div><p className="font-medium">ระบบจัดการเนื้อหา</p><p className="text-xs text-slate-500">เข้าสู่ระบบแล้ว</p></div></div>
       </div>
       <nav aria-label="ส่วนจัดการสถานที่" className="grid grid-cols-2 gap-2 rounded-2xl border bg-white p-2 shadow-sm sm:grid-cols-4">
-        {([{ id: 'new', label: 'เพิ่ม / แก้ไข', Icon: Plus }, { id: 'existing', label: 'ค้นหาสถานที่', Icon: Search }, { id: 'drafts', label: `ฉบับร่าง (${activeDrafts.length})`, Icon: FilePenLine }, { id: 'history', label: `ประวัติการเผยแพร่ (${publishedDrafts.length})`, Icon: Clock3 }, {id:'quality',label:'คุณภาพรายจังหวัด',Icon:ShieldCheck}] as const).map(item => <button key={item.id} type="button" aria-current={tab === item.id ? 'page' : undefined} onClick={() => setTab(item.id)} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-3 text-center text-xs font-semibold transition sm:flex-row sm:text-sm ${tab === item.id ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}><item.Icon size={17} /><span>{item.label}</span></button>)}
+        {([{ id: 'new', label: 'เพิ่ม / แก้ไข', Icon: Plus }, { id: 'existing', label: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', Icon: Search }, { id: 'drafts', label: `ฉบับร่าง (${activeDrafts.length})`, Icon: FilePenLine }, { id: 'history', label: `ประวัติการเผยแพร่ (${publishedDrafts.length})`, Icon: Clock3 }, {id:'quality',label:'คุณภาพรายจังหวัด',Icon:ShieldCheck}] as const).map(item => <button key={item.id} type="button" aria-current={tab === item.id ? 'page' : undefined} onClick={() => setTab(item.id)} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-3 text-center text-xs font-semibold transition sm:flex-row sm:text-sm ${tab === item.id ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}><item.Icon size={17} /><span>{item.label}</span></button>)}
       </nav>
       {message && <div role="status" aria-live="polite" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">{message}</div>}
       {tab === 'existing' && <section className="space-y-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
@@ -507,7 +539,7 @@ export default function AdminCms() {
         <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search.trim()); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="เช่น วัดภูมโนรมย์" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span>พบ {catalogTotal} สถานที่ {catalogQuery ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setSearched(false); }}>แสดงทั้งหมด</button></div>
         {searched && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
-        <div className="divide-y">{catalog.map(place => <div key={place.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {place.province}</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">แก้ไขสถานที่</button></div></div>)}</div>
+        <div className="divide-y">{catalog.map(place => <div key={place.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {place.province}</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50" >แก้ไขสถานที่ที่เผยแพร่แล้ว</button></div></div>)}</div>
         {aliasPlace && <section className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-4" aria-label="จัดการชื่อเรียกสถานที่">
           <div className="flex items-center justify-between gap-2"><h3 className="font-semibold">ชื่อเรียกอื่น: {aliasPlace.name_local || aliasPlace.name}</h3><button type="button" className="text-sm underline" onClick={() => setAliasPlace(null)}>ปิด</button></div>
           <p className="text-xs text-slate-600">ชื่อที่เพิ่มจะรอตรวจสอบก่อน จึงไม่กระทบผลค้นหาบนเว็บไซต์ทันที</p>
@@ -575,6 +607,22 @@ export default function AdminCms() {
         <div className="sticky bottom-2 z-10 rounded-xl border bg-white/95 p-2 shadow-lg backdrop-blur"><button className="w-full rounded-xl bg-teal-600 px-4 py-3.5 font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-50" disabled={busy} type="submit">{busy ? 'กำลังดำเนินการ...' : editing ? 'บันทึกการแก้ไขเป็นฉบับร่าง' : 'บันทึกสถานที่เป็นฉบับร่าง'}</button><p className="mt-2 text-center text-xs text-slate-500">ยังไม่เผยแพร่จนกว่าจะยืนยันในแท็บฉบับร่าง</p></div>
       </form>}
       {tab === 'quality' && <ProvinceQualityDashboard api={api} onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}} />}
+      {reconcile && tab === 'drafts' && <section className="space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
+        <h2 className="text-lg font-bold">เปรียบเทียบฉบับร่างกับข้อมูลล่าสุด</h2>
+        <p className="text-sm text-slate-600">ติ๊กเฉพาะการแก้ไขจากฉบับร่างที่ต้องการเก็บไว้ ช่องที่ไม่เลือกจะใช้ข้อมูลล่าสุดบนเว็บไซต์</p>
+        {reconcile.data.fields.map(field => {
+          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหมู่',description:'รายละเอียด',lat:'ละติจูด',lng:'ลองจิจูด',imageUrl:'รูปหลัก'};
+          const oldValue = String(reconcile.data.draft[field as keyof DraftPayload] ?? '');
+          const latestValue = String(reconcile.data.latest[field as keyof DraftPayload] ?? '');
+          return <label key={field} className="block rounded-lg border p-3 text-sm">
+            <span className="flex items-center gap-2 font-semibold"><input type="checkbox" checked={reconcile.selected.includes(field)} onChange={event => setReconcile(current => current && ({...current,selected:event.target.checked?[...current.selected,field]:current.selected.filter(item=>item!==field)}))} />เก็บการแก้ไข: {names[field] || field}</span>
+            <span className="mt-2 block break-all text-slate-600">ฉบับร่าง: {oldValue.slice(0,250) || '(ว่าง)'}</span>
+            <span className="block break-all text-teal-700">ข้อมูลล่าสุด: {latestValue.slice(0,250) || '(ว่าง)'}</span>
+          </label>;
+        })}
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={reconcile.retainGallery} onChange={event=>setReconcile(current=>current&&({...current,retainGallery:event.target.checked}))}/>เก็บการเพิ่มและลบรูปภาพจากฉบับร่างนี้</label>
+        <div className="flex flex-wrap gap-2"><button type="button" disabled={busy} className="rounded-xl bg-teal-600 px-4 py-3 font-semibold text-white" onClick={()=>void confirmReconciliation()}>ยืนยันการแก้ไขเฉพาะส่วนที่เลือก</button><button type="button" className="rounded-xl border px-4 py-3" onClick={()=>setReconcile(null)}>ยกเลิก</button></div>
+      </section>}
       {tab === 'drafts' && <section className="space-y-4"><div><h2 className="text-xl font-bold">รายการฉบับร่าง</h2><p className="mt-1 text-sm text-slate-500">ตรวจสอบและแก้ไขข้อมูลให้ถูกต้องก่อนเผยแพร่</p></div>
         {!activeDrafts.length && <div className="rounded-2xl border bg-white p-10 text-center text-sm text-slate-500">ไม่มีฉบับร่างที่รอเผยแพร่</div>}
         {activeDrafts.map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง · พร้อมเผยแพร่' : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}</p><PlaceCandidateReview draft={draft} api={api} />{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}</article>)}
