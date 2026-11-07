@@ -181,7 +181,7 @@ test('catalog pagination, aliases, numeric and empty coordinates, and saving an 
     await expect(page.getByText(new RegExp(result))).toBeVisible();
   }
 
-  await page.getByRole('button', { name: 'แก้ไขสถานที่' }).click();
+  await page.getByRole('button', { name: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', exact: true }).last().click();
   await expect(page.getByLabel(/ละติจูด/)).toHaveValue('13.2');
   await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('100.9');
   await page.getByRole('searchbox', { name: 'ค้นหาชื่อสถานที่บนแผนที่' }).fill('ตำแหน่งทดสอบ');
