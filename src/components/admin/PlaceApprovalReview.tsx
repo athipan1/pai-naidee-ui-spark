@@ -6,7 +6,18 @@ type Evidence = { source:Record<string,string>;coordinate:Record<string,string|b
 type Report = {holds:string[];payloadMatches:boolean;provinceGate:string;duplicate:{matches:{placeId:string;confidence?:string;reason:string}[]}};
 type Review = {state:string;revision:number;evidence:Evidence|null;report:Report|null;history:{actor_id:string;action:string;to_state:string;reason:string;created_at:string}[]};
 type Props = {draft:{id:string;version:string;target_place_id?:string;payload:{name?:string|null;nameLocal?:string|null;province?:string|null;description?:string|null;imageUrl?:string|null;lat?:string|number|null;lng?:string|number|null}};
-  api:(path:string,options?:RequestInit)=>Promise<unknown>;onApprovalChange:(approved:boolean)=>void};
+  api:(path:string,options?:RequestInit)=>Promise<unknown>;onApprovalChange:(approved:boolean,reasons?:string[])=>void};
+const holdLabels:Record<string,string>={
+  source_license_unverified:'ยังไม่ยืนยันแหล่งข้อมูลหรือสิทธิ์การใช้ข้อมูล',
+  coordinate_hold:'หลักฐานพิกัดหรือทางเข้ายังไม่ผ่านการตรวจ',
+  province_polygon_unverified:'ยังยืนยันพิกัดว่าอยู่ในขอบเขตจังหวัดไม่ได้',
+  media_probe_failed:'ไฟล์รูปภาพยังไม่ผ่านการตรวจ',
+  duplicate_image:'รูปภาพซ้ำกับสถานที่อื่น',
+  unresolved_duplicate:'พบสถานที่อาจซ้ำ ต้องตรวจสอบและแนบหลักฐานแยกรายการ',
+  license_hold:'ยังไม่ยืนยันสิทธิ์การใช้ข้อมูลหรือรูปภาพ',
+  draft_changed_since_review:'ข้อมูลฉบับร่างเปลี่ยน ต้องบันทึกหลักฐานใหม่',
+};
+export const publishHoldLabel=(hold:string)=>holdLabels[hold]||'ยังไม่ผ่านการตรวจ: '+hold.replace(/_/g,' ');
 const licences=['','Operator permission','CC0 1.0','CC BY 4.0','CC BY 3.0','CC BY 3.0 au','CC BY 2.0','CC BY-SA 4.0','CC BY-SA 3.0','CC BY-SA 2.0','Public domain'];
 const fieldGroups:{group:Group;title:string;fields:[string,string][]}[]=[
   {group:'source',title:'แหล่งข้อมูลสถานที่และสิทธิ์',fields:[['namespace','ระบบรหัสแหล่งข้อมูล เช่น tat หรือ operator'],['id','รหัสสถานที่จากแหล่งข้อมูล'],['name','ชื่อแหล่งข้อมูล'],['url','URL หลักฐานสถานที่'],['licenseUrl','URL เงื่อนไขสิทธิ์'],['permissionUrl','URL หลักฐานการอนุญาต'],['checkedAt','วันที่ตรวจแหล่งข้อมูล']]},
@@ -21,7 +32,13 @@ export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) 
   async function load() {
     const data=await api(path+'/review') as Review;setReview(data);
     if(data.evidence)setEvidence(data.evidence);
-    onApprovalChange(Boolean(data.evidence)&&!['REJECTED','PUBLISHED'].includes(data.state)&&Boolean(data.report?.payloadMatches)&&data.report?.holds.length===0);
+    const reasons:string[]=[];
+    if(!data.evidence)reasons.push('ยังไม่ได้บันทึกหลักฐานแหล่งข้อมูลและพิกัด');
+    if(data.state==='REJECTED')reasons.push('รายการถูกปฏิเสธ ต้องแก้ไขก่อนเผยแพร่');
+    if(data.report&&!data.report.payloadMatches)reasons.push('ข้อมูลฉบับร่างเปลี่ยน ต้องบันทึกหลักฐานใหม่');
+    if(data.report)reasons.push(...data.report.holds.map(publishHoldLabel));
+    if(!data.report)reasons.push('ยังไม่มีผลตรวจคุณภาพ');
+    onApprovalChange(reasons.length===0&&data.state!=='PUBLISHED',reasons);
     return data;
   }
   async function run(action:()=>Promise<unknown>) {
@@ -37,13 +54,13 @@ export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) 
     await run(async()=>{await api(path+'/review-transition',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,revision:review?.revision,reason})});await load();});
   }
   return <section className="space-y-3 border-t pt-3" data-testid="place-approval-review">
-    <button type="button" disabled={busy} className="rounded-xl border px-4 py-2 text-sm font-semibold" onClick={()=>void run(load)}>ตรวจหลักฐานและการอนุมัติ</button>
+    <button type="button" disabled={busy} className="rounded-xl border px-4 py-2 text-sm font-semibold" onClick={()=>void run(load)}>ตรวจหลักฐานและคุณภาพอัตโนมัติ</button>
     {error&&<p role="alert" className="break-words text-sm text-red-700">{error}</p>}
     {review&&<div className="space-y-4 rounded-xl border bg-slate-50 p-3 text-sm">
       <p>ขั้นตรวจ: <strong>{review.state}</strong> · รุ่นหลักฐาน {review.revision}</p>
       <details><summary className="cursor-pointer font-semibold">ดูข้อมูลก่อนเผยแพร่</summary><p>{draft.payload.nameLocal||draft.payload.name} · {draft.payload.province}</p><p>{draft.payload.description}</p><p>พิกัดที่เสนอ: {draft.payload.lat}, {draft.payload.lng}</p></details>
       {review.report&&<div><p>ขอบเขตจังหวัด: {review.report.provinceGate}</p>{!review.report.payloadMatches&&<p className="text-amber-800">ข้อมูลร่างเปลี่ยนแล้ว ต้องตรวจหลักฐานใหม่</p>}
-        {!!review.report.holds.length&&<ul className="list-inside list-disc break-words text-amber-800">{review.report.holds.map(h=><li key={h}>{h}</li>)}</ul>}</div>}
+        {!!review.report.holds.length&&<ul className="list-inside list-disc break-words text-amber-800">{review.report.holds.map(h=><li key={h}>{publishHoldLabel(h)}</li>)}</ul>}</div>}
       {!['PUBLISHED'].includes(review.state)&&<form onSubmit={event=>void save(event)} className="space-y-4">
         {fieldGroups.filter(group=>group.group!=='media'||draft.payload.imageUrl).map(group=><fieldset key={group.group} className="space-y-2 rounded-lg border p-3"><legend className="px-1 font-semibold">{group.title}</legend>
           {group.fields.map(([key,title])=><label key={key} className="block">{title}<input className="mt-1 w-full min-w-0 rounded-lg border bg-white p-2" type={key==='checkedAt'?'date':'text'}
