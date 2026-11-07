@@ -39,4 +39,5 @@ test('media licence/probe expiry and description sources cannot be bypassed with
   assert.ok(evidenceHolds({description:'Description',imageUrl:media.url},e,{ok:true,url:media.url,checkedAt:'2001-01-01'}).includes('image_probe_required'));
   assert.ok(evidenceHolds({description:'Description',imageUrl:''},e,null).includes('description_source_unverified'));
   assert.notEqual(payloadHash({name:'a'}),payloadHash({name:'b'}));
+  assert.equal(payloadHash({a:1,b:{x:2,y:3}}),payloadHash({b:{y:3,x:2},a:1}));
 });

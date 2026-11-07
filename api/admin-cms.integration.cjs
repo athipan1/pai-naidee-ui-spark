@@ -321,7 +321,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
       if(count>5)resumed=await write(`/province-import-jobs/${job.id}/resume`,{});
       assert.equal(resumed.state,'REVIEW_PENDING');assert.equal(resumed.next_index,count);
       assert.equal((await write(`/province-import-jobs/${job.id}/resume`,{})).next_index,count);
-      assert.ok(resumed.result.every(r=>r.state==='REVIEW_PENDING'&&r.publicationAllowed===false));
+      assert.ok(resumed.result.every(r=>r.state==='REVIEW_PENDING'&&r.publicationAllowed===false),JSON.stringify(resumed.result));
       const queue=await (await admin('/candidate-queue?province='+encodeURIComponent(province)+'&page=1')).json();
       assert.ok(queue.candidates.length>=count);
     }

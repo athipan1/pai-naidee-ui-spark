@@ -2,7 +2,11 @@
 const {createHash}=require('node:crypto');
 const {independentUrl}=require('./place-candidate-quality.cjs');
 const {licenseAllowed,mediaLicenseHolds}=require('./place-media-quality.cjs');
-const payloadHash=p=>createHash('sha256').update(JSON.stringify(p)).digest('hex');
+const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'
+  ?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
+// PostgreSQL JSONB reorders object keys. Approval binds the values, not the
+// incidental key order produced by JavaScript or the database driver.
+const payloadHash=p=>createHash('sha256').update(JSON.stringify(canonical(p))).digest('hex');
 const trim=(value,max=2000)=>typeof value==='string'?value.trim().slice(0,max):'';
 function cleanEvidence(input) {
   const e=input||{},source=e.source||{},coordinate=e.coordinate||{},media=e.media||{};

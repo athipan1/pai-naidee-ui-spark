@@ -137,6 +137,8 @@ function serializePlaceDetail(place) {
       tags: place.tags,
       coordinates: place.coordinates,
       source: place.source,
+      navigation: place.navigation || null,
+      placeFacts: place.placeFacts || null,
   };
 }
 
