@@ -531,7 +531,7 @@ function normalizePlace(row) {
         ? [row.image_url]
         : [],
     mediaCredits: media.filter((item) =>
-      (item.sourcePage && item.licenseUrl) || item.id?.startsWith('painaidee-provided:')
+      (item.sourcePage && item.licenseUrl && item.licenseName && item.creatorName) || item.id?.startsWith('painaidee-provided:')
     ).map((item) => ({
       url: item.url,
       photographer: item.id?.startsWith('painaidee-provided:')
@@ -539,7 +539,7 @@ function normalizePlace(row) {
       licenseName: item.licenseName || 'User-provided photo for PaiNaiDee',
       licenseUrl: item.licenseUrl || '',
       sourcePage: item.sourcePage || '',
-      kind: item.id?.startsWith('painaidee-provided:') ? 'user-provided' : 'commons',
+      kind: item.id?.startsWith('painaidee-provided:') ? 'user-provided' : String(item.sourcePage||'').startsWith('https://commons.wikimedia.org/') ? 'commons' : 'licensed-source',
     })),
     detailedDescription: row.detail_text ? {
       text: row.detail_text,

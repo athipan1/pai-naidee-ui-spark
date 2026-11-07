@@ -11,5 +11,10 @@
   "width": 960,
   "height": 528,
   "bytes": 146824,
-  "source": "Wikimedia Commons imageinfo API"
+  "source": "Wikimedia Commons imageinfo API",
+  "sha256": "9e5dac10dee23227ade40157c6e1fbb61336e1781215ad70459ba02d1cd9edf1",
+  "measuredWidth": 960,
+  "measuredHeight": 528,
+  "measurementMethod": "Dimensions parsed from actual downloaded JPEG bytes; no Production image import",
+  "licenseMetadataHolds": []
 }

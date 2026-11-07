@@ -8,4 +8,8 @@ describe('reviewed gallery',()=>{
   it('keeps an explicit placeholder and rejects Google content or invalid protocols even with claimed credits',()=>{
     expect(reviewedGallery(['/placeholder-attraction.svg','javascript:alert(1)','https://lh3.googleusercontent.com/x'],[credit])).toEqual(['/placeholder-attraction.svg']);
   });
+  it('blocks unsafe attribution links and missing photographer credit',()=>{
+    expect(reviewedGallery([credit.url],[{...credit,licenseUrl:'javascript:alert(1)'}])).toEqual([]);
+    expect(reviewedGallery([credit.url],[{...credit,photographer:''}])).toEqual([]);
+  });
 });
