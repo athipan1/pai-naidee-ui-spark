@@ -21,7 +21,7 @@ export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) 
   async function load() {
     const data=await api(path+'/review') as Review;setReview(data);
     if(data.evidence)setEvidence(data.evidence);
-    onApprovalChange(data.state==='APPROVED'&&Boolean(data.report?.payloadMatches)&&data.report?.holds.length===0);
+    onApprovalChange(Boolean(data.evidence)&&!['REJECTED','PUBLISHED'].includes(data.state)&&Boolean(data.report?.payloadMatches)&&data.report?.holds.length===0);
     return data;
   }
   async function run(action:()=>Promise<unknown>) {
@@ -68,7 +68,7 @@ export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) 
       </form>}
       <div className="flex flex-wrap gap-2">
         {review.state==='STAGED'&&draft.payload.imageUrl&&<button type="button" disabled={busy} className="rounded-lg border p-2" onClick={()=>void run(async()=>{await api(path+'/probe-media',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({revision:review.revision})});await load();})}>ตรวจไฟล์ภาพจริง</button>}
-        {Object.entries({verify:['STAGED'],request_review:['VERIFIED'],approve:['REVIEW_PENDING']}).filter(([,states])=>states.includes(review.state)).map(([action])=><button key={action} type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white" onClick={()=>void transition(action)}>{{verify:'ตรวจทุก Gate',request_review:'ส่งให้ผู้ดูแลตรวจ',approve:'อนุมัติรายการ'}[action]}</button>)}
+        {Object.entries({verify:['STAGED']}).filter(([,states])=>states.includes(review.state)).map(([action])=><button key={action} type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white" onClick={()=>void transition(action)}>{{verify:'ตรวจทุก Gate'}[action]}</button>)}
       </div>
       {!['PUBLISHED','REJECTED','DISCOVERED'].includes(review.state)&&<div className="space-y-2"><label className="block">เหตุผลการตรวจ<input className="mt-1 w-full rounded border p-2" value={reason} onChange={event=>setReason(event.target.value)}/></label>
         <button type="button" disabled={busy||reason.trim().length<5} className="mr-2 rounded-lg border p-2" onClick={()=>void transition('reject')}>ปฏิเสธรายการ</button>
