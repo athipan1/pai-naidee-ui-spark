@@ -36,11 +36,25 @@ async function audit(tx,draftId,actorId,action,from,to,evidence,hash,reason='') 
   await tx`INSERT INTO place_review_events(id,draft_id,actor_id,action,from_state,to_state,evidence,payload_hash,reason)
     VALUES(${randomUUID()},${draftId},${actorId},${action},${from},${to},${tx.json(evidence)},${hash},${reason})`;
 }
+function publicationGateDecision(review,report) {
+  if(!review||!review.evidence||['REJECTED','PUBLISHED'].includes(review.state))
+    return {ok:false,error:'Save valid publication evidence before publishing.',holds:['review_evidence_required']};
+  if(report!==undefined&&(!report?.payloadMatches||report.holds?.length))
+    return {ok:false,error:'Publication quality gates failed or evidence is stale.',holds:report?.payloadMatches?(report.holds||[]):['draft_changed_since_review']};
+  return {ok:true};
+}
 async function assertApprovedPublication(tx,draft) {
   const [review]=await tx`SELECT * FROM place_reviews WHERE draft_id=${draft.id} FOR UPDATE`;
-  if(!review||review.state!=='APPROVED')return {ok:false,error:'An administrator must verify and approve this draft before publishing.',holds:['review_not_approved']};
+  // Admin direct publishing removes the human approval step, not the evidence gates.
+  const preflight=publicationGateDecision(review);
+  if(!preflight.ok)return preflight;
   const report=await evaluateReview(tx,draft,review);
-  if(!report.payloadMatches||report.holds.length)return {ok:false,error:'Approval is stale or quality gates no longer pass.',holds:report.payloadMatches?report.holds:['draft_changed_since_review']};
+  const decision=publicationGateDecision(review,report);
+  if(!decision.ok)return decision;
+  if(review.state!=='APPROVED') {
+    await tx`UPDATE place_reviews SET state='APPROVED',reviewed_by=${draft._publishingActorId},reviewed_at=NOW(),revision=revision+1,updated_at=NOW() WHERE draft_id=${draft.id}`;
+    await audit(tx,draft.id,draft._publishingActorId,'auto_approve_on_publish',review.state,'APPROVED',review.evidence,review.payload_hash,'Admin direct publish; all quality gates passed');
+  }
   return {ok:true,review,evidence:review.evidence,report};
 }
 async function finishPublication(tx,draft,placeId,actorId,approval) {
@@ -141,4 +155,4 @@ function registerPlaceReviewWorkflow(app,{getSql,requireAdmin,mediaStorage,probe
     });res.status(result.code||200).json(result);
   }));
 }
-module.exports={STATES,evaluateReview,assertApprovedPublication,finishPublication,registerPlaceReviewWorkflow,audit};
+module.exports={STATES,evaluateReview,publicationGateDecision,assertApprovedPublication,finishPublication,registerPlaceReviewWorkflow,audit};

@@ -18,7 +18,7 @@ async function mockCms(page: Page) {
   let session = false;
   let failUpload = false;
   let publishCount = 0;
-  let reviewState="REVIEW_PENDING";
+  let reviewState="VERIFIED";
   let selected = { model: models[0].id, structuredOutput: false, source: 'railway' };
   let drafts = [incomplete];
   let aliases: Array<{ id: string; alias_name: string; language: string; status: string }> = [];
@@ -41,7 +41,7 @@ async function mockCms(page: Page) {
       return reply(401, { error: 'Session expired or invalid.' });
     if (pathname === '/api/admin/me') return reply(200, { role: 'admin' });
     if (pathname.endsWith('/review-transition')) {reviewState=body().action==='approve'?'APPROVED':'REVIEW_PENDING';return reply(200,{state:reviewState,revision:2});}
-    if (/^\/api\/admin\/places\/[^/]+\/review$/.test(pathname)) return reply(200,{state:reviewState,revision:1,evidence:null,history:[],report:{holds:[],payloadMatches:true,provinceGate:'PASS',duplicate:{matches:[]}}});
+    if (/^\/api\/admin\/places\/[^/]+\/review$/.test(pathname)) return reply(200,{state:reviewState,revision:1,evidence:pathname.includes('created-fixture')?{source:{},coordinate:{},media:{},duplicateResolutions:[]}:null,history:[],report:{holds:[],payloadMatches:true,provinceGate:'PASS',duplicate:{matches:[]}}});
     if (pathname === '/api/admin/province-quality') return reply(200,{completenessClaim:null,automaticImport:false,provinces:[{province:'ชลบุรี',existing:{total:71,missing_images:1,missing_details:2,last_verified:null},review:{discovered:3,duplicates:1,license_hold:2,coordinate_hold:1,approved:0,published:0,confirmed_new:0}}]});
     if (pathname === '/api/admin/candidate-queue') return reply(200,{candidates:[],total:0,page:1,limit:30});
 
@@ -232,7 +232,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
   const draft = page.locator('article').filter({ hasText: 'Draft fixture' });
   await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeDisabled();
   await draft.getByRole('button', {name:'ตรวจหลักฐานและการอนุมัติ'}).click();
-  await draft.getByRole('button', {name:'อนุมัติรายการ',exact:true}).click();
+  await expect(draft.getByRole('button', {name:'อนุมัติรายการ',exact:true})).toHaveCount(0);
   await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeEnabled();
   await draft.getByRole('button', { name: 'เผยแพร่', exact: true }).click();
   await expect(draft.getByText('เผยแพร่แล้ว')).toBeVisible();
