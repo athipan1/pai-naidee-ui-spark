@@ -16,18 +16,20 @@ const distanceMeters = (a,b) => {
   const v = Math.sin(dLat/2)**2 + Math.cos(lat)*Math.cos(otherLat)*Math.sin(dLng/2)**2;
   return 6371000 * 2 * Math.atan2(Math.sqrt(v),Math.sqrt(1-v));
 };
-function adaptWikidata(row) {
+function adaptWikidata(row,province='ชลบุรี') {
+  if(!Object.hasOwn(require('./place-localizations.cjs').PROVINCE_EN,province))throw Error('Unknown province');
   const id = entityId(row.item);
   const point = extract(row.coord).match(/^Point\((-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)\)$/);
   return {
     source:'wikidata', sourceId:id, wikidataId:id,
     sourceUrl:id ? 'https://www.wikidata.org/wiki/' + id : null,
     nameLocal:extract(row.nameTh), name:extract(row.nameEn),
-    province:'ชลบุรี', lat:point ? toNumber(point[2]) : NaN,
+    province, lat:point ? toNumber(point[2]) : NaN,
     lng:point ? toNumber(point[1]) : NaN, verified:false
   };
 }
-function adaptOsm(row) {
+function adaptOsm(row,province='ชลบุรี') {
+  if(!Object.hasOwn(require('./place-localizations.cjs').PROVINCE_EN,province))throw Error('Unknown province');
   const type = row.type, id = toNumber(row.id);
   const sourceId = ['node','way','relation'].includes(type) && Number.isSafeInteger(id) && id>0 ? type + '/' + id : null;
   const local = extract(row.tags?.['name:th']) || extract(row.tags?.name);
@@ -36,10 +38,11 @@ function adaptOsm(row) {
     source:'openstreetmap', sourceId, wikidataId:entityId(row.tags?.wikidata),
     sourceUrl:sourceId ? 'https://www.openstreetmap.org/' + sourceId : null,
     nameLocal:hasThai(local) ? local : '', name:extract(row.tags?.['name:en']) || (!hasThai(local) ? local : ''),
-    province:'ชลบุรี', lat,lng, verified:false
+    province, lat,lng, verified:false
   };
 }
-function stage(rows,adapter,existing) {
+function stage(rows,adapter,existing,{province='ชลบุรี'}={}) {
+  if(!Object.hasOwn(require('./place-localizations.cjs').PROVINCE_EN,province))throw Error('Unknown province');
   if (!Array.isArray(rows) || typeof adapter !== 'function') throw Error('invalid source rows or adapter');
   if (!Array.isArray(existing)) throw Error('Production comparison places are required');
   const seen = existing.map(p => ({
@@ -53,7 +56,9 @@ function stage(rows,adapter,existing) {
     const item=adapter(raw), issues=[];
     if(!item.sourceId || !item.sourceUrl)issues.push('missing_provenance');
     if(!hasThai(item.nameLocal))issues.push('missing_thai_name');
-    if(!inBbox(item.lat,item.lng))issues.push('outside_chonburi_bbox');
+    if(item.province!==province)issues.push('source_province_mismatch');
+    if(province==='ชลบุรี'&&!inBbox(item.lat,item.lng))issues.push('outside_chonburi_bbox');
+    if(province!=='ชลบุรี'&&(!Number.isFinite(item.lat)||!Number.isFinite(item.lng)))issues.push('missing_independent_coordinates');
     // Share the stronger CMS/source review engine; resolve lazily because it
     // reuses this module's distance primitive. Keep Wikidata cross-links too.
     const duplicate=require('./place-candidate-quality.cjs').duplicateDecision(item,seen);
@@ -66,6 +71,6 @@ function stage(rows,adapter,existing) {
     (issues.length?rejected:candidates).push(record);
     if(!issues.length)seen.push(item);
   }
-  return {status:'dry_run_only',province:'ชลบุรี',candidates,rejected,approved:0};
+  return {status:'dry_run_only',province,candidates,rejected,approved:0};
 }
 module.exports={adaptWikidata,adaptOsm,stage,distanceMeters};

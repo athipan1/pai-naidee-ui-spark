@@ -1,48 +1,68 @@
-# Phase 0 / Phase 1 review foundation
+# PaiNaiDee Phase 0–4 — implementation and release boundary
 
-## What runs
+## Verified baseline
 
-An existing Admin CMS draft can request a read-only quality review. The server authenticates with the existing Railway admin guard, reads the complete catalogue plus approved aliases in one repeatable-read read-only transaction (5 second statement timeout; abort above 20,000 rows), and returns duplicate matches and missing evidence. No draft is modified. A CSV response uses the same authenticated route and escapes spreadsheet formula prefixes.
+- Main audited: `cd2749d7b82cc7b95855096ef7e4b717cb7d59e7`.
+- Existing Railway PostgreSQL SELECT and all four API pages agree: **194 places, 71 Chon Buri, 77 province labels**. Province presence is not completeness.
+- Phase 0/1 foundation commit `8a08b777b45a2dc1f187ee51111a9390f80f0d3d`: CI [42354866674](https://github.com/athipan1/pai-naidee-ui-spark/actions/runs/42354866674) passed all applicable jobs; isolated PostgreSQL, 22 discovery E2E, 12 trip planner E2E, 12 Admin E2E and 15 live Production E2E passed. The live Production tests used Desktop Chromium, Android Chromium and iPhone WebKit, not physical devices.
+- That CI run proves the foundation and current Production baseline; the expanded Phase 2–4 implementation requires a new CI run on its final commit.
+- Local browser limits: WebKit libraries cannot be installed in this executor, and live HTTPS through the executor proxy fails Chromium certificate trust. TLS validation was not disabled. CI provides browser evidence.
+- Google Cloud console returns “Site Unavailable” to this browser. Current Cloud quotas, Billing Alerts, aggregate usage and the 500 THB cost target are **not verified**.
 
-- `GET /api/admin/places/:draftId/quality-review`
-- `GET /api/admin/places/:draftId/quality-review?format=csv`
-- `GET /api/admin/google-verification/status`
-- `POST /api/admin/google-verification` — manual action, default disabled
+## Phase 1 — identity and coordinate review
 
-The pure duplicate engine handles canonical TAT source IDs, namespaced source IDs, existing IDs, Google Place IDs when supplied, normalized Thai/English names, approved aliases, distance and cross-source batch comparisons. An ID match means update-only, not approval. Confidence descriptions distinguish identifier matches, name matches and proximity; they are not invented calibrated probabilities.
+Existing TAT/Wikidata/OSM staging and Admin CMS share duplicate gates: existing IDs, namespaced source IDs, Google Place IDs, Thai/English normalized names, aliases, proximity and cross-source batch matches. Exact identifiers require update of the existing entity; they cannot be dismissed as a different place.
 
-Province math accepts trusted independent boundary geometry and independently sourced coordinates only. The current CMS has no such stored evidence/registry yet, so its review correctly returns province/evidence holds. Google coordinates are not requested. The live Google panel displays a minimal ID/name/address/type result with attribution, no map, no storage, no automatic identity match, no photo/rating/review fields. Only the existing detail quota bucket is used; no new quota ledger or schema.
+Independent boundary geometry is read from an explicitly reviewed province registry. Bbox checks never prove province membership. Site centres, vehicle entrances, parking and trailheads stay distinct. Restricted sites require public access and authority evidence. The Navy turtle centre `tat-2010120911214112696` remains update-only.
 
-## Reproduce the real research report
+Google verification is a fresh, attributed, manually requested panel without a non-Google map. It requests no coordinates/photos/reviews, never persists response content, and shares the existing detail quota (default 0, hard max 2/day). No new ledger or quota allowance is created. Activation requires a short-lived explicit approval, existing key, Cloud quota and Billing Alerts attestations. Attestation booleans are not Cloud enforcement; alerts never stop charges.
+
+Original real Chon Buri research: 3 candidates, 1 existing entity, 2 unmatched candidates pending review, 3 coordinate holds, 3 licence holds, **0 approved, 0 published, 0 Google calls**. A second read-only report uses actual CC0 Wikidata structured entities for Chon Buri and Chiang Mai; its missing polygons/entrances remain holds. These reports are not import payloads.
+
+## Phase 2 — media and details
+
+The server media probe accepts the existing private CMS S3 bucket and bounded HTTPS requests to Wikimedia upload/thumb hosts only. It rejects redirects, arbitrary server-side destinations, Google photo URLs, SVG, files over 5 MiB, unsuitable dimensions/aspect ratios, incomplete signatures/PNG chunks and unconfirmed image licences. It records actual dimensions, SHA-256 and a one-day probe expiry; identical published image hashes are held for review. It does not infer reuse permission from a website merely being public.
+
+Gallery images need exact matching attribution. Wikipedia summary thumbnails cannot bypass per-image rights review. Each displayed gallery image has credit links; loading and broken-image placeholders remain. Navigation uses an approved independent entrance/parking/trailhead snapshot only. Legacy places open a name search on Google Maps instead of treating a centre pin as an entrance. Optional hours/admission facts require independent sources and a check within 30 days; expired facts are hidden. Unknown hours/fees are explicitly unknown.
+
+## Phase 3 — human approval and integrity
+
+The existing CMS publisher now enforces the review on the server inside its publication transaction. The lifecycle is `DISCOVERED → STAGED → VERIFIED → REVIEW_PENDING → APPROVED → PUBLISHED`, with duplicate, licence, coordinate and rejection holds. Saving evidence, probing an image or changing draft content cannot silently retain approval. Exact payload hashes, evidence revisions, reviewer identity, immutable event history, fresh quality gates and unique external identifiers protect publication. Draft edits and place row versions are checked again at publish time. All new routes reuse the existing admin bearer/RBAC guard and tagged SQL; normal users cannot stage, approve or publish.
+
+A prepared **manual additive migration** creates review/event/external-ID/boundary/publication/job tables in the existing PostgreSQL database. API startup does not run it. If it is missing, review mutations/publication fail closed while public catalogue reads remain available. It is applied only to the isolated CI PostgreSQL fixture for integration tests.
+
+Plan-only command (does not connect to a database):
 
 ```
-node api/review-place-candidates.cjs reports/place-verification/research-candidates.json reports/place-verification/production-baseline.json /tmp/new-candidate-review
+node api/apply-place-review-migration.cjs
 ```
 
-Output is research only: 3 candidates, 1 existing entity (turtle centre, update-only), 2 unmatched entities pending review, 3 coordinate holds, 3 source-license holds, 0 province proofs, 0 approved, 0 published, 0 Google calls. Empty coordinates are intentional, not fabricated. Baseline API pagination returned 194 unique IDs over 4 pages, agreeing with live PostgreSQL SELECT counts (71 Chon Buri, 77 province labels).
+Production application requires separate approval of the printed SQL SHA-256, an approved release reference, existing DATABASE_URL and `PLACE_REVIEW_MIGRATION_SHA256`. Do not run `--apply` until that approval and an existing Railway backup/preflight are complete. Province boundary rows also require separately reviewed independent geometry; no fabricated boundary is bundled for Production.
 
-## Activation / release gates
+Rollback plan: disable publication/stop the release, roll application code back only with an explicit publishing freeze, retain additive review tables and immutable audit history, and reconcile any published rows through edit drafts. Do not automatically delete places or drop evidence tables as a rollback. Export and separately review any future destructive schema rollback.
 
-No environment values have been changed. A later, separately approved release would need all of:
+## Phase 4 — bounded province expansion
 
-- Existing `GOOGLE_PLACES_API_KEY` available, without printing it.
-- Explicit short-lived `GOOGLE_PLACE_VERIFICATION_ENABLED=true` and `GOOGLE_PLACE_VERIFICATION_EXPIRES_AT`.
-- Cloud-side quota and Billing Alerts actually inspected and configured; then operator attestation using `GOOGLE_CLOUD_QUOTAS_CONFIRMED` and `GOOGLE_BILLING_ALERTS_CONFIRMED`. These booleans do not enforce Cloud quotas and do not prove a billing cap.
-- Existing `GOOGLE_PLACE_DETAIL_DAILY_LIMIT` explicitly approved (default 0; hard maximum 2), shared with the detail pilot. No increase in hard daily limits.
-- Current SKU/THB estimate across Places, Routes and photos consistent with the 500 THB/month target, including other consumers of the same project. Budget alerts never stop spending.
-- Successful live Google test after explicit approval, authoritative entrance coordinates, province polygon evidence and source/media rights review.
-- CI, conflict check against latest main, explicit merge/deployment approval. Railway and Vercel deploy from main automatically; a merge must be treated as a production release.
+The existing API hosts resumable, manually initiated province jobs: known 77-province registry, one province per batch, at most 20 candidates, at most 5 reviews per resume, stable idempotency keys with input hashes, transaction checkpoints and isolated failure state. They create private drafts only. Passing automated gates sends a candidate to human review; it never publishes. No workflow, service, project or database was added. Existing source adapters can stage a selected second province without declaring it polygon-verified.
 
-## Explicit unfinished work
+The CMS province dashboard shows existing/discovered/confirmed-new/duplicate/licence-hold/coordinate-hold/approved/published/missing-image/missing-detail counts and verified dates. A paginated queue lets an admin open drafts for evidence, approval and preview. Counts are not a claim of 100% completeness. Failed jobs resume from the last committed checkpoint and never affect another province.
 
-This is not a Phase 1–4 completion claim. Existing CMS publish behavior is not represented as a newly enforced quality gate. Its separate approval workflow still needs Phase 3; do not use this read-only report as authorization to publish.
+## Main API surface
 
-| Phase | Remaining acceptance work |
+| Route (all under `/api/admin`) | Behavior |
 | --- | --- |
-| 0 | Finish CI live browser proof, address or separately retire failing legacy GitHub Pages workflow; test coverage percentage not yet established |
-| 1 | Approved live Google request, persistent Place ID/source identity design and unique constraints, trusted province registry, source/entrance rights evidence, server-enforced publication gate |
-| 2 | Media licence and URL/dimension/duplicate gate, all-gallery attribution, eliminate unreviewed Wikipedia thumbnail bypass, verify details/entrance navigation on all target browsers |
-| 3 | Candidate lifecycle and human approvals, reviewer/audit/provenance persistence, transactional idempotent import and uniqueness migration, isolated PostgreSQL + Admin E2E proof; migration must be separately approved before production |
-| 4 | Reusable multi-province source orchestration, checkpointed jobs, province quality dashboard, second-province proof and post-release API/browser verification; no automatic imports |
+| GET `/places/:id/quality-review[?format=csv]` | Read-only duplicate/missing-evidence report; CSV formula escaping |
+| GET `/google-verification/status`, POST `/google-verification` | Activation/expiry/quota guard; fresh identity panel only |
+| GET `/places/:id/review` | Evidence, preview, fresh gates and review history |
+| PUT `/places/:id/evidence` | Allowlisted independent provenance; resets approval |
+| POST `/places/:id/probe-media` | Server-controlled bounded media probe |
+| POST `/places/:id/review-transition` | Verify / request review / approve / reject / request changes |
+| Existing POST `/places/:id/publish` | Fresh approval gate, version checks, uniqueness, transaction and audit |
+| GET `/candidate-queue`, `/province-quality` | Pagination and province metrics |
+| POST `/province-import-jobs`, GET `/:jobId`, POST `/:jobId/resume` | Explicit staging, idempotency and bounded resume; no publishing |
 
-No database migration is included or applied. No production rows were added or changed by this work. No paid service was activated. No merge or deploy was performed.
+## Production gate — still not passed
+
+No production database write, migration, source import, Google API request, environment/quota change, merge or deploy has been performed by this work. Production place count remains the audited baseline, not an increased count. Railway and Vercel auto-deploy main, so merge approval is also release approval.
+
+Release requires final CI success and latest-main conflict check, approval of the exact migration/release, reviewed independent province boundaries, owner/entrance and media evidence, approved live Google testing with inspected Cloud quotas/Billing Alerts and cost estimate, then post-deploy SQL/API/browser checks. The nationwide expansion acceptance remains unproven until approved real candidates in more than one province are actually published and verified. Isolated fixtures and read-only research are never labelled Production imports.

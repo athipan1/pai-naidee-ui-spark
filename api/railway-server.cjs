@@ -5,6 +5,8 @@ const { randomUUID } = require('node:crypto');
 const { registerAdminCms } = require('./admin-cms.cjs');
 const { registerQualityReview } = require('./place-quality-review.cjs');
 const { registerGoogleVerification } = require('./google-place-verification.cjs');
+const { registerPlaceReviewWorkflow } = require('./place-review-workflow.cjs');
+const { registerProvinceReviewPipeline } = require('./province-review-pipeline.cjs');
 const { registerAiTripRoutes } = require('./ai-trip-plan.cjs');
 const { registerBasicTripRoadRoutes } = require('./basic-trip-road.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
@@ -53,6 +55,8 @@ registerAdminCms(app, {
 registerRailwayMedia(app, { getSql, storage, requireAdmin });
 registerQualityReview(app, { getSql, requireAdmin });
 registerGoogleVerification(app, { getSql, requireAdmin });
+registerPlaceReviewWorkflow(app, { getSql, requireAdmin, mediaStorage:storage });
+registerProvinceReviewPipeline(app, { getSql, requireAdmin });
 registerAiTripRoutes(app, { listPlaces,getSql });
 registerBasicTripRoadRoutes(app, { listPlaces });
 registerAiHealthRoutes(app, { requireAdmin,getSql });

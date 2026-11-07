@@ -728,7 +728,16 @@ async function getPlaceById(id) {
     LIMIT 1
   `;
 
-  return rows[0] ? normalizePlace(rows[0]) : null;
+  if(!rows[0])return null;
+  let publication;
+  try { [publication]=await sql`SELECT evidence,verified_at FROM place_publication_details WHERE place_id=${id}`; }
+  catch(error) {if(error?.code!=='42P01')throw error;}
+  const point=publication?.evidence?.navigation;
+  const navigation=point&&['vehicle_entrance','parking','trailhead'].includes(point.kind)&&
+    point.lat===rows[0].lat&&point.lng===rows[0].lng?{...point,verifiedAt:publication.verified_at}:null;
+  const freshFact=fact=>{const age=Date.now()-require('./place-review-evidence.cjs').dateTimestamp(fact?.checkedAt);return fact?.text&&Number.isFinite(age)&&age>=0&&age<=30*86400000?fact:null;};
+  return {...normalizePlace(rows[0]),navigation,placeFacts:publication?{district:publication.evidence.district||null,
+    openingHours:freshFact(publication.evidence.openingHours),admissionFee:freshFact(publication.evidence.admissionFee),verifiedAt:publication.verified_at}:null};
 }
 
 async function pingDatabase() {

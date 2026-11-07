@@ -2,6 +2,7 @@ const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
+const { assertApprovedPublication, finishPublication } = require('./place-review-workflow.cjs');
 
 const draftVersion = value => typeof value === 'string' && /^\d{1,12}\.\d{6}$/.test(value);
 
@@ -21,16 +22,6 @@ function validateImageUrl(imageUrl) {
   } catch {
     return 'Image URL must be HTTPS.';
   }
-}
-
-async function findDuplicates(tx, p, targetId) {
-  const local = p.nameLocal || p.name;
-  return tx`SELECT id, name FROM places WHERE id IS DISTINCT FROM ${targetId} AND (
-    (LOWER(TRIM(province)) = LOWER(${p.province}) AND (
-      LOWER(TRIM(name)) IN (LOWER(${p.name}), LOWER(${local})) OR
-      LOWER(TRIM(name_local)) IN (LOWER(${p.name}), LOWER(${local}))
-    )) OR (ABS(lat - ${p.lat}) < 0.0003 AND ABS(lng - ${p.lng}) < 0.0003)
-  ) LIMIT 3`;
 }
 
 async function preservePlaceImage(tx, placeId, url, title) {
@@ -66,7 +57,8 @@ function cleanPlace(input) {
 function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {} }) {
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
-    catch {
+    catch (error) {
+      if(error?.code==='PUBLICATION_DUPLICATE')return res.status(409).json({error:'External identity already belongs to another place.'});
       console.error('Admin CMS failed.');
       res.status(503).json({ error: 'Admin CMS is unavailable.' });
     }
@@ -232,6 +224,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       const p = parsed.value;
       // Serialize the duplicate check and write, including publications of different drafts.
       await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
+      const approval=await assertApprovedPublication(tx,draft);
+      if(!approval.ok)return {status:409,error:approval.error,holds:approval.holds};
       if (draft.target_place_id) {
         const [current] = await tx`SELECT id, name, name_local, province, lat, lng, image_url,
           updated_at IS NOT DISTINCT FROM (SELECT target_updated_at FROM place_drafts WHERE id = ${draft.id}) AS version_matches
@@ -239,12 +233,6 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         if (!current) return { status: 404, error: 'Original place no longer exists.' };
         if (!current.version_matches)
           return { status: 409, error: 'Place changed since this draft was created. Review the latest place before updating.' };
-        const identityChanged = p.name !== current.name || p.nameLocal !== (current.name_local || '') ||
-          p.province !== current.province || p.lat !== current.lat || p.lng !== current.lng;
-        if (identityChanged) {
-          const duplicates = await findDuplicates(tx, p, current.id);
-          if (duplicates.length) return { status: 409, error: 'Possible duplicate place.', duplicates };
-        }
         await tx`UPDATE places SET name = ${p.name}, name_local = ${p.nameLocal}, province = ${p.province},
           category = ${p.category}, description = ${p.description}, lat = ${p.lat}, lng = ${p.lng},
           image_url = ${p.imageUrl || null}, updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
@@ -254,16 +242,16 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           await preservePlaceImage(tx, current.id, p.imageUrl, p.name);
         }
         await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${current.id}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
+        await finishPublication(tx,draft,current.id,req.auth.user.id,approval);
         return { status: 200, placeId: current.id, published: true, updated: true };
       }
-      const duplicates = await findDuplicates(tx, p, null);
-      if (duplicates.length) return { status: 409, error: 'Possible duplicate place.', duplicates };
       const placeId = `cms:${draft.id}`;
       await tx`INSERT INTO places (id, name, name_local, province, category, description, lat, lng, image_url, source_name)
         VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${p.description}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, 'PaiNaiDee Admin CMS')`;
       if (p.imageUrl) await tx`INSERT INTO media (id, place_id, url, type, title)
         VALUES (${`cms-media:${draft.id}`}, ${placeId}, ${p.imageUrl}, 'image', ${p.name})`;
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
+      await finishPublication(tx,draft,placeId,req.auth.user.id,approval);
       return { status: 200, placeId, published: true };
     });
     if (result.published) invalidateSearchIndex();

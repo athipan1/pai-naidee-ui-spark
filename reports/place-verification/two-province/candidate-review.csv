@@ -1,0 +1,3 @@
+"candidateId","name","province","status","action","holds","matchedPlaceIds","publishAllowed"
+"wikidata:Q3576017","สวนสัตว์เปิดเขาเขียว","ชลบุรี","NEEDS_REVIEW","human_review_required","province_polygon_unverified|entrance_not_verified|public_access_evidence_required","","false"
+"wikidata:Q656576","อุทยานแห่งชาติดอยอินทนนท์","เชียงใหม่","PROBABLE_DUPLICATE","resolve_identity_before_import","province_polygon_unverified|entrance_not_verified|public_access_evidence_required","3","false"

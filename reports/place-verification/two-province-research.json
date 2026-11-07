@@ -1,0 +1,52 @@
+[
+  {
+    "candidateId": "wikidata:Q3576017",
+    "source": "wikidata",
+    "sourceId": "Q3576017",
+    "name": "Khao Kheow Open Zoo",
+    "nameLocal": "สวนสัตว์เปิดเขาเขียว",
+    "aliases": [
+      "Khao Khiao Open Zoo"
+    ],
+    "province": "ชลบุรี",
+    "lat": 13.216462,
+    "lng": 101.056382,
+    "provenance": {
+      "sourceId": "Q3576017",
+      "sourceUrl": "https://www.wikidata.org/wiki/Q3576017",
+      "license": "CC0 1.0",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q3576017",
+      "coordinateLicense": "CC0 1.0"
+    },
+    "access": {
+      "kind": "site_center"
+    },
+    "researchNote": "Actual Wikidata structured facts under CC0. Province selected for review; independent province polygon and entrance access remain unverified."
+  },
+  {
+    "candidateId": "wikidata:Q656576",
+    "source": "wikidata",
+    "sourceId": "Q656576",
+    "name": "Doi Inthanon National Park",
+    "nameLocal": "อุทยานแห่งชาติดอยอินทนนท์",
+    "aliases": [
+      "อ่างกา",
+      "ดอยอินทนนท์",
+      "อุทยานแห่งชาติอินทนนท์"
+    ],
+    "province": "เชียงใหม่",
+    "lat": 18.5,
+    "lng": 98.6,
+    "provenance": {
+      "sourceId": "Q656576",
+      "sourceUrl": "https://www.wikidata.org/wiki/Q656576",
+      "license": "CC0 1.0",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q656576",
+      "coordinateLicense": "CC0 1.0"
+    },
+    "access": {
+      "kind": "site_center"
+    },
+    "researchNote": "Actual Wikidata structured facts under CC0. Province selected for review; independent province polygon and entrance access remain unverified."
+  }
+]

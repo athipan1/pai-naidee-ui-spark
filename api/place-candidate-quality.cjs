@@ -38,8 +38,8 @@ function duplicateDecision(candidate, existing) {
     const sameProvince=!candidate.province || !item.province || aliasKey(candidate.province)===aliasKey(item.province);
     let reason, certainty;
     if(candidate.existingPlaceId && candidate.existingPlaceId===item.id) {reason='existing_place_id';certainty='EXISTING_PLACE';}
-    else if(c.source && c.id && c.source===e.source && c.id===e.id) {reason='exact_source_id';certainty='EXISTING_PLACE';}
-    else if(c.google && c.google===e.google) {reason='exact_google_place_id';certainty='EXISTING_PLACE';}
+    else if(c.source && c.id && ((c.source===e.source && c.id===e.id)||(item.external_ids||[]).some(x=>x.source===c.source&&x.id===c.id))) {reason='exact_source_id';certainty='EXISTING_PLACE';}
+    else if(c.google && (c.google===e.google||(item.external_ids||[]).some(x=>x.source==='google_places'&&x.id===c.google))) {reason='exact_google_place_id';certainty='EXISTING_PLACE';}
     else if(shared && sameProvince) {reason='normalized_name_or_alias';certainty='PROBABLE_DUPLICATE';}
     else if(distance!==null && distance<=50) {reason='nearby_location';certainty='PROBABLE_DUPLICATE';}
     else if(distance!==null && distance<=300 && sameProvince) {reason='nearby_entity_review';certainty='NEEDS_REVIEW';}
@@ -53,7 +53,7 @@ function duplicateDecision(candidate, existing) {
 function reviewCandidate(candidate, existing, {boundary=null, province=null}={}) {
   const duplicate=duplicateDecision(candidate,existing), holds=[];
   const point=coordinate(candidate);
-  if(!text(candidate.nameLocal || candidate.name_local) || !text(candidate.name) || !text(candidate.province)) holds.push('missing_names_or_province');
+  if(!/[\u0e01-\u0e5b]/.test(text(candidate.nameLocal || candidate.name_local)) || !text(candidate.name) || !text(candidate.province)) holds.push('missing_names_or_province');
   const provenance=candidate.provenance || {};
   if(!independentUrl(provenance.sourceUrl) || !text(provenance.license) || !text(provenance.sourceId)) holds.push('source_license_unverified');
   const independent=independentUrl(provenance.coordinateSourceUrl) && text(provenance.coordinateLicense);
