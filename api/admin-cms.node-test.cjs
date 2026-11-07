@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { cleanPlace, registerAdminCms } = require('./admin-cms.cjs');
 const { createRoleGuard } = require('./security.cjs');
-const { hashPassword, verifyPassword, hashToken } = require('./railway-admin-auth.cjs');
+const { authRoutes, hashPassword, verifyPassword, hashToken } = require('./railway-admin-auth.cjs');
 
 const good = { name: 'Test Place', nameLocal: 'สถานที่ทดสอบ', province: 'มุกดาหาร', category: 'Culture', description: 'description', lat: 16.5, lng: 104.7 };
 
@@ -66,6 +66,15 @@ test('admin role guard denies anonymous access before any database interaction',
   let status = 0;
   await guard({ headers: {} }, { status: code => { status = code; return { json() {} }; } }, () => assert.fail('No anonymous access'));
   assert.equal(status, 401);
+});
+
+test('Railway session guard rejects a non-admin role returned by the identity store', async () => {
+  const app={post(){},get(){}};
+  const guard=authRoutes(app,{getSql:()=>async()=>[{id:'viewer',role:'viewer'}],limitLogin:(_q,_s,next)=>next()});
+  let status;
+  const response={setHeader(){},status(code){status=code;return this;},json(){}};
+  await guard({headers:{authorization:`Bearer ${'a'.repeat(43)}`}},response,()=>assert.fail('A viewer must never pass the admin guard'));
+  assert.equal(status,401);
 });
 
 test('Railway passwords use salted scrypt; session secrets are hashed', () => {

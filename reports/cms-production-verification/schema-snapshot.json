@@ -1,0 +1,1670 @@
+{
+  "checked_at": "2026-11-07T10:14:48.622488+00:00",
+  "transaction_read_only": "on",
+  "tables": [
+    {
+      "name": "places",
+      "present": true
+    },
+    {
+      "name": "place_drafts",
+      "present": true
+    },
+    {
+      "name": "place_reviews",
+      "present": true
+    },
+    {
+      "name": "place_review_events",
+      "present": true
+    },
+    {
+      "name": "place_external_ids",
+      "present": true
+    },
+    {
+      "name": "place_publication_details",
+      "present": true
+    },
+    {
+      "name": "province_review_boundaries",
+      "present": true
+    },
+    {
+      "name": "province_import_jobs",
+      "present": true
+    },
+    {
+      "name": "province_import_candidates",
+      "present": true
+    },
+    {
+      "name": "admin_users",
+      "present": true
+    },
+    {
+      "name": "admin_sessions",
+      "present": true
+    }
+  ],
+  "columns": [
+    {
+      "table_name": "admin_sessions",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "admin_sessions",
+      "column_name": "user_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "admin_sessions",
+      "column_name": "token_hash",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "admin_sessions",
+      "column_name": "expires_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "admin_sessions",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "admin_users",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "admin_users",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "admin_users",
+      "column_name": "password_hash",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "admin_users",
+      "column_name": "role",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'admin'::text"
+    },
+    {
+      "table_name": "admin_users",
+      "column_name": "disabled",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "admin_users",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "payload",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "author_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'draft'::text"
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "published_place_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "target_place_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "place_drafts",
+      "column_name": "target_updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "place_external_ids",
+      "column_name": "namespace",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_external_ids",
+      "column_name": "external_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_external_ids",
+      "column_name": "place_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_external_ids",
+      "column_name": "reviewed_by",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_external_ids",
+      "column_name": "verified_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "place_publication_details",
+      "column_name": "place_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_publication_details",
+      "column_name": "evidence",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_publication_details",
+      "column_name": "reviewed_by",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_publication_details",
+      "column_name": "verified_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "draft_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "actor_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "action",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "from_state",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "to_state",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "evidence",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "payload_hash",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "place_review_events",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "draft_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "state",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'STAGED'::text"
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "evidence",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": "'{}'::jsonb"
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "payload_hash",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "media_probe",
+      "data_type": "jsonb",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "revision",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "reviewed_by",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "reviewed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "place_reviews",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "places",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "name_local",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "province",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "category",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "rating",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "places",
+      "column_name": "review_count",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "places",
+      "column_name": "image_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "places",
+      "column_name": "tags",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "table_name": "places",
+      "column_name": "lat",
+      "data_type": "double precision",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "lng",
+      "data_type": "double precision",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "places",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "places",
+      "column_name": "source_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "source_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "verified_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "detail_text",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "detail_source_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "province_en",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "places",
+      "column_name": "description_en",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_candidates",
+      "column_name": "job_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_candidates",
+      "column_name": "ordinal",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_candidates",
+      "column_name": "draft_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "province",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "request_key",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "input_hash",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "candidate_count",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "next_index",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "state",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'STAGED'::text"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "result",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "created_by",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "column_name": "province",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "column_name": "iso_code",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "column_name": "geometry",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "column_name": "source_url",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "column_name": "license_name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "column_name": "reviewed_by",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "column_name": "reviewed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_created_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_expires_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_token_hash_key",
+      "type": "u",
+      "validated": true,
+      "definition": "UNIQUE (token_hash)"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_token_hash_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL token_hash"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_user_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_user_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL user_id"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_created_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_disabled_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL disabled"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_email_key",
+      "type": "u",
+      "validated": true,
+      "definition": "UNIQUE (email)"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_email_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL email"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_password_hash_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL password_hash"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_role_check",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((role = 'admin'::text))"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_role_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL role"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_author_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL author_id"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_created_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_payload_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL payload"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_published_place_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (published_place_id) REFERENCES places(id)"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_status_check",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((status = ANY (ARRAY['draft'::text, 'published'::text])))"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_status_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL status"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_target_place_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (target_place_id) REFERENCES places(id)"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_updated_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_external_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL external_id"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_namespace_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL namespace"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (namespace, external_id)"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_place_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (place_id) REFERENCES places(id)"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_place_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL place_id"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_reviewed_by_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (reviewed_by) REFERENCES admin_users(id)"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_reviewed_by_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL reviewed_by"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_verified_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL verified_at"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_evidence_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL evidence"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (place_id)"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_place_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (place_id) REFERENCES places(id)"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_place_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL place_id"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_reviewed_by_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (reviewed_by) REFERENCES admin_users(id)"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_reviewed_by_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL reviewed_by"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_verified_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL verified_at"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_action_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL action"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_actor_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (actor_id) REFERENCES admin_users(id)"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_actor_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL actor_id"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_created_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_draft_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (draft_id) REFERENCES place_drafts(id)"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_draft_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL draft_id"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_evidence_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL evidence"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_payload_hash_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL payload_hash"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_reason_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL reason"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_to_state_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL to_state"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_created_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_draft_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (draft_id) REFERENCES place_drafts(id)"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_draft_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL draft_id"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_evidence_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL evidence"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_payload_hash_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL payload_hash"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (draft_id)"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_reviewed_by_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (reviewed_by) REFERENCES admin_users(id)"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_revision_check",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((revision > 0))"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_revision_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL revision"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_state_check",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((state = ANY (ARRAY['DISCOVERED'::text, 'STAGED'::text, 'VERIFIED'::text, 'REVIEW_PENDING'::text, 'APPROVED'::text, 'PUBLISHED'::text, 'POSSIBLE_DUPLICATE'::text, 'LICENSE_HOLD'::text, 'COORDINATE_HOLD'::text, 'REJECTED'::text])))"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_state_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL state"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_updated_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "places",
+      "name": "places_category_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL category"
+    },
+    {
+      "table_name": "places",
+      "name": "places_created_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "places",
+      "name": "places_description_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL description"
+    },
+    {
+      "table_name": "places",
+      "name": "places_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "places",
+      "name": "places_name_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL name"
+    },
+    {
+      "table_name": "places",
+      "name": "places_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "places",
+      "name": "places_province_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL province"
+    },
+    {
+      "table_name": "places",
+      "name": "places_rating_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL rating"
+    },
+    {
+      "table_name": "places",
+      "name": "places_review_count_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL review_count"
+    },
+    {
+      "table_name": "places",
+      "name": "places_tags_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL tags"
+    },
+    {
+      "table_name": "places",
+      "name": "places_updated_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_draft_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (draft_id) REFERENCES place_drafts(id)"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_draft_id_key",
+      "type": "u",
+      "validated": true,
+      "definition": "UNIQUE (draft_id)"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_draft_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL draft_id"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_job_id_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (job_id) REFERENCES province_import_jobs(id)"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_job_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL job_id"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_ordinal_check",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((ordinal >= 0))"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_ordinal_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL ordinal"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (job_id, ordinal)"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_candidate_count_check",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK (((candidate_count >= 1) AND (candidate_count <= 20)))"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_candidate_count_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL candidate_count"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_created_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_created_by_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (created_by) REFERENCES admin_users(id)"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_created_by_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL created_by"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_id_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_input_hash_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL input_hash"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_next_index_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL next_index"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_province_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL province"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_request_key_key",
+      "type": "u",
+      "validated": true,
+      "definition": "UNIQUE (request_key)"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_request_key_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL request_key"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_result_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL result"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_state_check",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((state = ANY (ARRAY['STAGED'::text, 'RUNNING'::text, 'REVIEW_PENDING'::text, 'FAILED'::text])))"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_state_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL state"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_updated_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_geometry_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL geometry"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_iso_code_key",
+      "type": "u",
+      "validated": true,
+      "definition": "UNIQUE (iso_code)"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_iso_code_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL iso_code"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_license_name_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL license_name"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_pkey",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (province)"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_province_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL province"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_reviewed_at_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL reviewed_at"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_reviewed_by_fkey",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (reviewed_by) REFERENCES admin_users(id)"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_reviewed_by_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL reviewed_by"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_source_url_not_null",
+      "type": "n",
+      "validated": true,
+      "definition": "NOT NULL source_url"
+    }
+  ],
+  "indexes": [
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX admin_sessions_pkey ON public.admin_sessions USING btree (id)"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "admin_sessions_token_hash_key",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX admin_sessions_token_hash_key ON public.admin_sessions USING btree (token_hash)"
+    },
+    {
+      "table_name": "admin_sessions",
+      "name": "idx_admin_sessions_expiry",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_admin_sessions_expiry ON public.admin_sessions USING btree (expires_at)"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_email_key",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX admin_users_email_key ON public.admin_users USING btree (email)"
+    },
+    {
+      "table_name": "admin_users",
+      "name": "admin_users_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX admin_users_pkey ON public.admin_users USING btree (id)"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "idx_place_drafts_province_review",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_place_drafts_province_review ON public.place_drafts USING btree (((payload ->> 'province'::text)))"
+    },
+    {
+      "table_name": "place_drafts",
+      "name": "place_drafts_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX place_drafts_pkey ON public.place_drafts USING btree (id)"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "idx_place_external_ids_place",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_place_external_ids_place ON public.place_external_ids USING btree (place_id)"
+    },
+    {
+      "table_name": "place_external_ids",
+      "name": "place_external_ids_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX place_external_ids_pkey ON public.place_external_ids USING btree (namespace, external_id)"
+    },
+    {
+      "table_name": "place_publication_details",
+      "name": "place_publication_details_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX place_publication_details_pkey ON public.place_publication_details USING btree (place_id)"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "idx_place_review_events_draft",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_place_review_events_draft ON public.place_review_events USING btree (draft_id, created_at)"
+    },
+    {
+      "table_name": "place_review_events",
+      "name": "place_review_events_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX place_review_events_pkey ON public.place_review_events USING btree (id)"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "idx_place_reviews_queue",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_place_reviews_queue ON public.place_reviews USING btree (state, updated_at)"
+    },
+    {
+      "table_name": "place_reviews",
+      "name": "place_reviews_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX place_reviews_pkey ON public.place_reviews USING btree (draft_id)"
+    },
+    {
+      "table_name": "places",
+      "name": "idx_places_category",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_places_category ON public.places USING btree (category)"
+    },
+    {
+      "table_name": "places",
+      "name": "idx_places_coordinates",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_places_coordinates ON public.places USING btree (lat, lng)"
+    },
+    {
+      "table_name": "places",
+      "name": "idx_places_name_lower",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_places_name_lower ON public.places USING btree (lower(name))"
+    },
+    {
+      "table_name": "places",
+      "name": "idx_places_province",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE INDEX idx_places_province ON public.places USING btree (province)"
+    },
+    {
+      "table_name": "places",
+      "name": "places_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX places_pkey ON public.places USING btree (id)"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_draft_id_key",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX province_import_candidates_draft_id_key ON public.province_import_candidates USING btree (draft_id)"
+    },
+    {
+      "table_name": "province_import_candidates",
+      "name": "province_import_candidates_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX province_import_candidates_pkey ON public.province_import_candidates USING btree (job_id, ordinal)"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX province_import_jobs_pkey ON public.province_import_jobs USING btree (id)"
+    },
+    {
+      "table_name": "province_import_jobs",
+      "name": "province_import_jobs_request_key_key",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX province_import_jobs_request_key_key ON public.province_import_jobs USING btree (request_key)"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_iso_code_key",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX province_review_boundaries_iso_code_key ON public.province_review_boundaries USING btree (iso_code)"
+    },
+    {
+      "table_name": "province_review_boundaries",
+      "name": "province_review_boundaries_pkey",
+      "valid": true,
+      "ready": true,
+      "definition": "CREATE UNIQUE INDEX province_review_boundaries_pkey ON public.province_review_boundaries USING btree (province)"
+    }
+  ],
+  "triggers": [
+    {
+      "tgname": "place_review_events_append_only",
+      "tgenabled": "O",
+      "definition": "CREATE TRIGGER place_review_events_append_only BEFORE DELETE OR UPDATE ON public.place_review_events FOR EACH ROW EXECUTE FUNCTION reject_place_review_event_mutation()"
+    }
+  ],
+  "counts": {
+    "places": 194,
+    "chonburi": 71,
+    "drafts": 5,
+    "reviews": 0,
+    "events": 0,
+    "boundaries": 0,
+    "jobs": 0
+  },
+  "auth_summary": {
+    "enabled_admins": 1,
+    "active_admin_sessions": 0
+  },
+  "fingerprints": {
+    "places": "00c0d56d8f7bc831a9c52bb0944d45e0",
+    "drafts": "e8cbefddac48a745cadad49b006b9bd1",
+    "review_events": "d41d8cd98f00b204e9800998ecf8427e"
+  }
+}

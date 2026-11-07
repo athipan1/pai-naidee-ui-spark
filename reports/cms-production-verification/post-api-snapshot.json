@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-11-07T10:23:10.546289+00:00",
+  "transaction_read_only": "on",
+  "function_definition": "CREATE OR REPLACE FUNCTION public.reject_place_review_event_mutation()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Review events are append-only'; END; $function$\n",
+  "migration_tables": [],
+  "counts": {
+    "places": 194,
+    "chonburi": 71,
+    "drafts": 5,
+    "reviews": 0,
+    "events": 0,
+    "boundaries": 0,
+    "jobs": 0,
+    "external_ids": 0,
+    "approved_aliases": 0,
+    "active_admin_sessions": 0
+  },
+  "fingerprints": {
+    "places": "00c0d56d8f7bc831a9c52bb0944d45e0",
+    "drafts": "e8cbefddac48a745cadad49b006b9bd1",
+    "review_events": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "catalogueCount": 194,
+  "fingerprintsUnchanged": true
+}

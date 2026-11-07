@@ -1,0 +1,157 @@
+{
+  "checkedAt": "2026-11-07T10:25:44.415Z",
+  "baselineAt": "2026-11-07T10:23:10.546289+00:00",
+  "baselineCount": 194,
+  "approvedAliases": 0,
+  "externalIds": 0,
+  "productionWrite": "NOT PERFORMED",
+  "candidates": [
+    {
+      "candidateId": "research:underwater-world-pattaya",
+      "existingPlaceId": null,
+      "name": "Underwater World Pattaya",
+      "nameLocal": "อันเดอร์วอเตอร์เวิลด์ พัทยา",
+      "province": "ชลบุรี",
+      "sourceUrl": "https://underwaterworldpattaya.com/contact-us/",
+      "license": null,
+      "coordinates": null,
+      "entranceEvidence": null,
+      "reviewer": null,
+      "status": "NEEDS_REVIEW",
+      "duplicate": {
+        "status": "NEW_CANDIDATE",
+        "matches": [],
+        "action": "human_review_required"
+      },
+      "holds": [
+        "source_license_unverified",
+        "coordinate_missing_or_invalid",
+        "independent_coordinate_evidence_required",
+        "province_polygon_unverified",
+        "coordinate_role_unverified"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "unknown",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "readiness": [
+        "COORDINATE_HOLD",
+        "LICENSE_HOLD"
+      ],
+      "coordinateMatching": "NOT_TESTED_NO_INDEPENDENT_CANDIDATE_COORDINATES",
+      "publicationApproved": false,
+      "expectedCountIfSeparatelyApproved": 195
+    },
+    {
+      "candidateId": "research:wat-khao-ta-bag",
+      "existingPlaceId": null,
+      "name": "Wat Khao Ta Bag",
+      "nameLocal": "วัดเขาตะแบก",
+      "province": "ชลบุรี",
+      "sourceUrl": "https://www.watkhaotabagsriracha.com/",
+      "license": null,
+      "coordinates": null,
+      "entranceEvidence": null,
+      "reviewer": null,
+      "status": "NEEDS_REVIEW",
+      "duplicate": {
+        "status": "NEW_CANDIDATE",
+        "matches": [],
+        "action": "human_review_required"
+      },
+      "holds": [
+        "source_license_unverified",
+        "coordinate_missing_or_invalid",
+        "independent_coordinate_evidence_required",
+        "province_polygon_unverified",
+        "coordinate_role_unverified"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "unknown",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "readiness": [
+        "COORDINATE_HOLD",
+        "LICENSE_HOLD"
+      ],
+      "coordinateMatching": "NOT_TESTED_NO_INDEPENDENT_CANDIDATE_COORDINATES",
+      "publicationApproved": false,
+      "expectedCountIfSeparatelyApproved": 195
+    },
+    {
+      "candidateId": "research:navy-turtle-centre-update",
+      "existingPlaceId": "tat-2010120911214112696",
+      "name": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+      "nameLocal": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+      "province": "ชลบุรี",
+      "sourceUrl": "https://acdc.navy.mi.th/aoep3gxp8m2j",
+      "license": null,
+      "coordinates": null,
+      "entranceEvidence": null,
+      "reviewer": null,
+      "status": "EXISTING_PLACE",
+      "duplicate": {
+        "status": "EXISTING_PLACE",
+        "matches": [
+          {
+            "placeId": "tat-2010120911214112696",
+            "reason": "existing_place_id",
+            "status": "EXISTING_PLACE",
+            "confidence": "identifier_match",
+            "distanceMeters": null
+          }
+        ],
+        "action": "update_existing_only"
+      },
+      "holds": [
+        "source_license_unverified",
+        "coordinate_missing_or_invalid",
+        "independent_coordinate_evidence_required",
+        "province_polygon_unverified",
+        "coordinate_role_unverified",
+        "public_access_evidence_required",
+        "restricted_access_not_authorized"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "unknown",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "readiness": [
+        "COORDINATE_HOLD",
+        "LICENSE_HOLD"
+      ],
+      "coordinateMatching": "NOT_TESTED_NO_INDEPENDENT_CANDIDATE_COORDINATES",
+      "publicationApproved": false,
+      "expectedCountIfSeparatelyApproved": 194
+    }
+  ],
+  "sourceRecheck": {
+    "underwater": {
+      "url": "https://underwaterworldpattaya.com/contact-us/",
+      "verified": [
+        "venue identity",
+        "Bang Lamung address in Chon Buri"
+      ],
+      "notEstablished": [
+        "independent vehicle entrance coordinates",
+        "data/image reuse permission"
+      ]
+    },
+    "temple": {
+      "url": "https://www.watkhaotabagsriracha.com/contact/",
+      "verified": [
+        "Thai temple name",
+        "Si Racha/Chon Buri"
+      ],
+      "notEstablished": [
+        "independent entrance coordinates",
+        "data/image reuse permission"
+      ],
+      "sourceCaution": "About page contains template placeholder text; do not copy it as a place description."
+    },
+    "turtle": "Existing entity only. Current public gate authority and independent gate coordinate remain unverified."
+  }
+}
