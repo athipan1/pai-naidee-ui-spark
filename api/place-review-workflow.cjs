@@ -38,9 +38,16 @@ async function audit(tx,draftId,actorId,action,from,to,evidence,hash,reason='') 
 }
 async function assertApprovedPublication(tx,draft) {
   const [review]=await tx`SELECT * FROM place_reviews WHERE draft_id=${draft.id} FOR UPDATE`;
-  if(!review||review.state!=='APPROVED')return {ok:false,error:'An administrator must verify and approve this draft before publishing.',holds:['review_not_approved']};
+  // Admin direct publishing removes the human approval step, not the evidence gates.
+  if(!review||!review.evidence||['REJECTED','PUBLISHED'].includes(review.state))
+    return {ok:false,error:'Save valid publication evidence before publishing.',holds:['review_evidence_required']};
   const report=await evaluateReview(tx,draft,review);
-  if(!report.payloadMatches||report.holds.length)return {ok:false,error:'Approval is stale or quality gates no longer pass.',holds:report.payloadMatches?report.holds:['draft_changed_since_review']};
+  if(!report.payloadMatches||report.holds.length)
+    return {ok:false,error:'Publication quality gates failed or evidence is stale.',holds:report.payloadMatches?report.holds:['draft_changed_since_review']};
+  if(review.state!=='APPROVED') {
+    await tx`UPDATE place_reviews SET state='APPROVED',reviewed_by=${draft._publishingActorId},reviewed_at=NOW(),revision=revision+1,updated_at=NOW() WHERE draft_id=${draft.id}`;
+    await audit(tx,draft.id,draft._publishingActorId,'auto_approve_on_publish',review.state,'APPROVED',review.evidence,review.payload_hash,'Admin direct publish; all quality gates passed');
+  }
   return {ok:true,review,evidence:review.evidence,report};
 }
 async function finishPublication(tx,draft,placeId,actorId,approval) {
