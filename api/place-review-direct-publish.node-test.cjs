@@ -28,5 +28,5 @@ test('admin direct publish rejects stale payload and every quality hold',()=>{
     assert.equal(result.ok,false,hold);
     assert.deepEqual(result.holds,[hold]);
   }
-  assert.equal(publicationGateDecision(review,undefined).ok,false);
+  assert.equal(publicationGateDecision(review,{payloadMatches:false,holds:[]}).ok,false);
 });
