@@ -233,7 +233,13 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await expect(draft.getByRole('button', {name:'ตรวจหลักฐานและคุณภาพอัตโนมัติ'})).toHaveCount(0);
   await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeEnabled();
   await draft.getByRole('button', { name: 'เผยแพร่', exact: true }).click();
-  await expect(draft.getByText('เผยแพร่แล้ว')).toBeVisible();
+  await expect(page.getByText(/เผยแพร่สำเร็จ/)).toBeVisible();
+  await expect(draft).toHaveCount(0);
+  await page.getByRole('button', { name: /ประวัติการเผยแพร่ \(/ }).click();
+  const published = page.locator('article').filter({ hasText: 'Draft fixture' });
+  await expect(published).toBeVisible();
+  await expect(published.getByText('เผยแพร่แล้ว')).toBeVisible();
+  await expect(published.getByText('เผยแพร่สถานที่ใหม่')).toBeVisible();
   expect(fixture.published()).toBe(1);
 });
 
