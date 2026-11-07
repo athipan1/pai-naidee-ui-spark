@@ -86,6 +86,19 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.head_ref == 'fix/chonburi-live-api-verification'
         run: node scripts/verify-chonburi-production.mjs
 
+      - name: Verify real Production search card once on desktop and mobile
+        if: github.ref == 'refs/heads/main' || github.head_ref == 'test/chonburi-temple-live-browser-proof'
+        run: npx playwright test --config=playwright.production.config.ts --grep "Chon Buri temple live UI"
+
+      - name: Upload Chon Buri Production browser proof
+        if: always() && (github.ref == 'refs/heads/main' || github.head_ref == 'test/chonburi-temple-live-browser-proof')
+        uses: actions/upload-artifact@v4
+        with:
+          name: chonburi-temple-live-ui
+          path: test-results/chonburi-temple-*.png
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Upload Admin CMS screenshots
         if: always()
         uses: actions/upload-artifact@v4
