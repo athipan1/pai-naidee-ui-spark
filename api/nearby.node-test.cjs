@@ -208,3 +208,16 @@ test('new destinations cover multiple regions and retain stable location/source 
     assert.ok(new URL(place.sourceUrl).host);
   }
 });
+
+test('Admin CMS uploaded image is credited for detail gallery, while arbitrary external images are not', () => {
+  const upload = 'https://painaidee-api-production.up.railway.app/api/media/cms/11111111-1111-4111-8111-111111111111.png';
+  const external = 'https://example.org/unlicensed.jpg';
+  const base = {id:'cms:test',name:'Admin Fixture',province:'ชลบุรี',category:'Nature',lat:13,lng:101};
+  const photo = (id,url) => ({id,url});
+  const own = normalizePlace({...base,image_url:upload,media:[photo('cms-media:fixture',upload)]});
+  assert.deepEqual(own.images,[upload]);
+  assert.equal(own.mediaCredits[0].url,upload);
+  assert.equal(own.mediaCredits[0].kind,'user-provided');
+  const outside = normalizePlace({...base,image_url:external,media:[photo('cms-media:external',external)]});
+  assert.deepEqual(outside.mediaCredits,[]);
+});
