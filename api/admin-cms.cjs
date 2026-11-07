@@ -234,6 +234,65 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.error ? { error: result.error } : { deleted: true });
   }));
 
+  const editableFields = ['name', 'nameLocal', 'province', 'category', 'description', 'lat', 'lng', 'imageUrl'];
+  const placeSnapshot = place => ({
+    name: place.name, nameLocal: place.name_local || '', province: place.province,
+    category: place.category, description: place.description || '', lat: Number(place.lat),
+    lng: Number(place.lng), imageUrl: place.image_url || '',
+  });
+  // A stale draft is never rebased implicitly. Admin must review and choose every field to retain.
+  app.get('/api/admin/places/:draftId/reconcile', requireAdmin, wrap(async (req, res) => {
+    const sql = getSql();
+    const [draft] = await sql`SELECT id, status, target_place_id, payload, target_updated_at,
+      EXTRACT(EPOCH FROM updated_at)::text AS version FROM place_drafts WHERE id = ${req.params.draftId}`;
+    if (!draft || draft.status !== 'draft' || !draft.target_place_id) return res.status(404).json({ error: 'Editable place draft not found.' });
+    const [place] = await sql`SELECT name, name_local, province, category, description, lat, lng, image_url, updated_at
+      FROM places WHERE id = ${draft.target_place_id}`;
+    if (!place) return res.status(404).json({ error: 'Published place not found.' });
+    res.json({ draft: draft.payload, latest: placeSnapshot(place), version: draft.version,
+      stale: new Date(place.updated_at).getTime() !== new Date(draft.target_updated_at).getTime(),
+      placeUpdatedAt: new Date(place.updated_at).toISOString(),
+      fields: editableFields });
+  }));
+
+  app.post('/api/admin/places/:draftId/reconcile', requireAdmin, wrap(async (req, res) => {
+    const selected = req.body?.selectedFields;
+    if (!Array.isArray(selected) || selected.some(field => !editableFields.includes(field)) ||
+      new Set(selected).size !== selected.length || !draftVersion(req.body?.version))
+      return res.status(400).json({ error: 'Select valid fields and provide the current draft version.' });
+    const result = await getSql().begin(async tx => {
+      const [draft] = await tx`SELECT *, EXTRACT(EPOCH FROM updated_at)::text AS version FROM place_drafts
+        WHERE id = ${req.params.draftId} FOR UPDATE`;
+      if (!draft || draft.status !== 'draft' || !draft.target_place_id) return { code: 404, error: 'Editable draft not found.' };
+      if (draft.version !== req.body.version) return { code: 409, error: 'Draft changed. Reload before reconciling.' };
+      const [place] = await tx`SELECT name, name_local, province, category, description, lat, lng, image_url, updated_at
+        FROM places WHERE id = ${draft.target_place_id} FOR UPDATE`;
+      if (!place) return { code: 404, error: 'Published place not found.' };
+      if (req.body?.expectedPlaceUpdatedAt !== new Date(place.updated_at).toISOString())
+        return { code: 409, error: 'Published place changed again. Reload the comparison.' };
+      const latest = placeSnapshot(place);
+      const payload = { ...latest };
+      for (const field of selected) payload[field] = draft.payload[field] ?? latest[field];
+      // Gallery modifications are an explicit separate selection, never silently replayed.
+      if (req.body?.retainGallery === true) {
+        payload.imageUrls = draft.payload.imageUrls || [];
+        payload.removedImageUrls = draft.payload.removedImageUrls || [];
+      } else {
+        payload.imageUrls = [];
+        payload.removedImageUrls = [];
+      }
+      const parsed = cleanPlace(payload);
+      if (parsed.errors.length) return { code: 400, errors: parsed.errors };
+      const [saved] = await tx`UPDATE place_drafts SET payload = ${tx.json(parsed.value)},
+        target_updated_at = ${place.updated_at},
+        updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
+        WHERE id = ${draft.id} RETURNING id, status, target_place_id, payload,
+        EXTRACT(EPOCH FROM updated_at)::text AS version`;
+      return { code: 200, draft: saved };
+    });
+    res.status(result.code).json(result.draft || { error: result.error, errors: result.errors });
+  }));
+
   app.post('/api/admin/places/:draftId/publish', requireAdmin, wrap(async (req, res) => {
     const sql = getSql();
     const result = await sql.begin(async tx => {
