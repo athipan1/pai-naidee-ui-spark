@@ -106,6 +106,11 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   const makeDraft = fields => write('/places', { ...fixture, ...fields }, 201);
   const publish = async (draft, status = 200) => {
     if(status===200&&draft.status!=='published')await approve(draft);
+    if(status===200&&draft.status!=='published') {
+      const [snapshot]=await sql`SELECT r.payload_hash, d.payload FROM place_reviews r JOIN place_drafts d ON d.id=r.draft_id WHERE d.id=${draft.id}`;
+      const {payloadHash}=require('./place-review-evidence.cjs');
+      assert.equal(snapshot.payload_hash,payloadHash(snapshot.payload),'Evidence hash must bind to the exact draft payload before publish');
+    }
     return write(`/places/${draft.id}/publish`, {version:draft.version},status);
   };
   async function approve(draft,extraEvidence={}) {
