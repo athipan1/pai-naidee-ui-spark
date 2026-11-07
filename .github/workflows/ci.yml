@@ -7,6 +7,32 @@ on:
     branches: [ main ]
 
 jobs:
+  chonburi-source-audit:
+    name: Chon Buri Source Audit (Read Only)
+    if: github.event_name == 'pull_request' && github.head_ref == 'research/chonburi-source-bulk-audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify province polygon and source review regression tests
+        run: node --test api/chonburi-bulk-audit.node-test.cjs
+      - name: Audit real Wikidata, OSM and live Railway Chon Buri
+        timeout-minutes: 9
+        run: node api/audit-chonburi-bulk-live.cjs
+      - name: Upload source evidence for human review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chonburi-source-audit
+          path: artifacts/chonburi-source-audit/
+          if-no-files-found: warn
+          retention-days: 14
+
   test:
     name: Run Tests
     runs-on: ubuntu-latest
