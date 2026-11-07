@@ -46,6 +46,10 @@ jobs:
       - name: Run API security tests
         run: npm test --prefix api
 
+      - name: Verify Wikidata and OSM Chon Buri examples against live Railway catalogue
+        if: github.head_ref == 'feature/chonburi-source-adapters-20261105'
+        run: node api/verify-chonburi-sources-live.cjs
+
       - name: Run Admin CMS integration tests against isolated PostgreSQL
         env:
           CMS_TEST_DATABASE_PORT: ${{ job.services.cms-postgres.ports[5432] }}
