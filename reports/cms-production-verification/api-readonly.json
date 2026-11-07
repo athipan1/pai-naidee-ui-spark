@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-11-07T10:19:13.864Z",
+  "results": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "service": "painaidee-railway-api",
+        "database": "ok",
+        "timestamp": "2026-11-07T10:18:39.483Z"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/places",
+      "status": 401,
+      "body": {
+        "error": "Admin login required."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/candidate-queue",
+      "status": 401,
+      "body": {
+        "error": "Admin login required."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/province-quality",
+      "status": 401,
+      "body": {
+        "error": "Admin login required."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/google-verification/status",
+      "status": 401,
+      "body": {
+        "error": "Admin login required."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/places/nonexistent/review",
+      "status": 401,
+      "body": {
+        "error": "Admin login required."
+      }
+    }
+  ]
+}

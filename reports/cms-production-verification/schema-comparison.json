@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-11-07T10:14:48.622488+00:00",
+  "transactionReadOnly": "on",
+  "sourceCommit": "740ecf0fc10d8c08d9c9ba791eb8c32f8cc2db30",
+  "migrationSha256": "5e83b340179b98a21382416b4fd1e2dd0154342926befc307b5dbad3c3f1a6b2",
+  "expectedTableCount": 11,
+  "missingTables": [],
+  "expectedColumnCount": 91,
+  "actualColumnCount": 91,
+  "columnMismatches": [],
+  "missingIndexes": [],
+  "invalidIndexes": [],
+  "unvalidatedConstraints": [],
+  "constraintCounts": {
+    "p": 11,
+    "f": 15,
+    "u": 5,
+    "c": 7,
+    "n": 73
+  },
+  "counts": {
+    "places": 194,
+    "chonburi": 71,
+    "drafts": 5,
+    "reviews": 0,
+    "events": 0,
+    "boundaries": 0,
+    "jobs": 0
+  },
+  "authSummary": {
+    "enabled_admins": 1,
+    "active_admin_sessions": 0
+  },
+  "fingerprintsBefore": {
+    "places": "00c0d56d8f7bc831a9c52bb0944d45e0",
+    "drafts": "e8cbefddac48a745cadad49b006b9bd1",
+    "review_events": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "productionWrite": "NOT PERFORMED",
+  "migrationAction": "NOT PERFORMED",
+  "authenticatedProductionReads": "BLOCKED_NO_ACTIVE_ADMIN_SESSION",
+  "defaultMismatches": [],
+  "missingPrimaryForeignUniqueConstraints": [],
+  "comparedForeignKeys": 15,
+  "comparedPrimaryKeys": 11,
+  "comparedUniqueConstraints": 5,
+  "auditFunctionMatches": true,
+  "migrationLedgerTables": [],
+  "migrationStatus": "OBJECTS_PRESENT_AND_COMPATIBLE; no migration ledger receipt exists",
+  "fingerprintsAfter": {
+    "places": "00c0d56d8f7bc831a9c52bb0944d45e0",
+    "drafts": "e8cbefddac48a745cadad49b006b9bd1",
+    "review_events": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "fingerprintsUnchanged": true,
+  "schemaCompatibility": "PASS"
+}
