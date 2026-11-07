@@ -52,3 +52,44 @@ test('mobile visitor can browse without horizontal overflow and see a loaded des
   await page.goto('/discover');
   await expect(page.getByRole('tab', { name: /Map|แผนที่/ })).toBeVisible();
 });
+
+
+for (const viewport of [
+  { label: 'desktop', width: 1280, height: 800 },
+  { label: 'mobile', width: 390, height: 844 },
+]) {
+  test(`Chon Buri temple live UI shows exactly one card on ${viewport.label}`, async ({ page }) => {
+    const id = 'tat-2015120421550718075';
+    const name = 'วัดเขาบ่อกวางทอง';
+    const backend = 'painaidee-api-production.up.railway.app';
+    const responseCodes: number[] = [];
+
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.addInitScript(() => localStorage.setItem('painaidee.language', 'th'));
+    page.on('response', response => {
+      if (new URL(response.url()).hostname === backend &&
+          new URL(response.url()).pathname === '/api/places') {
+        responseCodes.push(response.status());
+      }
+    });
+    await page.goto('/discover?mode=search&q=' + encodeURIComponent(name));
+    const resultCards = page.locator('[data-testid="attraction-card"]');
+    const templeCard = resultCards.filter({ has: page.getByRole('heading', { name, exact: true }) });
+
+    await expect(templeCard).toHaveCount(1, { timeout: 30_000 });
+    await expect(resultCards).toHaveCount(1);
+    await expect(templeCard).toBeVisible();
+    expect(responseCodes).toContain(200);
+
+    await page.screenshot({
+      path: `test-results/chonburi-temple-${viewport.label}.png`,
+      fullPage: true,
+    });
+
+    await templeCard.click();
+    await expect(page).toHaveURL(new RegExp('/attraction/' + id + '$'));
+    await expect(page.getByRole('heading', { level: 1, name, exact: true }))
+      .toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Error: ไม่พบข้อมูล/)).toHaveCount(0);
+  });
+}
