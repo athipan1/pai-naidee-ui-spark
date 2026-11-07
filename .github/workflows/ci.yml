@@ -80,6 +80,12 @@ jobs:
       - name: Test Admin CMS in Chrome and iPhone Safari with mocked APIs
         run: npx playwright test --config=playwright.admin-cms.config.ts
 
+      # The frontend's live place catalogue is on Railway, not Vercel's legacy /api/places.
+      # A read-only targeted production proof, limited to this review PR and main.
+      - name: Verify live Chon Buri Railway pagination and temple uniqueness
+        if: github.ref == 'refs/heads/main' || github.head_ref == 'fix/chonburi-live-api-verification'
+        run: node scripts/verify-chonburi-production.mjs
+
       - name: Upload Admin CMS screenshots
         if: always()
         uses: actions/upload-artifact@v4
