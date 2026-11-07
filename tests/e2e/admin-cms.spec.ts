@@ -153,7 +153,7 @@ test('login, failed credentials, logout, and an expired session during a request
   await login(page);
   await expect(page.getByRole('heading', { name: 'จัดการสถานที่ท่องเที่ยว' })).toBeVisible();
   fixture.expire();
-  await page.getByRole('button', { name: 'ค้นหาสถานที่', exact: true }).click();
+  await page.getByRole('button', { name: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('เซสชันหมดอายุ');
 });
 
@@ -162,7 +162,7 @@ test('catalog pagination, aliases, numeric and empty coordinates, and saving an 
   const pageErrors: string[] = [];
   page.on('pageerror', error => pageErrors.push(error.message));
   await login(page);
-  await page.getByRole('button', { name: 'ค้นหาสถานที่', exact: true }).click();
+  await page.getByRole('button', { name: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', exact: true }).click();
   const search = page.getByRole('textbox', { name: 'ค้นหาสถานที่เดิม' });
   await search.fill('รายการจำลอง');
   await page.getByRole('button', { name: 'ค้นหา', exact: true }).click();
@@ -181,7 +181,7 @@ test('catalog pagination, aliases, numeric and empty coordinates, and saving an 
     await expect(page.getByText(new RegExp(result))).toBeVisible();
   }
 
-  await page.getByRole('button', { name: 'แก้ไขสถานที่' }).click();
+  await page.getByRole('button', { name: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', exact: true }).last().click();
   await expect(page.getByLabel(/ละติจูด/)).toHaveValue('13.2');
   await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('100.9');
   await page.getByRole('searchbox', { name: 'ค้นหาชื่อสถานที่บนแผนที่' }).fill('ตำแหน่งทดสอบ');
