@@ -288,7 +288,6 @@ export default function AdminCms() {
       const data: Draft = await api(path, { method: editing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, version: editing?.version }) });
       setDrafts(current => [data, ...current.filter(draft => draft.id !== data.id)]);
-      setApprovalStates(current=>({...current,[data.id]:false}));
       setForm({ ...empty }); setEditing(null); setTab('drafts'); setProposedCoordinate(null); setGeoCandidates([]); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'บันทึกไม่สำเร็จ'); }
     finally { setBusy(false); }
