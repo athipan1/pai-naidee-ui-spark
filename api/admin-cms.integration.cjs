@@ -96,7 +96,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     const headers = auth && token ? { Authorization: `Bearer ${token}` } : {};
     if (body && !(body instanceof FormData)) headers['Content-Type'] = 'application/json';
     const res = await fetch(origin + path, { method, headers, body: body instanceof FormData ? body : JSON.stringify(body) });
-    assert.equal(res.status, status, `${method} ${path} returned ${res.status}, expected ${status}`);
+    assert.equal(res.status, status, `${method} ${path} returned ${res.status}, expected ${status}: ${res.status===status?'':await res.clone().text()}`);
     return res;
   }
   const admin = (path, options) => request('/api/admin' + path, options);
