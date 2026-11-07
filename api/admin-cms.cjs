@@ -215,6 +215,29 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.draft || { error: result.error });
   }));
 
+  app.delete('/api/admin/places/:draftId', requireAdmin, wrap(async (req, res) => {
+    const version = req.body?.version;
+    if (!draftVersion(version)) return res.status(400).json({ error: 'Draft version required. Reload the draft.' });
+    const result = await getSql().begin(async tx => {
+      const [draft] = await tx`SELECT status, EXTRACT(EPOCH FROM updated_at)::text AS version
+        FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
+      if (!draft) return { code: 404, error: 'Draft not found.' };
+      if (draft.status !== 'draft') return { code: 409, error: 'Published places cannot be deleted from drafts.' };
+      if (draft.version !== version) return { code: 409, error: 'Draft changed. Reload before deleting.' };
+      // Existing review/import records are protected by foreign keys and immutable audit history.
+      // Do not erase evidence or related records merely to remove a draft.
+      const [linked] = await tx`SELECT
+        EXISTS(SELECT 1 FROM place_reviews WHERE draft_id = ${req.params.draftId}) AS reviewed,
+        EXISTS(SELECT 1 FROM place_review_events WHERE draft_id = ${req.params.draftId}) AS audited,
+        EXISTS(SELECT 1 FROM province_import_candidates WHERE draft_id = ${req.params.draftId}) AS imported`;
+      if (linked?.reviewed || linked?.audited || linked?.imported)
+        return { code: 409, error: 'This draft has linked review or import history and cannot be deleted safely.' };
+      await tx`DELETE FROM place_drafts WHERE id = ${req.params.draftId} AND status = 'draft'`;
+      return { code: 200, deleted: true };
+    });
+    res.status(result.code).json(result.error ? { error: result.error } : { deleted: true });
+  }));
+
   app.post('/api/admin/places/:draftId/publish', requireAdmin, wrap(async (req, res) => {
     const sql = getSql();
     const result = await sql.begin(async tx => {
