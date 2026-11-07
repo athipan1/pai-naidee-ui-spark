@@ -22,7 +22,7 @@ test('Admin catalog reuses public smart search and supports browsing existing pl
   const routes = new Map();
   const app = {
     get: (path, ...handlers) => routes.set(path, handlers.at(-1)),
-    post() {}, put() {},
+    post() {}, put() {}, delete() {},
   };
   const calls = [];
   registerAdminCms(app, {
@@ -48,7 +48,7 @@ test('Admin catalog reuses public smart search and supports browsing existing pl
 test('Admin media preview includes existing media and main image without duplicates', async () => {
   const routes = new Map();
   registerAdminCms({
-    get: (path, ...handlers) => routes.set(path, handlers.at(-1)), post() {}, put() {},
+    get: (path, ...handlers) => routes.set(path, handlers.at(-1)), post() {}, put() {}, delete() {},
   }, {
     getSql: () => async (strings) => strings[0].includes('SELECT image_url')
       ? [{ image_url: 'https://example.com/main.jpg' }]

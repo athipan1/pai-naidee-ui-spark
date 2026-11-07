@@ -42,6 +42,11 @@ function cleanPlace(input) {
   const lng = number(input?.lng);
   const imageUrl = text(input?.imageUrl, 2000);
   const errors = [];
+  const rawImages = input?.imageUrls ?? [];
+  if (!Array.isArray(rawImages) || rawImages.length > 20) errors.push('Choose up to 20 images.');
+  const imageUrls = Array.isArray(rawImages) ? [...new Set(rawImages.map(url => typeof url === 'string' ? url.trim() : ''))].filter(Boolean) : [];
+  if (imageUrls.some(url => url.length > 2000 || validateImageUrl(url))) errors.push('All gallery images must have valid HTTPS URLs.');
+  if (imageUrls.length > 20) errors.push('Choose up to 20 images.');
   if (!name || !province || !category) errors.push('Name, province and category are required.');
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < 5 || lat > 21 || lng < 97 || lng > 106) errors.push('Coordinates must be within Thailand.');
   const imageError = validateImageUrl(imageUrl);
@@ -50,7 +55,7 @@ function cleanPlace(input) {
   return {
     errors,
     value: { name, nameLocal: text(input?.nameLocal, 200), province, category,
-      description: text(input?.description, 10000), lat, lng, imageUrl },
+      description: text(input?.description, 10000), lat, lng, imageUrl, imageUrls: [...new Set([imageUrl, ...imageUrls].filter(Boolean))] },
   };
 }
 
@@ -58,6 +63,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
+      if(error?.code==='23503' && req.method === 'DELETE') return res.status(409).json({error:'This draft has linked review or import history and cannot be deleted safely.'});
       if(error?.code==='PUBLICATION_DUPLICATE')return res.status(409).json({error:'External identity already belongs to another place.'});
       console.error('Admin CMS failed.');
       res.status(503).json({ error: 'Admin CMS is unavailable.' });
@@ -170,7 +176,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (existing.length) return { code: 200, draft: existing[0] };
       const id = randomUUID();
       const payload = { name: place.name, nameLocal: place.name_local || '', province: place.province,
-        category: place.category, description: place.description || '', lat: place.lat, lng: place.lng, imageUrl: place.image_url || '' };
+        category: place.category, description: place.description || '', lat: place.lat, lng: place.lng, imageUrl: place.image_url || '', imageUrls: [] };
       const [draft] = await tx`INSERT INTO place_drafts (id, payload, author_id, target_place_id, target_updated_at)
         SELECT ${id}, ${tx.json(payload)}, ${req.auth.user.id}, id, updated_at FROM places WHERE id = ${place.id}
         RETURNING id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version`;
@@ -210,6 +216,22 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.draft || { error: result.error });
   }));
 
+  app.delete('/api/admin/places/:draftId', requireAdmin, wrap(async (req, res) => {
+    const version = req.body?.version;
+    if (!draftVersion(version)) return res.status(400).json({ error: 'Draft version required. Reload the draft.' });
+    const result = await getSql().begin(async tx => {
+      const [draft] = await tx`SELECT status, EXTRACT(EPOCH FROM updated_at)::text AS version
+        FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
+      if (!draft) return { code: 404, error: 'Draft not found.' };
+      if (draft.status !== 'draft') return { code: 409, error: 'Published places cannot be deleted from drafts.' };
+      if (draft.version !== version) return { code: 409, error: 'Draft changed. Reload before deleting.' };
+      // Foreign keys protect linked review/import evidence. A failed delete rolls back.
+      await tx`DELETE FROM place_drafts WHERE id = ${req.params.draftId} AND status = 'draft'`;
+      return { code: 200, deleted: true };
+    });
+    res.status(result.code).json(result.error ? { error: result.error } : { deleted: true });
+  }));
+
   app.post('/api/admin/places/:draftId/publish', requireAdmin, wrap(async (req, res) => {
     const sql = getSql();
     const result = await sql.begin(async tx => {
@@ -245,10 +267,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           category = ${p.category}, description = ${p.description}, lat = ${p.lat}, lng = ${p.lng},
           image_url = ${p.imageUrl || null}, updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
           WHERE id = ${draft.target_place_id}`;
-        if ((p.imageUrl || null) !== current.image_url) {
-          await preservePlaceImage(tx, current.id, current.image_url, current.name);
-          await preservePlaceImage(tx, current.id, p.imageUrl, p.name);
-        }
+        if ((p.imageUrl || null) !== current.image_url) await preservePlaceImage(tx, current.id, current.image_url, current.name);
+        for (const url of p.imageUrls) await preservePlaceImage(tx, current.id, url, p.name);
         await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${current.id}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
         return { status: 200, placeId: current.id, published: true, updated: true };
@@ -256,8 +276,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       const placeId = `cms:${draft.id}`;
       await tx`INSERT INTO places (id, name, name_local, province, category, description, lat, lng, image_url, source_name)
         VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${p.description}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, 'PaiNaiDee Admin CMS')`;
-      if (p.imageUrl) await tx`INSERT INTO media (id, place_id, url, type, title)
-        VALUES (${`cms-media:${draft.id}`}, ${placeId}, ${p.imageUrl}, 'image', ${p.name})`;
+      for (const url of p.imageUrls) await preservePlaceImage(tx, placeId, url, p.name);
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
       return { status: 200, placeId, published: true };
