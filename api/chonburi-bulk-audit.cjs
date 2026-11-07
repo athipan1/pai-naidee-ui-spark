@@ -1,12 +1,11 @@
 'use strict';
 // Province boundary geometry must come from the OSM relation ISO3166-2=TH-20.
 // No bounding-box-only location may be labelled "inside Chon Buri".
-const { adaptWikidata,adaptOsm,stage,distanceMeters } = require('./tourism-source-adapters.cjs');
+const { adaptWikidata,adaptOsm,distanceMeters } = require('./tourism-source-adapters.cjs');
 const norm = x => String(x??'').normalize('NFKC').toLocaleLowerCase('th').replace(/[\s\u200b._\-()\[\]]+/g,'');
-const key = c => c.source+':'+c.sourceId;
 function same(a,b){return Math.abs(a.lat-b.lat)<1e-6&&Math.abs(a.lon-b.lon)<1e-6;}
 function joinRole(members,role){
-  let fragments=members.filter(m=>m.role===role&&m.type==='way'&&Array.isArray(m.geometry)&&m.geometry.length>=2)
+  const fragments=members.filter(m=>m.role===role&&m.type==='way'&&Array.isArray(m.geometry)&&m.geometry.length>=2)
     .map(m=>m.geometry.map(p=>({lat:p.lat,lon:p.lon})));
   const rings=[];let broken=0;
   while(fragments.length){
@@ -63,8 +62,6 @@ function review({wdRows,osmRows,existing,boundary,maxRows=600}){
     const blockers=[];
     const inside=inProvince(item,boundary);
     if(inside)stats.inside++;else{stats.outside++;blockers.push('outside_province_polygon');}
-    const clean=stage([],adaptOsm,baseline);
-    void clean;
     if(!item.sourceId||!item.sourceUrl)blockers.push('missing_provenance');
     if(!/[\u0e01-\u0e5b]/.test(item.nameLocal))blockers.push('missing_thai_name');
     const compared=baseline.concat(seen);
