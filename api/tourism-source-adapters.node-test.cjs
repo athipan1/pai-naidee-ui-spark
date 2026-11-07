@@ -37,3 +37,8 @@ test('one source duplicate is not offered twice',()=>{
 test('never stage without a provided comparison catalogue',()=>{
  assert.throws(()=>stage([W],adaptWikidata),/Production comparison/);
 });
+test('existing source staging shares alias and English-name duplicate gates even without coordinates',()=>{
+ const result=stage([O],adaptOsm,[{id:'existing',name:'Khao Kheow Open Zoo',aliases:['สวนสัตว์เปิดเขาเขียว'],province:'ชลบุรี'}]);
+ assert.ok(result.rejected[0].issues.includes('possible_duplicate'));
+ assert.equal(result.approved,0);
+});

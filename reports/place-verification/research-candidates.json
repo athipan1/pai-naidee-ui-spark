@@ -1,0 +1,34 @@
+[
+  {
+    "candidateId": "research:underwater-world-pattaya",
+    "name": "Underwater World Pattaya",
+    "nameLocal": "อันเดอร์วอเตอร์เวิลด์ พัทยา",
+    "province": "ชลบุรี",
+    "source": "tat",
+    "sourceId": "tat-2011032410133215415",
+    "provenance": { "sourceUrl": "https://underwaterworldpattaya.com/contact-us/", "sourceId": "tat-2011032410133215415" },
+    "access": { "kind": "unknown", "sourceUrl": "https://underwaterworldpattaya.com/contact-us/" },
+    "researchNote": "Operator contact confirms venue and Bang Lamung address. Linked Google Maps pin is not independent coordinate evidence. No permission to copy photos or detailed descriptions established."
+  },
+  {
+    "candidateId": "research:wat-khao-ta-bag",
+    "name": "Wat Khao Ta Bag",
+    "nameLocal": "วัดเขาตะแบก",
+    "province": "ชลบุรี",
+    "provenance": { "sourceUrl": "https://www.watkhaotabagsriracha.com/" },
+    "access": { "kind": "unknown", "sourceUrl": "https://www.watkhaotabagsriracha.com/" },
+    "researchNote": "Temple site confirms name, Si Racha and Chon Buri. Vehicle entrance coordinates and image reuse permission remain unconfirmed. No manufactured source ID or coordinates."
+  },
+  {
+    "candidateId": "research:navy-turtle-centre-update",
+    "existingPlaceId": "tat-2010120911214112696",
+    "name": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+    "nameLocal": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+    "province": "ชลบุรี",
+    "source": "tat",
+    "sourceId": "tat-2010120911214112696",
+    "provenance": { "sourceUrl": "https://acdc.navy.mi.th/aoep3gxp8m2j", "sourceId": "tat-2010120911214112696" },
+    "access": { "kind": "unknown", "restricted": true, "authorityUrl": "https://acdc.navy.mi.th/aoep3gxp8m2j" },
+    "researchNote": "Existing SQL/API record confirmed. Update only. Navy notice dated 16 Dec 2025 describes railway-gate access; current authorization and independent gate coordinate are not confirmed. Centre coordinates intentionally not reused as entrance."
+  }
+]

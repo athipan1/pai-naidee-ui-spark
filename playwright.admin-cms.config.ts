@@ -10,6 +10,7 @@ export default defineConfig({
   projects: [
     { name: 'Desktop Chrome', use: { ...devices['Desktop Chrome'] } },
     { name: 'iPhone Safari', use: { ...devices['iPhone 13'] } },
+    { name: 'Android Chrome', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
     command: 'npm run build -- --outDir dist/admin-test && npm run preview -- --outDir dist/admin-test --host 127.0.0.1 --port 4174 --strictPort',

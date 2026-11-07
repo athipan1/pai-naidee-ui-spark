@@ -58,7 +58,7 @@ for (const viewport of [
   { label: 'desktop', width: 1280, height: 800 },
   { label: 'mobile', width: 390, height: 844 },
 ]) {
-  test(`Chon Buri temple live UI shows exactly one card on ${viewport.label}`, async ({ page }) => {
+  test(`Chon Buri temple live UI shows exactly one card on ${viewport.label}`, async ({ page }, testInfo) => {
     const id = 'tat-2015120421550718075';
     const name = 'วัดเขาบ่อกวางทอง';
     const backend = 'painaidee-api-production.up.railway.app';
@@ -82,7 +82,7 @@ for (const viewport of [
     expect(responseCodes).toContain(200);
 
     await page.screenshot({
-      path: `test-results/chonburi-temple-${viewport.label}.png`,
+      path: `test-results/chonburi-temple-${testInfo.project.name.replaceAll(' ', '-')}-${viewport.label}.png`,
       fullPage: true,
     });
 

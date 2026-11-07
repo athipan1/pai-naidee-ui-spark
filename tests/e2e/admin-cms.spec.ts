@@ -39,6 +39,9 @@ async function mockCms(page: Page) {
     if (pathname.startsWith('/api/admin/') && (!session || request.headers().authorization !== 'Bearer browser-test-session'))
       return reply(401, { error: 'Session expired or invalid.' });
     if (pathname === '/api/admin/me') return reply(200, { role: 'admin' });
+    if (pathname.endsWith('/quality-review')) return reply(200, { status:'NEEDS_REVIEW',provinceGate:'NEEDS_REVIEW',coordinateKind:'unknown',
+      holds:['province_polygon_unverified'],baselineCount:194,duplicate:{action:'human_review_required',matches:[]},publishAllowed:false });
+    if (pathname === '/api/admin/google-verification/status') return reply(200, {enabled:false,reasons:['activation_not_approved'],dailyLimit:0});
     if (pathname === '/api/admin/logout') {
       session = false;
       return reply(200, { success: true });
@@ -115,6 +118,20 @@ async function login(page: Page, password = 'cms-fixture-password') {
   await page.getByLabel('รหัสผ่าน').fill(password);
   await page.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
 }
+
+test('candidate review is read-only and Google stays disabled without activation', async ({page}) => {
+  await mockCms(page);
+  let googleCalls=0;
+  page.on('request', request => {if(new URL(request.url()).pathname==='/api/admin/google-verification')googleCalls++;});
+  await login(page);
+  await page.getByRole('button', {name:/ฉบับร่าง \(/}).click();
+  await page.getByRole('button', {name:'ตรวจคุณภาพแบบอ่านอย่างเดียว'}).click();
+  await expect(page.getByText(/เทียบฐานข้อมูล 194/)).toBeVisible();
+  await expect(page.getByText('รายงานนี้ยังไม่อนุมัติให้เผยแพร่')).toBeVisible();
+  await expect(page.getByRole('button', {name:'ตรวจ Google (th)'})).toBeDisabled();
+  await expect(page.getByRole('button', {name:'ตรวจ Google (en)'})).toBeDisabled();
+  expect(googleCalls).toBe(0);
+});
 
 test('login, failed credentials, logout, and an expired session during a request', async ({ page }) => {
   const fixture = await mockCms(page);

@@ -1,8 +1,6 @@
 'use strict';
 // Staging-only. No DB writes, web requests or publication side effects.
 // Approximate bbox is a prefilter, never proof of Chon Buri province membership.
-const norm = value => String(value || '').normalize('NFKC').toLocaleLowerCase('th')
-  .replace(/[\s\u200b\-_.()\[\]]+/g, '');
 const inBbox = (lat, lng) => Number.isFinite(lat) && Number.isFinite(lng) &&
   lat >= 12.3 && lat <= 13.7 && lng >= 100.4 && lng <= 101.6;
 const hasThai = value => /[\u0e01-\u0e5b]/.test(value || '');
@@ -45,6 +43,7 @@ function stage(rows,adapter,existing) {
   if (!Array.isArray(rows) || typeof adapter !== 'function') throw Error('invalid source rows or adapter');
   if (!Array.isArray(existing)) throw Error('Production comparison places are required');
   const seen = existing.map(p => ({
+    ...p,
     source:p.source || p.source_name, sourceId:p.sourceId,
     wikidataId:p.wikidataId || p.wikidata_id, nameLocal:p.nameLocal || p.name_local || p.name,
     lat:toNumber(p.lat ?? p.coordinates?.lat), lng:toNumber(p.lng ?? p.coordinates?.lng)
@@ -55,13 +54,11 @@ function stage(rows,adapter,existing) {
     if(!item.sourceId || !item.sourceUrl)issues.push('missing_provenance');
     if(!hasThai(item.nameLocal))issues.push('missing_thai_name');
     if(!inBbox(item.lat,item.lng))issues.push('outside_chonburi_bbox');
-    if(seen.some(p => {
-      if(p.source===item.source && p.sourceId && p.sourceId===item.sourceId)return true;
-      if(p.wikidataId && item.wikidataId && p.wikidataId===item.wikidataId)return true;
-      if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng)||!inBbox(item.lat,item.lng))return false;
-      return norm(p.nameLocal)===norm(item.nameLocal) && !!norm(item.nameLocal) &&
-        distanceMeters(p,item)<=300;
-    }))issues.push('possible_duplicate');
+    // Share the stronger CMS/source review engine; resolve lazily because it
+    // reuses this module's distance primitive. Keep Wikidata cross-links too.
+    const duplicate=require('./place-candidate-quality.cjs').duplicateDecision(item,seen);
+    if(['EXISTING_PLACE','PROBABLE_DUPLICATE'].includes(duplicate.status) ||
+      seen.some(p=>p.wikidataId && item.wikidataId && p.wikidataId===item.wikidataId)) issues.push('possible_duplicate');
     // The bbox does NOT verify the province and source fields are not
     // evidence of property ownership, permission, license or visitor entrance.
     const record={...item,status:issues.length?'rejected':'needs_review',

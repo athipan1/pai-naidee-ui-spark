@@ -4,6 +4,8 @@ const { once } = require('node:events');
 const express = require('express');
 const { authRoutes, hashPassword, hashToken } = require('./railway-admin-auth.cjs');
 const { registerAdminCms } = require('./admin-cms.cjs');
+const { registerQualityReview } = require('./place-quality-review.cjs');
+const { registerGoogleVerification } = require('./google-place-verification.cjs');
 const { createImageUpload, registerRailwayMedia, uploadImage, MAX_IMAGE_BYTES } = require('./railway-media.cjs');
 const { ensureAiSettings, MODEL_OPTIONS, registerAiSettingsRoutes } = require('./ai-model-settings.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
@@ -55,6 +57,8 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage: createImageUpload(),
     uploadImage: file => uploadImage(storage, file), invalidateSearchIndex });
   registerRailwayMedia(app, { getSql, storage, requireAdmin });
+  registerQualityReview(app, { getSql, requireAdmin });
+  registerGoogleVerification(app, { getSql, requireAdmin });
   registerAiSettingsRoutes(app, { requireAdmin, getSql, checkModel: async model => ({ ok: true, model }) });
   registerAiHealthRoutes(app, { requireAdmin, getSql, request: async (_url, options) => {
     modelProbes++;
@@ -99,6 +103,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
       ['GET', '/catalog/x/media'], ['GET', '/media/1a111111-1111-4111-8111-111111111111.png'],
       ['POST', '/media'], ['GET', '/ai/models'], ['GET', '/ai/models/validate'], ['PUT', '/ai/models'],
       ['POST', '/ai/health-check'],
+      ['GET', '/places/x/quality-review'], ['GET', '/google-verification/status'], ['POST', '/google-verification'],
     ];
     for (const [method, path] of guarded) {
       const response = await admin(path, { method, status: 401, auth: false });
@@ -117,6 +122,21 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await admin('/me', { status: 401 });
     await sql`UPDATE admin_users SET disabled = FALSE WHERE id = 'test-admin'`;
     await signIn();
+  });
+
+  await t.test('candidate review uses live SQL rows, exports safely and cannot publish or mutate a draft', async () => {
+    const draft=await makeDraft({name:'Quality fixture',nameLocal:'คุณภาพจำลอง'});
+    const [before]=await sql`SELECT payload,updated_at FROM place_drafts WHERE id=${draft.id}`;
+    const review=await (await admin(`/places/${draft.id}/quality-review`)).json();
+    assert.equal(review.mode,'read_only');assert.equal(review.publishAllowed,false);
+    assert.equal(review.provinceGate,'NEEDS_REVIEW');assert.ok(review.holds.includes('source_license_unverified'));
+    assert.equal(review.baselineCount,1);
+    const csv=await admin(`/places/${draft.id}/quality-review?format=csv`);
+    assert.match(csv.headers.get('content-type'),/text\/csv/);
+    assert.match(await csv.text(),/Quality|คุณภาพ/);
+    const [after]=await sql`SELECT payload,updated_at FROM place_drafts WHERE id=${draft.id}`;
+    assert.deepEqual(after,before);
+    await admin('/places/not-found/quality-review',{status:404});
   });
 
   let placeId, imagePath;
