@@ -530,17 +530,26 @@ function normalizePlace(row) {
       : row.image_url
         ? [row.image_url]
         : [],
-    mediaCredits: media.filter((item) =>
-      (item.sourcePage && item.licenseUrl && item.licenseName && item.creatorName) || item.id?.startsWith('painaidee-provided:')
-    ).map((item) => ({
-      url: item.url,
-      photographer: item.id?.startsWith('painaidee-provided:')
-        ? 'PaiNaiDee user' : (item.creatorName || 'Wikimedia Commons contributor'),
-      licenseName: item.licenseName || 'User-provided photo for PaiNaiDee',
-      licenseUrl: item.licenseUrl || '',
-      sourcePage: item.sourcePage || '',
-      kind: item.id?.startsWith('painaidee-provided:') ? 'user-provided' : String(item.sourcePage||'').startsWith('https://commons.wikimedia.org/') ? 'commons' : 'licensed-source',
-    })),
+    // Admin uploads served by our own media endpoint are user-provided assets.
+    // Do not grant this status to arbitrary external URLs entered in the CMS.
+    mediaCredits: media.filter((item) => {
+      const cmsUpload = /^https:\/\/[^/]+\/api\/media\/cms\/[a-f0-9-]{36}\.(jpg|png|webp)$/.test(item.url || '')
+        && (item.id?.startsWith('cms-media:') || item.id?.startsWith('painaidee-provided:'));
+      return cmsUpload || (item.sourcePage && item.licenseUrl && item.licenseName && item.creatorName)
+        || item.id?.startsWith('painaidee-provided:');
+    }).map((item) => {
+      const cmsUpload = /^https:\/\/[^/]+\/api\/media\/cms\/[a-f0-9-]{36}\.(jpg|png|webp)$/.test(item.url || '')
+        && item.id?.startsWith('cms-media:');
+      const userProvided = cmsUpload || item.id?.startsWith('painaidee-provided:');
+      return {
+        url: item.url,
+        photographer: userProvided ? 'PaiNaiDee Admin upload' : (item.creatorName || 'Wikimedia Commons contributor'),
+        licenseName: item.licenseName || (userProvided ? 'Admin-provided photo for PaiNaiDee' : ''),
+        licenseUrl: item.licenseUrl || '',
+        sourcePage: item.sourcePage || '',
+        kind: userProvided ? 'user-provided' : String(item.sourcePage||'').startsWith('https://commons.wikimedia.org/') ? 'commons' : 'licensed-source',
+      };
+    }),
     detailedDescription: row.detail_text ? {
       text: row.detail_text,
       sourceUrl: row.detail_source_url || null,
