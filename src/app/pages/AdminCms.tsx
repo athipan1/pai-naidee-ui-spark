@@ -8,6 +8,7 @@ import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboar
 
 type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls'>, string | null>> & {
   imageUrls?: string[];
+  removedImageUrls?: string[];
   lat?: string | number | null;
   lng?: string | number | null;
 };
@@ -15,8 +16,8 @@ type Draft = { id: string; status: string; payload: DraftPayload; version: strin
 type CatalogPlace = { id: string; name: string; name_local: string | null; province: string };
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
-type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string; imageUrls: string[] };
-const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '', imageUrls: [] };
+type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
+const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
 function toPlaceForm(payload: DraftPayload): PlaceForm {
   const coordinate = (value: string | number | null | undefined) => value == null ? '' : String(value).trim();
   return {
@@ -27,6 +28,7 @@ function toPlaceForm(payload: DraftPayload): PlaceForm {
     description: payload.description ?? empty.description,
     imageUrl: payload.imageUrl ?? empty.imageUrl,
     imageUrls: payload.imageUrls ?? (payload.imageUrl ? [payload.imageUrl] : []),
+    removedImageUrls: payload.removedImageUrls ?? [],
     lat: coordinate(payload.lat),
     lng: coordinate(payload.lng),
   };
@@ -372,7 +374,7 @@ export default function AdminCms() {
       if (!controller.signal.aborted) {
         const images: ExistingImage[] = result.images || [];
         setExistingImages(images);
-        setForm(current => ({ ...current, imageUrls: [...new Set([...images.map(image => image.url), ...current.imageUrls])] }));
+        setForm(current => ({ ...current, imageUrls: [...new Set([...images.filter(image => !current.removedImageUrls.includes(image.url)).map(image => image.url), ...current.imageUrls])] }));
       }
     } catch (error) {
       if (!controller.signal.aborted) setMessage(error instanceof Error ? error.message : 'โหลดภาพเดิมไม่สำเร็จ');
@@ -534,7 +536,20 @@ export default function AdminCms() {
         <section className="space-y-3 rounded-xl border border-dashed border-teal-200 bg-teal-50/40 p-4">
           <h3 className="flex items-center gap-2 font-semibold"><ImagePlus size={19} className="text-teal-700" /> รูปภาพสถานที่</h3>
           {loadingImages && <p className="text-sm text-slate-500">กำลังโหลดรูปภาพที่มีอยู่...</p>}
-          {existingImages.length > 0 && <div className="space-y-3 rounded-xl bg-white p-3"><div><h4 className="font-semibold">รูปภาพที่ใช้อยู่บนเว็บไซต์ ({existingImages.length})</h4><p className="text-xs text-slate-500">แตะรูปเพื่อเลือกเป็นรูปหลักในฉบับร่าง รูปอื่นยังคงอยู่ ไม่ถูกลบ</p></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{existingImages.map(image => <button key={image.id} type="button" onClick={() => { setForm(current => ({ ...current, imageUrl: image.url, imageUrls: [...new Set([...current.imageUrls, image.url])] })); setBrokenImage(false); }} className={`min-w-0 overflow-hidden rounded-xl border-2 text-left transition ${form.imageUrl === image.url ? 'border-teal-600 ring-2 ring-teal-100' : 'border-slate-200 hover:border-teal-300'}`}><img src={image.url} alt={image.title || 'รูปสถานที่เดิม'} className="aspect-[4/3] w-full bg-slate-100 object-cover" loading="lazy" /><span className="block truncate p-2 text-xs text-slate-600">{form.imageUrl === image.url ? '✓ เลือกเป็นรูปหลัก' : image.title || 'รูปเดิม'}</span></button>)}</div></div>}
+          {existingImages.filter(image => !form.removedImageUrls.includes(image.url)).length > 0 && <div className="space-y-3 rounded-xl bg-white p-3">
+            <div><h4 className="font-semibold">รูปภาพที่ใช้อยู่บนเว็บไซต์ ({existingImages.filter(image => !form.removedImageUrls.includes(image.url)).length})</h4><p className="text-xs text-slate-500">เลือกรูปหลักหรือทำเครื่องหมายลบรูปเดิม การเปลี่ยนแปลงจะมีผลเมื่อบันทึกฉบับร่างและเผยแพร่</p></div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{existingImages.filter(image => !form.removedImageUrls.includes(image.url)).map(image => <div key={image.id} className={`min-w-0 overflow-hidden rounded-xl border-2 ${form.imageUrl === image.url ? 'border-teal-600' : 'border-slate-200'}`}>
+              <button type="button" className="w-full text-left" onClick={() => { setForm(current => ({ ...current, imageUrl: image.url, imageUrls: [...new Set([...current.imageUrls, image.url])] })); setBrokenImage(false); }}>
+                <img src={image.url} alt={image.title || 'รูปสถานที่เดิม'} className="aspect-[4/3] w-full bg-slate-100 object-cover" loading="lazy" />
+                <span className="block truncate p-2 text-xs">{form.imageUrl === image.url ? '✓ รูปภาพหลัก' : 'เลือกเป็นรูปหลัก'}</span>
+              </button>
+              <button type="button" className="w-full border-t p-2 text-xs text-red-700" onClick={() => {
+                if (!window.confirm('นำรูปนี้ออกจากเว็บไซต์เมื่อเผยแพร่การแก้ไขหรือไม่?')) return;
+                setForm(current => { const imageUrls = current.imageUrls.filter(url => url !== image.url); return { ...current, imageUrls, removedImageUrls: [...new Set([...current.removedImageUrls, image.url])], imageUrl: current.imageUrl === image.url ? (imageUrls[0] || '') : current.imageUrl }; });
+              }}>ลบรูปจากเว็บไซต์</button>
+            </div>)}</div>
+          </div>}
+          {form.removedImageUrls.length > 0 && <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">เตรียมลบรูปเดิม {form.removedImageUrls.length} รูป เมื่อเผยแพร่การแก้ไข <button type="button" className="ml-2 underline" onClick={() => setForm(current => ({ ...current, removedImageUrls: [], imageUrls: [...new Set([...existingImages.map(image => image.url), ...current.imageUrls])] }))}>ยกเลิกการลบทั้งหมด</button></div>}
           {editing && !loadingImages && existingImages.length === 0 && <p className="rounded-lg bg-white p-3 text-sm text-slate-600">ไม่พบรูปเดิมในคลังภาพของสถานที่นี้ คุณสามารถอัปโหลดรูปใหม่ได้</p>}
           {form.imageUrls.length > 0 && <div className="space-y-2 rounded-xl bg-white p-3">
             <h4 className="font-semibold">รูปภาพที่จะเผยแพร่ ({form.imageUrls.length}/20)</h4>
@@ -547,7 +562,7 @@ export default function AdminCms() {
                 </button>
                 <button type="button" className="w-full border-t p-2 text-xs text-red-700" onClick={() => setForm(current => {
                   const imageUrls = current.imageUrls.filter(image => image !== url);
-                  return { ...current, imageUrls, imageUrl: current.imageUrl === url ? (imageUrls[0] || '') : current.imageUrl };
+                  return { ...current, imageUrls, removedImageUrls: existingImages.some(image => image.url === url) ? [...new Set([...current.removedImageUrls, url])] : current.removedImageUrls, imageUrl: current.imageUrl === url ? (imageUrls[0] || '') : current.imageUrl };
                 })}>นำออกจากรายการ</button>
               </div>)}
             </div>
