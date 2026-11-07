@@ -10,6 +10,7 @@ const { registerPlaceReviewWorkflow } = require('./place-review-workflow.cjs');
 const { applyPlaceReviewSchema } = require('./place-review-schema.cjs');
 const {fixturePng}=require('./test-fixtures/image.cjs');
 const {registerProvinceReviewPipeline}=require('./province-review-pipeline.cjs');
+const {boundaryPlan,storeApprovedBoundary}=require('./import-province-boundary.cjs');
 const { createImageUpload, registerRailwayMedia, uploadImage, MAX_IMAGE_BYTES } = require('./railway-media.cjs');
 const { ensureAiSettings, MODEL_OPTIONS, registerAiSettingsRoutes } = require('./ai-model-settings.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
@@ -328,6 +329,22 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     const [after]=await sql`SELECT COUNT(*)::int AS count FROM places`;assert.equal(after.count,before.count);
     const dashboard=await (await admin('/province-quality')).json();assert.equal(dashboard.provinces.length,77);assert.equal(dashboard.automaticImport,false);
     assert.equal(dashboard.completenessClaim,null);
+  });
+
+  await t.test('approved boundary configuration is idempotent, admin-only and cannot overwrite geometry or place rows', async () => {
+    // Synthetic geometry tests storage mechanics only; never Production evidence.
+    const raw={type:'relation',id:999,tags:{'name:th':'จังหวัดระยอง','ISO3166-2':'TH-21',admin_level:'4',boundary:'administrative'},
+      members:[{type:'way',role:'outer',geometry:geometry.outer[0]}]};
+    const plan=boundaryPlan(raw,'ระยอง');
+    const [before]=await sql`SELECT COUNT(*)::int AS count FROM places`;
+    await assert.rejects(storeApprovedBoundary(sql,plan,'missing-admin'));
+    assert.equal((await storeApprovedBoundary(sql,plan,'test-admin')).status,'approved_boundary_stored');
+    assert.equal((await storeApprovedBoundary(sql,plan,'test-admin')).status,'unchanged');
+    const changed=structuredClone(raw);changed.members[0].geometry[1].lat=20;
+    await assert.rejects(storeApprovedBoundary(sql,boundaryPlan(changed,'ระยอง'),'test-admin'),/No overwrite/);
+    const [saved]=await sql`SELECT geometry FROM province_review_boundaries WHERE province='ระยอง'`;
+    assert.deepEqual(saved.geometry,plan.geometry);
+    const [after]=await sql`SELECT COUNT(*)::int AS count FROM places`;assert.equal(after.count,before.count);
   });
 
   await t.test('allowlisted model settings save and probe with a mock, with no paid call', async () => {
