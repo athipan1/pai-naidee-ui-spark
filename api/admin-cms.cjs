@@ -224,14 +224,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (!draft) return { code: 404, error: 'Draft not found.' };
       if (draft.status !== 'draft') return { code: 409, error: 'Published places cannot be deleted from drafts.' };
       if (draft.version !== version) return { code: 409, error: 'Draft changed. Reload before deleting.' };
-      // Existing review/import records are protected by foreign keys and immutable audit history.
-      // Do not erase evidence or related records merely to remove a draft.
-      const [linked] = await tx`SELECT
-        EXISTS(SELECT 1 FROM place_reviews WHERE draft_id = ${req.params.draftId}) AS reviewed,
-        EXISTS(SELECT 1 FROM place_review_events WHERE draft_id = ${req.params.draftId}) AS audited,
-        EXISTS(SELECT 1 FROM province_import_candidates WHERE draft_id = ${req.params.draftId}) AS imported`;
-      if (linked?.reviewed || linked?.audited || linked?.imported)
-        return { code: 409, error: 'This draft has linked review or import history and cannot be deleted safely.' };
+      // Foreign keys protect linked review/import evidence. A failed delete rolls back.
       await tx`DELETE FROM place_drafts WHERE id = ${req.params.draftId} AND status = 'draft'`;
       return { code: 200, deleted: true };
     });
