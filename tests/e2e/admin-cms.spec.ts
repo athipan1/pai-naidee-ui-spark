@@ -18,6 +18,7 @@ async function mockCms(page: Page) {
   let session = false;
   let failUpload = false;
   let publishCount = 0;
+  let reviewState="REVIEW_PENDING";
   let selected = { model: models[0].id, structuredOutput: false, source: 'railway' };
   let drafts = [incomplete];
   let aliases: Array<{ id: string; alias_name: string; language: string; status: string }> = [];
@@ -39,6 +40,14 @@ async function mockCms(page: Page) {
     if (pathname.startsWith('/api/admin/') && (!session || request.headers().authorization !== 'Bearer browser-test-session'))
       return reply(401, { error: 'Session expired or invalid.' });
     if (pathname === '/api/admin/me') return reply(200, { role: 'admin' });
+    if (pathname.endsWith('/review-transition')) {reviewState=body().action==='approve'?'APPROVED':'REVIEW_PENDING';return reply(200,{state:reviewState,revision:2});}
+    if (/^\/api\/admin\/places\/[^/]+\/review$/.test(pathname)) return reply(200,{state:reviewState,revision:1,evidence:null,history:[],report:{holds:[],payloadMatches:true,provinceGate:'PASS',duplicate:{matches:[]}}});
+    if (pathname === '/api/admin/province-quality') return reply(200,{completenessClaim:null,automaticImport:false,provinces:[{province:'ชลบุรี',existing:{total:71,missing_images:1,missing_details:2,last_verified:null},review:{discovered:3,duplicates:1,license_hold:2,coordinate_hold:1,approved:0,published:0,confirmed_new:0}}]});
+    if (pathname === '/api/admin/candidate-queue') return reply(200,{candidates:[],total:0,page:1,limit:30});
+
+    if (pathname.endsWith('/quality-review')) return reply(200, { status:'NEEDS_REVIEW',provinceGate:'NEEDS_REVIEW',coordinateKind:'unknown',
+      holds:['province_polygon_unverified'],baselineCount:194,duplicate:{action:'human_review_required',matches:[]},publishAllowed:false });
+    if (pathname === '/api/admin/google-verification/status') return reply(200, {enabled:false,reasons:['activation_not_approved'],dailyLimit:0});
     if (pathname === '/api/admin/logout') {
       session = false;
       return reply(200, { success: true });
@@ -115,6 +124,20 @@ async function login(page: Page, password = 'cms-fixture-password') {
   await page.getByLabel('รหัสผ่าน').fill(password);
   await page.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
 }
+
+test('candidate review is read-only and Google stays disabled without activation', async ({page}) => {
+  await mockCms(page);
+  let googleCalls=0;
+  page.on('request', request => {if(new URL(request.url()).pathname==='/api/admin/google-verification')googleCalls++;});
+  await login(page);
+  await page.getByRole('button', {name:/ฉบับร่าง \(/}).click();
+  await page.getByRole('button', {name:'ตรวจคุณภาพแบบอ่านอย่างเดียว'}).click();
+  await expect(page.getByText(/เทียบฐานข้อมูล 194/)).toBeVisible();
+  await expect(page.getByText('รายงานนี้ยังไม่อนุมัติให้เผยแพร่')).toBeVisible();
+  await expect(page.getByRole('button', {name:'ตรวจ Google (th)'})).toBeDisabled();
+  await expect(page.getByRole('button', {name:'ตรวจ Google (en)'})).toBeDisabled();
+  expect(googleCalls).toBe(0);
+});
 
 test('login, failed credentials, logout, and an expired session during a request', async ({ page }) => {
   const fixture = await mockCms(page);
@@ -207,7 +230,21 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await page.getByRole('button', { name: 'บันทึกสถานที่เป็นฉบับร่าง' }).click();
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
   const draft = page.locator('article').filter({ hasText: 'Draft fixture' });
+  await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeDisabled();
+  await draft.getByRole('button', {name:'ตรวจหลักฐานและการอนุมัติ'}).click();
+  await draft.getByRole('button', {name:'อนุมัติรายการ',exact:true}).click();
+  await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeEnabled();
   await draft.getByRole('button', { name: 'เผยแพร่', exact: true }).click();
   await expect(draft.getByText('เผยแพร่แล้ว')).toBeVisible();
   expect(fixture.published()).toBe(1);
+});
+
+
+test('province dashboard shows counted data without a completeness claim or automatic import',async({page})=>{
+  await mockCms(page);await login(page);
+  await page.getByRole('button',{name:'คุณภาพรายจังหวัด',exact:true}).click();
+  await page.getByRole('button',{name:'โหลดคิวและสถิติจังหวัด'}).click();
+  await expect(page.getByText('มีในฐานข้อมูล',{exact:true})).toBeVisible();
+  await expect(page.getByText('71',{exact:true})).toBeVisible();
+  await expect(page.getByText(/ไม่ใช่จำนวนสถานที่ทั้งหมดที่ควรมี/)).toBeVisible();
 });

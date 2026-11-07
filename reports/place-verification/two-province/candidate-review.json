@@ -1,0 +1,82 @@
+{
+  "mode": "research_review_only",
+  "generatedAt": "2026-11-07T08:46:18.473Z",
+  "baselineGeneratedAt": "2026-11-07T08:01:48.350254+00:00",
+  "baselineCount": 194,
+  "candidateCount": 2,
+  "approved": 0,
+  "published": 0,
+  "googleApiCalls": 0,
+  "gates": {
+    "duplicate": {
+      "EXISTING_PLACE": 0,
+      "PROBABLE_DUPLICATE": 1,
+      "NEW_CANDIDATE": 1,
+      "NEEDS_REVIEW": 0,
+      "REJECTED": 0
+    },
+    "provinceVerified": 0,
+    "coordinateHold": 2,
+    "sourceLicenseHold": 0
+  },
+  "rows": [
+    {
+      "candidateId": "wikidata:Q3576017",
+      "name": "สวนสัตว์เปิดเขาเขียว",
+      "province": "ชลบุรี",
+      "sourceUrl": "https://www.wikidata.org/wiki/Q3576017",
+      "status": "NEEDS_REVIEW",
+      "duplicate": {
+        "status": "NEW_CANDIDATE",
+        "matches": [],
+        "action": "human_review_required"
+      },
+      "holds": [
+        "province_polygon_unverified",
+        "entrance_not_verified",
+        "public_access_evidence_required"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "site_center",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "action": "human_review_required",
+      "matchedPlaceIds": []
+    },
+    {
+      "candidateId": "wikidata:Q656576",
+      "name": "อุทยานแห่งชาติดอยอินทนนท์",
+      "province": "เชียงใหม่",
+      "sourceUrl": "https://www.wikidata.org/wiki/Q656576",
+      "status": "PROBABLE_DUPLICATE",
+      "duplicate": {
+        "status": "PROBABLE_DUPLICATE",
+        "matches": [
+          {
+            "placeId": "3",
+            "reason": "normalized_name_or_alias",
+            "status": "PROBABLE_DUPLICATE",
+            "confidence": "name_match_needs_review",
+            "distanceMeters": 15473
+          }
+        ],
+        "action": "resolve_identity_before_import"
+      },
+      "holds": [
+        "province_polygon_unverified",
+        "entrance_not_verified",
+        "public_access_evidence_required"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "site_center",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "action": "resolve_identity_before_import",
+      "matchedPlaceIds": [
+        "3"
+      ]
+    }
+  ]
+}

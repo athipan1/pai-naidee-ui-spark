@@ -34,6 +34,7 @@ import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
 import { useAttractionDetail } from "@/shared/hooks/useAttractionQueries";
 import type { Accommodation, WikiData } from "@/shared/types/attraction";
 import { localizedProvince, localizedDescription, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
+import { reviewedGallery, reviewedPhotoCredits } from '@/shared/utils/reviewedGallery';
 
 const pastelVariants = [
   "pastel-blue",
@@ -137,13 +138,18 @@ const AttractionDetail = ({
   };
 
   const t = content[currentLanguage];
+  const navigationLabel=attraction?.navigation
+    ? (currentLanguage==='th'?'นำทางไปจุดเข้าที่ตรวจแล้ว':'Directions to verified access point')
+    : (currentLanguage==='th'?'ค้นสถานที่บน Google Maps':'Find this place on Google Maps');
 
   // Handle Google Maps navigation
   const handleGoogleMapsNavigation = () => {
     if (!attraction?.coordinates) return;
     
-    const { lat, lng } = attraction.coordinates;
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    const point=attraction.navigation;
+    const googleMapsUrl = point
+      ? `https://www.google.com/maps/dir/?api=1&destination=${point.lat},${point.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((attraction.nameLocal||attraction.name)+' '+attraction.province)}`;
     
     // Open Google Maps in a new tab
     window.open(googleMapsUrl, '_blank', 'noopener,noreferrer');
@@ -249,13 +255,11 @@ const AttractionDetail = ({
       : wikiData?.title || attraction.name;
   const displayProvince = localizedProvince(attraction, currentLanguage);
 
-  // This logic correctly prioritizes the Wikipedia image if it exists.
-  const displayImages = wikiData?.thumbnail?.source
-    ? [wikiData.thumbnail.source, ...attraction.images]
-    : attraction.images.length > 0
-    ? attraction.images
-    : ['/placeholder-attraction.svg'];
-  const mainPhotoCredit = attraction.mediaCredits?.find(credit => credit.url === displayImages[0]);
+  // A Wikipedia summary thumbnail is not per-image licence evidence.
+  const displayCredits=reviewedPhotoCredits(attraction.mediaCredits);
+  const approvedImages = reviewedGallery(attraction.images, displayCredits);
+  const displayImages = approvedImages.length ? approvedImages : ['/placeholder-attraction.svg'];
+  const mainPhotoCredit = displayCredits.find(credit => credit.url === displayImages[0]);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -304,7 +308,7 @@ const AttractionDetail = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleGoogleMapsNavigation}>
                     <Navigation className="w-4 h-4 mr-2" />
-                    {t.getDirections}
+                    {navigationLabel}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -337,7 +341,7 @@ const AttractionDetail = ({
 
       {/* Hero Section with Image Gallery */}
       <div className="relative h-[54svh] min-h-[350px] max-h-[620px] w-full overflow-hidden sm:h-[65vh] sm:min-h-[430px]">
-        <ImageGallery images={displayImages} alt={displayName} />
+        <ImageGallery images={displayImages} alt={displayName} credits={displayCredits} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 via-35% to-transparent pointer-events-none" />
 
         {/* Action Buttons */}
@@ -356,7 +360,7 @@ const AttractionDetail = ({
             size="icon"
             onClick={handleGoogleMapsNavigation}
             className="rounded-full bg-white/20 border-white/30 text-white hover:bg-white/30"
-            aria-label={t.getDirections}
+            aria-label={navigationLabel}
           >
             <Navigation className="w-5 h-5" />
           </Button>
@@ -402,7 +406,7 @@ const AttractionDetail = ({
             </div>
             <Button className="mt-5 min-h-12 w-full bg-amber-500 font-semibold text-slate-950 hover:bg-amber-400" onClick={handleGoogleMapsNavigation}>
               <Navigation className="mr-2 h-5 w-5" />
-              {currentLanguage === 'th' ? 'นำทางไปที่นี่' : 'Get directions'}
+              {navigationLabel}
             </Button>
           </CardContent>
         </Card>
@@ -424,11 +428,12 @@ const AttractionDetail = ({
                 <a href={mainPhotoCredit.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
                   {mainPhotoCredit.licenseName}
                 </a>
-                {' · Wikimedia Commons'}
+                {mainPhotoCredit.sourcePage.startsWith('https://commons.wikimedia.org/')&&' · Wikimedia Commons'}
               </>
             )}
           </div>
         )}
+
         {attraction.source?.url && (
           <p>
             {currentLanguage === 'th' ? 'แหล่งอ้างอิงสถานที่: ' : 'Place source: '}
@@ -440,6 +445,15 @@ const AttractionDetail = ({
             </div>
           </details>
         )}
+        <section className="mb-6 space-y-2 rounded-xl border p-4 text-sm" aria-label={currentLanguage==='th'?'ข้อมูลที่ตรวจสอบได้':'Verified visit information'}>
+          {attraction.placeFacts?.district&&<p>{currentLanguage==='th'?'อำเภอ: ':'District: '}{attraction.placeFacts.district}</p>}
+          {(['openingHours','admissionFee'] as const).map(key=><p key={key}>
+            {key==='openingHours'?(currentLanguage==='th'?'เวลาเปิดปิด: ':'Opening hours: '):(currentLanguage==='th'?'ค่าเข้าชม: ':'Admission: ')}
+            {attraction.placeFacts?.[key]?<>{attraction.placeFacts[key]!.text} · <a className="underline" href={attraction.placeFacts[key]!.sourceUrl} target="_blank" rel="noopener noreferrer">{currentLanguage==='th'?'แหล่งข้อมูล':'Source'}</a> ({attraction.placeFacts[key]!.checkedAt.slice(0,10)})</>:
+              (currentLanguage==='th'?'ยังไม่มีข้อมูลปัจจุบันที่ยืนยันได้':'No verified current information')}
+          </p>)}
+          <p>{attraction.navigation?(currentLanguage==='th'?'ปุ่มนำทางใช้จุดเข้าที่ตรวจสอบแล้ว':'Directions use a verified access point'):(currentLanguage==='th'?'ยังไม่ยืนยันจุดทางเข้า กรุณาตรวจเส้นทางกับผู้ดูแลสถานที่':'Access point is unverified; confirm with the venue')}</p>
+        </section>
         {/* Tags Section */}
         <Card className="mb-8">
           <CardContent className="p-6">

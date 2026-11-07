@@ -1,0 +1,114 @@
+{
+  "mode": "research_review_only",
+  "generatedAt": "2026-11-07T08:13:32.932Z",
+  "baselineGeneratedAt": "2026-11-07T08:01:48.350254+00:00",
+  "baselineCount": 194,
+  "candidateCount": 3,
+  "approved": 0,
+  "published": 0,
+  "googleApiCalls": 0,
+  "gates": {
+    "duplicate": {
+      "EXISTING_PLACE": 1,
+      "PROBABLE_DUPLICATE": 0,
+      "NEW_CANDIDATE": 2,
+      "NEEDS_REVIEW": 0,
+      "REJECTED": 0
+    },
+    "provinceVerified": 0,
+    "coordinateHold": 3,
+    "sourceLicenseHold": 3
+  },
+  "rows": [
+    {
+      "candidateId": "research:underwater-world-pattaya",
+      "name": "อันเดอร์วอเตอร์เวิลด์ พัทยา",
+      "province": "ชลบุรี",
+      "sourceUrl": "https://underwaterworldpattaya.com/contact-us/",
+      "status": "NEEDS_REVIEW",
+      "duplicate": {
+        "status": "NEW_CANDIDATE",
+        "matches": [],
+        "action": "human_review_required"
+      },
+      "holds": [
+        "source_license_unverified",
+        "coordinate_missing_or_invalid",
+        "independent_coordinate_evidence_required",
+        "province_polygon_unverified",
+        "coordinate_role_unverified"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "unknown",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "action": "human_review_required",
+      "matchedPlaceIds": []
+    },
+    {
+      "candidateId": "research:wat-khao-ta-bag",
+      "name": "วัดเขาตะแบก",
+      "province": "ชลบุรี",
+      "sourceUrl": "https://www.watkhaotabagsriracha.com/",
+      "status": "NEEDS_REVIEW",
+      "duplicate": {
+        "status": "NEW_CANDIDATE",
+        "matches": [],
+        "action": "human_review_required"
+      },
+      "holds": [
+        "source_license_unverified",
+        "coordinate_missing_or_invalid",
+        "independent_coordinate_evidence_required",
+        "province_polygon_unverified",
+        "coordinate_role_unverified"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "unknown",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "action": "human_review_required",
+      "matchedPlaceIds": []
+    },
+    {
+      "candidateId": "research:navy-turtle-centre-update",
+      "name": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+      "province": "ชลบุรี",
+      "sourceUrl": "https://acdc.navy.mi.th/aoep3gxp8m2j",
+      "status": "EXISTING_PLACE",
+      "duplicate": {
+        "status": "EXISTING_PLACE",
+        "matches": [
+          {
+            "placeId": "tat-2010120911214112696",
+            "reason": "existing_place_id",
+            "status": "EXISTING_PLACE",
+            "confidence": "identifier_match",
+            "distanceMeters": null
+          }
+        ],
+        "action": "update_existing_only"
+      },
+      "holds": [
+        "source_license_unverified",
+        "coordinate_missing_or_invalid",
+        "independent_coordinate_evidence_required",
+        "province_polygon_unverified",
+        "coordinate_role_unverified",
+        "public_access_evidence_required",
+        "restricted_access_not_authorized"
+      ],
+      "provinceGate": "NEEDS_REVIEW",
+      "coordinateKind": "unknown",
+      "publishAllowed": false,
+      "requiresHumanApproval": true,
+      "googleVerification": "NOT_REQUESTED",
+      "action": "update_existing_only",
+      "matchedPlaceIds": [
+        "tat-2010120911214112696"
+      ]
+    }
+  ]
+}

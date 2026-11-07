@@ -1,8 +1,7 @@
 'use strict';
 // Province boundary geometry must come from the OSM relation ISO3166-2=TH-20.
 // No bounding-box-only location may be labelled "inside Chon Buri".
-const { adaptWikidata,adaptOsm,distanceMeters } = require('./tourism-source-adapters.cjs');
-const norm = x => String(x??'').normalize('NFKC').toLocaleLowerCase('th').replace(/[\s\u200b._\-()\[\]]+/g,'');
+const { adaptWikidata,adaptOsm } = require('./tourism-source-adapters.cjs');
 function same(a,b){return Math.abs(a.lat-b.lat)<1e-6&&Math.abs(a.lon-b.lon)<1e-6;}
 function joinRole(members,role){
   const fragments=members.filter(m=>m.role===role&&m.type==='way'&&Array.isArray(m.geometry)&&m.geometry.length>=2)
@@ -54,7 +53,7 @@ function review({wdRows,osmRows,existing,boundary,maxRows=600}){
   const entries=[...wdRows.map(row=>adaptWikidata(row)),...osmRows.map(row=>adaptOsm(row))];
   // Compare each source to live Production AND all other source items.
   const seen=[];const rows=[];const stats={inside:0,outside:0,duplicate:0,needs_review:0,source_rejected:0,license_hold:0};
-  const baseline=existing.map(x=>({nameLocal:x.nameLocal||x.name_local||x.name,
+  const baseline=existing.map(x=>({...x,nameLocal:x.nameLocal||x.name_local||x.name,
     lat:Number(x.coordinates?.lat??x.lat),lng:Number(x.coordinates?.lng??x.lng),
     wikidataId:x.wikidataId||x.wikidata_id,sourceId:x.sourceId,
     source:x.source||x.source_name}));
@@ -65,13 +64,9 @@ function review({wdRows,osmRows,existing,boundary,maxRows=600}){
     if(!item.sourceId||!item.sourceUrl)blockers.push('missing_provenance');
     if(!/[\u0e01-\u0e5b]/.test(item.nameLocal))blockers.push('missing_thai_name');
     const compared=baseline.concat(seen);
-    const dupe=compared.some(x=>{
-      if(x.source===item.source&&x.sourceId&&x.sourceId===item.sourceId)return true;
-      if(x.wikidataId&&item.wikidataId&&x.wikidataId===item.wikidataId)return true;
-      const a=norm(x.nameLocal), b=norm(item.nameLocal);
-      return a&&b&&a===b&&Number.isFinite(x.lat)&&Number.isFinite(x.lng)&&
-        Number.isFinite(item.lat)&&Number.isFinite(item.lng)&&distanceMeters(x,item)<=300;
-    });
+    const duplicate=require('./place-candidate-quality.cjs').duplicateDecision(item,compared);
+    const dupe=['EXISTING_PLACE','PROBABLE_DUPLICATE'].includes(duplicate.status) ||
+      compared.some(x=>x.wikidataId&&item.wikidataId&&x.wikidataId===item.wikidataId);
     if(dupe){stats.duplicate++;blockers.push('possible_duplicate');}
     if(item.source==='openstreetmap'){
       // ODbL: isolate source data, attribution + database license legal review needed before import.

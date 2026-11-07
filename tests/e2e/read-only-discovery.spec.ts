@@ -283,7 +283,9 @@ test('detail page displays Railway photo attribution, license, and sourced addit
   await page.goto('/attraction/railway-test-1');
   await page.getByTestId('attribution-details').locator('summary').click();
   await expect(page.getByTestId('photo-attribution')).toContainText('Test Photographer');
-  await expect(page.getByRole('link', { name: 'CC BY-SA 4.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0');
+  const licenceLinks=page.getByRole('link', { name: 'CC BY-SA 4.0' });
+  await expect(licenceLinks).toHaveCount(2); // Gallery caption and full attribution panel.
+  for(const link of await licenceLinks.all())await expect(link).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0');
   await expect(page.getByTestId('verified-place-details')).toContainText('Documented history and geography');
   await expect.poll(() => page.getByAltText('Doi Inthanon - image 1').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });

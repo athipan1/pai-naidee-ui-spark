@@ -1,0 +1,3001 @@
+{
+  "generatedAt": "2026-11-07T08:01:48.350254+00:00",
+  "source": "https://painaidee-api-production.up.railway.app/api/places",
+  "mode": "read_only",
+  "total": 194,
+  "pages": 4,
+  "counts": {
+    "กระบี่": 4,
+    "กรุงเทพฯ": 4,
+    "กาญจนบุรี": 2,
+    "กาฬสินธุ์": 1,
+    "กำแพงเพชร": 1,
+    "ขอนแก่น": 2,
+    "จันทบุรี": 3,
+    "ฉะเชิงเทรา": 1,
+    "ชลบุรี": 71,
+    "ชัยนาท": 1,
+    "ชัยภูมิ": 3,
+    "ชุมพร": 1,
+    "ตรัง": 3,
+    "ตราด": 3,
+    "ตาก": 1,
+    "นครนายก": 1,
+    "นครปฐม": 1,
+    "นครพนม": 1,
+    "นครราชสีมา": 2,
+    "นครศรีธรรมราช": 1,
+    "นครสวรรค์": 1,
+    "นนทบุรี": 1,
+    "นราธิวาส": 1,
+    "น่าน": 1,
+    "บึงกาฬ": 1,
+    "บุรีรัมย์": 1,
+    "ปทุมธานี": 1,
+    "ประจวบคีรีขันธ์": 2,
+    "ปราจีนบุรี": 2,
+    "ปัตตานี": 1,
+    "พระนครศรีอยุธยา": 2,
+    "พะเยา": 1,
+    "พังงา": 1,
+    "พัทลุง": 1,
+    "พิจิตร": 1,
+    "พิษณุโลก": 2,
+    "ภูเก็ต": 3,
+    "มหาสารคาม": 1,
+    "มุกดาหาร": 1,
+    "ยะลา": 1,
+    "ยโสธร": 1,
+    "ระนอง": 1,
+    "ระยอง": 1,
+    "ราชบุรี": 1,
+    "ร้อยเอ็ด": 1,
+    "ลพบุรี": 1,
+    "ลำปาง": 1,
+    "ลำพูน": 1,
+    "ศรีสะเกษ": 1,
+    "สกลนคร": 2,
+    "สงขลา": 1,
+    "สตูล": 4,
+    "สมุทรปราการ": 1,
+    "สมุทรสงคราม": 2,
+    "สมุทรสาคร": 1,
+    "สระบุรี": 1,
+    "สระแก้ว": 2,
+    "สิงห์บุรี": 1,
+    "สุพรรณบุรี": 1,
+    "สุราษฎร์ธานี": 4,
+    "สุรินทร์": 1,
+    "สุโขทัย": 2,
+    "หนองคาย": 1,
+    "หนองบัวลำภู": 1,
+    "อำนาจเจริญ": 1,
+    "อุดรธานี": 3,
+    "อุตรดิตถ์": 1,
+    "อุทัยธานี": 2,
+    "อุบลราชธานี": 2,
+    "อ่างทอง": 1,
+    "เชียงราย": 5,
+    "เชียงใหม่": 6,
+    "เพชรบุรี": 1,
+    "เพชรบูรณ์": 1,
+    "เลย": 1,
+    "แพร่": 1,
+    "แม่ฮ่องสอน": 2
+  },
+  "postgresSelectTotal": 194,
+  "postgresSelectChonburi": 71,
+  "places": [
+    {
+      "id": "curated-aiyerweng-sea-of-mist-viewpoint",
+      "name": "Aiyerweng Sea of Mist Viewpoint",
+      "nameLocal": "จุดชมวิวทะเลหมอกอัยเยอร์เวง",
+      "province": "ยะลา",
+      "source": {
+        "name": "OpenStreetMap via Mapcarta: Aiyoeweng Sea of Mist",
+        "url": "https://mapcarta.com/N4750058924",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 5.97732,
+        "lng": 101.18224
+      }
+    },
+    {
+      "id": "curated-amphawa-floating-market",
+      "name": "Amphawa Floating Market",
+      "nameLocal": "ตลาดน้ำอัมพวา",
+      "province": "สมุทรสงคราม",
+      "source": {
+        "name": "Tourism Authority of Thailand: Amphawa Floating Market",
+        "url": "https://www.tourismthailand.org/Attraction/amphawa-floating-market",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.42479,
+        "lng": 99.9556
+      }
+    },
+    {
+      "id": "tat-201005182246293199",
+      "name": "Anek Kusala Sala (Viharn Sien)",
+      "nameLocal": "อเนกกุศลศาลา",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.78782568844963,
+        "lng": 100.95535709942023
+      }
+    },
+    {
+      "id": "curated-ao-manao-beach",
+      "name": "Ao Manao Beach",
+      "nameLocal": "อ่าวมะนาว",
+      "province": "ประจวบคีรีขันธ์",
+      "source": {
+        "name": "Travelfish: Ao Manao Beach",
+        "url": "https://www.travelfish.org/sight_profile/thailand/southern_thailand/prachuap_khiri_khan/prachuap_khiri_khan/437",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 11.7748,
+        "lng": 99.7964
+      }
+    },
+    {
+      "id": "curated-ao-nang-beach",
+      "name": "Ao Nang Beach",
+      "nameLocal": "อ่าวนาง",
+      "province": "กระบี่",
+      "source": {
+        "name": "Tourism Authority of Thailand: Ao Nang",
+        "url": "https://thai.tourismthailand.org/Attraction/%E0%B8%AD%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%99%E0%B8%B2%E0%B8%87",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 8.029205,
+        "lng": 98.824035
+      }
+    },
+    {
+      "id": "curated-ayutthaya-historical-park",
+      "name": "Ayutthaya Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์พระนครศรีอยุธยา",
+      "province": "พระนครศรีอยุธยา",
+      "source": {
+        "name": "UNESCO: Historic City of Ayutthaya",
+        "url": "https://whc.unesco.org/en/list/576/",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.34778,
+        "lng": 100.56056
+      }
+    },
+    {
+      "id": "curated-ban-chiang-archaeological-site",
+      "name": "Ban Chiang Archaeological Site",
+      "nameLocal": "แหล่งโบราณคดีบ้านเชียง",
+      "province": "อุดรธานี",
+      "source": {
+        "name": "UNESCO: Ban Chiang Archaeological Site",
+        "url": "https://whc.unesco.org/en/list/575/",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.4069,
+        "lng": 103.2414
+      }
+    },
+    {
+      "id": "curated-bang-rachan-heroes-monument",
+      "name": "Bang Rachan Heroes Monument",
+      "nameLocal": "อนุสาวรีย์วีรชนค่ายบางระจัน",
+      "province": "สิงห์บุรี",
+      "source": {
+        "name": "National Statistical Office: Sing Buri tourism map",
+        "url": "https://www.nso.go.th/nsoweb/storage/file_or_link/2025/20251001141002_61901.pdf",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.9,
+        "lng": 100.31667
+      }
+    },
+    {
+      "id": "curated-bang-saen-beach",
+      "name": "Bang Saen Beach",
+      "nameLocal": "หาดบางแสน",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "OpenStreetMap: Bang Saen Beach",
+        "url": "https://www.openstreetmap.org/way/32877657",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.28955,
+        "lng": 100.90961
+      }
+    },
+    {
+      "id": "tat-20200908183352469711",
+      "name": "Bang Saray Old Town",
+      "nameLocal": "ชุมชนเก่าชายทะเล (หมู่ 4 บ้านตลาดบางเสร่)",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.7631974,
+        "lng": 100.8896373
+      }
+    },
+    {
+      "id": "tat-20250815163438001",
+      "name": "Ban Nam Chieo Tourism Group",
+      "nameLocal": "กลุ่มท่องเที่ยวบ้านน้ำเชี่ยว",
+      "province": "ตราด",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.1892542,
+        "lng": 102.4612939
+      }
+    },
+    {
+      "id": "tat-20260126145509001",
+      "name": "Ban Pae On Tai",
+      "nameLocal": "ชุมชนบ้านออนใต้",
+      "province": "เชียงใหม่",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 18.7376401,
+        "lng": 99.23324
+      }
+    },
+    {
+      "id": "curated-river-kwai-bridge",
+      "name": "Bridge on the River Kwai",
+      "nameLocal": "สะพานข้ามแม่น้ำแคว",
+      "province": "กาญจนบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand: River Kwai Bridge",
+        "url": "https://www.tourismthailand.org/Attraction/bridge-over-the-river-kwai",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.041736,
+        "lng": 99.503812
+      }
+    },
+    {
+      "id": "curated-bua-tong-waterfall",
+      "name": "Bua Tong Waterfall",
+      "nameLocal": "น้ำตกบัวตอง (น้ำตกเหนียว)",
+      "province": "เชียงใหม่",
+      "source": {
+        "name": "Travelfish: Bua Tong Waterfall",
+        "url": "https://www.travelfish.org/sight_profile/thailand/northern_thailand/chiang_mai/phrao/3441",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 19.0692,
+        "lng": 99.07949
+      }
+    },
+    {
+      "id": "curated-bueng-boraphet",
+      "name": "Bueng Boraphet",
+      "nameLocal": "บึงบอระเพ็ด",
+      "province": "นครสวรรค์",
+      "source": {
+        "name": "Wikipedia: Bueng Boraphet",
+        "url": "https://en.wikipedia.org/wiki/Bueng_Boraphet",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.683,
+        "lng": 100.25
+      }
+    },
+    {
+      "id": "curated-chai-nat-bird-park",
+      "name": "Chai Nat Bird Park",
+      "nameLocal": "สวนนกชัยนาท",
+      "province": "ชัยนาท",
+      "source": {
+        "name": "Wikidata: Chai Nat Bird Park",
+        "url": "https://www.wikidata.org/wiki/Q2530020",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.20715,
+        "lng": 100.15198
+      }
+    },
+    {
+      "id": "tat-20250922135409001",
+      "name": "Chiang Mai House of Photography",
+      "nameLocal": "หอภาพถ่ายล้านนา",
+      "province": "เชียงใหม่",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 18.7898668,
+        "lng": 98.9885823
+      }
+    },
+    {
+      "id": "tat-201005182246293051",
+      "name": "Chon Buri Phra Phuttha Sihing Shrine",
+      "nameLocal": "หอพระพุทธสิหิงค์มิ่งมงคลสิรินาถ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3685335,
+        "lng": 100.9868746
+      }
+    },
+    {
+      "id": "tat-20251225110647001",
+      "name": "Constitutional Court Museum",
+      "nameLocal": "พิพิธภัณฑ์ศาลรัฐธรรมนูญ",
+      "province": "กรุงเทพฯ",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.7420208,
+        "lng": 100.5008664
+      }
+    },
+    {
+      "id": "3",
+      "name": "Doi Inthanon",
+      "nameLocal": "ดอยอินทนนท์",
+      "province": "เชียงใหม่",
+      "source": {
+        "name": "Wikipedia: Doi Inthanon",
+        "url": "https://en.wikipedia.org/wiki/Doi_Inthanon",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.5888,
+        "lng": 98.487
+      }
+    },
+    {
+      "id": "tat-201005182246293428",
+      "name": "Dong Tan Bay",
+      "nameLocal": "อ่าวดงตาล",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6554581,
+        "lng": 100.922451
+      }
+    },
+    {
+      "id": "curated-emerald-cave-ko-muk",
+      "name": "Emerald Cave (Ko Muk)",
+      "nameLocal": "ถ้ำมรกต (เกาะมุก)",
+      "province": "ตรัง",
+      "source": {
+        "name": "Lovethailand: Emerald Cave and Koh Mook",
+        "url": "https://www.lovethailand.org/travel/en/75-Trang/4522-Emerald-Cave-and-Koh-Mook.html",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.36922,
+        "lng": 99.28377
+      }
+    },
+    {
+      "id": "curated-erawan-falls",
+      "name": "Erawan Falls",
+      "nameLocal": "น้ำตกเอราวัณ",
+      "province": "กาญจนบุรี",
+      "source": {
+        "name": "Wikipedia: Cascade d’Erawan",
+        "url": "https://fr.wikipedia.org/wiki/Cascade_d%27Erawan",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.36889,
+        "lng": 99.14472
+      }
+    },
+    {
+      "id": "curated-erawan-museum",
+      "name": "Erawan Museum",
+      "nameLocal": "พิพิธภัณฑ์ช้างเอราวัณ",
+      "province": "สมุทรปราการ",
+      "source": {
+        "name": "Wikipedia: Erawan Museum",
+        "url": "https://en.wikipedia.org/wiki/Erawan_Museum",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.628,
+        "lng": 100.589
+      }
+    },
+    {
+      "id": "4",
+      "name": "Floating Market",
+      "nameLocal": "ตลาดน้ำ",
+      "province": "ราชบุรี",
+      "source": {
+        "name": "OpenStreetMap: Damnoen Saduak Floating Market",
+        "url": "https://www.openstreetmap.org/way/603657447",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.518,
+        "lng": 99.9594
+      }
+    },
+    {
+      "id": "tat-20211221230034734283",
+      "name": "Grand Canyon Chonburi (KIRI)",
+      "nameLocal": "แกรนด์แคนยอนคีรี",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3216428,
+        "lng": 100.9800556
+      }
+    },
+    {
+      "id": "curated-great-buddha-of-thailand",
+      "name": "Great Buddha of Thailand",
+      "nameLocal": "พระพุทธมหานวมินทรศากยมุนีศรีวิเศษชัยชาญ (หลวงพ่อใหญ่)",
+      "province": "อ่างทอง",
+      "source": {
+        "name": "Wikipedia: Great Buddha of Thailand",
+        "url": "https://en.wikipedia.org/wiki/Great_Buddha_of_Thailand",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.593222,
+        "lng": 100.377783
+      }
+    },
+    {
+      "id": "curated-hala-bala-wildlife-sanctuary",
+      "name": "Hala-Bala Wildlife Sanctuary",
+      "nameLocal": "เขตรักษาพันธุ์สัตว์ป่าฮาลา-บาลา",
+      "province": "นราธิวาส",
+      "source": {
+        "name": "Tourism Authority of Thailand: Hala-Bala Wildlife Sanctuary",
+        "url": "https://www.tourismthailand.org/Attraction/hala-bala-wildlife-sanctuary",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 5.8333,
+        "lng": 101.8167
+      }
+    },
+    {
+      "id": "curated-hin-ta-hin-yai",
+      "name": "Hin Ta Hin Yai Rocks",
+      "nameLocal": "หินตาหินยาย",
+      "province": "สุราษฎร์ธานี",
+      "source": {
+        "name": "Thailandee: Hin Ta Hin Yai",
+        "url": "https://www.thailandee.com/en/visit-thailand/hin-ta-hin-yai-koh-samui-336",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 9.451953,
+        "lng": 100.039803
+      }
+    },
+    {
+      "id": "tat-20250925134625001",
+      "name": "Homestay Ban Tha Khan Thong, community-based tourism",
+      "nameLocal": "โฮมสเตย์บ้านท่าขันทองการท่องเที่ยวโดยชุมชน",
+      "province": "เชียงราย",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 20.1964598,
+        "lng": 100.2372647
+      }
+    },
+    {
+      "id": "tat-20260204141052001",
+      "name": "Honghompaya Lanna",
+      "nameLocal": "ศูนย์เรียนรู้โฮงฮอมผญ๋า ล้านนา",
+      "province": "เชียงราย",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 20.0344254,
+        "lng": 99.85596450000001
+      }
+    },
+    {
+      "id": "curated-kamphaeng-phet-historical-park",
+      "name": "Kamphaeng Phet Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์กำแพงเพชร",
+      "province": "กำแพงเพชร",
+      "source": {
+        "name": "Wikipedia: Kamphaeng Phet Historical Park",
+        "url": "https://en.wikipedia.org/wiki/Kamphaeng_Phet_Historical_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.467,
+        "lng": 99.5
+      }
+    },
+    {
+      "id": "curated-khao-khitchakut-national-park",
+      "name": "Khao Khitchakut National Park",
+      "nameLocal": "อุทยานแห่งชาติเขาคิชฌกูฏ",
+      "province": "จันทบุรี",
+      "source": {
+        "name": "Wikipedia: Khao Khitchakut National Park",
+        "url": "https://en.wikipedia.org/wiki/Khao_Khitchakut_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 12.84556,
+        "lng": 102.15972
+      }
+    },
+    {
+      "id": "tat-20260203143512001",
+      "name": "Khao Phanom Bencha National Park",
+      "nameLocal": "อุทยานแห่งชาติเขาพนมเบญจา",
+      "province": "กระบี่",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 8.240163599999999,
+        "lng": 98.91414739999999
+      }
+    },
+    {
+      "id": "curated-khao-sok-national-park",
+      "name": "Khao Sok National Park",
+      "nameLocal": "อุทยานแห่งชาติเขาสก",
+      "province": "สุราษฎร์ธานี",
+      "source": {
+        "name": "Wikipedia: Khao Sok National Park",
+        "url": "https://en.wikipedia.org/wiki/Khao_Sok_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 8.914933,
+        "lng": 98.530167
+      }
+    },
+    {
+      "id": "curated-khao-yai-national-park",
+      "name": "Khao Yai National Park",
+      "nameLocal": "อุทยานแห่งชาติเขาใหญ่",
+      "province": "นครราชสีมา",
+      "source": {
+        "name": "Khao Yai National Park: About",
+        "url": "https://www.khaoyainationalpark.com/en/about/get-to-know",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.4391808,
+        "lng": 101.3723666
+      }
+    },
+    {
+      "id": "curated-ko-chang",
+      "name": "Ko Chang",
+      "nameLocal": "เกาะช้าง",
+      "province": "ตราด",
+      "source": {
+        "name": "Wikipedia: List of islands of Thailand",
+        "url": "https://en.wikipedia.org/wiki/List_of_islands_of_Thailand",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 12.06,
+        "lng": 102.33
+      }
+    },
+    {
+      "id": "tat-201005182246293275",
+      "name": "Koh Sichang",
+      "nameLocal": "เกาะสีชัง",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.161954907759235,
+        "lng": 100.8105880598108
+      }
+    },
+    {
+      "id": "curated-ko-kradan",
+      "name": "Ko Kradan",
+      "nameLocal": "เกาะกระดาน",
+      "province": "ตรัง",
+      "source": {
+        "name": "Wikipedia: Ko Kradan",
+        "url": "https://en.wikipedia.org/wiki/Ko_Kradan",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.31,
+        "lng": 99.25314
+      }
+    },
+    {
+      "id": "curated-ko-kret",
+      "name": "Ko Kret",
+      "nameLocal": "เกาะเกร็ด",
+      "province": "นนทบุรี",
+      "source": {
+        "name": "Wikipedia: Ko Kret",
+        "url": "https://en.wikipedia.org/wiki/Ko_Kret",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.9069362,
+        "lng": 100.4733154
+      }
+    },
+    {
+      "id": "curated-ko-kut",
+      "name": "Ko Kut",
+      "nameLocal": "เกาะกูด",
+      "province": "ตราด",
+      "source": {
+        "name": "Wikipedia: List of islands of Thailand",
+        "url": "https://en.wikipedia.org/wiki/List_of_islands_of_Thailand",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 11.66,
+        "lng": 102.57
+      }
+    },
+    {
+      "id": "curated-ko-lan",
+      "name": "Ko Lan",
+      "nameLocal": "เกาะล้าน",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Wikipedia: Ko Lan",
+        "url": "https://en.wikipedia.org/wiki/Ko_Lan",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 12.91583,
+        "lng": 100.7775
+      }
+    },
+    {
+      "id": "curated-ko-lipe",
+      "name": "Ko Lipe",
+      "nameLocal": "เกาะหลีเป๊ะ",
+      "province": "สตูล",
+      "source": {
+        "name": "Wikipedia: Ko Lipe",
+        "url": "https://en.wikipedia.org/wiki/Ko_Lipe",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 6.489389,
+        "lng": 99.301778
+      }
+    },
+    {
+      "id": "curated-ko-phayam",
+      "name": "Ko Phayam",
+      "nameLocal": "เกาะพยาม",
+      "province": "ระนอง",
+      "source": {
+        "name": "Wikipedia: Ko Phayam",
+        "url": "https://en.wikipedia.org/wiki/Ko_Phayam",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 9.733,
+        "lng": 98.4
+      }
+    },
+    {
+      "id": "curated-ko-samet",
+      "name": "Ko Samet",
+      "nameLocal": "เกาะเสม็ด",
+      "province": "ระยอง",
+      "source": {
+        "name": "Wikipedia: Ko Samet",
+        "url": "https://en.wikipedia.org/wiki/Ko_Samet",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 12.56778,
+        "lng": 101.45472
+      }
+    },
+    {
+      "id": "curated-ko-tao",
+      "name": "Ko Tao",
+      "nameLocal": "เกาะเต่า",
+      "province": "สุราษฎร์ธานี",
+      "source": {
+        "name": "Wikipedia: Ko Tao",
+        "url": "https://en.wikipedia.org/wiki/Ko_Tao",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 10.09,
+        "lng": 99.83806
+      }
+    },
+    {
+      "id": "curated-ko-tarutao",
+      "name": "Ko Tarutao",
+      "nameLocal": "เกาะตะรุเตา",
+      "province": "สตูล",
+      "source": {
+        "name": "Wikipedia: Ko Tarutao",
+        "url": "https://en.wikipedia.org/wiki/Ko_Tarutao",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 6.617,
+        "lng": 99.65
+      }
+    },
+    {
+      "id": "curated-maeklong-railway-market",
+      "name": "Maeklong Railway Market",
+      "nameLocal": "ตลาดร่มหุบ (ตลาดแม่กลอง)",
+      "province": "สมุทรสงคราม",
+      "source": {
+        "name": "Wikipedia: Maeklong Railway",
+        "url": "https://en.wikipedia.org/wiki/Maeklong_Railway",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.407478,
+        "lng": 99.998389
+      }
+    },
+    {
+      "id": "tat-201005182246293336",
+      "name": "Mueang Phra Rot Archaeological Site",
+      "nameLocal": "เมืองพระรถ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.4669973,
+        "lng": 101.164865
+      }
+    },
+    {
+      "id": "curated-mu-ko-ang-thong-national-park",
+      "name": "Mu Ko Ang Thong National Park",
+      "nameLocal": "อุทยานแห่งชาติหมู่เกาะอ่างทอง",
+      "province": "สุราษฎร์ธานี",
+      "source": {
+        "name": "Wikipedia: Mu Ko Ang Thong National Park",
+        "url": "https://en.wikipedia.org/wiki/Mu_Ko_Ang_Thong_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 9.6338836,
+        "lng": 99.6692093
+      }
+    },
+    {
+      "id": "curated-similan-islands-national-park",
+      "name": "Mu Ko Similan National Park",
+      "nameLocal": "อุทยานแห่งชาติหมู่เกาะสิมิลัน",
+      "province": "พังงา",
+      "source": {
+        "name": "Tourism Authority of Thailand: Similan Islands",
+        "url": "https://www.tourismthailand.org/Attraction/mu-ko-similan-national-park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 8.6525,
+        "lng": 97.64083
+      }
+    },
+    {
+      "id": "curated-namtok-chet-sao-noi-national-park",
+      "name": "Namtok Chet Sao Noi National Park",
+      "nameLocal": "อุทยานแห่งชาติน้ำตกเจ็ดสาวน้อย",
+      "province": "สระบุรี",
+      "source": {
+        "name": "Wikipedia: Namtok Chet Sao Noi National Park",
+        "url": "https://en.wikipedia.org/wiki/Namtok_Chet_Sao_Noi_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.72611,
+        "lng": 101.18917
+      }
+    },
+    {
+      "id": "curated-namtok-phlio-national-park",
+      "name": "Namtok Phlio National Park",
+      "nameLocal": "อุทยานแห่งชาติน้ำตกพลิ้ว",
+      "province": "จันทบุรี",
+      "source": {
+        "name": "Wikipedia: Namtok Phlio National Park",
+        "url": "https://en.wikipedia.org/wiki/Namtok_Phlio_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 12.52528,
+        "lng": 102.17694
+      }
+    },
+    {
+      "id": "curated-nang-rong-waterfall",
+      "name": "Nang Rong Waterfall",
+      "nameLocal": "น้ำตกนางรอง",
+      "province": "นครนายก",
+      "source": {
+        "name": "Wikipedia: Nang Rong Waterfall",
+        "url": "https://en.wikipedia.org/wiki/Nang_Rong_Waterfall",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.33333,
+        "lng": 101.32083
+      }
+    },
+    {
+      "id": "tat-20260203120214001",
+      "name": "Nong Pla Lai Community",
+      "nameLocal": "ชุมชนหนองปลาไหล",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9791195,
+        "lng": 100.9601339
+      }
+    },
+    {
+      "id": "curated-pa-hin-ngam-national-park",
+      "name": "Pa Hin Ngam National Park",
+      "nameLocal": "อุทยานแห่งชาติป่าหินงาม",
+      "province": "ชัยภูมิ",
+      "source": {
+        "name": "Wikipedia: Pa Hin Ngam National Park",
+        "url": "https://en.wikipedia.org/wiki/Pa_Hin_Ngam_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.65944,
+        "lng": 101.39
+      }
+    },
+    {
+      "id": "curated-pai-canyon",
+      "name": "Pai Canyon",
+      "nameLocal": "ปายแคนยอน (กองแลน)",
+      "province": "แม่ฮ่องสอน",
+      "source": {
+        "name": "Travelfish: Pai Canyon",
+        "url": "https://www.travelfish.org/sight_profile/thailand/northern_thailand/mae_hong_son/pai/3329",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 19.3061,
+        "lng": 98.4525
+      }
+    },
+    {
+      "id": "curated-pang-sida-national-park",
+      "name": "Pang Sida National Park",
+      "nameLocal": "อุทยานแห่งชาติปางสีดา",
+      "province": "สระแก้ว",
+      "source": {
+        "name": "Wikipedia: Pang Sida National Park",
+        "url": "https://en.wikipedia.org/wiki/Pang_Sida_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.08,
+        "lng": 102.26
+      }
+    },
+    {
+      "id": "curated-phae-mueang-phi",
+      "name": "Phae Mueang Phi Forest Park",
+      "nameLocal": "วนอุทยานแพะเมืองผี",
+      "province": "แพร่",
+      "source": {
+        "name": "Wikipedia: Phae Mueang Phi Forest Park",
+        "url": "https://en.wikipedia.org/wiki/Phae_Mueang_Phi_Forest_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.18528,
+        "lng": 100.21056
+      }
+    },
+    {
+      "id": "curated-phanom-rung-historical-park",
+      "name": "Phanom Rung Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์พนมรุ้ง",
+      "province": "บุรีรัมย์",
+      "source": {
+        "name": "UNESCO: Phanom Rung tentative list",
+        "url": "https://whc.unesco.org/en/tentativelists/6401/",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.5325,
+        "lng": 102.94167
+      }
+    },
+    {
+      "id": "curated-pha-taem-national-park",
+      "name": "Pha Taem National Park",
+      "nameLocal": "อุทยานแห่งชาติผาแต้ม",
+      "province": "อุบลราชธานี",
+      "source": {
+        "name": "Wikipedia: Pha Taem National Park",
+        "url": "https://en.wikipedia.org/wiki/Pha_Taem_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.39903,
+        "lng": 105.50769
+      }
+    },
+    {
+      "id": "curated-phimai-historical-park",
+      "name": "Phimai Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์พิมาย",
+      "province": "นครราชสีมา",
+      "source": {
+        "name": "Wikipedia: Phimai Historical Park",
+        "url": "https://en.wikipedia.org/wiki/Phimai_Historical_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.22083,
+        "lng": 102.49389
+      }
+    },
+    {
+      "id": "1",
+      "name": "Phi Phi Islands",
+      "nameLocal": "หมู่เกาะพีพี",
+      "province": "กระบี่",
+      "source": {
+        "name": "Wikipedia: Phi Phi Islands",
+        "url": "https://en.wikipedia.org/wiki/Phi_Phi_Islands",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.7367,
+        "lng": 98.7784
+      }
+    },
+    {
+      "id": "curated-phra-maha-chedi-chai-mongkol",
+      "name": "Phra Maha Chedi Chai Mongkol",
+      "nameLocal": "พระมหาเจดีย์ชัยมงคล",
+      "province": "ร้อยเอ็ด",
+      "source": {
+        "name": "Tourism Authority of Thailand: Phra Maha Chedi Chai Mongkhon",
+        "url": "https://www.tourismthailand.org/Attraction/phra-maha-chedi-chai-mongkhon",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.331568,
+        "lng": 104.320196
+      }
+    },
+    {
+      "id": "curated-phra-mongkhon-ming-mueang",
+      "name": "Phra Mongkhon Ming Mueang",
+      "nameLocal": "พระมงคลมิ่งเมือง",
+      "province": "อำนาจเจริญ",
+      "source": {
+        "name": "OpenStreetMap via Mapcarta: Phra Mongkon Ming Mueang",
+        "url": "https://mapcarta.com/N13001795506",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.89156,
+        "lng": 104.6219
+      }
+    },
+    {
+      "id": "curated-phra-nakhon-khiri",
+      "name": "Phra Nakhon Khiri Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์พระนครคีรี",
+      "province": "เพชรบุรี",
+      "source": {
+        "name": "Thailand Tourism Directory: Khao Wang",
+        "url": "https://www.thailandtourismdirectory.go.th/en/attraction/4383",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.1089,
+        "lng": 99.9365
+      }
+    },
+    {
+      "id": "curated-phra-pathom-chedi",
+      "name": "Phra Pathom Chedi",
+      "nameLocal": "พระปฐมเจดีย์",
+      "province": "นครปฐม",
+      "source": {
+        "name": "Wikipedia: Phra Pathom Chedi",
+        "url": "https://en.wikipedia.org/wiki/Phra_Pathom_Chedi",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.81846,
+        "lng": 100.06092
+      }
+    },
+    {
+      "id": "curated-phra-prang-sam-yot",
+      "name": "Phra Prang Sam Yot",
+      "nameLocal": "พระปรางค์สามยอด",
+      "province": "ลพบุรี",
+      "source": {
+        "name": "Wikipedia: Phra Prang Sam Yot",
+        "url": "https://en.wikipedia.org/wiki/Phra_Prang_Sam_Yot",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.80291,
+        "lng": 100.61407
+      }
+    },
+    {
+      "id": "curated-phra-that-kong-khao-noi",
+      "name": "Phra That Kong Khao Noi",
+      "nameLocal": "พระธาตุก่องข้าวน้อย",
+      "province": "ยโสธร",
+      "source": {
+        "name": "Wikimedia Commons: Geotagged Phra That Kong Khao Noi",
+        "url": "https://commons.wikimedia.org/wiki/File:Phra_That_Kong_Khao_Noi_(I).jpg",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.763645,
+        "lng": 104.207177
+      }
+    },
+    {
+      "id": "curated-phra-that-na-dun",
+      "name": "Phra That Na Dun",
+      "nameLocal": "พระธาตุนาดูน",
+      "province": "มหาสารคาม",
+      "source": {
+        "name": "OpenStreetMap via Mapcarta: Phrathat Na Dun",
+        "url": "https://mapcarta.com/29810370",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.70319,
+        "lng": 103.227
+      }
+    },
+    {
+      "id": "curated-phraya-nakhon-cave",
+      "name": "Phraya Nakhon Cave",
+      "nameLocal": "ถ้ำพระยานคร",
+      "province": "ประจวบคีรีขันธ์",
+      "source": {
+        "name": "Wikipedia: Phraya Nakhon Cave",
+        "url": "https://en.wikipedia.org/wiki/Phraya_Nakhon_Cave",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 12.1825,
+        "lng": 100.01111
+      }
+    },
+    {
+      "id": "curated-phu-chi-fa",
+      "name": "Phu Chi Fa",
+      "nameLocal": "ภูชี้ฟ้า",
+      "province": "เชียงราย",
+      "source": {
+        "name": "Wikipedia: Phu Chi Fa",
+        "url": "https://en.wikipedia.org/wiki/Phu_Chi_Fa",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 19.85,
+        "lng": 100.45417
+      }
+    },
+    {
+      "id": "curated-phuket-big-buddha",
+      "name": "Phuket Big Buddha",
+      "nameLocal": "พระพุทธมิ่งมงคลเอกนาคคีรี",
+      "province": "ภูเก็ต",
+      "source": {
+        "name": "Wikipedia: Phuket Big Buddha",
+        "url": "https://en.wikipedia.org/wiki/Phuket_Big_Buddha",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.827598,
+        "lng": 98.312853
+      }
+    },
+    {
+      "id": "curated-phu-kradueng-national-park",
+      "name": "Phu Kradueng National Park",
+      "nameLocal": "อุทยานแห่งชาติภูกระดึง",
+      "province": "เลย",
+      "source": {
+        "name": "Thai National Parks: Phu Kradueng",
+        "url": "https://www.thainationalparks.com/phu-kradueng-national-park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.8704,
+        "lng": 101.8466
+      }
+    },
+    {
+      "id": "curated-phu-laen-kha-national-park",
+      "name": "Phu Laen Kha National Park",
+      "nameLocal": "อุทยานแห่งชาติภูแลนคา",
+      "province": "ชัยภูมิ",
+      "source": {
+        "name": "Wikipedia: Phu Laen Kha National Park",
+        "url": "https://en.wikipedia.org/wiki/Phu_Laen_Kha_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.010093,
+        "lng": 101.890619
+      }
+    },
+    {
+      "id": "curated-phu-langka-forest-park",
+      "name": "Phu Langka Forest Park",
+      "nameLocal": "วนอุทยานภูลังกา",
+      "province": "พะเยา",
+      "source": {
+        "name": "Wikipedia: Phu Langka Forest Park",
+        "url": "https://en.wikipedia.org/wiki/Phu_Langka_Forest_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 19.45139,
+        "lng": 100.4175
+      }
+    },
+    {
+      "id": "curated-phu-pha-man-national-park",
+      "name": "Phu Pha Man National Park",
+      "nameLocal": "อุทยานแห่งชาติภูผาม่าน",
+      "province": "ขอนแก่น",
+      "source": {
+        "name": "Wikipedia: Phu Pha Man National Park",
+        "url": "https://en.wikipedia.org/wiki/Phu_Pha_Man_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.74389,
+        "lng": 102.00111
+      }
+    },
+    {
+      "id": "curated-phu-phan-national-park",
+      "name": "Phu Phan National Park",
+      "nameLocal": "อุทยานแห่งชาติภูพาน",
+      "province": "สกลนคร",
+      "source": {
+        "name": "Wikipedia: Phu Phan National Park",
+        "url": "https://en.wikipedia.org/wiki/Phu_Phan_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.0625,
+        "lng": 103.97278
+      }
+    },
+    {
+      "id": "curated-phu-phra-bat-historical-park",
+      "name": "Phu Phra Bat Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์ภูพระบาท",
+      "province": "อุดรธานี",
+      "source": {
+        "name": "Fine Arts Department: Phu Phra Bat",
+        "url": "https://3dheritage.finearts.go.th/%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%B2%E0%B8%97/",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.731029,
+        "lng": 102.357551
+      }
+    },
+    {
+      "id": "curated-phu-soi-dao",
+      "name": "Phu Soi Dao",
+      "nameLocal": "ภูสอยดาว",
+      "province": "อุตรดิตถ์",
+      "source": {
+        "name": "Wikipedia: Phu Soi Dao",
+        "url": "https://en.wikipedia.org/wiki/Phu_Soi_Dao",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.733,
+        "lng": 101
+      }
+    },
+    {
+      "id": "curated-phu-thok",
+      "name": "Phu Thok",
+      "nameLocal": "ภูทอก",
+      "province": "บึงกาฬ",
+      "source": {
+        "name": "Wikipedia: Phu Thok",
+        "url": "https://en.wikipedia.org/wiki/Phu_Thok",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.1375,
+        "lng": 103.87917
+      }
+    },
+    {
+      "id": "tat-20250916103852001",
+      "name": "Phu Wiang Dinosaur Museum",
+      "nameLocal": "ศูนย์ศึกษาวิจัยและพิพิธภัณฑ์ไดโนเสาร์",
+      "province": "ขอนแก่น",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 16.6777635,
+        "lng": 102.2661556
+      }
+    },
+    {
+      "id": "curated-prasat-sikhoraphum",
+      "name": "Prasat Sikhoraphum",
+      "nameLocal": "ปราสาทศีขรภูมิ",
+      "province": "สุรินทร์",
+      "source": {
+        "name": "Wikipedia: Prasat Sikhoraphum",
+        "url": "https://en.wikipedia.org/wiki/Prasat_Sikhoraphum",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.94556,
+        "lng": 103.79889
+      }
+    },
+    {
+      "id": "curated-promthep-cape",
+      "name": "Promthep Cape",
+      "nameLocal": "แหลมพรหมเทพ",
+      "province": "ภูเก็ต",
+      "source": {
+        "name": "Lovethailand: Promthep Cape",
+        "url": "https://www.lovethailand.org/travel/en/70-Phuket/4265-Promthep-Cape.html",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.76199,
+        "lng": 98.30531
+      }
+    },
+    {
+      "id": "curated-railay-beach",
+      "name": "Railay Beach",
+      "nameLocal": "หาดไร่เลย์",
+      "province": "กระบี่",
+      "source": {
+        "name": "Thailand Tourism Directory: Railay Beach",
+        "url": "https://www.thailandtourismdirectory.go.th/en/attraction/1805",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 8.012616,
+        "lng": 98.837196
+      }
+    },
+    {
+      "id": "curated-sala-keoku",
+      "name": "Sala Keoku",
+      "nameLocal": "ศาลาแก้วกู่",
+      "province": "หนองคาย",
+      "source": {
+        "name": "Wikipedia: Sala Keoku",
+        "url": "https://en.wikipedia.org/wiki/Sala_Keoku",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.8855,
+        "lng": 102.776
+      }
+    },
+    {
+      "id": "curated-sam-chuk-old-market",
+      "name": "Sam Chuk Old Market",
+      "nameLocal": "ตลาดสามชุก 100 ปี",
+      "province": "สุพรรณบุรี",
+      "source": {
+        "name": "OpenStreetMap via Mapcarta: Old Market Sam Chuk",
+        "url": "https://mapcarta.com/N1841339771",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.75598,
+        "lng": 100.09427
+      }
+    },
+    {
+      "id": "curated-samila-beach",
+      "name": "Samila Beach",
+      "nameLocal": "หาดสมิหลา",
+      "province": "สงขลา",
+      "source": {
+        "name": "Travelfish: Samila Beach",
+        "url": "https://www.travelfish.org/sight_profile/thailand/southern_thailand/songkhla/songkhla/3956",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.21535,
+        "lng": 100.58981
+      }
+    },
+    {
+      "id": "curated-sam-phan-bok",
+      "name": "Sam Phan Bok",
+      "nameLocal": "สามพันโบก",
+      "province": "อุบลราชธานี",
+      "source": {
+        "name": "Tourism Authority of Thailand: Sam Phan Bok",
+        "url": "https://www.tourismthailand.org/Attraction/ban-song-khon-sam-phan-bok",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.79554,
+        "lng": 105.39497
+      }
+    },
+    {
+      "id": "curated-sanctuary-of-truth",
+      "name": "Sanctuary of Truth",
+      "nameLocal": "ปราสาทสัจธรรม",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Wikipedia: Sanctuary of Truth",
+        "url": "https://en.wikipedia.org/wiki/Sanctuary_of_Truth",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 12.97278,
+        "lng": 100.88889
+      }
+    },
+    {
+      "id": "tat-20260209144621001",
+      "name": "Satun Old Town",
+      "nameLocal": "เมืองเก่าสตูล",
+      "province": "สตูล",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 6.613603691140582,
+        "lng": 100.06622314453125
+      }
+    },
+    {
+      "id": "tat-20160528170226008563",
+      "name": "Siri Charoenwat Forest Plantation",
+      "nameLocal": "ป่าสิริเจริญวรรษ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.7596807,
+        "lng": 100.9800186
+      }
+    },
+    {
+      "id": "curated-sirindhorn-museum",
+      "name": "Sirindhorn Museum",
+      "nameLocal": "พิพิธภัณฑ์สิรินธร",
+      "province": "กาฬสินธุ์",
+      "source": {
+        "name": "Wikipedia: Sirindhorn Museum",
+        "url": "https://en.wikipedia.org/wiki/Sirindhorn_Museum",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.69222,
+        "lng": 103.52389
+      }
+    },
+    {
+      "id": "curated-si-satchanalai-historical-park",
+      "name": "Si Satchanalai Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์ศรีสัชนาลัย",
+      "province": "สุโขทัย",
+      "source": {
+        "name": "Wikipedia: Si Satchanalai Historical Park",
+        "url": "https://en.wikipedia.org/wiki/Si_Satchanalai_Historical_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.523944,
+        "lng": 99.786528
+      }
+    },
+    {
+      "id": "tat-20160528165231008560",
+      "name": "Space Inspirium",
+      "nameLocal": "อุทยานรังสรรค์นวัตกรรมอวกาศ (สเปซ อินสไปเลียม)",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1026146,
+        "lng": 100.9304523
+      }
+    },
+    {
+      "id": "curated-sukhothai-historical-park",
+      "name": "Sukhothai Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์สุโขทัย",
+      "province": "สุโขทัย",
+      "source": {
+        "name": "Wikipedia: Sukhothai Historical Park",
+        "url": "https://en.wikipedia.org/wiki/Sukhothai_Historical_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.02111,
+        "lng": 99.70361
+      }
+    },
+    {
+      "id": "tat-2016010510155820163",
+      "name": "Takiantia Cultural Village",
+      "nameLocal": "ชุมชนตะเคียนเตี้ย",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.0187322,
+        "lng": 100.9326826
+      }
+    },
+    {
+      "id": "curated-tat-ton-national-park",
+      "name": "Tat Ton National Park",
+      "nameLocal": "อุทยานแห่งชาติตาดโตน",
+      "province": "ชัยภูมิ",
+      "source": {
+        "name": "Wikipedia: Tat Ton National Park",
+        "url": "https://en.wikipedia.org/wiki/Tat_Ton_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.98778,
+        "lng": 102.04139
+      }
+    },
+    {
+      "id": "tat-2015120421550718116",
+      "name": "Thai House Folk Museum (Map Sam Kliew)",
+      "nameLocal": "พิพิธภัณฑ์เรือนไทย",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.4377257,
+        "lng": 101.0526614
+      }
+    },
+    {
+      "id": "curated-thale-noi-wetland",
+      "name": "Thale Noi Non-Hunting Area",
+      "nameLocal": "เขตห้ามล่าสัตว์ป่าทะเลน้อย",
+      "province": "พัทลุง",
+      "source": {
+        "name": "Wikipedia: Thale Noi Non-Hunting Area",
+        "url": "https://en.wikipedia.org/wiki/Thale_Noi_Non-Hunting_Area",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.76667,
+        "lng": 100.15306
+      }
+    },
+    {
+      "id": "curated-thap-lan-national-park",
+      "name": "Thap Lan National Park",
+      "nameLocal": "อุทยานแห่งชาติทับลาน",
+      "province": "ปราจีนบุรี",
+      "source": {
+        "name": "Wikipedia: Thap Lan National Park",
+        "url": "https://en.wikipedia.org/wiki/Thap_Lan_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.2,
+        "lng": 101.917
+      }
+    },
+    {
+      "id": "tat-2015120421550718119",
+      "name": "Thian Talay Beach",
+      "nameLocal": "หาดเทียนทะเล",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.643518498083282,
+        "lng": 100.92836536539475
+      }
+    },
+    {
+      "id": "curated-thi-lo-su-waterfall",
+      "name": "Thi Lo Su Waterfall",
+      "nameLocal": "น้ำตกทีลอซู",
+      "province": "ตาก",
+      "source": {
+        "name": "Wikipedia: Thi Lo Su Waterfall",
+        "url": "https://en.wikipedia.org/wiki/Thi_Lo_Su_Waterfall",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.9282,
+        "lng": 98.7535
+      }
+    },
+    {
+      "id": "curated-thung-wua-laen-beach",
+      "name": "Thung Wua Laen Beach",
+      "nameLocal": "หาดทุ่งวัวแล่น",
+      "province": "ชุมพร",
+      "source": {
+        "name": "BeachAtlas: Thung Wua Laen Beach",
+        "url": "https://www.beachatlas.com/thung-wua-laen",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 10.562686,
+        "lng": 99.273956
+      }
+    },
+    {
+      "id": "curated-wat-arun",
+      "name": "Wat Arun",
+      "nameLocal": "วัดอรุณราชวราราม",
+      "province": "กรุงเทพฯ",
+      "source": {
+        "name": "Wikipedia: Wat Arun",
+        "url": "https://en.wikipedia.org/wiki/Wat_Arun",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.74361,
+        "lng": 100.48889
+      }
+    },
+    {
+      "id": "curated-wat-chalong",
+      "name": "Wat Chalong",
+      "nameLocal": "วัดไชยธาราราม (วัดฉลอง)",
+      "province": "ภูเก็ต",
+      "source": {
+        "name": "Travelfish: Wat Chalong",
+        "url": "https://www.travelfish.org/sight_profile/thailand/southern_thailand/phuket/phuket/1175",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 7.846964,
+        "lng": 98.336022
+      }
+    },
+    {
+      "id": "curated-wat-chang-hai",
+      "name": "Wat Chang Hai Rat Buranaram",
+      "nameLocal": "วัดช้างให้ราษฎร์บูรณาราม",
+      "province": "ปัตตานี",
+      "source": {
+        "name": "Mapcarta (OpenStreetMap): Wat Chang Hai",
+        "url": "https://mapcarta.com/28110034",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 6.66868,
+        "lng": 101.16892
+      }
+    },
+    {
+      "id": "curated-wat-chantharam-tha-sung",
+      "name": "Wat Chantharam (Wat Tha Sung)",
+      "nameLocal": "วัดจันทาราม (วัดท่าซุง)",
+      "province": "อุทัยธานี",
+      "source": {
+        "name": "Wikipedia: Wat Chantharam",
+        "url": "https://en.wikipedia.org/wiki/Wat_Chantharam",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 15.327968,
+        "lng": 100.071219
+      }
+    },
+    {
+      "id": "curated-wat-chedi-hoi",
+      "name": "Wat Chedi Hoi",
+      "nameLocal": "วัดเจดีย์หอย",
+      "province": "ปทุมธานี",
+      "source": {
+        "name": "Tourism Authority of Thailand: Wat Chedi Hoi",
+        "url": "https://www.tourismthailand.org/Attraction/wat-chedi-hoi",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.11486,
+        "lng": 100.38508
+      }
+    },
+    {
+      "id": "tat-2015120421550718075",
+      "name": "Wat Khao Bo Kwang Thong",
+      "nameLocal": "วัดเขาบ่อกวางทอง",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Municipality of Bo Kwang Thong / Burapha University Tourism Research",
+        "url": "https://www.bokwangthong.go.th/catalog/travels/206",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.28303,
+        "lng": 101.3188
+      }
+    },
+    {
+      "id": "curated-wat-khok-kham",
+      "name": "Wat Khok Kham",
+      "nameLocal": "วัดโคกขาม",
+      "province": "สมุทรสาคร",
+      "source": {
+        "name": "OpenStreetMap via Mapcarta: Wat Khok Kham",
+        "url": "https://mapcarta.com/27353948",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.56897,
+        "lng": 100.34306
+      }
+    },
+    {
+      "id": "curated-wat-pa-maha-chedi-kaew",
+      "name": "Wat Pa Maha Chedi Kaew",
+      "nameLocal": "วัดป่ามหาเจดีย์แก้ว (วัดล้านขวด)",
+      "province": "ศรีสะเกษ",
+      "source": {
+        "name": "Wikipedia: Wat Pa Maha Chedi Kaew",
+        "url": "https://en.wikipedia.org/wiki/Wat_Pa_Maha_Chedi_Kaew",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.618516,
+        "lng": 104.418962
+      }
+    },
+    {
+      "id": "curated-wat-pa-phu-kon",
+      "name": "Wat Pa Phu Kon",
+      "nameLocal": "วัดป่าภูก้อน",
+      "province": "อุดรธานี",
+      "source": {
+        "name": "Wikipedia: Wat Pa Phu Kon",
+        "url": "https://en.wikipedia.org/wiki/Wat_Pa_Phu_Kon",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.922898,
+        "lng": 102.118177
+      }
+    },
+    {
+      "id": "curated-wat-pha-sorn-kaew",
+      "name": "Wat Pha Sorn Kaew",
+      "nameLocal": "วัดพระธาตุผาซ่อนแก้ว",
+      "province": "เพชรบูรณ์",
+      "source": {
+        "name": "Wikipedia: Wat Pha Sorn Kaew",
+        "url": "https://en.wikipedia.org/wiki/Wat_Pha_Sorn_Kaew",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.78972,
+        "lng": 101.04917
+      }
+    },
+    {
+      "id": "curated-wat-pho",
+      "name": "Wat Pho",
+      "nameLocal": "วัดพระเชตุพนวิมลมังคลาราม",
+      "province": "กรุงเทพฯ",
+      "source": {
+        "name": "Wikipedia: Wat Pho",
+        "url": "https://en.wikipedia.org/wiki/Wat_Pho",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.74639,
+        "lng": 100.49361
+      }
+    },
+    {
+      "id": "2",
+      "name": "Wat Phra Kaew",
+      "nameLocal": "วัดพระแก้ว",
+      "province": "กรุงเทพฯ",
+      "source": {
+        "name": "Wikipedia: Wat Phra Kaew",
+        "url": "https://en.wikipedia.org/wiki/Wat_Phra_Kaew",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.7515,
+        "lng": 100.4925
+      }
+    },
+    {
+      "id": "curated-wat-phra-mahathat-nakhon",
+      "name": "Wat Phra Mahathat Woramahawihan",
+      "nameLocal": "วัดพระมหาธาตุวรมหาวิหาร",
+      "province": "นครศรีธรรมราช",
+      "source": {
+        "name": "UNESCO: Wat Phra Mahathat Woramahawihan",
+        "url": "https://whc.unesco.org/en/list/1761",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 8.411475,
+        "lng": 99.966217
+      }
+    },
+    {
+      "id": "curated-wat-phra-singh",
+      "name": "Wat Phra Singh",
+      "nameLocal": "วัดพระสิงห์วรมหาวิหาร",
+      "province": "เชียงใหม่",
+      "source": {
+        "name": "Wikipedia: Wat Phra Singh",
+        "url": "https://en.wikipedia.org/wiki/Wat_Phra_Singh",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.78875,
+        "lng": 98.981214
+      }
+    },
+    {
+      "id": "curated-wat-phra-si-rattana-mahathat-phitsanulok",
+      "name": "Wat Phra Si Rattana Mahathat",
+      "nameLocal": "วัดพระศรีรัตนมหาธาตุวรมหาวิหาร",
+      "province": "พิษณุโลก",
+      "source": {
+        "name": "Wikipedia: Wat Phra Si Rattana Mahathat",
+        "url": "https://en.wikipedia.org/wiki/Wat_Phra_Si_Rattana_Mahathat",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.8237,
+        "lng": 100.2622
+      }
+    },
+    {
+      "id": "curated-wat-phra-that-choeng-chum",
+      "name": "Wat Phra That Choeng Chum",
+      "nameLocal": "วัดพระธาตุเชิงชุมวรวิหาร",
+      "province": "สกลนคร",
+      "source": {
+        "name": "Tourism Authority of Thailand: Wat Phra That Choeng Chum",
+        "url": "https://www.tourismthailand.org/Attraction/wat-phra-that-choeng-chum",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.164092,
+        "lng": 104.152912
+      }
+    },
+    {
+      "id": "curated-wat-doi-kong-mu",
+      "name": "Wat Phrathat Doi Kong Mu",
+      "nameLocal": "วัดพระธาตุดอยกองมู",
+      "province": "แม่ฮ่องสอน",
+      "source": {
+        "name": "Wikipedia: Wat Phrathat Doi Kong Mu",
+        "url": "https://en.wikipedia.org/wiki/Wat_Phrathat_Doi_Kong_Mu",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 19.3001,
+        "lng": 97.9601
+      }
+    },
+    {
+      "id": "curated-wat-phra-that-doi-suthep",
+      "name": "Wat Phra That Doi Suthep",
+      "nameLocal": "วัดพระธาตุดอยสุเทพราชวรวิหาร",
+      "province": "เชียงใหม่",
+      "source": {
+        "name": "Tourism Authority of Thailand: Doi Suthep",
+        "url": "https://www.tourismthailand.org/Attraction/wat-phra-that-doi-suthep",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.8052,
+        "lng": 98.9216
+      }
+    },
+    {
+      "id": "curated-wat-phra-that-hariphunchai",
+      "name": "Wat Phra That Hariphunchai",
+      "nameLocal": "วัดพระธาตุหริภุญชัยวรมหาวิหาร",
+      "province": "ลำพูน",
+      "source": {
+        "name": "Wikipedia: Wat Phra That Hariphunchai",
+        "url": "https://en.wikipedia.org/wiki/Wat_Phra_That_Hariphunchai",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.5775,
+        "lng": 99.00778
+      }
+    },
+    {
+      "id": "curated-wat-phra-that-lampang-luang",
+      "name": "Wat Phra That Lampang Luang",
+      "nameLocal": "วัดพระธาตุลำปางหลวง",
+      "province": "ลำปาง",
+      "source": {
+        "name": "Wikipedia: Wat Phra That Lampang Luang",
+        "url": "https://en.wikipedia.org/wiki/Wat_Phra_That_Lampang_Luang",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.2175,
+        "lng": 99.38889
+      }
+    },
+    {
+      "id": "curated-wat-phra-that-phanom",
+      "name": "Wat Phra That Phanom",
+      "nameLocal": "วัดพระธาตุพนมวรมหาวิหาร",
+      "province": "นครพนม",
+      "source": {
+        "name": "Thailand Tourism Directory: Wat Phra That Phanom",
+        "url": "https://www.thailandtourismdirectory.go.th/en/attraction/22010",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.94263,
+        "lng": 104.7242
+      }
+    },
+    {
+      "id": "curated-wat-phumin",
+      "name": "Wat Phumin",
+      "nameLocal": "วัดภูมินทร์",
+      "province": "น่าน",
+      "source": {
+        "name": "Wikipedia: Wat Phumin",
+        "url": "https://en.wikipedia.org/wiki/Wat_Phumin",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 18.774497,
+        "lng": 100.771853
+      }
+    },
+    {
+      "id": "curated-wat-phu-manorom",
+      "name": "Wat Roi Phra Phutthabat Phu Manorom",
+      "nameLocal": "วัดรอยพระพุทธบาทภูมโนรมย์",
+      "province": "มุกดาหาร",
+      "source": {
+        "name": "Tourism Authority of Thailand: Wat Roi Phra Phutthabat Phu Manorom",
+        "url": "https://www.tourismthailand.org/Attraction/wat-roi-phra-phutthabat-phu-manorom",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.49904,
+        "lng": 104.72819
+      }
+    },
+    {
+      "id": "curated-wat-rong-khun",
+      "name": "Wat Rong Khun",
+      "nameLocal": "วัดร่องขุ่น",
+      "province": "เชียงราย",
+      "source": {
+        "name": "Wikimedia Commons: object location",
+        "url": "https://commons.wikimedia.org/wiki/File:Chiang_Rai_Thailand_Wat-Rong-Khun-01.jpg",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 19.824126,
+        "lng": 99.763289
+      }
+    },
+    {
+      "id": "curated-wat-rong-suea-ten",
+      "name": "Wat Rong Suea Ten",
+      "nameLocal": "วัดร่องเสือเต้น",
+      "province": "เชียงราย",
+      "source": {
+        "name": "Wikipedia: Wat Rong Suea Ten",
+        "url": "https://en.wikipedia.org/wiki/Wat_Rong_Suea_Ten",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 19.923367,
+        "lng": 99.841922
+      }
+    },
+    {
+      "id": "curated-wat-sothonwararam",
+      "name": "Wat Sothon Wararam Worawihan",
+      "nameLocal": "วัดโสธรวรารามวรวิหาร",
+      "province": "ฉะเชิงเทรา",
+      "source": {
+        "name": "Wikipedia: Wat Sothonwararam",
+        "url": "https://en.wikipedia.org/wiki/Wat_Sothonwararam",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 13.6737,
+        "lng": 101.0673
+      }
+    },
+    {
+      "id": "curated-wat-tha-luang-phichit",
+      "name": "Wat Tha Luang",
+      "nameLocal": "วัดท่าหลวง",
+      "province": "พิจิตร",
+      "source": {
+        "name": "Tourism Authority of Thailand: Wat Tha Luang",
+        "url": "https://thai.tourismthailand.org/Attraction/วัดท่าหลวง",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 16.441,
+        "lng": 100.35161
+      }
+    },
+    {
+      "id": "curated-wat-tham-klong-phen",
+      "name": "Wat Tham Klong Phen",
+      "nameLocal": "วัดถ้ำกลองเพล",
+      "province": "หนองบัวลำภู",
+      "source": {
+        "name": "OpenStreetMap via Mapcarta: Tham Kong Phen Monastery",
+        "url": "https://mapcarta.com/29266986",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 17.23075,
+        "lng": 102.53124
+      }
+    },
+    {
+      "id": "curated-wat-yai-chai-mongkhon",
+      "name": "Wat Yai Chai Mongkhon",
+      "nameLocal": "วัดใหญ่ชัยมงคล",
+      "province": "พระนครศรีอยุธยา",
+      "source": {
+        "name": "Ayutthaya Historical Research: Wat Yai Chai Mongkhon",
+        "url": "https://www.ayutthaya-history.com/wat-yai-chai-mongkhon.html",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      },
+      "coordinates": {
+        "lat": 14.34553,
+        "lng": 100.5924
+      }
+    },
+    {
+      "id": "tat-2010120911214113305",
+      "name": "เกาะขามใหญ่",
+      "nameLocal": "เกาะขามใหญ่",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1677778,
+        "lng": 100.8241667
+      }
+    },
+    {
+      "id": "tat-201005182246293232",
+      "name": "เกาะครก",
+      "nameLocal": "เกาะครก",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9281801,
+        "lng": 100.805294
+      }
+    },
+    {
+      "id": "tat-201005182246293252",
+      "name": "เกาะลอยศรีราชา",
+      "nameLocal": "เกาะลอยศรีราชา",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.173935,
+        "lng": 100.9203128
+      }
+    },
+    {
+      "id": "tat-201005182246293266",
+      "name": "เกาะสาก",
+      "nameLocal": "เกาะสาก",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.942854,
+        "lng": 100.790758
+      }
+    },
+    {
+      "id": "tat-2015120421550718047",
+      "name": "เกาะแสมสาร",
+      "nameLocal": "เกาะแสมสาร",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.5770042,
+        "lng": 100.949619
+      }
+    },
+    {
+      "id": "tat-20251215120121001",
+      "name": "เขตห้ามล่าสัตว์ป่าถ้ำผาท่าพล",
+      "nameLocal": "เขตห้ามล่าสัตว์ป่าถ้ำผาท่าพล",
+      "province": "พิษณุโลก",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 16.5088643,
+        "lng": 100.6602245
+      }
+    },
+    {
+      "id": "tat-201005182246293395",
+      "name": "เขาพระตำหนัก",
+      "nameLocal": "เขาพระตำหนัก",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9211051,
+        "lng": 100.8667178
+      }
+    },
+    {
+      "id": "tat-201005182246293316",
+      "name": "เขาสามมุข",
+      "nameLocal": "เขาสามมุข",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3046183,
+        "lng": 100.9025866
+      }
+    },
+    {
+      "id": "tat-2015120421550718297",
+      "name": "ชมรมส่งเสริมการท่องเที่ยวโดยชุมชนบ้านชากแง้ว",
+      "nameLocal": "ชมรมส่งเสริมการท่องเที่ยวโดยชุมชนบ้านชากแง้ว",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.8322221,
+        "lng": 100.9662213
+      }
+    },
+    {
+      "id": "tat-20100518224629120",
+      "name": "ช่องเขาขาด",
+      "nameLocal": "ช่องเขาขาด",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1633042,
+        "lng": 100.8004481
+      }
+    },
+    {
+      "id": "tat-20250620154151001",
+      "name": "ชุมชนริมน้ำจันทบูร",
+      "nameLocal": "ชุมชนริมน้ำจันทบูร",
+      "province": "จันทบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6127731,
+        "lng": 102.1136881
+      }
+    },
+    {
+      "id": "tat-2010120911214114470",
+      "name": "ตลาดเก่าอ่างศิลา",
+      "nameLocal": "ตลาดเก่าอ่างศิลา",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3355193,
+        "lng": 100.9245667
+      }
+    },
+    {
+      "id": "tat-2011032413454815424",
+      "name": "ตลาดน้ำสี่ภาคพัทยา",
+      "nameLocal": "ตลาดน้ำสี่ภาคพัทยา",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.8684,
+        "lng": 100.9043884
+      }
+    },
+    {
+      "id": "tat-20100518224629483",
+      "name": "ถ้ำเขาชะอางค์ห้ายอด",
+      "nameLocal": "ถ้ำเขาชะอางค์ห้ายอด",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.161556,
+        "lng": 101.5975857
+      }
+    },
+    {
+      "id": "tat-20100518224629568",
+      "name": "ถ้ำเขาชะอางค์โอน",
+      "nameLocal": "ถ้ำเขาชะอางค์โอน",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.2088719,
+        "lng": 101.6516234
+      }
+    },
+    {
+      "id": "tat-20100518224629350",
+      "name": "ถ้ำจักรพงษ์",
+      "nameLocal": "ถ้ำจักรพงษ์",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1577158,
+        "lng": 100.8061617
+      }
+    },
+    {
+      "id": "tat-20250701101935001",
+      "name": "ถ้ำภูผาเพชร",
+      "nameLocal": "ถ้ำภูผาเพชร",
+      "province": "สตูล",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 7.1246747,
+        "lng": 99.9981765
+      }
+    },
+    {
+      "id": "tat-2010120911214113304",
+      "name": "น้ำตกชันตาเถร",
+      "nameLocal": "น้ำตกชันตาเถร",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.2421847,
+        "lng": 101.0454846
+      }
+    },
+    {
+      "id": "tat-20100518224629991",
+      "name": "พระพุทธมิ่งเมือง",
+      "nameLocal": "พระพุทธมิ่งเมือง",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.4523732,
+        "lng": 101.1789006
+      }
+    },
+    {
+      "id": "tat-201005182246291103",
+      "name": "พระพุทธรูปแกะสลักเขาชีจรรย์",
+      "nameLocal": "พระพุทธรูปแกะสลักเขาชีจรรย์",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.7646977,
+        "lng": 100.9560315
+      }
+    },
+    {
+      "id": "tat-20251213063829001",
+      "name": "พิพิธภัณฑ์การแพทย์แผนไทยอภัยภูเบศร",
+      "nameLocal": "พิพิธภัณฑ์การแพทย์แผนไทยอภัยภูเบศร",
+      "province": "ปราจีนบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 14.0541674,
+        "lng": 101.394816
+      }
+    },
+    {
+      "id": "tat-2015120421550718063",
+      "name": "พิพิธภัณฑ์ทหารนาวิกโยธิน",
+      "nameLocal": "พิพิธภัณฑ์ทหารนาวิกโยธิน",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6634884,
+        "lng": 100.8623598
+      }
+    },
+    {
+      "id": "tat-2010120911214113306",
+      "name": "พิพิธภัณฑ์ธรรมชาติวิทยาเกาะและทะเลไทย",
+      "nameLocal": "พิพิธภัณฑ์ธรรมชาติวิทยาเกาะและทะเลไทย",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6027587,
+        "lng": 100.9501253
+      }
+    },
+    {
+      "id": "tat-201005182246291174",
+      "name": "พิพิธภัณฑ์พระจุฑาธุชราชฐาน",
+      "nameLocal": "พิพิธภัณฑ์พระจุฑาธุชราชฐาน",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1484592,
+        "lng": 100.8176024
+      }
+    },
+    {
+      "id": "tat-2012080610583316342",
+      "name": "พิพิธภัณฑ์ภาพวาด 3 มิติ",
+      "nameLocal": "พิพิธภัณฑ์ภาพวาด 3 มิติ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9291169,
+        "lng": 100.9218676
+      }
+    },
+    {
+      "id": "tat-2015120421550718067",
+      "name": "มณฑปรอยพระพุทธบาท",
+      "nameLocal": "มณฑปรอยพระพุทธบาท",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1690831,
+        "lng": 100.8054641
+      }
+    },
+    {
+      "id": "tat-20250620152816001",
+      "name": "เมืองเก่าอุทัยธานี",
+      "nameLocal": "เมืองเก่าอุทัยธานี",
+      "province": "อุทัยธานี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 15.4088251,
+        "lng": 99.8270594
+      }
+    },
+    {
+      "id": "tat-201005182246293332",
+      "name": "เมืองจำลอง",
+      "nameLocal": "เมืองจำลอง",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9551857,
+        "lng": 100.9088535
+      }
+    },
+    {
+      "id": "tat-2010120911214112695",
+      "name": "เรือรบหลวงจักรีนฤเบศร์",
+      "nameLocal": "เรือรบหลวงจักรีนฤเบศร์",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6259684,
+        "lng": 100.9137149
+      }
+    },
+    {
+      "id": "tat-201005182246291737",
+      "name": "วัดเขาพระพุทธบาทบางทราย",
+      "nameLocal": "วัดเขาพระพุทธบาทบางทราย",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3927964,
+        "lng": 100.9885299
+      }
+    },
+    {
+      "id": "tat-20251213065714001",
+      "name": "วัดเขาสิงโต",
+      "nameLocal": "วัดเขาสิงโต",
+      "province": "สระแก้ว",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.9895613,
+        "lng": 102.0081452
+      }
+    },
+    {
+      "id": "tat-2015120421550718079",
+      "name": "วัดช่องแสมสาร",
+      "nameLocal": "วัดช่องแสมสาร",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6014032,
+        "lng": 100.9576018
+      }
+    },
+    {
+      "id": "tat-2015120421550718080",
+      "name": "วัดชัยมงคล",
+      "nameLocal": "วัดชัยมงคล",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9259664,
+        "lng": 100.8765398
+      }
+    },
+    {
+      "id": "tat-201005182246291544",
+      "name": "วัดญาณสังวรารามวรมหาวิหาร",
+      "nameLocal": "วัดญาณสังวรารามวรมหาวิหาร",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.7918292,
+        "lng": 100.9566809
+      }
+    },
+    {
+      "id": "tat-2015120421550718083",
+      "name": "วัดตาลล้อม",
+      "nameLocal": "วัดตาลล้อม",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.272151,
+        "lng": 100.9407247
+      }
+    },
+    {
+      "id": "tat-2015120421550718078",
+      "name": "วัดใต้ต้นลาน",
+      "nameLocal": "วัดใต้ต้นลาน",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.4914767,
+        "lng": 101.1814865
+      }
+    },
+    {
+      "id": "tat-2015120421550717971",
+      "name": "วัดพระใหญ่",
+      "nameLocal": "วัดพระใหญ่",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9143312,
+        "lng": 100.8685384
+      }
+    },
+    {
+      "id": "tat-2010120911214112692",
+      "name": "วัดสัตหีบ",
+      "nameLocal": "วัดสัตหีบ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6636495,
+        "lng": 100.898163
+      }
+    },
+    {
+      "id": "tat-201005182246291963",
+      "name": "วัดใหญ่อินทราราม (พระอารามหลวง)",
+      "nameLocal": "วัดใหญ่อินทราราม (พระอารามหลวง)",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3637625,
+        "lng": 100.9882191
+      }
+    },
+    {
+      "id": "tat-20251224114028001",
+      "name": "วิสาหกิจชุมชนบ้านหน้าเขา-ในวัง",
+      "nameLocal": "วิสาหกิจชุมชนบ้านหน้าเขา-ในวัง",
+      "province": "ตรัง",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 8.00575743001172,
+        "lng": 99.74576681575446
+      }
+    },
+    {
+      "id": "tat-2010120911214113284",
+      "name": "วิหารเทพสถิตพระกิติเฉลิม",
+      "nameLocal": "วิหารเทพสถิตพระกิติเฉลิม",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3286704,
+        "lng": 100.923325
+      }
+    },
+    {
+      "id": "tat-20100518224629631",
+      "name": "ศาลเจ้าพ่อเขาใหญ่",
+      "nameLocal": "ศาลเจ้าพ่อเขาใหญ่",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1682022,
+        "lng": 100.8066827
+      }
+    },
+    {
+      "id": "tat-2010120911214113283",
+      "name": "ศูนย์ศึกษาธรรมชาติและอนุรักษ์ป่าชายเลนเพื่อการท่องเที่ยวเชิงนิเวศ",
+      "nameLocal": "ศูนย์ศึกษาธรรมชาติและอนุรักษ์ป่าชายเลนเพื่อการท่องเที่ยวเชิงนิเวศ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3421159,
+        "lng": 100.9427898
+      }
+    },
+    {
+      "id": "tat-2010120911214112696",
+      "name": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+      "nameLocal": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6368819,
+        "lng": 100.9261747
+      }
+    },
+    {
+      "id": "tat-201005182246292827",
+      "name": "สวนนงนุช",
+      "nameLocal": "สวนนงนุช",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.765497,
+        "lng": 100.9351314
+      }
+    },
+    {
+      "id": "tat-2015120421550717997",
+      "name": "สะพานอัษฎางค์",
+      "nameLocal": "สะพานอัษฎางค์",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1504566,
+        "lng": 100.818051
+      }
+    },
+    {
+      "id": "tat-201005182246293007",
+      "name": "หอพระพนัสบดี",
+      "nameLocal": "หอพระพนัสบดี",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.4517979,
+        "lng": 101.1769884
+      }
+    },
+    {
+      "id": "tat-201005182246293101",
+      "name": "หาดจอมเทียน",
+      "nameLocal": "หาดจอมเทียน",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.8901483,
+        "lng": 100.8745
+      }
+    },
+    {
+      "id": "tat-2015120421550718003",
+      "name": "หาดเตยงาม",
+      "nameLocal": "หาดเตยงาม",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.7111914,
+        "lng": 100.8908161
+      }
+    },
+    {
+      "id": "tat-201005182246293377",
+      "name": "หาดถ้ำเขาพัง",
+      "nameLocal": "หาดถ้ำเขาพัง",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.1455084,
+        "lng": 100.8065832
+      }
+    },
+    {
+      "id": "tat-2015120421550718121",
+      "name": "หาดทรายแก้ว",
+      "nameLocal": "หาดทรายแก้ว",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.7420875,
+        "lng": 100.8408871
+      }
+    },
+    {
+      "id": "tat-2010120911214112694",
+      "name": "หาดนางรอง",
+      "nameLocal": "หาดนางรอง",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6154691,
+        "lng": 100.9222223
+      }
+    },
+    {
+      "id": "tat-201005182246293423",
+      "name": "หาดนางรำ",
+      "nameLocal": "หาดนางรำ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6197852,
+        "lng": 100.9194303
+      }
+    },
+    {
+      "id": "tat-2015120421550718123",
+      "name": "หาดน้ำใส",
+      "nameLocal": "หาดน้ำใส",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.6041741,
+        "lng": 100.9442161
+      }
+    },
+    {
+      "id": "tat-2015120421550718124",
+      "name": "หาดบ้านอำเภอ",
+      "nameLocal": "หาดบ้านอำเภอ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.8105494,
+        "lng": 100.9128112
+      }
+    },
+    {
+      "id": "tat-201005182246293148",
+      "name": "หาดพัทยา",
+      "nameLocal": "หาดพัทยา",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9365663,
+        "lng": 100.8860361
+      }
+    },
+    {
+      "id": "tat-2015120421550718125",
+      "name": "หาดวงศ์อมาตย์",
+      "nameLocal": "หาดวงศ์อมาตย์",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9592572,
+        "lng": 100.8846511
+      }
+    },
+    {
+      "id": "tat-2015120421550718120",
+      "name": "หาดแสม",
+      "nameLocal": "หาดแสม",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.9128462,
+        "lng": 100.7688194
+      }
+    },
+    {
+      "id": "tat-2010120911214113286",
+      "name": "แหลมแท่น",
+      "nameLocal": "แหลมแท่น",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.3022007,
+        "lng": 100.897683
+      }
+    },
+    {
+      "id": "tat-201005182246293417",
+      "name": "อ่างเก็บน้ำบางพระ",
+      "nameLocal": "อ่างเก็บน้ำบางพระ",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 13.208179,
+        "lng": 100.9750484
+      }
+    },
+    {
+      "id": "tat-2010120911214113308",
+      "name": "อุทยานใต้ทะเลเกาะขาม",
+      "nameLocal": "อุทยานใต้ทะเลเกาะขาม",
+      "province": "ชลบุรี",
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      },
+      "coordinates": {
+        "lat": 12.573091,
+        "lng": 100.9330413
+      }
+    }
+  ],
+  "postgresObservedDate": "2026-11-07"
+}

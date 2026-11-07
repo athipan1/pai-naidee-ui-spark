@@ -110,6 +110,19 @@ jobs:
       - name: Test Admin CMS in Chrome and iPhone Safari with mocked APIs
         run: npx playwright test --config=playwright.admin-cms.config.ts
 
+      - name: Verify Phase 0 live Production baseline in desktop, Android and iPhone browsers
+        if: github.head_ref == 'feat/place-verification-phase1-4'
+        run: npx playwright test --config=playwright.production.config.ts
+
+      - name: Upload Phase 0 live Production failure evidence
+        if: failure() && github.head_ref == 'feat/place-verification-phase1-4'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase0-production-browser-evidence
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
       # The frontend's live place catalogue is on Railway, not Vercel's legacy /api/places.
       # A read-only targeted production proof, limited to this review PR and main.
       - name: Verify live Chon Buri Railway pagination and temple uniqueness

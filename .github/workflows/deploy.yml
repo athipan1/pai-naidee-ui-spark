@@ -1,4 +1,4 @@
-name: build-and-deploy
+name: Production Build Validation
 
 on:
   push:
@@ -8,16 +8,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build project
         run: npm run build
@@ -26,10 +26,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: build
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          path: dist
+      # Vercel and Railway already deploy the approved main release. This
+      # existing legacy workflow validates its build without a second host.

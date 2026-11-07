@@ -1,0 +1,20 @@
+{
+  "mode": "read_only",
+  "checkedAt": "2026-11-07T08:47:52.221698+00:00",
+  "status": 200,
+  "mime": "image/jpeg",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg/960px-Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg",
+  "photographer": "Original image: Ninara from Helsinki, Finland.  Edit: TSP",
+  "licenseName": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "width": 960,
+  "height": 528,
+  "bytes": 146824,
+  "source": "Wikimedia Commons imageinfo API",
+  "sha256": "9e5dac10dee23227ade40157c6e1fbb61336e1781215ad70459ba02d1cd9edf1",
+  "measuredWidth": 960,
+  "measuredHeight": 528,
+  "measurementMethod": "Dimensions parsed from actual downloaded JPEG bytes; no Production image import",
+  "licenseMetadataHolds": []
+}

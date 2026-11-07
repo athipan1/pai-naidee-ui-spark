@@ -37,3 +37,15 @@ test('one source duplicate is not offered twice',()=>{
 test('never stage without a provided comparison catalogue',()=>{
  assert.throws(()=>stage([W],adaptWikidata),/Production comparison/);
 });
+test('existing source staging shares alias and English-name duplicate gates even without coordinates',()=>{
+ const result=stage([O],adaptOsm,[{id:'existing',name:'Khao Kheow Open Zoo',aliases:['สวนสัตว์เปิดเขาเขียว'],province:'ชลบุรี'}]);
+ assert.ok(result.rejected[0].issues.includes('possible_duplicate'));
+ assert.equal(result.approved,0);
+});
+test('existing adapters stage another selected province without asserting bbox-based province proof',()=>{
+ const r=stage([W],row=>adaptWikidata(row,'เชียงใหม่'),[],{province:'เชียงใหม่'});
+ assert.equal(r.province,'เชียงใหม่');assert.equal(r.approved,0);
+ assert.ok(r.candidates[0].requires.includes('province_polygon_check'));
+ assert.throws(()=>adaptOsm(O,'Unknown'),/Unknown province/);
+ assert.ok(stage([W],adaptWikidata,[],{province:'เชียงใหม่'}).rejected[0].issues.includes('source_province_mismatch'));
+});
