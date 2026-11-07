@@ -42,6 +42,8 @@ function cleanPlace(input) {
   const lng = number(input?.lng);
   const imageUrl = text(input?.imageUrl, 2000);
   const errors = [];
+  const removedImageUrls = input?.removedImageUrls ?? [];
+  if (!Array.isArray(removedImageUrls) || removedImageUrls.length > 50 || removedImageUrls.some(url => typeof url !== 'string' || url.length > 2000 || validateImageUrl(url))) errors.push('Invalid removed image URLs.');
   const rawImages = input?.imageUrls ?? [];
   if (!Array.isArray(rawImages) || rawImages.length > 20) errors.push('Choose up to 20 images.');
   const imageUrls = Array.isArray(rawImages) ? [...new Set(rawImages.map(url => typeof url === 'string' ? url.trim() : ''))].filter(Boolean) : [];
@@ -55,7 +57,7 @@ function cleanPlace(input) {
   return {
     errors,
     value: { name, nameLocal: text(input?.nameLocal, 200), province, category,
-      description: text(input?.description, 10000), lat, lng, imageUrl, imageUrls: [...new Set([imageUrl, ...imageUrls].filter(Boolean))] },
+      description: text(input?.description, 10000), lat, lng, imageUrl, imageUrls: [...new Set([imageUrl, ...imageUrls].filter(Boolean))], removedImageUrls: Array.isArray(removedImageUrls) ? [...new Set(removedImageUrls)] : [] },
   };
 }
 
@@ -176,7 +178,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (existing.length) return { code: 200, draft: existing[0] };
       const id = randomUUID();
       const payload = { name: place.name, nameLocal: place.name_local || '', province: place.province,
-        category: place.category, description: place.description || '', lat: place.lat, lng: place.lng, imageUrl: place.image_url || '', imageUrls: [] };
+        category: place.category, description: place.description || '', lat: place.lat, lng: place.lng, imageUrl: place.image_url || '', imageUrls: [], removedImageUrls: [] };
       const [draft] = await tx`INSERT INTO place_drafts (id, payload, author_id, target_place_id, target_updated_at)
         SELECT ${id}, ${tx.json(payload)}, ${req.auth.user.id}, id, updated_at FROM places WHERE id = ${place.id}
         RETURNING id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version`;
@@ -267,8 +269,19 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           category = ${p.category}, description = ${p.description}, lat = ${p.lat}, lng = ${p.lng},
           image_url = ${p.imageUrl || null}, updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
           WHERE id = ${draft.target_place_id}`;
-        if ((p.imageUrl || null) !== current.image_url) await preservePlaceImage(tx, current.id, current.image_url, current.name);
-        for (const url of p.imageUrls) await preservePlaceImage(tx, current.id, url, p.name);
+        // Explicit removal only: never erase existing gallery images merely because a draft omitted them.
+        // Verify every removal belongs to this place, and do not remove the selected primary.
+        if (p.removedImageUrls.includes(p.imageUrl)) return { status: 400, error: 'The primary image cannot be removed.' };
+        if (p.removedImageUrls.length) {
+          const existingMedia = await tx`SELECT url FROM media WHERE place_id = ${current.id} AND type = 'image'`;
+          const known = new Set([current.image_url, ...existingMedia.map(item => item.url)].filter(Boolean));
+          if (p.removedImageUrls.some(url => !known.has(url))) return { status: 409, error: 'Gallery changed. Reload the place before removing images.' };
+          for (const url of p.removedImageUrls) {
+            await tx`DELETE FROM media WHERE place_id = ${current.id} AND type = 'image' AND url = ${url}`;
+          }
+        }
+        if (current.image_url && current.image_url !== p.imageUrl && !p.removedImageUrls.includes(current.image_url)) await preservePlaceImage(tx, current.id, current.image_url, current.name);
+        for (const url of p.imageUrls.filter(url => !p.removedImageUrls.includes(url))) await preservePlaceImage(tx, current.id, url, p.name);
         await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${current.id}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
         return { status: 200, placeId: current.id, published: true, updated: true };
