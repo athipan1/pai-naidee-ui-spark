@@ -7,6 +7,7 @@ const review={state:'STAGED',evidence:{source:{namespace:'test',id:'fixture'}}};
 const clean={payloadMatches:true,holds:[]};
 
 test('admin direct publish accepts valid evidence without manual approval',()=>{
+  assert.deepEqual(publicationGateDecision(review),{ok:true},'Preflight must not require a report before evaluation');
   assert.deepEqual(publicationGateDecision(review,clean),{ok:true});
   assert.deepEqual(publicationGateDecision({...review,state:'VERIFIED'},clean),{ok:true});
   assert.deepEqual(publicationGateDecision({...review,state:'REVIEW_PENDING'},clean),{ok:true});
