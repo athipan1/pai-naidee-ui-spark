@@ -224,7 +224,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       const p = parsed.value;
       // Serialize the duplicate check and write, including publications of different drafts.
       await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
-      const approval=await assertApprovedPublication(tx,draft);
+      const approval=await assertApprovedPublication(tx,{...draft,_publishingActorId:req.auth.user.id});
       if(!approval.ok)return {status:409,error:approval.error,holds:approval.holds};
       if (draft.target_place_id) {
         const [current] = await tx`SELECT id, name, name_local, province, lat, lng, image_url,
