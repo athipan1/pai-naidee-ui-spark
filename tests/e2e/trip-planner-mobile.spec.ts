@@ -21,6 +21,12 @@ const chiangMaiPlan = {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => window.localStorage.setItem('painaidee.language', 'th'));
+  // Catalogue photo refreshes must use fixture IDs/data, never Production.
+  await page.route('**/api/places/*', route => {
+    const id = decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1)!);
+    const stop = chiangMaiPlan.days.flatMap(day => day.stops).find(place => place.id === id);
+    return route.fulfill({json:{id,name:stop?.name||'Fixture place',nameLocal:stop?.nameLocal||'สถานที่จำลอง',province:'เชียงใหม่',category:'Nature',rating:0,reviewCount:0,description:'Fixture',tags:[],images:[],image:'/placeholder-attraction.svg',mediaCredits:[],coordinates:stop?.coordinates||{lat:18.8,lng:98.9}}});
+  });
   await page.route('**/api/places/facets', route => route.fulfill({ json: {
     provinces: ['เชียงใหม่'], categories: ['Nature', 'Culture'],
   } }));
