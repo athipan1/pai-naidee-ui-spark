@@ -7,7 +7,7 @@ import SearchSection from '@/components/common/SearchSection';
 import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
 import AttractionCard from '@/components/common/AttractionCard';
 import { useAttractions } from '@/shared/hooks/useAttractionQueries';
-import { getRailwayPlaceFacets } from '@/services/railway-api.service';
+import { getRailwayPlaceFacets, getRailwayPlaceSuggestions } from '@/services/railway-api.service';
 import { getThailandPlaceImage } from '@/shared/data/thailandPlaceImages';
 import { localizedCategory } from '@/shared/i18n/placeLocalization';
 import { uniqueAttractionsById } from '@/shared/utils/uniqueAttractions';
@@ -39,6 +39,15 @@ const SearchView = ({ currentLanguage, onLanguageChange, onSearch, query, catego
   const facets = useQuery({ queryKey: ['places', 'facets'], queryFn: getRailwayPlaceFacets, staleTime: 5 * 60_000 });
   const provinces = facets.data?.provinces ?? [];
   const categories = facets.data?.categories ?? [];
+  const nearbyMatches = useQuery({
+    queryKey: ['places', 'search-alternatives', query],
+    queryFn: () => getRailwayPlaceSuggestions(query),
+    enabled: !isLoading && !error && (data?.total ?? 0) === 0 && query.trim().length >= 2,
+    staleTime: 30_000,
+    retry: 1,
+  });
+  const matchingSuggestions = (nearbyMatches.data ?? []).filter(place =>
+    (!province || place.province === province) && (!category || place.category === category));
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / pageSize);
 
@@ -189,6 +198,27 @@ const SearchView = ({ currentLanguage, onLanguageChange, onSearch, query, catego
                 : 'Try adjusting your search'
               }
             </p>
+            {nearbyMatches.isLoading && query.trim().length >= 2 && (
+              <p role="status" className="mt-4 text-sm text-muted-foreground">
+                {currentLanguage === 'th' ? 'กำลังค้นหาชื่อสถานที่ใกล้เคียง...' : 'Looking for similar place names...'}
+              </p>
+            )}
+            {matchingSuggestions.length > 0 && (
+              <div className="mx-auto mt-6 max-w-xl text-left" aria-label={currentLanguage === 'th' ? 'สถานที่ชื่อใกล้เคียง' : 'Similar place names'}>
+                <h3 className="mb-3 font-semibold">{currentLanguage === 'th' ? 'คุณหมายถึงสถานที่เหล่านี้หรือไม่?' : 'Did you mean one of these places?'}</h3>
+                <ul className="space-y-2">
+                  {matchingSuggestions.map(place => (
+                    <li key={place.id}>
+                      <button type="button" className="w-full rounded-lg border border-border bg-card p-3 text-left hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                        onClick={() => navigate(`/attraction/${encodeURIComponent(place.id)}`)}>
+                        <span className="block font-medium">{currentLanguage === 'th' ? (place.nameLocal || place.name) : place.name}</span>
+                        <span className="text-sm text-muted-foreground">{place.province}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
         ) : (
           <section 
