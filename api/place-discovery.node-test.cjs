@@ -11,9 +11,9 @@ test('province allowlist, source and limit validation',()=>{
  for(const body of [{province:'จังหวัดปลอม',sources:['osm'],limit:1},{province,sources:['tat'],limit:1},{province,sources:['osm'],limit:101},{province,sources:['osm'],limit:'100'}])
   assert.equal(validateSearch(body),null);
 });
-test('query scoped to Thailand and chosen province',()=>{
+test('query scoped to selected administrative province',()=>{
  const q=overpassQuery(province,10);
- assert.match(q,/ISO3166-1/);assert.match(q,/admin_level"="4/);assert.ok(q.includes(JSON.stringify(province)));
+ assert.match(q,/boundary"="administrative/);assert.match(q,/admin_level"="4/);assert.ok(q.includes(JSON.stringify(province)));
  assert.doesNotMatch(q,/out center 100;/);
 });
 test('duplicate detection and attribution',()=>{
