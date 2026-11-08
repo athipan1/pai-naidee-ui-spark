@@ -23,12 +23,12 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
     if(typeof value.province!=='string'||!Array.isArray(value.candidates)||value.candidates.length<1||value.candidates.length>20)throw Error('ใช้ JSON หนึ่งจังหวัดและ 1–20 รายการ พร้อม payload/evidence ของแต่ละแห่ง');
     setBatch({province:value.province,candidates:value.candidates});setRequestKey(crypto.randomUUID());setJob(null);
   }
-  async function searchOsm() {
+  async function searchGoogle() {
     setDiscovery([]);setDiscoveryStatus('กำลังค้นหา...');
     try {
-      const result=await api('/place-discovery/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province,sources:['osm'],limit:100})}) as {candidates?:DiscoveryCandidate[]};
+      const result=await api('/google-place-discovery/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province,sources:['google'],limit:10})}) as {status?:string;candidates?:DiscoveryCandidate[];warning?:string};
       setDiscovery(result.candidates||[]);
-      setDiscoveryStatus(result.candidates?.length ? 'พบ '+result.candidates.length+' รายการ · ยังไม่มีการนำเข้าหรือเผยแพร่' : 'ค้นหาไม่พบ');
+      setDiscoveryStatus(result.candidates?.length ? 'ตัวอย่างจาก Google '+result.candidates.length+' รายการ · แสดงชั่วคราวเท่านั้น ห้ามนำเข้าข้อมูล Google' : 'ไม่พบรายการในผลค้นหาชุดนี้ (ไม่ใช่การตรวจครบทั้งจังหวัด)');
     } catch(e) {setDiscoveryStatus('ค้นหาไม่สำเร็จ: '+(e instanceof Error?e.message:'ไม่สามารถเชื่อมต่อบริการได้'));}
   }
   const selected=provinces.find(p=>p.province===province);
@@ -38,7 +38,7 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
     <button type="button" disabled={busy} className="rounded-xl border px-4 py-2" onClick={()=>void run(load)}>โหลดคิวและสถิติจังหวัด</button>
     {error&&<p role="alert" className="break-words text-sm text-red-700">{error}</p>}
     {<label className="block text-sm">จังหวัด<select className="ml-2 rounded-lg border p-2" value={province} onChange={event=>{setProvince(event.target.value);void run(()=>loadQueue(1,event.target.value));}}>{THAI_PROVINCES.map(p=><option key={p}>{p}</option>)}</select></label>}
-    <div className="space-y-2 rounded-xl border p-3"><button type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void run(searchOsm)}>ค้นหาสถานที่ท่องเที่ยวใหม่</button><p className="text-sm text-slate-600">ค้นหาเฉพาะจังหวัดที่เลือกจาก OpenStreetMap เมื่อกดปุ่มเท่านั้น ไม่สร้าง Draft หรือเผยแพร่อัตโนมัติ</p>{discoveryStatus&&<p role="status" className="text-sm">{discoveryStatus}</p>}{discovery.length>0&&<ul className="space-y-1 text-sm">{discovery.map(c=><li key={c.sourceId} className="rounded border p-2">{c.name} · {c.lat}, {c.lng} · {c.duplicateStatus||'รอตรวจสอบ'}{c.holds?.length?' · '+c.holds.join(', '):''}</li>)}</ul>}</div>
+    <div className="space-y-2 rounded-xl border p-3"><button type="button" disabled={busy||province!=='ชลบุรี'} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void run(searchGoogle)}>ค้นหาสถานที่ท่องเที่ยวใหม่</button><p className="text-sm text-slate-600">Google Places (New) ทดลองเฉพาะชลบุรี จำกัด 10 รายการต่อครั้ง ไม่เก็บข้อมูล Google ลงฐานข้อมูล ไม่สร้าง Draft หรือเผยแพร่อัตโนมัติ</p>{discoveryStatus&&<p role="status" className="text-sm">{discoveryStatus}</p>}{discovery.length>0&&<ul className="space-y-1 text-sm">{discovery.map(c=><li key={c.sourceId} className="rounded border p-2">{c.name} · {c.lat}, {c.lng} · {c.duplicateStatus||'รอตรวจสอบ'}{c.holds?.length?' · '+c.holds.join(', '):''}</li>)}</ul>}</div>
     {selected&&<div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">{[
       ['มีในฐานข้อมูล',selected.existing.total],['ค้นพบเข้าคิว',selected.review.discovered],['ยืนยันรายการใหม่',selected.review.confirmed_new],['เสี่ยงซ้ำ',selected.review.duplicates],
       ['รอสิทธิ์',selected.review.license_hold],['รอพิกัด',selected.review.coordinate_hold],['อนุมัติ',selected.review.approved],['เผยแพร่ผ่านคิว',selected.review.published],
