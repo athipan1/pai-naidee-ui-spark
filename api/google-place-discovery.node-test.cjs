@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {availability,validate,discoverGoogle,MASK}=require('./google-place-discovery.cjs');
+const {availability,validate,discoverGoogle,MASK,classifyCandidates}=require('./google-place-discovery.cjs');
 const env={GOOGLE_DISCOVERY_ENABLED:'true',GOOGLE_DISCOVERY_EXPIRES_AT:'2099-01-01',GOOGLE_PLACES_API_KEY:'stub',GOOGLE_CLOUD_QUOTAS_CONFIRMED:'true',GOOGLE_BILLING_ALERTS_CONFIRMED:'true'};
 const input={province:'ชลบุรี',sources:['google'],limit:10};
 test('pilot is disabled by default and requires billing confirmations',()=>{
@@ -37,4 +37,12 @@ test('search results are ephemeral, without import or DB writes',async()=>{
 test('upstream failure does not masquerade as no places',async()=>{
  const r=await discoverGoogle({province:'ชลบุรี',limit:1},{env,reserve:async()=>true,fetchImpl:async()=>({ok:false,status:429})});
  assert.equal(r.status,'unavailable');
+});
+
+test('duplicate matching by Google ID, name and coordinates',()=>{
+ const candidate=(id,name,lat,lng)=>({placeId:id,name,lat,lng,holds:['MANUAL_REVIEW']});
+ const existing=[{id:'p1',name:'น้ำตกชันตาเถร',name_local:'',lat:13.24,lng:101.04,aliases:[],external_ids:[{source:'google_places',id:'id1'}]}];
+ const rows=classifyCandidates([candidate('id1','other',12,100),candidate('id2','น้ำตกชันตาเถร',12,100),candidate('id3','other',13.2401,101.04),candidate('id4','other',12,100)],existing);
+ assert.deepEqual(rows.map(x=>x.duplicateStatus),['existing_place','possible_duplicate','possible_duplicate','not_detected']);
+ assert.equal(rows[0].duplicateMatches[0].reason,'google_place_id');
 });
