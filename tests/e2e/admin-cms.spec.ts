@@ -100,6 +100,10 @@ async function mockCms(page: Page) {
     }
     const draftId = pathname.split('/')[4];
     const draft = drafts.find(item => item.id === draftId);
+    if (pathname.endsWith('/reconcile') && draft && method === 'GET') {
+      return reply(200, { draft: draft.payload, latest: draft.payload,
+        version: draft.version, stale: false, placeUpdatedAt: '2026-11-08T00:00:00.000Z', fields: [] });
+    }
     if (pathname.endsWith('/publish') && draft) {
       if (body().version !== draft.version) return reply(409, { error: 'Draft changed.' });
       draft.status = 'published';
