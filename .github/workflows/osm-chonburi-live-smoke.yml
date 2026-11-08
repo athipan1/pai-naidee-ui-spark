@@ -19,6 +19,7 @@ jobs:
           node <<'NODE'
           const assert=require('node:assert/strict');
           const {discover,toCandidates}=require('./api/place-discovery.cjs');
+          (async()=>{
           const controller=new AbortController();
           const timer=setTimeout(()=>controller.abort(),12000);
           try {
@@ -29,7 +30,6 @@ jobs:
             assert.ok(Array.isArray(payload.elements)&&payload.elements.length>0,'Chonburi province area not resolved');
             console.log('SMALL_AREA_PROBE_PASS',payload.elements.map(x=>x.id));
           } finally {clearTimeout(timer);}
-          (async()=>{
             const province='ชลบุรี';
             const getSql=()=>({begin:async(_mode,callback)=>callback(async()=>[])});
             const result=await discover({province,limit:10,getSql});
