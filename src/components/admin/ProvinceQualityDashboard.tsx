@@ -1,4 +1,6 @@
 import {useState} from 'react';
+const THAI_PROVINCES = ["กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน","ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"];
+type DiscoveryCandidate={sourceId:string;name:string;lat:number;lng:number;duplicateStatus?:string;holds?:string[]};
 type Candidate={id:string;version:string;status:string;state:string;payload:Record<string,string|number|null>;target_place_id?:string};
 type Province={province:string;existing:{total:number;missing_images:number;missing_details:number;last_verified:string|null};review:{discovered:number;duplicates:number;license_hold:number;coordinate_hold:number;approved:number;published:number;confirmed_new:number}};
 type Job={id:string;state:string;candidate_count:number;next_index:number;result:{draftId:string;state:string;holds:string[]}[]};
@@ -7,6 +9,7 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
   const [provinces,setProvinces]=useState<Province[]>([]),[province,setProvince]=useState('ชลบุรี');
   const [queue,setQueue]=useState<Candidate[]>([]),[page,setPage]=useState(1),[total,setTotal]=useState(0);
   const [batch,setBatch]=useState<{province:string;candidates:unknown[]}|null>(null),[requestKey,setRequestKey]=useState('');
+  const [discovery,setDiscovery]=useState<DiscoveryCandidate[]>([]),[discoveryStatus,setDiscoveryStatus]=useState('');
   const [job,setJob]=useState<Job|null>(null),[jobId,setJobId]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   async function run(action:()=>Promise<unknown>) {setBusy(true);setError('');try{await action();}catch(e){setError(e instanceof Error?e.message:'ดำเนินการไม่สำเร็จ');}finally{setBusy(false);}}
   async function loadQueue(nextPage:number,selected=province) {
@@ -20,13 +23,22 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
     if(typeof value.province!=='string'||!Array.isArray(value.candidates)||value.candidates.length<1||value.candidates.length>20)throw Error('ใช้ JSON หนึ่งจังหวัดและ 1–20 รายการ พร้อม payload/evidence ของแต่ละแห่ง');
     setBatch({province:value.province,candidates:value.candidates});setRequestKey(crypto.randomUUID());setJob(null);
   }
+  async function searchOsm() {
+    setDiscovery([]);setDiscoveryStatus('กำลังค้นหา...');
+    try {
+      const result=await api('/place-discovery/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province,sources:['osm'],limit:100})}) as {candidates?:DiscoveryCandidate[]};
+      setDiscovery(result.candidates||[]);
+      setDiscoveryStatus(result.candidates?.length ? 'พบ '+result.candidates.length+' รายการ · ยังไม่มีการนำเข้าหรือเผยแพร่' : 'ค้นหาไม่พบ');
+    } catch(e) {setDiscoveryStatus('ค้นหาไม่สำเร็จ: '+(e instanceof Error?e.message:'ไม่สามารถเชื่อมต่อบริการได้'));}
+  }
   const selected=provinces.find(p=>p.province===province);
   return <section className="space-y-4 rounded-2xl border bg-white p-4 sm:p-6" data-testid="province-quality-dashboard">
     <h2 className="text-xl font-bold">คิวตรวจและคุณภาพข้อมูลรายจังหวัด</h2>
     <p className="text-sm text-slate-600">จำนวนด้านล่างเป็นข้อมูลที่ตรวจนับได้ ไม่ใช่จำนวนสถานที่ทั้งหมดที่ควรมี และไม่มีการเผยแพร่อัตโนมัติ</p>
     <button type="button" disabled={busy} className="rounded-xl border px-4 py-2" onClick={()=>void run(load)}>โหลดคิวและสถิติจังหวัด</button>
     {error&&<p role="alert" className="break-words text-sm text-red-700">{error}</p>}
-    {!!provinces.length&&<label className="block text-sm">จังหวัด<select className="ml-2 rounded-lg border p-2" value={province} onChange={event=>{setProvince(event.target.value);void run(()=>loadQueue(1,event.target.value));}}>{provinces.map(p=><option key={p.province}>{p.province}</option>)}</select></label>}
+    {<label className="block text-sm">จังหวัด<select className="ml-2 rounded-lg border p-2" value={province} onChange={event=>{setProvince(event.target.value);void run(()=>loadQueue(1,event.target.value));}}>{THAI_PROVINCES.map(p=><option key={p}>{p}</option>)}</select></label>}
+    <div className="space-y-2 rounded-xl border p-3"><button type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void run(searchOsm)}>ค้นหาสถานที่ท่องเที่ยวใหม่</button><p className="text-sm text-slate-600">ค้นหาเฉพาะจังหวัดที่เลือกจาก OpenStreetMap เมื่อกดปุ่มเท่านั้น ไม่สร้าง Draft หรือเผยแพร่อัตโนมัติ</p>{discoveryStatus&&<p role="status" className="text-sm">{discoveryStatus}</p>}{discovery.length>0&&<ul className="space-y-1 text-sm">{discovery.map(c=><li key={c.sourceId} className="rounded border p-2">{c.name} · {c.lat}, {c.lng} · {c.duplicateStatus||'รอตรวจสอบ'}{c.holds?.length?' · '+c.holds.join(', '):''}</li>)}</ul>}</div>
     {selected&&<div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">{[
       ['มีในฐานข้อมูล',selected.existing.total],['ค้นพบเข้าคิว',selected.review.discovered],['ยืนยันรายการใหม่',selected.review.confirmed_new],['เสี่ยงซ้ำ',selected.review.duplicates],
       ['รอสิทธิ์',selected.review.license_hold],['รอพิกัด',selected.review.coordinate_hold],['อนุมัติ',selected.review.approved],['เผยแพร่ผ่านคิว',selected.review.published],
