@@ -8,6 +8,7 @@ const { registerGoogleVerification } = require('./google-place-verification.cjs'
 const { registerPlaceReviewWorkflow } = require('./place-review-workflow.cjs');
 const { registerProvinceReviewPipeline } = require('./province-review-pipeline.cjs');
 const { registerPlaceDiscovery } = require('./place-discovery.cjs');
+const { registerGoogleDiscovery } = require('./google-place-discovery.cjs');
 const { registerAiTripRoutes } = require('./ai-trip-plan.cjs');
 const { registerBasicTripRoadRoutes } = require('./basic-trip-road.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
@@ -60,6 +61,7 @@ registerGoogleVerification(app, { getSql, requireAdmin });
 registerPlaceReviewWorkflow(app, { getSql, requireAdmin, mediaStorage:storage });
 registerProvinceReviewPipeline(app, { getSql, requireAdmin });
 registerPlaceDiscovery(app, { getSql, requireAdmin });
+registerGoogleDiscovery(app, { getSql, requireAdmin });
 registerAiTripRoutes(app, { listPlaces,getSql });
 registerBasicTripRoadRoutes(app, { listPlaces });
 registerAiHealthRoutes(app, { requireAdmin,getSql });
