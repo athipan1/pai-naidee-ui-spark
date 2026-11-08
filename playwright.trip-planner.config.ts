@@ -5,7 +5,9 @@ export default defineConfig({
   testMatch: 'trip-planner-mobile.spec.ts',
   timeout: 45_000,
   expect: { timeout: 10_000 },
-  use: { baseURL: 'http://127.0.0.1:4173' },
+  use: {
+    // Fixture API interception must not be bypassed by a controlling service worker.
+    serviceWorkers: 'block', baseURL: 'http://127.0.0.1:4173' },
   projects: [
     { name: 'Android Chrome - Pixel 5', use: { ...devices['Pixel 5'] } },
     { name: 'iPhone Safari - iPhone 13', use: { ...devices['iPhone 13'] } },
