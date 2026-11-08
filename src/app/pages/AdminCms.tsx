@@ -342,16 +342,6 @@ export default function AdminCms() {
     finally { setBusy(false); }
   }
 
-  async function loadReconciliation(draft: Draft) {
-    setBusy(true); setMessage('');
-    try {
-      const data: ReconcileData = await api(`/places/${encodeURIComponent(draft.id)}/reconcile`);
-      setReconcile({ draftId: draft.id, data, selected: [], retainGallery: false });
-      setTab('drafts');
-    } catch (error) { setMessage(error instanceof Error ? error.message : 'โหลดข้อมูลล่าสุดไม่สำเร็จ'); }
-    finally { setBusy(false); }
-  }
-
   async function confirmReconciliation() {
     if (!reconcile) return;
     if (!window.confirm('ยืนยันใช้ข้อมูลล่าสุด และเก็บเฉพาะรายการแก้ไขที่เลือกหรือไม่?')) return;
