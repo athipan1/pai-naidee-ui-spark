@@ -3,6 +3,9 @@ const { PROVINCE_EN } = require('./place-localizations.cjs');
 const { createRateLimiter } = require('./security.cjs');
 
 const OSM_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+const OSM_USER_AGENT = 'PaiNaiDee/1.0 (+https://github.com/athipan1/pai-naidee-ui-spark/issues)';
+const UPSTREAM_COOLDOWN_MS = 30000;
+let upstreamCooldownUntil = 0;
 const TOURISM_TYPES = new Set(['attraction','museum','viewpoint','theme_park','zoo','aquarium','gallery','information','artwork','picnic_site']);
 function normalizeName(value) {
   return String(value || '').normalize('NFKC').toLocaleLowerCase().replace(/[\s\u200b\u200c\u200d\-_.(),]+/g, '');
@@ -35,14 +38,22 @@ function upstreamError(code,message) {
   const error=new Error(message);error.code=code;return error;
 }
 async function requestOverpass({province,limit,fetchImpl,endpoint,timeoutMs=REQUEST_TIMEOUT_MS}) {
+  if (Date.now() < upstreamCooldownUntil) throw upstreamError('cooldown','Overpass cooldown active');
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try {
     const response=await fetchImpl(endpoint,{method:'POST',headers:{
       'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
-      'Accept':'application/json','User-Agent':'PaiNaiDee/1.0 (admin initiated OSM discovery)'
+      'Accept':'application/json','User-Agent':OSM_USER_AGENT
     },body:new URLSearchParams({data:overpassQuery(province,limit)}),signal:controller.signal});
-    if(!response.ok)throw upstreamError(response.status===429?'rate_limited':'upstream_http','Overpass HTTP '+response.status);
+    if(!response.ok){
+      const status=response.status;
+      const body=typeof response.text==='function' ? (await response.text()).slice(0,1000) : '';
+      if(status===406||status===429)upstreamCooldownUntil=Date.now()+UPSTREAM_COOLDOWN_MS;
+      const reason=status===406?'blocked':status===429?'rate_limited':'upstream_http';
+      const detail=status===406 ? (/nginx|not acceptable/i.test(body)?'rejected_by_gateway':'rejected_by_provider') : 'http_error';
+      throw upstreamError(reason,`Overpass HTTP ${status} (${detail}); ${body.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,180)}`);
+    }
     if(Number(response.headers?.get?.('content-length')||0)>2000000)throw upstreamError('invalid_response','Overpass response too large');
     const raw=await response.text();
     if(raw.length>2000000)throw upstreamError('invalid_response','Overpass response too large');
@@ -56,14 +67,8 @@ async function requestOverpass({province,limit,fetchImpl,endpoint,timeoutMs=REQU
   } finally {clearTimeout(timer);}
 }
 async function fetchWithLimitedRetry(args) {
-  // One retry only for rate-limiting. Never retry a timeout: doing so doubles
-  // load on an already busy public Overpass instance.
-  try{return await requestOverpass(args);}
-  catch(error){
-    if(error.code!=='rate_limited')throw error;
-    await new Promise(resolve=>setTimeout(resolve,1000));
-    return requestOverpass(args);
-  }
+  // Never immediately retry 406/429: the provider requires a cooldown.
+  return requestOverpass(args);
 }
 function toCandidates(elements,province,existing,limit) {
   const candidates=[],seen=new Set();
@@ -126,4 +131,4 @@ function registerPlaceDiscovery(app,{getSql,requireAdmin,fetchImpl=fetch}) {
         return res.status(error?.code==='rate_limited'?429:503).json({error:'OSM discovery unavailable. Please retry later.',code:error?.code||'unavailable',sources:[{source:'osm',status:error?.code||'unavailable'}]});}
     });
 }
-module.exports={registerPlaceDiscovery,discover,validateSearch,overpassQuery,toCandidates,normalizeName,requestOverpass,fetchWithLimitedRetry};
+module.exports={OSM_USER_AGENT,registerPlaceDiscovery,discover,validateSearch,overpassQuery,toCandidates,normalizeName,requestOverpass,fetchWithLimitedRetry};
