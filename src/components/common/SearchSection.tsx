@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroBeach from "@/shared/assets/hero-beach.jpg";
 import { getRailwayPlaceSuggestions, type PlaceSuggestion } from '@/services/railway-api.service';
 
@@ -11,22 +12,53 @@ interface SearchSectionProps {
 }
 
 const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const requestId = useRef(0);
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
-    if (query.trim().length < 2 || !showSuggestions) return;
-    let active = true;
+    const term = query.trim();
+    const id = ++requestId.current;
+    setActiveIndex(-1);
+    if (term.length < 2 || !showSuggestions) {
+      setSuggestions([]);
+      return;
+    }
     const timer = window.setTimeout(() => {
-      getRailwayPlaceSuggestions(query).then(items => {
-        if (active) setSuggestions(items);
+      getRailwayPlaceSuggestions(term).then(items => {
+        if (id === requestId.current) setSuggestions(items);
       }).catch(() => {
-        if (active) setSuggestions([]);
+        if (id === requestId.current) setSuggestions([]);
       });
-    }, 300);
-    return () => { active = false; window.clearTimeout(timer); };
+    }, 250);
+    return () => { window.clearTimeout(timer); requestId.current++; };
   }, [query, showSuggestions]);
+
+  const selectSuggestion = (place: PlaceSuggestion) => {
+    requestId.current++;
+    setQuery(place.nameLocal || place.name);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    navigate(`/attraction/${encodeURIComponent(place.id)}`);
+  };
+
+  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      setShowSuggestions(false);
+      setActiveIndex(-1);
+    } else if (showSuggestions && suggestions.length > 0 && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      event.preventDefault();
+      setActiveIndex(current => event.key === 'ArrowDown'
+        ? (current + 1) % suggestions.length
+        : (current - 1 + suggestions.length) % suggestions.length);
+    } else if (event.key === 'Enter' && showSuggestions && activeIndex >= 0 && suggestions[activeIndex]) {
+      event.preventDefault();
+      selectSuggestion(suggestions[activeIndex]);
+    }
+  };
 
   const content = {
     th: {
@@ -85,7 +117,11 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
                 maxLength={120}
                 autoComplete="off"
                 aria-label={t.placeholder}
+                role="combobox"
+                aria-autocomplete="list"
                 aria-expanded={showSuggestions && suggestions.length > 0}
+                aria-activedescendant={activeIndex >= 0 && showSuggestions ? `place-suggestion-${activeIndex}` : undefined}
+                onKeyDown={handleSearchKeyDown}
                 aria-controls="place-search-suggestions"
                 onFocus={() => setShowSuggestions(true)}
                 onChange={(e) => { setQuery(e.target.value); setSuggestions([]); setShowSuggestions(true); }}
@@ -97,10 +133,10 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
               </Button>
             </div>
             {showSuggestions && suggestions.length > 0 && (
-              <ul id="place-search-suggestions" aria-label={currentLanguage === 'th' ? 'สถานที่แนะนำ' : 'Suggested places'} className="absolute z-30 mt-2 w-full rounded-2xl bg-white shadow-xl text-left overflow-hidden max-h-72 overflow-y-auto">
-                {suggestions.map(place => (
-                  <li key={place.id}>
-                    <button type="button" className="w-full px-5 py-3 text-slate-900 hover:bg-slate-100 focus:bg-slate-100 text-left flex justify-between gap-3 items-center" onClick={() => { setQuery(place.nameLocal || place.name); setShowSuggestions(false); onSearch(place.nameLocal || place.name); }}>
+              <ul role="listbox" id="place-search-suggestions" aria-label={currentLanguage === 'th' ? 'สถานที่แนะนำ' : 'Suggested places'} className="absolute z-30 mt-2 w-full rounded-2xl bg-white shadow-xl text-left overflow-hidden max-h-72 overflow-y-auto">
+                {suggestions.map((place, index) => (
+                  <li key={place.id} id={`place-suggestion-${index}`} role="option" aria-selected={activeIndex === index}>
+                    <button type="button" className={`w-full px-5 py-3 text-slate-900 hover:bg-slate-100 focus:bg-slate-100 text-left flex justify-between gap-3 items-center ${activeIndex === index ? "bg-slate-100" : ""}`} onMouseEnter={() => setActiveIndex(index)} onClick={() => selectSuggestion(place)}>
                       <span className="font-medium truncate">{currentLanguage === 'th' ? (place.nameLocal || place.name) : place.name}</span>
                       <span className="text-sm text-slate-500 shrink-0">{place.province}</span>
                     </button>
