@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit
           runtimeCaching: [
             {
-              urlPattern: ({ url }) => /^\/(?:api\/admin|admin|login)(?:\/|$)/.test(url.pathname),
+              urlPattern: ({ url }) => /^\/(?:api|admin|login)(?:\/|$)/.test(url.pathname),
               handler: 'NetworkOnly',
             },
             {

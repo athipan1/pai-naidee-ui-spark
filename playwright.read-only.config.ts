@@ -4,6 +4,8 @@ export default defineConfig({
   testDir: './tests/e2e',
   testMatch: 'read-only-discovery.spec.ts',
   use: {
+    // Fixture API interception must not be bypassed by a controlling service worker.
+    serviceWorkers: 'block',
     baseURL: 'http://127.0.0.1:4173',
     browserName: 'chromium',
   },

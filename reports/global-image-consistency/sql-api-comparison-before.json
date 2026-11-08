@@ -1,0 +1,2534 @@
+[
+  {
+    "id": "1",
+    "province": "กระบี่",
+    "source": "Wikipedia: Phi Phi Islands",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/KohPhiPhi.JPG/960px-KohPhiPhi.JPG",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/KohPhiPhi.JPG/960px-KohPhiPhi.JPG",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/KohPhiPhi.JPG/960px-KohPhiPhi.JPG",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "2",
+    "province": "กรุงเทพฯ",
+    "source": "Wikipedia: Wat Phra Kaew",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg/960px-Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg/960px-Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg/960px-Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "3",
+    "province": "เชียงใหม่",
+    "source": "Wikipedia: Doi Inthanon",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg/960px-Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg/960px-Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg/960px-Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "4",
+    "province": "ราชบุรี",
+    "source": "OpenStreetMap: Damnoen Saduak Floating Market",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ratchaburi%20Damnoen%20Saduak%20Floating%20Market%202.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ratchaburi%20Damnoen%20Saduak%20Floating%20Market%202.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ratchaburi%20Damnoen%20Saduak%20Floating%20Market%202.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "cms:27efc0ad-e2a5-479f-89d9-ad60df6cb9d3",
+    "province": "สุราษฎร์ธานี",
+    "source": "PaiNaiDee Admin CMS",
+    "storedPrimary": "https://painaidee-api-production.up.railway.app/api/media/cms/91e8dd42-39e7-455f-bf72-59693d230e4d.jpg",
+    "effectivePrimary": "https://painaidee-api-production.up.railway.app/api/media/cms/91e8dd42-39e7-455f-bf72-59693d230e4d.jpg",
+    "expectedDisplay": "https://painaidee-api-production.up.railway.app/api/media/cms/91e8dd42-39e7-455f-bf72-59693d230e4d.jpg",
+    "apiDisplay": "https://painaidee-api-production.up.railway.app/api/media/cms/91e8dd42-39e7-455f-bf72-59693d230e4d.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-aiyerweng-sea-of-mist-viewpoint",
+    "province": "ยะลา",
+    "source": "OpenStreetMap via Mapcarta: Aiyoeweng Sea of Mist",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-amphawa-floating-market",
+    "province": "สมุทรสงคราม",
+    "source": "Tourism Authority of Thailand: Amphawa Floating Market",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ao-manao-beach",
+    "province": "ประจวบคีรีขันธ์",
+    "source": "Travelfish: Ao Manao Beach",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ao-nang-beach",
+    "province": "กระบี่",
+    "source": "Tourism Authority of Thailand: Ao Nang",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ayutthaya-historical-park",
+    "province": "พระนครศรีอยุธยา",
+    "source": "UNESCO: Historic City of Ayutthaya",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ban-chiang-archaeological-site",
+    "province": "อุดรธานี",
+    "source": "UNESCO: Ban Chiang Archaeological Site",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-bang-rachan-heroes-monument",
+    "province": "สิงห์บุรี",
+    "source": "National Statistical Office: Sing Buri tourism map",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-bang-saen-beach",
+    "province": "ชลบุรี",
+    "source": "OpenStreetMap: Bang Saen Beach",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Bang_Saen_Beach_at_sunset_2.jpg/960px-Bang_Saen_Beach_at_sunset_2.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Bang_Saen_Beach_at_sunset_2.jpg/960px-Bang_Saen_Beach_at_sunset_2.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Bang_Saen_Beach_at_sunset_2.jpg/960px-Bang_Saen_Beach_at_sunset_2.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-bua-tong-waterfall",
+    "province": "เชียงใหม่",
+    "source": "Travelfish: Bua Tong Waterfall",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg/960px-%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg/960px-%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg/960px-%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-bueng-boraphet",
+    "province": "นครสวรรค์",
+    "source": "Wikipedia: Bueng Boraphet",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Fishing_on_Bueng_Boraphet.jpg/960px-Fishing_on_Bueng_Boraphet.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Fishing_on_Bueng_Boraphet.jpg/960px-Fishing_on_Bueng_Boraphet.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Fishing_on_Bueng_Boraphet.jpg/960px-Fishing_on_Bueng_Boraphet.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-chai-nat-bird-park",
+    "province": "ชัยนาท",
+    "source": "Wikidata: Chai Nat Bird Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/View_on_the_Bird_Park_of_Chainat.JPG/960px-View_on_the_Bird_Park_of_Chainat.JPG",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/View_on_the_Bird_Park_of_Chainat.JPG/960px-View_on_the_Bird_Park_of_Chainat.JPG",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/View_on_the_Bird_Park_of_Chainat.JPG/960px-View_on_the_Bird_Park_of_Chainat.JPG",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-emerald-cave-ko-muk",
+    "province": "ตรัง",
+    "source": "Lovethailand: Emerald Cave and Koh Mook",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Inside%20the%20emerald%20cave%20(8161381748).jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Inside%20the%20emerald%20cave%20(8161381748).jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Inside%20the%20emerald%20cave%20(8161381748).jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-erawan-falls",
+    "province": "กาญจนบุรี",
+    "source": "Wikipedia: Cascade d’Erawan",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Erawan%20Waterfall%20Level%203%20P1110261.JPG?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Erawan%20Waterfall%20Level%203%20P1110261.JPG?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Erawan%20Waterfall%20Level%203%20P1110261.JPG?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-erawan-museum",
+    "province": "สมุทรปราการ",
+    "source": "Wikipedia: Erawan Museum",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Erawan_museum-001.jpg/960px-Erawan_museum-001.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Erawan_museum-001.jpg/960px-Erawan_museum-001.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Erawan_museum-001.jpg/960px-Erawan_museum-001.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-great-buddha-of-thailand",
+    "province": "อ่างทอง",
+    "source": "Wikipedia: Great Buddha of Thailand",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg/960px-Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg/960px-Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg/960px-Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-hala-bala-wildlife-sanctuary",
+    "province": "นราธิวาส",
+    "source": "Tourism Authority of Thailand: Hala-Bala Wildlife Sanctuary",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg/960px-%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg/960px-%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg/960px-%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-hin-ta-hin-yai",
+    "province": "สุราษฎร์ธานี",
+    "source": "Thailandee: Hin Ta Hin Yai",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hin%20ta%20hin%20yai%20-%20koh%20samui%20-%20panoramio.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hin%20ta%20hin%20yai%20-%20koh%20samui%20-%20panoramio.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hin%20ta%20hin%20yai%20-%20koh%20samui%20-%20panoramio.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-kamphaeng-phet-historical-park",
+    "province": "กำแพงเพชร",
+    "source": "Wikipedia: Kamphaeng Phet Historical Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Histparkkamphet.png/960px-Histparkkamphet.png",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Histparkkamphet.png/960px-Histparkkamphet.png",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Histparkkamphet.png/960px-Histparkkamphet.png",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-khao-khitchakut-national-park",
+    "province": "จันทบุรี",
+    "source": "Wikipedia: Khao Khitchakut National Park",
+    "storedPrimary": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "effectivePrimary": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "expectedDisplay": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "apiDisplay": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-khao-sok-national-park",
+    "province": "สุราษฎร์ธานี",
+    "source": "Wikipedia: Khao Sok National Park",
+    "storedPrimary": "https://painaidee-api-production.up.railway.app/api/media/cms/cf40e9c0-a72f-428c-aaf6-b618b2fae938.jpg",
+    "effectivePrimary": "https://painaidee-api-production.up.railway.app/api/media/cms/cf40e9c0-a72f-428c-aaf6-b618b2fae938.jpg",
+    "expectedDisplay": "https://painaidee-api-production.up.railway.app/api/media/cms/cf40e9c0-a72f-428c-aaf6-b618b2fae938.jpg",
+    "apiDisplay": "https://painaidee-api-production.up.railway.app/api/media/cms/cf40e9c0-a72f-428c-aaf6-b618b2fae938.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-khao-yai-national-park",
+    "province": "นครราชสีมา",
+    "source": "Khao Yai National Park: About",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Haew_Suwat_Waterfall_Khao-Yai02.jpg/960px-Haew_Suwat_Waterfall_Khao-Yai02.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Haew_Suwat_Waterfall_Khao-Yai02.jpg/960px-Haew_Suwat_Waterfall_Khao-Yai02.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Haew_Suwat_Waterfall_Khao-Yai02.jpg/960px-Haew_Suwat_Waterfall_Khao-Yai02.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-chang",
+    "province": "ตราด",
+    "source": "Wikipedia: List of islands of Thailand",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Ko_Chang%2C_Thailand.jpg/960px-Ko_Chang%2C_Thailand.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Ko_Chang%2C_Thailand.jpg/960px-Ko_Chang%2C_Thailand.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Ko_Chang%2C_Thailand.jpg/960px-Ko_Chang%2C_Thailand.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-kradan",
+    "province": "ตรัง",
+    "source": "Wikipedia: Ko Kradan",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/KoKradanisland.jpg/960px-KoKradanisland.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/KoKradanisland.jpg/960px-KoKradanisland.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/KoKradanisland.jpg/960px-KoKradanisland.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-kret",
+    "province": "นนทบุรี",
+    "source": "Wikipedia: Ko Kret",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Kho-kret-Thailand.JPG/960px-Kho-kret-Thailand.JPG",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Kho-kret-Thailand.JPG/960px-Kho-kret-Thailand.JPG",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Kho-kret-Thailand.JPG/960px-Kho-kret-Thailand.JPG",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-kut",
+    "province": "ตราด",
+    "source": "Wikipedia: List of islands of Thailand",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg/960px-Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg/960px-Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg/960px-Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-lan",
+    "province": "ชลบุรี",
+    "source": "Wikipedia: Ko Lan",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg/960px-Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg/960px-Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg/960px-Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-lipe",
+    "province": "สตูล",
+    "source": "Wikipedia: Ko Lipe",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Koh_Lipe_island_coast.jpg/960px-Koh_Lipe_island_coast.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Koh_Lipe_island_coast.jpg/960px-Koh_Lipe_island_coast.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Koh_Lipe_island_coast.jpg/960px-Koh_Lipe_island_coast.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-phayam",
+    "province": "ระนอง",
+    "source": "Wikipedia: Ko Phayam",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Thailand_-_Koh_Phayam_%2824873552885%29.jpg/960px-Thailand_-_Koh_Phayam_%2824873552885%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Thailand_-_Koh_Phayam_%2824873552885%29.jpg/960px-Thailand_-_Koh_Phayam_%2824873552885%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Thailand_-_Koh_Phayam_%2824873552885%29.jpg/960px-Thailand_-_Koh_Phayam_%2824873552885%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-samet",
+    "province": "ระยอง",
+    "source": "Wikipedia: Ko Samet",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ko%20Samet%20Beach%2C%20Thailand.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ko%20Samet%20Beach%2C%20Thailand.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ko%20Samet%20Beach%2C%20Thailand.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-tao",
+    "province": "สุราษฎร์ธานี",
+    "source": "Wikipedia: Ko Tao",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Ban_Mae_Haad_Ko_Tao.jpg/960px-Ban_Mae_Haad_Ko_Tao.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Ban_Mae_Haad_Ko_Tao.jpg/960px-Ban_Mae_Haad_Ko_Tao.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Ban_Mae_Haad_Ko_Tao.jpg/960px-Ban_Mae_Haad_Ko_Tao.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-ko-tarutao",
+    "province": "สตูล",
+    "source": "Wikipedia: Ko Tarutao",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg/960px-Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg/960px-Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg/960px-Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-maeklong-railway-market",
+    "province": "สมุทรสงคราม",
+    "source": "Wikipedia: Maeklong Railway",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Talad_Rom_Hoop_%28II%29.jpg/960px-Talad_Rom_Hoop_%28II%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Talad_Rom_Hoop_%28II%29.jpg/960px-Talad_Rom_Hoop_%28II%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Talad_Rom_Hoop_%28II%29.jpg/960px-Talad_Rom_Hoop_%28II%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-mu-ko-ang-thong-national-park",
+    "province": "สุราษฎร์ธานี",
+    "source": "Wikipedia: Mu Ko Ang Thong National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-namtok-chet-sao-noi-national-park",
+    "province": "สระบุรี",
+    "source": "Wikipedia: Namtok Chet Sao Noi National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Waterfall_7Girls.jpg/960px-Waterfall_7Girls.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Waterfall_7Girls.jpg/960px-Waterfall_7Girls.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Waterfall_7Girls.jpg/960px-Waterfall_7Girls.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-namtok-phlio-national-park",
+    "province": "จันทบุรี",
+    "source": "Wikipedia: Namtok Phlio National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Entrance_to_Phliu.jpg/960px-Entrance_to_Phliu.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Entrance_to_Phliu.jpg/960px-Entrance_to_Phliu.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Entrance_to_Phliu.jpg/960px-Entrance_to_Phliu.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-nang-rong-waterfall",
+    "province": "นครนายก",
+    "source": "Wikipedia: Nang Rong Waterfall",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Nang_Rong_Waterfall.jpg/960px-Nang_Rong_Waterfall.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Nang_Rong_Waterfall.jpg/960px-Nang_Rong_Waterfall.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Nang_Rong_Waterfall.jpg/960px-Nang_Rong_Waterfall.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-pa-hin-ngam-national-park",
+    "province": "ชัยภูมิ",
+    "source": "Wikipedia: Pa Hin Ngam National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pa%20hin%20ngam.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pa%20hin%20ngam.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pa%20hin%20ngam.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-pai-canyon",
+    "province": "แม่ฮ่องสอน",
+    "source": "Travelfish: Pai Canyon",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pai%20canyon.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pai%20canyon.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pai%20canyon.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-pang-sida-national-park",
+    "province": "สระแก้ว",
+    "source": "Wikipedia: Pang Sida National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Pangsida_National_Park.jpg/960px-Pangsida_National_Park.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Pangsida_National_Park.jpg/960px-Pangsida_National_Park.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Pangsida_National_Park.jpg/960px-Pangsida_National_Park.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phae-mueang-phi",
+    "province": "แพร่",
+    "source": "Wikipedia: Phae Mueang Phi Forest Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Phae_Mueang_Phi_Forest_Park2.jpg/960px-Phae_Mueang_Phi_Forest_Park2.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Phae_Mueang_Phi_Forest_Park2.jpg/960px-Phae_Mueang_Phi_Forest_Park2.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Phae_Mueang_Phi_Forest_Park2.jpg/960px-Phae_Mueang_Phi_Forest_Park2.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phanom-rung-historical-park",
+    "province": "บุรีรัมย์",
+    "source": "UNESCO: Phanom Rung tentative list",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg/960px-%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg/960px-%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg/960px-%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-pha-taem-national-park",
+    "province": "อุบลราชธานี",
+    "source": "Wikipedia: Pha Taem National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Pha_taem_figures1.JPG/960px-Pha_taem_figures1.JPG",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Pha_taem_figures1.JPG/960px-Pha_taem_figures1.JPG",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Pha_taem_figures1.JPG/960px-Pha_taem_figures1.JPG",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phimai-historical-park",
+    "province": "นครราชสีมา",
+    "source": "Wikipedia: Phimai Historical Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Phimai_%28III%29.jpg/960px-Phimai_%28III%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Phimai_%28III%29.jpg/960px-Phimai_%28III%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Phimai_%28III%29.jpg/960px-Phimai_%28III%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phra-maha-chedi-chai-mongkol",
+    "province": "ร้อยเอ็ด",
+    "source": "Tourism Authority of Thailand: Phra Maha Chedi Chai Mongkhon",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20Maha%20Chedi%20Chai%20Mongkol.JPG?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20Maha%20Chedi%20Chai%20Mongkol.JPG?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20Maha%20Chedi%20Chai%20Mongkol.JPG?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phra-mongkhon-ming-mueang",
+    "province": "อำนาจเจริญ",
+    "source": "OpenStreetMap via Mapcarta: Phra Mongkon Ming Mueang",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Mingmuang.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Mingmuang.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Mingmuang.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phra-nakhon-khiri",
+    "province": "เพชรบุรี",
+    "source": "Thailand Tourism Directory: Khao Wang",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG/960px-%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG/960px-%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG/960px-%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phra-pathom-chedi",
+    "province": "นครปฐม",
+    "source": "Wikipedia: Phra Pathom Chedi",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phra-prang-sam-yot",
+    "province": "ลพบุรี",
+    "source": "Wikipedia: Phra Prang Sam Yot",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg/960px-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg/960px-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg/960px-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phra-that-kong-khao-noi",
+    "province": "ยโสธร",
+    "source": "Wikimedia Commons: Geotagged Phra That Kong Khao Noi",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20That%20Kong%20Khao%20Noi%20(I).jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20That%20Kong%20Khao%20Noi%20(I).jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20That%20Kong%20Khao%20Noi%20(I).jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phra-that-na-dun",
+    "province": "มหาสารคาม",
+    "source": "OpenStreetMap via Mapcarta: Phrathat Na Dun",
+    "storedPrimary": null,
+    "effectivePrimary": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-01-main.jpg",
+    "expectedDisplay": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-01-main.jpg",
+    "apiDisplay": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-01-main.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phraya-nakhon-cave",
+    "province": "ประจวบคีรีขันธ์",
+    "source": "Wikipedia: Phraya Nakhon Cave",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg/960px-01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg/960px-01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg/960px-01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-chi-fa",
+    "province": "เชียงราย",
+    "source": "Wikipedia: Phu Chi Fa",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phu%20Chi%20Fa%20National%20Park%2C%20Chiengrai%2C%20Thailand.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phu%20Chi%20Fa%20National%20Park%2C%20Chiengrai%2C%20Thailand.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phu%20Chi%20Fa%20National%20Park%2C%20Chiengrai%2C%20Thailand.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phuket-big-buddha",
+    "province": "ภูเก็ต",
+    "source": "Wikipedia: Phuket Big Buddha",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/The_Big_Buddha%2C_Phuket.jpg/960px-The_Big_Buddha%2C_Phuket.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/The_Big_Buddha%2C_Phuket.jpg/960px-The_Big_Buddha%2C_Phuket.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/The_Big_Buddha%2C_Phuket.jpg/960px-The_Big_Buddha%2C_Phuket.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-kradueng-national-park",
+    "province": "เลย",
+    "source": "Thai National Parks: Phu Kradueng",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Lom_Sak_Cliff_%28I%29.jpg/960px-Lom_Sak_Cliff_%28I%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Lom_Sak_Cliff_%28I%29.jpg/960px-Lom_Sak_Cliff_%28I%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Lom_Sak_Cliff_%28I%29.jpg/960px-Lom_Sak_Cliff_%28I%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-laen-kha-national-park",
+    "province": "ชัยภูมิ",
+    "source": "Wikipedia: Phu Laen Kha National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg/960px-%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg/960px-%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg/960px-%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-langka-forest-park",
+    "province": "พะเยา",
+    "source": "Wikipedia: Phu Langka Forest Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg/960px-Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg/960px-Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg/960px-Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-pha-man-national-park",
+    "province": "ขอนแก่น",
+    "source": "Wikipedia: Phu Pha Man National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg/960px-%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg/960px-%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg/960px-%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-phan-national-park",
+    "province": "สกลนคร",
+    "source": "Wikipedia: Phu Phan National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%96%E0%B9%89%E0%B8%B3%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B5%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%B2%E0%B8%99.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%96%E0%B9%89%E0%B8%B3%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B5%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%B2%E0%B8%99.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%96%E0%B9%89%E0%B8%B3%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B5%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%B2%E0%B8%99.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": [
+      {
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%96%E0%B9%89%E0%B8%B3%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B5%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%B2%E0%B8%99.jpg?width=960",
+        "status": "unverified"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-phra-bat-historical-park",
+    "province": "อุดรธานี",
+    "source": "Fine Arts Department: Phu Phra Bat",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Rock_formation_in_Phu_Phra_Bat.jpg/960px-Rock_formation_in_Phu_Phra_Bat.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Rock_formation_in_Phu_Phra_Bat.jpg/960px-Rock_formation_in_Phu_Phra_Bat.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Rock_formation_in_Phu_Phra_Bat.jpg/960px-Rock_formation_in_Phu_Phra_Bat.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-soi-dao",
+    "province": "อุตรดิตถ์",
+    "source": "Wikipedia: Phu Soi Dao",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg/960px-Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg/960px-Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg/960px-Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-phu-thok",
+    "province": "บึงกาฬ",
+    "source": "Wikipedia: Phu Thok",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/What_phu_tok_from_bottom.JPG/960px-What_phu_tok_from_bottom.JPG",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/What_phu_tok_from_bottom.JPG/960px-What_phu_tok_from_bottom.JPG",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/What_phu_tok_from_bottom.JPG/960px-What_phu_tok_from_bottom.JPG",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-prasat-sikhoraphum",
+    "province": "สุรินทร์",
+    "source": "Wikipedia: Prasat Sikhoraphum",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg/960px-Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg/960px-Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg/960px-Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-promthep-cape",
+    "province": "ภูเก็ต",
+    "source": "Lovethailand: Promthep Cape",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Promthep%20Cape%20Phuket.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Promthep%20Cape%20Phuket.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Promthep%20Cape%20Phuket.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-railay-beach",
+    "province": "กระบี่",
+    "source": "Thailand Tourism Directory: Railay Beach",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Railay_Beach_5.jpg/960px-Railay_Beach_5.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Railay_Beach_5.jpg/960px-Railay_Beach_5.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Railay_Beach_5.jpg/960px-Railay_Beach_5.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-river-kwai-bridge",
+    "province": "กาญจนบุรี",
+    "source": "Tourism Authority of Thailand: River Kwai Bridge",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Bridge%20over%20River%20Kwai%20in%20Kanchanaburi%2C%20Thailand.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Bridge%20over%20River%20Kwai%20in%20Kanchanaburi%2C%20Thailand.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Bridge%20over%20River%20Kwai%20in%20Kanchanaburi%2C%20Thailand.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-sala-keoku",
+    "province": "หนองคาย",
+    "source": "Wikipedia: Sala Keoku",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Sala_Keoku.JPG/960px-Sala_Keoku.JPG",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Sala_Keoku.JPG/960px-Sala_Keoku.JPG",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Sala_Keoku.JPG/960px-Sala_Keoku.JPG",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-sam-chuk-old-market",
+    "province": "สุพรรณบุรี",
+    "source": "OpenStreetMap via Mapcarta: Old Market Sam Chuk",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Suphanburi%20Samchuk%20Market%201.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Suphanburi%20Samchuk%20Market%201.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Suphanburi%20Samchuk%20Market%201.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-samila-beach",
+    "province": "สงขลา",
+    "source": "Travelfish: Samila Beach",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Songkhla%20mermaid.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Songkhla%20mermaid.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Songkhla%20mermaid.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-sam-phan-bok",
+    "province": "อุบลราชธานี",
+    "source": "Tourism Authority of Thailand: Sam Phan Bok",
+    "storedPrimary": null,
+    "effectivePrimary": "https://upload.wikimedia.org/wikipedia/commons/2/2b/%E0%B8%81%E0%B8%B8%E0%B8%A1%E0%B8%A0%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%93%E0%B9%8C.jpg",
+    "expectedDisplay": "https://upload.wikimedia.org/wikipedia/commons/2/2b/%E0%B8%81%E0%B8%B8%E0%B8%A1%E0%B8%A0%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%93%E0%B9%8C.jpg",
+    "apiDisplay": "https://upload.wikimedia.org/wikipedia/commons/2/2b/%E0%B8%81%E0%B8%B8%E0%B8%A1%E0%B8%A0%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%93%E0%B9%8C.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-sanctuary-of-truth",
+    "province": "ชลบุรี",
+    "source": "Wikipedia: Sanctuary of Truth",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Santuaryoftruth2.jpg/960px-Santuaryoftruth2.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Santuaryoftruth2.jpg/960px-Santuaryoftruth2.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Santuaryoftruth2.jpg/960px-Santuaryoftruth2.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-similan-islands-national-park",
+    "province": "พังงา",
+    "source": "Tourism Authority of Thailand: Similan Islands",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Similan.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Similan.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Similan.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-sirindhorn-museum",
+    "province": "กาฬสินธุ์",
+    "source": "Wikipedia: Sirindhorn Museum",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg/960px-Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg/960px-Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg/960px-Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-si-satchanalai-historical-park",
+    "province": "สุโขทัย",
+    "source": "Wikipedia: Si Satchanalai Historical Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Histparksisatchanalai.png/960px-Histparksisatchanalai.png",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Histparksisatchanalai.png/960px-Histparksisatchanalai.png",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Histparksisatchanalai.png/960px-Histparksisatchanalai.png",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-sukhothai-historical-park",
+    "province": "สุโขทัย",
+    "source": "Wikipedia: Sukhothai Historical Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Wat_srichum_03.jpg/960px-Wat_srichum_03.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Wat_srichum_03.jpg/960px-Wat_srichum_03.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Wat_srichum_03.jpg/960px-Wat_srichum_03.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-tat-ton-national-park",
+    "province": "ชัยภูมิ",
+    "source": "Wikipedia: Tat Ton National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Tatton_Waterfall_2014_-_001_%282%29.jpg/960px-Tatton_Waterfall_2014_-_001_%282%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Tatton_Waterfall_2014_-_001_%282%29.jpg/960px-Tatton_Waterfall_2014_-_001_%282%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Tatton_Waterfall_2014_-_001_%282%29.jpg/960px-Tatton_Waterfall_2014_-_001_%282%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-thale-noi-wetland",
+    "province": "พัทลุง",
+    "source": "Wikipedia: Thale Noi Non-Hunting Area",
+    "storedPrimary": null,
+    "effectivePrimary": "https://upload.wikimedia.org/wikipedia/commons/6/60/Thale_Noi_Non-Hunting_Area.png",
+    "expectedDisplay": "https://upload.wikimedia.org/wikipedia/commons/6/60/Thale_Noi_Non-Hunting_Area.png",
+    "apiDisplay": "https://upload.wikimedia.org/wikipedia/commons/6/60/Thale_Noi_Non-Hunting_Area.png",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-thap-lan-national-park",
+    "province": "ปราจีนบุรี",
+    "source": "Wikipedia: Thap Lan National Park",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Tublarn01.jpg/960px-Tublarn01.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Tublarn01.jpg/960px-Tublarn01.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Tublarn01.jpg/960px-Tublarn01.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-thi-lo-su-waterfall",
+    "province": "ตาก",
+    "source": "Wikipedia: Thi Lo Su Waterfall",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/TheeLorSue-h.jpg/960px-TheeLorSue-h.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/TheeLorSue-h.jpg/960px-TheeLorSue-h.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/TheeLorSue-h.jpg/960px-TheeLorSue-h.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-thung-wua-laen-beach",
+    "province": "ชุมพร",
+    "source": "BeachAtlas: Thung Wua Laen Beach",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Thung%20Wua%20Laen%20beach%20-%20Chumphon.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Thung%20Wua%20Laen%20beach%20-%20Chumphon.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Thung%20Wua%20Laen%20beach%20-%20Chumphon.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-arun",
+    "province": "กรุงเทพฯ",
+    "source": "Wikipedia: Wat Arun",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg/960px-%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg/960px-%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg/960px-%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-chalong",
+    "province": "ภูเก็ต",
+    "source": "Travelfish: Wat Chalong",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chalong.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chalong.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chalong.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-chang-hai",
+    "province": "ปัตตานี",
+    "source": "Mapcarta (OpenStreetMap): Wat Chang Hai",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chang%20Hai%20im%202018.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chang%20Hai%20im%202018.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chang%20Hai%20im%202018.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-chantharam-tha-sung",
+    "province": "อุทัยธานี",
+    "source": "Wikipedia: Wat Chantharam",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg/960px-%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg/960px-%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg/960px-%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-chedi-hoi",
+    "province": "ปทุมธานี",
+    "source": "Tourism Authority of Thailand: Wat Chedi Hoi",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AB%E0%B8%AD%E0%B8%A2%20%E0%B8%AD.%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7%20%E0%B8%88.%E0%B8%9B%E0%B8%97%E0%B8%B8%E0%B8%A1%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5%20(4).jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AB%E0%B8%AD%E0%B8%A2%20%E0%B8%AD.%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7%20%E0%B8%88.%E0%B8%9B%E0%B8%97%E0%B8%B8%E0%B8%A1%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5%20(4).jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AB%E0%B8%AD%E0%B8%A2%20%E0%B8%AD.%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7%20%E0%B8%88.%E0%B8%9B%E0%B8%97%E0%B8%B8%E0%B8%A1%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5%20(4).jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": [
+      {
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AB%E0%B8%AD%E0%B8%A2%20%E0%B8%AD.%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7%20%E0%B8%88.%E0%B8%9B%E0%B8%97%E0%B8%B8%E0%B8%A1%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5%20(4).jpg?width=960",
+        "status": "unverified"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-doi-kong-mu",
+    "province": "แม่ฮ่องสอน",
+    "source": "Wikipedia: Wat Phrathat Doi Kong Mu",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg/960px-%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg/960px-%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg/960px-%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-khok-kham",
+    "province": "สมุทรสาคร",
+    "source": "OpenStreetMap via Mapcarta: Wat Khok Kham",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/0006052-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%81%E0%B8%82%E0%B8%B2%E0%B8%A1-2.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/0006052-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%81%E0%B8%82%E0%B8%B2%E0%B8%A1-2.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/0006052-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%81%E0%B8%82%E0%B8%B2%E0%B8%A1-2.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": [
+      {
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/0006052-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%81%E0%B8%82%E0%B8%B2%E0%B8%A1-2.jpg?width=960",
+        "status": "unverified"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-pa-maha-chedi-kaew",
+    "province": "ศรีสะเกษ",
+    "source": "Wikipedia: Wat Pa Maha Chedi Kaew",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Million_Bottle_Temple_%287447377506%29.jpg/960px-Million_Bottle_Temple_%287447377506%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Million_Bottle_Temple_%287447377506%29.jpg/960px-Million_Bottle_Temple_%287447377506%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Million_Bottle_Temple_%287447377506%29.jpg/960px-Million_Bottle_Temple_%287447377506%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-pa-phu-kon",
+    "province": "อุดรธานี",
+    "source": "Wikipedia: Wat Pa Phu Kon",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Wat_Pa_Phu_Kon_-_panoramio.jpg/960px-Wat_Pa_Phu_Kon_-_panoramio.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Wat_Pa_Phu_Kon_-_panoramio.jpg/960px-Wat_Pa_Phu_Kon_-_panoramio.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Wat_Pa_Phu_Kon_-_panoramio.jpg/960px-Wat_Pa_Phu_Kon_-_panoramio.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-pha-sorn-kaew",
+    "province": "เพชรบูรณ์",
+    "source": "Wikipedia: Wat Pha Sorn Kaew",
+    "storedPrimary": null,
+    "effectivePrimary": "https://upload.wikimedia.org/wikipedia/commons/6/62/%E0%B8%9C%E0%B8%B2%E0%B8%8B%E0%B9%88%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7.jpg",
+    "expectedDisplay": "https://upload.wikimedia.org/wikipedia/commons/6/62/%E0%B8%9C%E0%B8%B2%E0%B8%8B%E0%B9%88%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7.jpg",
+    "apiDisplay": "https://upload.wikimedia.org/wikipedia/commons/6/62/%E0%B8%9C%E0%B8%B2%E0%B8%8B%E0%B9%88%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-pho",
+    "province": "กรุงเทพฯ",
+    "source": "Wikipedia: Wat Pho",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-mahathat-nakhon",
+    "province": "นครศรีธรรมราช",
+    "source": "UNESCO: Wat Phra Mahathat Woramahawihan",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20Mahathat%20Woramahawihan%2C%20Nakhon%20Si%20Thammarat.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20Mahathat%20Woramahawihan%2C%20Nakhon%20Si%20Thammarat.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20Mahathat%20Woramahawihan%2C%20Nakhon%20Si%20Thammarat.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-singh",
+    "province": "เชียงใหม่",
+    "source": "Wikipedia: Wat Phra Singh",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg/960px-Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg/960px-Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg/960px-Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-si-rattana-mahathat-phitsanulok",
+    "province": "พิษณุโลก",
+    "source": "Wikipedia: Wat Phra Si Rattana Mahathat",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg/960px-Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg/960px-Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg/960px-Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-that-choeng-chum",
+    "province": "สกลนคร",
+    "source": "Tourism Authority of Thailand: Wat Phra That Choeng Chum",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Prathat%20Cherng%20Chum%20Temple%20(1).jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Prathat%20Cherng%20Chum%20Temple%20(1).jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Prathat%20Cherng%20Chum%20Temple%20(1).jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-that-doi-suthep",
+    "province": "เชียงใหม่",
+    "source": "Tourism Authority of Thailand: Doi Suthep",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Doi%20Suthep%20temple%20Thailand.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Doi%20Suthep%20temple%20Thailand.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Doi%20Suthep%20temple%20Thailand.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-that-hariphunchai",
+    "province": "ลำพูน",
+    "source": "Wikipedia: Wat Phra That Hariphunchai",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Wat_Phra_That_Hariphunchai_%28III%29.jpg/960px-Wat_Phra_That_Hariphunchai_%28III%29.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Wat_Phra_That_Hariphunchai_%28III%29.jpg/960px-Wat_Phra_That_Hariphunchai_%28III%29.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Wat_Phra_That_Hariphunchai_%28III%29.jpg/960px-Wat_Phra_That_Hariphunchai_%28III%29.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-that-lampang-luang",
+    "province": "ลำปาง",
+    "source": "Wikipedia: Wat Phra That Lampang Luang",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg/960px-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg/960px-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg/960px-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phra-that-phanom",
+    "province": "นครพนม",
+    "source": "Thailand Tourism Directory: Wat Phra That Phanom",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Phanom%2C%20That%20Phanom%2C%20Nakhon%20Phanom%2C%20Thailand.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Phanom%2C%20That%20Phanom%2C%20Nakhon%20Phanom%2C%20Thailand.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Phanom%2C%20That%20Phanom%2C%20Nakhon%20Phanom%2C%20Thailand.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phu-manorom",
+    "province": "มุกดาหาร",
+    "source": "Tourism Authority of Thailand: Wat Roi Phra Phutthabat Phu Manorom",
+    "storedPrimary": null,
+    "effectivePrimary": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-01-main.jpg",
+    "expectedDisplay": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-01-main.jpg",
+    "apiDisplay": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-01-main.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-phumin",
+    "province": "น่าน",
+    "source": "Wikipedia: Wat Phumin",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/2013_Wat_Phumin_Nan.jpg/960px-2013_Wat_Phumin_Nan.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/2013_Wat_Phumin_Nan.jpg/960px-2013_Wat_Phumin_Nan.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/2013_Wat_Phumin_Nan.jpg/960px-2013_Wat_Phumin_Nan.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-rong-khun",
+    "province": "เชียงราย",
+    "source": "Wikimedia Commons: object location",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Rong%20Khun%20view.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Rong%20Khun%20view.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Rong%20Khun%20view.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-rong-suea-ten",
+    "province": "เชียงราย",
+    "source": "Wikipedia: Wat Rong Suea Ten",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg/960px-Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg/960px-Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg/960px-Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-sothonwararam",
+    "province": "ฉะเชิงเทรา",
+    "source": "Wikipedia: Wat Sothonwararam",
+    "storedPrimary": null,
+    "effectivePrimary": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Wat_sothorn_11.jpg/960px-Wat_sothorn_11.jpg",
+    "expectedDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Wat_sothorn_11.jpg/960px-Wat_sothorn_11.jpg",
+    "apiDisplay": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Wat_sothorn_11.jpg/960px-Wat_sothorn_11.jpg",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-tha-luang-phichit",
+    "province": "พิจิตร",
+    "source": "Tourism Authority of Thailand: Wat Tha Luang",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "curated-wat-tham-klong-phen",
+    "province": "หนองบัวลำภู",
+    "source": "OpenStreetMap via Mapcarta: Tham Kong Phen Monastery",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%96%E0%B9%88%E0%B8%B3%E0%B8%81%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%9E%E0%B8%A5.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%96%E0%B9%88%E0%B8%B3%E0%B8%81%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%9E%E0%B8%A5.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%96%E0%B9%88%E0%B8%B3%E0%B8%81%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%9E%E0%B8%A5.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": [
+      {
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%96%E0%B9%88%E0%B8%B3%E0%B8%81%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%9E%E0%B8%A5.jpg?width=960",
+        "status": "unverified"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-yai-chai-mongkhon",
+    "province": "พระนครศรีอยุธยา",
+    "source": "Ayutthaya Historical Research: Wat Yai Chai Mongkhon",
+    "storedPrimary": null,
+    "effectivePrimary": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Yai%20Chai%20Mongkhon%20Ayutthaya.jpg?width=960",
+    "expectedDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Yai%20Chai%20Mongkhon%20Ayutthaya.jpg?width=960",
+    "apiDisplay": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Yai%20Chai%20Mongkhon%20Ayutthaya.jpg?width=960",
+    "apiMatches": true,
+    "imageIssues": [],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246291103",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246291174",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20100518224629120",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246291544",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246291737",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246291963",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246292827",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293007",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293051",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293101",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293148",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293199",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293232",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293252",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293266",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293275",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293316",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293332",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293336",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293377",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293395",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293417",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293423",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-201005182246293428",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20100518224629350",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20100518224629483",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20100518224629568",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20100518224629631",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20100518224629991",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214112692",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214112694",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214112695",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214112696",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214113283",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214113284",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214113286",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214113304",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214113305",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214113306",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214113308",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2010120911214114470",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2011032413454815424",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2012080610583316342",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550717971",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550717997",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718003",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718047",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718063",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718067",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718075",
+    "province": "ชลบุรี",
+    "source": "Municipality of Bo Kwang Thong / Burapha University Tourism Research",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718078",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718079",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718080",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718083",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718116",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718119",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718120",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718121",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718123",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718124",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718125",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2015120421550718297",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-2016010510155820163",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20160528165231008560",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20160528170226008563",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20200908183352469711",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20211221230034734283",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20250620152816001",
+    "province": "อุทัยธานี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20250620154151001",
+    "province": "จันทบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20250701101935001",
+    "province": "สตูล",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20250815163438001",
+    "province": "ตราด",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20250916103852001",
+    "province": "ขอนแก่น",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20250922135409001",
+    "province": "เชียงใหม่",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20250925134625001",
+    "province": "เชียงราย",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20251213063829001",
+    "province": "ปราจีนบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20251213065714001",
+    "province": "สระแก้ว",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20251215120121001",
+    "province": "พิษณุโลก",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20251224114028001",
+    "province": "ตรัง",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20251225110647001",
+    "province": "กรุงเทพฯ",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20260126145509001",
+    "province": "เชียงใหม่",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20260203120214001",
+    "province": "ชลบุรี",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20260203143512001",
+    "province": "กระบี่",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20260204141052001",
+    "province": "เชียงราย",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  },
+  {
+    "id": "tat-20260209144621001",
+    "province": "สตูล",
+    "source": "Tourism Authority of Thailand — Open Data",
+    "storedPrimary": null,
+    "effectivePrimary": null,
+    "expectedDisplay": "/placeholder-attraction.svg",
+    "apiDisplay": null,
+    "apiMatches": true,
+    "imageIssues": [
+      "primary_missing"
+    ],
+    "urlIssues": []
+  }
+]

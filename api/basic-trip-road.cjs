@@ -2,7 +2,7 @@
 const { createRateLimiter } = require('./security.cjs');
 const { roadLeg } = require('./ai-trip-plan.cjs');
 const valid = p => p && typeof p.id === 'string' && p.id.length < 120 && Number.isFinite(p.coordinates?.lat) && Number.isFinite(p.coordinates?.lng) && p.coordinates.lat >= 5 && p.coordinates.lat <= 21 && p.coordinates.lng >= 97 && p.coordinates.lng <= 106;
-const identity = p => ({id:p.id,name:p.name,nameLocal:p.nameLocal,province:p.province,category:p.category,rating:p.rating,reviewCount:p.reviewCount,images:Array.isArray(p.images)?p.images:[],tags:Array.isArray(p.tags)?p.tags:[],coordinates:{lat:p.coordinates.lat,lng:p.coordinates.lng}});
+const identity = p => ({id:p.id,name:p.name,nameLocal:p.nameLocal,province:p.province,category:p.category,rating:p.rating,reviewCount:p.reviewCount,image:p.image,publishedPrimaryImage:p.publishedPrimaryImage,imageIssues:p.imageIssues,mediaCredits:p.mediaCredits,images:Array.isArray(p.images)?p.images:[],tags:Array.isArray(p.tags)?p.tags:[],coordinates:{lat:p.coordinates.lat,lng:p.coordinates.lng}});
 async function rankRoadStops(places,{days,maxRoadMinutes=90,mode='car'},route=roadLeg){
   const pool=[...new Map(places.filter(valid).map(p=>[p.id,p])).values()].slice(0,40);
   const used=new Set(),output=[],legs=[],rejectedCounts={LONG_DRIVE:0,ROUTE_UNVERIFIED:0};

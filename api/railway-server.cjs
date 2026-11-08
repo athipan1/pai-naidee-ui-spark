@@ -40,6 +40,7 @@ app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '256kb' }));
+app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store, max-age=0'); next(); });
 app.use('/api', createRateLimiter({ windowMs: 60_000, max: 180 }));
 
 const storage = createRailwayMediaStorage();
@@ -129,6 +130,9 @@ function serializePlaceDetail(place) {
       category: place.category,
       rating: place.rating,
       reviewCount: place.reviewCount,
+      image: place.image,
+      publishedPrimaryImage: place.publishedPrimaryImage,
+      imageIssues: place.imageIssues,
       images: place.images,
       mediaCredits: place.mediaCredits,
       detailedDescription: place.detailedDescription,

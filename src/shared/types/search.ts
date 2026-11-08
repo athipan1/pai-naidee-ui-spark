@@ -26,6 +26,9 @@ export interface SearchSuggestion {
 }
 
 export interface SearchResult {
+  image: string;
+  publishedPrimaryImage?: string | null;
+  imageIssues?: string[];
   id: string;
   name: string;
   nameLocal?: string;
@@ -35,7 +38,7 @@ export interface SearchResult {
   tags: string[];
   rating: number;
   reviewCount: number;
-  image: string;
+  images?: string[];
   mediaCredits?: AttractionPhotoCredit[];
   description: string;
   descriptionEn?: string | null;

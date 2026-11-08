@@ -1,11 +1,6 @@
 import type { AttractionDetail } from "@/shared/types/attraction";
 import type { SearchResult } from "@/shared/types/search";
-import { correctKnownIncorrectPhoto } from '@/shared/data/photoCorrections';
-import { addVerifiedPhotoIfMissing, addUserProvidedGalleryIfMissing } from '@/shared/data/verifiedPlacePhotoFallbacks';
-
-function withMissingPlacePhotos<T extends { id: string; image?: string | null; images?: string[]; mediaCredits?: import('@/shared/types/attraction').AttractionPhotoCredit[] }>(place: T): T {
-  return addUserProvidedGalleryIfMissing(addVerifiedPhotoIfMissing(correctKnownIncorrectPhoto(place)));
-}
+import { withPublishedPlaceImages } from '@/shared/utils/publishedPlaceImages';
 
 const DEFAULT_API_BASE_URL = "https://painaidee-api-production.up.railway.app";
 const REQUEST_TIMEOUT_MS = 8_000;
@@ -23,6 +18,7 @@ async function requestJson<T>(path: string): Promise<T> {
 
   try {
     const response = await fetch(`${getApiBaseUrl()}${path}`, {
+      cache: 'no-store',
       headers: { Accept: "application/json" },
       signal: controller.signal,
     });
@@ -95,14 +91,14 @@ export async function getRailwayNearbyAttractions(options: {
     limit: String(options.limit ?? 30),
   });
   const response = await requestJson<RailwayNearbyResponse>(`/api/places/nearby?${params}`);
-  return { ...response, attractions: response.attractions.map(withMissingPlacePhotos) };
+  return { ...response, attractions: response.attractions.map(withPublishedPlaceImages) };
 }
 
 export async function getRailwayAttractionDetail(
   id: string,
 ): Promise<AttractionDetail> {
   const place = await requestJson<AttractionDetail>(`/api/places/${encodeURIComponent(id)}`);
-  return withMissingPlacePhotos(place);
+  return withPublishedPlaceImages(place);
 }
 
 export async function getRailwayAttractions(options?: {
@@ -123,7 +119,7 @@ export async function getRailwayAttractions(options?: {
   const response = await requestJson<RailwayAttractionsResponse>(
     `/api/places?${params.toString()}`,
   );
-  return { ...response, attractions: response.attractions.map(withMissingPlacePhotos) };
+  return { ...response, attractions: response.attractions.map(withPublishedPlaceImages) };
 }
 
 export { getApiBaseUrl };

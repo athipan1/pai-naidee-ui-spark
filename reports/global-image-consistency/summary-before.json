@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-11-08T07:44:46.830Z",
+  "scope": "Pre-release PostgreSQL read-only + all public API pages + bounded HTTP image probes; no post-deployment UI certification",
+  "transactionReadOnly": "on",
+  "total": 195,
+  "mediaTotal": 117,
+  "explicitPrimary": 3,
+  "legacyPrimaryFromMedia": 106,
+  "noMedia": 86,
+  "apiMatchesDatabaseEffectiveImage": 195,
+  "photoPrimaryEqualsFirstGallery": 109,
+  "placesWithConfirmedHttpError": 0,
+  "placesWithUnverifiedUrls": 4,
+  "placesNeedingReview": 90,
+  "distinctUrls": 117,
+  "urlStatuses": {
+    "unverified": 4,
+    "ok": 113
+  },
+  "duplicateGalleryUrlGroups": 0,
+  "identicalContentHashGroups": 0,
+  "mediaWithoutCompleteExternalCredit": 12,
+  "note": "12 incomplete external-credit rows include CMS/user-provided assets; uploader provenance is not a newly granted external licence. No media was deleted or modified.",
+  "globalStatus": "NOT_PASS: release and post-deployment verification pending"
+}

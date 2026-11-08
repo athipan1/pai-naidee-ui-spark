@@ -1,6 +1,11 @@
+import { useQueries } from '@tanstack/react-query';
+import { getRailwayAttractionDetail } from '@/services/railway-api.service';
+import { attractionKeys } from '@/shared/hooks/useAttractionQueries';
+import OptimizedImage from '@/components/common/OptimizedImage';
+import { withPublishedPlaceImages } from '@/shared/utils/publishedPlaceImages';
 import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from 'react-leaflet';
-import { ArrowDown, ArrowUp, MapPinned, Navigation, Plus, Trash2, ImageOff, ChevronDown } from 'lucide-react';
+import { ArrowDown, ArrowUp, MapPinned, Navigation, Plus, Trash2, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { TripStop } from '@/shared/utils/tripPlanner';
 import { auditTripRoute, mapDirectionsUrl } from '@/shared/utils/tripPlanner';
@@ -20,6 +25,16 @@ function FocusMap({ points }: { points: [number,number][] }) {
   return null;
 }
 export default function TripTimelineMap({stops,available,days,th,onChange,verifiedRoad=false}:Props){
+  const ids = [...new Set(stops.map(s => s.place.id))];
+  const published = useQueries({queries: ids.map(id => ({
+    queryKey: attractionKeys.detail(id), queryFn: () => getRailwayAttractionDetail(id),
+    staleTime: 0, refetchInterval: 30_000, retry: false,
+    enabled: !stops.some(s => s.place.id === id && (s.place.source as unknown) === 'google_places'),
+  }))});
+  const primaryFor = (id: string) => {
+    const current = published[ids.indexOf(id)];
+    return current?.data && !current.isError ? withPublishedPlaceImages(current.data).image : '/placeholder-attraction.svg';
+  };
   const [selectedDay,setSelectedDay]=useState(1);
   const [addId,setAddId]=useState('');
   const [mapExpanded,setMapExpanded]=useState(false);
@@ -44,7 +59,7 @@ export default function TripTimelineMap({stops,available,days,th,onChange,verifi
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-500/15 font-bold text-teal-700 dark:text-teal-300">{i+1}</span>
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:gap-3">
-                {stop.place.images?.[0]?<img src={stop.place.images[0]} alt="" loading="lazy" className="h-24 w-full max-w-full rounded-xl object-cover sm:h-20 sm:w-24 sm:shrink-0" referrerPolicy="no-referrer"/>:<div className="flex h-20 w-full max-w-full items-center justify-center rounded-xl bg-muted sm:w-24 sm:shrink-0"><ImageOff className="h-5 w-5 text-muted-foreground"/></div>}
+                <OptimizedImage src={primaryFor(stop.place.id)} alt={stop.place.name} loading="lazy" className="h-24 w-full max-w-full rounded-xl object-cover sm:h-20 sm:w-24 sm:shrink-0"/>
                 <div className="min-w-0 break-words">{(stop.place as AttractionDetail & {source?: string;googleMapsUri?: string}).source==='google_places'?
                   <a href={(stop.place as AttractionDetail & {googleMapsUri?: string}).googleMapsUri||mapDirectionsUrl([stop])} target="_blank" rel="noopener noreferrer" className="break-words font-semibold hover:underline">{th?stop.place.nameLocal||stop.place.name:stop.place.name}</a>:
                   <Link to={`/attraction/${encodeURIComponent(stop.place.id)}`} className="break-words font-semibold hover:underline">{th?stop.place.nameLocal||stop.place.name:stop.place.name}</Link>}
