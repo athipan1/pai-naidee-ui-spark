@@ -290,7 +290,7 @@ test('detail page displays Railway photo attribution, license, and sourced addit
   await expect.poll(() => page.getByAltText('Doi Inthanon - image 1').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
-test('incorrect Ko Chang photo is corrected with matching Wikimedia attribution', async ({ page }) => {
+test('published Ko Chang photo is not silently replaced by a frontend correction', async ({ page }) => {
   const wrongPhoto = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg';
   await page.unroute('**/api/places**');
   await page.route('**/api/places/curated-ko-chang', route => route.fulfill({ json: {
@@ -299,12 +299,13 @@ test('incorrect Ko Chang photo is corrected with matching Wikimedia attribution'
     mediaCredits: [{ url: wrongPhoto, photographer: 'Incorrect location', licenseName: 'CC BY 4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0', sourcePage: 'https://example.org/wrong' }],
   } }));
+  await page.route(wrongPhoto, route => route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"/>'}));
   await page.goto('/attraction/curated-ko-chang');
   await page.getByTestId('attribution-details').locator('summary').click();
-  await expect(page.getByTestId('photo-attribution')).toContainText('Nina R');
-  await expect(page.getByTestId('photo-attribution')).not.toContainText('Incorrect location');
-  await expect(page.getByTestId('photo-attribution').getByRole('link', { name: 'Nina R' }))
-    .toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/File:Ko_Chang,_Thailand.jpg');
+  await expect(page.getByTestId('photo-attribution')).toContainText('Incorrect location');
+  await expect(page.getByTestId('photo-attribution')).not.toContainText('Nina R');
+  await expect(page.getByAltText('Ko Chang - image 1')).toHaveAttribute('src', wrongPhoto);
+
 });
 
 test('admin routes require authentication and public upload routes remain closed', async ({ page }) => {
@@ -335,7 +336,7 @@ test('mobile homepage renders loaded photos and honest missing-review and missin
   await page.unroute('**/api/places**');
   await page.route('**/api/places**', route => route.fulfill({ json: {
     attractions: [
-      { ...place, id: 'real-photo', image: photoUrl, nameLocal: 'ดอยอินทนนท์', rating: 0, reviewCount: 0 },
+      { ...place, id: 'real-photo', image: photoUrl, images:[photoUrl], mediaCredits:[{url:photoUrl,photographer:'Test owner',licenseName:'CC BY 4.0',licenseUrl:'https://creativecommons.org/licenses/by/4.0/',sourcePage:'https://example.test/photo'}], nameLocal: 'ดอยอินทนนท์', rating: 0, reviewCount: 0 },
       { ...place, id: 'no-photo', name: 'No Photo Place', nameLocal: 'สถานที่ยังไม่มีรูป', image: null, rating: 0, reviewCount: 0 },
     ],
     total: 2, page: 1, limit: 10,
@@ -359,8 +360,10 @@ test('mobile Phra That Na Dun gallery loads all three submitted photos without o
   await page.unroute('**/api/places**');
   await page.route('**/api/places/curated-phra-that-na-dun', route => route.fulfill({ json: {
     ...place, id: 'curated-phra-that-na-dun', name: 'Phra That Na Dun',
-    nameLocal: 'พระธาตุนาดูน', province: 'มหาสารคาม', images: [], image: null,
-    mediaCredits: [],
+    nameLocal: 'พระธาตุนาดูน', province: 'มหาสารคาม',
+    images: userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-phra-that-na-dun').map(photo => photo.url),
+    image: userProvidedMedia.find((photo: { placeId: string }) => photo.placeId === 'curated-phra-that-na-dun')?.url,
+    mediaCredits: userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-phra-that-na-dun').map(photo => ({url:photo.url,photographer:'PaiNaiDee user',licenseName:'User-provided photo for PaiNaiDee',licenseUrl:'',sourcePage:'',kind:'user-provided'})),
   } }));
   await page.route('https://pai-naidee-ui-spark.vercel.app/place-photos/*.jpg', route => {
     const filename = new URL(route.request().url()).pathname.split('/').at(-1)!;
@@ -391,8 +394,10 @@ test('mobile Wat Phu Manorom gallery loads all three confirmed user photos witho
   await page.unroute('**/api/places**');
   await page.route('**/api/places/curated-wat-phu-manorom', route => route.fulfill({ json: {
     ...place, id: 'curated-wat-phu-manorom', name: 'Wat Roi Phra Phutthabat Phu Manorom',
-    nameLocal: 'วัดรอยพระพุทธบาทภูมโนรมย์', province: 'มุกดาหาร', images: [], image: null,
-    mediaCredits: [],
+    nameLocal: 'วัดรอยพระพุทธบาทภูมโนรมย์', province: 'มุกดาหาร',
+    images: userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-wat-phu-manorom').map(photo => photo.url),
+    image: userProvidedMedia.find((photo: { placeId: string }) => photo.placeId === 'curated-wat-phu-manorom')?.url,
+    mediaCredits: userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-wat-phu-manorom').map(photo => ({url:photo.url,photographer:'PaiNaiDee user',licenseName:'User-provided photo for PaiNaiDee',licenseUrl:'',sourcePage:'',kind:'user-provided'})),
   } }));
   await page.route('https://pai-naidee-ui-spark.vercel.app/place-photos/*.jpg', route => {
     const filename = new URL(route.request().url()).pathname.split('/').at(-1)!;
