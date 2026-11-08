@@ -74,10 +74,29 @@ test('autocomplete returns one row per place ID even with several matching alias
   assert.deepEqual(rankPlaces(places, 'วัดอรุณ').map(place => place.id), ['one']);
 });
 
-test('Cheow Lan typo resolves to the published dam by canonical name, without an ID override', () => {
-  const places = [{ id: 'production-generated-id', name: 'Ratchaprapha Dam',
-    name_local: 'เขื่อนรัชชประภา', province: 'สุราษฎร์ธานี' }];
-  assert.equal(rankPlaces(places, 'เขื่อนเชียวหลาน')[0]?.id, 'production-generated-id');
-  assert.equal(rankPlaces(places, 'เขื่อนเชี่ยวหลาน')[0]?.id, 'production-generated-id');
-  assert.equal(rankPlaces(places, 'สถานที่ที่ไม่มีอยู่').length, 0);
+
+test('nationwide regression: aliases, partial names and one-character typos', () => {
+  const places = [
+    { id: 'chonburi-beach', name: 'Bang Saen Beach', name_local: 'หาดบางแสน', province: 'ชลบุรี', category: 'Beach', aliases: ['บางแสน'] },
+    { id: 'surat-dam', name: 'Ratchaprapha Dam', name_local: 'เขื่อนรัชชประภา', province: 'สุราษฎร์ธานี', category: 'Nature', aliases: ['เขื่อนเชี่ยวหลาน', 'เชี่ยวหลาน'] },
+    { id: 'mukdahan-temple', name: 'Wat Phu Manorom', name_local: 'วัดภูมโนรมย์', province: 'มุกดาหาร', category: 'Culture', aliases: ['วัดพระพุทธบาทภูมโนรมย์'] },
+    { id: 'bangkok-temple', name: 'Wat Arun', name_local: 'วัดอรุณ', province: 'กรุงเทพมหานคร', category: 'Culture', aliases: ['วัดแจ้ง'] },
+    { id: 'chiangmai-mountain', name: 'Doi Inthanon', name_local: 'ดอยอินทนนท์', province: 'เชียงใหม่', category: 'Nature', aliases: ['อุทยานแห่งชาติดอยอินทนนท์'] },
+  ];
+  const cases = [
+    ['บางแสน', 'chonburi-beach'],
+    ['หาดบางแสน', 'chonburi-beach'],
+    ['เขื่อนเชียวหลาน', 'surat-dam'],
+    ['เขื่อนเชี่ยวหลาน', 'surat-dam'],
+    ['วัดภูมโนรมย', 'mukdahan-temple'],
+    ['วัดแจ้ง', 'bangkok-temple'],
+    ['ดอยอินทนนท', 'chiangmai-mountain'],
+    ['Doi Inthanon', 'chiangmai-mountain'],
+  ];
+  for (const [query, expected] of cases) {
+    assert.equal(rankPlaces(places, query)[0]?.id, expected, query);
+  }
+  assert.equal(rankPlaces(places, 'เขื่อนเชี่ยวหลาน', 'Nature', 'ชลบุรี').length, 0);
+  assert.equal(rankPlaces(places, 'zzzzzzzzzzzz').length, 0);
+  assert.deepEqual(rankPlaces(places, 'วัดแจ้ง').map(place => place.id), ['bangkok-temple']);
 });
