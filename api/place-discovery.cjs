@@ -23,12 +23,12 @@ const CACHE_TTL_MS=10*60*1000;
 const REQUEST_TIMEOUT_MS=18000;
 const cache=new Map(),inFlight=new Map();
 function overpassQuery(province,limit) {
-  // Directly resolve the province's level-4 area; avoid a nationwide relation scan.
+  // Resolve the province level-4 area by tags; area(area.country) is unsupported.
   // Overpass 'out center' is bounded and returns only tourism features with names.
   const name=JSON.stringify(province);
   return `[out:json][timeout:15];
 area["ISO3166-1"="TH"]["admin_level"="2"]->.country;
-area(area.country)["boundary"="administrative"]["admin_level"="4"]["name:th"=${name}]->.searchArea;
+area["boundary"="administrative"]["admin_level"="4"]["name:th"=${name}]->.searchArea;
 nwr(area.searchArea)["tourism"~"^(attraction|museum|viewpoint|theme_park|zoo|aquarium|gallery|information|artwork|picnic_site)$"]["name"];
 out center ${limit};`;
 }
