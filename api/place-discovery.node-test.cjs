@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {validateSearch,overpassQuery,toCandidates,discover}=require('./place-discovery.cjs');
+const {validateSearch,overpassQuery,toCandidates,discover,requestOverpass,fetchWithLimitedRetry}=require('./place-discovery.cjs');
 const province='ชลบุรี';
 const item={type:'node',id:123,lat:13.3,lon:100.9,tags:{tourism:'attraction',name:'สวนตัวอย่าง'}};
 const sql={begin:async(_mode,cb)=>cb(async()=>[{id:'existing',name:'สวนตัวอย่าง',name_local:'',lat:13.3,lng:100.9}])};
@@ -32,4 +32,26 @@ test('no matches returns empty array, not an error',async()=>{
 });
 test('upstream failure throws, not mistaken for zero matches',async()=>{
  await assert.rejects(discover({province,limit:10,getSql:()=>sql,fetchImpl:async()=>({ok:false,status:429})}),/429/);
+});
+
+test('timeout is classified and never retried',async()=>{
+ let calls=0;
+ const fetchImpl=async(_url,{signal})=>{calls++;return new Promise((_resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('aborted')),{once:true}));};
+ await assert.rejects(fetchWithLimitedRetry({province,limit:10,fetchImpl,endpoint:'https://example.test',timeoutMs:5}),error=>error.code==='timeout');
+ assert.equal(calls,1);
+});
+test('rate limited upstream retries at most once',async()=>{
+ let calls=0;
+ const fetchImpl=async()=>{calls++;return {ok:false,status:429};};
+ await assert.rejects(fetchWithLimitedRetry({province,limit:10,fetchImpl,endpoint:'https://example.test',timeoutMs:100}),error=>error.code==='rate_limited');
+ assert.equal(calls,2);
+});
+test('non-rate-limited failures do not retry',async()=>{
+ let calls=0;
+ const fetchImpl=async()=>{calls++;return {ok:false,status:503};};
+ await assert.rejects(fetchWithLimitedRetry({province,limit:10,fetchImpl,endpoint:'https://example.test'}),error=>error.code==='upstream_http');
+ assert.equal(calls,1);
+});
+test('invalid upstream response is not confused with empty results',async()=>{
+ await assert.rejects(requestOverpass({province,limit:10,fetchImpl:async()=>({ok:true,headers:{get:()=>null},text:async()=>'<html>failure</html>'}),endpoint:'https://example.test'}),error=>error.code==='unavailable');
 });
