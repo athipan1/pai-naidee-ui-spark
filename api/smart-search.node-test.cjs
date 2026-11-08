@@ -54,3 +54,22 @@ test('explicit province filter intersects query and category', () => {
     .every(place => place.province === 'เชียงใหม่'), true);
   assert.equal(rankPlaces(SEED_PLACES, 'วัดแจ้ง', '', 'มุกดาหาร').length, 0);
 });
+
+test('autocomplete ranking prefers exact and alias names over typos', () => {
+  const places = [
+    { id: 'exact', name: 'Bang Saen Beach', name_local: 'หาดบางแสน', province: 'ชลบุรี' },
+    { id: 'typo', name: 'Bang Saan', name_local: 'หาดบางสาน', province: 'ชลบุรี' },
+    { id: 'alias', name: 'Ratchaprapha Dam', name_local: 'เขื่อนรัชชประภา',
+      province: 'สุราษฎร์ธานี', aliases: ['เขื่อนเชี่ยวหลาน'] },
+  ];
+  assert.equal(rankPlaces(places, 'หาดบางแสน')[0]?.id, 'exact');
+  assert.equal(rankPlaces(places, 'เขื่อนเชียวหลาน')[0]?.id, 'alias');
+  assert.equal(rankPlaces(places, 'เขื่อนเชี่ยวหลาน')[0]?.id, 'alias');
+  assert.equal(rankPlaces(places, 'ไม่เกี่ยวข้อง').length, 0);
+});
+
+test('autocomplete returns one row per place ID even with several matching aliases', () => {
+  const places = [{ id: 'one', name: 'Wat Arun', name_local: 'วัดอรุณ',
+    aliases: ['วัดอรุณ', 'วัดอรุณราชวราราม'], province: 'กรุงเทพฯ' }];
+  assert.deepEqual(rankPlaces(places, 'วัดอรุณ').map(place => place.id), ['one']);
+});
