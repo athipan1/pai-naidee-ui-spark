@@ -38,7 +38,7 @@ function upstreamError(code,message) {
   const error=new Error(message);error.code=code;return error;
 }
 async function requestOverpass({province,limit,fetchImpl,endpoint,timeoutMs=REQUEST_TIMEOUT_MS}) {
-  if (Date.now() < upstreamCooldownUntil) throw upstreamError('cooldown','Overpass cooldown active');
+  if (endpoint===OSM_ENDPOINT && Date.now() < upstreamCooldownUntil) throw upstreamError('cooldown','Overpass cooldown active');
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try {
@@ -49,7 +49,7 @@ async function requestOverpass({province,limit,fetchImpl,endpoint,timeoutMs=REQU
     if(!response.ok){
       const status=response.status;
       const body=typeof response.text==='function' ? (await response.text()).slice(0,1000) : '';
-      if(status===406||status===429)upstreamCooldownUntil=Date.now()+UPSTREAM_COOLDOWN_MS;
+      if(endpoint===OSM_ENDPOINT && (status===406||status===429))upstreamCooldownUntil=Date.now()+UPSTREAM_COOLDOWN_MS;
       const reason=status===406?'blocked':status===429?'rate_limited':'upstream_http';
       const detail=status===406 ? (/nginx|not acceptable/i.test(body)?'rejected_by_gateway':'rejected_by_provider') : 'http_error';
       throw upstreamError(reason,`Overpass HTTP ${status} (${detail}); ${body.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,180)}`);
