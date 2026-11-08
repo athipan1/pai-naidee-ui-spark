@@ -1,3 +1,4 @@
+const { seedPlaceMedia } = require('./seed-place-media.cjs');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { once } = require('node:events');
@@ -237,6 +238,15 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.ok(detail.images[1].endsWith(imagePath));
     assert.deepEqual(detail.tags, ['fixture-tag']);
     assert.equal(detail.reviewCount, 17);
+    // An Admin may intentionally remove all images; a later startup must not
+    // restore an older seeded gallery merely because image_url is empty.
+    await sql`UPDATE places SET image_url=NULL WHERE id=${placeId}`;
+    const beforeSeed = await sql`SELECT id,url FROM media WHERE place_id=${placeId} ORDER BY id`;
+    const restored = await seedPlaceMedia(sql,{id:'wikimedia:removed-fixture',placeId,url:'https://example.test/removed.jpg'});
+    assert.equal(restored,false);
+    assert.deepEqual(await sql`SELECT id,url FROM media WHERE place_id=${placeId} ORDER BY id`,beforeSeed);
+    await sql`UPDATE places SET image_url=${main} WHERE id=${placeId}`;
+
     const next = await write(`/catalog/${placeId}/edit`, {}, 201);
     await sql`UPDATE places SET updated_at = updated_at + INTERVAL '1 microsecond' WHERE id = ${placeId}`;
     await publish(next, 409);

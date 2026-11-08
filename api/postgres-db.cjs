@@ -1,3 +1,4 @@
+const { seedPlaceMedia } = require('./seed-place-media.cjs');
 const { publishedPlaceImages } = require('./published-place-images.cjs');
 const postgres = require('postgres');
 const ADDITIONAL_CURATED_PLACES = require('./additional-curated-places.cjs');
@@ -424,16 +425,8 @@ async function ensureSchema() {
   // PostgreSQL; the images themselves remain on Wikimedia's CDN. Use an
   // immutable namespaced ID to preserve any existing user-uploaded media.
   for (const photo of VERIFIED_WIKIMEDIA_MEDIA) {
-    await sql`
-      INSERT INTO media (
-        id, place_id, url, type, title, description,
-        creator_name, license_name, license_url, source_page
-      ) VALUES (
-        ${`wikimedia:${photo.placeId}`}, ${photo.placeId}, ${photo.url},
-        'image', ${photo.placeName}, 'Photograph sourced from Wikimedia Commons',
-        ${photo.photographer}, ${photo.licenseName}, ${photo.licenseUrl}, ${photo.sourcePage}
-      ) ON CONFLICT (id) DO NOTHING
-    `;
+    await seedPlaceMedia(sql, {...photo,id:`wikimedia:${photo.placeId}`,title:photo.placeName,
+      description:'Photograph sourced from Wikimedia Commons'});
     if (photo.detailText) {
       await sql`
         UPDATE places SET detail_text = ${photo.detailText},
@@ -448,55 +441,13 @@ async function ensureSchema() {
   // Backfill verified, licensed photographs for destinations that previously
   // had no media. A later editor upload or earlier verification always wins.
   for (const photo of VERIFIED_MISSING_MEDIA) {
-    await sql`
-      INSERT INTO media (
-        id, place_id, url, type, title, description,
-        creator_name, license_name, license_url, source_page
-      ) SELECT
-        ${`wikimedia:${photo.placeId}`}, p.id, ${photo.url},
-        'image', p.name, 'Photograph sourced from Wikimedia Commons',
-        ${photo.photographer}, ${photo.licenseName}, ${photo.licenseUrl}, ${photo.sourcePage}
-      FROM places p WHERE p.id = ${photo.placeId}
-      ON CONFLICT (id) DO NOTHING
-    `;
+    await seedPlaceMedia(sql, {...photo,id:`wikimedia:${photo.placeId}`,title:photo.placeName,
+      description:'Photograph sourced from Wikimedia Commons'});
   }
-
-  // User-supplied photos are stored as static assets on the SINGLE production
-  // Vercel site. They do not carry a claimed Commons or Creative Commons
-  // license. Add them in gallery order only if no other photo has been entered
-  // for the place; preserve editor-created media and keep deploys idempotent.
   for (const photo of USER_PROVIDED_MEDIA) {
-    await sql`
-      INSERT INTO media (id, place_id, url, type, title, description)
-      SELECT ${photo.id}, p.id, ${photo.url}, 'image', ${photo.title},
-        'Image supplied by a PaiNaiDee user for this destination'
-      FROM places p
-      WHERE p.id = ${photo.placeId}
-        AND NOT EXISTS (
-          SELECT 1 FROM media existing
-          WHERE existing.place_id = p.id
-            AND existing.id NOT LIKE ${`painaidee-provided:${photo.placeId}:%`}
-        )
-      ON CONFLICT (id) DO NOTHING
-    `;
+    await seedPlaceMedia(sql, {...photo,description:'Image supplied by a PaiNaiDee user for this destination'}, {userOnly:true});
   }
 
-  // The initial Ko Chang / Ko Kut import accidentally used a photograph of
-  // Mu Ko Ang Thong for both locations. Repair ONLY the two original seeded
-  // media rows while they still contain that exact incorrect URL; never touch
-  // another media record or a photo subsequently updated by an editor.
-  const staleAngThongUrl = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg';
-  for (const placeId of ['curated-ko-chang', 'curated-ko-kut']) {
-    const verified = VERIFIED_WIKIMEDIA_MEDIA.find((photo) => photo.placeId === placeId);
-    if (!verified) continue;
-    await sql`
-      UPDATE media SET url = ${verified.url}, title = ${verified.placeName},
-        creator_name = ${verified.photographer}, license_name = ${verified.licenseName},
-        license_url = ${verified.licenseUrl}, source_page = ${verified.sourcePage}
-      WHERE id = ${`wikimedia:${placeId}`} AND place_id = ${placeId}
-        AND url = ${staleAngThongUrl}
-    `;
-  }
 }
 
 function normalizeJsonArray(value) {

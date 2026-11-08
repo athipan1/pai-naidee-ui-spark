@@ -8,6 +8,8 @@ Read `summary-before.json` for exact counts, `sql-before.json` for all 195 rows 
 
 The database has only three explicit primary selections. For legacy records without `places.image_url`, existing media order remains the effective published selection, now deterministic by media ID when timestamps tie. Missing/unusable selected primaries become the local fallback in position zero; licensed gallery photos remain available without being promoted as a substitute. The read normalizer never mutates or repairs stored data.
 
+Startup image backfills lock the place row and skip any Admin-published place, including an intentional empty primary, so deploys cannot resurrect Admin-removed seed photos. The old per-place startup photo rewrite was removed.
+
 The central API normalizer emits `image`, `images`, `publishedPrimaryImage`, `mediaCredits`, and `imageIssues` to list/detail/planner flows. Existing reviewed manifest metadata and exact uploader provenance are retained. External URLs cannot obtain uploader status by a forged media ID or a lookalike CMS path on another host. Complete stored licence metadata is not a new legal certification of third-party ownership. Never claim external rights automatically.
 
 The Railway client no longer injects place-specific replacement photos or galleries. Detail and planner use the same published selection. Planner images refresh from current catalogue detail rather than generated-plan snapshots. Query caches are invalidated after Admin publication, visible catalogue/detail/planner queries refresh every 30 seconds, public JSON is no-store, and service workers bypass API caching. Photo objects retain their immutable upload UUIDs. Runtime image failures display an explicit fallback warning.
