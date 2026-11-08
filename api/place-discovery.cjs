@@ -27,7 +27,6 @@ function overpassQuery(province,limit) {
   // Overpass 'out center' is bounded and returns only tourism features with names.
   const name=JSON.stringify(province);
   return `[out:json][timeout:15];
-area["ISO3166-1"="TH"]["admin_level"="2"]->.country;
 area["boundary"="administrative"]["admin_level"="4"]["name:th"=${name}]->.searchArea;
 nwr(area.searchArea)["tourism"~"^(attraction|museum|viewpoint|theme_park|zoo|aquarium|gallery|information|artwork|picnic_site)$"]["name"];
 out center ${limit};`;
