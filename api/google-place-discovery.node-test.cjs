@@ -32,7 +32,7 @@ test('search results are ephemeral, without import or DB writes',async()=>{
  }});
  assert.equal(count,1);assert.equal(r.status,'ok');assert.equal(r.candidates.length,1);
  assert.equal(r.candidates[0].liveOnly,true);assert.equal(r.automaticImport,false);
- assert.equal(r.publicationAllowed,false);assert.equal(r.candidates[0].duplicateStatus,'not_checked');
+ assert.equal(r.publicationAllowed,false);assert.equal(r.candidates[0].duplicateStatus,'not_detected');
 });
 test('upstream failure does not masquerade as no places',async()=>{
  const r=await discoverGoogle({province:'ชลบุรี',limit:1},{env,reserve:async()=>true,fetchImpl:async()=>({ok:false,status:429})});
