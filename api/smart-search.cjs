@@ -7,8 +7,20 @@ function normalize(text) {
     .replace(/[\s\u200B-\u200D\uFEFF\p{P}\p{S}]+/gu, '');
 }
 
+// Alternate public names are matched against canonical names, not database IDs.
+// This keeps the ranking shared across every published place.
+const CANONICAL_NAME_VARIANTS = [
+  { canonical: ['เขื่อนรัชชประภา', 'ratchaprapha dam'], variants: ['เขื่อนเชี่ยวหลาน', 'เชี่ยวหลาน', 'cheow lan dam', 'cheow lan lake'] },
+];
+
 function placeNames(place) {
   const names = [place.name, place.name_local || place.nameLocal, ...(PLACE_NAME_ALIASES[place.id] || []), ...(place.aliases || [])];
+  const canonical = names.map(normalize);
+  for (const entry of CANONICAL_NAME_VARIANTS) {
+    if (entry.canonical.some(value => canonical.some(name => name.includes(normalize(value))))) {
+      names.push(...entry.variants);
+    }
+  }
   for (const value of [...names]) {
     const name = String(value || '');
     if (/^วัด\s*.+/u.test(name)) names.push(name.replace(/^วัด\s*/u, ''));
