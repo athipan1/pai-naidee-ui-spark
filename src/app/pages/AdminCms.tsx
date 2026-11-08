@@ -366,7 +366,7 @@ export default function AdminCms() {
       setDrafts(current => current.map(item => item.id === draft.id ? draft : item));
       setReconcile(null);
       setMessage('ปรับฉบับร่างตามข้อมูลล่าสุดแล้ว กรุณาตรวจสอบก่อนเผยแพร่');
-      openDraft(draft);
+      await openDraft(draft);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'ปรับฉบับร่างไม่สำเร็จ กรุณาโหลดข้อมูลล่าสุดอีกครั้ง'); }
     finally { setBusy(false); }
   }
@@ -376,14 +376,28 @@ export default function AdminCms() {
     try {
       const draft = await api(`/catalog/${encodeURIComponent(place.id)}/edit`, { method: 'POST' });
       setDrafts(current => [draft, ...current.filter(item => item.id !== draft.id)]);
-      openDraft(draft);
+      await openDraft(draft);
       setMessage('เปิดฉบับร่างแก้ไขแล้ว ข้อมูลบนเว็บไซต์ยังไม่เปลี่ยนจนกว่าจะกดเผยแพร่');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'สร้างฉบับร่างไม่สำเร็จ'); }
     finally { setBusy(false); }
   }
 
-  function openDraft(draft: Draft) {
+  async function openDraft(draft: Draft) {
     setReconcile(null);
+    if (draft.target_place_id) {
+      try {
+        const data: ReconcileData = await api(`/places/${encodeURIComponent(draft.id)}/reconcile`);
+        if (data.stale) {
+          setReconcile({ draftId: draft.id, data, selected: [], retainGallery: false });
+          setTab('drafts');
+          setMessage('ข้อมูลที่เผยแพร่เปลี่ยนไป กรุณาเลือกการแก้ไขที่จะเก็บไว้ก่อนเปิดฉบับร่าง');
+          return;
+        }
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : 'ตรวจสอบข้อมูลล่าสุดไม่สำเร็จ');
+        return;
+      }
+    }
     setEditing({ id: draft.id, version: draft.version });
     setForm(toPlaceForm(draft.payload));
     setTab('new');
@@ -458,6 +472,21 @@ export default function AdminCms() {
   }
 
   async function publish(draft: Draft) {
+    if (draft.target_place_id) {
+      setBusy(true);
+      try {
+        const data: ReconcileData = await api(`/places/${encodeURIComponent(draft.id)}/reconcile`);
+        if (data.stale) {
+          setReconcile({ draftId: draft.id, data, selected: [], retainGallery: false });
+          setTab('drafts');
+          setMessage('ข้อมูลที่เผยแพร่เปลี่ยนไป กรุณาตรวจสอบความขัดแย้งก่อนเผยแพร่');
+          return;
+        }
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : 'ตรวจสอบข้อมูลล่าสุดไม่สำเร็จ');
+        return;
+      } finally { setBusy(false); }
+    }
     if (!window.confirm(`เผยแพร่ “${draft.payload.name}” บนเว็บไซต์จริงหรือไม่?`)) return;
     setBusy(true); setMessage('');
     try {
@@ -628,7 +657,7 @@ export default function AdminCms() {
       </section>}
       {tab === 'drafts' && <section className="space-y-4"><div><h2 className="text-xl font-bold">รายการฉบับร่าง</h2><p className="mt-1 text-sm text-slate-500">ตรวจสอบและแก้ไขข้อมูลให้ถูกต้องก่อนเผยแพร่</p></div>
         {!activeDrafts.length && <div className="rounded-2xl border bg-white p-10 text-center text-sm text-slate-500">ไม่มีฉบับร่างที่รอเผยแพร่</div>}
-        {activeDrafts.map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง · พร้อมเผยแพร่' : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}</p><PlaceCandidateReview draft={draft} api={api} />{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => openDraft(draft)}>แก้ไขร่าง</button>{draft.target_place_id && <button type="button" disabled={busy} className="rounded-xl border border-amber-300 px-4 py-2.5 text-sm font-semibold text-amber-800" onClick={() => void loadReconciliation(draft)}>โหลดข้อมูลล่าสุด</button>}<button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}</article>)}
+        {activeDrafts.map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง · พร้อมเผยแพร่' : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}</p><PlaceCandidateReview draft={draft} api={api} />{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}</article>)}
       </section>}      {tab === 'history' && <section className="space-y-4">
         <div><h2 className="text-xl font-bold">ประวัติการเผยแพร่</h2><p className="mt-1 text-sm text-slate-500">รายการที่เผยแพร่แล้ว แยกจากฉบับร่างที่รอดำเนินการ</p></div>
         {!publishedDrafts.length && <div className="rounded-2xl border bg-white p-10 text-center text-sm text-slate-500">ยังไม่มีประวัติการเผยแพร่</div>}
