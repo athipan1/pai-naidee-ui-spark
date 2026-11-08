@@ -19,17 +19,51 @@ function validateSearch(body) {
       !Number.isInteger(body.limit) || body.limit < 1 || body.limit > 100) return null;
   return {province:body.province,limit:body.limit};
 }
+const CACHE_TTL_MS=10*60*1000;
+const REQUEST_TIMEOUT_MS=18000;
+const cache=new Map(),inFlight=new Map();
 function overpassQuery(province,limit) {
-  // Escape the province even though it comes from a fixed allowlist.
+  // Directly resolve the province's level-4 area; avoid a nationwide relation scan.
+  // Overpass 'out center' is bounded and returns only tourism features with names.
   const name=JSON.stringify(province);
-  return `[out:json][timeout:20];
-area["ISO3166-1"="TH"]["admin_level"="2"]->.country;
-rel(area.country)["boundary"="administrative"]["admin_level"="4"]["name:th"=${name}]->.province;
-.province map_to_area -> .searchArea;
-(
-  nwr(area.searchArea)["tourism"~"^(attraction|museum|viewpoint|theme_park|zoo|aquarium|gallery|information|artwork|picnic_site)$"]["name"];
-);
+  return `[out:json][timeout:15];
+area["boundary"="administrative"]["admin_level"="4"]["name:th"=${name}]->.searchArea;
+nwr(area.searchArea)["tourism"~"^(attraction|museum|viewpoint|theme_park|zoo|aquarium|gallery|information|artwork|picnic_site)$"]["name"];
 out center ${limit};`;
+}
+function upstreamError(code,message) {
+  const error=new Error(message);error.code=code;return error;
+}
+async function requestOverpass({province,limit,fetchImpl,endpoint,timeoutMs=REQUEST_TIMEOUT_MS}) {
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try {
+    const response=await fetchImpl(endpoint,{method:'POST',headers:{
+      'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
+      'Accept':'application/json','User-Agent':'PaiNaiDee/1.0 (admin initiated OSM discovery)'
+    },body:new URLSearchParams({data:overpassQuery(province,limit)}),signal:controller.signal});
+    if(!response.ok)throw upstreamError(response.status===429?'rate_limited':'upstream_http','Overpass HTTP '+response.status);
+    if(Number(response.headers?.get?.('content-length')||0)>2000000)throw upstreamError('invalid_response','Overpass response too large');
+    const raw=await response.text();
+    if(raw.length>2000000)throw upstreamError('invalid_response','Overpass response too large');
+    const payload=JSON.parse(raw);
+    if(!Array.isArray(payload.elements))throw upstreamError('invalid_response','Invalid Overpass response');
+    return payload.elements;
+  } catch(error) {
+    if(controller.signal.aborted)throw upstreamError('timeout','Overpass timed out');
+    if(error.code)throw error;
+    throw upstreamError('unavailable',error.message||'Overpass unavailable');
+  } finally {clearTimeout(timer);}
+}
+async function fetchWithLimitedRetry(args) {
+  // One retry only for rate-limiting. Never retry a timeout: doing so doubles
+  // load on an already busy public Overpass instance.
+  try{return await requestOverpass(args);}
+  catch(error){
+    if(error.code!=='rate_limited')throw error;
+    await new Promise(resolve=>setTimeout(resolve,1000));
+    return requestOverpass(args);
+  }
 }
 function toCandidates(elements,province,existing,limit) {
   const candidates=[],seen=new Set();
@@ -58,21 +92,25 @@ function toCandidates(elements,province,existing,limit) {
   }
   return candidates;
 }
-async function discover({province,limit,getSql,fetchImpl=fetch,endpoint=OSM_ENDPOINT}) {
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),25000);
-  try {
-    const response=await fetchImpl(endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json','User-Agent':'PaiNaiDee/1.0 (admin initiated OSM discovery)'},body:new URLSearchParams({data:overpassQuery(province,limit)}),signal:controller.signal});
-    if(!response.ok)throw new Error('Overpass returned HTTP '+response.status);
-    if(Number(response.headers?.get?.('content-length')||0)>2000000)throw new Error('Overpass response too large');
-    const raw=await response.text();
-    if(raw.length>2000000)throw new Error('Overpass response too large');
-    const payload=JSON.parse(raw);
-    if(!Array.isArray(payload.elements))throw new Error('Invalid Overpass response');
+async function discover({province,limit,getSql,fetchImpl=fetch,endpoint=OSM_ENDPOINT,timeoutMs=REQUEST_TIMEOUT_MS}) {
+  const key=province+':'+limit;
+  const useCache=fetchImpl===fetch&&endpoint===OSM_ENDPOINT;
+  const cached=useCache&&cache.get(key);
+  if(cached&&cached.expires>Date.now())return cached.value;
+  if(useCache&&inFlight.has(key))return inFlight.get(key);
+  const task=(async()=>{
+    const elements=await fetchWithLimitedRetry({province,limit,fetchImpl,endpoint,timeoutMs});
     const existing=await getSql().begin('ISOLATION LEVEL REPEATABLE READ READ ONLY',async tx=>
       tx`SELECT id,name,name_local,lat,lng FROM places WHERE province=${province}`);
-    return {province,sources:[{source:'osm',status:'ok'}],candidates:toCandidates(payload.elements,province,existing,limit),automaticImport:false,publicationAllowed:false};
-  } finally {clearTimeout(timeout);}
+    const result={province,sources:[{source:'osm',status:'ok'}],
+      candidates:toCandidates(elements,province,existing,limit),
+      automaticImport:false,publicationAllowed:false};
+    if(useCache){cache.set(key,{expires:Date.now()+CACHE_TTL_MS,value:result});
+      if(cache.size>100)cache.delete(cache.keys().next().value);}
+    return result;
+  })();
+  if(useCache)inFlight.set(key,task);
+  try{return await task;}finally{if(useCache)inFlight.delete(key);}
 }
 function registerPlaceDiscovery(app,{getSql,requireAdmin,fetchImpl=fetch}) {
   app.post('/api/admin/place-discovery/search',requireAdmin,
@@ -82,7 +120,7 @@ function registerPlaceDiscovery(app,{getSql,requireAdmin,fetchImpl=fetch}) {
       if(!input)return res.status(400).json({error:'Invalid province, source or limit.'});
       try {return res.json(await discover({...input,getSql,fetchImpl}));}
       catch(error){console.error('OSM discovery failed:',error?.message);
-        return res.status(503).json({error:'OSM discovery unavailable. Please retry later.',sources:[{source:'osm',status:'unavailable'}]});}
+        return res.status(error?.code==='rate_limited'?429:503).json({error:'OSM discovery unavailable. Please retry later.',code:error?.code||'unavailable',sources:[{source:'osm',status:error?.code||'unavailable'}]});}
     });
 }
-module.exports={registerPlaceDiscovery,discover,validateSearch,overpassQuery,toCandidates,normalizeName};
+module.exports={registerPlaceDiscovery,discover,validateSearch,overpassQuery,toCandidates,normalizeName,requestOverpass,fetchWithLimitedRetry};
