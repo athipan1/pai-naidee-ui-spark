@@ -22,14 +22,14 @@ test('duplicate detection and attribution',()=>{
  assert.equal(found[0].license,'ODbL 1.0');assert.match(found[0].evidence.url,/openstreetmap.org/);
 });
 test('successful discovery is read only and never creates drafts',async()=>{
- const result=await discover({province,limit:10,getSql:sql,fetchImpl:okFetch});
+ const result=await discover({province,limit:10,getSql:()=>sql,fetchImpl:okFetch});
  assert.equal(result.candidates.length,1);assert.equal(result.automaticImport,false);
  assert.equal(result.publicationAllowed,false);
 });
 test('no matches returns empty array, not an error',async()=>{
- const result=await discover({province,limit:10,getSql:sql,fetchImpl:async()=>({ok:true,headers:{get:()=>null},text:async()=>JSON.stringify({elements:[]})})});
+ const result=await discover({province,limit:10,getSql:()=>sql,fetchImpl:async()=>({ok:true,headers:{get:()=>null},text:async()=>JSON.stringify({elements:[]})})});
  assert.deepEqual(result.candidates,[]);
 });
 test('upstream failure throws, not mistaken for zero matches',async()=>{
- await assert.rejects(discover({province,limit:10,getSql:sql,fetchImpl:async()=>({ok:false,status:429})}),/429/);
+ await assert.rejects(discover({province,limit:10,getSql:()=>sql,fetchImpl:async()=>({ok:false,status:429})}),/429/);
 });
