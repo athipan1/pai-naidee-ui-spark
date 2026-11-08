@@ -48,7 +48,8 @@ const SearchView = ({ currentLanguage, onLanguageChange, onSearch, query, catego
   });
   const matchingSuggestions = (nearbyMatches.data ?? []).filter(place =>
     (!province || place.province === province) && (!category || place.category === category));
-  const total = data?.total ?? 0;
+  const showFuzzyResults = !isLoading && !error && (data?.total ?? 0) === 0 && matchingSuggestions.length > 0;
+  const total = showFuzzyResults ? matchingSuggestions.length : (data?.total ?? 0);
   const totalPages = Math.ceil(total / pageSize);
 
   const railwayResults = uniqueAttractionsById(data?.attractions ?? []).map(item => ({
@@ -184,7 +185,7 @@ const SearchView = ({ currentLanguage, onLanguageChange, onSearch, query, catego
             <p>{currentLanguage === 'th' ? 'ไม่สามารถค้นหาข้อมูลจาก Railway ได้' : 'Unable to search Railway places.'}</p>
             <Button onClick={() => refetch()}>{currentLanguage === 'th' ? 'ลองอีกครั้ง' : 'Retry'}</Button>
           </div>
-        ) : filteredResults.length === 0 ? (
+        ) : filteredResults.length === 0 && !showFuzzyResults ? (
           <section className="text-center py-12">
             <p className="text-muted-foreground text-lg">
               {currentLanguage === 'th' 
@@ -203,22 +204,7 @@ const SearchView = ({ currentLanguage, onLanguageChange, onSearch, query, catego
                 {currentLanguage === 'th' ? 'กำลังค้นหาชื่อสถานที่ใกล้เคียง...' : 'Looking for similar place names...'}
               </p>
             )}
-            {matchingSuggestions.length > 0 && (
-              <div className="mx-auto mt-6 max-w-xl text-left" aria-label={currentLanguage === 'th' ? 'สถานที่ชื่อใกล้เคียง' : 'Similar place names'}>
-                <h3 className="mb-3 font-semibold">{currentLanguage === 'th' ? 'คุณหมายถึงสถานที่เหล่านี้หรือไม่?' : 'Did you mean one of these places?'}</h3>
-                <ul className="space-y-2">
-                  {matchingSuggestions.map(place => (
-                    <li key={place.id}>
-                      <button type="button" className="w-full rounded-lg border border-border bg-card p-3 text-left hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                        onClick={() => navigate(`/attraction/${encodeURIComponent(place.id)}`)}>
-                        <span className="block font-medium">{currentLanguage === 'th' ? (place.nameLocal || place.name) : place.name}</span>
-                        <span className="text-sm text-muted-foreground">{place.province}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+
           </section>
         ) : (
           <section 
@@ -234,6 +220,14 @@ const SearchView = ({ currentLanguage, onLanguageChange, onSearch, query, catego
                 : `Search results ${filteredResults.length} items`
             }
           >
+            {showFuzzyResults && matchingSuggestions.map(place => (
+              <button key={place.id} type="button"
+                className="rounded-lg border border-border bg-card p-4 text-left hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                onClick={() => navigate(`/attraction/${encodeURIComponent(place.id)}`)}>
+                <span className="block font-semibold">{currentLanguage === 'th' ? (place.nameLocal || place.name) : place.name}</span>
+                <span className="text-sm text-muted-foreground">{place.province}</span>
+              </button>
+            ))}
             {filteredResults.map((attraction) => (
               <div key={attraction.id} className={viewMode === 'list' ? 'border border-border rounded-lg p-4' : ''}>
                 <AttractionCard
