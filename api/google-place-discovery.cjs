@@ -54,7 +54,7 @@ async function readExisting(getSql,province){
  });
 }
 
-async function discoverGoogle(input,{getSql,fetchImpl=fetch,reserve=reserveGoogleDailyQuota,env=process.env}){
+async function discoverGoogle(input,{getSql,fetchImpl=fetch,reserve=reserveGoogleDailyQuota,env=process.env,readExistingImpl=readExisting}){
  const gate=availability(env);
  if(!gate.enabled)return {status:'disabled',reasons:gate.reasons,candidates:[]};
  // Reuse existing durable search ledger. A search consumes quota even on HTTP failure.
@@ -72,7 +72,7 @@ async function discoverGoogle(input,{getSql,fetchImpl=fetch,reserve=reserveGoogl
    // Google data is displayed only during this request. No database lookup, logs or writes.
    candidates.push({source:'google',sourceId:'google:'+id,placeId:id,name,province:input.province,lat:Number.isFinite(lat)?lat:null,lng:Number.isFinite(lng)?lng:null,address:String(p.formattedAddress||''),mapsUrl:typeof p.googleMapsUri==='string'&&/^https:\/\/([\w-]+\.)?google\.com\//.test(p.googleMapsUri)?p.googleMapsUri:null,duplicateStatus:'not_checked',holds:['MANUAL_REVIEW','GOOGLE_CONTENT_NOT_FOR_IMPORT'],liveOnly:true});
   }
-  const existing=await readExisting(getSql,input.province);
+  const existing=await readExistingImpl(getSql,input.province);
   return {status:'ok',province:input.province,sources:[{source:'google',status:'ok'}],candidates:classifyCandidates(candidates,existing),automaticImport:false,publicationAllowed:false,liveOnly:true,warning:'Preview only. Google content must not be imported or stored; independently verify place and rights.'};
  }catch{return {status:'unavailable',candidates:[],error:'Google search or duplicate verification unavailable; no results can be trusted.'};}
 }
