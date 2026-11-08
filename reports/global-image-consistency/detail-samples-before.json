@@ -1,0 +1,346 @@
+[
+  {
+    "id": "curated-khao-khitchakut-national-park",
+    "province": "จันทบุรี",
+    "listImage": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "detailFirst": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "match": true,
+    "detail": {
+      "id": "curated-khao-khitchakut-national-park",
+      "name": "Khao Khitchakut National Park",
+      "nameLocal": "อุทยานแห่งชาติเขาคิชฌกูฏ",
+      "province": "จันทบุรี",
+      "images": [
+        "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+        "https://painaidee-api-production.up.railway.app/api/media/cms/ccb5dc78-d220-4a95-b018-99f4c6f2f359.jpg",
+        "https://painaidee-api-production.up.railway.app/api/media/cms/d174611d-4d58-4fb2-afd6-359c93576d2b.jpg",
+        "https://painaidee-api-production.up.railway.app/api/media/cms/46e379e0-0b9c-4697-89cc-d6b15251737e.jpg"
+      ],
+      "mediaCredits": [
+        {
+          "url": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+          "photographer": "PaiNaiDee Admin upload",
+          "licenseName": "Admin-provided photo for PaiNaiDee",
+          "licenseUrl": "",
+          "sourcePage": "",
+          "kind": "user-provided"
+        },
+        {
+          "url": "https://painaidee-api-production.up.railway.app/api/media/cms/ccb5dc78-d220-4a95-b018-99f4c6f2f359.jpg",
+          "photographer": "PaiNaiDee Admin upload",
+          "licenseName": "Admin-provided photo for PaiNaiDee",
+          "licenseUrl": "",
+          "sourcePage": "",
+          "kind": "user-provided"
+        },
+        {
+          "url": "https://painaidee-api-production.up.railway.app/api/media/cms/d174611d-4d58-4fb2-afd6-359c93576d2b.jpg",
+          "photographer": "PaiNaiDee Admin upload",
+          "licenseName": "Admin-provided photo for PaiNaiDee",
+          "licenseUrl": "",
+          "sourcePage": "",
+          "kind": "user-provided"
+        },
+        {
+          "url": "https://painaidee-api-production.up.railway.app/api/media/cms/46e379e0-0b9c-4697-89cc-d6b15251737e.jpg",
+          "photographer": "PaiNaiDee Admin upload",
+          "licenseName": "Admin-provided photo for PaiNaiDee",
+          "licenseUrl": "",
+          "sourcePage": "",
+          "kind": "user-provided"
+        }
+      ],
+      "coordinates": {
+        "lat": 12.84556,
+        "lng": 102.15972
+      },
+      "source": {
+        "name": "Wikipedia: Khao Khitchakut National Park",
+        "url": "https://en.wikipedia.org/wiki/Khao_Khitchakut_National_Park",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "curated-aiyerweng-sea-of-mist-viewpoint",
+    "province": "ยะลา",
+    "listImage": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+    "detailFirst": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+    "match": true,
+    "detail": {
+      "id": "curated-aiyerweng-sea-of-mist-viewpoint",
+      "name": "Aiyerweng Sea of Mist Viewpoint",
+      "nameLocal": "จุดชมวิวทะเลหมอกอัยเยอร์เวง",
+      "province": "ยะลา",
+      "images": [
+        "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960"
+      ],
+      "mediaCredits": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+          "photographer": "Aoeinista",
+          "licenseName": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:The_Sea_of_Mist_Ai_Yerweng%2C_Betong.jpg",
+          "kind": "commons"
+        }
+      ],
+      "coordinates": {
+        "lat": 5.97732,
+        "lng": 101.18224
+      },
+      "source": {
+        "name": "OpenStreetMap via Mapcarta: Aiyoeweng Sea of Mist",
+        "url": "https://mapcarta.com/N4750058924",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "curated-amphawa-floating-market",
+    "province": "สมุทรสงคราม",
+    "listImage": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+    "detailFirst": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+    "match": true,
+    "detail": {
+      "id": "curated-amphawa-floating-market",
+      "name": "Amphawa Floating Market",
+      "nameLocal": "ตลาดน้ำอัมพวา",
+      "province": "สมุทรสงคราม",
+      "images": [
+        "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg"
+      ],
+      "mediaCredits": [
+        {
+          "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+          "photographer": "Marida1996",
+          "licenseName": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:Amphawa1.jpg",
+          "kind": "commons"
+        }
+      ],
+      "coordinates": {
+        "lat": 13.42479,
+        "lng": 99.9556
+      },
+      "source": {
+        "name": "Tourism Authority of Thailand: Amphawa Floating Market",
+        "url": "https://www.tourismthailand.org/Attraction/amphawa-floating-market",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "tat-201005182246293199",
+    "province": "ชลบุรี",
+    "listImage": null,
+    "detailFirst": null,
+    "match": true,
+    "detail": {
+      "id": "tat-201005182246293199",
+      "name": "Anek Kusala Sala (Viharn Sien)",
+      "nameLocal": "อเนกกุศลศาลา",
+      "province": "ชลบุรี",
+      "images": [],
+      "mediaCredits": [],
+      "coordinates": {
+        "lat": 12.78782568844963,
+        "lng": 100.95535709942023
+      },
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      }
+    }
+  },
+  {
+    "id": "curated-ao-manao-beach",
+    "province": "ประจวบคีรีขันธ์",
+    "listImage": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+    "detailFirst": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+    "match": true,
+    "detail": {
+      "id": "curated-ao-manao-beach",
+      "name": "Ao Manao Beach",
+      "nameLocal": "อ่าวมะนาว",
+      "province": "ประจวบคีรีขันธ์",
+      "images": [
+        "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960"
+      ],
+      "mediaCredits": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+          "photographer": "Immoreel",
+          "licenseName": "CC BY-SA 3.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:Ao_Manao_Beach%2C_Prachuap_Khiri_Khan.JPG",
+          "kind": "commons"
+        }
+      ],
+      "coordinates": {
+        "lat": 11.7748,
+        "lng": 99.7964
+      },
+      "source": {
+        "name": "Travelfish: Ao Manao Beach",
+        "url": "https://www.travelfish.org/sight_profile/thailand/southern_thailand/prachuap_khiri_khan/prachuap_khiri_khan/437",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "curated-ao-nang-beach",
+    "province": "กระบี่",
+    "listImage": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+    "detailFirst": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+    "match": true,
+    "detail": {
+      "id": "curated-ao-nang-beach",
+      "name": "Ao Nang Beach",
+      "nameLocal": "อ่าวนาง",
+      "province": "กระบี่",
+      "images": [
+        "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960"
+      ],
+      "mediaCredits": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+          "photographer": "Satdeep Gill",
+          "licenseName": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:A_view_of_Ao_Nang_beach%2C_Krabi.jpg",
+          "kind": "commons"
+        }
+      ],
+      "coordinates": {
+        "lat": 8.029205,
+        "lng": 98.824035
+      },
+      "source": {
+        "name": "Tourism Authority of Thailand: Ao Nang",
+        "url": "https://thai.tourismthailand.org/Attraction/%E0%B8%AD%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%99%E0%B8%B2%E0%B8%87",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "curated-ayutthaya-historical-park",
+    "province": "พระนครศรีอยุธยา",
+    "listImage": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+    "detailFirst": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+    "match": true,
+    "detail": {
+      "id": "curated-ayutthaya-historical-park",
+      "name": "Ayutthaya Historical Park",
+      "nameLocal": "อุทยานประวัติศาสตร์พระนครศรีอยุธยา",
+      "province": "พระนครศรีอยุธยา",
+      "images": [
+        "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg"
+      ],
+      "mediaCredits": [
+        {
+          "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+          "photographer": "Christophe95",
+          "licenseName": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:Ayutthaya_World_Heritage_sign.jpg",
+          "kind": "commons"
+        }
+      ],
+      "coordinates": {
+        "lat": 14.34778,
+        "lng": 100.56056
+      },
+      "source": {
+        "name": "UNESCO: Historic City of Ayutthaya",
+        "url": "https://whc.unesco.org/en/list/576/",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "curated-ban-chiang-archaeological-site",
+    "province": "อุดรธานี",
+    "listImage": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+    "detailFirst": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+    "match": true,
+    "detail": {
+      "id": "curated-ban-chiang-archaeological-site",
+      "name": "Ban Chiang Archaeological Site",
+      "nameLocal": "แหล่งโบราณคดีบ้านเชียง",
+      "province": "อุดรธานี",
+      "images": [
+        "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960"
+      ],
+      "mediaCredits": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+          "photographer": "Akiponkun",
+          "licenseName": "CC BY-SA 3.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:Ban_Chiang_Archaeological_Site_UNESCO_plaque.JPG",
+          "kind": "commons"
+        }
+      ],
+      "coordinates": {
+        "lat": 17.4069,
+        "lng": 103.2414
+      },
+      "source": {
+        "name": "UNESCO: Ban Chiang Archaeological Site",
+        "url": "https://whc.unesco.org/en/list/575/",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "curated-bang-rachan-heroes-monument",
+    "province": "สิงห์บุรี",
+    "listImage": null,
+    "detailFirst": null,
+    "match": true,
+    "detail": {
+      "id": "curated-bang-rachan-heroes-monument",
+      "name": "Bang Rachan Heroes Monument",
+      "nameLocal": "อนุสาวรีย์วีรชนค่ายบางระจัน",
+      "province": "สิงห์บุรี",
+      "images": [],
+      "mediaCredits": [],
+      "coordinates": {
+        "lat": 14.9,
+        "lng": 100.31667
+      },
+      "source": {
+        "name": "National Statistical Office: Sing Buri tourism map",
+        "url": "https://www.nso.go.th/nsoweb/storage/file_or_link/2025/20251001141002_61901.pdf",
+        "verifiedAt": "2026-10-25T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "tat-20250815163438001",
+    "province": "ตราด",
+    "listImage": null,
+    "detailFirst": null,
+    "match": true,
+    "detail": {
+      "id": "tat-20250815163438001",
+      "name": "Ban Nam Chieo Tourism Group",
+      "nameLocal": "กลุ่มท่องเที่ยวบ้านน้ำเชี่ยว",
+      "province": "ตราด",
+      "images": [],
+      "mediaCredits": [],
+      "coordinates": {
+        "lat": 12.1892542,
+        "lng": 102.4612939
+      },
+      "source": {
+        "name": "Tourism Authority of Thailand — Open Data",
+        "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+        "verifiedAt": null
+      }
+    }
+  }
+]

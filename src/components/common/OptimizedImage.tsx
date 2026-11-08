@@ -32,19 +32,7 @@ const normalizeImageUrl = (src: string): string => {
 };
 
 // Default fallback images for different scenarios
-const getDefaultFallback = (alt: string): string => {
-  // Use a default image based on the alt text context
-  if (alt.toLowerCase().includes('beach') || alt.toLowerCase().includes('sea')) {
-    return '/placeholder-beach.svg';
-  } else if (alt.toLowerCase().includes('temple') || alt.toLowerCase().includes('culture')) {
-    return '/placeholder-temple.svg';
-  } else if (alt.toLowerCase().includes('mountain') || alt.toLowerCase().includes('nature')) {
-    return '/placeholder-mountain.svg';
-  } else if (alt.toLowerCase().includes('food') || alt.toLowerCase().includes('market')) {
-    return '/placeholder-food.svg';
-  }
-  return '/placeholder-attraction.svg';
-};
+const getDefaultFallback = (): string => '/placeholder-attraction.svg';
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
@@ -58,12 +46,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onLoad,
   onError,
 }) => {
+  const [failed, setFailed] = useState(false);
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
-  const [currentSrc, setCurrentSrc] = useState(normalizeImageUrl(src || fallbackSrc || getDefaultFallback(alt)));
+  const [currentSrc, setCurrentSrc] = useState(normalizeImageUrl(src || fallbackSrc || getDefaultFallback()));
 
   useEffect(() => {
-    setCurrentSrc(normalizeImageUrl(src || fallbackSrc || getDefaultFallback(alt)));
+    setCurrentSrc(normalizeImageUrl(src || fallbackSrc || getDefaultFallback()));
     setImageState('loading');
+    setFailed(false);
   }, [src, fallbackSrc, alt]);
 
   const handleImageLoad = () => {
@@ -72,13 +62,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   const handleImageError = () => {
+    setFailed(true);
+    onError?.();
     if (fallbackSrc && currentSrc !== normalizeImageUrl(fallbackSrc)) {
       setCurrentSrc(normalizeImageUrl(fallbackSrc));
       return;
     }
     
     // If no custom fallback or fallback also failed, try default
-    const defaultFallback = getDefaultFallback(alt);
+    const defaultFallback = getDefaultFallback();
     if (currentSrc !== defaultFallback) {
       setCurrentSrc(defaultFallback);
       return;
@@ -86,11 +78,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     
     // All fallbacks failed
     setImageState('error');
-    onError?.();
   };
 
   return (
     <div className={`relative ${className}`}>
+      {(failed || !src || src.startsWith('/placeholder-')) && <span role="status" className="absolute bottom-1 left-1 z-10 rounded bg-background/90 px-2 text-xs">รูปภาพไม่พร้อมใช้งาน · รอ Admin ตรวจสอบ</span>}
       {imageState === 'loading' && (
         <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
       )}

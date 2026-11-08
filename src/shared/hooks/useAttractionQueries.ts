@@ -26,7 +26,8 @@ export const useAttractionDetail = (id: string | undefined, options?: {
       return attractionAPI.attractionService.getAttractionDetail(id);
     },
     enabled: !!id && (options?.enabled !== false),
-    staleTime: options?.staleTime || 5 * 60 * 1000, // 5 minutes
+    staleTime: 0,
+    refetchInterval: 30_000,
     gcTime: options?.cacheTime || 10 * 60 * 1000, // 10 minutes (was cacheTime in v4)
     retry: (failureCount, error) => {
       // Don't retry if attraction not found
@@ -55,7 +56,8 @@ export const useAttractions = (filters?: {
     queryKey: attractionKeys.list(filters || {}),
     queryFn: () => attractionAPI.attractionService.getAttractions(filters),
     enabled: options?.enabled !== false,
-    staleTime: options?.staleTime || 3 * 60 * 1000, // 3 minutes
+    staleTime: 0,
+    refetchInterval: 30_000,
     gcTime: 8 * 60 * 1000, // 8 minutes
     retry: 2,
     throwOnError: false,
@@ -88,7 +90,8 @@ export const useAllAttractions = (filters?: { category?: string; province?: stri
       if (attractions.length < first.total) throw new Error('Attractions catalogue exceeds available pages');
       return { attractions, total: first.total, page: 1, limit: attractions.length };
     },
-    staleTime: 3 * 60 * 1000,
+    staleTime: 0,
+    refetchInterval: 30_000,
     gcTime: 8 * 60 * 1000,
     retry: 2,
     throwOnError: false,
@@ -103,7 +106,8 @@ export const useNearbyAttractions = (location: { lat: number; lng: number } | nu
       return getRailwayNearbyAttractions({ ...location, radiusKm });
     },
     enabled: !!location,
-    staleTime: 60_000,
+    staleTime: 0,
+    refetchInterval: 30_000,
     retry: 1,
   });
 };

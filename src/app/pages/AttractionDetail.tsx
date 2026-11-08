@@ -258,7 +258,8 @@ const AttractionDetail = ({
   // A Wikipedia summary thumbnail is not per-image licence evidence.
   const displayCredits=reviewedPhotoCredits(attraction.mediaCredits);
   const approvedImages = reviewedGallery(attraction.images, displayCredits);
-  const displayImages = approvedImages.length ? approvedImages : ['/placeholder-attraction.svg'];
+  const primary = attraction.image || attraction.images[0];
+  const displayImages = approvedImages.includes(primary) ? [primary, ...approvedImages.filter(url => url !== primary)] : ['/placeholder-attraction.svg', ...approvedImages];
   const mainPhotoCredit = displayCredits.find(credit => credit.url === displayImages[0]);
 
   return (

@@ -172,7 +172,7 @@ async function enforceTripConstraints(itinerary,lookup,input,preferences,{route=
         leg={from:previous.id,to:stop.id,straightLineKm:Math.round(haversine(previous,stop)*10)/10,road};
       }
       const openingHours=hourCalls++<5?await hours(place):{status:'unverified'};
-      accepted.push({...stop,openingHours});used.add(String(stop.id));
+      accepted.push({...stop,image:place.image,images:place.images,mediaCredits:place.mediaCredits,publishedPrimaryImage:place.publishedPrimaryImage,imageIssues:place.imageIssues,openingHours});used.add(String(stop.id));
       if(leg) legs.push(leg);
     }
     if(accepted.length)days.push({day:day.day,stops:accepted,legs});

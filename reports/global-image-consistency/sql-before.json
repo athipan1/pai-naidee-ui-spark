@@ -1,0 +1,2802 @@
+[
+  {
+    "id": "1",
+    "name": "Phi Phi Islands",
+    "province": "กระบี่",
+    "source_name": "Wikipedia: Phi Phi Islands",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.769422+00:00",
+    "media": [
+      {
+        "id": "wikimedia:1",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/KohPhiPhi.JPG/960px-KohPhiPhi.JPG",
+        "creatorName": "Luxure",
+        "licenseName": "CC BY 3.0 au",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0/au/deed.en",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:KohPhiPhi.JPG"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Wat Phra Kaew",
+    "province": "กรุงเทพฯ",
+    "source_name": "Wikipedia: Wat Phra Kaew",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.773046+00:00",
+    "media": [
+      {
+        "id": "wikimedia:2",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg/960px-Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg",
+        "creatorName": "Original image: Ninara from Helsinki, Finland. Edit: TSP",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Doi Inthanon",
+    "province": "เชียงใหม่",
+    "source_name": "Wikipedia: Doi Inthanon",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.776381+00:00",
+    "media": [
+      {
+        "id": "wikimedia:3",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg/960px-Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg",
+        "creatorName": "Lester Mathias Andersson",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Naphamethinidon,_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Floating Market",
+    "province": "ราชบุรี",
+    "source_name": "OpenStreetMap: Damnoen Saduak Floating Market",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.780543+00:00",
+    "media": [
+      {
+        "id": "wikimedia:4",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ratchaburi%20Damnoen%20Saduak%20Floating%20Market%202.jpg?width=960",
+        "creatorName": "Mr. Niwat Tantayanusorn",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ratchaburi_Damnoen_Saduak_Floating_Market_2.jpg"
+      }
+    ]
+  },
+  {
+    "id": "cms:27efc0ad-e2a5-479f-89d9-ad60df6cb9d3",
+    "name": "Ratchaprapha Dam",
+    "province": "สุราษฎร์ธานี",
+    "source_name": "PaiNaiDee Admin CMS",
+    "image_url": "https://painaidee-api-production.up.railway.app/api/media/cms/91e8dd42-39e7-455f-bf72-59693d230e4d.jpg",
+    "updated_at": "2026-11-07T15:57:52.621083+00:00",
+    "media": [
+      {
+        "id": "cms-media:27efc0ad-e2a5-479f-89d9-ad60df6cb9d3",
+        "url": "https://painaidee-api-production.up.railway.app/api/media/cms/91e8dd42-39e7-455f-bf72-59693d230e4d.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      }
+    ]
+  },
+  {
+    "id": "curated-aiyerweng-sea-of-mist-viewpoint",
+    "name": "Aiyerweng Sea of Mist Viewpoint",
+    "province": "ยะลา",
+    "source_name": "OpenStreetMap via Mapcarta: Aiyoeweng Sea of Mist",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.535484+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-aiyerweng-sea-of-mist-viewpoint",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+        "creatorName": "Aoeinista",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:The_Sea_of_Mist_Ai_Yerweng%2C_Betong.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-amphawa-floating-market",
+    "name": "Amphawa Floating Market",
+    "province": "สมุทรสงคราม",
+    "source_name": "Tourism Authority of Thailand: Amphawa Floating Market",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.609747+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-amphawa-floating-market",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+        "creatorName": "Marida1996",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Amphawa1.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ao-manao-beach",
+    "name": "Ao Manao Beach",
+    "province": "ประจวบคีรีขันธ์",
+    "source_name": "Travelfish: Ao Manao Beach",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.647042+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ao-manao-beach",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+        "creatorName": "Immoreel",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ao_Manao_Beach%2C_Prachuap_Khiri_Khan.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-ao-nang-beach",
+    "name": "Ao Nang Beach",
+    "province": "กระบี่",
+    "source_name": "Tourism Authority of Thailand: Ao Nang",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.662031+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ao-nang-beach",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+        "creatorName": "Satdeep Gill",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:A_view_of_Ao_Nang_beach%2C_Krabi.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ayutthaya-historical-park",
+    "name": "Ayutthaya Historical Park",
+    "province": "พระนครศรีอยุธยา",
+    "source_name": "UNESCO: Historic City of Ayutthaya",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.559886+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ayutthaya-historical-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+        "creatorName": "Christophe95",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ayutthaya_World_Heritage_sign.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ban-chiang-archaeological-site",
+    "name": "Ban Chiang Archaeological Site",
+    "province": "อุดรธานี",
+    "source_name": "UNESCO: Ban Chiang Archaeological Site",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.622991+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ban-chiang-archaeological-site",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+        "creatorName": "Akiponkun",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ban_Chiang_Archaeological_Site_UNESCO_plaque.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-bang-rachan-heroes-monument",
+    "name": "Bang Rachan Heroes Monument",
+    "province": "สิงห์บุรี",
+    "source_name": "National Statistical Office: Sing Buri tourism map",
+    "image_url": null,
+    "updated_at": "2026-10-31T07:51:33.759305+00:00",
+    "media": []
+  },
+  {
+    "id": "curated-bang-saen-beach",
+    "name": "Bang Saen Beach",
+    "province": "ชลบุรี",
+    "source_name": "OpenStreetMap: Bang Saen Beach",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.635268+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-bang-saen-beach",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Bang_Saen_Beach_at_sunset_2.jpg/960px-Bang_Saen_Beach_at_sunset_2.jpg",
+        "creatorName": "Slyronit",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Bang_Saen_Beach_at_sunset_2.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-bua-tong-waterfall",
+    "name": "Bua Tong Waterfall",
+    "province": "เชียงใหม่",
+    "source_name": "Travelfish: Bua Tong Waterfall",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.60277+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-bua-tong-waterfall",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg/960px-%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg",
+        "creatorName": "chootrong",
+        "licenseName": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_(1).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-bueng-boraphet",
+    "name": "Bueng Boraphet",
+    "province": "นครสวรรค์",
+    "source_name": "Wikipedia: Bueng Boraphet",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.456837+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-bueng-boraphet",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Fishing_on_Bueng_Boraphet.jpg/960px-Fishing_on_Bueng_Boraphet.jpg",
+        "creatorName": "JJ Harrison ( https://www.jjharrison.com.au/ )",
+        "licenseName": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Fishing_on_Bueng_Boraphet.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-chai-nat-bird-park",
+    "name": "Chai Nat Bird Park",
+    "province": "ชัยนาท",
+    "source_name": "Wikidata: Chai Nat Bird Park",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.465126+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-chai-nat-bird-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/View_on_the_Bird_Park_of_Chainat.JPG/960px-View_on_the_Bird_Park_of_Chainat.JPG",
+        "creatorName": "Media lib",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:View_on_the_Bird_Park_of_Chainat.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-emerald-cave-ko-muk",
+    "name": "Emerald Cave (Ko Muk)",
+    "province": "ตรัง",
+    "source_name": "Lovethailand: Emerald Cave and Koh Mook",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.667313+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-emerald-cave-ko-muk",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Inside%20the%20emerald%20cave%20(8161381748).jpg?width=960",
+        "creatorName": "Nik Cyclist",
+        "licenseName": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Inside_the_emerald_cave_(8161381748).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-erawan-falls",
+    "name": "Erawan Falls",
+    "province": "กาญจนบุรี",
+    "source_name": "Wikipedia: Cascade d’Erawan",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.758043+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-erawan-falls",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Erawan%20Waterfall%20Level%203%20P1110261.JPG?width=960",
+        "creatorName": "Deror Avi",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Erawan_Waterfall_Level_3_P1110261.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-erawan-museum",
+    "name": "Erawan Museum",
+    "province": "สมุทรปราการ",
+    "source_name": "Wikipedia: Erawan Museum",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.496027+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-erawan-museum",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Erawan_museum-001.jpg/960px-Erawan_museum-001.jpg",
+        "creatorName": "Ddalbiez",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Erawan_museum-001.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-great-buddha-of-thailand",
+    "name": "Great Buddha of Thailand",
+    "province": "อ่างทอง",
+    "source_name": "Wikipedia: Great Buddha of Thailand",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.631422+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-great-buddha-of-thailand",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg/960px-Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg",
+        "creatorName": "Chainwit.",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ang_Thong_-_Wiset_Chai_Chan_(2024)_Great_Buddha_of_Thailand,_Wat_Muang_-_img_01.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-hala-bala-wildlife-sanctuary",
+    "name": "Hala-Bala Wildlife Sanctuary",
+    "province": "นราธิวาส",
+    "source_name": "Tourism Authority of Thailand: Hala-Bala Wildlife Sanctuary",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.669487+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-hala-bala-wildlife-sanctuary",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg/960px-%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg",
+        "creatorName": "Piyawat Chongkaichak",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_(%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA)_1.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-hin-ta-hin-yai",
+    "name": "Hin Ta Hin Yai Rocks",
+    "province": "สุราษฎร์ธานี",
+    "source_name": "Thailandee: Hin Ta Hin Yai",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.696591+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-hin-ta-hin-yai",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hin%20ta%20hin%20yai%20-%20koh%20samui%20-%20panoramio.jpg?width=960",
+        "creatorName": "Dirk Enthoven",
+        "licenseName": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Hin_ta_hin_yai_-_koh_samui_-_panoramio.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-kamphaeng-phet-historical-park",
+    "name": "Kamphaeng Phet Historical Park",
+    "province": "กำแพงเพชร",
+    "source_name": "Wikipedia: Kamphaeng Phet Historical Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.596232+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-kamphaeng-phet-historical-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Histparkkamphet.png/960px-Histparkkamphet.png",
+        "creatorName": "Heinrich Damm ( User:Hdamm , Hdamm at de.wikipedia.org )",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Histparkkamphet.png"
+      }
+    ]
+  },
+  {
+    "id": "curated-khao-khitchakut-national-park",
+    "name": "Khao Khitchakut National Park",
+    "province": "จันทบุรี",
+    "source_name": "Wikipedia: Khao Khitchakut National Park",
+    "image_url": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "updated_at": "2026-11-08T07:16:41.81306+00:00",
+    "media": [
+      {
+        "id": "cms-media:222fb491-3b64-4ad0-9f1c-ff345b2735f5",
+        "url": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "cms-media:45e57870-7038-448c-a72e-89d6de1e2079",
+        "url": "https://painaidee-api-production.up.railway.app/api/media/cms/46e379e0-0b9c-4697-89cc-d6b15251737e.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "cms-media:6855e7d3-c542-4080-be85-dfe05282ad3f",
+        "url": "https://painaidee-api-production.up.railway.app/api/media/cms/ccb5dc78-d220-4a95-b018-99f4c6f2f359.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "cms-media:b8ad578f-38b9-4bf3-9f2a-a02e0e837453",
+        "url": "https://painaidee-api-production.up.railway.app/api/media/cms/d174611d-4d58-4fb2-afd6-359c93576d2b.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      }
+    ]
+  },
+  {
+    "id": "curated-khao-sok-national-park",
+    "name": "Khao Sok National Park",
+    "province": "สุราษฎร์ธานี",
+    "source_name": "Wikipedia: Khao Sok National Park",
+    "image_url": "https://painaidee-api-production.up.railway.app/api/media/cms/cf40e9c0-a72f-428c-aaf6-b618b2fae938.jpg",
+    "updated_at": "2026-11-06T19:31:16.406432+00:00",
+    "media": [
+      {
+        "id": "cms-media:11833441-069f-45c3-9415-4ff79d79da38",
+        "url": "https://painaidee-api-production.up.railway.app/api/media/cms/cf40e9c0-a72f-428c-aaf6-b618b2fae938.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "wikimedia:curated-khao-sok-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/1022_KhaoSokNationalPark_2.jpg/960px-1022_KhaoSokNationalPark_2.jpg",
+        "creatorName": "BerryJ",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:1022_KhaoSokNationalPark_2.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-khao-yai-national-park",
+    "name": "Khao Yai National Park",
+    "province": "นครราชสีมา",
+    "source_name": "Khao Yai National Park: About",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.566939+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-khao-yai-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Haew_Suwat_Waterfall_Khao-Yai02.jpg/960px-Haew_Suwat_Waterfall_Khao-Yai02.jpg",
+        "creatorName": "Nawit science",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Haew_Suwat_Waterfall_Khao-Yai02.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-chang",
+    "name": "Ko Chang",
+    "province": "ตราด",
+    "source_name": "Wikipedia: List of islands of Thailand",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.607174+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-chang",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Ko_Chang%2C_Thailand.jpg/960px-Ko_Chang%2C_Thailand.jpg",
+        "creatorName": "Nina R",
+        "licenseName": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ko_Chang,_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-kradan",
+    "name": "Ko Kradan",
+    "province": "ตรัง",
+    "source_name": "Wikipedia: Ko Kradan",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.658987+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-kradan",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/KoKradanisland.jpg/960px-KoKradanisland.jpg",
+        "creatorName": "Ravitpong",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:KoKradanisland.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-kret",
+    "name": "Ko Kret",
+    "province": "นนทบุรี",
+    "source_name": "Wikipedia: Ko Kret",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.49039+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-kret",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Kho-kret-Thailand.JPG/960px-Kho-kret-Thailand.JPG",
+        "creatorName": "No machine-readable author provided. LigerCommon assumed (based on copyright claims).",
+        "licenseName": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/Commons:Licensing",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Kho-kret-Thailand.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-kut",
+    "name": "Ko Kut",
+    "province": "ตราด",
+    "source_name": "Wikipedia: List of islands of Thailand",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.610392+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-kut",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg/960px-Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg",
+        "creatorName": "Vyacheslav Argenberg",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Koh_Kut,_Thailand,_Gulf_of_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-lan",
+    "name": "Ko Lan",
+    "province": "ชลบุรี",
+    "source_name": "Wikipedia: Ko Lan",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.651242+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-lan",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg/960px-Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg",
+        "creatorName": "Don Ramey Logan",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-lipe",
+    "name": "Ko Lipe",
+    "province": "สตูล",
+    "source_name": "Wikipedia: Ko Lipe",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.604445+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-lipe",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Koh_Lipe_island_coast.jpg/960px-Koh_Lipe_island_coast.jpg",
+        "creatorName": "VascoPlanet World Photography",
+        "licenseName": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Koh_Lipe_island_coast.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-phayam",
+    "name": "Ko Phayam",
+    "province": "ระนอง",
+    "source_name": "Wikipedia: Ko Phayam",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.655174+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-phayam",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Thailand_-_Koh_Phayam_%2824873552885%29.jpg/960px-Thailand_-_Koh_Phayam_%2824873552885%29.jpg",
+        "creatorName": "Visions of Domino",
+        "licenseName": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Thailand_-_Koh_Phayam_(24873552885).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-samet",
+    "name": "Ko Samet",
+    "province": "ระยอง",
+    "source_name": "Wikipedia: Ko Samet",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.601909+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-samet",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ko%20Samet%20Beach%2C%20Thailand.jpg?width=960",
+        "creatorName": "Ken Eckert",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ko_Samet_Beach%2C_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-tao",
+    "name": "Ko Tao",
+    "province": "สุราษฎร์ธานี",
+    "source_name": "Wikipedia: Ko Tao",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.649572+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-tao",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Ban_Mae_Haad_Ko_Tao.jpg/960px-Ban_Mae_Haad_Ko_Tao.jpg",
+        "creatorName": "kallerna",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Ban_Mae_Haad_Ko_Tao.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-ko-tarutao",
+    "name": "Ko Tarutao",
+    "province": "สตูล",
+    "source_name": "Wikipedia: Ko Tarutao",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.723392+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-ko-tarutao",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg/960px-Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg",
+        "creatorName": "Vyacheslav Argenberg",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Koh_Tarutao,_Thailand,_Ancient_Cambrian_deposits.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-maeklong-railway-market",
+    "name": "Maeklong Railway Market",
+    "province": "สมุทรสงคราม",
+    "source_name": "Wikipedia: Maeklong Railway",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.617789+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-maeklong-railway-market",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Talad_Rom_Hoop_%28II%29.jpg/960px-Talad_Rom_Hoop_%28II%29.jpg",
+        "creatorName": "Supanut Arunoprayote",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Talad_Rom_Hoop_(II).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-mu-ko-ang-thong-national-park",
+    "name": "Mu Ko Ang Thong National Park",
+    "province": "สุราษฎร์ธานี",
+    "source_name": "Wikipedia: Mu Ko Ang Thong National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.580867+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-mu-ko-ang-thong-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg",
+        "creatorName": "Vyacheslav Argenberg",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Mu_Ko_Ang_Thong,_Islands_in_the_sea_2,_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-namtok-chet-sao-noi-national-park",
+    "name": "Namtok Chet Sao Noi National Park",
+    "province": "สระบุรี",
+    "source_name": "Wikipedia: Namtok Chet Sao Noi National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.641057+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-namtok-chet-sao-noi-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Waterfall_7Girls.jpg/960px-Waterfall_7Girls.jpg",
+        "creatorName": "Chowalit",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Waterfall_7Girls.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-namtok-phlio-national-park",
+    "name": "Namtok Phlio National Park",
+    "province": "จันทบุรี",
+    "source_name": "Wikipedia: Namtok Phlio National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.632747+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-namtok-phlio-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Entrance_to_Phliu.jpg/960px-Entrance_to_Phliu.jpg",
+        "creatorName": "Yoshifumi Iwata",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Entrance_to_Phliu.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-nang-rong-waterfall",
+    "name": "Nang Rong Waterfall",
+    "province": "นครนายก",
+    "source_name": "Wikipedia: Nang Rong Waterfall",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.469733+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-nang-rong-waterfall",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Nang_Rong_Waterfall.jpg/960px-Nang_Rong_Waterfall.jpg",
+        "creatorName": "Anuruk A.",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Nang_Rong_Waterfall.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-pa-hin-ngam-national-park",
+    "name": "Pa Hin Ngam National Park",
+    "province": "ชัยภูมิ",
+    "source_name": "Wikipedia: Pa Hin Ngam National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.610322+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-pa-hin-ngam-national-park",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pa%20hin%20ngam.jpg?width=960",
+        "creatorName": "Poohpachatpimuk",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Pa_hin_ngam.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-pai-canyon",
+    "name": "Pai Canyon",
+    "province": "แม่ฮ่องสอน",
+    "source_name": "Travelfish: Pai Canyon",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.625656+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-pai-canyon",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pai%20canyon.jpg?width=960",
+        "creatorName": "Sgroey",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Pai_canyon.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-pang-sida-national-park",
+    "name": "Pang Sida National Park",
+    "province": "สระแก้ว",
+    "source_name": "Wikipedia: Pang Sida National Park",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.48004+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-pang-sida-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Pangsida_National_Park.jpg/960px-Pangsida_National_Park.jpg",
+        "creatorName": "Chaiyathat",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Pangsida_National_Park.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phae-mueang-phi",
+    "name": "Phae Mueang Phi Forest Park",
+    "province": "แพร่",
+    "source_name": "Wikipedia: Phae Mueang Phi Forest Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.534967+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phae-mueang-phi",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Phae_Mueang_Phi_Forest_Park2.jpg/960px-Phae_Mueang_Phi_Forest_Park2.jpg",
+        "creatorName": "LannaPhoto",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Phae_Mueang_Phi_Forest_Park2.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phanom-rung-historical-park",
+    "name": "Phanom Rung Historical Park",
+    "province": "บุรีรัมย์",
+    "source_name": "UNESCO: Phanom Rung tentative list",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.563863+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phanom-rung-historical-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg/960px-%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg",
+        "creatorName": "Салига Павло",
+        "licenseName": "Public domain",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/Commons:Licensing",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-pha-taem-national-park",
+    "name": "Pha Taem National Park",
+    "province": "อุบลราชธานี",
+    "source_name": "Wikipedia: Pha Taem National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.557089+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-pha-taem-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Pha_taem_figures1.JPG/960px-Pha_taem_figures1.JPG",
+        "creatorName": "Henry_Flower ( talk ) ( Uploads )",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Pha_taem_figures1.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-phimai-historical-park",
+    "name": "Phimai Historical Park",
+    "province": "นครราชสีมา",
+    "source_name": "Wikipedia: Phimai Historical Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.546494+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phimai-historical-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Phimai_%28III%29.jpg/960px-Phimai_%28III%29.jpg",
+        "creatorName": "Supanut Arunoprayote",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Phimai_(III).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phra-maha-chedi-chai-mongkol",
+    "name": "Phra Maha Chedi Chai Mongkol",
+    "province": "ร้อยเอ็ด",
+    "source_name": "Tourism Authority of Thailand: Phra Maha Chedi Chai Mongkhon",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.504236+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phra-maha-chedi-chai-mongkol",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20Maha%20Chedi%20Chai%20Mongkol.JPG?width=960",
+        "creatorName": "Pawyilee",
+        "licenseName": "Public domain",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Phra_Maha_Chedi_Chai_Mongkol.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-phra-mongkhon-ming-mueang",
+    "name": "Phra Mongkhon Ming Mueang",
+    "province": "อำนาจเจริญ",
+    "source_name": "OpenStreetMap via Mapcarta: Phra Mongkon Ming Mueang",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.518318+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phra-mongkhon-ming-mueang",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Mingmuang.jpg?width=960",
+        "creatorName": "นายพงษ์ศักดิ์ แก้วแสนเมือง",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Mingmuang.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phra-nakhon-khiri",
+    "name": "Phra Nakhon Khiri Historical Park",
+    "province": "เพชรบุรี",
+    "source_name": "Thailand Tourism Directory: Khao Wang",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.621384+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phra-nakhon-khiri",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG/960px-%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG",
+        "creatorName": "Kritmongkholrat Arunsuriya",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-phra-pathom-chedi",
+    "name": "Phra Pathom Chedi",
+    "province": "นครปฐม",
+    "source_name": "Wikipedia: Phra Pathom Chedi",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.601388+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phra-pathom-chedi",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg",
+        "creatorName": "Mastertongapollo",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phra-prang-sam-yot",
+    "name": "Phra Prang Sam Yot",
+    "province": "ลพบุรี",
+    "source_name": "Wikipedia: Phra Prang Sam Yot",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.591079+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phra-prang-sam-yot",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg/960px-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg",
+        "creatorName": "Mastertongapollo",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phra-that-kong-khao-noi",
+    "name": "Phra That Kong Khao Noi",
+    "province": "ยโสธร",
+    "source_name": "Wikimedia Commons: Geotagged Phra That Kong Khao Noi",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.514487+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phra-that-kong-khao-noi",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20That%20Kong%20Khao%20Noi%20(I).jpg?width=960",
+        "creatorName": "Supanut Arunoprayote",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Phra_That_Kong_Khao_Noi_(I).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phra-that-na-dun",
+    "name": "Phra That Na Dun",
+    "province": "มหาสารคาม",
+    "source_name": "OpenStreetMap via Mapcarta: Phrathat Na Dun",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.506602+00:00",
+    "media": [
+      {
+        "id": "painaidee-provided:curated-phra-that-na-dun:01",
+        "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-01-main.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "painaidee-provided:curated-phra-that-na-dun:02",
+        "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-02-buddha.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "painaidee-provided:curated-phra-that-na-dun:03",
+        "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-03-chedi.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      }
+    ]
+  },
+  {
+    "id": "curated-phraya-nakhon-cave",
+    "name": "Phraya Nakhon Cave",
+    "province": "ประจวบคีรีขันธ์",
+    "source_name": "Wikipedia: Phraya Nakhon Cave",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.703417+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phraya-nakhon-cave",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg/960px-01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg",
+        "creatorName": "BerryJ",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-chi-fa",
+    "name": "Phu Chi Fa",
+    "province": "เชียงราย",
+    "source_name": "Wikipedia: Phu Chi Fa",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.589215+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-chi-fa",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phu%20Chi%20Fa%20National%20Park%2C%20Chiengrai%2C%20Thailand.jpg?width=960",
+        "creatorName": "SunnyCamera",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Phu_Chi_Fa_National_Park%2C_Chiengrai%2C_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phuket-big-buddha",
+    "name": "Phuket Big Buddha",
+    "province": "ภูเก็ต",
+    "source_name": "Wikipedia: Phuket Big Buddha",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.764992+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phuket-big-buddha",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/The_Big_Buddha%2C_Phuket.jpg/960px-The_Big_Buddha%2C_Phuket.jpg",
+        "creatorName": "Subhrajyoti07",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:The_Big_Buddha,_Phuket.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-kradueng-national-park",
+    "name": "Phu Kradueng National Park",
+    "province": "เลย",
+    "source_name": "Thai National Parks: Phu Kradueng",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.586712+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-kradueng-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Lom_Sak_Cliff_%28I%29.jpg/960px-Lom_Sak_Cliff_%28I%29.jpg",
+        "creatorName": "Supanut Arunoprayote",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Lom_Sak_Cliff_(I).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-laen-kha-national-park",
+    "name": "Phu Laen Kha National Park",
+    "province": "ชัยภูมิ",
+    "source_name": "Wikipedia: Phu Laen Kha National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.627308+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-laen-kha-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg/960px-%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg",
+        "creatorName": "Yakuzakorat",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-langka-forest-park",
+    "name": "Phu Langka Forest Park",
+    "province": "พะเยา",
+    "source_name": "Wikipedia: Phu Langka Forest Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.608072+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-langka-forest-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg/960px-Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg",
+        "creatorName": "Chainwit.",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-pha-man-national-park",
+    "name": "Phu Pha Man National Park",
+    "province": "ขอนแก่น",
+    "source_name": "Wikipedia: Phu Pha Man National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.620719+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-pha-man-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg/960px-%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg",
+        "creatorName": "Samornthip",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-phan-national-park",
+    "name": "Phu Phan National Park",
+    "province": "สกลนคร",
+    "source_name": "Wikipedia: Phu Phan National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.615977+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-phan-national-park",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%96%E0%B9%89%E0%B8%B3%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B5%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%B2%E0%B8%99.jpg?width=960",
+        "creatorName": "อรอนงค์ ฮาดทักษ์วงค์",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%96%E0%B9%89%E0%B8%B3%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B5%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%B2%E0%B8%99.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-phra-bat-historical-park",
+    "name": "Phu Phra Bat Historical Park",
+    "province": "อุดรธานี",
+    "source_name": "Fine Arts Department: Phu Phra Bat",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.581152+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-phra-bat-historical-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Rock_formation_in_Phu_Phra_Bat.jpg/960px-Rock_formation_in_Phu_Phra_Bat.jpg",
+        "creatorName": "Theppitak Karoonboonyanan",
+        "licenseName": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Rock_formation_in_Phu_Phra_Bat.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-soi-dao",
+    "name": "Phu Soi Dao",
+    "province": "อุตรดิตถ์",
+    "source_name": "Wikipedia: Phu Soi Dao",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.605063+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-soi-dao",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg/960px-Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg",
+        "creatorName": "ผู้สร้างสรรค์ผลงาน/ส่งข้อมูลเก็บในคลังข้อมูลเสรีวิกิมีเดียคอมมอนส์ - เทวประภาส มากคล้าย",
+        "licenseName": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-phu-thok",
+    "name": "Phu Thok",
+    "province": "บึงกาฬ",
+    "source_name": "Wikipedia: Phu Thok",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.62526+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-phu-thok",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/What_phu_tok_from_bottom.JPG/960px-What_phu_tok_from_bottom.JPG",
+        "creatorName": "Erwannjacquin",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:What_phu_tok_from_bottom.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-prasat-sikhoraphum",
+    "name": "Prasat Sikhoraphum",
+    "province": "สุรินทร์",
+    "source_name": "Wikipedia: Prasat Sikhoraphum",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.520786+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-prasat-sikhoraphum",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg/960px-Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg",
+        "creatorName": "JJ Harrison ( jjharrison89@facebook.com )",
+        "licenseName": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-promthep-cape",
+    "name": "Promthep Cape",
+    "province": "ภูเก็ต",
+    "source_name": "Lovethailand: Promthep Cape",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.714019+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-promthep-cape",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Promthep%20Cape%20Phuket.jpg?width=960",
+        "creatorName": "Christophe95",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Promthep_Cape_Phuket.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-railay-beach",
+    "name": "Railay Beach",
+    "province": "กระบี่",
+    "source_name": "Thailand Tourism Directory: Railay Beach",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.573024+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-railay-beach",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Railay_Beach_5.jpg/960px-Railay_Beach_5.jpg",
+        "creatorName": "kallerna",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Railay_Beach_5.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-river-kwai-bridge",
+    "name": "Bridge on the River Kwai",
+    "province": "กาญจนบุรี",
+    "source_name": "Tourism Authority of Thailand: River Kwai Bridge",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.618672+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-river-kwai-bridge",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Bridge%20over%20River%20Kwai%20in%20Kanchanaburi%2C%20Thailand.jpg?width=960",
+        "creatorName": "spotter_nl",
+        "licenseName": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Bridge_over_River_Kwai_in_Kanchanaburi%2C_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-sala-keoku",
+    "name": "Sala Keoku",
+    "province": "หนองคาย",
+    "source_name": "Wikipedia: Sala Keoku",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.567259+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-sala-keoku",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Sala_Keoku.JPG/960px-Sala_Keoku.JPG",
+        "creatorName": "Jpatokal",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Sala_Keoku.JPG"
+      }
+    ]
+  },
+  {
+    "id": "curated-sam-chuk-old-market",
+    "name": "Sam Chuk Old Market",
+    "province": "สุพรรณบุรี",
+    "source_name": "OpenStreetMap via Mapcarta: Old Market Sam Chuk",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.459283+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-sam-chuk-old-market",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Suphanburi%20Samchuk%20Market%201.jpg?width=960",
+        "creatorName": "Mr.Peerapong Prasutr",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Suphanburi_Samchuk_Market_1.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-samila-beach",
+    "name": "Samila Beach",
+    "province": "สงขลา",
+    "source_name": "Travelfish: Samila Beach",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.689888+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-samila-beach",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Songkhla%20mermaid.jpg?width=960",
+        "creatorName": "Ahoerstemeier",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Songkhla_mermaid.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-sam-phan-bok",
+    "name": "Sam Phan Bok",
+    "province": "อุบลราชธานี",
+    "source_name": "Tourism Authority of Thailand: Sam Phan Bok",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.591954+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-sam-phan-bok",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/%E0%B8%81%E0%B8%B8%E0%B8%A1%E0%B8%A0%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%93%E0%B9%8C.jpg",
+        "creatorName": "Ww doraemon",
+        "licenseName": "CC BY 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%81%E0%B8%B8%E0%B8%A1%E0%B8%A0%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%93%E0%B9%8C.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-sanctuary-of-truth",
+    "name": "Sanctuary of Truth",
+    "province": "ชลบุรี",
+    "source_name": "Wikipedia: Sanctuary of Truth",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.748281+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-sanctuary-of-truth",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Santuaryoftruth2.jpg/960px-Santuaryoftruth2.jpg",
+        "creatorName": "Marlinjuice at English Wikipedia",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Santuaryoftruth2.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-similan-islands-national-park",
+    "name": "Mu Ko Similan National Park",
+    "province": "พังงา",
+    "source_name": "Tourism Authority of Thailand: Similan Islands",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.576285+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-similan-islands-national-park",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Similan.jpg?width=960",
+        "creatorName": "Ist Meekwamdee",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Similan.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-sirindhorn-museum",
+    "name": "Sirindhorn Museum",
+    "province": "กาฬสินธุ์",
+    "source_name": "Wikipedia: Sirindhorn Museum",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.509063+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-sirindhorn-museum",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg/960px-Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg",
+        "creatorName": "::::=UT=::::",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Dinosaur_@%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_,Sirindhorn_Museum_,Kalasin,Thailand_-_panoramio.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-si-satchanalai-historical-park",
+    "name": "Si Satchanalai Historical Park",
+    "province": "สุโขทัย",
+    "source_name": "Wikipedia: Si Satchanalai Historical Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.590628+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-si-satchanalai-historical-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Histparksisatchanalai.png/960px-Histparksisatchanalai.png",
+        "creatorName": "Hdamm",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Histparksisatchanalai.png"
+      }
+    ]
+  },
+  {
+    "id": "curated-sukhothai-historical-park",
+    "name": "Sukhothai Historical Park",
+    "province": "สุโขทัย",
+    "source_name": "Wikipedia: Sukhothai Historical Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.752736+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-sukhothai-historical-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Wat_srichum_03.jpg/960px-Wat_srichum_03.jpg",
+        "creatorName": "Khunkay",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_srichum_03.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-tat-ton-national-park",
+    "name": "Tat Ton National Park",
+    "province": "ชัยภูมิ",
+    "source_name": "Wikipedia: Tat Ton National Park",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.612578+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-tat-ton-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Tatton_Waterfall_2014_-_001_%282%29.jpg/960px-Tatton_Waterfall_2014_-_001_%282%29.jpg",
+        "creatorName": "Yimsurawut",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Tatton_Waterfall_2014_-_001_(2).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-thale-noi-wetland",
+    "name": "Thale Noi Non-Hunting Area",
+    "province": "พัทลุง",
+    "source_name": "Wikipedia: Thale Noi Non-Hunting Area",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.674612+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-thale-noi-wetland",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/6/60/Thale_Noi_Non-Hunting_Area.png",
+        "creatorName": "M.McRoberts (Melloblox)",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Thale_Noi_Non-Hunting_Area.png"
+      }
+    ]
+  },
+  {
+    "id": "curated-thap-lan-national-park",
+    "name": "Thap Lan National Park",
+    "province": "ปราจีนบุรี",
+    "source_name": "Wikipedia: Thap Lan National Park",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.476603+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-thap-lan-national-park",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Tublarn01.jpg/960px-Tublarn01.jpg",
+        "creatorName": "Kawpodmd",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Tublarn01.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-thi-lo-su-waterfall",
+    "name": "Thi Lo Su Waterfall",
+    "province": "ตาก",
+    "source_name": "Wikipedia: Thi Lo Su Waterfall",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.450525+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-thi-lo-su-waterfall",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/TheeLorSue-h.jpg/960px-TheeLorSue-h.jpg",
+        "creatorName": "Yxejamir",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:TheeLorSue-h.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-thung-wua-laen-beach",
+    "name": "Thung Wua Laen Beach",
+    "province": "ชุมพร",
+    "source_name": "BeachAtlas: Thung Wua Laen Beach",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.53262+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-thung-wua-laen-beach",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Thung%20Wua%20Laen%20beach%20-%20Chumphon.jpg?width=960",
+        "creatorName": "Lamacchiacosta",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Thung_Wua_Laen_beach_-_Chumphon.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-arun",
+    "name": "Wat Arun",
+    "province": "กรุงเทพฯ",
+    "source_name": "Wikipedia: Wat Arun",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.734066+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-arun",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg/960px-%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg",
+        "creatorName": "Mastertongapollo",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-chalong",
+    "name": "Wat Chalong",
+    "province": "ภูเก็ต",
+    "source_name": "Travelfish: Wat Chalong",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.682797+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-chalong",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chalong.jpg?width=960",
+        "creatorName": "Gossipguy",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Chalong.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-chang-hai",
+    "name": "Wat Chang Hai Rat Buranaram",
+    "province": "ปัตตานี",
+    "source_name": "Mapcarta (OpenStreetMap): Wat Chang Hai",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.665903+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-chang-hai",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chang%20Hai%20im%202018.jpg?width=960",
+        "creatorName": "แอนเดอร์สัน",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Chang_Hai_im_2018.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-chantharam-tha-sung",
+    "name": "Wat Chantharam (Wat Tha Sung)",
+    "province": "อุทัยธานี",
+    "source_name": "Wikipedia: Wat Chantharam",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.453703+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-chantharam-tha-sung",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg/960px-%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg",
+        "creatorName": "กสิณธร ราชโอรส",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:(2023)_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_(%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87)_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_(20).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-chedi-hoi",
+    "name": "Wat Chedi Hoi",
+    "province": "ปทุมธานี",
+    "source_name": "Tourism Authority of Thailand: Wat Chedi Hoi",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.483175+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-chedi-hoi",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AB%E0%B8%AD%E0%B8%A2%20%E0%B8%AD.%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7%20%E0%B8%88.%E0%B8%9B%E0%B8%97%E0%B8%B8%E0%B8%A1%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5%20(4).jpg?width=960",
+        "creatorName": "กสิณธร ราชโอรส",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AB%E0%B8%AD%E0%B8%A2_%E0%B8%AD.%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7_%E0%B8%88.%E0%B8%9B%E0%B8%97%E0%B8%B8%E0%B8%A1%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_(4).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-doi-kong-mu",
+    "name": "Wat Phrathat Doi Kong Mu",
+    "province": "แม่ฮ่องสอน",
+    "source_name": "Wikipedia: Wat Phrathat Doi Kong Mu",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.600278+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-doi-kong-mu",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg/960px-%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg",
+        "creatorName": "Thanes Piamnamai",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-khok-kham",
+    "name": "Wat Khok Kham",
+    "province": "สมุทรสาคร",
+    "source_name": "OpenStreetMap via Mapcarta: Wat Khok Kham",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.501518+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-khok-kham",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/0006052-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%81%E0%B8%82%E0%B8%B2%E0%B8%A1-2.jpg?width=960",
+        "creatorName": "Paul-shy",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:0006052-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%81%E0%B8%82%E0%B8%B2%E0%B8%A1-2.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-pa-maha-chedi-kaew",
+    "name": "Wat Pa Maha Chedi Kaew",
+    "province": "ศรีสะเกษ",
+    "source_name": "Wikipedia: Wat Pa Maha Chedi Kaew",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.523418+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-pa-maha-chedi-kaew",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Million_Bottle_Temple_%287447377506%29.jpg/960px-Million_Bottle_Temple_%287447377506%29.jpg",
+        "creatorName": "Mark Fischer",
+        "licenseName": "CC BY-SA 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Million_Bottle_Temple_(7447377506).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-pa-phu-kon",
+    "name": "Wat Pa Phu Kon",
+    "province": "อุดรธานี",
+    "source_name": "Wikipedia: Wat Pa Phu Kon",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.574047+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-pa-phu-kon",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Wat_Pa_Phu_Kon_-_panoramio.jpg/960px-Wat_Pa_Phu_Kon_-_panoramio.jpg",
+        "creatorName": "Matt Prosser",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Pa_Phu_Kon_-_panoramio.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-pha-sorn-kaew",
+    "name": "Wat Pha Sorn Kaew",
+    "province": "เพชรบูรณ์",
+    "source_name": "Wikipedia: Wat Pha Sorn Kaew",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.44106+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-pha-sorn-kaew",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/6/62/%E0%B8%9C%E0%B8%B2%E0%B8%8B%E0%B9%88%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7.jpg",
+        "creatorName": "Pisanthia",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%9C%E0%B8%B2%E0%B8%8B%E0%B9%88%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-pho",
+    "name": "Wat Pho",
+    "province": "กรุงเทพฯ",
+    "source_name": "Wikipedia: Wat Pho",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.738922+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-pho",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg",
+        "creatorName": "Mastertongapollo",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-mahathat-nakhon",
+    "name": "Wat Phra Mahathat Woramahawihan",
+    "province": "นครศรีธรรมราช",
+    "source_name": "UNESCO: Wat Phra Mahathat Woramahawihan",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.597917+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-mahathat-nakhon",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20Mahathat%20Woramahawihan%2C%20Nakhon%20Si%20Thammarat.jpg?width=960",
+        "creatorName": "Preecha.MJ",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_Mahathat_Woramahawihan%2C_Nakhon_Si_Thammarat.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-singh",
+    "name": "Wat Phra Singh",
+    "province": "เชียงใหม่",
+    "source_name": "Wikipedia: Wat Phra Singh",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.623647+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-singh",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg/960px-Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg",
+        "creatorName": "Supanut Arunoprayote",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_Sing,_Chiang_Mai_(I).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-si-rattana-mahathat-phitsanulok",
+    "name": "Wat Phra Si Rattana Mahathat",
+    "province": "พิษณุโลก",
+    "source_name": "Wikipedia: Wat Phra Si Rattana Mahathat",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.436908+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-si-rattana-mahathat-phitsanulok",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg/960px-Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg",
+        "creatorName": "Supanut Arunoprayote",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_Si_Rattana_Mahathat,_Phitsanulok_(I).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-that-choeng-chum",
+    "name": "Wat Phra That Choeng Chum",
+    "province": "สกลนคร",
+    "source_name": "Tourism Authority of Thailand: Wat Phra That Choeng Chum",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.62968+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-that-choeng-chum",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Prathat%20Cherng%20Chum%20Temple%20(1).jpg?width=960",
+        "creatorName": "Chaiyathat",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Prathat_Cherng_Chum_Temple_(1).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-that-doi-suthep",
+    "name": "Wat Phra That Doi Suthep",
+    "province": "เชียงใหม่",
+    "source_name": "Tourism Authority of Thailand: Doi Suthep",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.58361+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-that-doi-suthep",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Doi%20Suthep%20temple%20Thailand.jpg?width=960",
+        "creatorName": "Kate Branch",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_That_Doi_Suthep_temple_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-that-hariphunchai",
+    "name": "Wat Phra That Hariphunchai",
+    "province": "ลำพูน",
+    "source_name": "Wikipedia: Wat Phra That Hariphunchai",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.508102+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-that-hariphunchai",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Wat_Phra_That_Hariphunchai_%28III%29.jpg/960px-Wat_Phra_That_Hariphunchai_%28III%29.jpg",
+        "creatorName": "Supanut Arunoprayote",
+        "licenseName": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_That_Hariphunchai_(III).jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-that-lampang-luang",
+    "name": "Wat Phra That Lampang Luang",
+    "province": "ลำปาง",
+    "source_name": "Wikipedia: Wat Phra That Lampang Luang",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.519162+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-that-lampang-luang",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg/960px-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg",
+        "creatorName": "Hong2101",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phra-that-phanom",
+    "name": "Wat Phra That Phanom",
+    "province": "นครพนม",
+    "source_name": "Thailand Tourism Directory: Wat Phra That Phanom",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.59501+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phra-that-phanom",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Phanom%2C%20That%20Phanom%2C%20Nakhon%20Phanom%2C%20Thailand.jpg?width=960",
+        "creatorName": "Paul Cornelis",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Phra_That_Phanom%2C_That_Phanom%2C_Nakhon_Phanom%2C_Thailand.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phu-manorom",
+    "name": "Wat Roi Phra Phutthabat Phu Manorom",
+    "province": "มุกดาหาร",
+    "source_name": "Tourism Authority of Thailand: Wat Roi Phra Phutthabat Phu Manorom",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.512016+00:00",
+    "media": [
+      {
+        "id": "painaidee-provided:curated-wat-phu-manorom:01",
+        "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-01-main.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "painaidee-provided:curated-wat-phu-manorom:02",
+        "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-02-temple.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      },
+      {
+        "id": "painaidee-provided:curated-wat-phu-manorom:03",
+        "url": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-03-hall.jpg",
+        "creatorName": null,
+        "licenseName": null,
+        "licenseUrl": null,
+        "sourcePage": null
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-phumin",
+    "name": "Wat Phumin",
+    "province": "น่าน",
+    "source_name": "Wikipedia: Wat Phumin",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.528371+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-phumin",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/2013_Wat_Phumin_Nan.jpg/960px-2013_Wat_Phumin_Nan.jpg",
+        "creatorName": "Takeaway",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:2013_Wat_Phumin_Nan.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-rong-khun",
+    "name": "Wat Rong Khun",
+    "province": "เชียงราย",
+    "source_name": "Wikimedia Commons: object location",
+    "image_url": null,
+    "updated_at": "2026-10-25T15:55:09.743553+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-rong-khun",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Rong%20Khun%20view.jpg?width=960",
+        "creatorName": "JurriaanH",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Rong_Khun_view.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-rong-suea-ten",
+    "name": "Wat Rong Suea Ten",
+    "province": "เชียงราย",
+    "source_name": "Wikipedia: Wat Rong Suea Ten",
+    "image_url": null,
+    "updated_at": "2026-10-25T16:33:43.630749+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-rong-suea-ten",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg/960px-Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg",
+        "creatorName": "Chainwit.",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-sothonwararam",
+    "name": "Wat Sothon Wararam Worawihan",
+    "province": "ฉะเชิงเทรา",
+    "source_name": "Wikipedia: Wat Sothonwararam",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:00:54.625269+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-sothonwararam",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Wat_sothorn_11.jpg/960px-Wat_sothorn_11.jpg",
+        "creatorName": "Khunkay",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_sothorn_11.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-tha-luang-phichit",
+    "name": "Wat Tha Luang",
+    "province": "พิจิตร",
+    "source_name": "Tourism Authority of Thailand: Wat Tha Luang",
+    "image_url": null,
+    "updated_at": "2026-10-31T07:51:33.74772+00:00",
+    "media": []
+  },
+  {
+    "id": "curated-wat-tham-klong-phen",
+    "name": "Wat Tham Klong Phen",
+    "province": "หนองบัวลำภู",
+    "source_name": "OpenStreetMap via Mapcarta: Tham Kong Phen Monastery",
+    "image_url": null,
+    "updated_at": "2026-10-26T12:36:18.525856+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-tham-klong-phen",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%96%E0%B9%88%E0%B8%B3%E0%B8%81%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%9E%E0%B8%A5.jpg?width=960",
+        "creatorName": "Thanongsuk harakunno",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%96%E0%B9%88%E0%B8%B3%E0%B8%81%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%9E%E0%B8%A5.jpg"
+      }
+    ]
+  },
+  {
+    "id": "curated-wat-yai-chai-mongkhon",
+    "name": "Wat Yai Chai Mongkhon",
+    "province": "พระนครศรีอยุธยา",
+    "source_name": "Ayutthaya Historical Research: Wat Yai Chai Mongkhon",
+    "image_url": null,
+    "updated_at": "2026-10-25T17:19:56.643797+00:00",
+    "media": [
+      {
+        "id": "wikimedia:curated-wat-yai-chai-mongkhon",
+        "url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Yai%20Chai%20Mongkhon%20Ayutthaya.jpg?width=960",
+        "creatorName": "KOSIN SUKHUM",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourcePage": "https://commons.wikimedia.org/wiki/File:Wat_Yai_Chai_Mongkhon_Ayutthaya.jpg"
+      }
+    ]
+  },
+  {
+    "id": "tat-201005182246291103",
+    "name": "พระพุทธรูปแกะสลักเขาชีจรรย์",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.630203+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246291174",
+    "name": "พิพิธภัณฑ์พระจุฑาธุชราชฐาน",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.551442+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20100518224629120",
+    "name": "ช่องเขาขาด",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.571196+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246291544",
+    "name": "วัดญาณสังวรารามวรมหาวิหาร",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.636387+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246291737",
+    "name": "วัดเขาพระพุทธบาทบางทราย",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:51.983294+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246291963",
+    "name": "วัดใหญ่อินทราราม (พระอารามหลวง)",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.573081+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246292827",
+    "name": "สวนนงนุช",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.627759+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293007",
+    "name": "หอพระพนัสบดี",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:51.988914+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293051",
+    "name": "Chon Buri Phra Phuttha Sihing Shrine",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T13:04:11.572757+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293101",
+    "name": "หาดจอมเทียน",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.592118+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293148",
+    "name": "หาดพัทยา",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.598485+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293199",
+    "name": "Anek Kusala Sala (Viharn Sien)",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T13:04:11.58639+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293232",
+    "name": "เกาะครก",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.606129+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293252",
+    "name": "เกาะลอยศรีราชา",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.548833+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293266",
+    "name": "เกาะสาก",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.600879+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293275",
+    "name": "Koh Sichang",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:11:35.538224+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293316",
+    "name": "เขาสามมุข",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.604491+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293332",
+    "name": "เมืองจำลอง",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T10:56:59.170703+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293336",
+    "name": "Mueang Phra Rot Archaeological Site",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T13:48:35.789667+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293377",
+    "name": "หาดถ้ำเขาพัง",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.58898+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293395",
+    "name": "เขาพระตำหนัก",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.81881+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293417",
+    "name": "อ่างเก็บน้ำบางพระ",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:52.028113+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293423",
+    "name": "หาดนางรำ",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.527176+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-201005182246293428",
+    "name": "Dong Tan Bay",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T13:48:35.76965+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20100518224629350",
+    "name": "ถ้ำจักรพงษ์",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:52.012927+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20100518224629483",
+    "name": "ถ้ำเขาชะอางค์ห้ายอด",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.802106+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20100518224629568",
+    "name": "ถ้ำเขาชะอางค์โอน",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T10:56:59.15576+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20100518224629631",
+    "name": "ศาลเจ้าพ่อเขาใหญ่",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.582116+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20100518224629991",
+    "name": "พระพุทธมิ่งเมือง",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:51.997113+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214112692",
+    "name": "วัดสัตหีบ",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.771819+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214112694",
+    "name": "หาดนางรอง",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.532714+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214112695",
+    "name": "เรือรบหลวงจักรีนฤเบศร์",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.614121+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214112696",
+    "name": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.61847+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214113283",
+    "name": "ศูนย์ศึกษาธรรมชาติและอนุรักษ์ป่าชายเลนเพื่อการท่องเที่ยวเชิงนิเวศ",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.750022+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214113284",
+    "name": "วิหารเทพสถิตพระกิติเฉลิม",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.63285+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214113286",
+    "name": "แหลมแท่น",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.761819+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214113304",
+    "name": "น้ำตกชันตาเถร",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.58884+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214113305",
+    "name": "เกาะขามใหญ่",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.613421+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214113306",
+    "name": "พิพิธภัณฑ์ธรรมชาติวิทยาเกาะและทะเลไทย",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.553349+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214113308",
+    "name": "อุทยานใต้ทะเลเกาะขาม",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.6252+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2010120911214114470",
+    "name": "ตลาดเก่าอ่างศิลา",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.608406+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2011032413454815424",
+    "name": "ตลาดน้ำสี่ภาคพัทยา",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.564217+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2012080610583316342",
+    "name": "พิพิธภัณฑ์ภาพวาด 3 มิติ",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T10:56:59.144986+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550717971",
+    "name": "วัดพระใหญ่",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T10:56:59.123253+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550717997",
+    "name": "สะพานอัษฎางค์",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.565618+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718003",
+    "name": "หาดเตยงาม",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.544636+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718047",
+    "name": "เกาะแสมสาร",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:51:13.621328+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718063",
+    "name": "พิพิธภัณฑ์ทหารนาวิกโยธิน",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.558795+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718067",
+    "name": "มณฑปรอยพระพุทธบาท",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:52.008063+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718075",
+    "name": "Wat Khao Bo Kwang Thong",
+    "province": "ชลบุรี",
+    "source_name": "Municipality of Bo Kwang Thong / Burapha University Tourism Research",
+    "image_url": null,
+    "updated_at": "2026-11-06T20:22:07.730586+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718078",
+    "name": "วัดใต้ต้นลาน",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.793073+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718079",
+    "name": "วัดช่องแสมสาร",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:52.019572+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718080",
+    "name": "วัดชัยมงคล",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.81106+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718083",
+    "name": "วัดตาลล้อม",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T06:51:05.783403+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718116",
+    "name": "Thai House Folk Museum (Map Sam Kliew)",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T13:04:11.596251+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718119",
+    "name": "Thian Talay Beach",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T13:48:35.781656+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718120",
+    "name": "หาดแสม",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.610004+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718121",
+    "name": "หาดทรายแก้ว",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:51.97587+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718123",
+    "name": "หาดน้ำใส",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:59:02.538968+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718124",
+    "name": "หาดบ้านอำเภอ",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:51.966501+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718125",
+    "name": "หาดวงศ์อมาตย์",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T02:36:51.96116+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2015120421550718297",
+    "name": "ชมรมส่งเสริมการท่องเที่ยวโดยชุมชนบ้านชากแง้ว",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T10:56:59.106712+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-2016010510155820163",
+    "name": "Takiantia Cultural Village",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:11:35.506768+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20160528165231008560",
+    "name": "Space Inspirium",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T17:14:01.148534+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20160528170226008563",
+    "name": "Siri Charoenwat Forest Plantation",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T17:14:01.153766+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20200908183352469711",
+    "name": "Bang Saray Old Town",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-05T00:11:35.52006+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20211221230034734283",
+    "name": "Grand Canyon Chonburi (KIRI)",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T17:14:01.139671+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20250620152816001",
+    "name": "เมืองเก่าอุทัยธานี",
+    "province": "อุทัยธานี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T16:46:07.070261+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20250620154151001",
+    "name": "ชุมชนริมน้ำจันทบูร",
+    "province": "จันทบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T16:46:07.060966+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20250701101935001",
+    "name": "ถ้ำภูผาเพชร",
+    "province": "สตูล",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T16:46:07.054891+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20250815163438001",
+    "name": "Ban Nam Chieo Tourism Group",
+    "province": "ตราด",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T16:46:07.046854+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20250916103852001",
+    "name": "Phu Wiang Dinosaur Museum",
+    "province": "ขอนแก่น",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T16:31:50.572681+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20250922135409001",
+    "name": "Chiang Mai House of Photography",
+    "province": "เชียงใหม่",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T16:31:50.555128+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20250925134625001",
+    "name": "Homestay Ban Tha Khan Thong, community-based tourism",
+    "province": "เชียงราย",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T16:31:50.532697+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20251213063829001",
+    "name": "พิพิธภัณฑ์การแพทย์แผนไทยอภัยภูเบศร",
+    "province": "ปราจีนบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:49:56.744934+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20251213065714001",
+    "name": "วัดเขาสิงโต",
+    "province": "สระแก้ว",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:49:56.735369+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20251215120121001",
+    "name": "เขตห้ามล่าสัตว์ป่าถ้ำผาท่าพล",
+    "province": "พิษณุโลก",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:49:56.723082+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20251224114028001",
+    "name": "วิสาหกิจชุมชนบ้านหน้าเขา-ในวัง",
+    "province": "ตรัง",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:49:56.710602+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20251225110647001",
+    "name": "Constitutional Court Museum",
+    "province": "กรุงเทพฯ",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:49:56.697243+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20260126145509001",
+    "name": "Ban Pae On Tai",
+    "province": "เชียงใหม่",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:10:41.242268+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20260203120214001",
+    "name": "Nong Pla Lai Community",
+    "province": "ชลบุรี",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:10:41.23599+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20260203143512001",
+    "name": "Khao Phanom Bencha National Park",
+    "province": "กระบี่",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:10:41.232328+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20260204141052001",
+    "name": "Honghompaya Lanna",
+    "province": "เชียงราย",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:10:41.228404+00:00",
+    "media": []
+  },
+  {
+    "id": "tat-20260209144621001",
+    "name": "Satun Old Town",
+    "province": "สตูล",
+    "source_name": "Tourism Authority of Thailand — Open Data",
+    "image_url": null,
+    "updated_at": "2026-11-04T15:10:41.220779+00:00",
+    "media": []
+  }
+]

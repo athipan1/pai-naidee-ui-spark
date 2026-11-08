@@ -9,6 +9,9 @@ export interface AttractionPhotoCredit {
 }
 
 export interface AttractionDetail {
+  image?: string;
+  publishedPrimaryImage?: string | null;
+  imageIssues?: string[];
   navigation?: {lat:number;lng:number;kind:'vehicle_entrance'|'parking'|'trailhead';sourceUrl:string;verifiedAt:string} | null;
   placeFacts?: {district:string|null;openingHours?:{text:string;sourceUrl:string;checkedAt:string}|null;admissionFee?:{text:string;sourceUrl:string;checkedAt:string}|null;verifiedAt:string}|null;
   source?: { name: string; url: string; verifiedAt?: string | null } | null;

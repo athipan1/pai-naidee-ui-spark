@@ -1,3 +1,4 @@
+const { publishedPlaceImages } = require('./published-place-images.cjs');
 const postgres = require('postgres');
 const ADDITIONAL_CURATED_PLACES = require('./additional-curated-places.cjs');
 const ADDITIONAL_CURATED_PLACES_V2 = require('./additional-curated-places-v2.cjs');
@@ -513,8 +514,6 @@ function normalizeJsonArray(value) {
 
 function normalizePlace(row) {
   const media = normalizeJsonArray(row.media);
-  const mainIndex = media.findIndex(item => item.url === row.image_url);
-  if (mainIndex > 0) media.unshift(...media.splice(mainIndex, 1));
   return {
     id: row.id,
     name: row.name,
@@ -524,32 +523,7 @@ function normalizePlace(row) {
     category: row.category,
     rating: Number(row.rating) || 0,
     reviewCount: Number(row.review_count) || 0,
-    image: media[0]?.url || row.image_url || null,
-    images: media.length > 0
-      ? media.map((item) => item.url)
-      : row.image_url
-        ? [row.image_url]
-        : [],
-    // Admin uploads served by our own media endpoint are user-provided assets.
-    // Do not grant this status to arbitrary external URLs entered in the CMS.
-    mediaCredits: media.filter((item) => {
-      const cmsUpload = /^https:\/\/[^/]+\/api\/media\/cms\/[a-f0-9-]{36}\.(jpg|png|webp)$/.test(item.url || '')
-        && (item.id?.startsWith('cms-media:') || item.id?.startsWith('painaidee-provided:'));
-      return cmsUpload || (item.sourcePage && item.licenseUrl && item.licenseName && item.creatorName)
-        || item.id?.startsWith('painaidee-provided:');
-    }).map((item) => {
-      const cmsUpload = /^https:\/\/[^/]+\/api\/media\/cms\/[a-f0-9-]{36}\.(jpg|png|webp)$/.test(item.url || '')
-        && item.id?.startsWith('cms-media:');
-      const userProvided = cmsUpload || item.id?.startsWith('painaidee-provided:');
-      return {
-        url: item.url,
-        photographer: userProvided ? 'PaiNaiDee Admin upload' : (item.creatorName || 'Wikimedia Commons contributor'),
-        licenseName: item.licenseName || (userProvided ? 'Admin-provided photo for PaiNaiDee' : ''),
-        licenseUrl: item.licenseUrl || '',
-        sourcePage: item.sourcePage || '',
-        kind: userProvided ? 'user-provided' : String(item.sourcePage||'').startsWith('https://commons.wikimedia.org/') ? 'commons' : 'licensed-source',
-      };
-    }),
+    ...publishedPlaceImages(row, media),
     detailedDescription: row.detail_text ? {
       text: row.detail_text,
       sourceUrl: row.detail_source_url || null,
@@ -603,7 +577,7 @@ async function listNearbyPlaces(options) {
         'title', m.title, 'description', m.description,
         'creatorName', m.creator_name, 'licenseName', m.license_name,
         'licenseUrl', m.license_url, 'sourcePage', m.source_page
-      ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC), '[]'::json)
+      ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC), '[]'::json)
       FROM media m WHERE m.place_id = ranked.id) AS media
     FROM ranked
     WHERE distance_km <= ${radius}
@@ -631,7 +605,7 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
         'description', m.description, 'creatorName', m.creator_name,
         'licenseName', m.license_name, 'licenseUrl', m.license_url,
         'sourcePage', m.source_page
-      ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC)
+      ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC)
       FILTER (WHERE m.id IS NOT NULL), '[]'::json) AS media
       FROM places p LEFT JOIN media m ON m.place_id = p.id
       WHERE p.id IN ${sql(ids)} GROUP BY p.id
@@ -656,7 +630,7 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
             'description', m.description,
             'creatorName', m.creator_name, 'licenseName', m.license_name,
             'licenseUrl', m.license_url, 'sourcePage', m.source_page
-          ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC
+          ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC
         ) FILTER (WHERE m.id IS NOT NULL),
         '[]'::json
       ) AS media
@@ -726,7 +700,7 @@ async function getPlaceById(id) {
             'description', m.description,
             'creatorName', m.creator_name, 'licenseName', m.license_name,
             'licenseUrl', m.license_url, 'sourcePage', m.source_page
-          ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC
+          ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC
         ) FILTER (WHERE m.id IS NOT NULL),
         '[]'::json
       ) AS media

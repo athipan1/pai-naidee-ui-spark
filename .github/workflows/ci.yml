@@ -104,6 +104,9 @@ jobs:
       - name: Test read-only discovery, routing, and PWA
         run: npm run test:e2e:read-only -- --config=playwright.read-only.config.ts
 
+      - name: Test shared published image consistency across public pages
+        run: npx playwright test --config=playwright.image-consistency.config.ts
+
       - name: Test Android Chrome and iPhone Safari trip planning
         run: npm run test:e2e:trip-planner
 

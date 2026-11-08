@@ -1,0 +1,2518 @@
+[
+  {
+    "id": "curated-aiyerweng-sea-of-mist-viewpoint",
+    "name": "จุดชมวิวทะเลหมอกอัยเยอร์เวง",
+    "province": "ยะลา",
+    "source": {
+      "name": "OpenStreetMap via Mapcarta: Aiyoeweng Sea of Mist",
+      "url": "https://mapcarta.com/N4750058924",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/The%20Sea%20of%20Mist%20Ai%20Yerweng%2C%20Betong.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-amphawa-floating-market",
+    "name": "ตลาดน้ำอัมพวา",
+    "province": "สมุทรสงคราม",
+    "source": {
+      "name": "Tourism Authority of Thailand: Amphawa Floating Market",
+      "url": "https://www.tourismthailand.org/Attraction/amphawa-floating-market",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Amphawa1.jpg/960px-Amphawa1.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-201005182246293199",
+    "name": "อเนกกุศลศาลา",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-ao-manao-beach",
+    "name": "อ่าวมะนาว",
+    "province": "ประจวบคีรีขันธ์",
+    "source": {
+      "name": "Travelfish: Ao Manao Beach",
+      "url": "https://www.travelfish.org/sight_profile/thailand/southern_thailand/prachuap_khiri_khan/prachuap_khiri_khan/437",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ao%20Manao%20Beach%2C%20Prachuap%20Khiri%20Khan.JPG?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-ao-nang-beach",
+    "name": "อ่าวนาง",
+    "province": "กระบี่",
+    "source": {
+      "name": "Tourism Authority of Thailand: Ao Nang",
+      "url": "https://thai.tourismthailand.org/Attraction/%E0%B8%AD%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%99%E0%B8%B2%E0%B8%87",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20view%20of%20Ao%20Nang%20beach%2C%20Krabi.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-ayutthaya-historical-park",
+    "name": "อุทยานประวัติศาสตร์พระนครศรีอยุธยา",
+    "province": "พระนครศรีอยุธยา",
+    "source": {
+      "name": "UNESCO: Historic City of Ayutthaya",
+      "url": "https://whc.unesco.org/en/list/576/",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Ayutthaya_World_Heritage_sign.jpg/960px-Ayutthaya_World_Heritage_sign.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ban-chiang-archaeological-site",
+    "name": "แหล่งโบราณคดีบ้านเชียง",
+    "province": "อุดรธานี",
+    "source": {
+      "name": "UNESCO: Ban Chiang Archaeological Site",
+      "url": "https://whc.unesco.org/en/list/575/",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ban%20Chiang%20Archaeological%20Site%20UNESCO%20plaque.JPG?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-bang-rachan-heroes-monument",
+    "name": "อนุสาวรีย์วีรชนค่ายบางระจัน",
+    "province": "สิงห์บุรี",
+    "source": {
+      "name": "National Statistical Office: Sing Buri tourism map",
+      "url": "https://www.nso.go.th/nsoweb/storage/file_or_link/2025/20251001141002_61901.pdf",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-bang-saen-beach",
+    "name": "หาดบางแสน",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "OpenStreetMap: Bang Saen Beach",
+      "url": "https://www.openstreetmap.org/way/32877657",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Bang_Saen_Beach_at_sunset_2.jpg/960px-Bang_Saen_Beach_at_sunset_2.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-20200908183352469711",
+    "name": "ชุมชนเก่าชายทะเล (หมู่ 4 บ้านตลาดบางเสร่)",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20250815163438001",
+    "name": "กลุ่มท่องเที่ยวบ้านน้ำเชี่ยว",
+    "province": "ตราด",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20260126145509001",
+    "name": "ชุมชนบ้านออนใต้",
+    "province": "เชียงใหม่",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-river-kwai-bridge",
+    "name": "สะพานข้ามแม่น้ำแคว",
+    "province": "กาญจนบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand: River Kwai Bridge",
+      "url": "https://www.tourismthailand.org/Attraction/bridge-over-the-river-kwai",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Bridge%20over%20River%20Kwai%20in%20Kanchanaburi%2C%20Thailand.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-bua-tong-waterfall",
+    "name": "น้ำตกบัวตอง (น้ำตกเหนียว)",
+    "province": "เชียงใหม่",
+    "source": {
+      "name": "Travelfish: Bua Tong Waterfall",
+      "url": "https://www.travelfish.org/sight_profile/thailand/northern_thailand/chiang_mai/phrao/3441",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg/960px-%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%81%E0%B8%9A%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%AD%E0%B8%87_Buatong_Waterfall_Thailand_-_panoramio_%281%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-bueng-boraphet",
+    "name": "บึงบอระเพ็ด",
+    "province": "นครสวรรค์",
+    "source": {
+      "name": "Wikipedia: Bueng Boraphet",
+      "url": "https://en.wikipedia.org/wiki/Bueng_Boraphet",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Fishing_on_Bueng_Boraphet.jpg/960px-Fishing_on_Bueng_Boraphet.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-chai-nat-bird-park",
+    "name": "สวนนกชัยนาท",
+    "province": "ชัยนาท",
+    "source": {
+      "name": "Wikidata: Chai Nat Bird Park",
+      "url": "https://www.wikidata.org/wiki/Q2530020",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/View_on_the_Bird_Park_of_Chainat.JPG/960px-View_on_the_Bird_Park_of_Chainat.JPG",
+    "issues": []
+  },
+  {
+    "id": "tat-20250922135409001",
+    "name": "หอภาพถ่ายล้านนา",
+    "province": "เชียงใหม่",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293051",
+    "name": "หอพระพุทธสิหิงค์มิ่งมงคลสิรินาถ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20251225110647001",
+    "name": "พิพิธภัณฑ์ศาลรัฐธรรมนูญ",
+    "province": "กรุงเทพฯ",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "3",
+    "name": "ดอยอินทนนท์",
+    "province": "เชียงใหม่",
+    "source": {
+      "name": "Wikipedia: Doi Inthanon",
+      "url": "https://en.wikipedia.org/wiki/Doi_Inthanon",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg/960px-Naphamethinidon%2C_Naphaphonphumisiri_near_summit_of_Doi_Inthanon.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-201005182246293428",
+    "name": "อ่าวดงตาล",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-emerald-cave-ko-muk",
+    "name": "ถ้ำมรกต (เกาะมุก)",
+    "province": "ตรัง",
+    "source": {
+      "name": "Lovethailand: Emerald Cave and Koh Mook",
+      "url": "https://www.lovethailand.org/travel/en/75-Trang/4522-Emerald-Cave-and-Koh-Mook.html",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Inside%20the%20emerald%20cave%20(8161381748).jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-erawan-falls",
+    "name": "น้ำตกเอราวัณ",
+    "province": "กาญจนบุรี",
+    "source": {
+      "name": "Wikipedia: Cascade d’Erawan",
+      "url": "https://fr.wikipedia.org/wiki/Cascade_d%27Erawan",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Erawan%20Waterfall%20Level%203%20P1110261.JPG?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-erawan-museum",
+    "name": "พิพิธภัณฑ์ช้างเอราวัณ",
+    "province": "สมุทรปราการ",
+    "source": {
+      "name": "Wikipedia: Erawan Museum",
+      "url": "https://en.wikipedia.org/wiki/Erawan_Museum",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Erawan_museum-001.jpg/960px-Erawan_museum-001.jpg",
+    "issues": []
+  },
+  {
+    "id": "4",
+    "name": "ตลาดน้ำ",
+    "province": "ราชบุรี",
+    "source": {
+      "name": "OpenStreetMap: Damnoen Saduak Floating Market",
+      "url": "https://www.openstreetmap.org/way/603657447",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ratchaburi%20Damnoen%20Saduak%20Floating%20Market%202.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "tat-20211221230034734283",
+    "name": "แกรนด์แคนยอนคีรี",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-great-buddha-of-thailand",
+    "name": "พระพุทธมหานวมินทรศากยมุนีศรีวิเศษชัยชาญ (หลวงพ่อใหญ่)",
+    "province": "อ่างทอง",
+    "source": {
+      "name": "Wikipedia: Great Buddha of Thailand",
+      "url": "https://en.wikipedia.org/wiki/Great_Buddha_of_Thailand",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg/960px-Ang_Thong_-_Wiset_Chai_Chan_%282024%29_Great_Buddha_of_Thailand%2C_Wat_Muang_-_img_01.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-hala-bala-wildlife-sanctuary",
+    "name": "เขตรักษาพันธุ์สัตว์ป่าฮาลา-บาลา",
+    "province": "นราธิวาส",
+    "source": {
+      "name": "Tourism Authority of Thailand: Hala-Bala Wildlife Sanctuary",
+      "url": "https://www.tourismthailand.org/Attraction/hala-bala-wildlife-sanctuary",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg/960px-%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%AE%E0%B8%B2%E0%B8%A5%E0%B8%B2-%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B2_%28%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%98%E0%B8%B4%E0%B8%A7%E0%B8%B2%E0%B8%AA%29_1.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-hin-ta-hin-yai",
+    "name": "หินตาหินยาย",
+    "province": "สุราษฎร์ธานี",
+    "source": {
+      "name": "Thailandee: Hin Ta Hin Yai",
+      "url": "https://www.thailandee.com/en/visit-thailand/hin-ta-hin-yai-koh-samui-336",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hin%20ta%20hin%20yai%20-%20koh%20samui%20-%20panoramio.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "tat-20250925134625001",
+    "name": "โฮมสเตย์บ้านท่าขันทองการท่องเที่ยวโดยชุมชน",
+    "province": "เชียงราย",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20260204141052001",
+    "name": "ศูนย์เรียนรู้โฮงฮอมผญ๋า ล้านนา",
+    "province": "เชียงราย",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-kamphaeng-phet-historical-park",
+    "name": "อุทยานประวัติศาสตร์กำแพงเพชร",
+    "province": "กำแพงเพชร",
+    "source": {
+      "name": "Wikipedia: Kamphaeng Phet Historical Park",
+      "url": "https://en.wikipedia.org/wiki/Kamphaeng_Phet_Historical_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Histparkkamphet.png/960px-Histparkkamphet.png",
+    "issues": []
+  },
+  {
+    "id": "curated-khao-khitchakut-national-park",
+    "name": "อุทยานแห่งชาติเขาคิชฌกูฏ",
+    "province": "จันทบุรี",
+    "source": {
+      "name": "Wikipedia: Khao Khitchakut National Park",
+      "url": "https://en.wikipedia.org/wiki/Khao_Khitchakut_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://painaidee-api-production.up.railway.app/api/media/cms/f3ebb82f-2cdb-44f4-9a19-5b0898e32327.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-20260203143512001",
+    "name": "อุทยานแห่งชาติเขาพนมเบญจา",
+    "province": "กระบี่",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-khao-sok-national-park",
+    "name": "อุทยานแห่งชาติเขาสก",
+    "province": "สุราษฎร์ธานี",
+    "source": {
+      "name": "Wikipedia: Khao Sok National Park",
+      "url": "https://en.wikipedia.org/wiki/Khao_Sok_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://painaidee-api-production.up.railway.app/api/media/cms/cf40e9c0-a72f-428c-aaf6-b618b2fae938.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-khao-yai-national-park",
+    "name": "อุทยานแห่งชาติเขาใหญ่",
+    "province": "นครราชสีมา",
+    "source": {
+      "name": "Khao Yai National Park: About",
+      "url": "https://www.khaoyainationalpark.com/en/about/get-to-know",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Haew_Suwat_Waterfall_Khao-Yai02.jpg/960px-Haew_Suwat_Waterfall_Khao-Yai02.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-chang",
+    "name": "เกาะช้าง",
+    "province": "ตราด",
+    "source": {
+      "name": "Wikipedia: List of islands of Thailand",
+      "url": "https://en.wikipedia.org/wiki/List_of_islands_of_Thailand",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Ko_Chang%2C_Thailand.jpg/960px-Ko_Chang%2C_Thailand.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-201005182246293275",
+    "name": "เกาะสีชัง",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-ko-kradan",
+    "name": "เกาะกระดาน",
+    "province": "ตรัง",
+    "source": {
+      "name": "Wikipedia: Ko Kradan",
+      "url": "https://en.wikipedia.org/wiki/Ko_Kradan",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/KoKradanisland.jpg/960px-KoKradanisland.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-kret",
+    "name": "เกาะเกร็ด",
+    "province": "นนทบุรี",
+    "source": {
+      "name": "Wikipedia: Ko Kret",
+      "url": "https://en.wikipedia.org/wiki/Ko_Kret",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Kho-kret-Thailand.JPG/960px-Kho-kret-Thailand.JPG",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-kut",
+    "name": "เกาะกูด",
+    "province": "ตราด",
+    "source": {
+      "name": "Wikipedia: List of islands of Thailand",
+      "url": "https://en.wikipedia.org/wiki/List_of_islands_of_Thailand",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg/960px-Koh_Kut%2C_Thailand%2C_Gulf_of_Thailand.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-lan",
+    "name": "เกาะล้าน",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Wikipedia: Ko Lan",
+      "url": "https://en.wikipedia.org/wiki/Ko_Lan",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg/960px-Koh_Larn_Island_from_the_Bird_and_Bees_resort_by_Don_Ramey_Logan.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-lipe",
+    "name": "เกาะหลีเป๊ะ",
+    "province": "สตูล",
+    "source": {
+      "name": "Wikipedia: Ko Lipe",
+      "url": "https://en.wikipedia.org/wiki/Ko_Lipe",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Koh_Lipe_island_coast.jpg/960px-Koh_Lipe_island_coast.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-phayam",
+    "name": "เกาะพยาม",
+    "province": "ระนอง",
+    "source": {
+      "name": "Wikipedia: Ko Phayam",
+      "url": "https://en.wikipedia.org/wiki/Ko_Phayam",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Thailand_-_Koh_Phayam_%2824873552885%29.jpg/960px-Thailand_-_Koh_Phayam_%2824873552885%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-samet",
+    "name": "เกาะเสม็ด",
+    "province": "ระยอง",
+    "source": {
+      "name": "Wikipedia: Ko Samet",
+      "url": "https://en.wikipedia.org/wiki/Ko_Samet",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ko%20Samet%20Beach%2C%20Thailand.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-tao",
+    "name": "เกาะเต่า",
+    "province": "สุราษฎร์ธานี",
+    "source": {
+      "name": "Wikipedia: Ko Tao",
+      "url": "https://en.wikipedia.org/wiki/Ko_Tao",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Ban_Mae_Haad_Ko_Tao.jpg/960px-Ban_Mae_Haad_Ko_Tao.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-ko-tarutao",
+    "name": "เกาะตะรุเตา",
+    "province": "สตูล",
+    "source": {
+      "name": "Wikipedia: Ko Tarutao",
+      "url": "https://en.wikipedia.org/wiki/Ko_Tarutao",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg/960px-Koh_Tarutao%2C_Thailand%2C_Ancient_Cambrian_deposits.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-maeklong-railway-market",
+    "name": "ตลาดร่มหุบ (ตลาดแม่กลอง)",
+    "province": "สมุทรสงคราม",
+    "source": {
+      "name": "Wikipedia: Maeklong Railway",
+      "url": "https://en.wikipedia.org/wiki/Maeklong_Railway",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Talad_Rom_Hoop_%28II%29.jpg/960px-Talad_Rom_Hoop_%28II%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-201005182246293336",
+    "name": "เมืองพระรถ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-mu-ko-ang-thong-national-park",
+    "name": "อุทยานแห่งชาติหมู่เกาะอ่างทอง",
+    "province": "สุราษฎร์ธานี",
+    "source": {
+      "name": "Wikipedia: Mu Ko Ang Thong National Park",
+      "url": "https://en.wikipedia.org/wiki/Mu_Ko_Ang_Thong_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg/960px-Mu_Ko_Ang_Thong%2C_Islands_in_the_sea_2%2C_Thailand.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-similan-islands-national-park",
+    "name": "อุทยานแห่งชาติหมู่เกาะสิมิลัน",
+    "province": "พังงา",
+    "source": {
+      "name": "Tourism Authority of Thailand: Similan Islands",
+      "url": "https://www.tourismthailand.org/Attraction/mu-ko-similan-national-park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Similan.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-namtok-chet-sao-noi-national-park",
+    "name": "อุทยานแห่งชาติน้ำตกเจ็ดสาวน้อย",
+    "province": "สระบุรี",
+    "source": {
+      "name": "Wikipedia: Namtok Chet Sao Noi National Park",
+      "url": "https://en.wikipedia.org/wiki/Namtok_Chet_Sao_Noi_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Waterfall_7Girls.jpg/960px-Waterfall_7Girls.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-namtok-phlio-national-park",
+    "name": "อุทยานแห่งชาติน้ำตกพลิ้ว",
+    "province": "จันทบุรี",
+    "source": {
+      "name": "Wikipedia: Namtok Phlio National Park",
+      "url": "https://en.wikipedia.org/wiki/Namtok_Phlio_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Entrance_to_Phliu.jpg/960px-Entrance_to_Phliu.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-nang-rong-waterfall",
+    "name": "น้ำตกนางรอง",
+    "province": "นครนายก",
+    "source": {
+      "name": "Wikipedia: Nang Rong Waterfall",
+      "url": "https://en.wikipedia.org/wiki/Nang_Rong_Waterfall",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Nang_Rong_Waterfall.jpg/960px-Nang_Rong_Waterfall.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-20260203120214001",
+    "name": "ชุมชนหนองปลาไหล",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-pa-hin-ngam-national-park",
+    "name": "อุทยานแห่งชาติป่าหินงาม",
+    "province": "ชัยภูมิ",
+    "source": {
+      "name": "Wikipedia: Pa Hin Ngam National Park",
+      "url": "https://en.wikipedia.org/wiki/Pa_Hin_Ngam_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pa%20hin%20ngam.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-pai-canyon",
+    "name": "ปายแคนยอน (กองแลน)",
+    "province": "แม่ฮ่องสอน",
+    "source": {
+      "name": "Travelfish: Pai Canyon",
+      "url": "https://www.travelfish.org/sight_profile/thailand/northern_thailand/mae_hong_son/pai/3329",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pai%20canyon.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-pang-sida-national-park",
+    "name": "อุทยานแห่งชาติปางสีดา",
+    "province": "สระแก้ว",
+    "source": {
+      "name": "Wikipedia: Pang Sida National Park",
+      "url": "https://en.wikipedia.org/wiki/Pang_Sida_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Pangsida_National_Park.jpg/960px-Pangsida_National_Park.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phae-mueang-phi",
+    "name": "วนอุทยานแพะเมืองผี",
+    "province": "แพร่",
+    "source": {
+      "name": "Wikipedia: Phae Mueang Phi Forest Park",
+      "url": "https://en.wikipedia.org/wiki/Phae_Mueang_Phi_Forest_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Phae_Mueang_Phi_Forest_Park2.jpg/960px-Phae_Mueang_Phi_Forest_Park2.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phanom-rung-historical-park",
+    "name": "อุทยานประวัติศาสตร์พนมรุ้ง",
+    "province": "บุรีรัมย์",
+    "source": {
+      "name": "UNESCO: Phanom Rung tentative list",
+      "url": "https://whc.unesco.org/en/tentativelists/6401/",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg/960px-%D0%93%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%9F%D1%85%D0%B0%D0%BD%D0%BE%D0%BC%D1%80%D1%83%D0%BD%D0%B3.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-pha-taem-national-park",
+    "name": "อุทยานแห่งชาติผาแต้ม",
+    "province": "อุบลราชธานี",
+    "source": {
+      "name": "Wikipedia: Pha Taem National Park",
+      "url": "https://en.wikipedia.org/wiki/Pha_Taem_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Pha_taem_figures1.JPG/960px-Pha_taem_figures1.JPG",
+    "issues": []
+  },
+  {
+    "id": "curated-phimai-historical-park",
+    "name": "อุทยานประวัติศาสตร์พิมาย",
+    "province": "นครราชสีมา",
+    "source": {
+      "name": "Wikipedia: Phimai Historical Park",
+      "url": "https://en.wikipedia.org/wiki/Phimai_Historical_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Phimai_%28III%29.jpg/960px-Phimai_%28III%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "1",
+    "name": "หมู่เกาะพีพี",
+    "province": "กระบี่",
+    "source": {
+      "name": "Wikipedia: Phi Phi Islands",
+      "url": "https://en.wikipedia.org/wiki/Phi_Phi_Islands",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/KohPhiPhi.JPG/960px-KohPhiPhi.JPG",
+    "issues": []
+  },
+  {
+    "id": "curated-phra-maha-chedi-chai-mongkol",
+    "name": "พระมหาเจดีย์ชัยมงคล",
+    "province": "ร้อยเอ็ด",
+    "source": {
+      "name": "Tourism Authority of Thailand: Phra Maha Chedi Chai Mongkhon",
+      "url": "https://www.tourismthailand.org/Attraction/phra-maha-chedi-chai-mongkhon",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20Maha%20Chedi%20Chai%20Mongkol.JPG?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-phra-mongkhon-ming-mueang",
+    "name": "พระมงคลมิ่งเมือง",
+    "province": "อำนาจเจริญ",
+    "source": {
+      "name": "OpenStreetMap via Mapcarta: Phra Mongkon Ming Mueang",
+      "url": "https://mapcarta.com/N13001795506",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Mingmuang.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-phra-nakhon-khiri",
+    "name": "อุทยานประวัติศาสตร์พระนครคีรี",
+    "province": "เพชรบุรี",
+    "source": {
+      "name": "Thailand Tourism Directory: Khao Wang",
+      "url": "https://www.thailandtourismdirectory.go.th/en/attraction/4383",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG/960px-%E0%B8%A5%E0%B8%B5%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B9%81%E0%B8%94%E0%B8%87.JPG",
+    "issues": []
+  },
+  {
+    "id": "curated-phra-pathom-chedi",
+    "name": "พระปฐมเจดีย์",
+    "province": "นครปฐม",
+    "source": {
+      "name": "Wikipedia: Phra Pathom Chedi",
+      "url": "https://en.wikipedia.org/wiki/Phra_Pathom_Chedi",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9B%E0%B8%90%E0%B8%A1%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%97%E0%B8%B4%E0%B8%A8%E0%B9%80%E0%B8%AB%E0%B8%99%E0%B8%B7%E0%B8%AD.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phra-prang-sam-yot",
+    "name": "พระปรางค์สามยอด",
+    "province": "ลพบุรี",
+    "source": {
+      "name": "Wikipedia: Phra Prang Sam Yot",
+      "url": "https://en.wikipedia.org/wiki/Phra_Prang_Sam_Yot",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg/960px-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%97%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%A2%E0%B8%AD%E0%B8%942.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phra-that-kong-khao-noi",
+    "name": "พระธาตุก่องข้าวน้อย",
+    "province": "ยโสธร",
+    "source": {
+      "name": "Wikimedia Commons: Geotagged Phra That Kong Khao Noi",
+      "url": "https://commons.wikimedia.org/wiki/File:Phra_That_Kong_Khao_Noi_(I).jpg",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phra%20That%20Kong%20Khao%20Noi%20(I).jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-phra-that-na-dun",
+    "name": "พระธาตุนาดูน",
+    "province": "มหาสารคาม",
+    "source": {
+      "name": "OpenStreetMap via Mapcarta: Phrathat Na Dun",
+      "url": "https://mapcarta.com/29810370",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://pai-naidee-ui-spark.vercel.app/place-photos/phra-that-na-dun-01-main.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phraya-nakhon-cave",
+    "name": "ถ้ำพระยานคร",
+    "province": "ประจวบคีรีขันธ์",
+    "source": {
+      "name": "Wikipedia: Phraya Nakhon Cave",
+      "url": "https://en.wikipedia.org/wiki/Phraya_Nakhon_Cave",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg/960px-01-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%99%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%84%E0%B8%B9%E0%B8%AB%E0%B8%B2%E0%B8%84%E0%B8%A4%E0%B8%AB%E0%B8%B2%E0%B8%AA%E0%B8%99%E0%B9%8C.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-chi-fa",
+    "name": "ภูชี้ฟ้า",
+    "province": "เชียงราย",
+    "source": {
+      "name": "Wikipedia: Phu Chi Fa",
+      "url": "https://en.wikipedia.org/wiki/Phu_Chi_Fa",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Phu%20Chi%20Fa%20National%20Park%2C%20Chiengrai%2C%20Thailand.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-phuket-big-buddha",
+    "name": "พระพุทธมิ่งมงคลเอกนาคคีรี",
+    "province": "ภูเก็ต",
+    "source": {
+      "name": "Wikipedia: Phuket Big Buddha",
+      "url": "https://en.wikipedia.org/wiki/Phuket_Big_Buddha",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/The_Big_Buddha%2C_Phuket.jpg/960px-The_Big_Buddha%2C_Phuket.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-kradueng-national-park",
+    "name": "อุทยานแห่งชาติภูกระดึง",
+    "province": "เลย",
+    "source": {
+      "name": "Thai National Parks: Phu Kradueng",
+      "url": "https://www.thainationalparks.com/phu-kradueng-national-park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Lom_Sak_Cliff_%28I%29.jpg/960px-Lom_Sak_Cliff_%28I%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-laen-kha-national-park",
+    "name": "อุทยานแห่งชาติภูแลนคา",
+    "province": "ชัยภูมิ",
+    "source": {
+      "name": "Wikipedia: Phu Laen Kha National Park",
+      "url": "https://en.wikipedia.org/wiki/Phu_Laen_Kha_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg/960px-%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%AB%E0%B9%88%E0%B8%87%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4%E0%B8%A0%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%99%E0%B8%84%E0%B8%B25.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-langka-forest-park",
+    "name": "วนอุทยานภูลังกา",
+    "province": "พะเยา",
+    "source": {
+      "name": "Wikipedia: Phu Langka Forest Park",
+      "url": "https://en.wikipedia.org/wiki/Phu_Langka_Forest_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg/960px-Phu_Langka_Phayao_%E0%B8%A0%E0%B8%B9%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2_%E0%B8%9E%E0%B8%B0%E0%B9%80%E0%B8%A2%E0%B8%B2_01.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-pha-man-national-park",
+    "name": "อุทยานแห่งชาติภูผาม่าน",
+    "province": "ขอนแก่น",
+    "source": {
+      "name": "Wikipedia: Phu Pha Man National Park",
+      "url": "https://en.wikipedia.org/wiki/Phu_Pha_Man_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg/960px-%E0%B8%A0%E0%B8%B9%E0%B8%9C%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%E0%B8%99.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-phan-national-park",
+    "name": "อุทยานแห่งชาติภูพาน",
+    "province": "สกลนคร",
+    "source": {
+      "name": "Wikipedia: Phu Phan National Park",
+      "url": "https://en.wikipedia.org/wiki/Phu_Phan_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%96%E0%B9%89%E0%B8%B3%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B5%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%B2%E0%B8%99.jpg?width=960",
+    "issues": [
+      "url_unverified"
+    ]
+  },
+  {
+    "id": "curated-phu-phra-bat-historical-park",
+    "name": "อุทยานประวัติศาสตร์ภูพระบาท",
+    "province": "อุดรธานี",
+    "source": {
+      "name": "Fine Arts Department: Phu Phra Bat",
+      "url": "https://3dheritage.finearts.go.th/%E0%B8%A0%E0%B8%B9%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%B2%E0%B8%97/",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Rock_formation_in_Phu_Phra_Bat.jpg/960px-Rock_formation_in_Phu_Phra_Bat.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-soi-dao",
+    "name": "ภูสอยดาว",
+    "province": "อุตรดิตถ์",
+    "source": {
+      "name": "Wikipedia: Phu Soi Dao",
+      "url": "https://en.wikipedia.org/wiki/Phu_Soi_Dao",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg/960px-Phusoidao_National_Park_Uttaradit_Province_Thailand.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-phu-thok",
+    "name": "ภูทอก",
+    "province": "บึงกาฬ",
+    "source": {
+      "name": "Wikipedia: Phu Thok",
+      "url": "https://en.wikipedia.org/wiki/Phu_Thok",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/What_phu_tok_from_bottom.JPG/960px-What_phu_tok_from_bottom.JPG",
+    "issues": []
+  },
+  {
+    "id": "tat-20250916103852001",
+    "name": "ศูนย์ศึกษาวิจัยและพิพิธภัณฑ์ไดโนเสาร์",
+    "province": "ขอนแก่น",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-prasat-sikhoraphum",
+    "name": "ปราสาทศีขรภูมิ",
+    "province": "สุรินทร์",
+    "source": {
+      "name": "Wikipedia: Prasat Sikhoraphum",
+      "url": "https://en.wikipedia.org/wiki/Prasat_Sikhoraphum",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg/960px-Prasat_Sikhoraphum_-_Sikhoraphum_edit1.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-promthep-cape",
+    "name": "แหลมพรหมเทพ",
+    "province": "ภูเก็ต",
+    "source": {
+      "name": "Lovethailand: Promthep Cape",
+      "url": "https://www.lovethailand.org/travel/en/70-Phuket/4265-Promthep-Cape.html",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Promthep%20Cape%20Phuket.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-railay-beach",
+    "name": "หาดไร่เลย์",
+    "province": "กระบี่",
+    "source": {
+      "name": "Thailand Tourism Directory: Railay Beach",
+      "url": "https://www.thailandtourismdirectory.go.th/en/attraction/1805",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Railay_Beach_5.jpg/960px-Railay_Beach_5.jpg",
+    "issues": []
+  },
+  {
+    "id": "cms:27efc0ad-e2a5-479f-89d9-ad60df6cb9d3",
+    "name": "เขื่อนรัชชประภา (หรือ เขื่อนเชี่ยวหลาน)",
+    "province": "สุราษฎร์ธานี",
+    "source": null,
+    "image": "https://painaidee-api-production.up.railway.app/api/media/cms/91e8dd42-39e7-455f-bf72-59693d230e4d.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-sala-keoku",
+    "name": "ศาลาแก้วกู่",
+    "province": "หนองคาย",
+    "source": {
+      "name": "Wikipedia: Sala Keoku",
+      "url": "https://en.wikipedia.org/wiki/Sala_Keoku",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Sala_Keoku.JPG/960px-Sala_Keoku.JPG",
+    "issues": []
+  },
+  {
+    "id": "curated-sam-chuk-old-market",
+    "name": "ตลาดสามชุก 100 ปี",
+    "province": "สุพรรณบุรี",
+    "source": {
+      "name": "OpenStreetMap via Mapcarta: Old Market Sam Chuk",
+      "url": "https://mapcarta.com/N1841339771",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Suphanburi%20Samchuk%20Market%201.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-samila-beach",
+    "name": "หาดสมิหลา",
+    "province": "สงขลา",
+    "source": {
+      "name": "Travelfish: Samila Beach",
+      "url": "https://www.travelfish.org/sight_profile/thailand/southern_thailand/songkhla/songkhla/3956",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Songkhla%20mermaid.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-sam-phan-bok",
+    "name": "สามพันโบก",
+    "province": "อุบลราชธานี",
+    "source": {
+      "name": "Tourism Authority of Thailand: Sam Phan Bok",
+      "url": "https://www.tourismthailand.org/Attraction/ban-song-khon-sam-phan-bok",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://upload.wikimedia.org/wikipedia/commons/2/2b/%E0%B8%81%E0%B8%B8%E0%B8%A1%E0%B8%A0%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%93%E0%B9%8C.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-sanctuary-of-truth",
+    "name": "ปราสาทสัจธรรม",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Wikipedia: Sanctuary of Truth",
+      "url": "https://en.wikipedia.org/wiki/Sanctuary_of_Truth",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Santuaryoftruth2.jpg/960px-Santuaryoftruth2.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-20260209144621001",
+    "name": "เมืองเก่าสตูล",
+    "province": "สตูล",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20160528170226008563",
+    "name": "ป่าสิริเจริญวรรษ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-sirindhorn-museum",
+    "name": "พิพิธภัณฑ์สิรินธร",
+    "province": "กาฬสินธุ์",
+    "source": {
+      "name": "Wikipedia: Sirindhorn Museum",
+      "url": "https://en.wikipedia.org/wiki/Sirindhorn_Museum",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg/960px-Dinosaur_%40%E0%B8%9E%E0%B8%B4%E0%B8%9E%E0%B8%B4%E0%B8%98%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%A3%E0%B8%B4%E0%B8%99%E0%B8%98%E0%B8%A3_%2CSirindhorn_Museum_%2CKalasin%2CThailand_-_panoramio.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-si-satchanalai-historical-park",
+    "name": "อุทยานประวัติศาสตร์ศรีสัชนาลัย",
+    "province": "สุโขทัย",
+    "source": {
+      "name": "Wikipedia: Si Satchanalai Historical Park",
+      "url": "https://en.wikipedia.org/wiki/Si_Satchanalai_Historical_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Histparksisatchanalai.png/960px-Histparksisatchanalai.png",
+    "issues": []
+  },
+  {
+    "id": "tat-20160528165231008560",
+    "name": "อุทยานรังสรรค์นวัตกรรมอวกาศ (สเปซ อินสไปเลียม)",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-sukhothai-historical-park",
+    "name": "อุทยานประวัติศาสตร์สุโขทัย",
+    "province": "สุโขทัย",
+    "source": {
+      "name": "Wikipedia: Sukhothai Historical Park",
+      "url": "https://en.wikipedia.org/wiki/Sukhothai_Historical_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Wat_srichum_03.jpg/960px-Wat_srichum_03.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-2016010510155820163",
+    "name": "ชุมชนตะเคียนเตี้ย",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-tat-ton-national-park",
+    "name": "อุทยานแห่งชาติตาดโตน",
+    "province": "ชัยภูมิ",
+    "source": {
+      "name": "Wikipedia: Tat Ton National Park",
+      "url": "https://en.wikipedia.org/wiki/Tat_Ton_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Tatton_Waterfall_2014_-_001_%282%29.jpg/960px-Tatton_Waterfall_2014_-_001_%282%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-2015120421550718116",
+    "name": "พิพิธภัณฑ์เรือนไทย",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-thale-noi-wetland",
+    "name": "เขตห้ามล่าสัตว์ป่าทะเลน้อย",
+    "province": "พัทลุง",
+    "source": {
+      "name": "Wikipedia: Thale Noi Non-Hunting Area",
+      "url": "https://en.wikipedia.org/wiki/Thale_Noi_Non-Hunting_Area",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://upload.wikimedia.org/wikipedia/commons/6/60/Thale_Noi_Non-Hunting_Area.png",
+    "issues": []
+  },
+  {
+    "id": "curated-thap-lan-national-park",
+    "name": "อุทยานแห่งชาติทับลาน",
+    "province": "ปราจีนบุรี",
+    "source": {
+      "name": "Wikipedia: Thap Lan National Park",
+      "url": "https://en.wikipedia.org/wiki/Thap_Lan_National_Park",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Tublarn01.jpg/960px-Tublarn01.jpg",
+    "issues": []
+  },
+  {
+    "id": "tat-2015120421550718119",
+    "name": "หาดเทียนทะเล",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-thi-lo-su-waterfall",
+    "name": "น้ำตกทีลอซู",
+    "province": "ตาก",
+    "source": {
+      "name": "Wikipedia: Thi Lo Su Waterfall",
+      "url": "https://en.wikipedia.org/wiki/Thi_Lo_Su_Waterfall",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/TheeLorSue-h.jpg/960px-TheeLorSue-h.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-thung-wua-laen-beach",
+    "name": "หาดทุ่งวัวแล่น",
+    "province": "ชุมพร",
+    "source": {
+      "name": "BeachAtlas: Thung Wua Laen Beach",
+      "url": "https://www.beachatlas.com/thung-wua-laen",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Thung%20Wua%20Laen%20beach%20-%20Chumphon.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-arun",
+    "name": "วัดอรุณราชวราราม",
+    "province": "กรุงเทพฯ",
+    "source": {
+      "name": "Wikipedia: Wat Arun",
+      "url": "https://en.wikipedia.org/wiki/Wat_Arun",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg/960px-%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-chalong",
+    "name": "วัดไชยธาราราม (วัดฉลอง)",
+    "province": "ภูเก็ต",
+    "source": {
+      "name": "Travelfish: Wat Chalong",
+      "url": "https://www.travelfish.org/sight_profile/thailand/southern_thailand/phuket/phuket/1175",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chalong.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-chang-hai",
+    "name": "วัดช้างให้ราษฎร์บูรณาราม",
+    "province": "ปัตตานี",
+    "source": {
+      "name": "Mapcarta (OpenStreetMap): Wat Chang Hai",
+      "url": "https://mapcarta.com/28110034",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Chang%20Hai%20im%202018.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-chantharam-tha-sung",
+    "name": "วัดจันทาราม (วัดท่าซุง)",
+    "province": "อุทัยธานี",
+    "source": {
+      "name": "Wikipedia: Wat Chantharam",
+      "url": "https://en.wikipedia.org/wiki/Wat_Chantharam",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg/960px-%282023%29_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1_%28%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%8B%E0%B8%B8%E0%B8%87%29_%E0%B8%AD.%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87_%E0%B8%88.%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%B1%E0%B8%A2%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5_%2820%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-chedi-hoi",
+    "name": "วัดเจดีย์หอย",
+    "province": "ปทุมธานี",
+    "source": {
+      "name": "Tourism Authority of Thailand: Wat Chedi Hoi",
+      "url": "https://www.tourismthailand.org/Attraction/wat-chedi-hoi",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AB%E0%B8%AD%E0%B8%A2%20%E0%B8%AD.%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7%20%E0%B8%88.%E0%B8%9B%E0%B8%97%E0%B8%B8%E0%B8%A1%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%B5%20(4).jpg?width=960",
+    "issues": [
+      "url_unverified"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718075",
+    "name": "วัดเขาบ่อกวางทอง",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Municipality of Bo Kwang Thong / Burapha University Tourism Research",
+      "url": "https://www.bokwangthong.go.th/catalog/travels/206",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-wat-khok-kham",
+    "name": "วัดโคกขาม",
+    "province": "สมุทรสาคร",
+    "source": {
+      "name": "OpenStreetMap via Mapcarta: Wat Khok Kham",
+      "url": "https://mapcarta.com/27353948",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/0006052-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%81%E0%B8%82%E0%B8%B2%E0%B8%A1-2.jpg?width=960",
+    "issues": [
+      "url_unverified"
+    ]
+  },
+  {
+    "id": "curated-wat-pa-maha-chedi-kaew",
+    "name": "วัดป่ามหาเจดีย์แก้ว (วัดล้านขวด)",
+    "province": "ศรีสะเกษ",
+    "source": {
+      "name": "Wikipedia: Wat Pa Maha Chedi Kaew",
+      "url": "https://en.wikipedia.org/wiki/Wat_Pa_Maha_Chedi_Kaew",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Million_Bottle_Temple_%287447377506%29.jpg/960px-Million_Bottle_Temple_%287447377506%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-pa-phu-kon",
+    "name": "วัดป่าภูก้อน",
+    "province": "อุดรธานี",
+    "source": {
+      "name": "Wikipedia: Wat Pa Phu Kon",
+      "url": "https://en.wikipedia.org/wiki/Wat_Pa_Phu_Kon",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Wat_Pa_Phu_Kon_-_panoramio.jpg/960px-Wat_Pa_Phu_Kon_-_panoramio.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-pha-sorn-kaew",
+    "name": "วัดพระธาตุผาซ่อนแก้ว",
+    "province": "เพชรบูรณ์",
+    "source": {
+      "name": "Wikipedia: Wat Pha Sorn Kaew",
+      "url": "https://en.wikipedia.org/wiki/Wat_Pha_Sorn_Kaew",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://upload.wikimedia.org/wikipedia/commons/6/62/%E0%B8%9C%E0%B8%B2%E0%B8%8B%E0%B9%88%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%89%E0%B8%A7.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-pho",
+    "name": "วัดพระเชตุพนวิมลมังคลาราม",
+    "province": "กรุงเทพฯ",
+    "source": {
+      "name": "Wikipedia: Wat Pho",
+      "url": "https://en.wikipedia.org/wiki/Wat_Pho",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg/960px-%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9E%E0%B8%B8%E0%B8%97%E0%B8%98%E0%B9%84%E0%B8%AA%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%8A%E0%B8%95%E0%B8%B8%E0%B8%9E%E0%B8%99.jpg",
+    "issues": []
+  },
+  {
+    "id": "2",
+    "name": "วัดพระแก้ว",
+    "province": "กรุงเทพฯ",
+    "source": {
+      "name": "Wikipedia: Wat Phra Kaew",
+      "url": "https://en.wikipedia.org/wiki/Wat_Phra_Kaew",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg/960px-Wat_Phra_Kaew_by_Ninara_TSP_edit_crop.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-mahathat-nakhon",
+    "name": "วัดพระมหาธาตุวรมหาวิหาร",
+    "province": "นครศรีธรรมราช",
+    "source": {
+      "name": "UNESCO: Wat Phra Mahathat Woramahawihan",
+      "url": "https://whc.unesco.org/en/list/1761",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20Mahathat%20Woramahawihan%2C%20Nakhon%20Si%20Thammarat.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-singh",
+    "name": "วัดพระสิงห์วรมหาวิหาร",
+    "province": "เชียงใหม่",
+    "source": {
+      "name": "Wikipedia: Wat Phra Singh",
+      "url": "https://en.wikipedia.org/wiki/Wat_Phra_Singh",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg/960px-Wat_Phra_Sing%2C_Chiang_Mai_%28I%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-si-rattana-mahathat-phitsanulok",
+    "name": "วัดพระศรีรัตนมหาธาตุวรมหาวิหาร",
+    "province": "พิษณุโลก",
+    "source": {
+      "name": "Wikipedia: Wat Phra Si Rattana Mahathat",
+      "url": "https://en.wikipedia.org/wiki/Wat_Phra_Si_Rattana_Mahathat",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg/960px-Wat_Phra_Si_Rattana_Mahathat%2C_Phitsanulok_%28I%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-that-choeng-chum",
+    "name": "วัดพระธาตุเชิงชุมวรวิหาร",
+    "province": "สกลนคร",
+    "source": {
+      "name": "Tourism Authority of Thailand: Wat Phra That Choeng Chum",
+      "url": "https://www.tourismthailand.org/Attraction/wat-phra-that-choeng-chum",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Prathat%20Cherng%20Chum%20Temple%20(1).jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-doi-kong-mu",
+    "name": "วัดพระธาตุดอยกองมู",
+    "province": "แม่ฮ่องสอน",
+    "source": {
+      "name": "Wikipedia: Wat Phrathat Doi Kong Mu",
+      "url": "https://en.wikipedia.org/wiki/Wat_Phrathat_Doi_Kong_Mu",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg/960px-%E0%B8%A2%E0%B8%B2%E0%B8%A1%E0%B9%82%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B9%80%E0%B8%9E%E0%B8%A5%E0%B9%89%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%94%E0%B8%AD%E0%B8%A2%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B9.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-that-doi-suthep",
+    "name": "วัดพระธาตุดอยสุเทพราชวรวิหาร",
+    "province": "เชียงใหม่",
+    "source": {
+      "name": "Tourism Authority of Thailand: Doi Suthep",
+      "url": "https://www.tourismthailand.org/Attraction/wat-phra-that-doi-suthep",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Doi%20Suthep%20temple%20Thailand.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-that-hariphunchai",
+    "name": "วัดพระธาตุหริภุญชัยวรมหาวิหาร",
+    "province": "ลำพูน",
+    "source": {
+      "name": "Wikipedia: Wat Phra That Hariphunchai",
+      "url": "https://en.wikipedia.org/wiki/Wat_Phra_That_Hariphunchai",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Wat_Phra_That_Hariphunchai_%28III%29.jpg/960px-Wat_Phra_That_Hariphunchai_%28III%29.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-that-lampang-luang",
+    "name": "วัดพระธาตุลำปางหลวง",
+    "province": "ลำปาง",
+    "source": {
+      "name": "Wikipedia: Wat Phra That Lampang Luang",
+      "url": "https://en.wikipedia.org/wiki/Wat_Phra_That_Lampang_Luang",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg/960px-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%95%E0%B8%B8%E0%B8%A5%E0%B8%B3%E0%B8%9B%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87_2.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phra-that-phanom",
+    "name": "วัดพระธาตุพนมวรมหาวิหาร",
+    "province": "นครพนม",
+    "source": {
+      "name": "Thailand Tourism Directory: Wat Phra That Phanom",
+      "url": "https://www.thailandtourismdirectory.go.th/en/attraction/22010",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Phra%20That%20Phanom%2C%20That%20Phanom%2C%20Nakhon%20Phanom%2C%20Thailand.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phumin",
+    "name": "วัดภูมินทร์",
+    "province": "น่าน",
+    "source": {
+      "name": "Wikipedia: Wat Phumin",
+      "url": "https://en.wikipedia.org/wiki/Wat_Phumin",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/2013_Wat_Phumin_Nan.jpg/960px-2013_Wat_Phumin_Nan.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-phu-manorom",
+    "name": "วัดรอยพระพุทธบาทภูมโนรมย์",
+    "province": "มุกดาหาร",
+    "source": {
+      "name": "Tourism Authority of Thailand: Wat Roi Phra Phutthabat Phu Manorom",
+      "url": "https://www.tourismthailand.org/Attraction/wat-roi-phra-phutthabat-phu-manorom",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://pai-naidee-ui-spark.vercel.app/place-photos/wat-phu-manorom-01-main.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-rong-khun",
+    "name": "วัดร่องขุ่น",
+    "province": "เชียงราย",
+    "source": {
+      "name": "Wikimedia Commons: object location",
+      "url": "https://commons.wikimedia.org/wiki/File:Chiang_Rai_Thailand_Wat-Rong-Khun-01.jpg",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Rong%20Khun%20view.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-rong-suea-ten",
+    "name": "วัดร่องเสือเต้น",
+    "province": "เชียงราย",
+    "source": {
+      "name": "Wikipedia: Wat Rong Suea Ten",
+      "url": "https://en.wikipedia.org/wiki/Wat_Rong_Suea_Ten",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg/960px-Chiang_Rai_Blue_Temple_%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%A3%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%89%E0%B8%99.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-sothonwararam",
+    "name": "วัดโสธรวรารามวรวิหาร",
+    "province": "ฉะเชิงเทรา",
+    "source": {
+      "name": "Wikipedia: Wat Sothonwararam",
+      "url": "https://en.wikipedia.org/wiki/Wat_Sothonwararam",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Wat_sothorn_11.jpg/960px-Wat_sothorn_11.jpg",
+    "issues": []
+  },
+  {
+    "id": "curated-wat-tha-luang-phichit",
+    "name": "วัดท่าหลวง",
+    "province": "พิจิตร",
+    "source": {
+      "name": "Tourism Authority of Thailand: Wat Tha Luang",
+      "url": "https://thai.tourismthailand.org/Attraction/วัดท่าหลวง",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "curated-wat-tham-klong-phen",
+    "name": "วัดถ้ำกลองเพล",
+    "province": "หนองบัวลำภู",
+    "source": {
+      "name": "OpenStreetMap via Mapcarta: Tham Kong Phen Monastery",
+      "url": "https://mapcarta.com/29266986",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%96%E0%B9%88%E0%B8%B3%E0%B8%81%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%9E%E0%B8%A5.jpg?width=960",
+    "issues": [
+      "url_unverified"
+    ]
+  },
+  {
+    "id": "curated-wat-yai-chai-mongkhon",
+    "name": "วัดใหญ่ชัยมงคล",
+    "province": "พระนครศรีอยุธยา",
+    "source": {
+      "name": "Ayutthaya Historical Research: Wat Yai Chai Mongkhon",
+      "url": "https://www.ayutthaya-history.com/wat-yai-chai-mongkhon.html",
+      "verifiedAt": "2026-10-25T00:00:00.000Z"
+    },
+    "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wat%20Yai%20Chai%20Mongkhon%20Ayutthaya.jpg?width=960",
+    "issues": []
+  },
+  {
+    "id": "tat-2010120911214113305",
+    "name": "เกาะขามใหญ่",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293232",
+    "name": "เกาะครก",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293252",
+    "name": "เกาะลอยศรีราชา",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293266",
+    "name": "เกาะสาก",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718047",
+    "name": "เกาะแสมสาร",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20251215120121001",
+    "name": "เขตห้ามล่าสัตว์ป่าถ้ำผาท่าพล",
+    "province": "พิษณุโลก",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293395",
+    "name": "เขาพระตำหนัก",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293316",
+    "name": "เขาสามมุข",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718297",
+    "name": "ชมรมส่งเสริมการท่องเที่ยวโดยชุมชนบ้านชากแง้ว",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20100518224629120",
+    "name": "ช่องเขาขาด",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20250620154151001",
+    "name": "ชุมชนริมน้ำจันทบูร",
+    "province": "จันทบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214114470",
+    "name": "ตลาดเก่าอ่างศิลา",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2011032413454815424",
+    "name": "ตลาดน้ำสี่ภาคพัทยา",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20100518224629483",
+    "name": "ถ้ำเขาชะอางค์ห้ายอด",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20100518224629568",
+    "name": "ถ้ำเขาชะอางค์โอน",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20100518224629350",
+    "name": "ถ้ำจักรพงษ์",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20250701101935001",
+    "name": "ถ้ำภูผาเพชร",
+    "province": "สตูล",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214113304",
+    "name": "น้ำตกชันตาเถร",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20100518224629991",
+    "name": "พระพุทธมิ่งเมือง",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246291103",
+    "name": "พระพุทธรูปแกะสลักเขาชีจรรย์",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20251213063829001",
+    "name": "พิพิธภัณฑ์การแพทย์แผนไทยอภัยภูเบศร",
+    "province": "ปราจีนบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718063",
+    "name": "พิพิธภัณฑ์ทหารนาวิกโยธิน",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214113306",
+    "name": "พิพิธภัณฑ์ธรรมชาติวิทยาเกาะและทะเลไทย",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246291174",
+    "name": "พิพิธภัณฑ์พระจุฑาธุชราชฐาน",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2012080610583316342",
+    "name": "พิพิธภัณฑ์ภาพวาด 3 มิติ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718067",
+    "name": "มณฑปรอยพระพุทธบาท",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20250620152816001",
+    "name": "เมืองเก่าอุทัยธานี",
+    "province": "อุทัยธานี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293332",
+    "name": "เมืองจำลอง",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214112695",
+    "name": "เรือรบหลวงจักรีนฤเบศร์",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246291737",
+    "name": "วัดเขาพระพุทธบาทบางทราย",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20251213065714001",
+    "name": "วัดเขาสิงโต",
+    "province": "สระแก้ว",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718079",
+    "name": "วัดช่องแสมสาร",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718080",
+    "name": "วัดชัยมงคล",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246291544",
+    "name": "วัดญาณสังวรารามวรมหาวิหาร",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718083",
+    "name": "วัดตาลล้อม",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718078",
+    "name": "วัดใต้ต้นลาน",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550717971",
+    "name": "วัดพระใหญ่",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214112692",
+    "name": "วัดสัตหีบ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246291963",
+    "name": "วัดใหญ่อินทราราม (พระอารามหลวง)",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20251224114028001",
+    "name": "วิสาหกิจชุมชนบ้านหน้าเขา-ในวัง",
+    "province": "ตรัง",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214113284",
+    "name": "วิหารเทพสถิตพระกิติเฉลิม",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-20100518224629631",
+    "name": "ศาลเจ้าพ่อเขาใหญ่",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214113283",
+    "name": "ศูนย์ศึกษาธรรมชาติและอนุรักษ์ป่าชายเลนเพื่อการท่องเที่ยวเชิงนิเวศ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214112696",
+    "name": "ศูนย์อนุรักษ์พันธุ์เต่าทะเล ฐานทัพเรือสัตหีบ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246292827",
+    "name": "สวนนงนุช",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550717997",
+    "name": "สะพานอัษฎางค์",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293007",
+    "name": "หอพระพนัสบดี",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293101",
+    "name": "หาดจอมเทียน",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718003",
+    "name": "หาดเตยงาม",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293377",
+    "name": "หาดถ้ำเขาพัง",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718121",
+    "name": "หาดทรายแก้ว",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214112694",
+    "name": "หาดนางรอง",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293423",
+    "name": "หาดนางรำ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718123",
+    "name": "หาดน้ำใส",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718124",
+    "name": "หาดบ้านอำเภอ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293148",
+    "name": "หาดพัทยา",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718125",
+    "name": "หาดวงศ์อมาตย์",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2015120421550718120",
+    "name": "หาดแสม",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214113286",
+    "name": "แหลมแท่น",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-201005182246293417",
+    "name": "อ่างเก็บน้ำบางพระ",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  },
+  {
+    "id": "tat-2010120911214113308",
+    "name": "อุทยานใต้ทะเลเกาะขาม",
+    "province": "ชลบุรี",
+    "source": {
+      "name": "Tourism Authority of Thailand — Open Data",
+      "url": "https://datacatalog.tat.or.th/dataset/tourist-attraction",
+      "verifiedAt": null
+    },
+    "image": null,
+    "issues": [
+      "primary_missing"
+    ]
+  }
+]

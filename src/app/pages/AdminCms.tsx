@@ -1,5 +1,6 @@
 declare const __PAINAIDEE_BUILD__: string;
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Clock3, CloudUpload, FilePenLine, ImagePlus, LogOut, MapPin, Plus, Search, ShieldCheck } from 'lucide-react';
 import { getApiBaseUrl } from '@/services/railway-api.service';
@@ -50,6 +51,7 @@ type GeocodeCandidate = { lat: number; lng: number; label: string; source: strin
 const validCoordinate = (lat: number, lng: number) => Number.isFinite(lat) && Number.isFinite(lng) && lat >= 5 && lat <= 21 && lng >= 97 && lng <= 106;
 
 export default function AdminCms() {
+  const queryClient = useQueryClient();
   const [token, setToken] = useState(() => {
     try { return window.sessionStorage.getItem('painaidee.admin.token'); } catch { return null; }
   });
@@ -462,6 +464,7 @@ export default function AdminCms() {
       const result = await api(`/places/${draft.id}/publish`, { method: 'POST',
         headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version: draft.version }) });
       setDrafts(current => current.map(item => item.id === draft.id ? { ...item, status: 'published' } : item));
+      await queryClient.invalidateQueries({ queryKey: ['attractions'] });
       setMessage(`เผยแพร่สำเร็จ: ${result.placeId}`);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'เผยแพร่ไม่สำเร็จ'); }
     finally { setBusy(false); }

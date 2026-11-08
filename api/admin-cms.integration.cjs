@@ -226,6 +226,14 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await publish(saved);
     const detail = await (await publicApi(`/api/places/${placeId}`)).json();
     assert.equal(detail.images[0], main);
+    assert.equal(detail.image, main);
+    assert.equal(detail.publishedPrimaryImage, main);
+    const publicListResponse = await publicApi('/api/places?search=Isolated%20CMS%20Fixture');
+    assert.match(publicListResponse.headers.get('cache-control'), /no-store/);
+    const publicList = await publicListResponse.json();
+    assert.equal(publicList.attractions.find(p => p.id === placeId).image, main);
+    assert.deepEqual(detail.mediaCredits, publicList.attractions.find(p => p.id === placeId).mediaCredits);
+
     assert.ok(detail.images[1].endsWith(imagePath));
     assert.deepEqual(detail.tags, ['fixture-tag']);
     assert.equal(detail.reviewCount, 17);
