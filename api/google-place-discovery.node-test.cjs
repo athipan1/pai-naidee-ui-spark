@@ -25,7 +25,7 @@ test('quota exhausted never calls Google',async()=>{
 });
 test('search results are ephemeral, without import or DB writes',async()=>{
  let count=0;
- const r=await discoverGoogle({province:'ชลบุรี',limit:10},{env,reserve:async()=>true,fetchImpl:async(_url,opts)=>{
+ const r=await discoverGoogle({province:'ชลบุรี',limit:10},{env,readExistingImpl:async()=>[],reserve:async()=>true,fetchImpl:async(_url,opts)=>{
  count++;assert.equal(opts.headers['X-Goog-FieldMask'],MASK);
  assert.ok(!MASK.includes('photos'));assert.equal(JSON.parse(opts.body).pageSize,10);
  return {ok:true,json:async()=>({places:[{id:'abc',displayName:{text:'วัดตัวอย่าง'},location:{latitude:13.1,longitude:100.9},formattedAddress:'ชลบุรี',googleMapsUri:'https://www.google.com/maps/place/test'}]})};
