@@ -93,20 +93,23 @@ function toCandidates(elements,province,existing,limit) {
   }
   return candidates;
 }
+async function classifyAgainstCurrentDb(elements,province,limit,getSql) {
+  const existing=await getSql().begin('ISOLATION LEVEL REPEATABLE READ READ ONLY',async tx=>
+    tx`SELECT id,name,name_local,lat,lng FROM places WHERE province=${province}`);
+  return {province,sources:[{source:'osm',status:'ok'}],
+    candidates:toCandidates(elements,province,existing,limit),
+    automaticImport:false,publicationAllowed:false};
+}
 async function discover({province,limit,getSql,fetchImpl=fetch,endpoint=OSM_ENDPOINT,timeoutMs=REQUEST_TIMEOUT_MS}) {
   const key=province+':'+limit;
   const useCache=fetchImpl===fetch&&endpoint===OSM_ENDPOINT;
   const cached=useCache&&cache.get(key);
-  if(cached&&cached.expires>Date.now())return cached.value;
+  if(cached&&cached.expires>Date.now())return classifyAgainstCurrentDb(cached.elements,province,limit,getSql);
   if(useCache&&inFlight.has(key))return inFlight.get(key);
   const task=(async()=>{
     const elements=await fetchWithLimitedRetry({province,limit,fetchImpl,endpoint,timeoutMs});
-    const existing=await getSql().begin('ISOLATION LEVEL REPEATABLE READ READ ONLY',async tx=>
-      tx`SELECT id,name,name_local,lat,lng FROM places WHERE province=${province}`);
-    const result={province,sources:[{source:'osm',status:'ok'}],
-      candidates:toCandidates(elements,province,existing,limit),
-      automaticImport:false,publicationAllowed:false};
-    if(useCache){cache.set(key,{expires:Date.now()+CACHE_TTL_MS,value:result});
+    const result=await classifyAgainstCurrentDb(elements,province,limit,getSql);
+    if(useCache){cache.set(key,{expires:Date.now()+CACHE_TTL_MS,elements});
       if(cache.size>100)cache.delete(cache.keys().next().value);}
     return result;
   })();
