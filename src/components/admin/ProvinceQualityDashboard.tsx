@@ -24,11 +24,11 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
     setBatch({province:value.province,candidates:value.candidates});setRequestKey(crypto.randomUUID());setJob(null);
   }
   async function searchOsm() {
-    setDiscovery([]);setDiscoveryStatus('กำลังค้นหาข้อมูลจาก OpenStreetMap...');
+    setDiscovery([]);setDiscoveryStatus('กำลังค้นหา...');
     try {
       const result=await api('/place-discovery/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province,sources:['osm'],limit:100})}) as {candidates?:DiscoveryCandidate[]};
       setDiscovery(result.candidates||[]);
-      setDiscoveryStatus('พบ '+(result.candidates?.length||0)+' รายการ · ยังไม่มีการนำเข้าหรือเผยแพร่');
+      setDiscoveryStatus(result.candidates?.length ? 'พบ '+result.candidates.length+' รายการ · ยังไม่มีการนำเข้าหรือเผยแพร่' : 'ค้นหาไม่พบ');
     } catch(e) {setDiscoveryStatus('ค้นหาไม่สำเร็จ: '+(e instanceof Error?e.message:'ไม่สามารถเชื่อมต่อบริการได้'));}
   }
   const selected=provinces.find(p=>p.province===province);
