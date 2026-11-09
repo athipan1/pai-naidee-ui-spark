@@ -333,6 +333,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       const parsed = cleanPlace(draft.payload);
       if (parsed.errors.length) return { status: 400, errors: parsed.errors };
       const p = parsed.value;
+      if (draft.payload?.googlePlaceId && p.name === 'รอยืนยันชื่อสถานที่')
+        return { status: 400, error: 'Admin must verify and enter the place name before publishing.' };
       // Serialize the duplicate check and write, including publications of different drafts.
       await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
       // Direct admin publication: retain auth, payload validation and duplicate protection.
