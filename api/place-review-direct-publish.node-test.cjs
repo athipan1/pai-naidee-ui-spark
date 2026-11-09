@@ -6,14 +6,14 @@ const {publicationGateDecision}=require('./place-review-workflow.cjs');
 const review={state:'APPROVED',evidence:{source:{namespace:'test',id:'fixture'}}};
 const clean={payloadMatches:true,holds:[]};
 
-test('admin direct publish requires explicit approval and valid evidence',()=>{
+test('optional reviewed publication requires explicit approval and valid evidence',()=>{
   assert.deepEqual(publicationGateDecision(review),{ok:true},'Preflight must not require a report before evaluation');
   assert.deepEqual(publicationGateDecision(review,clean),{ok:true});
   assert.equal(publicationGateDecision({...review,state:'VERIFIED'},clean).ok,false);
   assert.equal(publicationGateDecision({...review,state:'REVIEW_PENDING'},clean).ok,false);
 });
 
-test('admin direct publish rejects missing evidence and rejected drafts',()=>{
+test('optional reviewed publication rejects missing evidence and rejected drafts',()=>{
   for(const invalid of [null,{...review,evidence:null},{...review,state:'REJECTED'},{...review,state:'PUBLISHED'}]){
     const result=publicationGateDecision(invalid,clean);
     assert.equal(result.ok,false);
@@ -21,7 +21,7 @@ test('admin direct publish rejects missing evidence and rejected drafts',()=>{
   }
 });
 
-test('admin direct publish rejects stale payload and every quality hold',()=>{
+test('optional reviewed publication rejects stale payload and every quality hold',()=>{
   assert.deepEqual(publicationGateDecision(review,{payloadMatches:false,holds:[]}).holds,['draft_changed_since_review']);
   for(const hold of ['unresolved_duplicate','duplicate_image','license_hold','coordinate_hold','province_polygon_unverified','media_probe_failed']){
     const result=publicationGateDecision(review,{payloadMatches:true,holds:[hold]});

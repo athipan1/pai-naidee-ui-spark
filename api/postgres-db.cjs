@@ -666,6 +666,7 @@ async function getPlaceById(id) {
   let publication;
   try { [publication]=await sql`SELECT evidence,verified_at FROM place_publication_details WHERE place_id=${id}`; }
   catch(error) {if(error?.code!=='42P01')throw error;}
+  if(publication?.evidence?.publicationMode==='admin_direct')publication=null;
   const point=publication?.evidence?.navigation;
   const navigation=point&&['vehicle_entrance','parking','trailhead'].includes(point.kind)&&
     point.lat===rows[0].lat&&point.lng===rows[0].lng?{...point,verifiedAt:publication.verified_at}:null;

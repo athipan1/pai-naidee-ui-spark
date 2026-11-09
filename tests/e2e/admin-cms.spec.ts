@@ -18,9 +18,8 @@ async function mockCms(page: Page) {
   let session = false;
   let failUpload = false;
   let publishCount = 0;
-  let reviewState="VERIFIED";
   let selected = { model: models[0].id, structuredOutput: false, source: 'railway' };
-  let drafts = [incomplete];
+  let drafts = structuredClone([incomplete]);
   let aliases: Array<{ id: string; alias_name: string; language: string; status: string }> = [];
   const catalogQueries: string[] = [];
   await page.route('**/*', async route => {
@@ -40,8 +39,6 @@ async function mockCms(page: Page) {
     if (pathname.startsWith('/api/admin/') && (!session || request.headers().authorization !== 'Bearer browser-test-session'))
       return reply(401, { error: 'Session expired or invalid.' });
     if (pathname === '/api/admin/me') return reply(200, { role: 'admin', email:'admin@example.test' });
-    if (pathname.endsWith('/review-transition')) {reviewState=({verify:'VERIFIED',request_review:'REVIEW_PENDING',approve:'APPROVED'} as Record<string,string>)[body().action];return reply(200,{state:reviewState,revision:2});}
-    if (/^\/api\/admin\/places\/[^/]+\/review$/.test(pathname)) return reply(200,{state:reviewState,revision:1,evidence:pathname.includes('created-fixture')?{source:{},coordinate:{},media:{},duplicateResolutions:[]}:null,history:[],report:{holds:[],payloadMatches:true,provinceGate:'PASS',duplicate:{matches:[]}}});
     if (pathname === '/api/admin/province-quality') return reply(200,{completenessClaim:null,automaticImport:false,provinces:[{province:'ชลบุรี',existing:{total:71,missing_images:1,missing_details:2,last_verified:null},review:{discovered:3,duplicates:1,license_hold:2,coordinate_hold:1,approved:0,published:0,confirmed_new:0}}]});
     if (pathname === '/api/admin/candidate-queue') return reply(200,{candidates:[],total:0,page:1,limit:30});
 
@@ -67,8 +64,9 @@ async function mockCms(page: Page) {
       return reply(200, { candidates: [{ lat: 13.25, lng: 100.95, label: 'หมุดจำลอง', source: 'fixture' }], providerConfigured: false });
     }
     if (pathname === `/api/admin/catalog/${place.id}/edit`) {
-      drafts = [existing, ...drafts.filter(draft => draft.id !== existing.id)];
-      return reply(201, existing);
+      const draft = structuredClone(existing);
+      drafts = [draft, ...drafts.filter(item => item.id !== draft.id)];
+      return reply(201, draft);
     }
     if (pathname === `/api/admin/catalog/${place.id}/media`) return reply(200, { images: [] });
     if (pathname === `/api/admin/catalog/${place.id}/aliases`) {
@@ -105,7 +103,6 @@ async function mockCms(page: Page) {
         version: draft.version, stale: false, placeUpdatedAt: '2026-11-08T00:00:00.000Z', fields: [] });
     }
     if (pathname.endsWith('/publish') && draft) {
-      if(reviewState!=='APPROVED') return reply(409,{error:'Explicit approval required.'});
       if (body().version !== draft.version) return reply(409, { error: 'Draft changed.' });
       draft.status = 'published';
       publishCount++;
@@ -137,18 +134,21 @@ async function login(page: Page, password = 'cms-fixture-password') {
   await page.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
 }
 
-test('candidate review is read-only and Google stays disabled without activation', async ({page}) => {
-  await mockCms(page);
-  let googleCalls=0;
-  page.on('request', request => {if(new URL(request.url()).pathname==='/api/admin/google-verification')googleCalls++;});
-  await login(page);
-  await navigate(page, 'ฉบับร่าง');
-  await page.getByRole('button', {name:'ตรวจคุณภาพแบบอ่านอย่างเดียว'}).click();
-  await expect(page.getByText(/เทียบฐานข้อมูล 194/)).toBeVisible();
-  await expect(page.getByText('รายงานนี้ยังไม่อนุมัติให้เผยแพร่')).toBeVisible();
-  await expect(page.getByRole('button', {name:'ตรวจ Google (th)'})).toBeDisabled();
-  await expect(page.getByRole('button', {name:'ตรวจ Google (en)'})).toBeDisabled();
-  expect(googleCalls).toBe(0);
+test('admin publishes directly without evidence forms, approval, or quality API requests', async ({page},testInfo) => {
+  const fixture=await mockCms(page);let qualityCalls=0;
+  page.on('request', req => {if(/quality-review|review-transition|\/evidence|\/review$|google-verification/.test(new URL(req.url()).pathname))qualityCalls++;});
+  page.on('dialog',dialog=>dialog.accept());
+  await login(page);await navigate(page,'สถานที่ทั้งหมด');
+  await page.getByRole('button',{name:'แก้ไขสถานที่ที่เผยแพร่แล้ว',exact:true}).click();
+  await page.getByRole('button',{name:'บันทึกการแก้ไขเป็นฉบับร่าง'}).click();
+  const draft=page.locator('article').filter({hasText:place.name_local});
+  await expect(draft.getByRole('button',{name:'ตรวจหลักฐานและคุณภาพอัตโนมัติ'})).toHaveCount(0);
+  await expect(draft.getByRole('button',{name:'ตรวจคุณภาพแบบอ่านอย่างเดียว'})).toHaveCount(0);
+  await expect(draft.getByRole('button',{name:'เผยแพร่',exact:true})).toBeEnabled();
+  await page.screenshot({path:testInfo.outputPath('admin-cms.png'),fullPage:true});
+  await draft.getByRole('button',{name:'เผยแพร่',exact:true}).click();
+  await expect(page.getByText(/เผยแพร่สำเร็จ/)).toBeVisible();
+  expect(fixture.published()).toBe(1);expect(qualityCalls).toBe(0);
 });
 
 test('login, failed credentials, logout, and an expired session during a request', async ({ page }) => {
@@ -244,10 +244,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await page.getByRole('button', { name: 'บันทึกสถานที่เป็นฉบับร่าง' }).click();
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
   const draft = page.locator('article').filter({ hasText: 'Draft fixture' });
-  await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeDisabled();
-  await draft.getByRole('button', {name:'ตรวจหลักฐานและคุณภาพอัตโนมัติ'}).click();
-  await draft.getByRole('button', {name:'ส่งตรวจสอบ',exact:true}).click();
-  await draft.getByRole('button', {name:'อนุมัติการเผยแพร่',exact:true}).click();
+  await expect(draft.getByRole('button', {name:'ตรวจหลักฐานและคุณภาพอัตโนมัติ'})).toHaveCount(0);
   await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeEnabled();
   await draft.getByRole('button', { name: 'เผยแพร่', exact: true }).click();
   await expect(page.getByText(/เผยแพร่สำเร็จ/)).toBeVisible();
@@ -286,7 +283,9 @@ test('name-only draft, explicit coordinates, unsaved changes and safe validation
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   const draft = page.locator('article').filter({hasText:'ร่างชื่ออย่างเดียว'});
   await expect(draft).toBeVisible();
-  await expect(draft.getByRole('button',{name:'เผยแพร่',exact:true})).toBeDisabled();
+  await expect(draft.getByRole('button',{name:'เผยแพร่',exact:true})).toBeEnabled();
+  await draft.getByRole('button',{name:'เผยแพร่',exact:true}).click();
+  await expect(page.getByText('กรุณาแก้ไขร่างให้มีชื่อสถานที่ จังหวัด และหมวดหมู่ก่อนเผยแพร่')).toBeVisible();
   await draft.getByRole('button',{name:'แก้ไขร่าง'}).click();
   await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
   await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('');
