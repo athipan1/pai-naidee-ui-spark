@@ -19,7 +19,7 @@ async function mockCms(page: Page) {
   let failUpload = false;
   let publishCount = 0;
   let selected = { model: models[0].id, structuredOutput: false, source: 'railway' };
-  let drafts = [incomplete];
+  let drafts = structuredClone([incomplete]);
   let aliases: Array<{ id: string; alias_name: string; language: string; status: string }> = [];
   const catalogQueries: string[] = [];
   await page.route('**/*', async route => {
@@ -64,8 +64,9 @@ async function mockCms(page: Page) {
       return reply(200, { candidates: [{ lat: 13.25, lng: 100.95, label: 'หมุดจำลอง', source: 'fixture' }], providerConfigured: false });
     }
     if (pathname === `/api/admin/catalog/${place.id}/edit`) {
-      drafts = [existing, ...drafts.filter(draft => draft.id !== existing.id)];
-      return reply(201, existing);
+      const draft = structuredClone(existing);
+      drafts = [draft, ...drafts.filter(item => item.id !== draft.id)];
+      return reply(201, draft);
     }
     if (pathname === `/api/admin/catalog/${place.id}/media`) return reply(200, { images: [] });
     if (pathname === `/api/admin/catalog/${place.id}/aliases`) {
