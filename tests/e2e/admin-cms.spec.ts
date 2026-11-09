@@ -39,7 +39,7 @@ async function mockCms(page: Page) {
     }
     if (pathname.startsWith('/api/admin/') && (!session || request.headers().authorization !== 'Bearer browser-test-session'))
       return reply(401, { error: 'Session expired or invalid.' });
-    if (pathname === '/api/admin/me') return reply(200, { role: 'admin' });
+    if (pathname === '/api/admin/me') return reply(200, { role: 'admin', email:'admin@example.test' });
     if (pathname.endsWith('/review-transition')) {reviewState=({verify:'VERIFIED',request_review:'REVIEW_PENDING',approve:'APPROVED'} as Record<string,string>)[body().action];return reply(200,{state:reviewState,revision:2});}
     if (/^\/api\/admin\/places\/[^/]+\/review$/.test(pathname)) return reply(200,{state:reviewState,revision:1,evidence:pathname.includes('created-fixture')?{source:{},coordinate:{},media:{},duplicateResolutions:[]}:null,history:[],report:{holds:[],payloadMatches:true,provinceGate:'PASS',duplicate:{matches:[]}}});
     if (pathname === '/api/admin/province-quality') return reply(200,{completenessClaim:null,automaticImport:false,provinces:[{province:'ชลบุรี',existing:{total:71,missing_images:1,missing_details:2,last_verified:null},review:{discovered:3,duplicates:1,license_hold:2,coordinate_hold:1,approved:0,published:0,confirmed_new:0}}]});
@@ -313,4 +313,37 @@ test('responsive navigation, keyboard focus, cards and form width matrix', async
     await page.setViewportSize({width:640,height:450});
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(640);
   }
+});
+
+
+test('unsaved form survives reload without creating or saving a production draft', async ({page}) => {
+  await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
+  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('แบบฟอร์มกู้คืน');
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toContain('แบบฟอร์มกู้คืน');
+  page.once('dialog', dialog => dialog.accept());
+  await page.reload();
+  await page.getByRole('button',{name:'กู้คืนแบบฟอร์ม',exact:true}).click();
+  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('แบบฟอร์มกู้คืน');
+  await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
+  await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
+  expect(await page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();
+});
+
+
+test('newer catalog search wins over a delayed response and province reaches the server', async ({page}) => {
+  await mockCms(page); await login(page); await navigate(page,'สถานที่ทั้งหมด');
+  await page.route('**/api/admin/catalog?**',async route => {
+    const url = new URL(route.request().url());
+    const q = url.searchParams.get('q');
+    if(q === 'เก่า') await new Promise(resolve => setTimeout(resolve,500));
+    await route.fulfill({json:{places:[{...place,name_local:q || 'ทั้งหมด'}],total:1,page:1}}).catch(() => {});
+  });
+  const search = page.getByRole('textbox',{name:'ค้นหาสถานที่เดิม',exact:true});
+  await search.fill('เก่า'); await page.getByRole('button',{name:'ค้นหา',exact:true}).click();
+  await search.fill('ใหม่'); await page.getByRole('textbox',{name:'กรองจังหวัด'}).fill('ชลบุรี');
+  const request = page.waitForRequest(req => req.url().includes('/api/admin/catalog?') && new URL(req.url()).searchParams.get('q') === 'ใหม่');
+  await page.getByRole('button',{name:'ค้นหา',exact:true}).click();
+  expect(new URL((await request).url()).searchParams.get('province')).toBe('ชลบุรี');
+  await expect(page.getByText('ใหม่',{exact:true})).toBeVisible();
+  await expect(page.getByText('เก่า',{exact:true})).toHaveCount(0);
 });

@@ -241,10 +241,11 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     if (!draftVersion(version)) return res.status(400).json({ error: 'Draft version required. Reload the draft.' });
     const sql = getSql();
     const result = await sql.begin(async tx => {
-      const [draft] = await tx`SELECT status, EXTRACT(EPOCH FROM updated_at)::text AS version
+      const [draft] = await tx`SELECT status, payload, EXTRACT(EPOCH FROM updated_at)::text AS version
         FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
       if (!draft) return { code: 404, error: 'Editable draft not found.' };
       if (draft.status !== 'draft' || draft.version !== version) return { code: 409, error: 'Draft changed. Reload it before saving.' };
+      if (typeof draft.payload?.googlePlaceId === 'string') parsed.value.googlePlaceId = draft.payload.googlePlaceId;
       const [saved] = await tx`UPDATE place_drafts SET payload = ${tx.json(parsed.value)},
         updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
         WHERE id = ${req.params.draftId}
@@ -258,7 +259,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     const version = req.body?.version;
     if (!draftVersion(version)) return res.status(400).json({ error: 'Draft version required. Reload the draft.' });
     const result = await getSql().begin(async tx => {
-      const [draft] = await tx`SELECT status, EXTRACT(EPOCH FROM updated_at)::text AS version
+      const [draft] = await tx`SELECT status, payload, EXTRACT(EPOCH FROM updated_at)::text AS version
         FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
       if (!draft) return { code: 404, error: 'Draft not found.' };
       if (draft.status !== 'draft') return { code: 409, error: 'Published places cannot be deleted from drafts.' };

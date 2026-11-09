@@ -167,6 +167,17 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await signIn();
   });
 
+  await t.test('name-only drafts persist null coordinates and preserve Google reference IDs on editing', async () => {
+    const minimal = await write('/places', {name:'Name only fixture'}, 201);
+    assert.equal(minimal.payload.lat,null); assert.equal(minimal.payload.lng,null);
+    await write(`/places/${minimal.id}/publish`,{version:minimal.version},400);
+    const referenced = await write('/places/google-reference',{placeId:'ChIJisolatedDraftRef1234'},201);
+    const row = (await (await admin('/places')).json()).drafts.find(d => d.id === referenced.id);
+    const saved = await write(`/places/${row.id}`,{...row.payload,name:'ชื่อที่ยืนยันแล้ว',version:row.version},200,'PUT');
+    assert.equal(saved.payload.googlePlaceId,'ChIJisolatedDraftRef1234');
+    assert.equal(saved.payload.lat,null); assert.equal(saved.payload.lng,null);
+  });
+
   await t.test('candidate review uses live SQL rows, exports safely and cannot publish or mutate a draft', async () => {
     const draft=await makeDraft({name:'Quality fixture',nameLocal:'คุณภาพจำลอง'});
     const [before]=await sql`SELECT payload,updated_at FROM place_drafts WHERE id=${draft.id}`;

@@ -5,7 +5,7 @@ type Evidence = { source:Record<string,string>;coordinate:Record<string,string|b
   district:string;detailSourceUrl:string;googlePlaceId:string;duplicateResolutions:{placeId:string;note:string;sourceUrl:string}[] };
 type Report = {holds:string[];payloadMatches:boolean;provinceGate:string;duplicate:{matches:{placeId:string;confidence?:string;reason:string}[]}};
 type Review = {state:string;revision:number;evidence:Evidence|null;report:Report|null;history:{actor_id:string;action:string;to_state:string;reason:string;created_at:string}[]};
-type Props = {draft:{id:string;version:string;target_place_id?:string;payload:{name?:string|null;nameLocal?:string|null;province?:string|null;description?:string|null;imageUrl?:string|null;lat?:string|number|null;lng?:string|number|null}};
+type Props = {draft:{id:string;version:string;target_place_id?:string;payload:{name?:string|null;nameLocal?:string|null;province?:string|null;description?:string|null;imageUrl?:string|null;googlePlaceId?:string;lat?:string|number|null;lng?:string|number|null}};
   api:(path:string,options?:RequestInit)=>Promise<unknown>;onStateChange?:(state:string)=>void;onApprovalChange:(approved:boolean,reasons?:string[])=>void};
 const holdLabels:Record<string,string>={
   source_license_unverified:'ยังไม่ยืนยันแหล่งข้อมูลหรือสิทธิ์การใช้ข้อมูล',
@@ -26,7 +26,7 @@ const fieldGroups:{group:Group;title:string;fields:[string,string][]}[]=[
 ];
 export default function PlaceApprovalReview({draft,api,onApprovalChange,onStateChange}:Props) {
   const [review,setReview]=useState<Review|null>(null);
-  const [evidence,setEvidence]=useState<Evidence>({source:{},coordinate:{},media:{url:draft.payload.imageUrl||''},district:'',detailSourceUrl:'',googlePlaceId:'',duplicateResolutions:[]});
+  const [evidence,setEvidence]=useState<Evidence>({source:{},coordinate:{},media:{url:draft.payload.imageUrl||''},district:'',detailSourceUrl:'',googlePlaceId:draft.payload.googlePlaceId||'',duplicateResolutions:[]});
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[attested,setAttested]=useState(false),[reason,setReason]=useState('');
   const path=`/places/${encodeURIComponent(draft.id)}`;
   async function load() {

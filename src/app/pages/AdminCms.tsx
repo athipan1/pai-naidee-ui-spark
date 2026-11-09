@@ -11,6 +11,7 @@ import PlaceApprovalReview from '@/components/admin/PlaceApprovalReview';
 import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboard';
 
 type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls'>, string | null>> & {
+  googlePlaceId?: string;
   imageUrls?: string[];
   removedImageUrls?: string[];
   lat?: string | number | null;
@@ -59,6 +60,7 @@ export default function AdminCms() {
     try { return window.sessionStorage.getItem('painaidee.admin.token'); } catch { return null; }
   });
   const [isLoading, setIsLoading] = useState(Boolean(token));
+  const [adminEmail, setAdminEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionError, setSessionError] = useState('');
   const [sessionAttempt, setSessionAttempt] = useState(0);
@@ -96,6 +98,8 @@ export default function AdminCms() {
   const [aiSaved,setAiSaved] = useState<{model:string;structuredOutput:boolean;source?:string;updatedAt?:string|null}|null>(null);
   const [aiBackendCommit,setAiBackendCommit] = useState<string|null>(null);
   const [aiValidated,setAiValidated] = useState(false);
+  const [recovery, setRecovery] = useState<{form: PlaceForm; saved: string; editing: Pick<Draft,'id'|'version'> | null} | null>(null);
+  const [recoveryChecked, setRecoveryChecked] = useState(false);
   const [savedForm, setSavedForm] = useState(JSON.stringify(empty));
   const [draftLoading, setDraftLoading] = useState(true);
   const [draftError, setDraftError] = useState('');
@@ -115,8 +119,13 @@ export default function AdminCms() {
   function confirmLeave() { return !dirty || window.confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากแบบฟอร์มและละทิ้งการแก้ไขหรือไม่?'); }
   function navigate(view: AdminView) {
     if (view !== tab && !confirmLeave()) return;
-    if (view !== tab && dirty) { setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); }
+    if (view !== tab && dirty) { imageRequest.current?.abort(); setExistingImages([]); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); }
+    if (view !== 'existing') catalogRequest.current?.abort();
     setTab(view); setDraftPage(1); setStatusFilter('');
+  }
+  function startNew() {
+    if (!confirmLeave()) return;
+    imageRequest.current?.abort(); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); setExistingImages([]); setGeoCandidates([]); setProposedCoordinate(null); setGeocodeNote(''); setMessage(''); setTab('new');
   }
   useEffect(() => {
     if (!dirty) return;
@@ -130,6 +139,27 @@ export default function AdminCms() {
     return () => { window.removeEventListener('beforeunload', warn); document.removeEventListener('click', links, true); };
   }, [dirty]);
   useEffect(() => () => { imageRequest.current?.abort(); catalogRequest.current?.abort(); }, []);
+  useEffect(() => {
+    if (!isAdmin || !adminEmail || recoveryChecked) return;
+    try {
+      const stored = JSON.parse(window.sessionStorage.getItem('painaidee.admin.recovery') || 'null');
+      if (stored?.owner === adminEmail && Date.now() - stored.time < 86400000 && stored.form && typeof stored.saved === 'string') {
+        const restored = toPlaceForm(stored.form);
+        const baseline = JSON.stringify(toPlaceForm(JSON.parse(stored.saved)));
+        const editing = stored.editing && typeof stored.editing.id === 'string' && /^\d{1,12}\.\d{6}$/.test(stored.editing.version) ? stored.editing : null;
+        if (JSON.stringify(restored) !== baseline) setRecovery({form:restored, saved:baseline, editing});
+      }
+    } catch { /* Unavailable or invalid local recovery is ignored. */ }
+    setRecoveryChecked(true);
+  }, [isAdmin, adminEmail, recoveryChecked]);
+  useEffect(() => {
+    if (!isAdmin || !adminEmail || !recoveryChecked || recovery) return;
+    try {
+      if (dirty) window.sessionStorage.setItem('painaidee.admin.recovery', JSON.stringify({owner:adminEmail, time:Date.now(), form, saved:savedForm, editing}));
+      else window.sessionStorage.removeItem('painaidee.admin.recovery');
+    } catch { /* Saving the actual draft still uses the server. */ }
+  }, [isAdmin, adminEmail, recoveryChecked, recovery, dirty, form, savedForm, editing]);
+
   const imageRequest = useRef<AbortController | null>(null);
   const base = getApiBaseUrl();
 
@@ -164,7 +194,7 @@ export default function AdminCms() {
     void api('/me', { signal: controller.signal })
       .then(data => {
         if (controller.signal.aborted) return;
-        if (data.role === 'admin') setIsAdmin(true);
+        if (data.role === 'admin') { setAdminEmail(data.email || ''); setIsAdmin(true); }
         else clearSession('บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ');
       })
       .catch(() => {
@@ -179,6 +209,7 @@ export default function AdminCms() {
     setBusy(true);
     try {
       await api('/logout', { method: 'POST' });
+      try { window.sessionStorage.removeItem('painaidee.admin.recovery'); } catch { /* Storage may be disabled. */ }
       clearSession();
     } catch {
       setMessage('ออกจากระบบไม่สำเร็จ กรุณาลองใหม่');
@@ -205,7 +236,8 @@ export default function AdminCms() {
 
   useEffect(() => {
     if (tab !== 'existing' || !isAdmin || searched) return;
-    const controller = new AbortController();
+    catalogRequest.current?.abort();
+    const controller = new AbortController(); catalogRequest.current = controller;
     void api('/catalog?page=1', { signal: controller.signal })
       .then(data => {
         if (controller.signal.aborted) return;
@@ -527,7 +559,7 @@ export default function AdminCms() {
   const visibleDrafts = activeDrafts.filter(d => (tab !== 'review' || d.review_state === 'REVIEW_PENDING') && (!statusFilter || (d.review_state || 'DISCOVERED') === statusFilter) && `${d.payload.name} ${d.payload.nameLocal} ${d.payload.province}`.toLocaleLowerCase().includes(draftFilter.toLocaleLowerCase()));
   const publishedDrafts = drafts.filter(d => d.status === 'published');
   return <AdminWorkspace view={tab} onNavigate={navigate} onSignOut={() => void signOut()} busy={busy}>
-      <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-teal-800">Travel management</p><h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">จัดการสถานที่ท่องเที่ยว</h1><p className="mt-2 text-sm text-slate-600">ดูแลทุกจุดหมาย ตั้งแต่ฉบับร่างจนถึงการเผยแพร่</p></div><button type="button" disabled={busy} onClick={() => navigate('new')} className="flex items-center gap-2 rounded-xl bg-teal-800 px-4 py-3 text-sm font-semibold text-white"><Plus size={18} />เพิ่มสถานที่</button></header>
+      <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-teal-800">Travel management</p><h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">จัดการสถานที่ท่องเที่ยว</h1><p className="mt-2 text-sm text-slate-600">ดูแลทุกจุดหมาย ตั้งแต่ฉบับร่างจนถึงการเผยแพร่</p></div><button type="button" disabled={busy} onClick={startNew} className="flex items-center gap-2 rounded-xl bg-teal-800 px-4 py-3 text-sm font-semibold text-white"><Plus size={18} />เพิ่มสถานที่</button></header>
       <div className="flex flex-wrap items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><ShieldCheck size={18} className="shrink-0" /> การเปลี่ยนแปลงจะไม่ขึ้นเว็บไซต์จนกว่าจะกดเผยแพร่</div>
       {tab === 'settings' && <section className="space-y-3 rounded-2xl border border-teal-200 bg-white p-4 sm:p-6" aria-label="AI Model Management">
         <h2 className="text-lg font-bold">จัดการ AI วางแผนเที่ยว</h2>
@@ -573,14 +605,15 @@ export default function AdminCms() {
       {tab === 'overview' && <section className="space-y-5" aria-label="ภาพรวมข้อมูล">
         <div className="grid gap-4 sm:grid-cols-3">{[{label:'สถานที่ที่เผยแพร่ทั้งหมด', value:overviewTotal, note:'จำนวนจากแค็ตตาล็อกจริง'}, {label:'ฉบับร่างในรายการล่าสุด', value:draftLoading || draftError ? null : activeDrafts.length, note:'จากฉบับร่างล่าสุดไม่เกิน 100 รายการ'}, {label:'รอตรวจสอบในรายการล่าสุด', value:draftLoading || draftError ? null : activeDrafts.filter(d => d.review_state === 'REVIEW_PENDING').length, note:'เฉพาะสถานะจาก API ใน 100 รายการล่าสุด'}, {label:'ประวัติเผยแพร่ในรายการล่าสุด', value:draftLoading || draftError ? null : publishedDrafts.length, note:'ประวัติ CMS ไม่ใช่จำนวนสถานที่ทั้งหมด'}].map(item => <article key={item.label} className="rounded-2xl border bg-white p-6 shadow-sm"><p className="text-sm text-slate-600">{item.label}</p><p className="my-3 text-4xl font-bold tracking-tight text-teal-900">{item.value === null ? '—' : item.value.toLocaleString('th-TH')}</p><p className="text-xs text-slate-500">{item.note}</p></article>)}</div>
         {overviewError && <p role="alert">{overviewError} <button type="button" className="underline" onClick={() => setReloadDrafts(n => n + 1)}>ลองใหม่</button></p>}
-        <div className="rounded-2xl border bg-white p-6 sm:p-8"><p className="text-xs font-semibold text-teal-800">เริ่มต้นจากชื่อสถานที่</p><h2 className="mt-2 text-xl font-bold">เก็บจุดหมายใหม่ไว้เป็นฉบับร่าง</h2><p className="mt-2 max-w-xl text-sm text-slate-600">เพิ่มรายละเอียด พิกัดที่ตรวจสอบแล้ว และสิทธิ์ภาพในภายหลัง จากนั้นส่งตรวจและอนุมัติก่อนเผยแพร่</p><button type="button" onClick={() => navigate('new')} className="mt-5 rounded-xl bg-teal-800 px-5 py-3 text-sm font-semibold text-white">สร้างฉบับร่าง</button></div>
+        <div className="rounded-2xl border bg-white p-6 sm:p-8"><p className="text-xs font-semibold text-teal-800">เริ่มต้นจากชื่อสถานที่</p><h2 className="mt-2 text-xl font-bold">เก็บจุดหมายใหม่ไว้เป็นฉบับร่าง</h2><p className="mt-2 max-w-xl text-sm text-slate-600">เพิ่มรายละเอียด พิกัดที่ตรวจสอบแล้ว และสิทธิ์ภาพในภายหลัง จากนั้นส่งตรวจและอนุมัติก่อนเผยแพร่</p><button type="button" onClick={startNew} className="mt-5 rounded-xl bg-teal-800 px-5 py-3 text-sm font-semibold text-white">สร้างฉบับร่าง</button></div>
       </section>}
+      {recovery && <section role="status" className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-5"><h2 className="font-bold">พบแบบฟอร์มที่ยังไม่ได้บันทึก</h2><p className="text-sm">กู้คืนข้อมูลชั่วคราวจากแท็บนี้ แล้วตรวจสอบก่อนบันทึกลงระบบ</p><div className="flex flex-wrap gap-2"><button type="button" className="rounded-xl bg-teal-800 px-4 py-2 text-white" onClick={() => {setForm(recovery.form);setSavedForm(recovery.saved);setEditing(recovery.editing);setTab('new');setRecovery(null);}}>กู้คืนแบบฟอร์ม</button><button type="button" className="rounded-xl border px-4 py-2" onClick={() => setRecovery(null)}>ละทิ้งข้อมูลชั่วคราว</button></div></section>}
       {draftLoading && <p role="status" className="animate-pulse rounded-xl border bg-white p-4">กำลังโหลดรายการฉบับร่าง...</p>}
       {draftError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4">{draftError} <button type="button" className="underline" onClick={() => setReloadDrafts(n => n + 1)}>โหลดฉบับร่างใหม่</button></p>}
       {message && <div role="status" aria-live="polite" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">{message}</div>}
       {tab === 'existing' && <section className="space-y-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
         <div><h2 className="flex items-center gap-2 text-xl font-bold"><Search className="text-teal-600" /> ค้นหาสถานที่เดิม</h2><p className="mt-1 text-sm text-slate-500">แสดงสถานที่ที่มีอยู่ใน Railway และค้นหาได้ด้วยชื่อเต็ม ชื่อย่อ หรือจังหวัด</p></div>
-        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search.trim()); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={catalogLoading} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
+        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search.trim()); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span>พบ {catalogTotal} สถานที่ {catalogQuery ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setProvinceFilter(''); void findPlaces(1, '', ''); }}>แสดงทั้งหมด</button></div>
         {searched && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
         {catalogLoading && <p role="status">กำลังค้นหาสถานที่...</p>}
@@ -601,15 +634,17 @@ export default function AdminCms() {
         </section>}
         {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery, catalogProvince)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery, catalogProvince)}>ถัดไป</button></div>}
       </section>}
-      {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="contents">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนส่งตรวจและเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { setEditing(null); setForm({ ...empty }); setBrokenImage(false); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+      {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนส่งตรวจและเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setBrokenImage(false); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
-          {(['name', 'nameLocal', 'province', 'category', 'lat', 'lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{({ name: 'ชื่อสถานที่ (หลัก)', nameLocal: 'ชื่อภาษาไทย', province: 'จังหวัด', category: 'หมวดหมู่', lat: 'ละติจูด', lng: 'ลองจิจูด' })[key]}{key === 'name' ? ' *' : ''}</span><input className={inputStyle} value={form[key]} inputMode={key === 'lat' || key === 'lng' ? 'decimal' : 'text'} onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
+          {(['name', 'nameLocal', 'category'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{({ name: 'ชื่อสถานที่ (หลัก)', nameLocal: 'ชื่อภาษาไทย', province: 'จังหวัด', category: 'หมวดหมู่', lat: 'ละติจูด', lng: 'ลองจิจูด' })[key]}{key === 'name' ? ' *' : ''}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
         </section>
+        <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
         <section id="cms-location" className="scroll-mt-24 space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">กรอกพิกัดเอง หรือค้นหาและยืนยันหมุดด้วยตนเอง ระบบไม่เติมพิกัดอัตโนมัติ</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-3">{(['province','lat','lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium">{{province:'จังหวัด',lat:'ละติจูด',lng:'ลองจิจูด'}[key]}<input className={inputStyle} value={form[key]} inputMode={key === 'province' ? 'text' : 'decimal'} onChange={e => setForm(current => ({...current,[key]:e.target.value}))} /></label>)}</div>
           {geocodeNote && <p aria-live="polite" className="text-sm text-slate-700">{geocodeNote}</p>}
           {geoCandidates.length > 0 && <div className="space-y-2">{geoCandidates.map((candidate, index) => <button key={`${candidate.source}-${index}`} type="button" onClick={() => setProposedCoordinate({ lat: candidate.lat, lng: candidate.lng })} className="flex w-full items-start justify-between gap-2 rounded-lg border bg-white p-3 text-left text-sm hover:border-teal-500"><span>{candidate.label}<span className="mt-1 block text-xs text-slate-500">{candidate.source} · {candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}</span></span><MapPin size={16} className="shrink-0 text-teal-600" /></button>)}</div>}
           <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-slate-200" />}>
@@ -618,7 +653,7 @@ export default function AdminCms() {
           {proposedCoordinate && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-3"><span className="text-sm">หมุดที่เลือก: <strong>{proposedCoordinate.lat.toFixed(6)}, {proposedCoordinate.lng.toFixed(6)}</strong></span><button type="button" onClick={() => { setForm(current => ({ ...current, lat: proposedCoordinate.lat.toFixed(6), lng: proposedCoordinate.lng.toFixed(6) })); setProposedCoordinate(null); setGeocodeNote('ยืนยันพิกัดในแบบฟอร์มแล้ว กรุณาบันทึกฉบับร่างเพื่อเก็บการเปลี่ยนแปลง'); }} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">ยืนยันใช้พิกัดนี้</button></div>}
           <p className="text-xs text-slate-500">พิกัดจากระบบเป็นเพียงข้อเสนอ ตรวจสอบหมุดก่อนทุกครั้ง · ยังไม่มีการบันทึกลงฐานข้อมูล</p>
         </section>
-        <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
+
         <section id="cms-gallery" className="scroll-mt-24 space-y-3 rounded-xl border border-dashed border-teal-200 bg-teal-50/40 p-4">
           <h3 className="flex items-center gap-2 font-semibold"><ImagePlus size={19} className="text-teal-700" /> รูปภาพสถานที่</h3>
           <p className="text-xs text-slate-600">เครดิตและใบอนุญาตภาพ: ระบุในขั้นตรวจหลักฐานของฉบับร่างก่อนอนุมัติ</p>
