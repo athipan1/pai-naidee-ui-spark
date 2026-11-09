@@ -17,6 +17,7 @@ const place = {
 };
 
 test.beforeEach(async ({ page }, testInfo) => {
+  await page.route(/https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/, route => route.fulfill({ contentType: 'text/css', body: '' }));
   // Historical discovery assertions cover the English UI. Simulate a user
   // who explicitly selected English; the language test below covers a new
   // visitor without that preference, ensuring Thai remains the default.
@@ -286,7 +287,7 @@ test('detail page displays Railway photo attribution, license, and sourced addit
   await expect(licenceLinks).toHaveCount(2); // Gallery caption and full attribution panel.
   for(const link of await licenceLinks.all())await expect(link).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0');
   await expect(page.getByTestId('verified-place-details')).toContainText('Documented history and geography');
-  await expect.poll(() => page.getByAltText('Doi Inthanon - image 1').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await expect.poll(() => page.getByAltText('Doi Inthanon · Photo 1').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
 test('published Ko Chang photo is not silently replaced by a frontend correction', async ({ page }) => {
@@ -303,7 +304,7 @@ test('published Ko Chang photo is not silently replaced by a frontend correction
   await page.getByTestId('attribution-details').locator('summary').click();
   await expect(page.getByTestId('photo-attribution')).toContainText('Incorrect location');
   await expect(page.getByTestId('photo-attribution')).not.toContainText('Nina R');
-  await expect(page.getByAltText('Ko Chang - image 1')).toHaveAttribute('src', wrongPhoto);
+  await expect(page.getByAltText('Ko Chang · Photo 1')).toHaveAttribute('src', wrongPhoto);
 
 });
 
@@ -374,7 +375,7 @@ test('mobile Phra That Na Dun gallery loads all three submitted photos without o
   await expect(page.getByRole('heading', { name: 'Phra That Na Dun', exact: true })).toBeVisible();
   await expect(page.getByTestId('photo-attribution')).toContainText('PaiNaiDee user');
   await expect(page.getByTestId('photo-attribution').getByRole('link')).toHaveCount(0);
-  const gallery = page.locator('img[alt^="Phra That Na Dun - image"]');
+  const gallery = page.getByRole('region', { name: 'Destination photos', exact: true }).locator('img[alt^="Phra That Na Dun · Photo"]');
   await expect(gallery).toHaveCount(3);
   const photos = userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-phra-that-na-dun');
   for (let index = 0; index < photos.length; index++) {
@@ -382,7 +383,7 @@ test('mobile Phra That Na Dun gallery loads all three submitted photos without o
     await expect.poll(() => gallery.nth(index).evaluate(image =>
       (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0)).toBe(true);
     if (index < photos.length - 1) {
-      await page.getByRole('button', { name: 'Next slide' }).click();
+      await page.getByRole('button', { name: 'Next photo' }).click();
     }
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
@@ -407,14 +408,14 @@ test('mobile Wat Phu Manorom gallery loads all three confirmed user photos witho
   await page.goto('/attraction/curated-wat-phu-manorom');
   await expect(page.getByRole('heading', { name: 'Wat Roi Phra Phutthabat Phu Manorom', exact: true })).toBeVisible();
   await expect(page.getByTestId('photo-attribution')).toContainText('PaiNaiDee user');
-  const gallery = page.locator('img[alt^="Wat Roi Phra Phutthabat Phu Manorom - image"]');
+  const gallery = page.getByRole('region', { name: 'Destination photos', exact: true }).locator('img[alt^="Wat Roi Phra Phutthabat Phu Manorom · Photo"]');
   const photos = userProvidedMedia.filter((photo: { placeId: string }) => photo.placeId === 'curated-wat-phu-manorom');
   await expect(gallery).toHaveCount(3);
   for (let index = 0; index < photos.length; index++) {
     await expect(gallery.nth(index)).toHaveAttribute('src', photos[index].url);
     await expect.poll(() => gallery.nth(index).evaluate(image =>
       (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0)).toBe(true);
-    if (index < photos.length - 1) await page.getByRole('button', { name: 'Next slide' }).click();
+    if (index < photos.length - 1) await page.getByRole('button', { name: 'Next photo' }).click();
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });

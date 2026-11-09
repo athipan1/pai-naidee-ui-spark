@@ -217,7 +217,7 @@ export default function AttractionDetail({
             {th ? "กลับ" : "Back"}
           </Button>
           <div className="flex items-center gap-1 sm:gap-2">
-            <Button variant="outline" className="h-[44px] min-w-[44px]" aria-label={th ? 'TH · Switch to English' : 'EN · เปลี่ยนเป็นภาษาไทย'} onClick={() => onLanguageChange(th ? 'en' : 'th')}>
+            <Button variant="outline" className="h-[44px] min-w-[44px]" aria-label={th ? 'TH · Switch to English' : 'EN · Switch to ไทย'} onClick={() => onLanguageChange(th ? 'en' : 'th')}>
               {th ? 'TH' : 'EN'}
             </Button>
             <Button
