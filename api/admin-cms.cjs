@@ -187,6 +187,34 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.draft || { error: result.error });
   }));
 
+  // Google Discovery creates an ID-only draft. Google name and coordinates are
+  // never persisted; the administrator supplies verified place data later.
+  app.post('/api/admin/places/google-reference', requireAdmin, wrap(async (req, res) => {
+    const placeId = typeof req.body?.placeId === 'string' ? req.body.placeId.trim() : '';
+    if (!/^[A-Za-z0-9_-]{8,256}$/.test(placeId)) return res.status(400).json({ error: 'Invalid Google Place ID.' });
+    const sql = getSql();
+    const result = await sql.begin(async tx => {
+      await tx`SELECT pg_advisory_xact_lock(hashtext(${'google-place-draft:'+placeId}))`;
+      const existing = await tx`SELECT id FROM place_drafts
+        WHERE payload->>'googlePlaceId' = ${placeId} AND status = 'draft' LIMIT 1`;
+      if (existing.length) return { code: 200, id: existing[0].id, existing: true };
+      const linked = await tx`SELECT place_id FROM place_external_ids
+        WHERE namespace = 'google_places' AND external_id = ${placeId} LIMIT 1`;
+      if (linked.length) return { code: 409, error: 'This Google Place ID is already linked to a published place.' };
+      const payload = { name: 'รอยืนยันชื่อสถานที่', nameLocal: '', province: 'ชลบุรี',
+        category: 'attraction', description: '', lat: null, lng: null,
+        imageUrl: '', imageUrls: [], removedImageUrls: [],
+        googlePlaceId: placeId, verificationStatus: 'PENDING_VERIFICATION' };
+      const id = randomUUID();
+      await tx`INSERT INTO place_drafts (id, payload, author_id)
+        VALUES (${id}, ${tx.json(payload)}, ${req.auth.user.id})`;
+      return { code: 201, id, existing: false };
+    });
+    res.status(result.code).json(result.error ? { error: result.error } : {
+      id: result.id, status: 'draft', verificationStatus: 'PENDING_VERIFICATION',
+      existing: result.existing, coordinatesRequired: true });
+  }));
+
   app.post('/api/admin/places', requireAdmin, wrap(async (req, res) => {
     const parsed = cleanPlace(req.body);
     if (parsed.errors.length) return res.status(400).json({ errors: parsed.errors });
