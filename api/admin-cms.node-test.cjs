@@ -78,3 +78,10 @@ test('Railway passwords use salted scrypt; session secrets are hashed', () => {
   assert.equal(verifyPassword('wrong-password', undefined), false);
   assert.notEqual(hashToken('random-token-secret'), 'random-token-secret');
 });
+
+test('ID-only Google draft cannot pass publication validation without admin coordinates', () => {
+  const placeholder = {name:'รอยืนยันชื่อสถานที่',nameLocal:'',province:'ชลบุรี',
+    category:'attraction',description:'',lat:null,lng:null,googlePlaceId:'ChIJtest1234'};
+  assert.ok(cleanPlace(placeholder).errors.some(e=>e.includes('Coordinates')));
+  assert.equal(cleanPlace({...placeholder,name:'ชื่อที่ยืนยันแล้ว',lat:13.3,lng:100.9}).errors.length,0);
+});
