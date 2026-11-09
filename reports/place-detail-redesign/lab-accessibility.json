@@ -1,0 +1,57 @@
+{
+  "environment": "Local production build, Chromium headless, SVG fixtures, no throttling; not field data. INP not measured.",
+  "results": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "lab": {
+        "lcp": 936,
+        "cls": 0
+      },
+      "a11y": [],
+      "galleryA11y": []
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "lab": {
+        "lcp": 732,
+        "cls": 0
+      },
+      "a11y": [],
+      "galleryA11y": []
+    },
+    {
+      "name": "desktop-dark",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "lab": {
+        "lcp": 1580,
+        "cls": 0
+      },
+      "a11y": [],
+      "galleryA11y": []
+    },
+    {
+      "name": "mobile-dark",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "lab": {
+        "lcp": 1072,
+        "cls": 0
+      },
+      "a11y": [],
+      "galleryA11y": []
+    }
+  ]
+}
