@@ -10,8 +10,6 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
   const [queue,setQueue]=useState<Candidate[]>([]),[page,setPage]=useState(1),[total,setTotal]=useState(0);
   const [batch,setBatch]=useState<{province:string;candidates:unknown[]}|null>(null),[requestKey,setRequestKey]=useState('');
   const [discovery,setDiscovery]=useState<DiscoveryCandidate[]>([]),[discoveryStatus,setDiscoveryStatus]=useState('');
-  const [draftCandidate,setDraftCandidate]=useState<DiscoveryCandidate|null>(null);
-  const [draftForm,setDraftForm]=useState({name:'',lat:'',lng:'',sourceUrl:''});
   const [draftResult,setDraftResult]=useState('');
   const [job,setJob]=useState<Job|null>(null),[jobId,setJobId]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   async function run(action:()=>Promise<unknown>) {setBusy(true);setError('');try{await action();}catch(e){setError(e instanceof Error?e.message:'ดำเนินการไม่สำเร็จ');}finally{setBusy(false);}}
@@ -34,14 +32,12 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
       setDiscoveryStatus(result.candidates?.length ? 'ตัวอย่างจาก Google '+result.candidates.length+' รายการ · แสดงชั่วคราวเท่านั้น ห้ามนำเข้าข้อมูล Google' : 'ไม่พบรายการในผลค้นหาชุดนี้ (ไม่ใช่การตรวจครบทั้งจังหวัด)');
     } catch(e) {setDiscoveryStatus('ค้นหาไม่สำเร็จ: '+(e instanceof Error?e.message:'ไม่สามารถเชื่อมต่อบริการได้'));}
   }
-  async function createIndependentDraft() {
-    if(!draftCandidate||draftCandidate.duplicateStatus!=='not_detected')throw Error('สถานที่อาจซ้ำ ต้องตรวจสอบก่อนสร้างฉบับร่าง');
-    if(!/^https:\/\//.test(draftForm.sourceUrl)||/google\.|googleapis\.|googleusercontent\./i.test(draftForm.sourceUrl))throw Error('กรุณาใส่ลิงก์หลักฐานอิสระที่ไม่ใช่ Google');
-    if(!draftForm.name.trim()||!Number.isFinite(Number(draftForm.lat))||!Number.isFinite(Number(draftForm.lng)))throw Error('กรุณากรอกชื่อและพิกัดจากหลักฐานอิสระ');
-    const payload={name:draftForm.name.trim(),nameLocal:draftForm.name.trim(),province:'ชลบุรี',category:'attraction',description:'',lat:Number(draftForm.lat),lng:Number(draftForm.lng),imageUrl:'',imageUrls:[],removedImageUrls:[]};
-    const created=await api('/places',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) as {id:string};
-    setDraftResult('สร้างฉบับร่างสำเร็จ รหัส '+created.id+' · ยังต้องตรวจหลักฐานและอนุมัติก่อนเผยแพร่');
-    setDraftCandidate(null);
+  async function createReferenceDraft(candidate:DiscoveryCandidate) {
+    if(candidate.duplicateStatus!=='not_detected')throw Error('สถานที่อาจซ้ำ ต้องตรวจสอบก่อนสร้างฉบับร่าง');
+    const placeId=candidate.sourceId.startsWith('google:')?candidate.sourceId.slice(7):'';
+    if(!placeId)throw Error('ไม่พบ Google Place ID');
+    const result=await api('/places/google-reference',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({placeId})}) as {id:string;existing?:boolean};
+    setDraftResult((result.existing?'มีฉบับร่างนี้แล้ว':'สร้างฉบับร่างสำเร็จ')+' · รหัส '+result.id+' · ชื่อและพิกัดต้องได้รับการยืนยันโดย Admin ก่อนเผยแพร่');
     await loadQueue(1);
   }
   const selected=provinces.find(p=>p.province===province);
@@ -60,22 +56,12 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
         <p className="break-all text-slate-600">พิกัด: {c.lat===null||c.lng===null?'ไม่พบพิกัด':c.lat.toFixed(6)+', '+c.lng.toFixed(6)}</p>
         <p className={c.duplicateStatus==='not_detected'?'text-green-700':'text-amber-700'}>{c.duplicateStatus==='existing_place'?'พบ Google Place ID ที่มีอยู่แล้ว':c.duplicateStatus==='possible_duplicate'?'อาจซ้ำกับสถานที่เดิม':'ไม่พบรายการซ้ำจากการตรวจเบื้องต้น'}</p>
         {!!c.duplicateMatches?.length&&<p className="break-words text-slate-600">รายการที่ตรงกัน: {c.duplicateMatches.map(m=>m.name+' ('+(m.reason==='google_place_id'?'รหัส Google':m.reason==='name'?'ชื่อ':'พิกัดใกล้กัน')+')').join(', ')}</p>}
-        <p className="text-slate-600">ต้องตรวจสอบด้วยหลักฐานอิสระก่อนสร้างฉบับร่าง และไม่สามารถคัดลอกข้อมูล Google ไปจัดเก็บได้</p>
+        <p className="text-slate-600">สร้างฉบับร่างได้ทันทีโดยไม่บันทึกชื่อหรือพิกัดจาก Google · Admin กรอกและยืนยันข้อมูลก่อนเผยแพร่</p>
         <div className="flex flex-wrap gap-2">
           {c.mapsUrl&&<a href={c.mapsUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border px-3 py-2">ดูใน Google Maps</a>}
-          <button type="button" disabled={busy||c.duplicateStatus!=='not_detected'} className="rounded-lg bg-teal-700 px-3 py-2 text-white disabled:opacity-50" onClick={()=>{setDraftCandidate(c);setDraftResult('');setDraftForm({name:'',lat:'',lng:'',sourceUrl:''});}}>สร้างฉบับร่าง</button>
+          <button type="button" disabled={busy||c.duplicateStatus!=='not_detected'} className="rounded-lg bg-teal-700 px-3 py-2 text-white disabled:opacity-50" onClick={()=>void run(()=>createReferenceDraft(c))}>สร้างฉบับร่าง</button>
         </div>
       </li>)}</ul>}
-      {draftCandidate&&<div className="space-y-2 rounded-xl border-2 border-teal-600 p-3 text-sm">
-        <h3 className="font-semibold">สร้างฉบับร่างจากหลักฐานอิสระ</h3>
-        <p>สถานที่ที่เลือก: {draftCandidate.name} (ใช้เพื่อตรวจสอบเท่านั้น ไม่คัดลอกข้อมูล Google)</p>
-        <label className="block">ชื่อจากแหล่งข้อมูลอิสระ<input className="mt-1 w-full rounded border p-2" value={draftForm.name} onChange={e=>setDraftForm(v=>({...v,name:e.target.value}))}/></label>
-        <label className="block">ละติจูดจากหลักฐานอิสระ<input className="mt-1 w-full rounded border p-2" inputMode="decimal" value={draftForm.lat} onChange={e=>setDraftForm(v=>({...v,lat:e.target.value}))}/></label>
-        <label className="block">ลองจิจูดจากหลักฐานอิสระ<input className="mt-1 w-full rounded border p-2" inputMode="decimal" value={draftForm.lng} onChange={e=>setDraftForm(v=>({...v,lng:e.target.value}))}/></label>
-        <label className="block">URL หลักฐานอิสระ (ไม่ใช่ Google)<input className="mt-1 w-full rounded border p-2" type="url" value={draftForm.sourceUrl} onChange={e=>setDraftForm(v=>({...v,sourceUrl:e.target.value}))}/></label>
-        <p className="text-amber-800">ระบบจะสร้าง Draft เท่านั้น หลักฐานต้องบันทึกในขั้นตอน Review ก่อนอนุมัติและเผยแพร่</p>
-        <div className="flex gap-2"><button type="button" disabled={busy} className="rounded-lg bg-teal-700 px-3 py-2 text-white" onClick={()=>void run(createIndependentDraft)}>ยืนยันสร้างฉบับร่าง</button><button type="button" className="rounded-lg border px-3 py-2" onClick={()=>setDraftCandidate(null)}>ยกเลิก</button></div>
-      </div>}
       {draftResult&&<p role="status" className="break-all text-green-700">{draftResult}</p>}
     </div>
     {selected&&<div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">{[
