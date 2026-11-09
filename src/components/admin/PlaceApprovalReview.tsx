@@ -6,7 +6,7 @@ type Evidence = { source:Record<string,string>;coordinate:Record<string,string|b
 type Report = {holds:string[];payloadMatches:boolean;provinceGate:string;duplicate:{matches:{placeId:string;confidence?:string;reason:string}[]}};
 type Review = {state:string;revision:number;evidence:Evidence|null;report:Report|null;history:{actor_id:string;action:string;to_state:string;reason:string;created_at:string}[]};
 type Props = {draft:{id:string;version:string;target_place_id?:string;payload:{name?:string|null;nameLocal?:string|null;province?:string|null;description?:string|null;imageUrl?:string|null;lat?:string|number|null;lng?:string|number|null}};
-  api:(path:string,options?:RequestInit)=>Promise<unknown>;onApprovalChange:(approved:boolean,reasons?:string[])=>void};
+  api:(path:string,options?:RequestInit)=>Promise<unknown>;onStateChange?:(state:string)=>void;onApprovalChange:(approved:boolean,reasons?:string[])=>void};
 const holdLabels:Record<string,string>={
   source_license_unverified:'ยังไม่ยืนยันแหล่งข้อมูลหรือสิทธิ์การใช้ข้อมูล',
   coordinate_hold:'หลักฐานพิกัดหรือทางเข้ายังไม่ผ่านการตรวจ',
@@ -24,13 +24,13 @@ const fieldGroups:{group:Group;title:string;fields:[string,string][]}[]=[
   {group:'coordinate',title:'หลักฐานพิกัดจากแหล่งอิสระ',fields:[['sourceUrl','URL แหล่งพิกัดอิสระ'],['licenseUrl','URL สิทธิ์พิกัด'],['permissionUrl','URL การอนุญาตใช้พิกัด'],['publicAccessUrl','URL ยืนยันการเข้าสาธารณะ'],['authorityUrl','URL อนุญาตโดยหน่วยงาน (พื้นที่จำกัด)'],['checkedAt','วันที่ตรวจพิกัด']]},
   {group:'media',title:'สิทธิ์ภาพหลัก',fields:[['photographer','เจ้าของภาพ / ช่างภาพ'],['sourcePage','URL หน้าต้นฉบับภาพ'],['licenseUrl','URL สิทธิ์ภาพ'],['permissionUrl','URL การอนุญาตใช้ภาพ']]},
 ];
-export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) {
+export default function PlaceApprovalReview({draft,api,onApprovalChange,onStateChange}:Props) {
   const [review,setReview]=useState<Review|null>(null);
   const [evidence,setEvidence]=useState<Evidence>({source:{},coordinate:{},media:{url:draft.payload.imageUrl||''},district:'',detailSourceUrl:'',googlePlaceId:'',duplicateResolutions:[]});
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[attested,setAttested]=useState(false),[reason,setReason]=useState('');
   const path=`/places/${encodeURIComponent(draft.id)}`;
   async function load() {
-    const data=await api(path+'/review') as Review;setReview(data);
+    const data=await api(path+'/review') as Review;setReview(data);onStateChange?.(data.state);
     if(data.evidence)setEvidence(data.evidence);
     const reasons:string[]=[];
     if(!data.evidence)reasons.push('ยังไม่ได้บันทึกหลักฐานแหล่งข้อมูลและพิกัด');
@@ -38,7 +38,7 @@ export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) 
     if(data.report&&!data.report.payloadMatches)reasons.push('ข้อมูลฉบับร่างเปลี่ยน ต้องบันทึกหลักฐานใหม่');
     if(data.report)reasons.push(...data.report.holds.map(publishHoldLabel));
     if(!data.report)reasons.push('ยังไม่มีผลตรวจคุณภาพ');
-    onApprovalChange(reasons.length===0&&data.state!=='PUBLISHED',reasons);
+    onApprovalChange(reasons.length===0&&data.state==='APPROVED',reasons);
     return data;
   }
   async function run(action:()=>Promise<unknown>) {
@@ -51,6 +51,7 @@ export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) 
     await run(async()=>{await api(path+'/evidence',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:draft.version,revision:review.revision,evidence:{...evidence,media:{...evidence.media,url:draft.payload.imageUrl||''}}})});await load();setAttested(false);});
   }
   async function transition(action:string) {
+    if (!window.confirm('ยืนยันดำเนินการตามขั้นตรวจ: ' + action + ' หรือไม่?')) return;
     await run(async()=>{await api(path+'/review-transition',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,revision:review?.revision,reason})});await load();});
   }
   return <section className="space-y-3 border-t pt-3" data-testid="place-approval-review">
@@ -85,7 +86,7 @@ export default function PlaceApprovalReview({draft,api,onApprovalChange}:Props) 
       </form>}
       <div className="flex flex-wrap gap-2">
         {review.state==='STAGED'&&draft.payload.imageUrl&&<button type="button" disabled={busy} className="rounded-lg border p-2" onClick={()=>void run(async()=>{await api(path+'/probe-media',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({revision:review.revision})});await load();})}>ตรวจไฟล์ภาพจริง</button>}
-        {Object.entries({verify:['STAGED']}).filter(([,states])=>states.includes(review.state)).map(([action])=><button key={action} type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white" onClick={()=>void transition(action)}>{{verify:'ตรวจทุก Gate'}[action]}</button>)}
+        {Object.entries({verify:['STAGED'],request_review:['VERIFIED'],approve:['REVIEW_PENDING']}).filter(([,states])=>states.includes(review.state)).map(([action])=><button key={action} type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white" onClick={()=>void transition(action)}>{{verify:'ตรวจทุก Gate',request_review:'ส่งตรวจสอบ',approve:'อนุมัติการเผยแพร่'}[action]}</button>)}
       </div>
       {!['PUBLISHED','REJECTED','DISCOVERED'].includes(review.state)&&<div className="space-y-2"><label className="block">เหตุผลการตรวจ<input className="mt-1 w-full rounded border p-2" value={reason} onChange={event=>setReason(event.target.value)}/></label>
         <button type="button" disabled={busy||reason.trim().length<5} className="mr-2 rounded-lg border p-2" onClick={()=>void transition('reject')}>ปฏิเสธรายการ</button>

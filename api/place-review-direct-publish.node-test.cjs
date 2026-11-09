@@ -3,14 +3,14 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {publicationGateDecision}=require('./place-review-workflow.cjs');
 
-const review={state:'STAGED',evidence:{source:{namespace:'test',id:'fixture'}}};
+const review={state:'APPROVED',evidence:{source:{namespace:'test',id:'fixture'}}};
 const clean={payloadMatches:true,holds:[]};
 
-test('admin direct publish accepts valid evidence without manual approval',()=>{
+test('admin direct publish requires explicit approval and valid evidence',()=>{
   assert.deepEqual(publicationGateDecision(review),{ok:true},'Preflight must not require a report before evaluation');
   assert.deepEqual(publicationGateDecision(review,clean),{ok:true});
-  assert.deepEqual(publicationGateDecision({...review,state:'VERIFIED'},clean),{ok:true});
-  assert.deepEqual(publicationGateDecision({...review,state:'REVIEW_PENDING'},clean),{ok:true});
+  assert.equal(publicationGateDecision({...review,state:'VERIFIED'},clean).ok,false);
+  assert.equal(publicationGateDecision({...review,state:'REVIEW_PENDING'},clean).ok,false);
 });
 
 test('admin direct publish rejects missing evidence and rejected drafts',()=>{

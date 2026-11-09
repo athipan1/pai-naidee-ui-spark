@@ -2,9 +2,12 @@ declare const __PAINAIDEE_BUILD__: string;
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Clock3, CloudUpload, FilePenLine, ImagePlus, LogOut, MapPin, Plus, Search, ShieldCheck } from 'lucide-react';
+import { CloudUpload, ImagePlus, MapPin, Plus, Search, ShieldCheck } from 'lucide-react';
 import { getApiBaseUrl } from '@/services/railway-api.service';
+import AdminMediaPreview from '@/components/admin/AdminMediaPreview';
 import PlaceCandidateReview from '@/components/admin/PlaceCandidateReview';
+import AdminWorkspace, { type AdminView } from '@/components/admin/AdminWorkspace';
+import PlaceApprovalReview from '@/components/admin/PlaceApprovalReview';
 import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboard';
 
 type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls'>, string | null>> & {
@@ -13,8 +16,8 @@ type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'ima
   lat?: string | number | null;
   lng?: string | number | null;
 };
-type Draft = { id: string; status: string; payload: DraftPayload; version: string; target_place_id?: string };
-type CatalogPlace = { id: string; name: string; name_local: string | null; province: string };
+type Draft = { id: string; review_state?: string; updated_at?: string; status: string; payload: DraftPayload; version: string; target_place_id?: string };
+type CatalogPlace = { id: string; name: string; name_local: string | null; province: string; imageUrl?: string | null };
 type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; placeUpdatedAt: string; fields: string[] };
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
@@ -69,7 +72,7 @@ export default function AdminCms() {
   const [editing, setEditing] = useState<Pick<Draft, 'id' | 'version'> | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const [tab, setTab] = useState<'new' | 'existing' | 'drafts' | 'history' | 'quality'>('new');
+  const [tab, setTab] = useState<AdminView>('overview');
   const [searched, setSearched] = useState(false);
   const [privatePreview, setPrivatePreview] = useState<{ url: string; src: string } | null>(null);
   const [brokenImage, setBrokenImage] = useState(false);
@@ -93,7 +96,40 @@ export default function AdminCms() {
   const [aiSaved,setAiSaved] = useState<{model:string;structuredOutput:boolean;source?:string;updatedAt?:string|null}|null>(null);
   const [aiBackendCommit,setAiBackendCommit] = useState<string|null>(null);
   const [aiValidated,setAiValidated] = useState(false);
-  const lastAutoLookup = useRef('');
+  const [savedForm, setSavedForm] = useState(JSON.stringify(empty));
+  const [draftLoading, setDraftLoading] = useState(true);
+  const [draftError, setDraftError] = useState('');
+  const [reloadDrafts, setReloadDrafts] = useState(0);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [provinceFilter, setProvinceFilter] = useState('');
+  const [catalogProvince, setCatalogProvince] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [draftFilter, setDraftFilter] = useState('');
+  const [draftPage, setDraftPage] = useState(1);
+  const [uploadProgress, setUploadProgress] = useState<{done: number; total: number} | null>(null);
+  const [approved, setApproved] = useState<Record<string, boolean>>({});
+  const [overviewTotal, setOverviewTotal] = useState<number | null>(null);
+  const [overviewError, setOverviewError] = useState('');
+  const catalogRequest = useRef<AbortController | null>(null);
+  const dirty = JSON.stringify(form) !== savedForm;
+  function confirmLeave() { return !dirty || window.confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากแบบฟอร์มและละทิ้งการแก้ไขหรือไม่?'); }
+  function navigate(view: AdminView) {
+    if (view !== tab && !confirmLeave()) return;
+    if (view !== tab && dirty) { setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); }
+    setTab(view); setDraftPage(1); setStatusFilter('');
+  }
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+    const links = (event: MouseEvent) => {
+      const link = (event.target as Element).closest('a[href]');
+      if (link && !link.getAttribute('href')?.startsWith('#') && !window.confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากหน้านี้หรือไม่?')) { event.preventDefault(); event.stopPropagation(); }
+    };
+    window.addEventListener('beforeunload', warn);
+    document.addEventListener('click', links, true);
+    return () => { window.removeEventListener('beforeunload', warn); document.removeEventListener('click', links, true); };
+  }, [dirty]);
+  useEffect(() => () => { imageRequest.current?.abort(); catalogRequest.current?.abort(); }, []);
   const imageRequest = useRef<AbortController | null>(null);
   const base = getApiBaseUrl();
 
@@ -139,6 +175,7 @@ export default function AdminCms() {
   }, [token, api, clearSession, sessionAttempt]);
 
   async function signOut() {
+    if (!confirmLeave()) return;
     setBusy(true);
     try {
       await api('/logout', { method: 'POST' });
@@ -151,11 +188,20 @@ export default function AdminCms() {
   useEffect(() => {
     if (!isAdmin) return;
     const controller = new AbortController();
+    setDraftLoading(true); setDraftError('');
     void api('/places', { signal: controller.signal })
       .then(data => { if (!controller.signal.aborted) setDrafts(data.drafts || []); })
-      .catch(error => { if (!controller.signal.aborted) setMessage(error.message); });
+      .catch(error => { if (!controller.signal.aborted) setDraftError(error.message); })
+      .finally(() => { if (!controller.signal.aborted) setDraftLoading(false); });
     return () => controller.abort();
-  }, [isAdmin, api]);
+  }, [isAdmin, api, reloadDrafts]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const controller = new AbortController();
+    void api('/catalog?page=1', {signal: controller.signal}).then(data => { if (!controller.signal.aborted) { setOverviewTotal(data.total); setOverviewError(''); } }).catch(() => { if (!controller.signal.aborted) setOverviewError('โหลดจำนวนสถานที่ไม่สำเร็จ'); });
+    return () => controller.abort();
+  }, [isAdmin, api, reloadDrafts]);
 
   useEffect(() => {
     if (tab !== 'existing' || !isAdmin || searched) return;
@@ -252,30 +298,6 @@ export default function AdminCms() {
     finally {setAiBusy(false);}
   }
 
-  // Search only after both fields settle. Never overwrite the administrator's coordinates.
-  useEffect(() => {
-    const name = (form.nameLocal || form.name).trim();
-    const province = form.province.trim();
-    if (tab !== 'new' || !token || !isAdmin || !name || !province || name.length < 3 ||
-        (form.lat.trim() && form.lng.trim())) return;
-    const key = `${name}|${province}`;
-    if (key === lastAutoLookup.current) return;
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => {
-      lastAutoLookup.current = key;
-      setGeocodeBusy(true);
-      void api(`/geocode?name=${encodeURIComponent(name)}&province=${encodeURIComponent(province)}`, { signal: controller.signal })
-        .then(result => { if (!controller.signal.aborted) { setGeoCandidates(result.candidates || []); setGeocodeNote(result.candidates?.length ? 'พบพิกัดที่อาจตรงกับสถานที่ โปรดตรวจบนแผนที่' : 'ยังไม่พบพิกัดจากแหล่งข้อมูลที่เชื่อมต่อ'); } })
-        .catch(() => { if (!controller.signal.aborted) setGeocodeNote('ค้นหาพิกัดไม่สำเร็จ คุณสามารถเลือกหมุดเองได้'); })
-        .finally(() => { if (!controller.signal.aborted) setGeocodeBusy(false); });
-    }, 1000);
-    return () => {
-      window.clearTimeout(timer);
-      controller.abort();
-      setGeocodeBusy(false);
-    };
-  }, [form.name, form.nameLocal, form.province, form.lat, form.lng, tab, token, isAdmin, api]);
-
   async function lookupCoordinates() {
     const name = (form.nameLocal || form.name).trim();
     if (name.length < 2 || !form.province.trim()) { setGeocodeNote('กรุณากรอกชื่อสถานที่และจังหวัดก่อน'); return; }
@@ -290,22 +312,30 @@ export default function AdminCms() {
   }
 
   async function save(event: FormEvent) {
-    event.preventDefault(); setBusy(true); setMessage('');
+    event.preventDefault();
+    const hasLat = Boolean(form.lat.trim()), hasLng = Boolean(form.lng.trim());
+    if ((hasLat || hasLng) && (!hasLat || !hasLng || !validCoordinate(Number(form.lat), Number(form.lng)))) { setMessage('กรุณากรอกพิกัดทั้งคู่เป็นตัวเลขในประเทศไทย (ละติจูด 5–21, ลองจิจูด 97–106)'); return; }
+    setBusy(true); setMessage('');
     try {
       const path = editing ? `/places/${editing.id}` : '/places';
       const data: Draft = await api(path, { method: editing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, version: editing?.version }) });
-      setDrafts(current => [data, ...current.filter(draft => draft.id !== data.id)]);
-      setForm({ ...empty }); setEditing(null); setTab('drafts'); setProposedCoordinate(null); setGeoCandidates([]); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
+      setDrafts(current => [data, ...current.filter(draft => draft.id !== data.id)]); setApproved(current => ({...current, [data.id]: false}));
+      setForm({ ...empty }); setSavedForm(JSON.stringify(empty)); setEditing(null); setTab('drafts'); setProposedCoordinate(null); setGeoCandidates([]); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'บันทึกไม่สำเร็จ'); }
     finally { setBusy(false); }
   }
 
-  async function findPlaces(page: number, query: string) {
-    setBusy(true); setMessage('');
-    try { const result = await api(`/catalog?q=${encodeURIComponent(query)}&page=${page}`); setCatalogQuery(query); setCatalog(result.places); setCatalogTotal(result.total); setCatalogPage(page); setSearched(true); }
-    catch (error) { setMessage(error instanceof Error ? error.message : 'ค้นหาไม่สำเร็จ'); }
-    finally { setBusy(false); }
+  async function findPlaces(page: number, query: string, province = provinceFilter) {
+    catalogRequest.current?.abort();
+    const controller = new AbortController(); catalogRequest.current = controller;
+    setCatalogLoading(true); setMessage('');
+    try {
+      const result = await api(`/catalog?q=${encodeURIComponent(query)}&province=${encodeURIComponent(province.trim())}&page=${page}`, { signal: controller.signal });
+      if (controller.signal.aborted) return;
+      setCatalogQuery(query); setCatalogProvince(province); setCatalog(result.places); setCatalogTotal(result.total); setCatalogPage(page); setSearched(true);
+    } catch (error) { if (!controller.signal.aborted) setMessage(error instanceof Error ? error.message : 'ค้นหาไม่สำเร็จ'); }
+    finally { if (!controller.signal.aborted) setCatalogLoading(false); }
   }
 
   async function manageAliases(place: CatalogPlace) {
@@ -389,13 +419,12 @@ export default function AdminCms() {
       }
     }
     setEditing({ id: draft.id, version: draft.version });
-    setForm(toPlaceForm(draft.payload));
+    setForm(toPlaceForm(draft.payload)); setSavedForm(JSON.stringify(toPlaceForm(draft.payload)));
     setTab('new');
     setBrokenImage(false);
     setProposedCoordinate(null);
     setGeoCandidates([]);
     setGeocodeNote('');
-    lastAutoLookup.current = '';
     void loadExistingImages(draft.target_place_id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -412,7 +441,8 @@ export default function AdminCms() {
       if (!controller.signal.aborted) {
         const images: ExistingImage[] = result.images || [];
         setExistingImages(images);
-        setForm(current => ({ ...current, imageUrls: [...new Set([...images.filter(image => !current.removedImageUrls.includes(image.url)).map(image => image.url), ...current.imageUrls])] }));
+        setForm(current => ({...current, imageUrls: [...new Set([...images.filter(image => !current.removedImageUrls.includes(image.url)).map(image => image.url), ...current.imageUrls])]}));
+        setSavedForm(saved => {const baseline: PlaceForm = JSON.parse(saved); return JSON.stringify({...baseline, imageUrls: [...new Set([...images.filter(image => !baseline.removedImageUrls.includes(image.url)).map(image => image.url), ...baseline.imageUrls])]});});
       }
     } catch (error) {
       if (!controller.signal.aborted) setMessage(error instanceof Error ? error.message : 'โหลดภาพเดิมไม่สำเร็จ');
@@ -429,23 +459,18 @@ export default function AdminCms() {
     if (files.some(file => !['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024)) {
       setMessage('กรุณาเลือกภาพ JPG, PNG หรือ WebP ขนาดไม่เกิน 5 MB ต่อรูป'); return;
     }
-    setBusy(true); setMessage('');
+    setBusy(true); setMessage(''); setUploadProgress({done: 0, total: files.length});
     try {
-      const urls: string[] = [];
       for (const file of files) {
         const data = new FormData(); data.append('image', file);
         const result = await api('/media', { method: 'POST', body: data });
-        urls.push(result.imageUrl);
+        setForm(current => ({...current, imageUrl: current.imageUrl || result.imageUrl, imageUrls: [...new Set([...current.imageUrls, result.imageUrl])]}));
+        setUploadProgress(current => current && ({...current, done: current.done + 1}));
       }
-      setForm(current => ({
-        ...current,
-        imageUrl: current.imageUrl || urls[0],
-        imageUrls: [...new Set([...current.imageUrls, ...urls])],
-      }));
       setBrokenImage(false);
-      setMessage(`อัปโหลดสำเร็จ ${urls.length} รูป เลือกรูปหลักแล้วบันทึกฉบับร่าง`);
+      setMessage(`อัปโหลดสำเร็จ ${files.length} รูป เลือกรูปหลักแล้วบันทึกฉบับร่าง`);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'อัปโหลดไม่สำเร็จ'); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setUploadProgress(null); }
   }
 
   async function deleteDraft(draft: Draft) {
@@ -498,15 +523,13 @@ export default function AdminCms() {
 
   const inputStyle = 'mt-1.5 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-3 text-base text-slate-900 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100';
   const activeDrafts = drafts.filter(d => d.status === 'draft');
+  const statusLabels: Record<string,string> = {DISCOVERED:'ฉบับร่าง',STAGED:'บันทึกหลักฐานแล้ว',VERIFIED:'ตรวจคุณภาพแล้ว',REVIEW_PENDING:'รอตรวจสอบ',APPROVED:'อนุมัติแล้ว',LICENSE_HOLD:'รอหลักฐานสิทธิ์',COORDINATE_HOLD:'รอหลักฐานพิกัด',POSSIBLE_DUPLICATE:'รอตรวจความซ้ำ',REJECTED:'ปฏิเสธแล้ว'};
+  const visibleDrafts = activeDrafts.filter(d => (tab !== 'review' || d.review_state === 'REVIEW_PENDING') && (!statusFilter || (d.review_state || 'DISCOVERED') === statusFilter) && `${d.payload.name} ${d.payload.nameLocal} ${d.payload.province}`.toLocaleLowerCase().includes(draftFilter.toLocaleLowerCase()));
   const publishedDrafts = drafts.filter(d => d.status === 'published');
-  return <main className="min-h-screen min-w-0 bg-slate-50 pb-16 text-slate-900">
-    <div className="mx-auto w-full max-w-5xl space-y-5 px-4 py-6 sm:px-8">
-      <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-teal-700 to-cyan-700 p-5 text-white shadow-sm sm:p-7">
-        <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-widest text-teal-100">PaiNaiDee · Content Studio</p><h1 className="mt-1 text-2xl font-bold sm:text-3xl">จัดการสถานที่ท่องเที่ยว</h1><p className="mt-2 text-sm text-teal-50">เพิ่ม แก้ไข และเผยแพร่ข้อมูลอย่างปลอดภัย</p></div>
-        <button type="button" className="inline-flex items-center gap-2 rounded-xl border border-white/40 px-3 py-2 text-sm hover:bg-white/10" disabled={busy} onClick={() => void signOut()}><LogOut size={16} /> ออกจากระบบ</button>
-      </header>
+  return <AdminWorkspace view={tab} onNavigate={navigate} onSignOut={() => void signOut()} busy={busy}>
+      <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-teal-800">Travel management</p><h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">จัดการสถานที่ท่องเที่ยว</h1><p className="mt-2 text-sm text-slate-600">ดูแลทุกจุดหมาย ตั้งแต่ฉบับร่างจนถึงการเผยแพร่</p></div><button type="button" disabled={busy} onClick={() => navigate('new')} className="flex items-center gap-2 rounded-xl bg-teal-800 px-4 py-3 text-sm font-semibold text-white"><Plus size={18} />เพิ่มสถานที่</button></header>
       <div className="flex flex-wrap items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><ShieldCheck size={18} className="shrink-0" /> การเปลี่ยนแปลงจะไม่ขึ้นเว็บไซต์จนกว่าจะกดเผยแพร่</div>
-      <section className="space-y-3 rounded-2xl border border-teal-200 bg-white p-4 sm:p-6" aria-label="AI Model Management">
+      {tab === 'settings' && <section className="space-y-3 rounded-2xl border border-teal-200 bg-white p-4 sm:p-6" aria-label="AI Model Management">
         <h2 className="text-lg font-bold">จัดการ AI วางแผนเที่ยว</h2>
         <p className="text-sm text-slate-600">เลือกโมเดลฟรีที่อนุญาต และทดสอบกับ OpenRouter ผ่าน Backend โดยใช้บัญชี Admin ที่ล็อกอินอยู่</p>
         <label className="block text-sm font-medium" htmlFor="ai-model-picker">โมเดล AI</label>
@@ -546,22 +569,29 @@ export default function AdminCms() {
           <p>ค่าใช้จ่าย USD: {String((aiResult.usage as {costUsd?:number|null}|undefined)?.costUsd??'ไม่รายงาน')}</p>
         </div>}
         <p className="text-xs text-slate-500">เปลี่ยนโมเดลมีผลต่อคำขอใหม่ทันที ไม่เรียกโมเดลเสียเงินโดยอัตโนมัติ และ Health Check จำกัดทุก 5 นาที</p>
-      </section>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border bg-white p-4"><p className="text-xs text-slate-500">รอดำเนินการ</p><p className="mt-1 text-2xl font-bold text-teal-700">{activeDrafts.length}</p><p className="text-xs text-slate-500">ฉบับร่าง</p></div>
-        <div className="rounded-xl border bg-white p-4"><p className="text-xs text-slate-500">เผยแพร่ผ่าน CMS</p><p className="mt-1 text-2xl font-bold">{drafts.filter(d => d.status === 'published').length}</p><p className="text-xs text-slate-500">รายการ</p></div>
-        <div className="col-span-2 flex items-center gap-3 rounded-xl border bg-white p-4 sm:col-span-1"><CheckCircle2 className="text-emerald-600" /><div><p className="font-medium">ระบบจัดการเนื้อหา</p><p className="text-xs text-slate-500">เข้าสู่ระบบแล้ว</p></div></div>
-      </div>
-      <nav aria-label="ส่วนจัดการสถานที่" className="grid grid-cols-2 gap-2 rounded-2xl border bg-white p-2 shadow-sm sm:grid-cols-4">
-        {([{ id: 'new', label: 'เพิ่ม / แก้ไข', Icon: Plus }, { id: 'existing', label: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', Icon: Search }, { id: 'drafts', label: `ฉบับร่าง (${activeDrafts.length})`, Icon: FilePenLine }, { id: 'history', label: `ประวัติการเผยแพร่ (${publishedDrafts.length})`, Icon: Clock3 }, {id:'quality',label:'คุณภาพรายจังหวัด',Icon:ShieldCheck}] as const).map(item => <button key={item.id} type="button" aria-current={tab === item.id ? 'page' : undefined} onClick={() => setTab(item.id)} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-3 text-center text-xs font-semibold transition sm:flex-row sm:text-sm ${tab === item.id ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}><item.Icon size={17} /><span>{item.label}</span></button>)}
-      </nav>
+      </section>}
+      {tab === 'overview' && <section className="space-y-5" aria-label="ภาพรวมข้อมูล">
+        <div className="grid gap-4 sm:grid-cols-3">{[{label:'สถานที่ที่เผยแพร่ทั้งหมด', value:overviewTotal, note:'จำนวนจากแค็ตตาล็อกจริง'}, {label:'ฉบับร่างในรายการล่าสุด', value:draftLoading || draftError ? null : activeDrafts.length, note:'จากฉบับร่างล่าสุดไม่เกิน 100 รายการ'}, {label:'รอตรวจสอบในรายการล่าสุด', value:draftLoading || draftError ? null : activeDrafts.filter(d => d.review_state === 'REVIEW_PENDING').length, note:'เฉพาะสถานะจาก API ใน 100 รายการล่าสุด'}, {label:'ประวัติเผยแพร่ในรายการล่าสุด', value:draftLoading || draftError ? null : publishedDrafts.length, note:'ประวัติ CMS ไม่ใช่จำนวนสถานที่ทั้งหมด'}].map(item => <article key={item.label} className="rounded-2xl border bg-white p-6 shadow-sm"><p className="text-sm text-slate-600">{item.label}</p><p className="my-3 text-4xl font-bold tracking-tight text-teal-900">{item.value === null ? '—' : item.value.toLocaleString('th-TH')}</p><p className="text-xs text-slate-500">{item.note}</p></article>)}</div>
+        {overviewError && <p role="alert">{overviewError} <button type="button" className="underline" onClick={() => setReloadDrafts(n => n + 1)}>ลองใหม่</button></p>}
+        <div className="rounded-2xl border bg-white p-6 sm:p-8"><p className="text-xs font-semibold text-teal-800">เริ่มต้นจากชื่อสถานที่</p><h2 className="mt-2 text-xl font-bold">เก็บจุดหมายใหม่ไว้เป็นฉบับร่าง</h2><p className="mt-2 max-w-xl text-sm text-slate-600">เพิ่มรายละเอียด พิกัดที่ตรวจสอบแล้ว และสิทธิ์ภาพในภายหลัง จากนั้นส่งตรวจและอนุมัติก่อนเผยแพร่</p><button type="button" onClick={() => navigate('new')} className="mt-5 rounded-xl bg-teal-800 px-5 py-3 text-sm font-semibold text-white">สร้างฉบับร่าง</button></div>
+      </section>}
+      {draftLoading && <p role="status" className="animate-pulse rounded-xl border bg-white p-4">กำลังโหลดรายการฉบับร่าง...</p>}
+      {draftError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4">{draftError} <button type="button" className="underline" onClick={() => setReloadDrafts(n => n + 1)}>โหลดฉบับร่างใหม่</button></p>}
       {message && <div role="status" aria-live="polite" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">{message}</div>}
       {tab === 'existing' && <section className="space-y-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
         <div><h2 className="flex items-center gap-2 text-xl font-bold"><Search className="text-teal-600" /> ค้นหาสถานที่เดิม</h2><p className="mt-1 text-sm text-slate-500">แสดงสถานที่ที่มีอยู่ใน Railway และค้นหาได้ด้วยชื่อเต็ม ชื่อย่อ หรือจังหวัด</p></div>
-        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search.trim()); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="เช่น วัดภูมโนรมย์" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span>พบ {catalogTotal} สถานที่ {catalogQuery ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setSearched(false); }}>แสดงทั้งหมด</button></div>
+        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search.trim()); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={catalogLoading} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span>พบ {catalogTotal} สถานที่ {catalogQuery ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setProvinceFilter(''); void findPlaces(1, '', ''); }}>แสดงทั้งหมด</button></div>
         {searched && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
-        <div className="divide-y">{catalog.map(place => <div key={place.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {place.province}</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-xl border border-teal-200 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-50" >แก้ไขสถานที่ที่เผยแพร่แล้ว</button></div></div>)}</div>
+        {catalogLoading && <p role="status">กำลังค้นหาสถานที่...</p>}
+        <div role="table" aria-label="สถานที่ที่เผยแพร่แล้ว" className="overflow-hidden rounded-xl border">
+          <div role="row" className="hidden grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] items-center gap-3 border-b bg-slate-50 p-4 text-xs font-semibold text-slate-600 xl:grid"><span role="columnheader">สถานที่</span><span role="columnheader">จังหวัด</span><span role="columnheader">สถานะ</span><span role="columnheader">การจัดการ</span></div>
+          {catalog.map(place => <div role="row" key={place.id} className="grid min-w-0 gap-3 border-b p-4 last:border-0 xl:grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] xl:items-center">
+            <div role="cell" className="flex min-w-0 items-center gap-3">{place.imageUrl ? <img src={place.imageUrl} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-xl object-cover" /> : <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-100"><MapPin className="text-slate-400" /></span>}<div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p>{place.name_local && <p className="break-words text-xs text-slate-500">{place.name}</p>}</div></div>
+            <p role="cell" className="text-sm text-slate-600">{place.province}</p><span role="cell" className="w-fit rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">เผยแพร่แล้ว</span>
+            <div role="cell" className="flex flex-wrap gap-2"><Link className="rounded-lg border px-3 py-2 text-xs" to={`/attraction/${encodeURIComponent(place.id)}`}>ดูสถานที่</Link><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-lg border px-3 py-2 text-xs text-teal-800">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800">แก้ไขสถานที่ที่เผยแพร่แล้ว</button></div>
+          </div>)}
+        </div>
         {aliasPlace && <section className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-4" aria-label="จัดการชื่อเรียกสถานที่">
           <div className="flex items-center justify-between gap-2"><h3 className="font-semibold">ชื่อเรียกอื่น: {aliasPlace.name_local || aliasPlace.name}</h3><button type="button" className="text-sm underline" onClick={() => setAliasPlace(null)}>ปิด</button></div>
           <p className="text-xs text-slate-600">ชื่อที่เพิ่มจะรอตรวจสอบก่อน จึงไม่กระทบผลค้นหาบนเว็บไซต์ทันที</p>
@@ -569,15 +599,17 @@ export default function AdminCms() {
           {placeAliases.length === 0 && <p className="text-sm text-slate-500">ยังไม่มีชื่อเรียกเพิ่มเติม</p>}
           <div className="space-y-2">{placeAliases.map(alias => <div key={alias.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-3"><div><p className="font-medium">{alias.alias_name}</p><p className="text-xs text-slate-500">{alias.language} · {alias.status === 'approved' ? 'อนุมัติแล้ว' : alias.status === 'rejected' ? 'ปฏิเสธแล้ว' : 'รอตรวจสอบ'}</p></div>{alias.status === 'pending' && <div className="flex gap-2"><button type="button" disabled={busy} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs text-white disabled:opacity-50" onClick={() => void reviewAlias(alias, 'approved')}>อนุมัติ</button><button type="button" disabled={busy} className="rounded-lg border px-3 py-2 text-xs disabled:opacity-50" onClick={() => void reviewAlias(alias, 'rejected')}>ปฏิเสธ</button></div>}</div>)}</div>
         </section>}
-        {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery)}>ถัดไป</button></div>}
+        {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery, catalogProvince)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery, catalogProvince)}>ถัดไป</button></div>}
       </section>}
-      {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">ช่องที่มี * จำเป็นต้องกรอก</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { setEditing(null); setForm({ ...empty }); setBrokenImage(false); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); lastAutoLookup.current = ''; void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+      {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="contents">
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนส่งตรวจและเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { setEditing(null); setForm({ ...empty }); setBrokenImage(false); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+        <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
+        <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
-          {(['name', 'nameLocal', 'province', 'category', 'lat', 'lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{({ name: 'ชื่อสถานที่ (หลัก)', nameLocal: 'ชื่อภาษาไทย', province: 'จังหวัด', category: 'หมวดหมู่', lat: 'ละติจูด', lng: 'ลองจิจูด' })[key]}{['name', 'province', 'category', 'lat', 'lng'].includes(key) ? ' *' : ''}</span><input className={inputStyle} value={form[key]} inputMode={key === 'lat' || key === 'lng' ? 'decimal' : 'text'} onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={['name', 'province', 'category', 'lat', 'lng'].includes(key)} /></label>)}
+          {(['name', 'nameLocal', 'province', 'category', 'lat', 'lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{({ name: 'ชื่อสถานที่ (หลัก)', nameLocal: 'ชื่อภาษาไทย', province: 'จังหวัด', category: 'หมวดหมู่', lat: 'ละติจูด', lng: 'ลองจิจูด' })[key]}{key === 'name' ? ' *' : ''}</span><input className={inputStyle} value={form[key]} inputMode={key === 'lat' || key === 'lng' ? 'decimal' : 'text'} onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
         </section>
-        <section className="space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">กรอกชื่อและจังหวัดเพื่อเสนอพิกัดอัตโนมัติ แล้วตรวจตำแหน่งก่อนยืนยัน</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
+        <section id="cms-location" className="scroll-mt-24 space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">กรอกพิกัดเอง หรือค้นหาและยืนยันหมุดด้วยตนเอง ระบบไม่เติมพิกัดอัตโนมัติ</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
           {geocodeNote && <p aria-live="polite" className="text-sm text-slate-700">{geocodeNote}</p>}
           {geoCandidates.length > 0 && <div className="space-y-2">{geoCandidates.map((candidate, index) => <button key={`${candidate.source}-${index}`} type="button" onClick={() => setProposedCoordinate({ lat: candidate.lat, lng: candidate.lng })} className="flex w-full items-start justify-between gap-2 rounded-lg border bg-white p-3 text-left text-sm hover:border-teal-500"><span>{candidate.label}<span className="mt-1 block text-xs text-slate-500">{candidate.source} · {candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}</span></span><MapPin size={16} className="shrink-0 text-teal-600" /></button>)}</div>}
           <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-slate-200" />}>
@@ -587,14 +619,16 @@ export default function AdminCms() {
           <p className="text-xs text-slate-500">พิกัดจากระบบเป็นเพียงข้อเสนอ ตรวจสอบหมุดก่อนทุกครั้ง · ยังไม่มีการบันทึกลงฐานข้อมูล</p>
         </section>
         <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
-        <section className="space-y-3 rounded-xl border border-dashed border-teal-200 bg-teal-50/40 p-4">
+        <section id="cms-gallery" className="scroll-mt-24 space-y-3 rounded-xl border border-dashed border-teal-200 bg-teal-50/40 p-4">
           <h3 className="flex items-center gap-2 font-semibold"><ImagePlus size={19} className="text-teal-700" /> รูปภาพสถานที่</h3>
+          <p className="text-xs text-slate-600">เครดิตและใบอนุญาตภาพ: ระบุในขั้นตรวจหลักฐานของฉบับร่างก่อนอนุมัติ</p>
+          {uploadProgress && <div role="status">กำลังอัปโหลด {uploadProgress.done}/{uploadProgress.total} รูป<progress className="block w-full" value={uploadProgress.done} max={uploadProgress.total} aria-label="ความคืบหน้าการอัปโหลด" /></div>}
           {loadingImages && <p className="text-sm text-slate-500">กำลังโหลดรูปภาพที่มีอยู่...</p>}
           {existingImages.filter(image => !form.removedImageUrls.includes(image.url)).length > 0 && <div className="space-y-3 rounded-xl bg-white p-3">
             <div><h4 className="font-semibold">รูปภาพที่ใช้อยู่บนเว็บไซต์ ({existingImages.filter(image => !form.removedImageUrls.includes(image.url)).length})</h4><p className="text-xs text-slate-500">เลือกรูปหลักหรือทำเครื่องหมายลบรูปเดิม การเปลี่ยนแปลงจะมีผลเมื่อบันทึกฉบับร่างและเผยแพร่</p></div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{existingImages.filter(image => !form.removedImageUrls.includes(image.url)).map(image => <div key={image.id} className={`min-w-0 overflow-hidden rounded-xl border-2 ${form.imageUrl === image.url ? 'border-teal-600' : 'border-slate-200'}`}>
               <button type="button" className="w-full text-left" onClick={() => { setForm(current => ({ ...current, imageUrl: image.url, imageUrls: [...new Set([...current.imageUrls, image.url])] })); setBrokenImage(false); }}>
-                <img src={image.url} alt={image.title || 'รูปสถานที่เดิม'} className="aspect-[4/3] w-full bg-slate-100 object-cover" loading="lazy" />
+                <AdminMediaPreview url={image.url} base={base} request={requestAdmin} alt={image.title || 'รูปสถานที่เดิม'} className="aspect-[4/3] w-full bg-slate-100 object-cover" />
                 <span className="block truncate p-2 text-xs">{form.imageUrl === image.url ? '✓ รูปภาพหลัก' : 'เลือกเป็นรูปหลัก'}</span>
               </button>
               <button type="button" className="w-full border-t p-2 text-xs text-red-700" onClick={() => {
@@ -611,7 +645,7 @@ export default function AdminCms() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {form.imageUrls.map(url => <div key={url} className={`overflow-hidden rounded-xl border-2 ${form.imageUrl === url ? 'border-teal-600' : 'border-slate-200'}`}>
                 <button type="button" className="w-full" onClick={() => { setForm(current => ({ ...current, imageUrl: url })); setBrokenImage(false); }}>
-                  <img src={url} alt="รูปในแกลเลอรี" className="aspect-[4/3] w-full object-cover" loading="lazy" />
+                  <AdminMediaPreview url={url} base={base} request={requestAdmin} alt="รูปในแกลเลอรี" className="aspect-[4/3] w-full object-cover" />
                   <span className="block p-2 text-xs">{form.imageUrl === url ? '✓ รูปภาพหลัก' : 'เลือกเป็นรูปหลัก'}</span>
                 </button>
                 <button type="button" className="w-full border-t p-2 text-xs text-red-700" onClick={() => setForm(current => {
@@ -624,12 +658,12 @@ export default function AdminCms() {
           {previewSrc && !brokenImage && <img src={previewSrc} alt="ตัวอย่างภาพสถานที่" className="h-48 w-full rounded-xl bg-slate-100 object-cover sm:h-64" onError={() => setBrokenImage(true)} />}
           {form.imageUrl && brokenImage && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">ไม่สามารถแสดงตัวอย่างภาพได้ กรุณาตรวจสอบ URL</p>}
           <label className="block cursor-pointer rounded-xl border border-teal-200 bg-white px-4 py-5 text-center text-sm text-teal-800"><CloudUpload className="mx-auto mb-2" /><span className="font-semibold">เลือกภาพจากอุปกรณ์</span><span className="mt-1 block text-xs text-slate-500">เลือกหลายรูปพร้อมกันได้ สูงสุด 20 รูป · JPG, PNG, WebP ไม่เกิน 5 MB ต่อรูป</span><input className="mt-3 block w-full min-w-0 text-xs" type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e => { const files = Array.from(e.target.files || []); if (files.length) void upload(files); e.target.value = ''; }} /></label>
-          <label className="block text-sm font-medium">หรือใส่ URL รูปภาพ HTTPS<input className={inputStyle} type="url" value={form.imageUrl} onChange={e => { setBrokenImage(false); setForm(current => ({ ...current, imageUrl: e.target.value, imageUrls: e.target.value ? [...new Set([...current.imageUrls, e.target.value])] : current.imageUrls })); }} placeholder="https://..." /></label>
+          <label className="block text-sm font-medium">หรือใส่ URL รูปภาพ HTTPS<input className={inputStyle} type="url" value={form.imageUrl} onChange={e => { setBrokenImage(false); setForm(current => ({ ...current, imageUrl: e.target.value })); }} placeholder="https://..." /></label>
         </section>
-        <div className="sticky bottom-2 z-10 rounded-xl border bg-white/95 p-2 shadow-lg backdrop-blur"><button className="w-full rounded-xl bg-teal-600 px-4 py-3.5 font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-50" disabled={busy} type="submit">{busy ? 'กำลังดำเนินการ...' : editing ? 'บันทึกการแก้ไขเป็นฉบับร่าง' : 'บันทึกสถานที่เป็นฉบับร่าง'}</button><p className="mt-2 text-center text-xs text-slate-500">ยังไม่เผยแพร่จนกว่าจะยืนยันในแท็บฉบับร่าง</p></div>
-      </form>}
+        <div className="admin-save sticky bottom-2 z-10 rounded-xl border bg-white/95 p-2 shadow-lg backdrop-blur"><button className="w-full rounded-xl bg-teal-600 px-4 py-3.5 font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-50" disabled={busy} type="submit">{busy ? 'กำลังดำเนินการ...' : editing ? 'บันทึกการแก้ไขเป็นฉบับร่าง' : 'บันทึกสถานที่เป็นฉบับร่าง'}</button><p className="mt-2 text-center text-xs text-slate-500">ยังไม่เผยแพร่จนกว่าจะยืนยันในแท็บฉบับร่าง</p></div>
+      </fieldset></form>}
       {tab === 'quality' && <ProvinceQualityDashboard api={api} onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}} />}
-      {reconcile && tab === 'drafts' && <section className="space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
+      {reconcile && (tab === 'drafts' || tab === 'review') && <section className="space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
         <h2 className="text-lg font-bold">เปรียบเทียบฉบับร่างกับข้อมูลล่าสุด</h2>
         <p className="text-sm text-slate-600">ติ๊กเฉพาะการแก้ไขจากฉบับร่างที่ต้องการเก็บไว้ ช่องที่ไม่เลือกจะใช้ข้อมูลล่าสุดบนเว็บไซต์</p>
         {reconcile.data.fields.map(field => {
@@ -645,9 +679,14 @@ export default function AdminCms() {
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={reconcile.retainGallery} onChange={event=>setReconcile(current=>current&&({...current,retainGallery:event.target.checked}))}/>เก็บการเพิ่มและลบรูปภาพจากฉบับร่างนี้</label>
         <div className="flex flex-wrap gap-2"><button type="button" disabled={busy} className="rounded-xl bg-teal-600 px-4 py-3 font-semibold text-white" onClick={()=>void confirmReconciliation()}>ยืนยันการแก้ไขเฉพาะส่วนที่เลือก</button><button type="button" className="rounded-xl border px-4 py-3" onClick={()=>setReconcile(null)}>ยกเลิก</button></div>
       </section>}
-      {tab === 'drafts' && <section className="space-y-4"><div><h2 className="text-xl font-bold">รายการฉบับร่าง</h2><p className="mt-1 text-sm text-slate-500">ตรวจสอบและแก้ไขข้อมูลให้ถูกต้องก่อนเผยแพร่</p></div>
+      {(tab === 'drafts' || tab === 'review') && <section className="space-y-4"><div><h2 className="text-xl font-bold">รายการฉบับร่าง</h2><p className="mt-1 text-sm text-slate-500">ตรวจสอบและแก้ไขข้อมูลให้ถูกต้องก่อนเผยแพร่</p></div>
         {!activeDrafts.length && <div className="rounded-2xl border bg-white p-10 text-center text-sm text-slate-500">ไม่มีฉบับร่างที่รอเผยแพร่</div>}
-        {activeDrafts.map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง · พร้อมเผยแพร่' : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}</p><PlaceCandidateReview draft={draft} api={api} />{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}</article>)}
+        <label className="block text-sm">ค้นหาฉบับร่าง<input className={inputStyle} value={draftFilter} onChange={e => {setDraftFilter(e.target.value); setDraftPage(1);}} placeholder="ชื่อไทย / English / จังหวัด" /></label>
+        <label className="block text-sm">กรองสถานะ<select className={inputStyle} value={statusFilter} onChange={e => {setStatusFilter(e.target.value);setDraftPage(1);}}><option value="">ทุกสถานะ</option>{Object.entries(statusLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        {!visibleDrafts.length && activeDrafts.length > 0 && <p className="rounded-xl border bg-white p-6 text-center">ไม่มีรายการตรงกับตัวกรอง</p>}
+        <p className="text-xs text-slate-600">แสดงจากรายการ CMS ล่าสุดไม่เกิน 100 รายการ · ขั้นตอน: Draft → Review → Approved → Published</p>
+        {visibleDrafts.slice((draftPage-1)*10, draftPage*10).map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? (statusLabels[draft.review_state || 'DISCOVERED'] || 'ฉบับร่าง') : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}{draft.updated_at ? ` · อัปเดต ${new Date(draft.updated_at).toLocaleDateString('th-TH')}` : ''}</p><PlaceCandidateReview draft={draft} api={api} /><PlaceApprovalReview onStateChange={state => setDrafts(current => current.map(item => item.id === draft.id ? {...item, review_state:state} : item))} key={`${draft.id}-${draft.version}`} draft={draft} api={api} onApprovalChange={value => setApproved(current => ({...current, [draft.id]: value}))} />{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy || !approved[draft.id]} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}</article>)}
+        <div className="flex items-center gap-3"><button type="button" disabled={draftPage === 1} onClick={() => setDraftPage(p => p-1)} className="rounded-xl border px-4 py-2">หน้าร่างก่อนหน้า</button><span>หน้า {draftPage}</span><button type="button" disabled={visibleDrafts.length <= draftPage*10} onClick={() => setDraftPage(p => p+1)} className="rounded-xl border px-4 py-2">หน้าร่างถัดไป</button></div>
       </section>}      {tab === 'history' && <section className="space-y-4">
         <div><h2 className="text-xl font-bold">ประวัติการเผยแพร่</h2><p className="mt-1 text-sm text-slate-500">รายการที่เผยแพร่แล้ว แยกจากฉบับร่างที่รอดำเนินการ</p></div>
         {!publishedDrafts.length && <div className="rounded-2xl border bg-white p-10 text-center text-sm text-slate-500">ยังไม่มีประวัติการเผยแพร่</div>}
@@ -659,6 +698,5 @@ export default function AdminCms() {
         </article>)}
       </section>}
 
-    </div>
-  </main>;
+  </AdminWorkspace>;
 }
