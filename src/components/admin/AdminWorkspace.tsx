@@ -4,10 +4,10 @@ import { Compass, LayoutDashboard, MapPin, Plus, FilePenLine, Clock3, ShieldChec
 import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import './admin-workspace.css';
 
-export type AdminView = 'overview' | 'new' | 'existing' | 'drafts' | 'review' | 'history' | 'quality' | 'settings';
+export type AdminView = 'overview' | 'new' | 'existing' | 'drafts' | 'history' | 'quality' | 'settings';
 const groups = [
   { label: 'พื้นที่ทำงาน', items: [{ id: 'overview', label: 'ภาพรวมข้อมูล', Icon: LayoutDashboard }] },
-  { label: 'จัดการสถานที่', items: [{ id: 'existing', label: 'สถานที่ทั้งหมด', Icon: MapPin }, { id: 'new', label: 'เพิ่ม / แก้ไข', Icon: Plus }, { id: 'drafts', label: 'ฉบับร่าง', Icon: FilePenLine }, { id: 'review', label: 'รอตรวจสอบ', Icon: ShieldCheck }, { id: 'history', label: 'ประวัติการเผยแพร่', Icon: Clock3 }, { id: 'quality', label: 'คุณภาพรายจังหวัด', Icon: ShieldCheck }] },
+  { label: 'จัดการสถานที่', items: [{ id: 'existing', label: 'สถานที่ทั้งหมด', Icon: MapPin }, { id: 'new', label: 'เพิ่ม / แก้ไข', Icon: Plus }, { id: 'drafts', label: 'ฉบับร่าง', Icon: FilePenLine }, { id: 'history', label: 'ประวัติการเผยแพร่', Icon: Clock3 }, { id: 'quality', label: 'คุณภาพรายจังหวัด', Icon: ShieldCheck }] },
   { label: 'ระบบ', items: [{ id: 'settings', label: 'การตั้งค่า AI', Icon: Settings2 }] },
 ] as const;
 export default function AdminWorkspace({ view, onNavigate, onSignOut, busy, children }: { view: AdminView; onNavigate: (view: AdminView) => void; onSignOut: () => void; busy: boolean; children: ReactNode }) {

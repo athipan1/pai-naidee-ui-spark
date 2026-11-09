@@ -1,7 +1,7 @@
 const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
-const { assertApprovedPublication, finishPublication } = require('./place-review-workflow.cjs');
+const { finishDirectPublication } = require('./admin-direct-publication.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
 
@@ -346,9 +346,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         return { status: 400, error: 'Admin must verify and enter the place name before publishing.' };
       // Serialize the duplicate check and write, including publications of different drafts.
       await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
-      const approval = await assertApprovedPublication(tx, draft);
-      if (!approval.ok) return { status: 409, error: approval.error, holds: approval.holds };
-      // Keep the existing evidence, approval and duplicate gates authoritative.
+      // Admin direct publication retains payload, identity, conflict and duplicate protection.
       // An exact normalized name in the same province must not create a second place.
       if (!draft.target_place_id) {
         const duplicates = await tx`SELECT id FROM places
@@ -384,7 +382,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         for (const url of p.imageUrls.filter(url => !p.removedImageUrls.includes(url))) await preservePlaceImage(tx, current.id, url, p.name);
         await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${current.id}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
-        await finishPublication(tx, draft, current.id, req.auth.user.id, approval);
+        await finishDirectPublication(tx, draft, current.id, req.auth.user.id);
         return { status: 200, placeId: current.id, published: true, updated: true };
       }
       const placeId = `cms:${draft.id}`;
@@ -393,7 +391,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       for (const url of p.imageUrls) await preservePlaceImage(tx, placeId, url, p.name);
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
-      await finishPublication(tx, draft, placeId, req.auth.user.id, approval);
+      await finishDirectPublication(tx, draft, placeId, req.auth.user.id);
       return { status: 200, placeId, published: true };
     });
     if (result.published) invalidateSearchIndex();
