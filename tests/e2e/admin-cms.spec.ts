@@ -39,8 +39,8 @@ async function mockCms(page: Page) {
     }
     if (pathname.startsWith('/api/admin/') && (!session || request.headers().authorization !== 'Bearer browser-test-session'))
       return reply(401, { error: 'Session expired or invalid.' });
-    if (pathname === '/api/admin/me') return reply(200, { role: 'admin' });
-    if (pathname.endsWith('/review-transition')) {reviewState=body().action==='approve'?'APPROVED':'REVIEW_PENDING';return reply(200,{state:reviewState,revision:2});}
+    if (pathname === '/api/admin/me') return reply(200, { role: 'admin', email:'admin@example.test' });
+    if (pathname.endsWith('/review-transition')) {reviewState=({verify:'VERIFIED',request_review:'REVIEW_PENDING',approve:'APPROVED'} as Record<string,string>)[body().action];return reply(200,{state:reviewState,revision:2});}
     if (/^\/api\/admin\/places\/[^/]+\/review$/.test(pathname)) return reply(200,{state:reviewState,revision:1,evidence:pathname.includes('created-fixture')?{source:{},coordinate:{},media:{},duplicateResolutions:[]}:null,history:[],report:{holds:[],payloadMatches:true,provinceGate:'PASS',duplicate:{matches:[]}}});
     if (pathname === '/api/admin/province-quality') return reply(200,{completenessClaim:null,automaticImport:false,provinces:[{province:'ชลบุรี',existing:{total:71,missing_images:1,missing_details:2,last_verified:null},review:{discovered:3,duplicates:1,license_hold:2,coordinate_hold:1,approved:0,published:0,confirmed_new:0}}]});
     if (pathname === '/api/admin/candidate-queue') return reply(200,{candidates:[],total:0,page:1,limit:30});
@@ -105,6 +105,7 @@ async function mockCms(page: Page) {
         version: draft.version, stale: false, placeUpdatedAt: '2026-11-08T00:00:00.000Z', fields: [] });
     }
     if (pathname.endsWith('/publish') && draft) {
+      if(reviewState!=='APPROVED') return reply(409,{error:'Explicit approval required.'});
       if (body().version !== draft.version) return reply(409, { error: 'Draft changed.' });
       draft.status = 'published';
       publishCount++;
@@ -122,6 +123,13 @@ async function mockCms(page: Page) {
     published: () => publishCount, catalogQueries };
 }
 
+async function navigate(page: Page, name: string) {
+  await expect(page.getByRole('heading', {name:'จัดการสถานที่ท่องเที่ยว',exact:true})).toBeVisible();
+  const menu = page.getByRole('button', {name:'เปิดเมนูแอดมิน'});
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole('navigation', {name:'ส่วนจัดการสถานที่'}).filter({visible:true}).getByRole('button', {name,exact:true}).click();
+}
+
 async function login(page: Page, password = 'cms-fixture-password') {
   await page.goto('/login');
   await page.getByLabel('อีเมล').fill('admin@example.test');
@@ -134,7 +142,7 @@ test('candidate review is read-only and Google stays disabled without activation
   let googleCalls=0;
   page.on('request', request => {if(new URL(request.url()).pathname==='/api/admin/google-verification')googleCalls++;});
   await login(page);
-  await page.getByRole('button', {name:/ฉบับร่าง \(/}).click();
+  await navigate(page, 'ฉบับร่าง');
   await page.getByRole('button', {name:'ตรวจคุณภาพแบบอ่านอย่างเดียว'}).click();
   await expect(page.getByText(/เทียบฐานข้อมูล 194/)).toBeVisible();
   await expect(page.getByText('รายงานนี้ยังไม่อนุมัติให้เผยแพร่')).toBeVisible();
@@ -151,13 +159,13 @@ test('login, failed credentials, logout, and an expired session during a request
   await expect(page.getByRole('alert')).toHaveText('Invalid email or password.');
   await login(page);
   await expect(page.getByRole('heading', { name: 'จัดการสถานที่ท่องเที่ยว' })).toBeVisible();
-  await page.getByRole('button', { name: 'ออกจากระบบ' }).click();
+  await navigate(page, 'ออกจากระบบ');
   await expect(page.getByRole('link', { name: 'เข้าสู่ระบบแอดมิน' })).toBeVisible();
   expect(await page.evaluate(() => sessionStorage.getItem('painaidee.admin.token'))).toBeNull();
   await login(page);
   await expect(page.getByRole('heading', { name: 'จัดการสถานที่ท่องเที่ยว' })).toBeVisible();
   fixture.expire();
-  await page.getByRole('button', { name: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', exact: true }).click();
+  await navigate(page, 'สถานที่ทั้งหมด');
   await expect(page.getByRole('alert')).toContainText('เซสชันหมดอายุ');
 });
 
@@ -166,7 +174,7 @@ test('catalog pagination, aliases, numeric and empty coordinates, and saving an 
   const pageErrors: string[] = [];
   page.on('pageerror', error => pageErrors.push(error.message));
   await login(page);
-  await page.getByRole('button', { name: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', exact: true }).click();
+  await navigate(page, 'สถานที่ทั้งหมด');
   const search = page.getByRole('textbox', { name: 'ค้นหาสถานที่เดิม' });
   await search.fill('รายการจำลอง');
   await page.getByRole('button', { name: 'ค้นหา', exact: true }).click();
@@ -197,7 +205,7 @@ test('catalog pagination, aliases, numeric and empty coordinates, and saving an 
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
   await page.locator('article').filter({ hasText: place.name_local }).getByRole('button', { name: 'แก้ไขร่าง' }).click();
   await expect(page.getByLabel(/ละติจูด/)).toHaveValue('13.250000');
-  await page.getByRole('button', { name: /ฉบับร่าง \(/ }).click();
+  await navigate(page, 'ฉบับร่าง');
   const legacy = page.locator('article').filter({ hasText: 'ร่างเก่า' });
   await legacy.getByRole('button', { name: 'แก้ไขร่าง' }).click();
   await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
@@ -209,6 +217,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
   const fixture = await mockCms(page);
   page.on('dialog', dialog => dialog.accept());
   await login(page);
+  await navigate(page, 'การตั้งค่า AI');
   await page.getByLabel('โมเดล AI', { exact: true }).selectOption(models[1].id);
   await page.getByRole('button', { name: 'ตรวจ Model ID' }).click();
   await page.getByRole('button', { name: 'บันทึกโมเดล' }).click();
@@ -216,6 +225,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await page.getByRole('button', { name: 'ทดสอบ AI', exact: true }).click();
   await expect(page.getByText('ทดสอบ AI สำเร็จ')).toBeVisible();
 
+  await navigate(page, 'เพิ่ม / แก้ไข');
   const image = { name: 'fixture.png', mimeType: 'image/png', buffer: imageBytes };
   await page.locator('input[type=file]').setInputFiles(image);
   const preview = page.getByRole('img', { name: 'ตัวอย่างภาพสถานที่' });
@@ -226,7 +236,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await expect(preview).toHaveJSProperty('naturalWidth', 1);
 
   await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('Draft fixture');
-  await page.getByLabel(/จังหวัด \*/).fill('ชลบุรี');
+  await page.getByLabel('จังหวัด', {exact:true}).fill('ชลบุรี');
   await page.getByLabel(/ละติจูด/).fill('13.2');
   await page.getByLabel(/ลองจิจูด/).fill('100.9');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
@@ -234,12 +244,15 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await page.getByRole('button', { name: 'บันทึกสถานที่เป็นฉบับร่าง' }).click();
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
   const draft = page.locator('article').filter({ hasText: 'Draft fixture' });
-  await expect(draft.getByRole('button', {name:'ตรวจหลักฐานและคุณภาพอัตโนมัติ'})).toHaveCount(0);
+  await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeDisabled();
+  await draft.getByRole('button', {name:'ตรวจหลักฐานและคุณภาพอัตโนมัติ'}).click();
+  await draft.getByRole('button', {name:'ส่งตรวจสอบ',exact:true}).click();
+  await draft.getByRole('button', {name:'อนุมัติการเผยแพร่',exact:true}).click();
   await expect(draft.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeEnabled();
   await draft.getByRole('button', { name: 'เผยแพร่', exact: true }).click();
   await expect(page.getByText(/เผยแพร่สำเร็จ/)).toBeVisible();
   await expect(draft).toHaveCount(0);
-  await page.getByRole('button', { name: /ประวัติการเผยแพร่ \(/ }).click();
+  await navigate(page, 'ประวัติการเผยแพร่');
   const published = page.locator('article').filter({ hasText: 'Draft fixture' });
   await expect(published).toBeVisible();
   await expect(published.getByText('เผยแพร่แล้ว')).toBeVisible();
@@ -250,9 +263,88 @@ test('image preview and failure, create and publish, AI settings, and responsive
 
 test('province dashboard shows counted data without a completeness claim or automatic import',async({page})=>{
   await mockCms(page);await login(page);
-  await page.getByRole('button',{name:'คุณภาพรายจังหวัด',exact:true}).click();
+  await navigate(page,'คุณภาพรายจังหวัด');
   await page.getByRole('button',{name:'โหลดคิวและสถิติจังหวัด'}).click();
   await expect(page.getByText('มีในฐานข้อมูล',{exact:true})).toBeVisible();
   await expect(page.getByText('71',{exact:true})).toBeVisible();
   await expect(page.getByText(/ไม่ใช่จำนวนสถานที่ทั้งหมดที่ควรมี/)).toBeVisible();
+});
+
+
+test('name-only draft, explicit coordinates, unsaved changes and safe validation', async ({page}) => {
+  await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
+  let automaticGeocodes = 0;
+  page.on('request', req => {if(req.url().includes('/api/admin/geocode')) automaticGeocodes++;});
+  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('ร่างชื่ออย่างเดียว');
+  await page.getByLabel(/ละติจูด/).fill('NaN');
+  await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
+  await expect(page.getByRole('status').filter({hasText:'กรุณากรอกพิกัดทั้งคู่'})).toBeVisible();
+  await page.getByLabel(/ละติจูด/).fill('');
+  page.once('dialog', dialog => dialog.dismiss());
+  await navigate(page,'ฉบับร่าง');
+  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('ร่างชื่ออย่างเดียว');
+  await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
+  const draft = page.locator('article').filter({hasText:'ร่างชื่ออย่างเดียว'});
+  await expect(draft).toBeVisible();
+  await expect(draft.getByRole('button',{name:'เผยแพร่',exact:true})).toBeDisabled();
+  await draft.getByRole('button',{name:'แก้ไขร่าง'}).click();
+  await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
+  await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('');
+  expect(automaticGeocodes).toBe(0);
+});
+
+test('responsive navigation, keyboard focus, cards and form width matrix', async ({page}, testInfo) => {
+  test.setTimeout(120_000); // Eight screenshot widths plus WebKit drawer animations in one case.
+  await mockCms(page); await login(page);
+  for (const width of [320,360,375,390,430,768,1024,1280]) {
+    await page.setViewportSize({width,height:900});
+    await navigate(page,'สถานที่ทั้งหมด');
+    await expect(page.getByText('รายการจำลอง',{exact:true})).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await navigate(page,'เพิ่ม / แก้ไข');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await page.screenshot({path:testInfo.outputPath(`admin-${width}.png`),fullPage:true});
+    await navigate(page,'ภาพรวมข้อมูล');
+  }
+  if(testInfo.project.name === 'Desktop Chrome') {
+    await page.getByRole('button',{name:'ย่อเมนู',exact:true}).click();
+    await expect(page.getByRole('button',{name:'ขยายเมนู',exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'ขยายเมนู',exact:true}).click();
+    // A 1280px desktop at 200% zoom has the same CSS layout width as 640px.
+    await page.setViewportSize({width:640,height:450});
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(640);
+  }
+});
+
+
+test('unsaved form survives reload without creating or saving a production draft', async ({page}) => {
+  await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
+  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('แบบฟอร์มกู้คืน');
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toContain('แบบฟอร์มกู้คืน');
+  page.once('dialog', dialog => dialog.accept());
+  await page.reload();
+  await page.getByRole('button',{name:'กู้คืนแบบฟอร์ม',exact:true}).click();
+  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('แบบฟอร์มกู้คืน');
+  await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
+  await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
+  expect(await page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();
+});
+
+
+test('newer catalog search wins over a delayed response and province reaches the server', async ({page}) => {
+  await mockCms(page); await login(page); await navigate(page,'สถานที่ทั้งหมด');
+  await page.route('**/api/admin/catalog?**',async route => {
+    const url = new URL(route.request().url());
+    const q = url.searchParams.get('q');
+    if(q === 'เก่า') await new Promise(resolve => setTimeout(resolve,500));
+    await route.fulfill({json:{places:[{...place,name_local:q || 'ทั้งหมด'}],total:1,page:1}}).catch(() => {});
+  });
+  const search = page.getByRole('textbox',{name:'ค้นหาสถานที่เดิม',exact:true});
+  await search.fill('เก่า'); await page.getByRole('button',{name:'ค้นหา',exact:true}).click();
+  await search.fill('ใหม่'); await page.getByRole('textbox',{name:'กรองจังหวัด'}).fill('ชลบุรี');
+  const request = page.waitForRequest(req => req.url().includes('/api/admin/catalog?') && new URL(req.url()).searchParams.get('q') === 'ใหม่');
+  await page.getByRole('button',{name:'ค้นหา',exact:true}).click();
+  expect(new URL((await request).url()).searchParams.get('province')).toBe('ชลบุรี');
+  await expect(page.getByText('ใหม่',{exact:true})).toBeVisible();
+  await expect(page.getByText('เก่า',{exact:true})).toHaveCount(0);
 });

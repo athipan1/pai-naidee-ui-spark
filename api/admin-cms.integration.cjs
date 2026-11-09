@@ -105,7 +105,31 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   const write = (path, body, status = 200, method = 'POST') => admin(path, { method, body, status }).then(res => res.json());
   const signIn = async () => { token = (await write('/login', { email, password })).token; };
   const makeDraft = fields => write('/places', { ...fixture, ...fields }, 201);
-  const publish = (draft,status=200) => write(`/places/${draft.id}/publish`,{version:draft.version},status);
+  async function approveFixture(draft) {
+    const before = await (await admin(`/places/${draft.id}/review`)).json();
+    if (before.state === 'PUBLISHED' || before.state === 'APPROVED') return;
+    const sourceUrl = 'https://fixture.example.test/source';
+    const rights = {licenseName:'CC0 1.0',licenseUrl:'https://creativecommons.org/publicdomain/zero/1.0/',checkedAt:new Date().toISOString()};
+    const evidence = {source:{...rights,namespace:'fixture',id:draft.id,name:'Isolated test operator',url:sourceUrl},
+      coordinate:{...rights,sourceUrl,kind:'vehicle_entrance',publicAccessUrl:sourceUrl},
+      media:draft.payload.imageUrl?{...rights,url:draft.payload.imageUrl,sourcePage:sourceUrl,photographer:'Fixture artist'}:{},
+      detailSourceUrl:sourceUrl,duplicateResolutions:[]};
+    // The same real review API used by the UI; synthetic evidence exists only in the local fixture DB.
+    delete evidence.media.checkedAt;
+    let review = await write(`/places/${draft.id}/evidence`,{version:draft.version,revision:before.revision,evidence},200,'PUT');
+    const report = await (await admin(`/places/${draft.id}/review`)).json();
+    evidence.duplicateResolutions = report.report.duplicate.matches.filter(m => m.placeId !== draft.target_place_id && m.confidence !== 'identifier_match').map(m => ({placeId:m.placeId,note:'Distinct isolated fixture for regression testing',sourceUrl}));
+    if(evidence.duplicateResolutions.length) review = await write(`/places/${draft.id}/evidence`,{version:draft.version,revision:review.revision,evidence},200,'PUT');
+    if(draft.payload.imageUrl) review = await write(`/places/${draft.id}/probe-media`,{revision:review.revision});
+    for(const action of ['verify','request_review','approve']) {
+      review = await write(`/places/${draft.id}/review-transition`,{action,revision:review.revision});
+      assert.equal(review.state,{verify:'VERIFIED',request_review:'REVIEW_PENDING',approve:'APPROVED'}[action],JSON.stringify(review));
+    }
+  }
+  const publish = async (draft,status=200) => {
+    if(status===200||status===503) await approveFixture(draft);
+    return write(`/places/${draft.id}/publish`,{version:draft.version},status);
+  };
   const upload = (type, bytes, status = 201) => {
     const body = new FormData();
     body.set('image', new Blob([bytes], { type }), 'fixture.image');
@@ -141,6 +165,17 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await admin('/me', { status: 401 });
     await sql`UPDATE admin_users SET disabled = FALSE WHERE id = 'test-admin'`;
     await signIn();
+  });
+
+  await t.test('name-only drafts persist null coordinates and preserve Google reference IDs on editing', async () => {
+    const minimal = await write('/places', {name:'Name only fixture'}, 201);
+    assert.equal(minimal.payload.lat,null); assert.equal(minimal.payload.lng,null);
+    await write(`/places/${minimal.id}/publish`,{version:minimal.version},400);
+    const referenced = await write('/places/google-reference',{placeId:'ChIJisolatedDraftRef1234'},201);
+    const row = (await (await admin('/places')).json()).drafts.find(d => d.id === referenced.id);
+    const saved = await write(`/places/${row.id}`,{...row.payload,name:'ชื่อที่ยืนยันแล้ว',version:row.version},200,'PUT');
+    assert.equal(saved.payload.googlePlaceId,'ChIJisolatedDraftRef1234');
+    assert.equal(saved.payload.lat,null); assert.equal(saved.payload.lng,null);
   });
 
   await t.test('candidate review uses live SQL rows, exports safely and cannot publish or mutate a draft', async () => {
@@ -199,11 +234,12 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   });
 
   await t.test('duplicate publications are serialized and an error rolls back place and draft writes', async () => {
-    await publish(await makeDraft({ name: 'Near Existing Fixture', nameLocal: '', lat: 13.2001 }));
+    await publish(await makeDraft({ name: 'Near Existing Fixture', nameLocal: 'สถานที่ใกล้กัน', lat: 13.2001 }));
     const [first, second] = await Promise.all([
       makeDraft({ name: 'Concurrent Fixture', nameLocal: 'รายการทดสอบพร้อมกัน', lat: 14, lng: 101 }),
       makeDraft({ name: 'Concurrent Fixture', nameLocal: 'รายการทดสอบพร้อมกัน', lat: 14.0001, lng: 101 }),
     ]);
+    await approveFixture(first); await approveFixture(second);
     const results = await Promise.all([first, second].map(draft => fetch(`${base}/api/admin/places/${draft.id}/publish`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ version: draft.version }),
     })));
@@ -268,8 +304,9 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await write(`/aliases/${other.id}/review`, { status: 'approved' }, 409);
   });
 
-  await t.test('direct publication does not require review evidence and rejects exact duplicate names', async () => {
+  await t.test('publication requires evidence and explicit approval, and rejects exact duplicate names', async () => {
     const first=await makeDraft({name:'Direct publication fixture',nameLocal:'รายการเผยแพร่ตรง',lat:15.2,lng:102.4});
+    await write(`/places/${first.id}/publish`,{version:first.version},409);
     const result=await publish(first);
     assert.equal(result.published,true);
     const duplicate=await makeDraft({name:'Direct publication fixture',nameLocal:'รายการเผยแพร่ตรง',lat:15.3,lng:102.5});

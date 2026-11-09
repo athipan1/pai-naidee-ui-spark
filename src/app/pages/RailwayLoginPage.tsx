@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getApiBaseUrl } from '@/services/railway-api.service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,9 +34,9 @@ export default function RailwayLoginPage() {
     finally { setIsLoading(false); setPassword(''); }
   }
 
-  return <div className="flex min-h-screen items-center justify-center bg-background p-4">
-    <Card className="w-full max-w-md"><CardHeader>
-      <CardTitle>เข้าสู่ระบบผู้ดูแล PaiNaiDee</CardTitle>
+  return <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 text-slate-900">
+    <Card className="w-full max-w-md rounded-2xl border-slate-200 shadow-xl shadow-slate-200/50"><CardHeader>
+      <p className="mb-3 text-xs font-bold uppercase tracking-[.2em] text-teal-800">PaiNaiDee · Content Studio</p><CardTitle className="text-2xl leading-relaxed">เข้าสู่ระบบผู้ดูแล PaiNaiDee</CardTitle>
       <CardDescription>ระบบแอดมิน Railway · กรุณาใช้บัญชีที่ได้รับอนุญาต</CardDescription>
     </CardHeader><CardContent>
       <form onSubmit={handleLogin} className="space-y-4">
@@ -45,8 +45,8 @@ export default function RailwayLoginPage() {
         <Label htmlFor="admin-password">รหัสผ่าน</Label>
         <Input id="admin-password" type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} />
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" disabled={isLoading} className="w-full">{isLoading ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ'}</Button>
-      </form>
+        <Button type="submit" disabled={isLoading} className="min-h-12 w-full bg-teal-800 hover:bg-teal-900">{isLoading ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ'}</Button>
+      </form><Link to="/" className="mt-6 block py-2 text-center text-sm text-teal-800 underline">กลับไปหน้าเว็บไซต์</Link>
     </CardContent></Card>
   </div>;
 }

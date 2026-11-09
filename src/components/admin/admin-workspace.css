@@ -1,0 +1,17 @@
+.admin-workspace {
+  --admin-accent: #115e59;
+  --admin-radius: 1rem;
+  --admin-border: #cbd5e1;
+  font-family: 'Noto Sans Thai', system-ui, sans-serif;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.admin-workspace :is(button, input, select, textarea, a):focus-visible { outline: 3px solid var(--admin-accent); outline-offset: 3px; }
+.admin-workspace :is(input, select, textarea) { max-width: 100%; min-width: 0; font-size: 1rem; border-color: var(--admin-border); }
+.admin-workspace button { min-height: 44px; }
+.admin-workspace button:disabled { cursor: not-allowed; opacity: .55; }
+.admin-workspace :is(section, article, form, fieldset) { min-width: 0; }
+.admin-workspace .text-slate-500 { color: #475569; }
+.admin-workspace .bg-teal-600 { background-color: var(--admin-accent); }
+.admin-workspace .rounded-2xl { border-radius: var(--admin-radius); }
+.admin-workspace .admin-save { bottom: max(.5rem, env(safe-area-inset-bottom)); }

@@ -85,3 +85,12 @@ test('ID-only Google draft cannot pass publication validation without admin coor
   assert.ok(cleanPlace(placeholder).errors.some(e=>e.includes('Coordinates')));
   assert.equal(cleanPlace({...placeholder,name:'ชื่อที่ยืนยันแล้ว',lat:13.3,lng:100.9}).errors.length,0);
 });
+
+ test('name-only drafts retain null coordinates while publication stays strict', () => {
+  const result = cleanPlace({name:'ชื่อใหม่'}, {draft:true});
+  assert.deepEqual(result.errors, []);
+  assert.equal(result.value.lat, null); assert.equal(result.value.lng, null);
+  assert.ok(cleanPlace(result.value).errors.length);
+  for(const input of [{lat:'NaN',lng:100},{lat:13,lng:''},{lat:99,lng:100},{lat:[],lng:100}])
+    assert.ok(cleanPlace({name:'ชื่อใหม่',...input},{draft:true}).errors.length);
+});
