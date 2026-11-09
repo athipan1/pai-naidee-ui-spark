@@ -10,6 +10,9 @@ interface OptimizedImageProps {
   height?: string | number;
   loading?: "lazy" | "eager";
   decoding?: "async" | "auto" | "sync";
+  fetchPriority?: "high" | "low" | "auto";
+  sizes?: string;
+  unavailableLabel?: string;
   onLoad?: () => void;
   onError?: () => void;
 }
@@ -43,6 +46,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   height,
   loading = "lazy",
   decoding = "async",
+  fetchPriority,
+  sizes,
+  unavailableLabel = "รูปภาพไม่พร้อมใช้งาน · รอ Admin ตรวจสอบ",
   onLoad,
   onError,
 }) => {
@@ -54,7 +60,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     setCurrentSrc(normalizeImageUrl(src || fallbackSrc || getDefaultFallback()));
     setImageState('loading');
     setFailed(false);
-  }, [src, fallbackSrc, alt]);
+  }, [src, fallbackSrc]);
 
   const handleImageLoad = () => {
     setImageState('loaded');
@@ -82,7 +88,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      {(failed || !src || src.startsWith('/placeholder-')) && <span role="status" className="absolute bottom-1 left-1 z-10 rounded bg-background/90 px-2 text-xs">รูปภาพไม่พร้อมใช้งาน · รอ Admin ตรวจสอบ</span>}
+      {(failed || !src || src.startsWith('/placeholder-')) && <span role="status" className="absolute bottom-1 left-1 z-10 rounded bg-background/90 px-2 text-xs">{unavailableLabel}</span>}
       {imageState === 'loading' && (
         <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
       )}
@@ -98,6 +104,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           alt={alt}
           loading={loading}
           decoding={decoding}
+          fetchPriority={fetchPriority}
+          sizes={sizes}
           className={`${className} ${imageState === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
           onLoad={handleImageLoad}
           onError={handleImageError}

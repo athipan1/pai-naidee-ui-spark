@@ -18,6 +18,7 @@ export const useAttractionDetail = (id: string | undefined, options?: {
   enabled?: boolean;
   staleTime?: number;
   cacheTime?: number;
+  refetchInterval?: number | false;
 }) => {
   return useQuery({
     queryKey: attractionKeys.detail(id || ''),
@@ -27,7 +28,7 @@ export const useAttractionDetail = (id: string | undefined, options?: {
     },
     enabled: !!id && (options?.enabled !== false),
     staleTime: 0,
-    refetchInterval: 30_000,
+    refetchInterval: options?.refetchInterval ?? 30_000,
     gcTime: options?.cacheTime || 10 * 60 * 1000, // 10 minutes (was cacheTime in v4)
     retry: (failureCount, error) => {
       // Don't retry if attraction not found

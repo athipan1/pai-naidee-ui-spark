@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useAttractionDetail } from '@/shared/hooks/useAttractionQueries';
 import { ArrowLeft, Send, Sparkles, LoaderCircle, Plus, Bot, UserRound } from 'lucide-react';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
 import { parseTripIntent, type TripIntent } from '@/shared/utils/tripIntent';
@@ -41,11 +42,22 @@ function planStops(plan: TripPlanResponse): TripStop[] {
 }
 export default function TripPlanner({currentLanguage}:Props){
  const th=currentLanguage==='th';
+ const [searchParams]=useSearchParams();
+ const referenceId=searchParams.get('place') || undefined;
+ const reference=useAttractionDetail(referenceId,{refetchInterval:false});
+ const referenceApplied=useRef(false);
  const [draft,setDraft]=useState('');
  const [messages,setMessages]=useState<Message[]>([]);
  const [pending,setPending]=useState(false);
  const [context,setContext]=useState('');
  const bottom=useRef<HTMLDivElement>(null);
+ useEffect(()=>{
+  if(!reference.data || referenceApplied.current)return;
+  referenceApplied.current=true;
+  const place=reference.data;
+  const text=th?`อยากเที่ยว${place.province} โดยสนใจ ${place.nameLocal || place.name}`:`Plan a trip in ${place.provinceEn || place.province}, interested in ${place.name}`;
+  setDraft(previous=>previous || text);
+ },[reference.data,th]);
  const facets=useQuery({queryKey:['places','facets'],queryFn:getRailwayPlaceFacets,staleTime:300000});
  useEffect(()=>{
   // Effects must return only a cleanup function or undefined. Some browser
@@ -102,6 +114,7 @@ export default function TripPlanner({currentLanguage}:Props){
   </header>
   <main className="min-h-0 min-w-0 w-full flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2 py-4 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
    <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4">
+    {referenceId&&<div className="rounded-2xl border bg-card p-4 text-sm">{reference.isLoading?(th?'กำลังโหลดสถานที่อ้างอิง...':'Loading destination context...'):reference.data?<><p className="font-semibold">{th?'สถานที่ที่สนใจ':'Destination context'}</p><Link className="mt-1 inline-block underline" to={`/attraction/${encodeURIComponent(reference.data.id)}`}>{th?reference.data.nameLocal||reference.data.name:reference.data.name}</Link><p className="mt-2 text-xs text-muted-foreground">{th?'ใช้เป็นบริบทในการถาม ยังไม่รับประกันว่าสถานที่จะถูกเพิ่มลงแผน':'Used as planning context. Inclusion in the generated itinerary is not guaranteed.'}</p></>:(th?'โหลดสถานที่อ้างอิงไม่ได้ คุณยังเริ่มวางแผนได้ตามปกติ':'Destination context unavailable. You can still plan a trip.')}</div>}
     {!messages.length&&<div className="space-y-4 py-10 text-center"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-500/10 text-teal-500"><Sparkles className="h-8 w-8"/></span><h2 className="text-2xl font-bold">{th?'อยากไปเที่ยวที่ไหน?':'Where would you like to go?'}</h2><p className="text-sm text-muted-foreground">{th?'บอกจังหวัด จำนวนวัน งบรวม และสไตล์ที่ชอบได้เลย':'Tell me your destination, days, budget and travel style'}</p><button type="button" onClick={()=>submit(th?'อยากเที่ยวเชียงใหม่ 3 วัน งบ 6000 บาท เน้นธรรมชาติ ไม่อยากขับรถไกล':'Chiang Mai 3 days budget 6000 baht nature short drives')} className="rounded-2xl border px-4 py-3 text-left text-sm hover:bg-muted">{th?'ลอง: เชียงใหม่ 3 วัน งบ 6,000 บาท เน้นธรรมชาติ':'Try: Chiang Mai, 3 days, ฿6,000, nature'}</button></div>}
     {messages.map(message=><div key={message.id} className={message.role==='user'?'flex min-w-0 justify-end':'flex min-w-0 items-start gap-1.5 sm:gap-2'}>
      {message.role==='assistant'&&<span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Bot className="h-4 w-4"/></span>}

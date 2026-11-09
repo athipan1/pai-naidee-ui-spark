@@ -872,3 +872,21 @@
     @apply bg-muted-foreground/50;
   }
 }
+
+/* Detail-page contrast adjustments keep the existing teal/coral palette scoped. */
+.place-detail-theme {
+  --ring: 174 75% 28%;
+  --primary: 174 75% 28%;
+  --primary-foreground: 0 0% 100%;
+  --muted-foreground: 215 16% 40%;
+  --secondary: 18 80% 92%;
+  --secondary-foreground: 18 65% 25%;
+}
+.dark .place-detail-theme {
+  --ring: 174 75% 65%;
+  --primary: 174 75% 65%;
+  --primary-foreground: 220 13% 9%;
+  --muted-foreground: 215 20% 70%;
+  --secondary: 18 45% 22%;
+  --secondary-foreground: 18 85% 90%;
+}
