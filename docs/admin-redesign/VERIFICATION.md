@@ -25,11 +25,11 @@ Dashboard draft/history/review figures refer to the latest 100 CMS records and a
 
 - Baseline Vitest: 29 files / 137 tests passed.
 - Baseline ESLint: 0 errors / 218 existing warnings.
-- Updated API unit/security: 250 tests passed.
+- Updated API unit/security: 250 tests passed. Isolated PostgreSQL HTTP integration: 12 tests passed in CI, including name-only drafts, reference identity preservation, explicit approval, gallery persistence and rollback.
 - TypeScript and changed TSX lint: passed.
 - Browser suites use intercepted fixture APIs and private fixture images, never Production writes.
 - Chromium desktop/Android: initial full run 14 passed; final run recorded in PR CI.
-- Final local Chrome desktop/Android and WebKit iPhone/iPad suites: 28 passed, 0 failed, 0 skipped; CI verifies the final committed revision.
+- Final coverage: 36 browser cases across Chrome desktop/Android and WebKit iPhone/iPad. The eight-width screenshot matrix has a 120s per-case timeout; an initial 60s local WebKit timeout was corrected without removing checks. Final exact-head results are linked from the PR CI.
 - Width matrix: 320, 360, 375, 390, 430, 768, 1024, 1280 CSS pixels.
 - 200% desktop zoom: layout-equivalent 640 CSS-pixel viewport; not a physical-device zoom test.
 - No physical Android/iPhone/iPad hardware tested.
@@ -55,3 +55,8 @@ Dashboard draft/history/review figures refer to the latest 100 CMS records and a
 ## Screenshots
 
 Screenshots use isolated mock data. Map tiles are intentionally blocked by the fixture network guard. Before/after files are collected beside this report and in the existing CI screenshot artifact.
+
+| View | Before | After |
+|---|---|---|
+| Desktop | ![Before desktop](desktop-before.jpg) | ![After desktop](desktop-after.jpg) |
+| Mobile | ![Before mobile](mobile-before.jpg) | ![After mobile](mobile-after.jpg) |

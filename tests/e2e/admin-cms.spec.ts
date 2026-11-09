@@ -294,6 +294,7 @@ test('name-only draft, explicit coordinates, unsaved changes and safe validation
 });
 
 test('responsive navigation, keyboard focus, cards and form width matrix', async ({page}, testInfo) => {
+  test.setTimeout(120_000); // Eight screenshot widths plus WebKit drawer animations in one case.
   await mockCms(page); await login(page);
   for (const width of [320,360,375,390,430,768,1024,1280]) {
     await page.setViewportSize({width,height:900});
