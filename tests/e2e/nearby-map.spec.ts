@@ -170,6 +170,17 @@ test("radius, popup keyboard, navigation and cleanup during zoom", async ({
   await page.keyboard.press("Escape");
   await expect(popup).toHaveCount(0);
   await expect(marker).toBeFocused();
+  // Closing a popup must restore both pins inside the map before a user taps again.
+  const mapBox = (await page.getByTestId("embedded-nearby-map").boundingBox())!;
+  const primaryMarker = page.locator(
+    '.leaflet-marker-icon[title^="สถานที่นี้:"]'
+  );
+  const primaryBox = (await primaryMarker.boundingBox())!;
+  expect(primaryBox.y).toBeGreaterThanOrEqual(mapBox.y);
+  expect(primaryBox.y + primaryBox.height).toBeLessThanOrEqual(
+    mapBox.y + mapBox.height
+  );
+
   await page.locator('.leaflet-marker-icon[title^="สถานที่นี้:"]').click();
   await expect(
     page.locator(".leaflet-popup").getByRole("link", { name: /ดูรายละเอียด/ })
@@ -316,8 +327,6 @@ test("English map and dark popup keep accessible names and equivalent list", asy
     path: `reports/nearby-map/dark-popup-${info.project.name}.png`,
     fullPage: false,
   });
-  await page.keyboard.press("Escape");
-  await expect(popup).toHaveCount(0);
   await page
     .getByRole("button", { name: "Pause map to scroll page", exact: true })
     .click();
@@ -325,4 +334,5 @@ test("English map and dark popup keep accessible names and equivalent list", asy
     "inert",
     ""
   );
+  await expect(popup).toHaveCount(0);
 });

@@ -56,3 +56,11 @@ Await owner approval. Do not merge/deploy automatically. This PR changes backend
 - Scoped axe audit: 0 violations in all 10 before/after light/dark/popup runs. Incomplete automated rules remain listed in the JSON and require human review; this is not a WCAG certification.
 - Fixture lab LCP before/after: 390px 92/152ms; 1440px 172/160ms. CLS 0 in these runs. These low fixture values do not demonstrate real-user performance targets.
 - Vite bundle: existing Leaflet chunk unchanged, 153.95kB / gzip 44.73kB. Detail chunk 59.29→62.29kB (gzip 18.96→19.72kB). New lazy map 3.22kB (gzip 1.73kB) plus shared bounds 0.91kB; Leaflet is not bundled twice.
+
+## CI follow-up
+
+Initial CI run [42880802841](https://github.com/athipan1/pai-naidee-ui-spark/actions/runs/42880802841) passed unit 177, API 253, isolated PostgreSQL 13, security, lint/typecheck, build, Docker, discovery 22 and Explore 21. Image/detail/Nearby browsers passed 78/79; iPhone WebKit exposed popup auto-pan moving the primary marker out of the small map after closing another popup. The follow-up stops pending pan and restores non-animated bounds before focus returns, and closes popups when pausing the map. A new assertion requires the primary marker to remain inside the map. No force click, timeout increase, assertion removal or gate reduction.
+
+Additional exact-viewport local checks passed: 320×568, 360×800, 375×812, 390×844, 430×932, 412×915, 768×1024, 1024×768, 1280×800, 1440×900. No horizontal overflow, inactive maps allowed page scrolling, one Nearby request per page, no page errors.
+
+Vercel automatically built a preview for the PR. Real API integration from the preview is blocked by existing Railway CORS (HTTP 403, “Origin is not allowed by CORS policy”). Production configuration was not changed. Local/CI tests use the production frontend build with controlled responses; backend behavior is verified separately against isolated PostgreSQL. Production smoke for this new release remains pending separate merge/deploy approval.

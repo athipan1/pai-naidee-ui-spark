@@ -13,7 +13,13 @@ const currentIcon = L.divIcon({
   iconAnchor: [15, 15],
   popupAnchor: [0, -18],
 });
-function Interaction({ active }: { active: boolean }) {
+function Interaction({
+  active,
+  places,
+}: {
+  active: boolean;
+  places: NearbyMapPlace[];
+}) {
   const map = useMap();
   useEffect(() => {
     for (const handler of [
@@ -27,6 +33,7 @@ function Interaction({ active }: { active: boolean }) {
       else handler.disable();
     }
     map.scrollWheelZoom.disable();
+    if (!active) map.closePopup();
     const closePopup = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         map.closePopup();
@@ -42,17 +49,33 @@ function Interaction({ active }: { active: boolean }) {
     const unlockMarkers = () => {
       if (markerPane) markerPane.inert = false;
     };
+    const restoreBounds = () => {
+      unlockMarkers();
+      // Popup auto-pan can move the primary pin outside a small map (WebKit).
+      // Stop the pending pan before returning both the pins and keyboard focus.
+      if (!map.getPane("mapPane")?.isConnected) return;
+      map.stop();
+      map.fitBounds(
+        L.latLngBounds(
+          places.map(
+            (place) =>
+              [place.coordinates.lat, place.coordinates.lng] as [number, number]
+          )
+        ),
+        { padding: [45, 45], maxZoom: 13, animate: false }
+      );
+    };
     map.on("popupopen", lockMarkers);
-    map.on("popupclose", unlockMarkers);
+    map.on("popupclose", restoreBounds);
     const container = map.getContainer();
     container.addEventListener("keydown", closePopup);
     return () => {
       container.removeEventListener("keydown", closePopup);
       map.off("popupopen", lockMarkers);
-      map.off("popupclose", unlockMarkers);
+      map.off("popupclose", restoreBounds);
       unlockMarkers();
     };
-  }, [map, active]);
+  }, [map, active, places]);
   return null;
 }
 export default function NearbyAttractionsMap({
@@ -100,7 +123,7 @@ export default function NearbyAttractionsMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         <MapBounds places={places} />
-        <Interaction active={active} />
+        <Interaction active={active} places={places} />
         {places.map((place) => {
           const isCurrent = place.id === current.id;
           const name =
