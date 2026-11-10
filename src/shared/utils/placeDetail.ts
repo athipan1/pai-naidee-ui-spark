@@ -1,19 +1,31 @@
 import type { AttractionDetail } from "@/shared/types/attraction";
 import { STORAGE_KEYS } from "./constants";
 
-export function validPlaceCoordinates(
-  point: { lat: number; lng: number } | null | undefined
-): boolean {
-  return (
-    !!point &&
-    Number.isFinite(point.lat) &&
-    Number.isFinite(point.lng) &&
-    point.lat >= -90 &&
-    point.lat <= 90 &&
-    point.lng >= -180 &&
-    point.lng <= 180 &&
-    !(point.lat === 0 && point.lng === 0)
-  );
+/** Public PaiNaiDee places are in Thailand; never coerce blank/null to zero. */
+export function parsePlaceCoordinates(
+  point: unknown
+): { lat: number; lng: number } | null {
+  if (!point || typeof point !== "object") return null;
+  const { lat, lng } = point as { lat?: unknown; lng?: unknown };
+  const number = (value: unknown) =>
+    typeof value === "number" ||
+    (typeof value === "string" && value.trim() !== "")
+      ? Number(value)
+      : NaN;
+  const latitude = number(lat),
+    longitude = number(lng);
+  return Number.isFinite(latitude) &&
+    latitude >= 5 &&
+    latitude <= 21 &&
+    Number.isFinite(longitude) &&
+    longitude >= 97 &&
+    longitude <= 106
+    ? { lat: latitude, lng: longitude }
+    : null;
+}
+
+export function validPlaceCoordinates(point: unknown): boolean {
+  return parsePlaceCoordinates(point) !== null;
 }
 
 export function placeNavigationUrl(
@@ -22,8 +34,8 @@ export function placeNavigationUrl(
     "navigation" | "nameLocal" | "name" | "province"
   >
 ): string {
-  const access = place.navigation;
-  return access && validPlaceCoordinates(access)
+  const access = parsePlaceCoordinates(place.navigation);
+  return access
     ? `https://www.google.com/maps/dir/?api=1&destination=${access.lat},${access.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.nameLocal || place.name} ${place.province}`)}`;
 }

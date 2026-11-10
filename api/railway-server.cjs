@@ -114,6 +114,7 @@ app.get('/api/places/nearby', async (req, res) => {
       lng: options.longitude,
       radiusKm: options.radius,
       limit: options.count,
+      excludeId: options.excludeId,
     }));
   } catch (error) {
     if (error instanceof RangeError) {

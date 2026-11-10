@@ -1,126 +1,201 @@
-import { Link } from "react-router-dom";
-import { MapPin } from "lucide-react";
-import OptimizedImage from "@/components/common/OptimizedImage";
-import {
-  localizedCategory,
-  localizedProvince,
-} from "@/shared/i18n/placeLocalization";
-import { validPlaceCoordinates } from "@/shared/utils/placeDetail";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useNearbyAttractions } from "@/shared/hooks/useAttractionQueries";
-import type { SearchResult } from "@/shared/types/search";
+import { parsePlaceCoordinates } from "@/shared/utils/placeDetail";
+import {
+  NEARBY_RADII,
+  nearbyMapPlaces,
+  type NearbyMapPlace,
+} from "@/shared/utils/nearbyPlaces";
+import type { AttractionDetail } from "@/shared/types/attraction";
+import { NearbyPlaceSummary } from "./NearbyPlaceSummary";
 
-interface NearbyRealPlacesProps {
-  placeId: string;
-  category: string;
-  coordinates?: { lat: number; lng: number } | null;
-  currentLanguage: "th" | "en";
-}
-
+const NearbyAttractionsMap = lazy(
+  () => import("@/components/maps/NearbyAttractionsMap")
+);
 export default function NearbyRealPlaces({
-  placeId,
-  category,
-  coordinates,
+  place,
   currentLanguage,
-}: NearbyRealPlacesProps) {
-  const validCoordinates = validPlaceCoordinates(coordinates)
-    ? coordinates!
-    : null;
-  // The centre is the public place's coordinates, never the visitor's device location.
-  const nearby = useNearbyAttractions(validCoordinates, 100);
-  const places = (nearby.data?.attractions || [])
-    .filter((place: SearchResult) => place.id !== placeId)
-    .sort(
-      (a, b) =>
-        Number(b.category === category) - Number(a.category === category) ||
-        (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)
-    )
-    .slice(0, 4);
-
-  if (!validCoordinates) return null;
-
-  return (
-    <section
-      className="mb-8 rounded-xl border border-border bg-card p-5 sm:p-6"
-      data-testid="real-nearby-places"
-    >
-      <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-        <MapPin className="h-5 w-5 text-primary" />
-        {currentLanguage === "th"
-          ? "สถานที่ท่องเที่ยวใกล้เคียง"
-          : "Nearby destinations"}
-      </h2>
-      {nearby.isLoading ? (
-        <p role="status" className="text-muted-foreground">
-          {currentLanguage === "th"
-            ? "กำลังค้นหาสถานที่ใกล้เคียง..."
-            : "Finding nearby places..."}
-        </p>
-      ) : nearby.isError ? (
-        <p className="text-sm text-muted-foreground">
-          {currentLanguage === "th"
-            ? "ยังโหลดสถานที่ใกล้เคียงไม่ได้"
-            : "Nearby places are unavailable."}
-        </p>
-      ) : places.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {currentLanguage === "th"
-            ? "ยังไม่มีสถานที่ใกล้เคียงในฐานข้อมูล"
-            : "No nearby destinations in the catalogue yet."}
-        </p>
-      ) : (
-        <ul className="flex gap-4 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 lg:grid-cols-4">
-          {places.map((place) => (
-            <li key={place.id} className="w-[78%] shrink-0 sm:w-auto min-w-0">
-              <Link
-                to={`/attraction/${encodeURIComponent(place.id)}`}
-                className="block h-full overflow-hidden rounded-2xl border border-border/70 hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-              >
-                <OptimizedImage
-                  unavailableLabel={
-                    currentLanguage === "th"
-                      ? "รูปภาพไม่พร้อมใช้งาน · รอ Admin ตรวจสอบ"
-                      : "Image unavailable · Pending admin review"
-                  }
-                  src={place.image}
-                  alt={
-                    currentLanguage === "th"
-                      ? place.nameLocal || place.name
-                      : place.name
-                  }
-                  className="aspect-[4/3] w-full object-cover"
-                  loading="lazy"
-                  width="400"
-                  height="300"
-                  sizes="(min-width: 1024px) 280px, 75vw"
-                />
-                <div className="p-4">
-                  <div className="min-w-0">
-                    <p className="font-medium break-words">
-                      {currentLanguage === "th"
-                        ? place.nameLocal || place.name
-                        : place.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {localizedProvince(place, currentLanguage)} ·{" "}
-                      {localizedCategory(place.category, currentLanguage)}
-                    </p>
-                  </div>
-                  {Number.isFinite(place.distanceKm) && (
-                    <span className="text-xs shrink-0 text-muted-foreground">
-                      {place.distanceKm!.toFixed(1)} km
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className="mt-3 text-xs text-muted-foreground">
-        {currentLanguage === "th"
-          ? "แนะนำจากสถานที่ที่มีข้อมูลจริงภายในรัศมี 100 กม. ระยะทางเป็นเส้นตรง"
-          : "From real catalogue places within 100 km. Straight-line distances."}
+}: {
+  place: AttractionDetail;
+  currentLanguage: "th" | "en";
+}) {
+  const th = currentLanguage === "th";
+  const [radius, setRadius] = useState<number>(5);
+  const [active, setActive] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const section = useRef<HTMLDivElement>(null);
+  const coordinates = useMemo(
+    () => parsePlaceCoordinates(place.coordinates),
+    [place.coordinates]
+  );
+  const nearby = useNearbyAttractions(coordinates, radius, place.id);
+  const places = useMemo(
+    () => nearbyMapPlaces(nearby.data?.attractions || [], place.id, radius),
+    [nearby.data, place.id, radius]
+  );
+  const current = useMemo<NearbyMapPlace | null>(
+    () =>
+      coordinates
+        ? {
+            ...place,
+            coordinates,
+            image: place.image || "/placeholder-attraction.svg",
+          }
+        : null,
+    [place, coordinates]
+  );
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+    if (section.current) observer.observe(section.current);
+    return () => observer.disconnect();
+  }, [!!current]);
+  if (!current)
+    return (
+      <p className="mt-5 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
+        {th
+          ? "ยังไม่มีพิกัดที่ใช้แสดงแผนที่ได้"
+          : "Map coordinates are unavailable."}
       </p>
-    </section>
+    );
+  return (
+    <div ref={section} className="mt-5 space-y-4 motion-reduce:[&_*]:transition-none">
+      <fieldset>
+        <legend className="mb-2 text-sm font-medium">
+          {th ? "ค้นหารอบสถานที่นี้" : "Search around this place"}
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {NEARBY_RADII.map((value) => (
+            <Button
+              key={value}
+              type="button"
+              variant={radius === value ? "default" : "outline"}
+              aria-pressed={radius === value}
+              className="min-h-[44px] min-w-[48px] px-3"
+              onClick={() => setRadius(value)}
+            >
+              {value} {th ? "กม." : "km"}
+            </Button>
+          ))}
+        </div>
+      </fieldset>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          {th
+            ? "● สีเขียว: สถานที่นี้ · หมุดสีน้ำเงิน: สถานที่ใกล้เคียง"
+            : "● Green: this place · Blue pins: nearby places"}
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-[44px] whitespace-normal"
+          aria-pressed={active}
+          onClick={() => setActive((value) => !value)}
+        >
+          {active
+            ? th
+              ? "พักแผนที่เพื่อเลื่อนหน้า"
+              : "Pause map to scroll page"
+            : th
+              ? "แตะเพื่อใช้แผนที่"
+              : "Activate map"}
+        </Button>
+      </div>
+      {visible ? (
+        <Suspense fallback={<MapLoading th={th} />}>
+          <NearbyAttractionsMap
+            current={current}
+            nearby={places}
+            active={active}
+            currentLanguage={currentLanguage}
+          />
+        </Suspense>
+      ) : (
+        <MapLoading th={th} />
+      )}
+      <p className="text-xs text-muted-foreground">
+        {th
+          ? "ระยะทางวัดเป็นเส้นตรงจากสถานที่นี้ ไม่ใช่ระยะเดินทาง"
+          : "Distances are straight-line from this place, not travel distances."}
+      </p>
+      <div data-testid="real-nearby-places" aria-busy={nearby.isFetching}>
+        <h3 className="text-lg font-semibold">
+          {th ? "สถานที่ท่องเที่ยวใกล้เคียง" : "Nearby destinations"}
+        </h3>
+        {nearby.isLoading ? (
+          <p role="status" className="mt-3 text-sm text-muted-foreground">
+            {th ? "กำลังค้นหาสถานที่ใกล้เคียง..." : "Finding nearby places..."}
+          </p>
+        ) : nearby.isError ? (
+          <div role="alert" className="mt-3 rounded-xl bg-muted p-4">
+            <p>
+              {th
+                ? "ยังโหลดสถานที่ใกล้เคียงไม่ได้ ลองอีกครั้งได้"
+                : "Nearby places are unavailable. Please try again."}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-2 min-h-[44px]"
+              onClick={() => void nearby.refetch()}
+            >
+              {th ? "ลองอีกครั้ง" : "Retry"}
+            </Button>
+          </div>
+        ) : !places.length ? (
+          <p role="status" className="mt-3 text-sm text-muted-foreground">
+            {th
+              ? "ยังไม่พบสถานที่ท่องเที่ยวใน PaiNaiDee ภายในรัศมีนี้ ลองเลือกรัศมีที่กว้างขึ้น"
+              : "No PaiNaiDee destinations within this radius yet. Try a larger radius."}
+          </p>
+        ) : (
+          <>
+            <p role="status" className="my-3 text-sm text-muted-foreground">
+              {th
+                ? `แสดง ${places.length} แห่ง ภายใน ${radius} กม. (สูงสุด 30 แห่ง)`
+                : `Showing ${places.length} places within ${radius} km (up to 30)`}
+              {nearby.data?.hasMore &&
+                (th
+                  ? " · ยังมีสถานที่อื่นในรัศมีนี้"
+                  : " · More places exist within this radius")}
+            </p>
+            <ul
+              className="grid max-h-[32rem] grid-cols-1 gap-4 overflow-y-auto pr-1 sm:grid-cols-2"
+              aria-label={th ? "รายการสถานที่ใกล้เคียง" : "Nearby places list"}
+            >
+              {places.map((item) => (
+                <li
+                  key={item.id}
+                  className="min-w-0 rounded-xl border border-border p-3"
+                >
+                  <NearbyPlaceSummary
+                    place={item}
+                    currentLanguage={currentLanguage}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+function MapLoading({ th }: { th: boolean }) {
+  return (
+    <div
+      className="flex h-[300px] items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground sm:h-[360px]"
+      role="status"
+    >
+      {th ? "กำลังโหลดแผนที่..." : "Loading map..."}
+    </div>
   );
 }

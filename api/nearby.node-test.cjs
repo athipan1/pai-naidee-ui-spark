@@ -221,3 +221,15 @@ test('Admin CMS uploaded image is credited for detail gallery, while arbitrary e
   const outside = normalizePlace({...base,image_url:external,media:[photo('cms-media:external',external)]});
   assert.deepEqual(outside.mediaCredits,[]);
 });
+
+test('nearby preserves legacy radii, accepts detail radii, and validates canonical exclusion', () => {
+  for (const radiusKm of [3,5,10,20,25,50,100]) {
+    assert.equal(parseNearbyOptions({lat:13,lng:100,radiusKm,excludeId:'cms:canonical'}).radius,radiusKm);
+  }
+  for (const options of [
+    {lat:[13],lng:100}, {lat:true,lng:100}, {lat:0,lng:0}, {lat:100,lng:13},
+    {lat:4,lng:100}, {lat:13,lng:107}, {lat:'13; DROP TABLE places',lng:100},
+    {lat:13,lng:100,excludeId:[]}, {lat:13,lng:100,excludeId:'x'.repeat(201)},
+    {lat:13,lng:100,radiusKm:[5]}, {lat:13,lng:100,limit:true},
+  ]) assert.throws(()=>parseNearbyOptions(options),RangeError);
+});

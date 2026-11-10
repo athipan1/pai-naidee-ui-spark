@@ -360,4 +360,51 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await write('/ai/health-check', {}, 429);
     assert.equal(modelProbes, 1);
   });
+  await t.test('nearby radius query is bounded, stable, public-only and excludes canonical IDs', async () => {
+    // Only isolated fixture records. Never use application/Production database credentials.
+    const center={lat:18,lng:99};
+    await sql`INSERT INTO places(id,name,province,category,lat,lng) VALUES
+      ('nearby-center','Center','เชียงใหม่','Nature',18,99),
+      ('nearby-same-a','Same point','เชียงใหม่','Nature',18,99),
+      ('nearby-same-b','Same point','เชียงใหม่','Nature',18,99),
+      ('nearby-invalid','Invalid','เชียงใหม่','Nature',0,0),
+      ('nearby-swapped','Swapped','เชียงใหม่','Nature',99,18),
+      ('nearby-null','No coordinates','เชียงใหม่','Nature',NULL,NULL)`;
+    for (const km of [2.99,3.01,4.99,5.01,9.99,10.01,19.99,20.01]) {
+      const latitude=center.lat + km/6371*180/Math.PI;
+      await sql`INSERT INTO places(id,name,province,category,lat,lng)
+        VALUES(${'nearby-km-'+km},'Distance fixture','เชียงใหม่','Nature',${latitude},${center.lng})`;
+    }
+    await sql`INSERT INTO place_drafts(id,payload,author_id,status)
+      VALUES('nearby-private',${sql.json({name:'Private nearby',lat:18,lng:99})},'test-admin','draft')`;
+    // A large out-of-bounds catalogue must not cause media lookups for all rows.
+    await sql`INSERT INTO places(id,name,province,category,lat,lng)
+      SELECT 'nearby-far-'||n,'Far fixture','ชลบุรี','Nature',13,100 FROM generate_series(1,500) n`;
+    for (const radius of [3,5,10,20]) {
+      const payload=await (await publicApi(`/api/places/nearby?lat=18&lng=99&radiusKm=${radius}&excludeId=nearby-center&limit=30`)).json();
+      const ids=payload.attractions.map(p=>p.id);
+      assert.ok(!ids.includes('nearby-center') && !ids.includes('nearby-private'));
+      assert.ok(!ids.some(id=>/invalid|swapped|null|far/.test(id)));
+      assert.equal(new Set(ids).size,ids.length);
+      assert.deepEqual(ids.slice(0,2),['nearby-same-a','nearby-same-b']);
+      assert.ok(ids.includes('nearby-km-'+(radius-0.01).toFixed(2).replace(/0$/,'')));
+      assert.ok(!ids.includes('nearby-km-'+(radius+0.01)));
+      for (const [i,p] of payload.attractions.entries()) {
+        assert.ok(p.distanceKm<=radius);
+        if(i) assert.ok(p.distanceKm>=payload.attractions[i-1].distanceKm);
+        assert.ok(!('payload' in p) && !('author_id' in p) && !('password_hash' in p));
+      }
+    }
+    const limited=await (await publicApi('/api/places/nearby?lat=18&lng=99&radiusKm=20&limit=1')).json();
+    assert.equal(limited.attractions.length,1); assert.equal(limited.hasMore,true);
+    const injection=encodeURIComponent("' OR 1=1 --");
+    const safe=await (await publicApi(`/api/places/nearby?lat=18&lng=99&radiusKm=3&excludeId=${injection}`)).json();
+    assert.ok(safe.attractions.length>0);
+    await publicApi('/api/places/nearby?lat=18%3BSELECT&lng=99',400);
+    await publicApi('/api/places/nearby?lat=18&lat=19&lng=99',400);
+    // Clean up only this fixture's rows so other suites remain independent.
+    await sql`DELETE FROM place_drafts WHERE id='nearby-private'`;
+    await sql`DELETE FROM places WHERE id LIKE 'nearby-%'`;
+  });
+
 });

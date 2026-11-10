@@ -1,89 +1,5 @@
-import { test, expect, type Page, type BrowserContext } from "@playwright/test";
-const primary = "https://images.example.test/primary.jpg";
-const photos = [
-  primary,
-  "https://images.example.test/second.jpg",
-  "https://images.example.test/third.jpg",
-];
-const place = {
-  id: "detail-design-fixture",
-  name: "Forest Discovery Park",
-  nameLocal: "อุทยานธรรมชาติและเส้นทางศึกษาป่า",
-  province: "เชียงใหม่",
-  provinceEn: "Chiang Mai",
-  category: "Nature",
-  rating: 0,
-  reviewCount: 0,
-  description:
-    "พื้นที่ธรรมชาติสำหรับเดินชมทิวทัศน์และเรียนรู้ระบบนิเวศ อ่านข้อมูลการเข้าชมและตรวจสอบเส้นทางกับผู้ดูแลสถานที่ก่อนเดินทาง",
-  descriptionEn:
-    "Explore nature and discover the local landscape. Check visitor information and confirm access before travelling.",
-  tags: ["Nature"],
-  image: primary,
-  images: photos,
-  mediaCredits: photos.map((url) => ({
-    url,
-    photographer: "Fixture owner",
-    licenseName: "CC BY 4.0",
-    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
-    sourcePage: "https://example.test/photo",
-  })),
-  coordinates: { lat: 18.5, lng: 98.5 },
-  source: { name: "Fixture source", url: "https://example.test/source" },
-};
-const svg =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="1200" height="800" fill="#c8ddd1"/><path d="M0 800L400 180 750 800M450 800L850 100 1200 800" fill="#466d58"/><circle cx="180" cy="150" r="70" fill="#f4df9e"/></svg>';
-async function mock(page: Page | BrowserContext, sparse = false) {
-  await page.route(/https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/, route => route.fulfill({ contentType: "text/css", body: "" }));
-  await page.route("https://images.example.test/**", (r) =>
-    r.fulfill({ contentType: "image/svg+xml", body: svg })
-  );
-  await page.route("**/*.tile.openstreetmap.org/**", (r) =>
-    r.fulfill({ contentType: "image/svg+xml", body: svg })
-  );
-  await page.route("**/api/places**", (r) => {
-    const path = new URL(r.request().url()).pathname;
-    if (path.endsWith("/facets"))
-      return r.fulfill({
-        json: { provinces: ["เชียงใหม่"], categories: ["Nature"] },
-      });
-    if (path.includes("google-preview"))
-      throw Error("Unexpected Google request");
-    if (path.endsWith("/nearby"))
-      return r.fulfill({
-        json: {
-          attractions: [
-            place,
-            {
-              ...place,
-              id: "nearby-place",
-              nameLocal: "สถานที่ใกล้เคียง",
-              distanceKm: 1.2,
-            },
-          ],
-          center: place.coordinates,
-          radiusKm: 100,
-        },
-      });
-    return r.fulfill({
-      json: path.endsWith("/" + place.id)
-        ? sparse
-          ? {
-              ...place,
-              coordinates: null,
-              image: null,
-              images: [],
-              mediaCredits: [],
-              description: "",
-              descriptionEn: "",
-              tags: [],
-            }
-          : place
-        : { attractions: [place], total: 1, page: 1, limit: 50 },
-    });
-  });
-}
-
+import { test, expect } from "@playwright/test";
+import { mock, place, photos, primary } from "./fixtures/place-detail";
 for (const width of [320, 375, 390, 430, 768, 1024, 1440]) {
   test(`place detail layout ${width}px`, async ({ page }, info) => {
     await page.setViewportSize({ width, height: width < 768 ? 844 : 1100 });
@@ -118,7 +34,7 @@ for (const width of [320, 375, 390, 430, 768, 1024, 1440]) {
         expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     }
     await expect(
-      page.getByTestId("real-nearby-places").getByRole("link")
+      page.getByTestId("real-nearby-places").getByRole("link", { name: /^ดูรายละเอียด:/ })
     ).toHaveCount(1);
     if ([390, 1440].includes(width))
       await page.screenshot({
@@ -171,18 +87,13 @@ test("gallery keyboard, zoom, focus return, save, share, map, planner and histor
     page.getByRole("button", { name: "ยกเลิกบันทึก" })
   ).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "แชร์สถานที่" }).click();
-  await expect(page.getByRole("status")).toHaveText("คัดลอกลิงก์แล้ว");
+  await expect(page.getByRole("status").filter({ hasText: "คัดลอกลิงก์แล้ว" })).toHaveText("คัดลอกลิงก์แล้ว");
   expect(
     await page.evaluate(() => (window as unknown as { copied: string }).copied)
   ).toContain("/attraction/" + place.id);
   await page.getByRole("button", { name: "ดูแผนที่", exact: true }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page.locator(".leaflet-marker-icon")).toBeVisible();
-  await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("button", { name: "ค้นสถานที่บน Google Maps" })
-  ).toBeVisible();
+  await expect(page.getByTestId("embedded-nearby-map")).toBeVisible();
+  await expect(page.locator(".leaflet-marker-icon")).toHaveCount(2);
   await page.evaluate(() => {
     window.open = (url?: string | URL) => {
       (
@@ -191,10 +102,7 @@ test("gallery keyboard, zoom, focus return, save, share, map, planner and histor
       return null;
     };
   });
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "ค้นสถานที่บน Google Maps" })
-    .click();
+  await page.locator("#location").getByRole("button", { name: "ค้นสถานที่บน Google Maps" }).click();
   expect(
     await page.evaluate(
       () =>
@@ -202,7 +110,6 @@ test("gallery keyboard, zoom, focus return, save, share, map, planner and histor
           .detailNavigationUrl
     )
   ).toContain("https://www.google.com/maps/search/?api=1&query=");
-  await page.keyboard.press("Escape");
   const newTab = context.waitForEvent("page");
   await page.getByRole("link", { name: "วางแผนเที่ยวด้วย AI" }).click();
   const planner = await newTab;
@@ -213,7 +120,7 @@ test("gallery keyboard, zoom, focus return, save, share, map, planner and histor
     planner.getByText("สถานที่ที่สนใจ", { exact: true })
   ).toBeVisible();
   await planner.close();
-  await page.getByTestId("real-nearby-places").getByRole("link").click();
+  await page.getByTestId("real-nearby-places").getByRole("link", { name: /^ดูรายละเอียด:/ }).click();
   await expect(page).toHaveURL(/nearby-place/);
   await page.goBack();
   await expect(page).toHaveURL(new RegExp(place.id));

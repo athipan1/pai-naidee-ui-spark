@@ -119,6 +119,17 @@ jobs:
       - name: Test shared published image consistency across public pages
         run: npx playwright test --config=playwright.image-consistency.config.ts
 
+      - name: Upload Nearby map browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nearby-map-browser-evidence
+          path: |
+            reports/nearby-map/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Test Android Chrome and iPhone Safari trip planning
         run: npm run test:e2e:trip-planner
 
