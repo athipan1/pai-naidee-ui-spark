@@ -112,7 +112,7 @@ const DiscoverLayout = ({
           </div>
         )}
       </div>
-      <main id="discover-content" className="mx-auto max-w-[1600px]">
+      <main id="main-content" className="mx-auto max-w-[1600px]">
         {browsing ? (
           <SearchView
             currentLanguage={currentLanguage}

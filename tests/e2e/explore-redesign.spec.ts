@@ -241,3 +241,11 @@ test("viewport matrix has no overflow and captures desktop and mobile evidence",
       .count()
   ).toBe(0);
 });
+
+test('out-of-range deep-linked page recovers to the last available page', async ({ page }) => {
+  await page.goto('/discover?mode=search&page=9999');
+  await expect(page.getByTestId('attraction-card')).toHaveCount(5);
+  await expect(page).toHaveURL(/page=7/);
+  await page.getByRole('button', { name: 'ก่อนหน้า' }).click();
+  await expect(page.getByTestId('attraction-card')).toHaveCount(20);
+});

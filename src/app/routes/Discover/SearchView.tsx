@@ -108,6 +108,14 @@ export default function SearchView({
   const results = uniqueAttractionsById(data?.attractions ?? []);
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  useEffect(() => {
+    if (!data || isLoading || page <= totalPages) return;
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.set('page', String(totalPages));
+      return next;
+    }, { replace: true });
+  }, [data, isLoading, page, totalPages, setParams]);
   const updateParam = (name: string, value: string) => {
     const next = new URLSearchParams(params);
     next.set(name, value);
@@ -132,6 +140,21 @@ export default function SearchView({
       }
       return next;
     });
+
+  const cards = results.map((attraction, index) => (
+              <AttractionCard
+                key={attraction.id}
+                {...attraction}
+                variant="discovery"
+                priority={index === 0}
+                currentLanguage={currentLanguage}
+                isFavorite={favorites.includes(attraction.id)}
+                onFavoriteToggle={toggleFavorite}
+                onCardClick={(id) =>
+                  navigate(`/attraction/${encodeURIComponent(id)}`)
+                }
+              />
+            ));
 
   return (
     <div className="space-y-5 px-4 pb-4 sm:px-6 lg:px-8">
@@ -441,9 +464,14 @@ export default function SearchView({
                 ? "แผนที่แสดงสถานที่ในหน้านี้เท่านั้น สถานที่ที่ไม่มีพิกัดดูได้ในรายการ"
                 : "The map shows this result page only. Places without coordinates remain in the list."}
             </p>
-            <Suspense fallback={<Skeleton className="h-96 rounded-2xl" />}>
-              <ResultsMap places={results} currentLanguage={currentLanguage} />
-            </Suspense>
+            <div className="grid items-start gap-5 lg:grid-cols-2">
+              <section className="hidden max-h-[min(65svh,600px)] grid-cols-1 gap-4 overflow-y-auto rounded-2xl p-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary lg:grid xl:grid-cols-2" tabIndex={0} aria-label={th ? 'รายการสถานที่บนแผนที่' : 'Places on this map'}>
+                {cards}
+              </section>
+              <Suspense fallback={<Skeleton className="h-96 rounded-2xl" />}>
+                <ResultsMap places={results} currentLanguage={currentLanguage} />
+              </Suspense>
+            </div>
           </section>
         ) : (
           <section
@@ -454,20 +482,7 @@ export default function SearchView({
             }
             className={`grid gap-5 ${view === "list" ? "mx-auto max-w-2xl grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"}`}
           >
-            {results.map((attraction, index) => (
-              <AttractionCard
-                key={attraction.id}
-                {...attraction}
-                variant="discovery"
-                priority={index === 0}
-                currentLanguage={currentLanguage}
-                isFavorite={favorites.includes(attraction.id)}
-                onFavoriteToggle={toggleFavorite}
-                onCardClick={(id) =>
-                  navigate(`/attraction/${encodeURIComponent(id)}`)
-                }
-              />
-            ))}
+            {cards}
           </section>
         )}
       </div>
