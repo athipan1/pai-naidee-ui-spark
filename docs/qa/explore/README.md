@@ -22,3 +22,5 @@ Read-only Production baseline was inspected in shared Chrome: public rows and fa
 Local environment became unavailable during follow-up; final source updates and verification use the connected GitHub API and required CI. No local browser or final local rerun is claimed for the follow-up.
 
 Desktop map mode now shows a scrollable card pane beside the map; mobile map mode remains focused on the map. Skip-to-main targets the actual discovery main, and out-of-range deep-linked page numbers recover to the last available page.
+
+Final review memoizes the deduplicated page rows so favoriting a card in desktop split mode does not reset the map bounds. CI run 42767378726 passed code/security/build/Docker jobs but browser setup timed out downloading Ubuntu packages from azure.archive.ubuntu.com before any E2E assertion ran; the next commit is validated on a fresh runner without changing timeouts or test gates.

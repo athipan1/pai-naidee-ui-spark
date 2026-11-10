@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -105,7 +105,7 @@ export default function SearchView({
       (!province || province === place.province) &&
       (!category || category === place.category)
   );
-  const results = uniqueAttractionsById(data?.attractions ?? []);
+  const results = useMemo(() => uniqueAttractionsById(data?.attractions ?? []), [data?.attractions]);
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   useEffect(() => {
