@@ -50,7 +50,7 @@ test('mobile visitor can browse without horizontal overflow and see a loaded des
   )).toBe(true);
 
   await page.goto('/discover');
-  await expect(page.getByRole('tab', { name: /Map|แผนที่/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Map view|มุมมองแผนที่/ })).toBeVisible();
 });
 
 
@@ -86,7 +86,7 @@ for (const viewport of [
       fullPage: true,
     });
 
-    await templeCard.click();
+    await templeCard.getByRole('button', { name: 'ดูรายละเอียด', exact: true }).click();
     await expect(page).toHaveURL(new RegExp('/attraction/' + id + '$'));
     await expect(page.getByRole('heading', { level: 1, name, exact: true }))
       .toBeVisible({ timeout: 30_000 });

@@ -46,7 +46,7 @@ function MapBounds({
     return () => observer.disconnect();
   }, [map]);
   useEffect(() => {
-    if (target) map.setView(target, zoom ?? 6);
+    if (target) map.setView(target, zoom ?? 6, { animate: false });
     else if (places.length)
       map.fitBounds(
         L.latLngBounds(
@@ -55,7 +55,7 @@ function MapBounds({
             return [coords.lat, coords.lng] as [number, number];
           })
         ),
-        { padding: [35, 35], maxZoom: 13 }
+        { padding: [35, 35], maxZoom: 13, animate: false }
       );
     else map.setView(THAILAND_CENTER, 6);
   }, [map, places, target?.[0], target?.[1], zoom]);
@@ -78,6 +78,8 @@ export default function ResultsMap({
     [rawPlaces]
   );
   const th = currentLanguage === "th";
+  // Results maps can unmount during a zoom. Leaflet 1.x transition callbacks
+  // otherwise outlive their pane and throw when the pending zoom completes.
   return (
     <div
       className="relative z-0 h-[min(65svh,600px)] min-h-72 overflow-hidden rounded-2xl border border-border"
@@ -87,6 +89,9 @@ export default function ResultsMap({
       <MapContainer
         center={THAILAND_CENTER}
         zoom={6}
+        zoomAnimation={false}
+        fadeAnimation={false}
+        markerZoomAnimation={false}
         scrollWheelZoom={false}
         className="h-full w-full"
       >
@@ -118,7 +123,24 @@ export default function ResultsMap({
                       th ? "รูปภาพไม่พร้อมใช้งาน" : "Image unavailable"
                     }
                   />
-                  {place.mediaCredits?.filter(credit => credit.url === place.image).map(credit => <p key={credit.url} className="text-xs">© {credit.photographer} · {credit.licenseName}{credit.sourcePage && /^https?:\/\//i.test(credit.sourcePage) && <a href={credit.sourcePage} target="_blank" rel="noopener noreferrer"> {th ? 'เครดิตภาพ' : 'Photo credit'}</a>}</p>)}
+                  {place.mediaCredits
+                    ?.filter((credit) => credit.url === place.image)
+                    .map((credit) => (
+                      <p key={credit.url} className="text-xs">
+                        © {credit.photographer} · {credit.licenseName}
+                        {credit.sourcePage &&
+                          /^https?:\/\//i.test(credit.sourcePage) && (
+                            <a
+                              href={credit.sourcePage}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {" "}
+                              {th ? "เครดิตภาพ" : "Photo credit"}
+                            </a>
+                          )}
+                      </p>
+                    ))}
                   <strong>{name}</strong>
                   <div>{localizedProvince(place, currentLanguage)}</div>
                   {typeof place.distanceKm === "number" && (
@@ -130,8 +152,25 @@ export default function ResultsMap({
                   >
                     {th ? "ดูรายละเอียด" : "View details"}
                   </Link>
-                  <a className="block py-2" href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer">{th ? 'นำทาง' : 'Directions'}</a>
-                  {place.source?.url && /^https?:\/\//i.test(place.source.url) && <a className="block py-2" href={place.source.url} target="_blank" rel="noopener noreferrer">{th ? 'แหล่งข้อมูล' : 'Source'}</a>}
+                  <a
+                    className="block py-2"
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {th ? "นำทาง" : "Directions"}
+                  </a>
+                  {place.source?.url &&
+                    /^https?:\/\//i.test(place.source.url) && (
+                      <a
+                        className="block py-2"
+                        href={place.source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {th ? "แหล่งข้อมูล" : "Source"}
+                      </a>
+                    )}
                 </div>
               </Popup>
             </Marker>
