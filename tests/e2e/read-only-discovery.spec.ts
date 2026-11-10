@@ -142,7 +142,7 @@ test('mobile search shows one Wat Phu Manorom result for alternate Thai place na
     await page.goto(`/search?search=${encodeURIComponent(query)}`);
     await expect(page).toHaveURL(/\/discover\?.*mode=search/);
     await expect(page.getByTestId('attraction-card')).toHaveCount(1);
-    await expect(page.getByText(/1 results|พบ 1 รายการ/).first()).toBeVisible();
+    await expect(page.getByText(/1 places found|พบ 1 สถานที่/).first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   }
 });

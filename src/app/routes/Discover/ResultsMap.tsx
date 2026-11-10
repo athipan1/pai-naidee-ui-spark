@@ -1,0 +1,140 @@
+import { useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import L from "leaflet";
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+import OptimizedImage from "@/components/common/OptimizedImage";
+import type { SearchResult } from "@/shared/types/search";
+import { localizedProvince } from "@/shared/i18n/placeLocalization";
+
+const markerIcon = L.icon({
+  iconUrl,
+  shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+export const THAILAND_CENTER: [number, number] = [15.87, 100.99];
+export function hasValidCoordinates(place: SearchResult): boolean {
+  const coordinates = place.coordinates ?? place.location;
+  return (
+    !!coordinates &&
+    Number.isFinite(coordinates.lat) &&
+    Number.isFinite(coordinates.lng) &&
+    coordinates.lat >= 5 &&
+    coordinates.lat <= 21 &&
+    coordinates.lng >= 97 &&
+    coordinates.lng <= 106
+  );
+}
+
+function MapBounds({
+  places,
+  target,
+  zoom,
+}: {
+  places: SearchResult[];
+  target?: [number, number];
+  zoom?: number;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  useEffect(() => {
+    if (target) map.setView(target, zoom ?? 6);
+    else if (places.length)
+      map.fitBounds(
+        L.latLngBounds(
+          places.map((place) => {
+            const coords = place.coordinates ?? place.location!;
+            return [coords.lat, coords.lng] as [number, number];
+          })
+        ),
+        { padding: [35, 35], maxZoom: 13 }
+      );
+    else map.setView(THAILAND_CENTER, 6);
+  }, [map, places, target?.[0], target?.[1], zoom]);
+  return null;
+}
+
+export default function ResultsMap({
+  places: rawPlaces,
+  currentLanguage,
+  target,
+  zoom,
+}: {
+  places: SearchResult[];
+  currentLanguage: "th" | "en";
+  target?: [number, number];
+  zoom?: number;
+}) {
+  const places = useMemo(
+    () => rawPlaces.filter(hasValidCoordinates),
+    [rawPlaces]
+  );
+  const th = currentLanguage === "th";
+  return (
+    <div
+      className="relative z-0 h-[min(65svh,600px)] min-h-72 overflow-hidden rounded-2xl border border-border"
+      aria-label={th ? "แผนที่สถานที่ท่องเที่ยว" : "Attractions map"}
+      data-marker-count={places.length}
+    >
+      <MapContainer
+        center={THAILAND_CENTER}
+        zoom={6}
+        scrollWheelZoom={false}
+        className="h-full w-full"
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <MapBounds places={places} target={target} zoom={zoom} />
+        {places.map((place) => {
+          const coords = place.coordinates ?? place.location!;
+          const name = th ? place.nameLocal || place.name : place.name;
+          return (
+            <Marker
+              key={place.id}
+              position={[coords.lat, coords.lng]}
+              icon={markerIcon}
+              title={name}
+              alt={name}
+            >
+              <Popup>
+                <div className="w-44 max-w-full space-y-2">
+                  <OptimizedImage
+                    src={place.image}
+                    alt={name}
+                    width={176}
+                    height={132}
+                    className="aspect-[4/3] w-full object-cover"
+                    unavailableLabel={
+                      th ? "รูปภาพไม่พร้อมใช้งาน" : "Image unavailable"
+                    }
+                  />
+                  <strong>{name}</strong>
+                  <div>{localizedProvince(place, currentLanguage)}</div>
+                  {typeof place.distanceKm === "number" && (
+                    <div>{place.distanceKm.toFixed(1)} km</div>
+                  )}
+                  <Link
+                    className="inline-flex min-h-11 items-center"
+                    to={`/attraction/${encodeURIComponent(place.id)}`}
+                  >
+                    {th ? "ดูรายละเอียด" : "View details"}
+                  </Link>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+    </div>
+  );
+}
