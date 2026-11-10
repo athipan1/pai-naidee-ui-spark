@@ -9,7 +9,6 @@ import {
 } from "./hooks/useDiscoveryState";
 import FeedView from "./FeedView";
 import SearchView from "./SearchView";
-import CategoryView from "./CategoryView";
 const MapView = lazy(() => import("./MapView"));
 import BottomNavigation from "@/components/common/BottomNavigation";
 import EnhancedLanguageToggle from "@/components/common/EnhancedLanguageToggle";
@@ -26,10 +25,10 @@ const DiscoverLayout = ({
   const navigate = useNavigate();
   const { state, setMode, setQuery, setSearchFilters } = useDiscoveryState();
   const th = currentLanguage === "th";
-  const browsing = state.mode === "search";
+  const browsing = state.mode === "search" || state.mode === "category";
 
   return (
-    <div className="min-h-screen bg-muted/20 pb-[calc(6rem+env(safe-area-inset-bottom))]">
+    <div className="discovery-theme min-h-screen bg-muted/20 pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <header className="border-b border-border/60 bg-background">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-2">
@@ -141,11 +140,6 @@ const DiscoverLayout = ({
               }}
             />
           </Suspense>
-        ) : state.mode === "category" ? (
-          <CategoryView
-            currentLanguage={currentLanguage}
-            category={state.category}
-          />
         ) : (
           <FeedView
             currentLanguage={currentLanguage}

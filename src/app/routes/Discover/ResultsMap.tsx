@@ -118,6 +118,7 @@ export default function ResultsMap({
                       th ? "รูปภาพไม่พร้อมใช้งาน" : "Image unavailable"
                     }
                   />
+                  {place.mediaCredits?.filter(credit => credit.url === place.image).map(credit => <p key={credit.url} className="text-xs">© {credit.photographer} · {credit.licenseName}{credit.sourcePage && /^https?:\/\//i.test(credit.sourcePage) && <a href={credit.sourcePage} target="_blank" rel="noopener noreferrer"> {th ? 'เครดิตภาพ' : 'Photo credit'}</a>}</p>)}
                   <strong>{name}</strong>
                   <div>{localizedProvince(place, currentLanguage)}</div>
                   {typeof place.distanceKm === "number" && (
@@ -129,6 +130,8 @@ export default function ResultsMap({
                   >
                     {th ? "ดูรายละเอียด" : "View details"}
                   </Link>
+                  <a className="block py-2" href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer">{th ? 'นำทาง' : 'Directions'}</a>
+                  {place.source?.url && /^https?:\/\//i.test(place.source.url) && <a className="block py-2" href={place.source.url} target="_blank" rel="noopener noreferrer">{th ? 'แหล่งข้อมูล' : 'Source'}</a>}
                 </div>
               </Popup>
             </Marker>

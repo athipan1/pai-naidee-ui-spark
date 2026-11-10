@@ -165,6 +165,7 @@ test("query responses cannot overwrite newer query and typing does not fetch eac
   page,
 }) => {
   await page.goto("/discover?mode=search");
+  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
   const requests: string[] = [];
   await page.route("**/api/places?**", async (route) => {
     const query =
@@ -229,7 +230,7 @@ test("viewport matrix has no overflow and captures desktop and mobile evidence",
   );
   await page.screenshot({
     path: testInfo.outputPath("explore.png"),
-    fullPage: true,
+    fullPage: false,
   });
   // Native buttons are separate siblings, never nested inside a card-wide button.
   expect(
