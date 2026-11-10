@@ -873,8 +873,9 @@
   }
 }
 
-/* Detail-page contrast adjustments keep the existing teal/coral palette scoped. */
-.place-detail-theme {
+/* Public discovery/detail contrast keeps the existing teal/coral palette scoped. */
+.place-detail-theme,
+.discovery-theme {
   --ring: 174 75% 28%;
   --primary: 174 75% 28%;
   --primary-foreground: 0 0% 100%;
@@ -882,7 +883,8 @@
   --secondary: 18 80% 92%;
   --secondary-foreground: 18 65% 25%;
 }
-.dark .place-detail-theme {
+.dark .place-detail-theme,
+.dark .discovery-theme {
   --ring: 174 75% 65%;
   --primary: 174 75% 65%;
   --primary-foreground: 220 13% 9%;

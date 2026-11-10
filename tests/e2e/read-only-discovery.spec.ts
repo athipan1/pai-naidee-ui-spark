@@ -142,7 +142,7 @@ test('mobile search shows one Wat Phu Manorom result for alternate Thai place na
     await page.goto(`/search?search=${encodeURIComponent(query)}`);
     await expect(page).toHaveURL(/\/discover\?.*mode=search/);
     await expect(page.getByTestId('attraction-card')).toHaveCount(1);
-    await expect(page.getByText(/1 results|พบ 1 รายการ/).first()).toBeVisible();
+    await expect(page.getByText(/1 places found|พบ 1 สถานที่/).first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   }
 });
@@ -441,7 +441,7 @@ test('map uses Railway places and requests consent for real near-me search', asy
   await expect(page.getByText('Phi Phi Islands')).toHaveCount(0);
 });
 
-test('map and category load all pages while search uses explicit pagination', async ({ page }) => {
+test('legacy map loads all pages while search and categories use explicit pagination', async ({ page }) => {
   const places = Array.from({ length: 125 }, (_, index) => ({
     ...place,
     id: `railway-page-${index + 1}`,
@@ -473,6 +473,8 @@ test('map and category load all pages while search uses explicit pagination', as
   for (let index = 0; index < 6; index++) await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByText('Destination 125').first()).toBeVisible();
   await page.goto('/discover?mode=category&category=Nature');
+  await expect(page.getByTestId('attraction-card')).toHaveCount(20);
+  for (let index = 0; index < 6; index++) await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByText('Destination 125').first()).toBeVisible();
 });
 

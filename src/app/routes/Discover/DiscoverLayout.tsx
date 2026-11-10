@@ -1,216 +1,156 @@
-import { ArrowLeft } from "lucide-react";
+import { lazy, Suspense } from "react";
+import { ArrowLeft, Compass, Map, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import CategoryFilter from "@/components/common/CategoryFilter";
-import { useDiscoveryState, DiscoveryMode } from "./hooks/useDiscoveryState";
+import {
+  useDiscoveryState,
+  type DiscoveryMode,
+} from "./hooks/useDiscoveryState";
 import FeedView from "./FeedView";
 import SearchView from "./SearchView";
-import CategoryView from "./CategoryView";
-import MapView from "./MapView";
-import { useAllAttractions } from '@/shared/hooks/useAttractionQueries';
+const MapView = lazy(() => import("./MapView"));
 import BottomNavigation from "@/components/common/BottomNavigation";
-import EnhancedLanguageToggle from '@/components/common/EnhancedLanguageToggle';
+import EnhancedLanguageToggle from "@/components/common/EnhancedLanguageToggle";
 
 interface DiscoverLayoutProps {
   currentLanguage: "th" | "en";
   onLanguageChange: (language: "th" | "en") => void;
 }
 
-const DiscoverLayout = ({ currentLanguage, onLanguageChange }: DiscoverLayoutProps) => {
+const DiscoverLayout = ({
+  currentLanguage,
+  onLanguageChange,
+}: DiscoverLayoutProps) => {
   const navigate = useNavigate();
-  const { state, setMode, setQuery, setCategory, setSearchFilters } = useDiscoveryState();
+  const { state, setMode, setQuery, setSearchFilters } = useDiscoveryState();
+  const th = currentLanguage === "th";
+  const browsing = state.mode === "search" || state.mode === "category";
 
-  const content = {
-    th: {
-      discover: "สำรวจ",
-      feed: "ฟีด",
-      search: "ค้นหา",
-      category: "หมวดหมู่",
-      map: "แผนที่",
-      trending: "ยอดนิยม",
-      searchPlaceholder: "ค้นหาสถานที่...",
-      back: "กลับ",
-      filters: "ตัวกรอง"
-    },
-    en: {
-      discover: "Discover",
-      feed: "Feed",
-      search: "Search",
-      category: "Category", 
-      map: "Map",
-      trending: "Trending",
-      searchPlaceholder: "Search places...",
-      back: "Back",
-      filters: "Filters"
-    },
-  };
-
-  const t = content[currentLanguage];
-
-  // Handle search from SearchSection component
-  const handleSearch = (query: string) => {
-    setQuery(query);
-  };
-
-  // Handle category selection from CategoryFilter component  
-  const handleCategoryChange = (category: string) => {
-    if (category === "all") {
-      setMode("feed");
-      setCategory("");
-    } else {
-      setCategory(category);
-    }
-  };
-
-  // Calculate the counts using every paginated Railway result.
-  const { data: catalog } = useAllAttractions(undefined, { enabled: state.mode === 'feed' || state.mode === 'category' });
-  const attractionCounts = (catalog?.attractions ?? []).reduce((counts, item) => {
-    const key = item.category.toLowerCase();
-    counts[key] = (counts[key] || 0) + 1;
-    counts.all = (counts.all || 0) + 1;
-    return counts;
-  }, {} as Record<string, number>);
-
-  const getModeTitle = (mode: DiscoveryMode): string => {
-    switch (mode) {
-      case 'search':
-        return state.query ? `${t.search}: ${state.query}` : t.search;
-      case 'category':
-        return state.category ? `${t.category}: ${state.category}` : t.category;
-      case 'map':
-        return t.map;
-      case 'trending':
-        return t.trending;
-      case 'feed':
-      default:
-        return t.discover;
-    }
-  };
-
-  const renderContent = () => {
-    switch (state.mode) {
-      case 'search':
-        return (
-          <SearchView
+  return (
+    <div className="discovery-theme min-h-screen bg-muted/20 pb-[calc(6rem+env(safe-area-inset-bottom))]">
+      <header className="border-b border-border/60 bg-background">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 shrink-0"
+              aria-label={th ? "ย้อนกลับ" : "Go back"}
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <p className="hidden text-xs font-semibold tracking-widest text-primary sm:block">
+                PAINAIDEE
+              </p>
+              <h1 className="text-xl font-bold tracking-tight">
+                {th ? "สำรวจ" : "Discover"}
+              </h1>
+            </div>
+          </div>
+          <EnhancedLanguageToggle
             currentLanguage={currentLanguage}
             onLanguageChange={onLanguageChange}
-            onSearch={handleSearch}
+            variant="button"
+            size="sm"
+          />
+        </div>
+      </header>
+      <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 lg:px-8">
+        <Tabs
+          value={
+            state.mode === "category"
+              ? "search"
+              : state.mode === "trending"
+                ? "feed"
+                : state.mode
+          }
+          onValueChange={(value) => setMode(value as DiscoveryMode)}
+        >
+          <TabsList className="grid h-auto w-full grid-cols-3 rounded-xl bg-muted p-1 sm:w-fit">
+            <TabsTrigger
+              value="search"
+              className="min-h-11 gap-2 rounded-lg px-3 sm:px-6"
+            >
+              <Search className="h-4 w-4" />
+              {th ? "ค้นหา" : "Search"}
+            </TabsTrigger>
+            <TabsTrigger
+              value="feed"
+              className="min-h-11 gap-2 rounded-lg px-3 sm:px-6"
+            >
+              <Sparkles className="h-4 w-4" />
+              {th ? "ฟีด" : "Feed"}
+            </TabsTrigger>
+            <TabsTrigger
+              value="map"
+              className="min-h-11 gap-2 rounded-lg px-3 sm:px-6"
+            >
+              <Map className="h-4 w-4" />
+              {th ? "ใกล้ฉัน" : "Nearby"}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {browsing && (
+          <div className="mb-5 mt-5 sm:mt-7">
+            <p className="mb-2 flex items-center gap-2 text-sm font-medium text-primary">
+              <Compass className="h-4 w-4" />
+              {th
+                ? "ออกไปพบมุมใหม่ของเมืองไทย"
+                : "Find your next corner of Thailand"}
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              {th ? "ทริปต่อไป เริ่มจากที่นี่" : "Your next trip starts here"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {th
+                ? "ค้นหาจุดหมาย เลือกจังหวัด แล้วออกเดินทางในแบบของคุณ"
+                : "Find a destination, pick a province, and make it your own."}
+            </p>
+          </div>
+        )}
+      </div>
+      <main id="main-content" className="mx-auto max-w-[1600px]">
+        {browsing ? (
+          <SearchView
+            currentLanguage={currentLanguage}
+            onSearch={setQuery}
             query={state.query}
             category={state.category}
             province={state.province}
             onFiltersChange={setSearchFilters}
           />
-        );
-      case 'category':
-        return (
-          <CategoryView
-            currentLanguage={currentLanguage}
-            category={state.category}
-          />
-        );
-      case 'map':
-        return (
-          <MapView
-            currentLanguage={currentLanguage}
-            selectedAttractionId={state.selectedAttractionId}
-          />
-        );
-      case 'trending':
-        return <FeedView currentLanguage={currentLanguage} onBrowseAll={() => setMode('search')} />;
-      case 'feed':
-      default:
-        return <FeedView currentLanguage={currentLanguage} onBrowseAll={() => setMode('search')} />;
-    }
-  };
-
-  const shouldShowSearchAndFilter = state.mode === 'feed' || state.mode === 'category';
-
-  return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <header className={`${state.mode === 'search' ? 'hidden md:block' : ''} sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50`}>
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate(-1)}
-                className="md:hidden"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <h1 className="text-xl font-bold text-foreground">
-                {getModeTitle(state.mode)}
-              </h1>
-            </div>
-
-            {/* Mode Switcher - Only show for non-mobile or when relevant */}
-            <div className="flex items-center space-x-2">
-              <EnhancedLanguageToggle currentLanguage={currentLanguage}
-                onLanguageChange={onLanguageChange} variant="button" size="sm" />
-              {state.mode !== 'feed' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMode('feed')}
-                  className="hidden md:flex"
-                >
-                  {t.feed}
-                </Button>
-              )}
-              
-              <Tabs value={state.mode} onValueChange={(value) => setMode(value as DiscoveryMode)}>
-                <TabsList className="hidden md:grid w-auto grid-cols-5">
-                  <TabsTrigger value="feed">{t.feed}</TabsTrigger>
-                  <TabsTrigger value="search">{t.search}</TabsTrigger>
-                  <TabsTrigger value="category">{t.category}</TabsTrigger>
-                  <TabsTrigger value="map">{t.map}</TabsTrigger>
-                  <TabsTrigger value="trending" disabled>{t.trending}</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Compact category filters; the large search hero belongs on Home only. */}
-      {shouldShowSearchAndFilter && (
-        <div className="border-b border-border/30 bg-card/30">
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            <CategoryFilter
+        ) : state.mode === "map" ? (
+          <Suspense
+            fallback={
+              <p role="status" className="p-6">
+                {th ? "กำลังโหลดแผนที่…" : "Loading map…"}
+              </p>
+            }
+          >
+            <MapView
               currentLanguage={currentLanguage}
-              selectedCategory={state.category || "all"}
-              onCategoryChange={handleCategoryChange}
-              attractionCounts={attractionCounts}
+              selectedAttractionId={state.selectedAttractionId}
+              filters={{
+                search: state.query || undefined,
+                category: state.category || undefined,
+                province: state.province || undefined,
+              }}
             />
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Mode Switcher */}
-      <div className={`${state.mode === 'search' ? 'hidden' : ''} md:hidden border-b border-border/30 bg-card/30`}>
-        <div className="container mx-auto px-4">
-          <Tabs value={state.mode} onValueChange={(value) => setMode(value as DiscoveryMode)}>
-            <TabsList className="grid w-full grid-cols-5 h-12">
-              <TabsTrigger value="feed" className="text-xs">{t.feed}</TabsTrigger>
-              <TabsTrigger value="search" className="text-xs">{t.search}</TabsTrigger>
-              <TabsTrigger value="category" className="text-xs">{t.category}</TabsTrigger>
-              <TabsTrigger value="map" className="text-xs">{t.map}</TabsTrigger>
-              <TabsTrigger value="trending" disabled className="text-xs">{t.trending}</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="flex-1">
-        {renderContent()}
+          </Suspense>
+        ) : (
+          <FeedView
+            currentLanguage={currentLanguage}
+            onBrowseAll={() =>
+              setSearchFilters({ category: "", province: state.province })
+            }
+          />
+        )}
       </main>
       <BottomNavigation currentLanguage={currentLanguage} />
     </div>
   );
 };
-
 export default DiscoverLayout;

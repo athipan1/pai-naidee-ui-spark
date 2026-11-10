@@ -104,6 +104,18 @@ jobs:
       - name: Test read-only discovery, routing, and PWA
         run: npm run test:e2e:read-only -- --config=playwright.read-only.config.ts
 
+      - name: Test Explore redesign in desktop, Android and iPhone browsers
+        run: npx playwright test --config=playwright.explore.config.ts
+
+      - name: Upload Explore browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: explore-browser-evidence
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Test shared published image consistency across public pages
         run: npx playwright test --config=playwright.image-consistency.config.ts
 
