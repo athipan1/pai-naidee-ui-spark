@@ -242,10 +242,56 @@ test("viewport matrix has no overflow and captures desktop and mobile evidence",
   ).toBe(0);
 });
 
-test('out-of-range deep-linked page recovers to the last available page', async ({ page }) => {
-  await page.goto('/discover?mode=search&page=9999');
-  await expect(page.getByTestId('attraction-card')).toHaveCount(5);
+test("out-of-range deep-linked page recovers to the last available page", async ({
+  page,
+}) => {
+  await page.goto("/discover?mode=search&page=9999");
+  await expect(page.getByTestId("attraction-card")).toHaveCount(5);
   await expect(page).toHaveURL(/page=7/);
-  await page.getByRole('button', { name: 'ก่อนหน้า' }).click();
-  await expect(page.getByTestId('attraction-card')).toHaveCount(20);
+  await page.getByRole("button", { name: "ก่อนหน้า" }).click();
+  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+});
+
+test("leaving a map during zoom never accesses a removed Leaflet pane", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/discover?view=map");
+  await expect(page.locator(".leaflet-marker-icon")).toHaveCount(19);
+  // Finish initial bounds positioning, then deliberately leave mid-transition.
+  await page.waitForTimeout(350);
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await page.getByRole("button", { name: "มุมมองตาราง", exact: true }).click();
+  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+  await page.waitForTimeout(500);
+  expect(errors).toEqual([]);
+});
+
+test("cached destination images remain visible after map and grid remounts", async ({
+  page,
+}) => {
+  await page.goto("/discover");
+  const firstImage = page.getByTestId("attraction-card").first().locator("img");
+  await expect(firstImage).toHaveCSS("opacity", "1");
+  await expect
+    .poll(() =>
+      firstImage.evaluate((image) => (image as HTMLImageElement).naturalWidth)
+    )
+    .toBeGreaterThan(0);
+  for (let cycle = 0; cycle < 3; cycle++) {
+    await page
+      .getByRole("button", { name: "มุมมองแผนที่", exact: true })
+      .click();
+    await expect(page.locator(".leaflet-marker-icon")).toHaveCount(19);
+    await page
+      .getByRole("button", { name: "มุมมองตาราง", exact: true })
+      .click();
+    await expect(firstImage).toHaveCSS("opacity", "1");
+    await expect
+      .poll(() =>
+        firstImage.evaluate((image) => (image as HTMLImageElement).naturalWidth)
+      )
+      .toBeGreaterThan(0);
+  }
 });

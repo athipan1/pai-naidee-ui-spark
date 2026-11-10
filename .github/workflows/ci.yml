@@ -141,15 +141,15 @@ jobs:
       # The frontend's live place catalogue is on Railway, not Vercel's legacy /api/places.
       # A read-only targeted production proof, limited to this review PR and main.
       - name: Verify live Chon Buri Railway pagination and temple uniqueness
-        if: github.ref == 'refs/heads/main' || github.head_ref == 'fix/chonburi-live-api-verification'
+        if: github.ref == 'refs/heads/main' || github.head_ref == 'fix/chonburi-live-api-verification' || github.head_ref == 'fix/explore-map-image-lifecycle-20261110'
         run: node scripts/verify-chonburi-production.mjs
 
       - name: Verify real Production search card once on desktop and mobile
-        if: github.ref == 'refs/heads/main' || github.head_ref == 'test/chonburi-temple-live-browser-proof'
+        if: github.ref == 'refs/heads/main' || github.head_ref == 'test/chonburi-temple-live-browser-proof' || github.head_ref == 'fix/explore-map-image-lifecycle-20261110'
         run: npx playwright test --config=playwright.production.config.ts --grep "Chon Buri temple live UI"
 
       - name: Upload Chon Buri Production browser proof
-        if: always() && (github.ref == 'refs/heads/main' || github.head_ref == 'test/chonburi-temple-live-browser-proof')
+        if: always() && (github.ref == 'refs/heads/main' || github.head_ref == 'test/chonburi-temple-live-browser-proof' || github.head_ref == 'fix/explore-map-image-lifecycle-20261110')
         uses: actions/upload-artifact@v4
         with:
           name: chonburi-temple-live-ui
