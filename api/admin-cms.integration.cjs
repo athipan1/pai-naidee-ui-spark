@@ -306,8 +306,8 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(afterCount.count, beforeCount.count);
     const updated = await (await publicApi(`/api/places/${placeId}`)).json();
     assert.equal(updated.description, 'Updated visitor details');
-    assert.equal(updated.lat, 13.34567);
-    assert.equal(updated.lng, 100.98765);
+    assert.equal(updated.coordinates.lat, 13.34567);
+    assert.equal(updated.coordinates.lng, 100.98765);
     assert.equal(updated.category, 'Nature');
     assert.equal(updated.images[0], extra);
     assert.ok(updated.images.includes(main));
