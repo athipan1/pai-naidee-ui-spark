@@ -299,6 +299,8 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(reconciled.payload.lng, 100.98765);
     assert.equal(reconciled.payload.category, 'Nature');
     assert.ok(reconciled.payload.imageUrls.includes(extra));
+    assert.equal((await (await admin(`/places/${next.id}/reconcile`)).json()).stale, false,
+      'A reconciled draft must preserve the exact PostgreSQL timestamp before publishing');
     assert.equal((await publish(reconciled)).placeId, placeId);
     const [afterCount] = await sql`SELECT COUNT(*)::int AS count FROM places`;
     assert.equal(afterCount.count, beforeCount.count);

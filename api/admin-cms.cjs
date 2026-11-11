@@ -337,8 +337,10 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       }
       const parsed = cleanPlace(payload);
       if (parsed.errors.length) return { code: 400, errors: parsed.errors };
+      // Copy the version entirely inside PostgreSQL. Converting it through a
+      // JavaScript Date would lose microseconds and make this draft stale again.
       const [saved] = await tx`UPDATE place_drafts SET payload = ${tx.json(parsed.value)},
-        target_updated_at = ${place.updated_at},
+        target_updated_at = (SELECT updated_at FROM places WHERE id = ${draft.target_place_id}),
         updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
         WHERE id = ${draft.id} RETURNING id, status, target_place_id, payload,
         EXTRACT(EPOCH FROM updated_at)::text AS version`;
