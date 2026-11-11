@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowUpRight,
-  Clock,
   Globe,
   Heart,
   Map,
@@ -13,7 +12,6 @@ import {
   Share2,
   Sparkles,
   Star,
-  Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -539,84 +537,40 @@ export default function AttractionDetail({
               className="min-w-0 space-y-6"
               aria-label={th ? "วางแผนการเข้าชม" : "Plan your visit"}
             >
-              <section className={sectionClass} aria-labelledby="visit-title">
-                <h2 id="visit-title" className="text-xl font-semibold">
-                  {th ? "ข้อมูลการเข้าชม" : "Plan your visit"}
-                </h2>
-                <dl className="mt-5 divide-y">
-                  {(["openingHours", "admissionFee"] as const).map((key) => {
-                    const fact = attraction.placeFacts?.[key];
-                    const Icon = key === "openingHours" ? Clock : Ticket;
-                    return (
-                      <div key={key} className="py-4 first:pt-0">
-                        <dt className="flex items-center gap-3 font-medium">
-                          <Icon
-                            aria-hidden="true"
-                            className="h-5 w-5 shrink-0 text-primary"
-                          />
-                          {key === "openingHours"
-                            ? th
-                              ? "เวลาเปิด–ปิด"
-                              : "Opening hours"
-                            : th
-                              ? "ค่าเข้าชม"
-                              : "Admission"}
-                        </dt>
-                        <dd className="mt-1 break-words text-sm leading-6 text-muted-foreground">
-                          {fact?.text ||
-                            (th
-                              ? "ยังไม่มีข้อมูลปัจจุบันที่ยืนยันได้"
-                              : "No verified current information")}
-                          {fact && (
-                            <>
-                              <br />
-                              <a
-                                className="underline"
-                                href={fact.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {th ? "แหล่งข้อมูล" : "Source"}
-                              </a>
-                              {" · "}
-                              {fact.checkedAt.slice(0, 10)}
-                            </>
-                          )}
-                        </dd>
-                      </div>
-                    );
-                  })}
-                </dl>
-                {attraction.externalLinks?.officialWebsite && (
-                  <a
-                    href={attraction.externalLinks.officialWebsite}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 flex min-h-[44px] items-center justify-between gap-2 rounded-xl border p-3 text-sm font-medium hover:bg-muted"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Globe aria-hidden="true" className="h-4 w-4" />
-                      {th ? "เว็บไซต์ทางการ" : "Official website"}
-                    </span>
-                    <ArrowUpRight
-                      aria-hidden="true"
-                      className="h-4 w-4 shrink-0"
-                    />
-                  </a>
-                )}
-                {attraction.externalLinks?.wikipediaUrl && (
-                  <a
-                    href={attraction.externalLinks.wikipediaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 block py-3 text-sm underline"
-                  >
-                    {th
-                      ? "อ่านเพิ่มเติมจากวิกิพีเดีย"
-                      : "Read more on Wikipedia"}
-                  </a>
-                )}
-              </section>
+              {(attraction.externalLinks?.officialWebsite ||
+                attraction.externalLinks?.wikipediaUrl) && (
+                <nav aria-label={th ? "ลิงก์เพิ่มเติม" : "More links"} className="space-y-3">
+                  {attraction.externalLinks?.officialWebsite && (
+                    <a
+                      href={attraction.externalLinks.officialWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex min-h-[44px] items-center justify-between gap-2 rounded-xl border p-3 text-sm font-medium hover:bg-muted"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Globe aria-hidden="true" className="h-4 w-4" />
+                        {th ? "เว็บไซต์ทางการ" : "Official website"}
+                      </span>
+                      <ArrowUpRight
+                        aria-hidden="true"
+                        className="h-4 w-4 shrink-0"
+                      />
+                    </a>
+                  )}
+                  {attraction.externalLinks?.wikipediaUrl && (
+                    <a
+                      href={attraction.externalLinks.wikipediaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block py-3 text-sm underline"
+                    >
+                      {th
+                        ? "อ่านเพิ่มเติมจากวิกิพีเดีย"
+                        : "Read more on Wikipedia"}
+                    </a>
+                  )}
+                </nav>
+              )}
               <section className="rounded-3xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
                 <Sparkles
                   aria-hidden="true"
