@@ -47,10 +47,12 @@ test('language choice translates the Railway feed and details and persists acros
   await page.goto('/attraction/railway-test-1');
   await expect(page.getByRole('heading', { name: 'ดอยอินทนนท์', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'เกี่ยวกับสถานที่นี้' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'ข้อมูลการเข้าชม' })).toHaveCount(0);
   await expect(page.getByText('สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่').first()).toBeVisible();
   await expect(page.getByText('เชียงใหม่').first()).toBeVisible();
   await page.getByRole('button', { name: 'Switch to English' }).click();
   await expect(page.getByRole('heading', { name: 'About this place' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Plan your visit' })).toHaveCount(0);
   await expect(page.getByText('A scenic mountain destination in Chiang Mai province.').first()).toBeVisible();
   await expect(page.getByText('Chiang Mai').first()).toBeVisible();
   await page.reload();
