@@ -133,6 +133,7 @@ function serializePlaceDetail(place) {
       province: place.province,
       provinceEn: place.provinceEn,
       category: place.category,
+      categories: place.categories,
       rating: place.rating,
       reviewCount: place.reviewCount,
       image: place.image,
