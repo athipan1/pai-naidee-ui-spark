@@ -21,6 +21,7 @@ export interface AttractionDetail {
   province: string;
   provinceEn?: string | null;
   category: string;
+  categories?: string[];
   rating: number;
   reviewCount: number;
   images: string[];

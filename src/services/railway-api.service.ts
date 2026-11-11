@@ -67,6 +67,7 @@ export interface PlaceSuggestion {
   nameLocal: string;
   province: string;
   category: string;
+  categories?: string[];
 }
 
 export interface PlaceFacets {

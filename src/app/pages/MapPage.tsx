@@ -77,7 +77,7 @@ const MapPage = ({ currentLanguage, onBack }: MapPageProps) => {
       navigate: "นำทาง",
       categories: {
         all: "ทั้งหมด",
-        beach: "ชายหาด",
+        beach: "ทะเล",
         culture: "วัฒนธรรม",
         nature: "ธรรมชาติ",
         food: "อาหาร"

@@ -35,9 +35,15 @@ describe('Admin CMS topic and category controls', () => {
       <MemoryRouter><AdminCms /></MemoryRouter>
     </QueryClientProvider>);
     await user.click(await screen.findByRole('button', { name: 'เพิ่ม / แก้ไข' }));
-    const category = screen.getByRole('combobox', { name: 'เลือกหมวดหมู่สถานที่' });
-    await user.selectOptions(category, 'Nature');
-    expect(category).toHaveValue('Nature');
+    const categories = screen.getByRole('group', { name: /หมวดหมู่.*เลือกได้หลายหมวดหมู่/ });
+    await user.click(within(categories).getByRole('button', { name: 'ธรรมชาติ' }));
+    await user.click(within(categories).getByRole('button', { name: 'ทะเล' }));
+    expect(within(categories).getByRole('button', { name: 'ธรรมชาติ' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(categories).getByRole('button', { name: 'ทะเล' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(within(categories).getByRole('button', { name: 'ตั้งทะเลเป็นหมวดหลัก' }));
+    const categoryPreview = within(categories).getByLabelText('ตัวอย่างหมวดหมู่ที่จะเผยแพร่');
+    expect(within(categoryPreview).getByText('ทะเล')).toHaveTextContent('ทะเล');
+    expect(within(categoryPreview).getByText('(หลัก)')).toBeInTheDocument();
 
     const topics = screen.getByRole('region', { name: 'จัดการหัวข้อที่เกี่ยวข้อง' });
     await user.click(await within(topics).findByRole('button', { name: '+ จุดชมวิว' }));

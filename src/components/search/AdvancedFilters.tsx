@@ -86,7 +86,7 @@ const AdvancedFilters = ({
   const t = content[currentLanguage];
 
   const categories = [
-    { id: "beach", th: "ชายหาด", en: "Beach" },
+    { id: "beach", th: "ทะเล", en: "Beach" },
     { id: "temple", th: "วัด", en: "Temple" },
     { id: "mountain", th: "ภูเขา", en: "Mountain" },
     { id: "waterfall", th: "น้ำตก", en: "Waterfall" },

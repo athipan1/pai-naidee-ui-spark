@@ -37,7 +37,7 @@ const CategoryView = ({ currentLanguage, category }: CategoryViewProps) => {
 
   const getCategoryInfo = (categoryName?: string) => {
     const categoryMap: Record<string, { emoji: string; th: string; en: string }> = {
-      Beach: { emoji: "🏖️", th: "ชายหาด", en: "Beach" },
+      Beach: { emoji: "🏖️", th: "ทะเล", en: "Beach" },
       Culture: { emoji: "🛕", th: "วัฒนธรรม", en: "Culture" },
       Nature: { emoji: "⛰️", th: "ธรรมชาติ", en: "Nature" },
       Food: { emoji: "🍜", th: "อาหาร", en: "Food" },

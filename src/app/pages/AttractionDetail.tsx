@@ -260,9 +260,11 @@ export default function AttractionDetail({
         <div className="space-y-8 px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
           <section aria-labelledby="destination-title" className="space-y-5">
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Badge variant="secondary" className="rounded-full px-3 py-1">
-                {localizedCategory(attraction.category, currentLanguage)}
-              </Badge>
+              {[...new Set([attraction.category, ...(attraction.categories || [])])].filter(Boolean).map(category => (
+                <Badge key={category} variant="secondary" className="rounded-full px-3 py-1">
+                  {localizedCategory(category, currentLanguage)}
+                </Badge>
+              ))}
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <MapPin aria-hidden="true" className="h-4 w-4 shrink-0" />
                 {province}

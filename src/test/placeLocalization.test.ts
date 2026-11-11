@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { localizedCategory, localizedDescription, localizedProvince, localizedTag } from '@/shared/i18n/placeLocalization';
+import { ADMIN_PLACE_CATEGORIES, localizedCategory, localizedDescription, localizedProvince, localizedTag } from '@/shared/i18n/placeLocalization';
 
 const amphawa = {
   province: 'สมุทรสงคราม',
@@ -28,5 +28,15 @@ describe('place localization', () => {
     expect(localizedTag('Market', 'th')).toBe('ตลาด');
     expect(localizedCategory('Food', 'en')).toBe('Food');
     expect(localizedTag('Market', 'en')).toBe('Market');
+  });
+
+  it('shows Sea for the legacy Beach code and Thai labels for every selectable category', () => {
+    expect(localizedCategory('Beach', 'th')).toBe('ทะเล');
+    expect(localizedCategory('Beach', 'en')).toBe('Beach');
+    for (const category of ADMIN_PLACE_CATEGORIES) {
+      expect(localizedCategory(category, 'th')).toMatch(/[\u0e00-\u0e7f]/);
+    }
+    expect(ADMIN_PLACE_CATEGORIES).not.toContain('attraction');
+    expect(ADMIN_PLACE_CATEGORIES).not.toContain('Place');
   });
 });

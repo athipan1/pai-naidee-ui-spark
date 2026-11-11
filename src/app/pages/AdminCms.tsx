@@ -4,14 +4,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { CloudUpload, ImagePlus, MapPin, Plus, Search, ShieldCheck, X } from 'lucide-react';
 import { getApiBaseUrl } from '@/services/railway-api.service';
-import { localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
+import { ADMIN_PLACE_CATEGORIES, hasThaiCategoryLabel, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
 import AdminMediaPreview from '@/components/admin/AdminMediaPreview';
 import AdminWorkspace, { type AdminView } from '@/components/admin/AdminWorkspace';
 import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboard';
 
-type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls' | 'tags'>, string | null>> & {
+type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls' | 'tags' | 'categories'>, string | null>> & {
   googlePlaceId?: string;
   tags?: string[];
+  categories?: string[];
   imageUrls?: string[];
   removedImageUrls?: string[];
   lat?: string | number | null;
@@ -22,9 +23,8 @@ type CatalogPlace = { id: string; name: string; name_local: string | null; provi
 type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; placeVersion: string; placeUpdatedAt: string; fields: string[] };
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
-type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; tags?: string[]; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
-const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', tags: [], lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
-const fallbackCategories = ['Nature', 'Culture', 'Beach', 'Mountain', 'Temple', 'Food', 'Market', 'Museum', 'History', 'Park', 'Island', 'attraction', 'Place'];
+type PlaceForm = { name: string; nameLocal: string; province: string; category: string; categories: string[]; description: string; tags?: string[]; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
+const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', categories: ['Culture'], description: '', tags: [], lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
 const tagKey = (value: string) => localizedTag(value, 'th').trim().normalize('NFC').toLocaleLowerCase();
 class AdminRequestError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
@@ -36,6 +36,7 @@ function toPlaceForm(payload: DraftPayload): PlaceForm {
     nameLocal: payload.nameLocal ?? empty.nameLocal,
     province: payload.province ?? empty.province,
     category: payload.category ?? empty.category,
+    categories: Array.isArray(payload.categories) && payload.categories.length ? [...new Set([payload.category ?? empty.category, ...payload.categories])] : [payload.category ?? empty.category],
     description: payload.description ?? empty.description,
     tags: Array.isArray(payload.tags) ? payload.tags : undefined,
     imageUrl: payload.imageUrl ?? empty.imageUrl,
@@ -368,8 +369,26 @@ export default function AdminCms() {
   }
 
   const visibleTags = form.tags ?? inheritedTags;
-  const categoryOptions = [...new Set([...fallbackCategories, ...taxonomy.categories, form.category].filter(Boolean))]
-    .sort((a, b) => localizedCategory(a, 'th').localeCompare(localizedCategory(b, 'th'), 'th'));
+  const categoryOptions = [...new Set([...ADMIN_PLACE_CATEGORIES, ...taxonomy.categories.filter(hasThaiCategoryLabel), ...form.categories])]
+    .filter(Boolean).sort((a, b) => localizedCategory(a, 'th').localeCompare(localizedCategory(b, 'th'), 'th'));
+
+  function toggleCategory(category: string) {
+    setForm(current => {
+      const selected = current.categories.includes(category)
+        ? current.categories.filter(value => value !== category)
+        : [...current.categories.filter(value => !['attraction', 'Place'].includes(value)), category];
+      if (!selected.length || selected.length > 8) {
+        setMessage(!selected.length ? 'ต้องเลือกอย่างน้อยหนึ่งหมวดหมู่' : 'เลือกได้สูงสุด 8 หมวดหมู่');
+        return current;
+      }
+      setMessage('');
+      return { ...current, category: selected[0], categories: selected };
+    });
+  }
+
+  function makePrimaryCategory(category: string) {
+    setForm(current => ({ ...current, category, categories: [category, ...current.categories.filter(value => value !== category)] }));
+  }
   const suggestedTags = taxonomy.tags
     .filter(tag => !visibleTags.some(selected => tagKey(selected) === tagKey(tag)))
     .filter(tag => !tagInput.trim() || `${tag} ${localizedTag(tag, 'th')}`.toLocaleLowerCase().includes(tagInput.trim().toLocaleLowerCase()))
@@ -724,7 +743,29 @@ export default function AdminCms() {
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
           {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อสถานที่ (หลัก) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
-          <label className="min-w-0 text-sm font-medium"><span>หมวดหมู่ *</span><select aria-label="เลือกหมวดหมู่สถานที่" className={inputStyle} value={form.category} onChange={e => setForm(current => ({ ...current, category: e.target.value }))} required>{categoryOptions.map(category => <option key={category} value={category}>{localizedCategory(category, 'th')} ({category})</option>)}</select></label>
+          <fieldset className="min-w-0 space-y-3 rounded-xl border border-slate-200 p-4 sm:col-span-2">
+            <legend className="px-1 text-sm font-medium">หมวดหมู่ * (เลือกได้หลายหมวดหมู่)</legend>
+            <p className="text-xs text-slate-500">เลือกได้สูงสุด 8 หมวดหมู่ โดยหมวดแรกเป็นหมวดหลักสำหรับข้อมูลเดิม</p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {categoryOptions.map(category => (
+                <button key={category} type="button" aria-pressed={form.categories.includes(category)}
+                  onClick={() => toggleCategory(category)}
+                  className={`min-h-11 rounded-lg border px-3 py-2 text-left text-sm font-medium ${form.categories.includes(category) ? 'border-teal-700 bg-teal-50 text-teal-900' : 'border-slate-300 bg-white text-slate-700'}`}>
+                  <span aria-hidden="true">{form.categories.includes(category) ? '✓ ' : '+ '}</span>
+                  {hasThaiCategoryLabel(category) ? localizedCategory(category, 'th') : 'หมวดหมู่เดิม (โปรดตรวจสอบ)'}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2" aria-label="ตัวอย่างหมวดหมู่ที่จะเผยแพร่">
+              {form.categories.map(category => (
+                <span key={category} className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-2 text-sm text-teal-900">
+                  {hasThaiCategoryLabel(category) ? localizedCategory(category, 'th') : 'หมวดหมู่เดิม'}
+                  {category === form.category ? <span className="font-bold">(หลัก)</span> :
+                    <button type="button" className="underline" onClick={() => makePrimaryCategory(category)} aria-label={`ตั้ง${localizedCategory(category, 'th')}เป็นหมวดหลัก`}>ตั้งเป็นหลัก</button>}
+                </span>
+              ))}
+            </div>
+          </fieldset>
         </section>
         <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
         <section aria-label="จัดการหัวข้อที่เกี่ยวข้อง" className="space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
@@ -791,19 +832,21 @@ export default function AdminCms() {
       {reconcile && tab === 'drafts' && <section id="cms-reconcile" className="scroll-mt-24 space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
         <h2 className="text-lg font-bold">เปรียบเทียบฉบับร่างกับข้อมูลล่าสุด</h2>
         <p className="text-sm text-slate-600">ติ๊กเฉพาะการแก้ไขจากฉบับร่างที่ต้องการเก็บไว้ ช่องที่ไม่เลือกจะใช้ข้อมูลล่าสุดบนเว็บไซต์</p>
-        {reconcile.data.fields.filter(field => field !== 'lng').map(field => {
+        {reconcile.data.fields.filter(field => field !== 'lng' && field !== 'category').map(field => {
           const isCoordinate = field === 'lat';
-          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหมู่',description:'รายละเอียด',tags:'หัวข้อที่เกี่ยวข้อง',lat:'พิกัด (ละติจูดและลองจิจูด)',imageUrl:'รูปหลัก'};
+          const isCategory = field === 'categories';
+          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหลัก',categories:'หมวดหมู่ทั้งหมด',description:'รายละเอียด',tags:'หัวข้อที่เกี่ยวข้อง',lat:'พิกัด (ละติจูดและลองจิจูด)',imageUrl:'รูปหลัก'};
           const display = (payload: DraftPayload) => isCoordinate
             ? `${payload.lat ?? '(ว่าง)'}, ${payload.lng ?? '(ว่าง)'}`
             : field === 'tags' ? (payload.tags?.map(tag => localizedTag(tag, 'th')).join(', ') ?? '(คงหัวข้อเดิม)')
+            : isCategory ? (payload.categories?.length ? payload.categories : [payload.category]).filter(Boolean).map(item => localizedCategory(item, 'th')).join(', ')
             : String(payload[field as keyof DraftPayload] ?? '');
           const oldValue = display(reconcile.data.draft);
           const latestValue = display(reconcile.data.latest);
           return <label key={field} className="block rounded-lg border p-3 text-sm">
             <span className="flex items-center gap-2 font-semibold"><input type="checkbox" checked={reconcile.selected.includes(field)} onChange={event => setReconcile(current => {
               if (!current) return current;
-              const fields = isCoordinate ? ['lat', 'lng'] : [field];
+              const fields = isCoordinate ? ['lat', 'lng'] : isCategory ? ['category', 'categories'] : [field];
               return { ...current, selected: event.target.checked
                 ? [...new Set([...current.selected, ...fields])]
                 : current.selected.filter(item => !fields.includes(item)) };
