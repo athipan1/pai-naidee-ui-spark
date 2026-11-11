@@ -26,24 +26,56 @@ type PlaceAlias = { id: string; alias_name: string; language: string; status: st
 type PlaceForm = { name: string; nameLocal: string; province: string; category: string; categories: string[]; description: string; tags?: string[]; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
 const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', categories: ['Culture'], description: '', tags: [], lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
 const tagKey = (value: string) => localizedTag(value, 'th').trim().normalize('NFC').toLocaleLowerCase();
+const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
+const safeText = (value: unknown) => typeof value === 'string' ? value : '';
+const stringList = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && Boolean(item.trim())) : [];
+function draftPayload(draft: Draft): DraftPayload | null {
+  return isRecord(draft.payload) ? draft.payload : null;
+}
+function draftWarnings(draft: Draft): string[] {
+  const payload = draftPayload(draft);
+  if (!payload) return ['ข้อมูลหลักของฉบับร่างไม่ถูกต้อง'];
+  const warnings: string[] = [];
+  if (typeof payload.name !== 'string' || !payload.name.trim()) warnings.push('ชื่อสถานที่ไม่ถูกต้อง');
+  for (const [key, label] of [['nameLocal', 'ชื่อภาษาไทย'], ['province', 'จังหวัด'], ['category', 'หมวดหลัก'], ['description', 'รายละเอียด'], ['imageUrl', 'รูปหลัก']] as const) {
+    if (payload[key] != null && typeof payload[key] !== 'string') warnings.push(`${label} ไม่ถูกต้อง`);
+  }
+  if (payload.tags !== undefined && (!Array.isArray(payload.tags) || payload.tags.some(tag => typeof tag !== 'string' || !tag.trim()))) {
+    warnings.push('หัวข้อที่เกี่ยวข้องไม่ใช่รายการข้อความ');
+  }
+  if (payload.categories !== undefined && (!Array.isArray(payload.categories) || payload.categories.length === 0 || payload.categories.length > 8 || payload.categories.some(category => typeof category !== 'string' || !category.trim()))) {
+    warnings.push('หมวดหมู่ไม่ใช่รายการที่ถูกต้อง');
+  }
+  for (const [key, label] of [['imageUrls', 'แกลเลอรี'], ['removedImageUrls', 'รายการรูปที่ลบ']] as const) {
+    if (payload[key] !== undefined && (!Array.isArray(payload[key]) || payload[key].some(url => typeof url !== 'string'))) warnings.push(`${label} ไม่ถูกต้อง`);
+  }
+  return warnings;
+}
+function draftTitle(draft: Draft): string {
+  const payload = draftPayload(draft);
+  return safeText(payload?.nameLocal) || safeText(payload?.name) || 'ฉบับร่างที่ไม่มีชื่อ';
+}
 class AdminRequestError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
 }
 function toPlaceForm(payload: DraftPayload): PlaceForm {
   const coordinate = (value: string | number | null | undefined) => value == null ? '' : String(value).trim();
+  const category = safeText(payload?.category) || empty.category;
+  const categories = Array.isArray(payload?.categories) && payload.categories.length
+    ? [...new Set([category, ...stringList(payload.categories)])].slice(0, 8) : [category];
   return {
-    name: payload.name ?? empty.name,
-    nameLocal: payload.nameLocal ?? empty.nameLocal,
-    province: payload.province ?? empty.province,
-    category: payload.category ?? empty.category,
-    categories: Array.isArray(payload.categories) && payload.categories.length ? [...new Set([payload.category ?? empty.category, ...payload.categories])] : [payload.category ?? empty.category],
-    description: payload.description ?? empty.description,
-    tags: Array.isArray(payload.tags) ? payload.tags : undefined,
-    imageUrl: payload.imageUrl ?? empty.imageUrl,
-    imageUrls: payload.imageUrls ?? (payload.imageUrl ? [payload.imageUrl] : []),
-    removedImageUrls: payload.removedImageUrls ?? [],
-    lat: coordinate(payload.lat),
-    lng: coordinate(payload.lng),
+    name: safeText(payload?.name),
+    nameLocal: safeText(payload?.nameLocal),
+    province: safeText(payload?.province),
+    category,
+    categories,
+    description: safeText(payload?.description),
+    tags: Array.isArray(payload?.tags) ? stringList(payload.tags) : undefined,
+    imageUrl: safeText(payload?.imageUrl),
+    imageUrls: Array.isArray(payload?.imageUrls) ? stringList(payload.imageUrls) : (typeof payload?.imageUrl === 'string' && payload.imageUrl ? [payload.imageUrl] : []),
+    removedImageUrls: stringList(payload?.removedImageUrls),
+    lat: typeof payload?.lat === 'string' || typeof payload?.lat === 'number' ? coordinate(payload.lat) : '',
+    lng: typeof payload?.lng === 'string' || typeof payload?.lng === 'number' ? coordinate(payload.lng) : '',
   };
 }
 
@@ -513,6 +545,9 @@ export default function AdminCms() {
   }
 
   async function openDraft(draft: Draft) {
+    const payload = draftPayload(draft);
+    if (!payload) { setMessage('ข้อมูลหลักของฉบับร่างผิดรูปแบบ กรุณาให้ผู้ดูแลระบบตรวจสอบรายการนี้'); return; }
+    const needsReview = draftWarnings(draft).length > 0;
     setReconcile(null);
     let latestTags: string[] = [];
     if (draft.target_place_id) {
@@ -532,8 +567,9 @@ export default function AdminCms() {
     }
     setEditing({ id: draft.id, version: draft.version });
     setInheritedTags(latestTags); setTagInput('');
-    setForm(toPlaceForm(draft.payload)); setSavedForm(JSON.stringify(toPlaceForm(draft.payload)));
+    setForm(toPlaceForm(payload)); setSavedForm(JSON.stringify(toPlaceForm(payload)));
     setTab('new');
+    if (needsReview) setMessage('ฉบับร่างนี้มีข้อมูลบางช่องผิดรูปแบบ กรุณาตรวจสอบหัวข้อ หมวดหมู่ และข้อมูลอื่นก่อนบันทึกใหม่');
     setBrokenImage(false);
     setProposedCoordinate(null);
     setGeoCandidates([]);
@@ -587,7 +623,7 @@ export default function AdminCms() {
   }
 
   async function deleteDraft(draft: Draft) {
-    if (draft.status !== 'draft' || !window.confirm(`ลบฉบับร่าง “${draft.payload.nameLocal || draft.payload.name}” หรือไม่? การลบไม่กระทบสถานที่ที่เผยแพร่แล้ว`)) return;
+    if (draft.status !== 'draft' || !window.confirm(`ลบฉบับร่าง “${draftTitle(draft)}” หรือไม่? การลบไม่กระทบสถานที่ที่เผยแพร่แล้ว`)) return;
     setBusy(true); setMessage('');
     try {
       await api(`/places/${draft.id}`, { method: 'DELETE',
@@ -600,7 +636,10 @@ export default function AdminCms() {
   }
 
   async function publish(draft: Draft) {
-    const payload = draft.payload;
+    const payload = draftPayload(draft);
+    if (!payload || draftWarnings(draft).length) {
+      setMessage('ฉบับร่างนี้มีข้อมูลผิดรูปแบบ กรุณาเปิดแก้ไขและบันทึกใหม่ก่อนเผยแพร่'); return;
+    }
     if (!payload.name?.trim() || !payload.province?.trim() || !payload.category?.trim()) {
       setMessage('กรุณาแก้ไขร่างให้มีชื่อสถานที่ จังหวัด และหมวดหมู่ก่อนเผยแพร่'); return;
     }
@@ -622,7 +661,7 @@ export default function AdminCms() {
         return;
       } finally { setBusy(false); }
     }
-    if (!window.confirm(`เผยแพร่ “${draft.payload.name}” บนเว็บไซต์จริงหรือไม่?`)) return;
+    if (!window.confirm(`เผยแพร่ “${draftTitle(draft)}” บนเว็บไซต์จริงหรือไม่?`)) return;
     setBusy(true); setMessage('');
     try {
       const result = await api(`/places/${draft.id}/publish`, { method: 'POST',
@@ -659,7 +698,10 @@ export default function AdminCms() {
 
   const inputStyle = 'mt-1.5 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-3 text-base text-slate-900 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100';
   const activeDrafts = drafts.filter(d => d.status === 'draft');
-  const visibleDrafts = activeDrafts.filter(d => `${d.payload.name} ${d.payload.nameLocal} ${d.payload.province}`.toLocaleLowerCase().includes(draftFilter.toLocaleLowerCase()));
+  const visibleDrafts = activeDrafts.filter(d => {
+    const payload = draftPayload(d);
+    return `${safeText(payload?.name)} ${safeText(payload?.nameLocal)} ${safeText(payload?.province)}`.toLocaleLowerCase().includes(draftFilter.toLocaleLowerCase());
+  });
   const publishedDrafts = drafts.filter(d => d.status === 'published');
   return <AdminWorkspace view={tab} onNavigate={navigate} onSignOut={() => void signOut()} busy={busy}>
       <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-teal-800">Travel management</p><h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">จัดการสถานที่ท่องเที่ยว</h1><p className="mt-2 text-sm text-slate-600">ดูแลทุกจุดหมาย ตั้งแต่ฉบับร่างจนถึงการเผยแพร่</p></div><button type="button" disabled={busy} onClick={startNew} className="flex items-center gap-2 rounded-xl bg-teal-800 px-4 py-3 text-sm font-semibold text-white"><Plus size={18} />เพิ่มสถานที่</button></header>
@@ -864,19 +906,31 @@ export default function AdminCms() {
 
         {!visibleDrafts.length && activeDrafts.length > 0 && <p className="rounded-xl border bg-white p-6 text-center">ไม่มีรายการตรงกับตัวกรอง</p>}
         <p className="text-xs text-slate-600">แสดงจากรายการ CMS ล่าสุดไม่เกิน 100 รายการ · ขั้นตอน: ฉบับร่าง → เผยแพร่บนเว็บไซต์</p>
-        {visibleDrafts.slice((draftPage-1)*10, draftPage*10).map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
-          <div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง' : 'เผยแพร่แล้ว'}</span></div>
+        {visibleDrafts.slice((draftPage-1)*10, draftPage*10).map(draft => {
+          const payload = draftPayload(draft);
+          const warnings = draftWarnings(draft);
+          const tags = payload?.tags;
+          const categories = payload?.categories;
+          const canEdit = Boolean(payload);
+          return <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draftTitle(draft)}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {safeText(payload?.province) || 'ยังไม่ระบุจังหวัด'}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง' : 'เผยแพร่แล้ว'}</span></div>
           <p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}{draft.updated_at ? ` · อัปเดต ${new Date(draft.updated_at).toLocaleDateString('th-TH')}` : ''}</p>
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600"><span>หัวข้อเมื่อเผยแพร่:</span>{draft.payload.tags === undefined ? <span>คงหัวข้อเดิม</span> : draft.payload.tags.length === 0 ? <span>ไม่มีหัวข้อ</span> : draft.payload.tags.map(tag => <span key={tag} className="rounded-full border bg-slate-50 px-2 py-1">{localizedTag(tag, 'th')}</span>)}</div>
-          {draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}
-        </article>)}
+          <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600"><span>หมวดหมู่:</span>{categories === undefined || (Array.isArray(categories) && categories.length)
+            ? stringList(categories ?? [payload?.category]).map(category => <span key={category} className="rounded-full border bg-slate-50 px-2 py-1">{localizedCategory(category, 'th')}</span>)
+            : <span>โปรดตรวจสอบหมวดหมู่</span>}</div>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600"><span>หัวข้อเมื่อเผยแพร่:</span>{tags === undefined ? <span>คงหัวข้อเดิม</span>
+            : Array.isArray(tags) ? (tags.length === 0 ? <span>ไม่มีหัวข้อ</span> : stringList(tags).map(tag => <span key={tag} className="rounded-full border bg-slate-50 px-2 py-1">{localizedTag(tag, 'th')}</span>))
+            : <span>โปรดตรวจสอบหัวข้อ</span>}</div>
+          {warnings.length > 0 && <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"><strong>ฉบับร่างนี้มีข้อมูลผิดรูปแบบ:</strong> {warnings.join(' · ')} กรุณาเปิดแก้ไขและบันทึกใหม่ก่อนเผยแพร่</div>}
+          {draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" disabled={!canEdit} className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold disabled:opacity-50" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy || warnings.length > 0} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}
+        </article>;})}
         <div className="flex items-center gap-3"><button type="button" disabled={draftPage === 1} onClick={() => setDraftPage(p => p-1)} className="rounded-xl border px-4 py-2">หน้าร่างก่อนหน้า</button><span>หน้า {draftPage}</span><button type="button" disabled={visibleDrafts.length <= draftPage*10} onClick={() => setDraftPage(p => p+1)} className="rounded-xl border px-4 py-2">หน้าร่างถัดไป</button></div>
       </section>}      {tab === 'history' && <section className="space-y-4">
         <div><h2 className="text-xl font-bold">ประวัติการเผยแพร่</h2><p className="mt-1 text-sm text-slate-500">รายการที่เผยแพร่แล้ว แยกจากฉบับร่างที่รอดำเนินการ</p></div>
         {!publishedDrafts.length && <div className="rounded-2xl border bg-white p-10 text-center text-sm text-slate-500">ยังไม่มีประวัติการเผยแพร่</div>}
         {publishedDrafts.map(draft => <article key={draft.id} className="rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div><h3 className="font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p><p className="mt-1 text-xs text-slate-500">{draft.target_place_id ? 'อัปเดตสถานที่เดิม' : 'เผยแพร่สถานที่ใหม่'}</p></div>
+            <div><h3 className="font-bold">{draftTitle(draft)}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {safeText(draftPayload(draft)?.province) || 'ยังไม่ระบุจังหวัด'}</p><p className="mt-1 text-xs text-slate-500">{draft.target_place_id ? 'อัปเดตสถานที่เดิม' : 'เผยแพร่สถานที่ใหม่'}</p></div>
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">เผยแพร่แล้ว</span>
           </div>
         </article>)}

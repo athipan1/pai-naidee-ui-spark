@@ -382,6 +382,59 @@ test('responsive navigation, keyboard focus, cards and form width matrix', async
   }
 });
 
+test('legacy and malformed drafts render independently without crashing the admin page', async ({page}, testInfo) => {
+  await mockCms(page);
+  const fixtures = [
+    { id: 'legacy-no-taxonomy', status: 'draft', version: '1900000000.000010', payload: {
+      ...payload, name: 'Legacy without taxonomy', nameLocal: 'ร่างเก่าไม่มีหัวข้อ',
+    } },
+    { id: 'new-multi-category', status: 'draft', version: '1900000000.000011', payload: {
+      ...payload, name: 'Modern with taxonomy', nameLocal: 'ร่างใหม่หลายหมวด', category: 'Nature',
+      categories: ['Nature', 'Beach'], tags: ['Viewpoint', 'Mountain'],
+    } },
+    { id: 'broken-taxonomy', status: 'draft', version: '1900000000.000012', payload: {
+      ...payload, name: 'Malformed taxonomy', nameLocal: 'ร่างข้อมูลผิดรูปแบบ',
+      categories: 'Beach', tags: null, imageUrls: 'not-an-array',
+    } },
+    { id: 'broken-payload', status: 'draft', version: '1900000000.000013', payload: null },
+  ];
+  await page.route('**/api/admin/places', async route => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({ json: { drafts: fixtures } });
+  });
+  const pageErrors: string[] = [];
+  page.on('pageerror', error => pageErrors.push(error.message));
+  await login(page);
+  await navigate(page, 'ฉบับร่าง');
+  const legacy = page.locator('article').filter({ hasText: 'ร่างเก่าไม่มีหัวข้อ' });
+  const modern = page.locator('article').filter({ hasText: 'ร่างใหม่หลายหมวด' });
+  const malformed = page.locator('article').filter({ hasText: 'ร่างข้อมูลผิดรูปแบบ' });
+  const invalid = page.locator('article').filter({ hasText: 'ฉบับร่างที่ไม่มีชื่อ' });
+  await expect(legacy.getByText('คงหัวข้อเดิม')).toBeVisible();
+  await expect(legacy.getByText('วัฒนธรรม')).toBeVisible();
+  await expect(legacy.getByRole('alert')).toHaveCount(0);
+  await expect(modern.getByText('ธรรมชาติ')).toBeVisible();
+  await expect(modern.getByText('ทะเล')).toBeVisible();
+  await expect(modern.getByText('จุดชมวิว')).toBeVisible();
+  await expect(modern.getByRole('alert')).toHaveCount(0);
+  await expect(malformed.getByRole('alert')).toContainText('หัวข้อที่เกี่ยวข้อง');
+  await expect(malformed.getByRole('alert')).toContainText('หมวดหมู่');
+  await expect(malformed.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeDisabled();
+  await expect(malformed.getByRole('button', { name: 'แก้ไขร่าง' })).toBeEnabled();
+  await expect(invalid.getByRole('alert')).toContainText('ข้อมูลหลัก');
+  await expect(invalid.getByRole('button', { name: 'แก้ไขร่าง' })).toBeDisabled();
+  await expect(invalid.getByRole('button', { name: 'เผยแพร่', exact: true })).toBeDisabled();
+  expect(pageErrors).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await page.screenshot({ path: testInfo.outputPath('legacy-drafts-safe.png'), fullPage: true });
+
+  // An invalid record must not hide or break the valid drafts in the same response.
+  await malformed.getByRole('button', { name: 'แก้ไขร่าง' }).click();
+  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('Malformed taxonomy');
+  await expect(page.getByRole('status')).toContainText('กรุณาตรวจสอบหัวข้อ หมวดหมู่');
+  expect(pageErrors).toEqual([]);
+});
+
 
 test('unsaved form survives reload without creating or saving a production draft', async ({page}) => {
   await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
