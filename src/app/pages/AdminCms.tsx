@@ -2,14 +2,16 @@ declare const __PAINAIDEE_BUILD__: string;
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { CloudUpload, ImagePlus, MapPin, Plus, Search, ShieldCheck } from 'lucide-react';
+import { CloudUpload, ImagePlus, MapPin, Plus, Search, ShieldCheck, X } from 'lucide-react';
 import { getApiBaseUrl } from '@/services/railway-api.service';
+import { localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
 import AdminMediaPreview from '@/components/admin/AdminMediaPreview';
 import AdminWorkspace, { type AdminView } from '@/components/admin/AdminWorkspace';
 import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboard';
 
-type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls'>, string | null>> & {
+type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls' | 'tags'>, string | null>> & {
   googlePlaceId?: string;
+  tags?: string[];
   imageUrls?: string[];
   removedImageUrls?: string[];
   lat?: string | number | null;
@@ -20,8 +22,10 @@ type CatalogPlace = { id: string; name: string; name_local: string | null; provi
 type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; placeVersion: string; placeUpdatedAt: string; fields: string[] };
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
-type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
-const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
+type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; tags?: string[]; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
+const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', tags: [], lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
+const fallbackCategories = ['Nature', 'Culture', 'Beach', 'Mountain', 'Temple', 'Food', 'Market', 'Museum', 'History', 'Park', 'Island', 'attraction', 'Place'];
+const tagKey = (value: string) => localizedTag(value, 'th').trim().normalize('NFC').toLocaleLowerCase();
 class AdminRequestError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
 }
@@ -33,6 +37,7 @@ function toPlaceForm(payload: DraftPayload): PlaceForm {
     province: payload.province ?? empty.province,
     category: payload.category ?? empty.category,
     description: payload.description ?? empty.description,
+    tags: Array.isArray(payload.tags) ? payload.tags : undefined,
     imageUrl: payload.imageUrl ?? empty.imageUrl,
     imageUrls: payload.imageUrls ?? (payload.imageUrl ? [payload.imageUrl] : []),
     removedImageUrls: payload.removedImageUrls ?? [],
@@ -66,6 +71,9 @@ export default function AdminCms() {
   const [sessionError, setSessionError] = useState('');
   const [sessionAttempt, setSessionAttempt] = useState(0);
   const [form, setForm] = useState<PlaceForm>({ ...empty });
+  const [inheritedTags, setInheritedTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [taxonomy, setTaxonomy] = useState<{ categories: string[]; tags: string[] }>({ categories: [], tags: [] });
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [search, setSearch] = useState('');
   const [catalog, setCatalog] = useState<CatalogPlace[]>([]);
@@ -123,13 +131,13 @@ export default function AdminCms() {
   function confirmLeave() { return !dirty || window.confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากแบบฟอร์มและละทิ้งการแก้ไขหรือไม่?'); }
   function navigate(view: AdminView) {
     if (view !== tab && !confirmLeave()) return;
-    if (view !== tab && dirty) { imageRequest.current?.abort(); setExistingImages([]); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); }
+    if (view !== tab && dirty) { imageRequest.current?.abort(); setExistingImages([]); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); setInheritedTags([]); setTagInput(''); }
     if (view !== 'existing') catalogRequest.current?.abort();
     setTab(view); setDraftPage(1);
   }
   function startNew() {
     if (!confirmLeave()) return;
-    imageRequest.current?.abort(); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); setExistingImages([]); setGeoCandidates([]); setProposedCoordinate(null); setGeocodeNote(''); setMessage(''); setTab('new');
+    imageRequest.current?.abort(); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); setInheritedTags([]); setTagInput(''); setExistingImages([]); setGeoCandidates([]); setProposedCoordinate(null); setGeocodeNote(''); setMessage(''); setTab('new');
   }
   useEffect(() => {
     if (!dirty) return;
@@ -230,6 +238,18 @@ export default function AdminCms() {
       .finally(() => { if (!controller.signal.aborted) setDraftLoading(false); });
     return () => controller.abort();
   }, [isAdmin, api, reloadDrafts]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const controller = new AbortController();
+    void api('/taxonomy', { signal: controller.signal })
+      .then(data => { if (!controller.signal.aborted) setTaxonomy({
+        categories: Array.isArray(data.categories) ? data.categories : [],
+        tags: Array.isArray(data.tags) ? data.tags : [],
+      }); })
+      .catch(() => { /* Built-in categories remain available if suggestions cannot load. */ });
+    return () => controller.abort();
+  }, [isAdmin, api]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -347,6 +367,30 @@ export default function AdminCms() {
     finally { setGeocodeBusy(false); }
   }
 
+  const visibleTags = form.tags ?? inheritedTags;
+  const categoryOptions = [...new Set([...fallbackCategories, ...taxonomy.categories, form.category].filter(Boolean))]
+    .sort((a, b) => localizedCategory(a, 'th').localeCompare(localizedCategory(b, 'th'), 'th'));
+  const suggestedTags = taxonomy.tags
+    .filter(tag => !visibleTags.some(selected => tagKey(selected) === tagKey(tag)))
+    .filter(tag => !tagInput.trim() || `${tag} ${localizedTag(tag, 'th')}`.toLocaleLowerCase().includes(tagInput.trim().toLocaleLowerCase()))
+    .slice(0, 18);
+
+  function addTag(raw: string) {
+    const candidate = raw.trim().normalize('NFC');
+    if (!candidate) return;
+    if (candidate.length > 60 || /[\u0000-\u001f\u007f<>]/.test(candidate)) {
+      setMessage('หัวข้อต้องไม่เกิน 60 ตัวอักษรและไม่มีอักขระพิเศษที่ไม่อนุญาต'); return;
+    }
+    if (visibleTags.some(tag => tagKey(tag) === tagKey(candidate))) { setTagInput(''); return; }
+    if (visibleTags.length >= 12) { setMessage('เพิ่มหัวข้อได้ไม่เกิน 12 รายการ'); return; }
+    setForm(current => ({ ...current, tags: [...(current.tags ?? inheritedTags), candidate] }));
+    setTagInput(''); setMessage('');
+  }
+
+  function removeTag(raw: string) {
+    setForm(current => ({ ...current, tags: (current.tags ?? inheritedTags).filter(tag => tag !== raw) }));
+  }
+
   async function save(event: FormEvent) {
     event.preventDefault();
     const hasLat = Boolean(form.lat.trim()), hasLng = Boolean(form.lng.trim());
@@ -357,7 +401,7 @@ export default function AdminCms() {
       const data: Draft = await api(path, { method: editing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, version: editing?.version }) });
       setDrafts(current => [data, ...current.filter(draft => draft.id !== data.id)]);
-      setForm({ ...empty }); setSavedForm(JSON.stringify(empty)); setEditing(null); setTab('drafts'); setProposedCoordinate(null); setGeoCandidates([]); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
+      setForm({ ...empty }); setSavedForm(JSON.stringify(empty)); setEditing(null); setInheritedTags([]); setTagInput(''); setTab('drafts'); setProposedCoordinate(null); setGeoCandidates([]); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'บันทึกไม่สำเร็จ'); }
     finally { setBusy(false); }
   }
@@ -451,9 +495,11 @@ export default function AdminCms() {
 
   async function openDraft(draft: Draft) {
     setReconcile(null);
+    let latestTags: string[] = [];
     if (draft.target_place_id) {
       try {
         const data: ReconcileData = await api(`/places/${encodeURIComponent(draft.id)}/reconcile`);
+        latestTags = Array.isArray(data.latest.tags) ? data.latest.tags : [];
         if (data.stale) {
           setReconcile({ draftId: draft.id, data, selected: [], retainGallery: false });
           setTab('drafts');
@@ -466,6 +512,7 @@ export default function AdminCms() {
       }
     }
     setEditing({ id: draft.id, version: draft.version });
+    setInheritedTags(latestTags); setTagInput('');
     setForm(toPlaceForm(draft.payload)); setSavedForm(JSON.stringify(toPlaceForm(draft.payload)));
     setTab('new');
     setBrokenImage(false);
@@ -672,13 +719,20 @@ export default function AdminCms() {
         {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery, catalogProvince)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery, catalogProvince)}>ถัดไป</button></div>}
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setBrokenImage(false); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setBrokenImage(false); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
-          {(['name', 'nameLocal', 'category'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{({ name: 'ชื่อสถานที่ (หลัก)', nameLocal: 'ชื่อภาษาไทย', province: 'จังหวัด', category: 'หมวดหมู่', lat: 'ละติจูด', lng: 'ลองจิจูด' })[key]}{key === 'name' ? ' *' : ''}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
+          {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อสถานที่ (หลัก) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
+          <label className="min-w-0 text-sm font-medium"><span>หมวดหมู่ *</span><select aria-label="เลือกหมวดหมู่สถานที่" className={inputStyle} value={form.category} onChange={e => setForm(current => ({ ...current, category: e.target.value }))} required>{categoryOptions.map(category => <option key={category} value={category}>{localizedCategory(category, 'th')} ({category})</option>)}</select></label>
         </section>
         <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
+        <section aria-label="จัดการหัวข้อที่เกี่ยวข้อง" className="space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
+          <div><h3 className="font-semibold">หัวข้อที่เกี่ยวข้อง</h3><p className="mt-1 text-xs text-slate-600">เลือกหัวข้อเดิม หรือพิมพ์หัวข้อใหม่ได้สูงสุด 12 รายการ · จะแสดงใต้รายละเอียดสถานที่เมื่อเผยแพร่</p></div>
+          <div className="flex flex-wrap gap-2"><input aria-label="พิมพ์หัวข้อที่เกี่ยวข้อง" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={tagInput} maxLength={60} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(tagInput); } }} placeholder="เช่น ทะเลหมอก จุดชมวิว" /><button type="button" disabled={!tagInput.trim() || visibleTags.length >= 12} onClick={() => addTag(tagInput)} className="rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">เพิ่มหัวข้อ</button></div>
+          {suggestedTags.length > 0 && <div className="space-y-2"><p className="text-xs font-medium text-slate-600">เลือกจากหัวข้อที่มีอยู่ในระบบ</p><div className="flex flex-wrap gap-2">{suggestedTags.map(tag => <button type="button" key={tag} disabled={visibleTags.length >= 12} onClick={() => addTag(tag)} className="rounded-full border border-teal-200 bg-white px-3 py-1.5 text-xs text-teal-800 hover:bg-teal-100 disabled:opacity-50">+ {localizedTag(tag, 'th')}</button>)}</div></div>}
+          <div aria-label="ตัวอย่างหัวข้อที่จะเผยแพร่" className="space-y-2 rounded-lg border bg-white p-3"><p className="text-sm font-semibold">ตัวอย่างบนหน้ารายละเอียด ({visibleTags.length}/12)</p><div className="flex flex-wrap gap-2">{visibleTags.map(tag => <span key={tag} className="inline-flex max-w-full items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm"><span className="break-all">{localizedTag(tag, 'th')}</span><button type="button" aria-label={`ลบหัวข้อ ${localizedTag(tag, 'th')}`} onClick={() => removeTag(tag)} className="rounded-full p-0.5 text-red-700 hover:bg-red-50"><X size={14} /></button></span>)}{visibleTags.length === 0 && <p className="text-xs text-slate-500">ยังไม่มีหัวข้อที่เกี่ยวข้อง</p>}</div>{form.tags === undefined && <p className="text-xs text-teal-700">ยังไม่ได้เปลี่ยนหัวข้อ ระบบจะคงหัวข้อเดิมที่เผยแพร่ไว้</p>}</div>
+        </section>
         <section id="cms-location" className="scroll-mt-24 space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">กรอกพิกัดเอง หรือค้นหาและยืนยันหมุดด้วยตนเอง ระบบไม่เติมพิกัดอัตโนมัติ</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
           <div className="grid min-w-0 gap-4 sm:grid-cols-3">{(['province','lat','lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium">{{province:'จังหวัด',lat:'ละติจูด',lng:'ลองจิจูด'}[key]}<input className={inputStyle} value={form[key]} inputMode={key === 'province' ? 'text' : 'decimal'} onChange={e => setForm(current => ({...current,[key]:e.target.value}))} /></label>)}</div>
@@ -739,9 +793,10 @@ export default function AdminCms() {
         <p className="text-sm text-slate-600">ติ๊กเฉพาะการแก้ไขจากฉบับร่างที่ต้องการเก็บไว้ ช่องที่ไม่เลือกจะใช้ข้อมูลล่าสุดบนเว็บไซต์</p>
         {reconcile.data.fields.filter(field => field !== 'lng').map(field => {
           const isCoordinate = field === 'lat';
-          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหมู่',description:'รายละเอียด',lat:'พิกัด (ละติจูดและลองจิจูด)',imageUrl:'รูปหลัก'};
+          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหมู่',description:'รายละเอียด',tags:'หัวข้อที่เกี่ยวข้อง',lat:'พิกัด (ละติจูดและลองจิจูด)',imageUrl:'รูปหลัก'};
           const display = (payload: DraftPayload) => isCoordinate
             ? `${payload.lat ?? '(ว่าง)'}, ${payload.lng ?? '(ว่าง)'}`
+            : field === 'tags' ? (payload.tags?.map(tag => localizedTag(tag, 'th')).join(', ') ?? '(คงหัวข้อเดิม)')
             : String(payload[field as keyof DraftPayload] ?? '');
           const oldValue = display(reconcile.data.draft);
           const latestValue = display(reconcile.data.latest);
@@ -766,7 +821,12 @@ export default function AdminCms() {
 
         {!visibleDrafts.length && activeDrafts.length > 0 && <p className="rounded-xl border bg-white p-6 text-center">ไม่มีรายการตรงกับตัวกรอง</p>}
         <p className="text-xs text-slate-600">แสดงจากรายการ CMS ล่าสุดไม่เกิน 100 รายการ · ขั้นตอน: ฉบับร่าง → เผยแพร่บนเว็บไซต์</p>
-        {visibleDrafts.slice((draftPage-1)*10, draftPage*10).map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"><div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง' : 'เผยแพร่แล้ว'}</span></div><p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}{draft.updated_at ? ` · อัปเดต ${new Date(draft.updated_at).toLocaleDateString('th-TH')}` : ''}</p>{draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}</article>)}
+        {visibleDrafts.slice((draftPage-1)*10, draftPage*10).map(draft => <article key={draft.id} className="space-y-3 rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex flex-wrap justify-between gap-3"><div className="min-w-0"><h3 className="break-words font-bold">{draft.payload.nameLocal || draft.payload.name}</h3><p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><MapPin size={14} /> {draft.payload.province}</p></div><span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${draft.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>{draft.status === 'draft' ? 'ฉบับร่าง' : 'เผยแพร่แล้ว'}</span></div>
+          <p className="text-xs text-slate-500">{draft.target_place_id ? 'แก้ไขสถานที่เดิม' : 'สถานที่ใหม่'}{draft.updated_at ? ` · อัปเดต ${new Date(draft.updated_at).toLocaleDateString('th-TH')}` : ''}</p>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600"><span>หัวข้อเมื่อเผยแพร่:</span>{draft.payload.tags === undefined ? <span>คงหัวข้อเดิม</span> : draft.payload.tags.length === 0 ? <span>ไม่มีหัวข้อ</span> : draft.payload.tags.map(tag => <span key={tag} className="rounded-full border bg-slate-50 px-2 py-1">{localizedTag(tag, 'th')}</span>)}</div>
+          {draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}
+        </article>)}
         <div className="flex items-center gap-3"><button type="button" disabled={draftPage === 1} onClick={() => setDraftPage(p => p-1)} className="rounded-xl border px-4 py-2">หน้าร่างก่อนหน้า</button><span>หน้า {draftPage}</span><button type="button" disabled={visibleDrafts.length <= draftPage*10} onClick={() => setDraftPage(p => p+1)} className="rounded-xl border px-4 py-2">หน้าร่างถัดไป</button></div>
       </section>}      {tab === 'history' && <section className="space-y-4">
         <div><h2 className="text-xl font-bold">ประวัติการเผยแพร่</h2><p className="mt-1 text-sm text-slate-500">รายการที่เผยแพร่แล้ว แยกจากฉบับร่างที่รอดำเนินการ</p></div>

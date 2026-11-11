@@ -115,7 +115,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   await t.test('auth protects every admin route, rejects invalid/expired/disabled sessions and revokes logout', async () => {
     const guarded = [
       ['GET', '/me'], ['POST', '/logout'], ['GET', '/places'], ['POST', '/places'], ['PUT', '/places/x'],
-      ['POST', '/places/x/publish'], ['GET', '/catalog'], ['GET', '/geocode'], ['POST', '/catalog/x/edit'],
+      ['POST', '/places/x/publish'], ['GET', '/catalog'], ['GET', '/taxonomy'], ['GET', '/geocode'], ['POST', '/catalog/x/edit'],
       ['GET', '/catalog/x/aliases'], ['POST', '/catalog/x/aliases'], ['POST', '/aliases/x/review'],
       ['GET', '/catalog/x/media'], ['GET', '/media/1a111111-1111-4111-8111-111111111111.png'],
       ['POST', '/media'], ['GET', '/ai/models'], ['GET', '/ai/models/validate'], ['PUT', '/ai/models'],
@@ -311,6 +311,57 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(updated.category, 'Nature');
     assert.equal(updated.images[0], extra);
     assert.ok(updated.images.includes(main));
+  });
+
+  await t.test('tag suggestions, publishing, clearing and legacy draft preservation use the same place', async () => {
+    const taxonomy = await (await admin('/taxonomy')).json();
+    assert.ok(taxonomy.categories.includes('Nature'));
+    assert.ok(taxonomy.tags.includes('fixture-tag'));
+
+    const before = await (await publicApi(`/api/places/${placeId}`)).json();
+    assert.deepEqual(before.tags, ['fixture-tag']);
+    const edit = await write(`/catalog/${placeId}/edit`, {}, 201);
+    assert.deepEqual(edit.payload.tags, ['fixture-tag']);
+    const saved = await write(`/places/${edit.id}`, {
+      ...edit.payload, tags: ['Viewpoint', 'ทะเลหมอก'], version: edit.version,
+    }, 200, 'PUT');
+    const [countBefore] = await sql`SELECT COUNT(*)::int AS count FROM places`;
+    assert.equal((await publish(saved)).placeId, placeId);
+    const published = await (await publicApi(`/api/places/${placeId}`)).json();
+    assert.deepEqual(published.tags, ['Viewpoint', 'ทะเลหมอก']);
+    const [countAfter] = await sql`SELECT COUNT(*)::int AS count FROM places`;
+    assert.equal(countAfter.count, countBefore.count, 'republishing tags must update the same place');
+
+    const clear = await write(`/catalog/${placeId}/edit`, {}, 201);
+    const empty = await write(`/places/${clear.id}`, { ...clear.payload, tags: [], version: clear.version }, 200, 'PUT');
+    await publish(empty);
+    assert.deepEqual((await (await publicApi(`/api/places/${placeId}`)).json()).tags, []);
+
+    await sql`UPDATE places SET tags = ${sql.json(['keep-my-tag'])} WHERE id = ${placeId}`;
+    const legacy = await write(`/catalog/${placeId}/edit`, {}, 201);
+    await sql`UPDATE place_drafts SET payload = payload - 'tags' WHERE id = ${legacy.id}`;
+    const oldPayload = { ...legacy.payload };
+    delete oldPayload.tags;
+    const legacySaved = await write(`/places/${legacy.id}`, { ...oldPayload, description: 'Legacy draft update', version: legacy.version }, 200, 'PUT');
+    assert.equal(Object.hasOwn(legacySaved.payload, 'tags'), false);
+    await publish(legacySaved);
+    assert.deepEqual((await (await publicApi(`/api/places/${placeId}`)).json()).tags, ['keep-my-tag']);
+
+    const conflict = await write(`/catalog/${placeId}/edit`, {}, 201);
+    const changed = await write(`/places/${conflict.id}`, { ...conflict.payload, tags: ['ภูเขา'], version: conflict.version }, 200, 'PUT');
+    await sql`UPDATE places SET tags = ${sql.json(['external-edit'])},
+      updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond') WHERE id = ${placeId}`;
+    await publish(changed, 409);
+    const comparison = await (await admin(`/places/${conflict.id}/reconcile`)).json();
+    assert.equal(comparison.stale, true);
+    assert.ok(comparison.fields.includes('tags'));
+    assert.deepEqual(comparison.latest.tags, ['external-edit']);
+    const reconciled = await write(`/places/${conflict.id}/reconcile`, {
+      version: changed.version, expectedPlaceVersion: comparison.placeVersion,
+      selectedFields: ['tags'], retainGallery: false,
+    });
+    await publish(reconciled);
+    assert.deepEqual((await (await publicApi(`/api/places/${placeId}`)).json()).tags, ['ภูเขา']);
   });
 
   await t.test('approved aliases appear in search and rejected or duplicate aliases do not', async () => {
