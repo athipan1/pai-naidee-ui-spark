@@ -103,7 +103,7 @@ export default function SearchView({
   const suggestions = (nearbyMatches.data ?? []).filter(
     (place) =>
       (!province || province === place.province) &&
-      (!category || category === place.category)
+      (!category || [place.category, ...(place.categories || [])].includes(category))
   );
   const results = useMemo(() => uniqueAttractionsById(data?.attractions ?? []), [data?.attractions]);
   const total = data?.total ?? 0;

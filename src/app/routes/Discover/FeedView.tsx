@@ -26,6 +26,7 @@ interface TravelPlace {
   province: string;
   provinceEn?: string | null;
   category: string;
+  categories?: string[];
   rating: number;
   reviewCount: number;
   image: string;
@@ -79,7 +80,7 @@ const FeedView = ({ currentLanguage, onBrowseAll }: FeedViewProps) => {
       noPlaces: "ไม่พบสถานที่ท่องเที่ยว",
       loading: "กำลังโหลด...",
       categories: {
-        beach: "ชายหาด",
+        beach: "ทะเล",
         culture: "วัฒนธรรม",
         nature: "ธรรมชาติ",
         food: "อาหาร",
@@ -112,7 +113,7 @@ const FeedView = ({ currentLanguage, onBrowseAll }: FeedViewProps) => {
     {
       id: "beach",
       name: "Beach",
-      nameLocal: "ชายหาด",
+      nameLocal: "ทะเล",
       icon: Waves,
       color: "#0ea5e9",
       count: 1
@@ -167,6 +168,7 @@ const FeedView = ({ currentLanguage, onBrowseAll }: FeedViewProps) => {
           province: attraction.province,
           provinceEn: attraction.provinceEn,
           category: attraction.category,
+          categories: attraction.categories,
           rating: attraction.rating,
           reviewCount: attraction.reviewCount,
           image: getThailandPlaceImage(attraction.name, attraction.image),
@@ -179,7 +181,7 @@ const FeedView = ({ currentLanguage, onBrowseAll }: FeedViewProps) => {
       }
       
       setPlaces(displayPlaces);
-      setCategories(mockCategories.map(cat => ({ ...cat, count: displayPlaces.filter(place => place.category.toLowerCase() === cat.id).length })));
+      setCategories(mockCategories.map(cat => ({ ...cat, count: displayPlaces.filter(place => [place.category, ...(place.categories || [])].some(value => value.toLowerCase() === cat.id)).length })));
       setLoading(false);
     };
 
@@ -213,7 +215,7 @@ const FeedView = ({ currentLanguage, onBrowseAll }: FeedViewProps) => {
   // Filter places by selected category
   const filteredPlaces = selectedCategory === "all" 
     ? uniquePlaces
-    : uniquePlaces.filter(place => place.category.toLowerCase() === selectedCategory.toLowerCase());
+    : uniquePlaces.filter(place => [place.category, ...(place.categories || [])].some(value => value.toLowerCase() === selectedCategory.toLowerCase()));
 
   const trendingPlaces = uniquePlaces.filter(place => place.isTrending).slice(0, 6);
   const recommendedPlaces = uniquePlaces.slice(0, 8);

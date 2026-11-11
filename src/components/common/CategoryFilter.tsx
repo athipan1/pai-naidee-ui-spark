@@ -32,7 +32,7 @@ const CategoryFilter = ({
     },
     {
       id: "beach",
-      labelTh: "ชายหาด",
+      labelTh: "ทะเล",
       labelEn: "Beach",
       icon: Waves,
       color: "text-accent-sky",

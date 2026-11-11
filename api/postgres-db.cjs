@@ -35,7 +35,7 @@ let searchIndexExpires = 0;
 async function getSearchIndex() {
   if (searchIndex && Date.now() < searchIndexExpires) return searchIndex;
   const sql = getSql();
-  const places = await sql`SELECT id, name, name_local, province, province_en, category, description, description_en, tags, rating FROM places`;
+  const places = await sql`SELECT id, name, name_local, province, province_en, category, categories, description, description_en, tags, rating FROM places`;
   const aliases = await sql`SELECT place_id, alias_name FROM place_aliases WHERE status = 'approved'`;
   const byId = new Map();
   for (const alias of aliases) byId.set(alias.place_id, [...(byId.get(alias.place_id) || []), alias.alias_name]);
@@ -58,7 +58,7 @@ async function listPlaceFacets() {
   const places = await getSearchIndex();
   return {
     provinces: [...new Set(places.map(place => place.province).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th')),
-    categories: [...new Set(places.map(place => place.category).filter(Boolean))].sort(),
+    categories: [...new Set(places.flatMap(place => [place.category, ...normalizeJsonArray(place.categories)]).filter(Boolean))].sort(),
   };
 }
 
@@ -241,6 +241,7 @@ async function ensureSchemaTables(sql) {
       province TEXT NOT NULL,
       province_en TEXT,
       category TEXT NOT NULL,
+      categories JSONB NOT NULL DEFAULT '[]'::jsonb,
       rating DOUBLE PRECISION NOT NULL DEFAULT 0,
       review_count INTEGER NOT NULL DEFAULT 0,
       image_url TEXT,
@@ -339,6 +340,9 @@ async function ensureSchemaTables(sql) {
     ALTER TABLE places ADD COLUMN IF NOT EXISTS detail_source_url TEXT;
     ALTER TABLE places ADD COLUMN IF NOT EXISTS province_en TEXT;
     ALTER TABLE places ADD COLUMN IF NOT EXISTS description_en TEXT;
+    -- Additive, backwards-compatible multi-category field. Legacy rows continue to use category.
+    ALTER TABLE places ADD COLUMN IF NOT EXISTS categories JSONB NOT NULL DEFAULT '[]'::jsonb;
+    CREATE INDEX IF NOT EXISTS idx_places_categories_gin ON places USING GIN (categories);
     ALTER TABLE media ADD COLUMN IF NOT EXISTS creator_name TEXT;
     ALTER TABLE media ADD COLUMN IF NOT EXISTS license_name TEXT;
     ALTER TABLE media ADD COLUMN IF NOT EXISTS license_url TEXT;
@@ -472,6 +476,7 @@ function normalizePlace(row) {
     province: row.province,
     provinceEn: row.province_en || null,
     category: row.category,
+    categories: (() => { const values = normalizeJsonArray(row.categories).filter(item => typeof item === 'string' && item.trim()); return [...new Set([row.category, ...values])]; })(),
     rating: Number(row.rating) || 0,
     reviewCount: Number(row.review_count) || 0,
     ...publishedPlaceImages(row, media),
@@ -602,7 +607,9 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
     FROM places p
     LEFT JOIN media m ON m.place_id = p.id
     WHERE
-      (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}))
+      (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}) OR EXISTS (
+        SELECT 1 FROM jsonb_array_elements_text(p.categories) AS value WHERE LOWER(value) = LOWER(${categoryValue})
+      ))
       AND (${provinceValue}::text IS NULL OR LOWER(p.province) = LOWER(${provinceValue}) OR LOWER(p.province_en) = LOWER(${provinceValue}))
       AND (
         ${searchValue}::text IS NULL OR
@@ -626,7 +633,9 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
     SELECT COUNT(*)::int AS count
     FROM places p
     WHERE
-      (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}))
+      (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}) OR EXISTS (
+        SELECT 1 FROM jsonb_array_elements_text(p.categories) AS value WHERE LOWER(value) = LOWER(${categoryValue})
+      ))
       AND (${provinceValue}::text IS NULL OR LOWER(p.province) = LOWER(${provinceValue}) OR LOWER(p.province_en) = LOWER(${provinceValue}))
       AND (
         ${searchValue}::text IS NULL OR

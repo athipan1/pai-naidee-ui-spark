@@ -288,6 +288,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     const retain = { version: edited.version, expectedPlaceVersion: comparison.placeVersion,
       selectedFields: ['description', 'lat', 'lng', 'imageUrl'], retainGallery: true };
     await write(`/places/${next.id}/reconcile`, { ...retain, selectedFields: ['lat'] }, 400);
+    await write(`/places/${next.id}/reconcile`, { ...retain, selectedFields: ['categories'] }, 400);
     // Simulate another admin updating the place after the comparison opened.
     await sql`UPDATE places SET updated_at = updated_at + INTERVAL '1 microsecond' WHERE id = ${placeId}`;
     await write(`/places/${next.id}/reconcile`, retain, 409);
@@ -362,6 +363,31 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     });
     await publish(reconciled);
     assert.deepEqual((await (await publicApi(`/api/places/${placeId}`)).json()).tags, ['ภูเขา']);
+  });
+
+  await t.test('multi-category republish updates one place and all public filters while preserving legacy drafts', async () => {
+    const edit = await write(`/catalog/${placeId}/edit`, {}, 201);
+    const categories = ['Beach', 'Nature', 'Island'];
+    const saved = await write(`/places/${edit.id}`, { ...edit.payload, category: 'Beach', categories, version: edit.version }, 200, 'PUT');
+    const [before] = await sql`SELECT COUNT(*)::int AS count FROM places`;
+    await publish(saved);
+    const detail = await (await publicApi(`/api/places/${placeId}`)).json();
+    assert.equal(detail.category, 'Beach');
+    assert.deepEqual(detail.categories, categories);
+    for (const category of categories) {
+      const results = await (await publicApi(`/api/places?category=${category}&limit=50`)).json();
+      assert.ok(results.attractions.some(place => place.id === placeId), `${category} should find the published place`);
+    }
+    const [after] = await sql`SELECT COUNT(*)::int AS count FROM places`;
+    assert.equal(after.count, before.count, 'republishing must not create a duplicate');
+
+    const legacy = await write(`/catalog/${placeId}/edit`, {}, 201);
+    await sql`UPDATE place_drafts SET payload = payload - 'categories' WHERE id = ${legacy.id}`;
+    const oldPayload = { ...legacy.payload };
+    delete oldPayload.categories;
+    const legacySaved = await write(`/places/${legacy.id}`, { ...oldPayload, description: 'Legacy categories unchanged', version: legacy.version }, 200, 'PUT');
+    await publish(legacySaved);
+    assert.deepEqual((await (await publicApi(`/api/places/${placeId}`)).json()).categories, categories);
   });
 
   await t.test('approved aliases appear in search and rejected or duplicate aliases do not', async () => {

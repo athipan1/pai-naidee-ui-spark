@@ -40,7 +40,7 @@ const TrendingView = ({ currentLanguage }: TrendingViewProps) => {
       noTrending: "ยังไม่มีข้อมูลยอดนิยม",
       loadingTrending: "กำลังโหลดข้อมูลยอดนิยม...",
       categories: {
-        Beach: "ชายหาด",
+        Beach: "ทะเล",
         Culture: "วัฒนธรรม", 
         Nature: "ธรรมชาติ",
         Food: "อาหาร"

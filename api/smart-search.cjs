@@ -48,13 +48,14 @@ const INTENTS = [
 
 function matchesIntent(place, intent) {
   const tags = (Array.isArray(place.tags) ? place.tags : []).map(normalize);
+  const categories = [place.category, ...(Array.isArray(place.categories) ? place.categories : [])].map(normalize);
   const name = normalize(`${place.name || ''} ${place.name_local || place.nameLocal || ''}`);
   if (tags.includes(intent.tag)) return true;
   if (intent.tag === 'temple') return name.includes('วัด') || /^wat/i.test(place.name || '');
   if (intent.tag === 'waterfall') return name.includes('น้ำตก');
   if (intent.tag === 'island') return name.includes('เกาะ') || /^ko\s/i.test(place.name || '');
-  if (intent.tag === 'nature') return normalize(place.category) === 'nature';
-  return normalize(place.category) === intent.category && intent.tag === 'beach';
+  if (intent.tag === 'nature') return categories.includes('nature');
+  return categories.includes(intent.category) && intent.tag === 'beach';
 }
 
 function scoreName(query, names) {
@@ -90,7 +91,8 @@ function rankPlaces(places, search, category = '', provinceFilter = '') {
   const cleanedQuery = normalize(cleaned.replace(/^(?:วัด\s*|wat\s+)/iu, ''));
 
   return places.flatMap(place => {
-    if (category && normalize(place.category) !== normalize(category)) return [];
+    if (category && ![place.category, ...(Array.isArray(place.categories) ? place.categories : [])]
+      .some(value => normalize(value) === normalize(category))) return [];
     if (provinceFilter && ![place.province, place.province_en || place.provinceEn]
       .some(value => normalize(value) === normalize(provinceFilter))) return [];
     const names = placeNames(place);

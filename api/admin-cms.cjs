@@ -37,12 +37,27 @@ function cleanPlace(input, { draft = false } = {}) {
   const name = text(input?.name, 200);
   const province = text(input?.province, 120);
   const category = text(input?.category, 120);
+  // An omitted categories array is a legacy draft: do not erase published secondary categories.
+  let categories;
+  const categoryInput = input?.categories;
+  if (categoryInput !== undefined) {
+    if (!Array.isArray(categoryInput) || !categoryInput.length || categoryInput.length > 8 ||
+      categoryInput.some(item => typeof item !== 'string' || !item.trim() || item.trim().length > 120 || /[\u0000-\u001f\u007f<>]/.test(item))) {
+      categories = null;
+    } else {
+      const seen = new Set();
+      categories = [category, ...categoryInput.map(item => item.trim().normalize('NFC'))]
+        .filter(item => { const key = item.toLocaleLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; });
+      if (categories.length > 8) categories = null;
+    }
+  }
   const number = value => typeof value === 'number' || (typeof value === 'string' && value.trim())
     ? Number(value) : NaN;
   const lat = number(input?.lat);
   const lng = number(input?.lng);
   const imageUrl = text(input?.imageUrl, 2000);
   const errors = [];
+  if (categories === null) errors.push('Choose between 1 and 8 valid categories.');
   // Omitted tags mean "leave the published tags unchanged" for legacy drafts.
   // An explicit empty array is different: it means the admin removed every tag.
   let tags;
@@ -77,6 +92,7 @@ function cleanPlace(input, { draft = false } = {}) {
   return {
     errors,
     value: { name, nameLocal: text(input?.nameLocal, 200), province, category,
+      ...(categories === undefined || categories === null ? {} : { categories }),
       ...(tags === undefined ? {} : { tags }),
       description: text(input?.description, 10000), lat: missingCoordinates ? null : lat, lng: missingCoordinates ? null : lng, imageUrl, imageUrls: [...new Set([imageUrl, ...imageUrls].filter(Boolean))], removedImageUrls: Array.isArray(removedImageUrls) ? [...new Set(removedImageUrls)] : [] },
   };
@@ -108,8 +124,10 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   // Suggestions are drawn from the existing catalog, not a second taxonomy store.
   app.get('/api/admin/taxonomy', requireAdmin, wrap(async (_req, res) => {
     const sql = getSql();
-    const categories = await sql`SELECT DISTINCT category FROM places
-      WHERE category IS NOT NULL AND category <> '' ORDER BY category LIMIT 200`;
+    const categories = await sql`SELECT DISTINCT category FROM (
+      SELECT category FROM places UNION ALL
+      SELECT jsonb_array_elements_text(categories) AS category FROM places
+    ) source WHERE category IS NOT NULL AND category <> '' ORDER BY category LIMIT 200`;
     const tags = await sql`SELECT DISTINCT tag FROM places
       CROSS JOIN LATERAL jsonb_array_elements_text(
         CASE WHEN jsonb_typeof(tags) = 'array' THEN tags ELSE '[]'::jsonb END
@@ -209,7 +227,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
 
   app.post('/api/admin/catalog/:placeId/edit', requireAdmin, wrap(async (req, res) => {
     const result = await getSql().begin(async tx => {
-      const [place] = await tx`SELECT id, name, name_local, province, category, description, tags, lat, lng, image_url
+      const [place] = await tx`SELECT id, name, name_local, province, category, categories, description, tags, lat, lng, image_url
         FROM places WHERE id = ${req.params.placeId} FOR UPDATE`;
       if (!place) return { code: 404, error: 'Place not found.' };
       const existing = await tx`SELECT id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version
@@ -217,7 +235,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (existing.length) return { code: 200, draft: existing[0] };
       const id = randomUUID();
       const payload = { name: place.name, nameLocal: place.name_local || '', province: place.province,
-        category: place.category, description: place.description || '', tags: place.tags || [], lat: place.lat, lng: place.lng, imageUrl: place.image_url || '', imageUrls: [], removedImageUrls: [] };
+        category: place.category, categories: Array.isArray(place.categories) && place.categories.length ? place.categories : [place.category], description: place.description || '', tags: place.tags || [], lat: place.lat, lng: place.lng, imageUrl: place.image_url || '', imageUrls: [], removedImageUrls: [] };
       const [draft] = await tx`INSERT INTO place_drafts (id, payload, author_id, target_place_id, target_updated_at)
         SELECT ${id}, ${tx.json(payload)}, ${req.auth.user.id}, id, updated_at FROM places WHERE id = ${place.id}
         RETURNING id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version`;
@@ -302,10 +320,10 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.error ? { error: result.error } : { deleted: true });
   }));
 
-  const editableFields = ['name', 'nameLocal', 'province', 'category', 'description', 'tags', 'lat', 'lng', 'imageUrl'];
+  const editableFields = ['name', 'nameLocal', 'province', 'category', 'categories', 'description', 'tags', 'lat', 'lng', 'imageUrl'];
   const placeSnapshot = place => ({
     name: place.name, nameLocal: place.name_local || '', province: place.province,
-    category: place.category, description: place.description || '', tags: place.tags || [], lat: Number(place.lat),
+    category: place.category, categories: Array.isArray(place.categories) && place.categories.length ? place.categories : [place.category], description: place.description || '', tags: place.tags || [], lat: Number(place.lat),
     lng: Number(place.lng), imageUrl: place.image_url || '',
   });
   // A stale draft is never rebased implicitly. Admin must review and choose every field to retain.
@@ -317,7 +335,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     // Use PostgreSQL's exact timestamp comparison, just like the publish gate.
     // Converting timestamps to JavaScript Date first loses microseconds and can
     // incorrectly report a conflicting draft as safe to publish.
-    const [place] = await sql`SELECT p.name, p.name_local, p.province, p.category, p.tags,
+    const [place] = await sql`SELECT p.name, p.name_local, p.province, p.category, p.categories, p.tags,
       p.description, p.lat, p.lng, p.image_url, p.updated_at,
       p.updated_at IS DISTINCT FROM d.target_updated_at AS stale,
       EXTRACT(EPOCH FROM p.updated_at)::text AS place_version
@@ -337,6 +355,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       return res.status(400).json({ error: 'Select valid fields and provide the current draft version.' });
     if (selected.includes('lat') !== selected.includes('lng'))
       return res.status(400).json({ error: 'Select both latitude and longitude together.' });
+    if (selected.includes('category') !== selected.includes('categories'))
+      return res.status(400).json({ error: 'Select the primary category and all categories together.' });
     if (req.body?.expectedPlaceVersion !== undefined && !draftVersion(req.body.expectedPlaceVersion))
       return res.status(400).json({ error: 'Invalid published-place version.' });
     const result = await getSql().begin(async tx => {
@@ -344,7 +364,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         WHERE id = ${req.params.draftId} FOR UPDATE`;
       if (!draft || draft.status !== 'draft' || !draft.target_place_id) return { code: 404, error: 'Editable draft not found.' };
       if (draft.version !== req.body.version) return { code: 409, error: 'Draft changed. Reload before reconciling.' };
-      const [place] = await tx`SELECT name, name_local, province, category, description, tags, lat, lng, image_url, updated_at,
+      const [place] = await tx`SELECT name, name_local, province, category, categories, description, tags, lat, lng, image_url, updated_at,
         EXTRACT(EPOCH FROM updated_at)::text AS place_version
         FROM places WHERE id = ${draft.target_place_id} FOR UPDATE`;
       if (!place) return { code: 404, error: 'Published place not found.' };
@@ -425,7 +445,9 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           }
         }
         await tx`UPDATE places SET name = ${p.name}, name_local = ${p.nameLocal}, province = ${p.province},
-          category = ${p.category}, description = ${p.description},
+          category = ${p.category},
+          categories = CASE WHEN ${p.categories !== undefined} THEN ${tx.json(p.categories || [])}::jsonb ELSE categories END,
+          description = ${p.description},
           tags = CASE WHEN ${p.tags !== undefined} THEN ${tx.json(p.tags || [])}::jsonb ELSE tags END,
           lat = ${p.lat}, lng = ${p.lng},
           image_url = ${p.imageUrl || null}, updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
@@ -438,8 +460,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         return { status: 200, placeId: current.id, published: true, updated: true };
       }
       const placeId = `cms:${draft.id}`;
-      await tx`INSERT INTO places (id, name, name_local, province, category, description, tags, lat, lng, image_url, source_name)
-        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${p.description}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, 'PaiNaiDee Admin CMS')`;
+      await tx`INSERT INTO places (id, name, name_local, province, category, categories, description, tags, lat, lng, image_url, source_name)
+        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${tx.json(p.categories || [p.category])}, ${p.description}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, 'PaiNaiDee Admin CMS')`;
       for (const url of p.imageUrls) await preservePlaceImage(tx, placeId, url, p.name);
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 

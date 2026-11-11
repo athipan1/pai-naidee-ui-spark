@@ -35,6 +35,7 @@ export interface SearchResult {
   province: string;
   provinceEn?: string | null;
   category: string;
+  categories?: string[];
   tags: string[];
   rating: number;
   reviewCount: number;

@@ -149,7 +149,7 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
           {/* Enhanced Quick Search Suggestions */}
           <div className="flex flex-wrap justify-center gap-3 mt-6 md:mt-8 animate-fade-in px-4 sm:px-0">
             {[
-              { th: "ชายหาด", en: "Beach", icon: "🏖️" },
+              { th: "ทะเล", en: "Beach", icon: "🏖️" },
               { th: "วัด", en: "Temple", icon: "🛕" },
               { th: "ภูเขา", en: "Mountain", icon: "⛰️" },
               { th: "น้ำตก", en: "Waterfall", icon: "💧" },

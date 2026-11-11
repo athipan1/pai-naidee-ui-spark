@@ -29,6 +29,17 @@ test('CMS tags distinguish unchanged, explicitly cleared and customized topics',
   }
 });
 
+test('CMS stores independent multiple categories without weakening legacy primary category', () => {
+  assert.equal(Object.hasOwn(cleanPlace(good).value, 'categories'), false, 'legacy drafts preserve secondary categories');
+  const updated = cleanPlace({ ...good, category: 'Beach', categories: ['Beach', 'Nature', 'Island', 'beach'] });
+  assert.deepEqual(updated.errors, []);
+  assert.deepEqual(updated.value.categories, ['Beach', 'Nature', 'Island']);
+  assert.equal(updated.value.category, 'Beach');
+  for (const categories of [null, 'Beach', [], [1], [''], ['bad\ntag'], Array.from({ length: 9 }, (_, i) => `type-${i}`)]) {
+    assert.ok(cleanPlace({ ...good, categories }).errors.length, 'must reject invalid category arrays');
+  }
+});
+
 test('Admin catalog reuses public smart search and supports browsing existing places', async () => {
   const routes = new Map();
   const app = {

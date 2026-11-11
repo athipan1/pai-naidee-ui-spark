@@ -23,9 +23,18 @@ export function localizedDescription(place: PlaceText, language: PlaceLanguage):
 }
 
 const CATEGORY_TH: Record<string, string> = {
-  Beach: 'ชายหาด', Culture: 'วัฒนธรรม', Nature: 'ธรรมชาติ',
+  Beach: 'ทะเล', Culture: 'วัฒนธรรม', Nature: 'ธรรมชาติ',
   Food: 'อาหาร', Mountain: 'ภูเขา', Temple: 'วัด',
+  Market: 'ตลาด', Museum: 'พิพิธภัณฑ์', History: 'ประวัติศาสตร์',
+  Park: 'สวนสาธารณะ', Island: 'เกาะ',
 };
+
+/** Only recognised categories are offered for new publication. Legacy values are retained in existing places. */
+export const ADMIN_PLACE_CATEGORIES = ['Beach', 'Nature', 'Mountain', 'Culture', 'Temple', 'Food', 'Island', 'Market', 'Museum', 'History', 'Park'] as const;
+
+export function hasThaiCategoryLabel(category: string): boolean {
+  return Object.hasOwn(CATEGORY_TH, category);
+}
 
 const TAG_TH: Record<string, string> = {
   Archaeology: 'โบราณคดี', Architecture: 'สถาปัตยกรรม', Art: 'ศิลปะ',
