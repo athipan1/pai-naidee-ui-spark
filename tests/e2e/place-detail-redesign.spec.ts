@@ -10,6 +10,8 @@ for (const width of [320, 375, 390, 430, 768, 1024, 1440]) {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       place.nameLocal
     );
+    await expect(page.getByRole("heading", { name: "ข้อมูลการเข้าชม" })).toHaveCount(0);
+    await expect(page.locator("#place-description")).toContainText(place.description);
     const hero = page
       .getByRole("img", { name: `${place.nameLocal} · ภาพ 1`, exact: true })
       .first();

@@ -106,6 +106,47 @@ describe("Place detail data and actions", () => {
     );
     expect(screen.queryByText(/No verified reviews/)).not.toBeInTheDocument();
   });
+  it("keeps admin-entered visit details in the description without a separate visit card", () => {
+    const manualDetails =
+      "เปิดทุกวัน 08:00–17:00 น.\nค่าเข้าชม: ผู้ใหญ่ 100 บาท";
+    state.data = {
+      ...fixture,
+      description: manualDetails,
+      placeFacts: {
+        district: null,
+        verifiedAt: "2026-11-09",
+        openingHours: {
+          text: "Previous verified hours",
+          sourceUrl: "https://example.test/hours",
+          checkedAt: "2026-11-09",
+        },
+        admissionFee: {
+          text: "Previous verified fee",
+          sourceUrl: "https://example.test/fee",
+          checkedAt: "2026-11-09",
+        },
+      },
+      externalLinks: {
+        officialWebsite: "https://example.test/official",
+        wikipediaUrl: "https://en.wikipedia.org/wiki/Test",
+      },
+    };
+    page();
+    const description = document.getElementById("place-description");
+    expect(description).toHaveClass("whitespace-pre-line");
+    expect(description?.textContent).toBe(manualDetails);
+    expect(screen.queryByRole("heading", { name: "ข้อมูลการเข้าชม" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Previous verified hours")).not.toBeInTheDocument();
+    expect(screen.queryByText("Previous verified fee")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "เว็บไซต์ทางการ" })).toHaveAttribute(
+      "href",
+      "https://example.test/official"
+    );
+    expect(screen.getByRole("link", { name: "อ่านเพิ่มเติมจากวิกิพีเดีย" })).toHaveAttribute(
+      "href",
+      "https://en.wikipedia.org/wiki/Test"
+    );
+  });
   it("saves persistently on the device and removes the same ID", () => {
     page();
     fireEvent.click(screen.getAllByRole("button", { name: "บันทึก" })[0]);
@@ -136,8 +177,8 @@ describe("Place detail data and actions", () => {
     expect(screen.getByRole("button", { name: "ดูแผนที่" })).toBeDisabled();
     expect(screen.getByText("ยังไม่มีพิกัดที่ใช้แสดงแผนที่ได้")).toBeVisible();
     expect(
-      screen.getAllByText("ยังไม่มีข้อมูลปัจจุบันที่ยืนยันได้")
-    ).toHaveLength(2);
+      screen.queryByText("ยังไม่มีข้อมูลปัจจุบันที่ยืนยันได้")
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: /สวนทดสอบ/ })).toHaveAttribute(
       "src",
       "/placeholder-attraction.svg"
