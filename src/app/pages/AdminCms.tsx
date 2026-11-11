@@ -17,11 +17,14 @@ type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'ima
 };
 type Draft = { id: string; review_state?: string; updated_at?: string; status: string; payload: DraftPayload; version: string; target_place_id?: string };
 type CatalogPlace = { id: string; name: string; name_local: string | null; province: string; imageUrl?: string | null };
-type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; placeUpdatedAt: string; fields: string[] };
+type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; placeVersion: string; placeUpdatedAt: string; fields: string[] };
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
 type PlaceForm = { name: string; nameLocal: string; province: string; category: string; description: string; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
 const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', description: '', lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
+class AdminRequestError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
 function toPlaceForm(payload: DraftPayload): PlaceForm {
   const coordinate = (value: string | number | null | undefined) => value == null ? '' : String(value).trim();
   return {
@@ -111,6 +114,11 @@ export default function AdminCms() {
   const [overviewTotal, setOverviewTotal] = useState<number | null>(null);
   const [overviewError, setOverviewError] = useState('');
   const catalogRequest = useRef<AbortController | null>(null);
+  useEffect(() => {
+    if (reconcile?.draftId && tab === 'drafts') {
+      document.getElementById('cms-reconcile')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [reconcile?.draftId, tab]);
   const dirty = JSON.stringify(form) !== savedForm;
   function confirmLeave() { return !dirty || window.confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากแบบฟอร์มและละทิ้งการแก้ไขหรือไม่?'); }
   function navigate(view: AdminView) {
@@ -179,7 +187,7 @@ export default function AdminCms() {
   const api = useCallback(async (path: string, options: RequestInit = {}) => {
     const response = await requestAdmin(path, options);
     const data = await response.json().catch(() => null);
-    if (!response.ok) throw new Error(data?.error || data?.errors?.join(', ') || `HTTP ${response.status}`);
+    if (!response.ok) throw new AdminRequestError(data?.error || data?.errors?.join(', ') || `HTTP ${response.status}`, response.status);
     if (!data) throw new Error('เซิร์ฟเวอร์ตอบกลับในรูปแบบที่ไม่ถูกต้อง');
     return data;
   }, [requestAdmin]);
@@ -408,6 +416,7 @@ export default function AdminCms() {
       const draft: Draft = await api(`/places/${encodeURIComponent(reconcile.draftId)}/reconcile`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ version: reconcile.data.version,
+          expectedPlaceVersion: reconcile.data.placeVersion,
           expectedPlaceUpdatedAt: reconcile.data.placeUpdatedAt,
           selectedFields: reconcile.selected, retainGallery: reconcile.retainGallery }),
       });
@@ -415,7 +424,17 @@ export default function AdminCms() {
       setReconcile(null);
       setMessage('ปรับฉบับร่างตามข้อมูลล่าสุดแล้ว กรุณาตรวจสอบก่อนเผยแพร่');
       await openDraft(draft);
-    } catch (error) { setMessage(error instanceof Error ? error.message : 'ปรับฉบับร่างไม่สำเร็จ กรุณาโหลดข้อมูลล่าสุดอีกครั้ง'); }
+    } catch (error) {
+      if (error instanceof AdminRequestError && error.status === 409) {
+        try {
+          const data: ReconcileData = await api(`/places/${encodeURIComponent(reconcile.draftId)}/reconcile`);
+          setReconcile({ draftId: reconcile.draftId, data, selected: [], retainGallery: false });
+          setMessage('ข้อมูลสถานที่เปลี่ยนอีกครั้ง กรุณาเปรียบเทียบและเลือกการแก้ไขใหม่');
+          return;
+        } catch { /* Show the original conflict and allow a manual reload. */ }
+      }
+      setMessage(error instanceof Error ? error.message : 'ปรับฉบับร่างไม่สำเร็จ กรุณาโหลดข้อมูลล่าสุดอีกครั้ง');
+    }
     finally { setBusy(false); }
   }
 
@@ -546,7 +565,22 @@ export default function AdminCms() {
       await queryClient.invalidateQueries({ queryKey: ['attractions'] });
       setReloadDrafts(count => count + 1);
       setMessage(`เผยแพร่สำเร็จ: ${result.placeId}`);
-    } catch (error) { setMessage(error instanceof Error ? error.message : 'เผยแพร่ไม่สำเร็จ'); }
+    } catch (error) {
+      // A place may change between the preflight comparison and the locked
+      // publication transaction. Recover by opening the explicit field picker.
+      if (error instanceof AdminRequestError && error.status === 409 && draft.target_place_id) {
+        try {
+          const data: ReconcileData = await api(`/places/${encodeURIComponent(draft.id)}/reconcile`);
+          if (data.stale) {
+            setReconcile({ draftId: draft.id, data, selected: [], retainGallery: false });
+            setTab('drafts');
+            setMessage('สถานที่มีการเปลี่ยนแปลง กรุณาเลือกเก็บรายละเอียด รูปภาพ และพิกัดที่ต้องการก่อนเผยแพร่');
+            return;
+          }
+        } catch { /* Retain the original publication error when comparison fails. */ }
+      }
+      setMessage(error instanceof Error ? error.message : 'เผยแพร่ไม่สำเร็จ');
+    }
     finally { setBusy(false); }
   }
 
@@ -700,15 +734,25 @@ export default function AdminCms() {
         <div className="admin-save sticky bottom-2 z-10 rounded-xl border bg-white/95 p-2 shadow-lg backdrop-blur"><button className="w-full rounded-xl bg-teal-600 px-4 py-3.5 font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-50" disabled={busy} type="submit">{busy ? 'กำลังดำเนินการ...' : editing ? 'บันทึกการแก้ไขเป็นฉบับร่าง' : 'บันทึกสถานที่เป็นฉบับร่าง'}</button><p className="mt-2 text-center text-xs text-slate-500">ยังไม่เผยแพร่จนกว่าจะยืนยันในแท็บฉบับร่าง</p></div>
       </fieldset></form>}
       {tab === 'quality' && <ProvinceQualityDashboard api={api} onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}} />}
-      {reconcile && tab === 'drafts' && <section className="space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
+      {reconcile && tab === 'drafts' && <section id="cms-reconcile" className="scroll-mt-24 space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
         <h2 className="text-lg font-bold">เปรียบเทียบฉบับร่างกับข้อมูลล่าสุด</h2>
         <p className="text-sm text-slate-600">ติ๊กเฉพาะการแก้ไขจากฉบับร่างที่ต้องการเก็บไว้ ช่องที่ไม่เลือกจะใช้ข้อมูลล่าสุดบนเว็บไซต์</p>
-        {reconcile.data.fields.map(field => {
-          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหมู่',description:'รายละเอียด',lat:'ละติจูด',lng:'ลองจิจูด',imageUrl:'รูปหลัก'};
-          const oldValue = String(reconcile.data.draft[field as keyof DraftPayload] ?? '');
-          const latestValue = String(reconcile.data.latest[field as keyof DraftPayload] ?? '');
+        {reconcile.data.fields.filter(field => field !== 'lng').map(field => {
+          const isCoordinate = field === 'lat';
+          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหมู่',description:'รายละเอียด',lat:'พิกัด (ละติจูดและลองจิจูด)',imageUrl:'รูปหลัก'};
+          const display = (payload: DraftPayload) => isCoordinate
+            ? `${payload.lat ?? '(ว่าง)'}, ${payload.lng ?? '(ว่าง)'}`
+            : String(payload[field as keyof DraftPayload] ?? '');
+          const oldValue = display(reconcile.data.draft);
+          const latestValue = display(reconcile.data.latest);
           return <label key={field} className="block rounded-lg border p-3 text-sm">
-            <span className="flex items-center gap-2 font-semibold"><input type="checkbox" checked={reconcile.selected.includes(field)} onChange={event => setReconcile(current => current && ({...current,selected:event.target.checked?[...current.selected,field]:current.selected.filter(item=>item!==field)}))} />เก็บการแก้ไข: {names[field] || field}</span>
+            <span className="flex items-center gap-2 font-semibold"><input type="checkbox" checked={reconcile.selected.includes(field)} onChange={event => setReconcile(current => {
+              if (!current) return current;
+              const fields = isCoordinate ? ['lat', 'lng'] : [field];
+              return { ...current, selected: event.target.checked
+                ? [...new Set([...current.selected, ...fields])]
+                : current.selected.filter(item => !fields.includes(item)) };
+            })} />เก็บการแก้ไข: {names[field] || field}</span>
             <span className="mt-2 block break-all text-slate-600">ฉบับร่าง: {oldValue.slice(0,250) || '(ว่าง)'}</span>
             <span className="block break-all text-teal-700">ข้อมูลล่าสุด: {latestValue.slice(0,250) || '(ว่าง)'}</span>
           </label>;

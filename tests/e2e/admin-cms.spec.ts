@@ -18,6 +18,11 @@ async function mockCms(page: Page) {
   let session = false;
   let failUpload = false;
   let publishCount = 0;
+  let conflictOnPublish = false;
+  let stalePublishedPlace = false;
+  let retainedFields: string[] = [];
+  let retainedGallery = false;
+  const latestPublished = { ...payload, category: 'Nature', description: 'Edited elsewhere' };
   let selected = { model: models[0].id, structuredOutput: false, source: 'railway' };
   let drafts = structuredClone([incomplete]);
   let aliases: Array<{ id: string; alias_name: string; language: string; status: string }> = [];
@@ -99,11 +104,35 @@ async function mockCms(page: Page) {
     const draftId = pathname.split('/')[4];
     const draft = drafts.find(item => item.id === draftId);
     if (pathname.endsWith('/reconcile') && draft && method === 'GET') {
-      return reply(200, { draft: draft.payload, latest: draft.payload,
-        version: draft.version, stale: false, placeUpdatedAt: '2026-11-08T00:00:00.000Z', fields: [] });
+      return reply(200, { draft: draft.payload, latest: latestPublished,
+        version: draft.version, stale: stalePublishedPlace, placeVersion: '1900000000.123457',
+        placeUpdatedAt: '2030-03-17T17:46:40.123Z',
+        fields: ['name', 'nameLocal', 'province', 'category', 'description', 'lat', 'lng', 'imageUrl'] });
+    }
+    if (pathname.endsWith('/reconcile') && draft && method === 'POST') {
+      if (body().expectedPlaceVersion !== '1900000000.123457') return reply(409, { error: 'Published place changed again.' });
+      const selectedFields = body().selectedFields as string[];
+      if (selectedFields.includes('lat') !== selectedFields.includes('lng')) return reply(400, { error: 'Choose both coordinates.' });
+      const updated = { ...latestPublished } as typeof payload & { imageUrls?: string[]; removedImageUrls?: string[] };
+      for (const field of selectedFields) (updated as Record<string, unknown>)[field] = (draft.payload as Record<string, unknown>)[field];
+      retainedFields = selectedFields;
+      retainedGallery = body().retainGallery;
+      if (retainedGallery) {
+        updated.imageUrls = (draft.payload as typeof updated).imageUrls;
+        updated.removedImageUrls = (draft.payload as typeof updated).removedImageUrls;
+      }
+      draft.payload = updated;
+      draft.version = '1900000000.000004';
+      stalePublishedPlace = false;
+      return reply(200, draft);
     }
     if (pathname.endsWith('/publish') && draft) {
       if (body().version !== draft.version) return reply(409, { error: 'Draft changed.' });
+      if (conflictOnPublish) {
+        conflictOnPublish = false;
+        stalePublishedPlace = true;
+        return reply(409, { error: 'Place changed since this draft was created. Review the latest place before updating.' });
+      }
       draft.status = 'published';
       publishCount++;
       return reply(200, { placeId: 'published-fixture', published: true });
@@ -117,6 +146,8 @@ async function mockCms(page: Page) {
     return reply(404, { error: 'Fixture route not found' });
   });
   return { expire: () => { session = false; }, failNextUpload: () => { failUpload = true; },
+    conflictNextPublish: () => { conflictOnPublish = true; },
+    reconciled: () => ({ fields: retainedFields, gallery: retainedGallery }),
     published: () => publishCount, catalogQueries };
 }
 
@@ -149,6 +180,42 @@ test('admin publishes directly without evidence forms, approval, or quality API 
   await draft.getByRole('button',{name:'เผยแพร่',exact:true}).click();
   await expect(page.getByText(/เผยแพร่สำเร็จ/)).toBeVisible();
   expect(fixture.published()).toBe(1);expect(qualityCalls).toBe(0);
+});
+
+test('republishing a place preserves edited details, the coordinate pair and gallery after a concurrent conflict', async ({ page }) => {
+  const fixture = await mockCms(page);
+  page.on('dialog', dialog => dialog.accept());
+  await login(page);
+  await navigate(page, 'สถานที่ทั้งหมด');
+  await page.getByRole('button', { name: 'แก้ไขสถานที่ที่เผยแพร่แล้ว', exact: true }).click();
+  await page.getByLabel('รายละเอียดสถานที่').fill('New opening hours and visitor information');
+  await page.getByLabel(/ละติจูด/).fill('99');
+  await page.getByLabel(/ลองจิจูด/).fill('100.98765');
+  await page.getByRole('button', { name: 'บันทึกการแก้ไขเป็นฉบับร่าง' }).click();
+  await expect(page.getByText(/กรุณากรอกพิกัดทั้งคู่/)).toBeVisible();
+  await page.getByLabel(/ละติจูด/).fill('13.34567');
+  await page.locator('input[type=file]').setInputFiles({ name: 'viewpoint.png', mimeType: 'image/png', buffer: imageBytes });
+  await page.getByRole('button', { name: 'บันทึกการแก้ไขเป็นฉบับร่าง' }).click();
+  await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
+
+  fixture.conflictNextPublish(); // Change occurs after the preflight GET, before the locked POST.
+  const draft = page.locator('article').filter({ hasText: place.name_local });
+  await draft.getByRole('button', { name: 'เผยแพร่', exact: true }).click();
+  const comparison = page.getByRole('region', { name: 'เปรียบเทียบข้อมูลล่าสุด' });
+  await expect(comparison.getByRole('heading', { name: 'เปรียบเทียบฉบับร่างกับข้อมูลล่าสุด' })).toBeVisible();
+  await comparison.getByLabel('เก็บการแก้ไข: รายละเอียด').check();
+  await comparison.getByLabel('เก็บการแก้ไข: พิกัด (ละติจูดและลองจิจูด)').check();
+  await comparison.getByLabel('เก็บการแก้ไข: รูปหลัก').check();
+  await comparison.getByLabel('เก็บการเพิ่มและลบรูปภาพจากฉบับร่างนี้').check();
+  await comparison.getByRole('button', { name: 'ยืนยันการแก้ไขเฉพาะส่วนที่เลือก' }).click();
+  await expect(page.getByLabel('รายละเอียดสถานที่')).toHaveValue('New opening hours and visitor information');
+  await expect(page.getByLabel(/ละติจูด/)).toHaveValue('13.34567');
+  await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('100.98765');
+  await navigate(page, 'ฉบับร่าง');
+  await page.locator('article').filter({ hasText: place.name_local }).getByRole('button', { name: 'เผยแพร่', exact: true }).click();
+  await expect(page.getByText(/เผยแพร่สำเร็จ/)).toBeVisible();
+  expect(fixture.reconciled()).toEqual({ fields: ['description', 'lat', 'lng', 'imageUrl'], gallery: true });
+  expect(fixture.published()).toBe(1);
 });
 
 test('login, failed credentials, logout, and an expired session during a request', async ({ page }) => {
