@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -39,7 +39,7 @@ import {
   readSavedPlaceIds,
 } from "@/shared/utils/placeDetail";
 
-const MapModal = lazy(() => import("@/components/attraction/MapModal"));
+
 interface AttractionDetailProps {
   currentLanguage: "th" | "en";
   onLanguageChange: (language: "th" | "en") => void;
@@ -61,14 +61,17 @@ export default function AttractionDetail({
     refetch,
   } = useAttractionDetail(id);
   const [savedIds, setSavedIds] = useState<string[]>(readSavedPlaceIds);
-  const [showMap, setShowMap] = useState(false);
+  const showEmbeddedMap = () => {
+    const target = document.getElementById("location");
+    target?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+    target?.focus({ preventScroll: true });
+  };
   const [expanded, setExpanded] = useState(false);
   const [notice, setNotice] = useState("");
   const [shareLink, setShareLink] = useState("");
 
   useEffect(() => {
     setExpanded(false);
-    setShowMap(false);
     setNotice("");
     setShareLink("");
   }, [id]);
@@ -325,7 +328,7 @@ export default function AttractionDetail({
                   variant="outline"
                   disabled={!hasCoordinates}
                   className="hidden min-h-[44px] gap-2 md:inline-flex"
-                  onClick={() => setShowMap(true)}
+                  onClick={showEmbeddedMap}
                 >
                   <Map aria-hidden="true" className="h-4 w-4" />
                   {th ? "ดูแผนที่" : "View map"}
@@ -429,7 +432,8 @@ export default function AttractionDetail({
               </section>
               <section
                 id="location"
-                className={sectionClass}
+                tabIndex={-1}
+                className={`${sectionClass} scroll-mt-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary`}
                 aria-labelledby="location-title"
               >
                 <h2
@@ -445,28 +449,7 @@ export default function AttractionDetail({
                     ? ` · ${attraction.placeFacts.district}`
                     : ""}
                 </p>
-                {hasCoordinates ? (
-                  <button
-                    type="button"
-                    className="mt-5 flex min-h-40 w-full flex-col items-center justify-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-5 text-primary hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-                    onClick={() => setShowMap(true)}
-                  >
-                    <Map aria-hidden="true" className="h-9 w-9" />
-                    <span className="font-semibold">
-                      {th ? "เปิดแผนที่สถานที่" : "Open destination map"}
-                    </span>
-                    <span className="text-xs tabular-nums text-muted-foreground">
-                      {attraction.coordinates.lat.toFixed(5)},{" "}
-                      {attraction.coordinates.lng.toFixed(5)}
-                    </span>
-                  </button>
-                ) : (
-                  <p className="mt-5 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
-                    {th
-                      ? "ยังไม่มีพิกัดที่ใช้แสดงแผนที่ได้"
-                      : "Map coordinates are unavailable."}
-                  </p>
-                )}
+                <NearbyRealPlaces key={attraction.id} place={attraction} currentLanguage={currentLanguage} />
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">
                   {attraction.navigation &&
                   validPlaceCoordinates(attraction.navigation)
@@ -683,12 +666,7 @@ export default function AttractionDetail({
               />
             </aside>
           </div>
-          <NearbyRealPlaces
-            placeId={attraction.id}
-            category={attraction.category}
-            coordinates={attraction.coordinates}
-            currentLanguage={currentLanguage}
-          />
+
         </div>
       </main>
       <nav
@@ -711,7 +689,7 @@ export default function AttractionDetail({
           variant="outline"
           className="min-h-[48px] gap-2 px-2 text-xs"
           disabled={!hasCoordinates}
-          onClick={() => setShowMap(true)}
+          onClick={showEmbeddedMap}
         >
           <Map aria-hidden="true" className="h-4 w-4 shrink-0" />
           {th ? "แผนที่" : "Map"}
@@ -725,31 +703,7 @@ export default function AttractionDetail({
           {th ? "นำทาง" : "Directions"}
         </Button>
       </nav>
-      {showMap && hasCoordinates && (
-        <Suspense
-          fallback={
-            <p
-              role="status"
-              className="fixed inset-x-4 bottom-24 z-50 rounded-xl border bg-background p-4"
-            >
-              {th ? "กำลังโหลดแผนที่..." : "Loading map..."}
-            </p>
-          }
-        >
-          <MapModal
-            isOpen
-            onClose={() => setShowMap(false)}
-            location={{
-              ...attraction.coordinates,
-              name: attraction.name,
-              nameLocal: attraction.nameLocal,
-            }}
-            currentLanguage={currentLanguage}
-            onNavigate={openNavigation}
-            navigationLabel={navigationLabel}
-          />
-        </Suspense>
-      )}
+
     </div>
   );
 }

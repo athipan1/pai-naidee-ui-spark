@@ -1,9 +1,10 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: [
     "global-image-consistency.spec.ts",
     "place-detail-redesign.spec.ts",
+    "nearby-map.spec.ts",
   ],
   use: {
     baseURL: "http://127.0.0.1:4173",
@@ -16,6 +17,16 @@ export default defineConfig({
       name: "webkit",
       testMatch: "place-detail-redesign.spec.ts",
       use: { browserName: "webkit" },
+    },
+    {
+      name: "android-nearby",
+      testMatch: "nearby-map.spec.ts",
+      use: { ...devices["Pixel 7"] },
+    },
+    {
+      name: "iphone-nearby",
+      testMatch: "nearby-map.spec.ts",
+      use: { ...devices["iPhone 13"], browserName: "webkit" },
     },
   ],
   webServer: {

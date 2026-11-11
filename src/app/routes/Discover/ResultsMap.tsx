@@ -1,66 +1,13 @@
-import { useEffect, useMemo } from "react";
+import { MapBounds, markerIcon, THAILAND_CENTER, hasValidCoordinates } from "@/components/maps/leafletShared";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import L from "leaflet";
-import iconUrl from "leaflet/dist/images/marker-icon.png";
-import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import type { SearchResult } from "@/shared/types/search";
 import { localizedProvince } from "@/shared/i18n/placeLocalization";
 
-const markerIcon = L.icon({
-  iconUrl,
-  shadowUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-export const THAILAND_CENTER: [number, number] = [15.87, 100.99];
-export function hasValidCoordinates(place: SearchResult): boolean {
-  const coordinates = place.coordinates ?? place.location;
-  return (
-    !!coordinates &&
-    Number.isFinite(coordinates.lat) &&
-    Number.isFinite(coordinates.lng) &&
-    coordinates.lat >= 5 &&
-    coordinates.lat <= 21 &&
-    coordinates.lng >= 97 &&
-    coordinates.lng <= 106
-  );
-}
 
-function MapBounds({
-  places,
-  target,
-  zoom,
-}: {
-  places: SearchResult[];
-  target?: [number, number];
-  zoom?: number;
-}) {
-  const map = useMap();
-  useEffect(() => {
-    const observer = new ResizeObserver(() => map.invalidateSize());
-    observer.observe(map.getContainer());
-    return () => observer.disconnect();
-  }, [map]);
-  useEffect(() => {
-    if (target) map.setView(target, zoom ?? 6, { animate: false });
-    else if (places.length)
-      map.fitBounds(
-        L.latLngBounds(
-          places.map((place) => {
-            const coords = place.coordinates ?? place.location!;
-            return [coords.lat, coords.lng] as [number, number];
-          })
-        ),
-        { padding: [35, 35], maxZoom: 13, animate: false }
-      );
-    else map.setView(THAILAND_CENTER, 6);
-  }, [map, places, target?.[0], target?.[1], zoom]);
-  return null;
-}
+export { hasValidCoordinates, THAILAND_CENTER } from "@/components/maps/leafletShared";
 
 export default function ResultsMap({
   places: rawPlaces,
@@ -105,7 +52,7 @@ export default function ResultsMap({
           const name = th ? place.nameLocal || place.name : place.name;
           return (
             <Marker
-              key={place.id}
+              key={`${place.id}:${currentLanguage}`}
               position={[coords.lat, coords.lng]}
               icon={markerIcon}
               title={name}

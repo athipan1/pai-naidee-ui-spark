@@ -494,22 +494,32 @@ function normalizePlace(row) {
   };
 }
 
-function parseNearbyOptions({ lat, lng, radiusKm = 25, limit = 30 } = {}) {
+function parseNearbyOptions({ lat, lng, radiusKm = 25, limit = 30, excludeId } = {}) {
+  if ([lat, lng, radiusKm, limit].some(value => value != null && !['string', 'number'].includes(typeof value))) {
+    throw new RangeError('Nearby parameters must be scalar numbers');
+  }
+  if (excludeId !== undefined && (typeof excludeId !== 'string' || !excludeId.trim() || excludeId.length > 200)) {
+    throw new RangeError('Invalid excluded place ID');
+  }
   const latitude = lat == null || String(lat).trim() === '' ? NaN : Number(lat);
   const longitude = lng == null || String(lng).trim() === '' ? NaN : Number(lng);
   const radius = Number(radiusKm);
   const count = Number(limit);
-  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
-      !Number.isFinite(longitude) || longitude < -180 || longitude > 180 ||
+  if (!Number.isFinite(latitude) || latitude < 5 || latitude > 21 ||
+      !Number.isFinite(longitude) || longitude < 97 || longitude > 106 ||
       !Number.isFinite(radius) || radius < 1 || radius > 100 ||
       !Number.isInteger(count) || count < 1 || count > 50) {
     throw new RangeError('Invalid nearby coordinates, radiusKm, or limit');
   }
-  return { latitude, longitude, radius, count };
+  return { latitude, longitude, radius, count, ...(excludeId === undefined ? {} : { excludeId }) };
 }
 
 async function listNearbyPlaces(options) {
-  const { latitude, longitude, radius, count } = parseNearbyOptions(options);
+  const { latitude, longitude, radius, count, excludeId } = parseNearbyOptions(options);
+  // Conservative spherical bounding box uses the existing (lat, lng) index.
+  const angular = radius / 6371;
+  const latDelta = angular * 180 / Math.PI + 1e-9;
+  const lngDelta = Math.asin(Math.sin(angular) / Math.cos(latitude * Math.PI / 180)) * 180 / Math.PI + 1e-9;
   const sql = getSql();
   const rows = await sql`
     WITH ranked AS (
@@ -520,23 +530,27 @@ async function listNearbyPlaces(options) {
           POWER(SIN(RADIANS(p.lng - ${longitude}) / 2), 2)
         ))) AS distance_km
       FROM places p
-      WHERE p.lat BETWEEN -90 AND 90 AND p.lng BETWEEN -180 AND 180
+      WHERE p.lat BETWEEN ${Math.max(5, latitude - latDelta)} AND ${Math.min(21, latitude + latDelta)}
+        AND p.lng BETWEEN ${Math.max(97, longitude - lngDelta)} AND ${Math.min(106, longitude + lngDelta)}
+        AND (${excludeId ?? null}::text IS NULL OR p.id <> ${excludeId ?? null})
+    ), limited AS (
+      SELECT * FROM ranked WHERE distance_km <= ${radius}
+      ORDER BY distance_km ASC, id ASC LIMIT ${count + 1}
     )
-    SELECT ranked.*,
+    SELECT limited.*,
       (SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
         'id', m.id, 'url', m.url, 'type', m.type,
         'title', m.title, 'description', m.description,
         'creatorName', m.creator_name, 'licenseName', m.license_name,
         'licenseUrl', m.license_url, 'sourcePage', m.source_page
       ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC), '[]'::json)
-      FROM media m WHERE m.place_id = ranked.id) AS media
-    FROM ranked
-    WHERE distance_km <= ${radius}
-    ORDER BY distance_km ASC, name ASC
-    LIMIT ${count}
+      FROM media m WHERE m.place_id = limited.id) AS media
+    FROM limited
+    ORDER BY distance_km ASC, id ASC
   `;
   return {
-    attractions: rows.map(row => ({ ...normalizePlace(row), distanceKm: Number(row.distance_km) })),
+    attractions: rows.slice(0, count).map(row => ({ ...normalizePlace(row), distanceKm: Number(row.distance_km) })),
+    limit: count, hasMore: rows.length > count,
     center: { lat: latitude, lng: longitude }, radiusKm: radius,
   };
 }

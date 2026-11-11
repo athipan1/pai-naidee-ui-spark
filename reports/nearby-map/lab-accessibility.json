@@ -1,0 +1,120 @@
+{
+  "environment": "Chromium headless, SVG fixture images/tiles, localhost production builds; axe-core 4.11.0 WCAG 2/2.1/2.2 A/AA on #location. No throttling. Not field data; INP unmeasured. LCP/CLS collected during lab interaction, not Lighthouse scores.",
+  "results": [
+    {
+      "version": "before",
+      "width": 390,
+      "theme": "light",
+      "lab": {
+        "lcp": 92,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "version": "before",
+      "width": 390,
+      "theme": "dark",
+      "lab": {
+        "lcp": 92,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "version": "before",
+      "width": 1440,
+      "theme": "light",
+      "lab": {
+        "lcp": 172,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "version": "before",
+      "width": 1440,
+      "theme": "dark",
+      "lab": {
+        "lcp": 172,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "version": "after",
+      "width": 390,
+      "theme": "light",
+      "lab": {
+        "lcp": 152,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "version": "after",
+      "width": 390,
+      "theme": "dark",
+      "lab": {
+        "lcp": 152,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "version": "after",
+      "width": 390,
+      "theme": "dark-popup",
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "version": "after",
+      "width": 1440,
+      "theme": "light",
+      "lab": {
+        "lcp": 160,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "version": "after",
+      "width": 1440,
+      "theme": "dark",
+      "lab": {
+        "lcp": 160,
+        "cls": 0
+      },
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "version": "after",
+      "width": 1440,
+      "theme": "dark-popup",
+      "violations": [],
+      "incomplete": [
+        "color-contrast",
+        "link-in-text-block"
+      ]
+    }
+  ]
+}

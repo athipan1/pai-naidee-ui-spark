@@ -19,9 +19,7 @@ const state = vi.hoisted(() => ({
 }));
 vi.mock("@/shared/hooks/useAttractionQueries", () => ({
   useAttractionDetail: () => state,
-}));
-vi.mock("@/components/attraction/NearbyRealPlaces", () => ({
-  default: () => null,
+  useNearbyAttractions: () => ({ data: undefined, isLoading: false, isError: false }),
 }));
 vi.mock("@/components/attraction/GooglePlacePreview", () => ({
   default: () => null,

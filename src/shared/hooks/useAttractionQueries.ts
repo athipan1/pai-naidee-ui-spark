@@ -99,16 +99,16 @@ export const useAllAttractions = (filters?: { category?: string; province?: stri
   });
 };
 
-export const useNearbyAttractions = (location: { lat: number; lng: number } | null, radiusKm: number) => {
+export const useNearbyAttractions = (location: { lat: number; lng: number } | null, radiusKm: number, excludeId?: string) => {
   return useQuery({
-    queryKey: [...attractionKeys.all, 'nearby', location?.lat, location?.lng, radiusKm],
-    queryFn: () => {
+    queryKey: [...attractionKeys.all, 'nearby', location?.lat, location?.lng, radiusKm, excludeId],
+    queryFn: ({ signal }) => {
       if (!location) throw new Error('Location is required');
-      return getRailwayNearbyAttractions({ ...location, radiusKm });
+      return getRailwayNearbyAttractions({ ...location, radiusKm, excludeId, signal });
     },
     enabled: !!location,
-    staleTime: 0,
-    refetchInterval: 30_000,
+    staleTime: excludeId ? 30_000 : 0,
+    refetchInterval: excludeId ? false : 30_000,
     retry: 1,
   });
 };

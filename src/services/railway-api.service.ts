@@ -12,8 +12,11 @@ function getApiBaseUrl(): string {
   return (configured || DEFAULT_API_BASE_URL).replace(/\/+$/, "").replace(/\/api$/i, "");
 }
 
-async function requestJson<T>(path: string): Promise<T> {
+async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const controller = new AbortController();
+  const abort = () => controller.abort(signal?.reason);
+  if (signal?.aborted) abort();
+  signal?.addEventListener("abort", abort, { once: true });
   const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
@@ -32,12 +35,14 @@ async function requestJson<T>(path: string): Promise<T> {
 
     return (await response.json()) as T;
   } catch (error) {
+    if (signal?.aborted) throw error;
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("PaiNaiDee API request timed out");
     }
     throw error;
   } finally {
     window.clearTimeout(timeout);
+    signal?.removeEventListener("abort", abort);
   }
 }
 
@@ -52,6 +57,8 @@ export interface RailwayNearbyResponse {
   attractions: SearchResult[];
   center: { lat: number; lng: number };
   radiusKm: number;
+  limit?: number;
+  hasMore?: boolean;
 }
 
 export interface PlaceSuggestion {
@@ -83,6 +90,8 @@ export async function getRailwayNearbyAttractions(options: {
   lng: number;
   radiusKm?: number;
   limit?: number;
+  excludeId?: string;
+  signal?: AbortSignal;
 }): Promise<RailwayNearbyResponse> {
   const params = new URLSearchParams({
     lat: String(options.lat),
@@ -90,7 +99,8 @@ export async function getRailwayNearbyAttractions(options: {
     radiusKm: String(options.radiusKm ?? 25),
     limit: String(options.limit ?? 30),
   });
-  const response = await requestJson<RailwayNearbyResponse>(`/api/places/nearby?${params}`);
+  if (options.excludeId) params.set("excludeId", options.excludeId);
+  const response = await requestJson<RailwayNearbyResponse>(`/api/places/nearby?${params}`, options.signal);
   return { ...response, attractions: response.attractions.map(withPublishedPlaceImages) };
 }
 

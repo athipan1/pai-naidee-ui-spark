@@ -228,12 +228,14 @@ test('detail page recommends only real nearby places and never itself', async ({
   await page.route('**/api/places**', route => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/nearby')) return route.fulfill({ json: {
-      attractions: [{ ...place, distanceKm: 0 }, neighbor], center: { lat: 18.59, lng: 98.49 }, radiusKm: 100,
+      attractions: [{ ...place, distanceKm: 0 }, neighbor], center: { lat: 18.59, lng: 98.49 }, radiusKm: Number(url.searchParams.get("radiusKm")),
     } });
     return route.fulfill({ json: place });
   });
   await page.goto('/attraction/railway-test-1');
   const section = page.getByTestId('real-nearby-places');
+  await expect(section.getByRole('link', { name: /Nearby Scenic Place/ })).toHaveCount(0);
+  await page.getByRole('button', { name: '20 km', exact: true }).click();
   await expect(section.getByRole('link', { name: /Nearby Scenic Place/ })).toHaveCount(1);
   await expect(section).toContainText('12.4 km');
   await expect(section.getByRole('link', { name: /Doi Inthanon/ })).toHaveCount(0);
