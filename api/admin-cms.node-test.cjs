@@ -18,6 +18,17 @@ test('CMS validates coordinates and HTTPS media links', () => {
   assert.ok(cleanPlace({ ...good, name: '' }).errors.length > 0);
 });
 
+test('CMS tags distinguish unchanged, explicitly cleared and customized topics', () => {
+  assert.equal(Object.hasOwn(cleanPlace(good).value, 'tags'), false, 'legacy drafts must not erase published tags');
+  assert.deepEqual(cleanPlace({ ...good, tags: [] }).value.tags, []);
+  assert.deepEqual(cleanPlace({ ...good, tags: [' Viewpoint ', 'ทะเลหมอก', 'viewpoint', 'ทะเลหมอก'] }).value.tags,
+    ['Viewpoint', 'ทะเลหมอก']);
+  for (const tags of [null, 'Viewpoint', [1], [''], ['x'.repeat(61)], ['bad\ntag'],
+    Array.from({ length: 13 }, (_, i) => `tag-${i}`)]) {
+    assert.ok(cleanPlace({ ...good, tags }).errors.length > 0);
+  }
+});
+
 test('Admin catalog reuses public smart search and supports browsing existing places', async () => {
   const routes = new Map();
   const app = {

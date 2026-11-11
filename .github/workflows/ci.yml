@@ -84,6 +84,10 @@ jobs:
   read-only-e2e:
     name: Read-Only E2E (Production Build)
     runs-on: ubuntu-latest
+    # The version matches @playwright/test in package-lock.json. Browsers and
+    # OS libraries are bundled, so the job never needs Ubuntu apt mirrors.
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -97,9 +101,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium and WebKit for Playwright mobile tests
-        timeout-minutes: 5
-        run: npx playwright install --with-deps chromium webkit
+      - name: Verify bundled Chromium and WebKit for Playwright mobile tests
+        timeout-minutes: 2
+        run: |
+          node - <<'NODE'
+          const { chromium, webkit } = require('@playwright/test');
+          (async () => {
+            for (const [name, engine] of Object.entries({ chromium, webkit })) {
+              const browser = await engine.launch();
+              console.log(`${name} launched from ${engine.executablePath()}`);
+              await browser.close();
+            }
+          })().catch(error => { console.error(error); process.exitCode = 1; });
+          NODE
 
       - name: Test read-only discovery, routing, and PWA
         run: npm run test:e2e:read-only -- --config=playwright.read-only.config.ts
