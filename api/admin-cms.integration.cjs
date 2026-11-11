@@ -262,9 +262,53 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.deepEqual(await sql`SELECT id,url FROM media WHERE place_id=${placeId} ORDER BY id`,beforeSeed);
     await sql`UPDATE places SET image_url=${main} WHERE id=${placeId}`;
 
+    // A deterministic sub-millisecond external edit must be detected by the
+    // comparison UI as well as by the locked publish transaction.
+    await sql`UPDATE places SET updated_at = date_trunc('second', updated_at) + INTERVAL '123400 microseconds'
+      WHERE id = ${placeId}`;
     const next = await write(`/catalog/${placeId}/edit`, {}, 201);
+    const [draftBaseline] = await sql`SELECT target_updated_at FROM place_drafts WHERE id = ${next.id}`;
+    await write(`/places/${next.id}`, { ...next.payload, lat: 99, lng: 100.9, version: next.version }, 400, 'PUT');
+    const extra = (await (await upload('image/png', fixturePng(210))).json()).imageUrl;
+    const edited = await write(`/places/${next.id}`, { ...next.payload, version: next.version,
+      description: 'Updated visitor details', lat: 13.34567, lng: 100.98765,
+      imageUrl: extra, imageUrls: [extra, main] }, 200, 'PUT');
+    const [beforeCount] = await sql`SELECT COUNT(*)::int AS count FROM places`;
+    await sql`UPDATE places SET category = 'Nature', updated_at = updated_at + INTERVAL '1 microsecond'
+      WHERE id = ${placeId}`;
+    await publish(edited, 409);
+    const comparison = await (await admin(`/places/${next.id}/reconcile`)).json();
+    assert.equal(comparison.stale, true);
+    assert.match(comparison.placeVersion, /^\d{1,12}\.\d{6}$/);
+    assert.equal(comparison.latest.category, 'Nature');
+    assert.equal(comparison.draft.lat, 13.34567);
+    assert.equal(new Date(comparison.placeUpdatedAt).getTime(), draftBaseline.target_updated_at.getTime(),
+      'The old millisecond-only comparison would miss this conflict');
+
+    const retain = { version: edited.version, expectedPlaceVersion: comparison.placeVersion,
+      selectedFields: ['description', 'lat', 'lng', 'imageUrl'], retainGallery: true };
+    await write(`/places/${next.id}/reconcile`, { ...retain, selectedFields: ['lat'] }, 400);
+    // Simulate another admin updating the place after the comparison opened.
     await sql`UPDATE places SET updated_at = updated_at + INTERVAL '1 microsecond' WHERE id = ${placeId}`;
-    await publish(next, 409);
+    await write(`/places/${next.id}/reconcile`, retain, 409);
+    const latest = await (await admin(`/places/${next.id}/reconcile`)).json();
+    const reconciled = await write(`/places/${next.id}/reconcile`,
+      { ...retain, expectedPlaceVersion: latest.placeVersion });
+    assert.equal(reconciled.payload.description, 'Updated visitor details');
+    assert.equal(reconciled.payload.lat, 13.34567);
+    assert.equal(reconciled.payload.lng, 100.98765);
+    assert.equal(reconciled.payload.category, 'Nature');
+    assert.ok(reconciled.payload.imageUrls.includes(extra));
+    assert.equal((await publish(reconciled)).placeId, placeId);
+    const [afterCount] = await sql`SELECT COUNT(*)::int AS count FROM places`;
+    assert.equal(afterCount.count, beforeCount.count);
+    const updated = await (await publicApi(`/api/places/${placeId}`)).json();
+    assert.equal(updated.description, 'Updated visitor details');
+    assert.equal(updated.lat, 13.34567);
+    assert.equal(updated.lng, 100.98765);
+    assert.equal(updated.category, 'Nature');
+    assert.equal(updated.images[0], extra);
+    assert.ok(updated.images.includes(main));
   });
 
   await t.test('approved aliases appear in search and rejected or duplicate aliases do not', async () => {

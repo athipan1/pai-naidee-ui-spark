@@ -280,14 +280,21 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   // A stale draft is never rebased implicitly. Admin must review and choose every field to retain.
   app.get('/api/admin/places/:draftId/reconcile', requireAdmin, wrap(async (req, res) => {
     const sql = getSql();
-    const [draft] = await sql`SELECT id, status, target_place_id, payload, target_updated_at,
+    const [draft] = await sql`SELECT id, status, target_place_id, payload,
       EXTRACT(EPOCH FROM updated_at)::text AS version FROM place_drafts WHERE id = ${req.params.draftId}`;
     if (!draft || draft.status !== 'draft' || !draft.target_place_id) return res.status(404).json({ error: 'Editable place draft not found.' });
-    const [place] = await sql`SELECT name, name_local, province, category, description, lat, lng, image_url, updated_at
-      FROM places WHERE id = ${draft.target_place_id}`;
+    // Use PostgreSQL's exact timestamp comparison, just like the publish gate.
+    // Converting timestamps to JavaScript Date first loses microseconds and can
+    // incorrectly report a conflicting draft as safe to publish.
+    const [place] = await sql`SELECT p.name, p.name_local, p.province, p.category,
+      p.description, p.lat, p.lng, p.image_url, p.updated_at,
+      p.updated_at IS DISTINCT FROM d.target_updated_at AS stale,
+      EXTRACT(EPOCH FROM p.updated_at)::text AS place_version
+      FROM places p JOIN place_drafts d ON d.id = ${draft.id}
+      WHERE p.id = ${draft.target_place_id}`;
     if (!place) return res.status(404).json({ error: 'Published place not found.' });
     res.json({ draft: draft.payload, latest: placeSnapshot(place), version: draft.version,
-      stale: new Date(place.updated_at).getTime() !== new Date(draft.target_updated_at).getTime(),
+      stale: place.stale, placeVersion: place.place_version,
       placeUpdatedAt: new Date(place.updated_at).toISOString(),
       fields: editableFields });
   }));
@@ -297,15 +304,25 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     if (!Array.isArray(selected) || selected.some(field => !editableFields.includes(field)) ||
       new Set(selected).size !== selected.length || !draftVersion(req.body?.version))
       return res.status(400).json({ error: 'Select valid fields and provide the current draft version.' });
+    if (selected.includes('lat') !== selected.includes('lng'))
+      return res.status(400).json({ error: 'Select both latitude and longitude together.' });
+    if (req.body?.expectedPlaceVersion !== undefined && !draftVersion(req.body.expectedPlaceVersion))
+      return res.status(400).json({ error: 'Invalid published-place version.' });
     const result = await getSql().begin(async tx => {
       const [draft] = await tx`SELECT *, EXTRACT(EPOCH FROM updated_at)::text AS version FROM place_drafts
         WHERE id = ${req.params.draftId} FOR UPDATE`;
       if (!draft || draft.status !== 'draft' || !draft.target_place_id) return { code: 404, error: 'Editable draft not found.' };
       if (draft.version !== req.body.version) return { code: 409, error: 'Draft changed. Reload before reconciling.' };
-      const [place] = await tx`SELECT name, name_local, province, category, description, lat, lng, image_url, updated_at
+      const [place] = await tx`SELECT name, name_local, province, category, description, lat, lng, image_url, updated_at,
+        EXTRACT(EPOCH FROM updated_at)::text AS place_version
         FROM places WHERE id = ${draft.target_place_id} FOR UPDATE`;
       if (!place) return { code: 404, error: 'Published place not found.' };
-      if (req.body?.expectedPlaceUpdatedAt !== new Date(place.updated_at).toISOString())
+      // The opaque microsecond version is authoritative. Retain the legacy
+      // millisecond field only for clients still rolling over to this API.
+      const currentVersionMatches = req.body?.expectedPlaceVersion !== undefined
+        ? req.body.expectedPlaceVersion === place.place_version
+        : req.body?.expectedPlaceUpdatedAt === new Date(place.updated_at).toISOString();
+      if (!currentVersionMatches)
         return { code: 409, error: 'Published place changed again. Reload the comparison.' };
       const latest = placeSnapshot(place);
       const payload = { ...latest };
