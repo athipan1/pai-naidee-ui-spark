@@ -452,7 +452,7 @@ test('unsaved form survives reload without creating or saving a production draft
   await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('แบบฟอร์มกู้คืน');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
-  expect(await page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();
 });
 
 
