@@ -69,7 +69,7 @@ test('legacy, variant fallback and private access retain their cache and authori
   const optimized = await get(variant);
   assert.equal(optimized.headers.get('content-type'), 'image/webp');
   assert.equal(optimized.headers.get('content-length'), '7');
-  assert.match(optimized.headers.get('cache-control'), /immutable/);
+  assert.equal(optimized.headers.get('cache-control'), 'private, max-age=3600, must-revalidate');
   assert.equal(await optimized.text(), 'variant');
   assert.equal(await (await get(legacy + '?w=256')).text(), 'original');
   assert.equal(await (await get(modern + '?w=640')).text(), 'original');
@@ -169,4 +169,53 @@ test('storage object missing returns 404 and a provider failure returns 503 with
   const failure = await get(legacy);
   assert.equal(failure.status, 503);
   assert.doesNotMatch(await failure.text(), /fixture-provider-secret/);
+});
+
+test('conditional public reads recheck publication before contacting Storage or sending 304', async t => {
+  let published = true;
+  const calls = [];
+  const { get } = await fixture(t, async ({ input }) => {
+    calls.push(input);
+    if (input.IfNoneMatch === '"webp"') throw { $metadata: { httpStatusCode: 304 } };
+    return { Body: Readable.from(['webp']), ContentLength: 4, ETag: '"webp"' };
+  }, { getSql: () => async () => published ? [{}] : [] });
+  const cold = await get(variant);
+  assert.equal(cold.headers.get('etag'), '"webp"');
+  assert.equal(await cold.text(), 'webp');
+
+  const headers = { 'If-None-Match': '"webp"' };
+  for (const method of ['GET', 'HEAD']) {
+    const cached = await get(variant, { method, headers });
+    assert.equal(cached.status, 304);
+    assert.equal(cached.headers.get('etag'), '"webp"');
+    assert.equal(await cached.text(), '');
+  }
+  assert.equal(calls.at(-1).IfNoneMatch, '"webp"');
+  const firstPartyAdmin = await get(variant.replace('/media/cms/', '/admin/media/'), {
+    headers: { ...headers, authorization: 'Bearer fixture' },
+  });
+  assert.equal(firstPartyAdmin.status, 200);
+  assert.equal(firstPartyAdmin.headers.get('etag'), null);
+  assert.equal(firstPartyAdmin.headers.get('cache-control'), 'private, no-store');
+  await firstPartyAdmin.text();
+  const beforeWithdrawal = calls.length;
+  published = false;
+  const withdrawn = await get(variant, { headers });
+  assert.equal(withdrawn.status, 404);
+  assert.match(withdrawn.headers.get('cache-control'), /no-store/);
+  assert.equal(calls.length, beforeWithdrawal);
+});
+
+test('conditional WebP miss serves an uncacheable original and does not forward the WebP validator', async t => {
+  const { get } = await fixture(t, async ({ input }) => {
+    if (input.Key.includes('/variants/')) throw missing();
+    assert.equal(input.IfNoneMatch, undefined);
+    return { Body: Readable.from(['original']), ContentLength: 8, ETag: '"original"' };
+  });
+  const response = await get(variant, { headers: { 'If-None-Match': '"old-webp"' } });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('content-type'), 'image/png');
+  assert.equal(response.headers.get('etag'), null);
+  assert.match(response.headers.get('cache-control'), /no-store/);
+  assert.equal(await response.text(), 'original');
 });

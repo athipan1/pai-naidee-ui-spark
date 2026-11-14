@@ -1,5 +1,5 @@
 {
-  "git": { "deploymentEnabled": { "fix/admin-cms-production-validation": false, "fix/lint-baseline-production-readiness": false, "fix/global-image-performance": false } },
+  "git": { "deploymentEnabled": { "fix/admin-cms-production-validation": false, "fix/lint-baseline-production-readiness": false, "fix/global-image-performance": false, "fix/smart-image-cache": false } },
   "builds": [
     {
       "src": "api/api-server.cjs",

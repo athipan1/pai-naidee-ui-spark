@@ -64,7 +64,9 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     }
     const bytes = objects.get(command.input.Key);
     if (!bytes) throw Object.assign(new Error('Fixture object missing'), { name: 'NoSuchKey' });
-    return { Body: [bytes] };
+    const etag = '"' + require('node:crypto').createHash('sha256').update(bytes).digest('hex') + '"';
+    if (command.input.IfNoneMatch === etag) throw { $metadata: { httpStatusCode: 304 } };
+    return { Body: [bytes], ETag: etag, ContentLength: bytes.length };
   } } };
   const app = express();
   app.use(express.json());
@@ -214,8 +216,13 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.deepEqual(Buffer.from(await (await request(imagePath, { auth: false })).arrayBuffer()), png);
     const publishedThumb = await request(`${imagePath}?w=256`, { auth: false });
     assert.equal(publishedThumb.headers.get('content-type'), 'image/webp');
-    assert.match(publishedThumb.headers.get('cache-control'), /immutable/);
+    assert.equal(publishedThumb.headers.get('cache-control'), 'private, max-age=3600, must-revalidate');
     await publishedThumb.arrayBuffer();
+    const revalidatedThumb = await fetch(base + imagePath + '?w=256', {
+      headers: { 'If-None-Match': publishedThumb.headers.get('etag') },
+    });
+    assert.equal(revalidatedThumb.status, 304);
+    assert.equal((await revalidatedThumb.arrayBuffer()).byteLength, 0);
   });
 
   await t.test('duplicate publications are serialized and an error rolls back place and draft writes', async () => {

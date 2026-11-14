@@ -100,6 +100,7 @@ function registerRailwayMedia(app, {
 }) {
   const queue = createReadQueue(maxActive, maxQueued);
   const sendImage = publishedOnly => async (req, res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
     const filename = req.params.filename;
     const match = filenamePattern.exec(filename);
     if (!match) return res.status(404).end();
@@ -143,21 +144,38 @@ function registerRailwayMedia(app, {
       }
 
       const ObjectCommand = req.method === 'HEAD' ? HeadObjectCommand : GetObjectCommand;
-      const get = key => storage.client.send(
-        new ObjectCommand({ Bucket: storage.bucket, Key: key }), { abortSignal: signal }
-      );
+      const cacheControl = 'private, max-age=3600, must-revalidate';
+      // Forward the single strong validator emitted by S3. A conditional GET
+      // saves both the browser transfer and the Storage object body transfer.
+      const tag = req.get('If-None-Match');
+      const ifNoneMatch = publishedOnly && /^"[^"\s,]+"$/.test(tag ?? '') ? tag : undefined;
+      const get = (key, validator) => storage.client.send(
+        new ObjectCommand({ Bucket: storage.bucket, Key: key, IfNoneMatch: validator }), { abortSignal: signal }
+      ).catch(error => {
+        if (!validator || error?.$metadata?.httpStatusCode !== 304) throw error;
+        return { notModified: true, ETag: validator };
+      });
       let object;
       let optimized = false;
       if (width) {
         try {
-          object = await get(variantKey(filename, width));
+          object = await get(variantKey(filename, width), ifNoneMatch);
           optimized = true;
         } catch (error) {
           if (!isMissingObject(error)) throw error;
           signal.throwIfAborted();
         }
       }
-      object ??= await get(`cms/${filename}`);
+      // A missing variant may temporarily deliver the original. Its response
+      // must never validate or be cached as the requested WebP representation.
+      object ??= await get(`cms/${filename}`, width ? undefined : ifNoneMatch);
+      if (object.notModified) {
+        signal.throwIfAborted();
+        outcome = 'not_modified';
+        res.setHeader('Cache-Control', cacheControl);
+        res.setHeader('ETag', object.ETag);
+        return res.status(304).end();
+      }
       if (req.method !== 'HEAD') {
         if (!object.Body) throw new Error('Missing S3 response body');
         body = object.Body instanceof Readable ? object.Body : Readable.from(object.Body);
@@ -166,9 +184,14 @@ function registerRailwayMedia(app, {
       bytes = object.ContentLength;
       res.setHeader('Content-Type', optimized ? IMAGE_TYPES.webp : IMAGE_TYPES[match[1]]);
       res.setHeader('X-Content-Type-Options', 'nosniff');
-      // Publication can be removed. Keep the existing one-hour public cache window.
-      res.setHeader('Cache-Control', !publishedOnly ? 'private, no-store' :
-        optimized ? 'public, max-age=3600, immutable' : 'public, max-age=3600');
+      // Retain the existing one-hour browser freshness window and keep
+      // revalidation at the origin so withdrawal can be enforced by PostgreSQL.
+      if (publishedOnly && (!width || optimized)) {
+        res.setHeader('Cache-Control', cacheControl);
+        if (typeof object.ETag === 'string' && /^"[^"\s,]+"$/.test(object.ETag)) {
+          res.setHeader('ETag', object.ETag);
+        }
+      }
       if (Number.isSafeInteger(bytes) && bytes >= 0) res.setHeader('Content-Length', bytes);
       if (req.method === 'HEAD') return res.end();
       await pipeline(body, res, { signal });
@@ -186,7 +209,7 @@ function registerRailwayMedia(app, {
       res.off('close', onClose);
       release?.();
       const durationMs = Math.round(performance.now() - started);
-      if (outcome !== 'ok' || durationMs >= 1_000) {
+      if ((outcome !== 'ok' && outcome !== 'not_modified') || durationMs >= 1_000) {
         log({ event: 'cms_media_read', outcome, scope: publishedOnly ? 'public' : 'admin',
           width, durationMs, waitMs, bytes, ...queue.stats });
       }
