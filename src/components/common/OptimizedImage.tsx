@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ImageOff } from "lucide-react";
+import { cmsImageSrcSet } from "@/shared/utils/cmsImageDelivery";
 
 interface OptimizedImageProps {
   src: string;
@@ -12,6 +13,7 @@ interface OptimizedImageProps {
   decoding?: "async" | "auto" | "sync";
   fetchPriority?: "high" | "low" | "auto";
   sizes?: string;
+  cmsMaxWidth?: 256 | 640 | 1200;
   unavailableLabel?: string;
   onLoad?: () => void;
   onError?: () => void;
@@ -50,6 +52,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   decoding = "async",
   fetchPriority,
   sizes,
+  cmsMaxWidth,
   unavailableLabel = "รูปภาพไม่พร้อมใช้งาน · รอ Admin ตรวจสอบ",
   onLoad,
   onError,
@@ -80,6 +83,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     );
     setFailed(false);
   }, [src, fallbackSrc]);
+
+  const displayWidth = Number(width);
+  const maximum = cmsMaxWidth ?? (displayWidth >= 900 ? 1200 : displayWidth > 0 && displayWidth <= 256 ? 256 : 640);
+  const srcSet = cmsImageSrcSet(currentSrc, maximum);
 
   const handleImageLoad = () => {
     setImageState("loaded");
@@ -134,12 +141,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         // The img must not be display:none: browsers will defer a hidden lazy image indefinitely.
         <img
           ref={imageRef}
-          src={currentSrc}
           alt={alt}
           loading={loading}
           decoding={decoding}
           fetchPriority={fetchPriority}
-          sizes={sizes}
+          sizes={sizes ?? (srcSet ? (displayWidth ? `${displayWidth}px` : "(max-width: 639px) 100vw, 33vw") : undefined)}
+          srcSet={srcSet}
+          src={currentSrc}
           className={`${className} ${imageState === "loaded" ? "opacity-100" : "opacity-0"}`}
           onLoad={handleImageLoad}
           onError={handleImageError}

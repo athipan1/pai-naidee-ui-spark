@@ -52,7 +52,7 @@ registerAdminCms(app, {
   listPlaces,
   requireAdmin,
   storage: createImageUpload(),
-  uploadImage: (file) => uploadImage(storage, file),
+  uploadImage: (file, signal) => uploadImage(storage, file, signal),
   invalidateSearchIndex,
 });
 registerRailwayMedia(app, { getSql, storage, requireAdmin });

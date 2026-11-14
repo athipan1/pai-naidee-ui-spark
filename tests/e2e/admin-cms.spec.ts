@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 const baseURL = 'http://127.0.0.1:4174';
 const imageBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jD1cAAAAASUVORK5CYII=', 'base64');
-const filename = '1a111111-1111-4111-8111-111111111111.png';
+const filename = '1a111111-1111-8111-8111-111111111111.png';
 const publicImagePath = `/api/media/cms/${filename}`;
 const imageUrl = baseURL + publicImagePath;
 const models = [{ id: 'test/first:free', label: 'First test model' }, { id: 'test/second:free', label: 'Second test model' }];
@@ -294,7 +294,13 @@ test('image preview and failure, create and publish, AI settings, and responsive
 
   await navigate(page, 'เพิ่ม / แก้ไข');
   const image = { name: 'fixture.png', mimeType: 'image/png', buffer: imageBytes };
+  const privatePreviewRequest = page.waitForRequest(request => {
+    const url = new URL(request.url());
+    return url.pathname === `/api/admin/media/${filename}` && url.search === '?w=640';
+  });
   await page.locator('input[type=file]').setInputFiles(image);
+  await page.getByRole('group', { name: 'ตัวอย่างภาพหลัก' }).scrollIntoViewIfNeeded();
+  expect((await privatePreviewRequest).headers().authorization).toMatch(/^Bearer /);
   const preview = page.getByRole('img', { name: 'ตัวอย่างภาพสถานที่' });
   await expect(preview).toHaveJSProperty('naturalWidth', 1);
   fixture.failNextUpload();
@@ -446,7 +452,7 @@ test('unsaved form survives reload without creating or saving a production draft
   await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('แบบฟอร์มกู้คืน');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
-  expect(await page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();
 });
 
 
