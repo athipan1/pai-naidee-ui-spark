@@ -18,10 +18,11 @@ const tag = (name: string) => `"${name}"`;
 test('browser reuses fresh bytes, revalidates reloads, and only downloads a replacement when the primary changes', async ({ page, request }, testInfo) => {
   const app = express();
   let published = first;
-  const responses: Array<{ status: number; length: number }> = [];
-  app.use(mediaPath, (_req: unknown, res: import('node:http').ServerResponse, next: () => void) => {
+  const responses: Array<{ status: number; length: number; validator?: string }> = [];
+  app.use(mediaPath, (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse, next: () => void) => {
     res.once('finish', () => responses.push({
       status: res.statusCode, length: res.statusCode === 200 ? Number(res.getHeader('Content-Length')) : 0,
+      ...(req.headers['if-none-match'] && { validator: req.headers['if-none-match'] }),
     }));
     next();
   });
@@ -80,8 +81,12 @@ test('browser reuses fresh bytes, revalidates reloads, and only downloads a repl
     });
     expect(forced).toEqual({ status: 200, decodedBytes: original.length });
     metrics.forced = responses.slice(start);
-    expect(metrics.forced).toEqual([baseline ?
-      { status: 200, length: original.length } : { status: 304, length: 0 }]);
+    const [forcedResponse] = responses.slice(start);
+    expect(responses.length - start).toBe(1);
+    // WebKit can use a different cached entry for fetch than for <img>.
+    // Validate the response against the actual validator sent by the browser.
+    expect(forcedResponse).toMatchObject(!baseline && forcedResponse.validator === tag(first) ?
+      { status: 304, length: 0 } : { status: 200, length: original.length });
     if (baseline) {
       await testInfo.attach('cache-metrics', { body: JSON.stringify(metrics, null, 2), contentType: 'application/json' });
       console.log(testInfo.project.name, JSON.stringify(metrics));
@@ -89,6 +94,8 @@ test('browser reuses fresh bytes, revalidates reloads, and only downloads a repl
     }
     // Engines may reuse a fresh subresource on reload or revalidate with the origin.
     expect(reloadResponses.every(response => response.status === 304 && response.length === 0)).toBe(true);
+    // Explicit conditional GET verifies the origin contract in every browser
+    // project, even if the engine chose an unconditional network request.
     const revalidated = await request.get(root + mediaPath + first, { headers: { 'If-None-Match': tag(first) } });
     expect(revalidated.status()).toBe(304);
     expect((await revalidated.body()).byteLength).toBe(0);
