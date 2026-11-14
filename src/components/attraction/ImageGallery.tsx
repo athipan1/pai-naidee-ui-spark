@@ -164,6 +164,7 @@ export default function ImageGallery({
                   className="absolute inset-0 h-full w-full object-cover"
                   width="600"
                   height="375"
+                  cmsMaxWidth={1200}
                   sizes="400px"
                 />
               </button>

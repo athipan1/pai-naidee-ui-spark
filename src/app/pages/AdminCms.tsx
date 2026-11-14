@@ -6,6 +6,7 @@ import { CloudUpload, ImagePlus, MapPin, Plus, Search, ShieldCheck, X } from 'lu
 import { getApiBaseUrl } from '@/services/railway-api.service';
 import { ADMIN_PLACE_CATEGORIES, hasThaiCategoryLabel, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
 import AdminMediaPreview from '@/components/admin/AdminMediaPreview';
+import OptimizedImage from '@/components/common/OptimizedImage';
 import AdminWorkspace, { type AdminView } from '@/components/admin/AdminWorkspace';
 import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboard';
 
@@ -79,16 +80,6 @@ function toPlaceForm(payload: DraftPayload): PlaceForm {
   };
 }
 
-function cmsImageFilename(url: string, base: string) {
-  try {
-    const image = new URL(url);
-    if (image.origin !== new URL(base, window.location.origin).origin) return null;
-    return /^\/api\/media\/cms\/([a-f0-9-]{36}\.(?:jpg|png|webp))$/.exec(image.pathname)?.[1] ?? null;
-  } catch {
-    return null;
-  }
-}
-
 const AdminCoordinatePicker = lazy(() => import('./AdminCoordinatePicker'));
 type GeocodeCandidate = { lat: number; lng: number; label: string; source: string };
 const validCoordinate = (lat: number, lng: number) => Number.isFinite(lat) && Number.isFinite(lng) && lat >= 5 && lat <= 21 && lng >= 97 && lng <= 106;
@@ -118,8 +109,6 @@ export default function AdminCms() {
   const [message, setMessage] = useState('');
   const [tab, setTab] = useState<AdminView>('overview');
   const [searched, setSearched] = useState(false);
-  const [privatePreview, setPrivatePreview] = useState<{ url: string; src: string } | null>(null);
-  const [brokenImage, setBrokenImage] = useState(false);
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
   const [reconcile, setReconcile] = useState<{ draftId: string; data: ReconcileData; selected: string[]; retainGallery: boolean } | null>(null);
   const [aliasPlace, setAliasPlace] = useState<CatalogPlace | null>(null);
@@ -307,33 +296,6 @@ export default function AdminCms() {
       .catch(error => { if (!controller.signal.aborted) setMessage(error.message); });
     return () => controller.abort();
   }, [tab, isAdmin, searched, api]);
-
-  const mediaFilename = cmsImageFilename(form.imageUrl, base);
-  const previewSrc = mediaFilename
-    ? (privatePreview?.url === form.imageUrl ? privatePreview.src : null)
-    : (/^https:\/\//i.test(form.imageUrl) ? form.imageUrl : null);
-
-  useEffect(() => {
-    if (!isAdmin || !mediaFilename) return;
-    const controller = new AbortController();
-    let objectUrl: string | undefined;
-    void requestAdmin(`/media/${mediaFilename}`, { signal: controller.signal })
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.blob();
-      })
-      .then(blob => {
-        if (controller.signal.aborted) return;
-        objectUrl = URL.createObjectURL(blob);
-        setPrivatePreview({ url: form.imageUrl, src: objectUrl });
-      })
-      .catch(() => { if (!controller.signal.aborted) setBrokenImage(true); });
-    return () => {
-      controller.abort();
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      setPrivatePreview(null);
-    };
-  }, [isAdmin, mediaFilename, form.imageUrl, requestAdmin]);
 
   useEffect(() => {
     if(!isAdmin || !token) return;
@@ -570,7 +532,7 @@ export default function AdminCms() {
     setForm(toPlaceForm(payload)); setSavedForm(JSON.stringify(toPlaceForm(payload)));
     setTab('new');
     if (needsReview) setMessage('ฉบับร่างนี้มีข้อมูลบางช่องผิดรูปแบบ กรุณาตรวจสอบหัวข้อ หมวดหมู่ และข้อมูลอื่นก่อนบันทึกใหม่');
-    setBrokenImage(false);
+
     setProposedCoordinate(null);
     setGeoCandidates([]);
     setGeocodeNote('');
@@ -616,7 +578,7 @@ export default function AdminCms() {
         setForm(current => ({...current, imageUrl: current.imageUrl || result.imageUrl, imageUrls: [...new Set([...current.imageUrls, result.imageUrl])]}));
         setUploadProgress(current => current && ({...current, done: current.done + 1}));
       }
-      setBrokenImage(false);
+
       setMessage(`อัปโหลดสำเร็จ ${files.length} รูป เลือกรูปหลักแล้วบันทึกฉบับร่าง`);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'อัปโหลดไม่สำเร็จ'); }
     finally { setBusy(false); setUploadProgress(null); }
@@ -765,7 +727,7 @@ export default function AdminCms() {
         <div role="table" aria-label="สถานที่ที่เผยแพร่แล้ว" className="overflow-hidden rounded-xl border">
           <div role="row" className="hidden grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] items-center gap-3 border-b bg-slate-50 p-4 text-xs font-semibold text-slate-600 xl:grid"><span role="columnheader">สถานที่</span><span role="columnheader">จังหวัด</span><span role="columnheader">สถานะ</span><span role="columnheader">การจัดการ</span></div>
           {catalog.map(place => <div role="row" key={place.id} className="grid min-w-0 gap-3 border-b p-4 last:border-0 xl:grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] xl:items-center">
-            <div role="cell" className="flex min-w-0 items-center gap-3">{place.imageUrl ? <img src={place.imageUrl} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-xl object-cover" /> : <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-100"><MapPin className="text-slate-400" /></span>}<div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p>{place.name_local && <p className="break-words text-xs text-slate-500">{place.name}</p>}</div></div>
+            <div role="cell" className="flex min-w-0 items-center gap-3">{place.imageUrl ? <OptimizedImage src={place.imageUrl} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 shrink-0 rounded-xl object-cover" /> : <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-100"><MapPin className="text-slate-400" /></span>}<div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p>{place.name_local && <p className="break-words text-xs text-slate-500">{place.name}</p>}</div></div>
             <p role="cell" className="text-sm text-slate-600">{place.province}</p><span role="cell" className="w-fit rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">เผยแพร่แล้ว</span>
             <div role="cell" className="flex flex-wrap gap-2"><Link className="rounded-lg border px-3 py-2 text-xs" to={`/attraction/${encodeURIComponent(place.id)}`}>ดูสถานที่</Link><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-lg border px-3 py-2 text-xs text-teal-800">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800">แก้ไขสถานที่ที่เผยแพร่แล้ว</button></div>
           </div>)}
@@ -780,7 +742,7 @@ export default function AdminCms() {
         {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery, catalogProvince)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery, catalogProvince)}>ถัดไป</button></div>}
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setBrokenImage(false); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
@@ -835,7 +797,7 @@ export default function AdminCms() {
           {existingImages.filter(image => !form.removedImageUrls.includes(image.url)).length > 0 && <div className="space-y-3 rounded-xl bg-white p-3">
             <div><h4 className="font-semibold">รูปภาพที่ใช้อยู่บนเว็บไซต์ ({existingImages.filter(image => !form.removedImageUrls.includes(image.url)).length})</h4><p className="text-xs text-slate-500">เลือกรูปหลักหรือทำเครื่องหมายลบรูปเดิม การเปลี่ยนแปลงจะมีผลเมื่อบันทึกฉบับร่างและเผยแพร่</p></div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{existingImages.filter(image => !form.removedImageUrls.includes(image.url)).map(image => <div key={image.id} className={`min-w-0 overflow-hidden rounded-xl border-2 ${form.imageUrl === image.url ? 'border-teal-600' : 'border-slate-200'}`}>
-              <button type="button" className="w-full text-left" onClick={() => { setForm(current => ({ ...current, imageUrl: image.url, imageUrls: [...new Set([...current.imageUrls, image.url])] })); setBrokenImage(false); }}>
+              <button type="button" className="w-full text-left" onClick={() => { setForm(current => ({ ...current, imageUrl: image.url, imageUrls: [...new Set([...current.imageUrls, image.url])] })); }}>
                 <AdminMediaPreview url={image.url} base={base} request={requestAdmin} alt={image.title || 'รูปสถานที่เดิม'} className="aspect-[4/3] w-full bg-slate-100 object-cover" />
                 <span className="block truncate p-2 text-xs">{form.imageUrl === image.url ? '✓ รูปภาพหลัก' : 'เลือกเป็นรูปหลัก'}</span>
               </button>
@@ -852,7 +814,7 @@ export default function AdminCms() {
             <p className="text-xs text-slate-500">แตะรูปเพื่อเลือกเป็นภาพหลัก หรือเอาออกจากชุดรูปใหม่</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {form.imageUrls.map(url => <div key={url} className={`overflow-hidden rounded-xl border-2 ${form.imageUrl === url ? 'border-teal-600' : 'border-slate-200'}`}>
-                <button type="button" className="w-full" onClick={() => { setForm(current => ({ ...current, imageUrl: url })); setBrokenImage(false); }}>
+                <button type="button" className="w-full" onClick={() => { setForm(current => ({ ...current, imageUrl: url })); }}>
                   <AdminMediaPreview url={url} base={base} request={requestAdmin} alt="รูปในแกลเลอรี" className="aspect-[4/3] w-full object-cover" />
                   <span className="block p-2 text-xs">{form.imageUrl === url ? '✓ รูปภาพหลัก' : 'เลือกเป็นรูปหลัก'}</span>
                 </button>
@@ -863,10 +825,9 @@ export default function AdminCms() {
               </div>)}
             </div>
           </div>}
-          {previewSrc && !brokenImage && <img src={previewSrc} alt="ตัวอย่างภาพสถานที่" className="h-48 w-full rounded-xl bg-slate-100 object-cover sm:h-64" onError={() => setBrokenImage(true)} />}
-          {form.imageUrl && brokenImage && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">ไม่สามารถแสดงตัวอย่างภาพได้ กรุณาตรวจสอบ URL</p>}
+          {form.imageUrl && <AdminMediaPreview key={form.imageUrl} url={form.imageUrl} base={base} request={requestAdmin} alt="ตัวอย่างภาพสถานที่" size={640} className="h-48 w-full rounded-xl bg-slate-100 object-cover sm:h-64" />}
           <label className="block cursor-pointer rounded-xl border border-teal-200 bg-white px-4 py-5 text-center text-sm text-teal-800"><CloudUpload className="mx-auto mb-2" /><span className="font-semibold">เลือกภาพจากอุปกรณ์</span><span className="mt-1 block text-xs text-slate-500">เลือกหลายรูปพร้อมกันได้ สูงสุด 20 รูป · JPG, PNG, WebP ไม่เกิน 5 MB ต่อรูป</span><input className="mt-3 block w-full min-w-0 text-xs" type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e => { const files = Array.from(e.target.files || []); if (files.length) void upload(files); e.target.value = ''; }} /></label>
-          <label className="block text-sm font-medium">หรือใส่ URL รูปภาพ HTTPS<input className={inputStyle} type="url" value={form.imageUrl} onChange={e => { setBrokenImage(false); setForm(current => ({ ...current, imageUrl: e.target.value })); }} placeholder="https://..." /></label>
+          <label className="block text-sm font-medium">หรือใส่ URL รูปภาพ HTTPS<input className={inputStyle} type="url" value={form.imageUrl} onChange={e => { setForm(current => ({ ...current, imageUrl: e.target.value })); }} placeholder="https://..." /></label>
         </section>
         <div className="admin-save sticky bottom-2 z-10 rounded-xl border bg-white/95 p-2 shadow-lg backdrop-blur"><button className="w-full rounded-xl bg-teal-600 px-4 py-3.5 font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-50" disabled={busy} type="submit">{busy ? 'กำลังดำเนินการ...' : editing ? 'บันทึกการแก้ไขเป็นฉบับร่าง' : 'บันทึกสถานที่เป็นฉบับร่าง'}</button><p className="mt-2 text-center text-xs text-slate-500">ยังไม่เผยแพร่จนกว่าจะยืนยันในแท็บฉบับร่าง</p></div>
       </fieldset></form>}

@@ -19,7 +19,8 @@
     "dotenv": "^17.2.3",
     "express": "^4.22.3",
     "multer": "^2.5.0",
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.7",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

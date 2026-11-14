@@ -481,10 +481,18 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     });
   }, wrap(async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'Image file required (JPEG, PNG or WebP; max 5 MB).' });
-    try { res.status(201).json({ imageUrl: await uploadImage(req.file) }); }
-    catch (error) {
+    const controller = new AbortController();
+    const onClose = () => { if (!res.writableFinished) controller.abort(); };
+    res.once('close', onClose);
+    try {
+      const imageUrl = await uploadImage(req.file, controller.signal);
+      if (!res.destroyed) res.status(201).json({ imageUrl });
+    } catch (error) {
+      if (res.destroyed) return;
       if (error instanceof InvalidImageError) return res.status(error.status).json({ error: error.message });
       throw error;
+    } finally {
+      res.off('close', onClose);
     }
   }));
 }

@@ -2,12 +2,24 @@ import {test,expect} from '@playwright/test';
 const primary='https://images.example.test/primary.jpg',old='https://images.example.test/old.jpg';
 for (const source of ['Admin CMS','TAT','Wikidata','OSM','legacy']) {
  test(`${source}: primary remains selected on home, discover, explore, search and detail`,async({page})=>{
+  const cms = source === 'Admin CMS';
+  const primary = cms ? 'https://painaidee-api-production.up.railway.app/api/media/cms/1a111111-1111-8111-8111-111111111111.png' : 'https://images.example.test/primary.jpg';
+  if (cms) await page.route(primary + '?*', r => r.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="teal"/></svg>',
+  }));
   const p={id:'image-contract-fixture',name:'Image Contract Fixture',nameLocal:'ภาพทดสอบ',province:'เชียงใหม่',category:'Nature',rating:0,reviewCount:0,description:'Published fixture',tags:[],image:primary,images:[primary,old],mediaCredits:[primary,old].map(url=>({url,photographer:'Owner',licenseName:'CC BY 4.0',licenseUrl:'https://creativecommons.org/licenses/by/4.0/',sourcePage:'https://example.test/photo'})),coordinates:{lat:18.5,lng:98.5},source:{name:source,url:'https://example.test/source'}};
   await page.route('https://images.example.test/**',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="teal"/></svg>'}));
   await page.route('**/api/places**',r=>r.fulfill({json:new URL(r.request().url()).pathname.endsWith('/'+p.id)?p:{attractions:[p],total:1,page:1,limit:50}}));
   for(const path of ['/','/discover?mode=feed','/explore','/search?search=fixture','/attraction/'+p.id]){
    await page.goto(path);
-   await expect(page.locator(`img[src="${primary}"]`).first()).toBeVisible();
+   const image = page.locator(`img[src="${primary}"]`).first();
+   await expect(image).toBeVisible();
+   if (cms) {
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((el: HTMLImageElement) => el.currentSrc)).toMatch(/\?w=(256|640|1200)$/);
+    await expect.poll(() => image.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+   }
   }
  });
 }

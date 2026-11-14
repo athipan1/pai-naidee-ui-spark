@@ -172,8 +172,8 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   let placeId, imagePath;
   await t.test('draft stays private, upload validates types and size, and publication exposes the image and place', async () => {
     const png = fixturePng();
-    await upload('image/jpeg', Buffer.from([255, 216, 255]));
-    await upload('image/webp', Buffer.from('RIFF0000WEBP'));
+    await upload('image/jpeg', Buffer.from([255, 216, 255]), 400);
+    await upload('image/webp', Buffer.from('RIFF0000WEBP'), 400);
     await upload('image/png', Buffer.concat([png, Buffer.alloc(MAX_IMAGE_BYTES - png.length)]));
     await upload('image/svg+xml', Buffer.from('<svg/>'), 400);
     await upload('image/png', Buffer.from('invalid'), 400);
@@ -188,6 +188,11 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(privateImage.headers.get('content-type'), 'image/png');
     assert.match(privateImage.headers.get('cache-control'), /no-store/);
     assert.deepEqual(Buffer.from(await privateImage.arrayBuffer()), png);
+    const privateThumb = await admin(`/media/${imagePath.split('/').at(-1)}?w=256`);
+    assert.equal(privateThumb.headers.get('content-type'), 'image/webp');
+    assert.equal(privateThumb.headers.get('cache-control'), 'private, no-store');
+    await privateThumb.arrayBuffer();
+    await request(`${imagePath}?w=256`, { auth: false, status: 404 });
     await request(imagePath, { status: 404, auth: false });
 
     await write('/places', { ...fixture, imageUrl: 'https://lh3.googleusercontent.com/places/example' }, 400);
@@ -207,6 +212,10 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(detail.description, 'Edited fixture');
     assert.equal(detail.images[0], imageUrl);
     assert.deepEqual(Buffer.from(await (await request(imagePath, { auth: false })).arrayBuffer()), png);
+    const publishedThumb = await request(`${imagePath}?w=256`, { auth: false });
+    assert.equal(publishedThumb.headers.get('content-type'), 'image/webp');
+    assert.match(publishedThumb.headers.get('cache-control'), /immutable/);
+    await publishedThumb.arrayBuffer();
   });
 
   await t.test('duplicate publications are serialized and an error rolls back place and draft writes', async () => {
