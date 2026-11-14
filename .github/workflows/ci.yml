@@ -155,8 +155,8 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          git show "$BASE_SHA:api/railway-media.cjs" > api/.media-cache-baseline.cjs
+          git -c safe.directory="$PWD" fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git -c safe.directory="$PWD" show "$BASE_SHA:api/railway-media.cjs" > api/.media-cache-baseline.cjs
           MEDIA_CACHE_BASELINE_MODULE="$PWD/api/.media-cache-baseline.cjs" npx playwright test --config=playwright.media-cache.config.ts
 
       - name: Test browser HTTP image cache and withdrawal
