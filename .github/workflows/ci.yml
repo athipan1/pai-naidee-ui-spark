@@ -147,6 +147,21 @@ jobs:
       - name: Test Android Chrome and iPhone Safari trip planning
         run: npm run test:e2e:trip-planner
 
+      - name: Install API dependencies for browser cache fixture
+        run: npm ci --prefix api
+
+      - name: Compare browser HTTP image cache with the PR base
+        if: github.head_ref == 'fix/smart-image-cache'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git -c safe.directory="$PWD" fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git -c safe.directory="$PWD" show "$BASE_SHA:api/railway-media.cjs" > api/.media-cache-baseline.cjs
+          MEDIA_CACHE_BASELINE_MODULE="$PWD/api/.media-cache-baseline.cjs" npx playwright test --config=playwright.media-cache.config.ts
+
+      - name: Test browser HTTP image cache and withdrawal
+        run: npx playwright test --config=playwright.media-cache.config.ts
+
       - name: Test Admin CMS in Chrome and iPhone Safari with mocked APIs
         run: npx playwright test --config=playwright.admin-cms.config.ts
 
