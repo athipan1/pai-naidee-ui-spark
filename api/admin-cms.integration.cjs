@@ -328,6 +328,21 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(updated.category, 'Nature');
     assert.equal(updated.images[0], extra);
     assert.ok(updated.images.includes(main));
+    const previous = await request(imagePath, { auth: false });
+    const previousTag = previous.headers.get('etag');
+    assert.ok(previousTag);
+    await previous.arrayBuffer();
+    const removal = await write(`/catalog/${placeId}/edit`, {}, 201);
+    const removalDraft = await write(`/places/${removal.id}`, {
+      ...removal.payload, version: removal.version, removedImageUrls: [new URL(imagePath, 'https://cms-api.example.test').href],
+    }, 200, 'PUT');
+    await publish(removalDraft);
+    const withdrawn = await fetch(base + imagePath, { headers: { 'If-None-Match': previousTag } });
+    assert.equal(withdrawn.status, 404);
+    const privateOriginal = await admin(`/media/${imagePath.split('/').at(-1)}`);
+    assert.equal(privateOriginal.status, 200);
+    await privateOriginal.arrayBuffer();
+
   });
 
   await t.test('tag suggestions, publishing, clearing and legacy draft preservation use the same place', async () => {

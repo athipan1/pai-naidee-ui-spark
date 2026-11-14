@@ -70,13 +70,25 @@ test('browser reuses fresh bytes, revalidates reloads, and only downloads a repl
     start = responses.length;
     await page.reload();
     await sample('reload', start);
+    const reloadResponses = responses.slice(start);
+    start = responses.length;
+    // Force the browser to revalidate the cached representation even on
+    // engines that reuse fresh subresources on a normal document reload.
+    const forced = await hero.evaluate(async (image: HTMLImageElement) => {
+      const response = await fetch(image.src, { cache: 'no-cache' });
+      return { status: response.status, decodedBytes: (await response.arrayBuffer()).byteLength };
+    });
+    expect(forced).toEqual({ status: 200, decodedBytes: original.length });
+    metrics.forced = responses.slice(start);
+    expect(metrics.forced).toEqual([baseline ?
+      { status: 200, length: original.length } : { status: 304, length: 0 }]);
     if (baseline) {
       await testInfo.attach('cache-metrics', { body: JSON.stringify(metrics, null, 2), contentType: 'application/json' });
       console.log(testInfo.project.name, JSON.stringify(metrics));
       return;
     }
     // Engines may reuse a fresh subresource on reload or revalidate with the origin.
-    expect(responses.slice(start).every(response => response.status === 304 && response.length === 0)).toBe(true);
+    expect(reloadResponses.every(response => response.status === 304 && response.length === 0)).toBe(true);
     const revalidated = await request.get(root + mediaPath + first, { headers: { 'If-None-Match': tag(first) } });
     expect(revalidated.status()).toBe(304);
     expect((await revalidated.body()).byteLength).toBe(0);
