@@ -825,7 +825,7 @@ export default function AdminCms() {
               </div>)}
             </div>
           </div>}
-          {form.imageUrl && <AdminMediaPreview key={form.imageUrl} url={form.imageUrl} base={base} request={requestAdmin} alt="ตัวอย่างภาพสถานที่" size={640} className="h-48 w-full rounded-xl bg-slate-100 object-cover sm:h-64" />}
+          {form.imageUrl && <div role="group" aria-label="ตัวอย่างภาพหลัก"><AdminMediaPreview key={form.imageUrl} url={form.imageUrl} base={base} request={requestAdmin} alt="ตัวอย่างภาพสถานที่" size={640} className="h-48 w-full rounded-xl bg-slate-100 object-cover sm:h-64" /></div>}
           <label className="block cursor-pointer rounded-xl border border-teal-200 bg-white px-4 py-5 text-center text-sm text-teal-800"><CloudUpload className="mx-auto mb-2" /><span className="font-semibold">เลือกภาพจากอุปกรณ์</span><span className="mt-1 block text-xs text-slate-500">เลือกหลายรูปพร้อมกันได้ สูงสุด 20 รูป · JPG, PNG, WebP ไม่เกิน 5 MB ต่อรูป</span><input className="mt-3 block w-full min-w-0 text-xs" type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e => { const files = Array.from(e.target.files || []); if (files.length) void upload(files); e.target.value = ''; }} /></label>
           <label className="block text-sm font-medium">หรือใส่ URL รูปภาพ HTTPS<input className={inputStyle} type="url" value={form.imageUrl} onChange={e => { setForm(current => ({ ...current, imageUrl: e.target.value })); }} placeholder="https://..." /></label>
         </section>

@@ -299,7 +299,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
     return url.pathname === `/api/admin/media/${filename}` && url.search === '?w=640';
   });
   await page.locator('input[type=file]').setInputFiles(image);
-  await page.locator('input[type=file]').scrollIntoViewIfNeeded();
+  await page.getByRole('group', { name: 'ตัวอย่างภาพหลัก' }).scrollIntoViewIfNeeded();
   expect((await privatePreviewRequest).headers().authorization).toMatch(/^Bearer /);
   const preview = page.getByRole('img', { name: 'ตัวอย่างภาพสถานที่' });
   await expect(preview).toHaveJSProperty('naturalWidth', 1);
