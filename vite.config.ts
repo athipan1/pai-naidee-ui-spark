@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => {
               options: { cacheName: 'page-navigation-v3', expiration: { maxEntries: 20, maxAgeSeconds: 86400 } }
             },
             {
-              urlPattern: /^https:\/\/api\./i,
+              urlPattern: ({ url, request }) => request.destination !== 'image' && /^https:\/\/api\./i.test(url.href),
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'api-cache',
@@ -65,7 +65,11 @@ export default defineConfig(({ mode }) => {
               }
             },
             {
-              urlPattern: /\.(png|jpg|jpeg|svg|gif)$/i,
+              // Only local static images use CacheStorage. Remote place media
+              // follows the publisher's HTTP freshness and withdrawal policy.
+              urlPattern: ({ url, sameOrigin, request }) =>
+                sameOrigin && request.destination === 'image' &&
+                /\.(png|jpg|jpeg|webp|svg|gif)$/i.test(url.pathname),
               handler: 'CacheFirst',
               options: {
                 cacheName: 'images-cache',

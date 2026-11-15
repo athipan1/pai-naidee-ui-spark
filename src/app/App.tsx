@@ -11,6 +11,7 @@ import DevTools from "@/components/dev/DevTools";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
+import { listenForPlacePublications } from "@/shared/utils/placePublication";
 import { getInitialLanguage } from "@/shared/i18n/initialLanguage";
 
 // Lazy load new consolidated routes
@@ -70,6 +71,7 @@ const queryClient = new QueryClient({
 });
 
 const AppContent = () => {
+  useEffect(() => listenForPlacePublications(queryClient), []);
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">(() => {
     try {
       return getInitialLanguage(window.localStorage);

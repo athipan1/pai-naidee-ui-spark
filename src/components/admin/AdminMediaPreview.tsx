@@ -43,13 +43,14 @@ function acquirePreview(request: RequestAdmin, path: string): Preview {
   };
 }
 
-export default function AdminMediaPreview({ url, base, request, alt, className, size = 256 }: {
+export default function AdminMediaPreview({ url, base, request, alt, className, size = 256, eager = false }: {
   url: string;
   base: string;
   request: RequestAdmin;
   alt: string;
   className: string;
   size?: 256 | 640;
+  eager?: boolean;
 }) {
   const placeholder = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
@@ -58,7 +59,7 @@ export default function AdminMediaPreview({ url, base, request, alt, className, 
   const filename = cmsImageFilename(url, base);
 
   useEffect(() => {
-    if (!filename || visible || !placeholder.current) return;
+    if (!filename || eager || visible || !placeholder.current) return;
     if (typeof IntersectionObserver === 'undefined') {
       setVisible(true);
       return;
@@ -68,10 +69,10 @@ export default function AdminMediaPreview({ url, base, request, alt, className, 
     }, { rootMargin: '200px' });
     observer.observe(placeholder.current);
     return () => observer.disconnect();
-  }, [filename, visible]);
+  }, [filename, visible, eager]);
 
   useEffect(() => {
-    if (!filename || !visible) return;
+    if (!filename || (!eager && !visible)) return;
     let mounted = true;
     const width = hasCmsImageVariants(filename) ? `?w=${size}` : '';
     const image = acquirePreview(request, `/media/${filename}${width}`);
@@ -82,7 +83,7 @@ export default function AdminMediaPreview({ url, base, request, alt, className, 
       mounted = false;
       image.release();
     };
-  }, [filename, url, request, size, visible]);
+  }, [filename, url, request, size, visible, eager]);
 
   const src = filename ? (preview?.url === url ? preview.src : null) : /^https:\/\//i.test(url) ? url : null;
   if (failed === url) return <span role="img" aria-label={`${alt}: โหลดภาพไม่สำเร็จ`} className={`${className} flex items-center justify-center bg-slate-100 p-3 text-xs text-slate-600`}>โหลดภาพไม่สำเร็จ</span>;
