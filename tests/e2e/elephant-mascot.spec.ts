@@ -56,6 +56,12 @@ test("the shared assistant can be minimized, hidden, restored and localized", as
   const nav = await page.locator("nav").last().boundingBox();
   const toggle = await launcher.boundingBox();
   expect(toggle!.y + toggle!.height).toBeLessThan(nav!.y);
+  if (page.viewportSize()!.width >= 1024) {
+    const planner = await page
+      .getByRole("button", { name: "AI วางแผนเที่ยว", exact: true })
+      .boundingBox();
+    expect(planner!.x + planner!.width).toBeLessThan(toggle!.x);
+  }
   await page.mouse.click(8, 130);
   await expect(panel).toBeHidden();
   await launcher.click();
