@@ -278,7 +278,11 @@ export default function ElephantMascot({
                 {portrait}
               </div>
             )}
-            <div ref={stage} className="absolute inset-0" aria-hidden="true" />
+            <div
+              ref={stage}
+              className="absolute inset-y-0 left-1/2 aspect-square -translate-x-1/2"
+              aria-hidden="true"
+            />
           </div>
           {modelUrl && visual !== "ready" && (
             <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">

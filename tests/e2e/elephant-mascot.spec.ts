@@ -65,8 +65,7 @@ test("the shared assistant can be minimized, hidden, restored and localized", as
   await page.reload();
   await restore.click();
   await expect(launcher).toBeVisible();
-  await page.evaluate(() => localStorage.setItem("painaidee.language", "en"));
-  await page.reload();
+  await page.getByRole("button", { name: "Switch to English" }).click();
   await expect(
     page.getByRole("button", { name: "Elephant travel assistant" })
   ).toBeVisible();
@@ -177,9 +176,9 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await page.goto("/");
   const launcher = page.getByRole("button", { name: title });
   await expect(launcher).toBeVisible();
-  expect(urls.filter((url) => /\.glb$|ElephantRenderer-/.test(url))).toEqual(
-    []
-  );
+  expect(
+    urls.filter((url) => /\.glb$|ElephantRenderer-|\/three-/.test(url))
+  ).toEqual([]);
   const available = await page.evaluate(
     () => !!document.createElement("canvas").getContext("webgl2")
   );

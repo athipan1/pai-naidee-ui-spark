@@ -114,7 +114,7 @@ export async function createElephantRenderer(
   key.position.set(2, 4, 4);
   scene.add(key);
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
   canvas.className = "block h-full w-full";
   host.append(canvas);
   const mixer = new AnimationMixer(asset.scene);
