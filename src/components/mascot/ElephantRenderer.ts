@@ -75,7 +75,8 @@ export async function createElephantRenderer(
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("webgl2", {
     alpha: true,
-    antialias: true,
+    // The small mobile viewport already renders above CSS resolution.
+    antialias: !window.matchMedia("(pointer: coarse)").matches,
     powerPreference: "low-power",
   });
   if (!context) throw new Error("WebGL 2 unavailable");
