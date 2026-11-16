@@ -1,19 +1,28 @@
 export type PlannerStatus = "idle" | "thinking" | "success" | "error";
-export type MascotMotion = "Idle" | "Greeting" | "Thinking" | "Happy" | "Rest";
+export type MascotMotion =
+  | "Idle"
+  | "Greeting"
+  | "Thinking"
+  | "Happy"
+  | "Walking"
+  | "Rest";
 
 export function getMascotMotion({
   reducedMotion,
   resting,
   plannerStatus,
   greeting,
+  walking = false,
 }: {
   reducedMotion: boolean;
   resting: boolean;
   plannerStatus: PlannerStatus;
   greeting: boolean;
+  walking?: boolean;
 }): MascotMotion {
   if (reducedMotion) return "Rest";
   if (plannerStatus === "thinking") return "Thinking";
+  if (walking) return "Walking";
   if (resting) return "Rest";
   if (plannerStatus === "success") return "Happy";
   if (greeting && plannerStatus === "idle") return "Greeting";

@@ -40,6 +40,16 @@ describe("elephant mascot", () => {
     ).toBe("Rest");
   });
 
+  it("lets the user trigger Walking without overriding the Planner or reduced motion", () => {
+    expect(getMascotMotion({ ...idle, walking: true })).toBe("Walking");
+    expect(
+      getMascotMotion({ ...idle, walking: true, plannerStatus: "thinking" })
+    ).toBe("Thinking");
+    expect(
+      getMascotMotion({ ...idle, walking: true, reducedMotion: true })
+    ).toBe("Rest");
+  });
+
   it("persists the hide preference and clears it when restored", () => {
     expect(getMascotHidden()).toBe(false);
     setMascotHidden(true);

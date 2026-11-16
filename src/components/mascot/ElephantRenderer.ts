@@ -1,10 +1,12 @@
 import {
   AnimationMixer,
   Box3,
+  Bone,
   DirectionalLight,
   Group,
   HemisphereLight,
   LoopOnce,
+  LoopRepeat,
   MathUtils,
   Mesh,
   PerspectiveCamera,
@@ -66,7 +68,8 @@ export async function createElephantRenderer(
   host: HTMLDivElement,
   url: string,
   signal: AbortSignal,
-  onContextLost: () => void
+  onContextLost: () => void,
+  onWalkingFinished: () => void
 ) {
   signal.throwIfAborted();
   const canvas = document.createElement("canvas");
@@ -118,20 +121,57 @@ export async function createElephantRenderer(
   canvas.className = "block h-full w-full";
   host.append(canvas);
   const mixer = new AnimationMixer(asset.scene);
+  const bones: Bone[] = [];
   const morphWeights: number[][] = [];
   asset.scene.traverse((object) => {
+    if (object instanceof Bone) bones.push(object);
     if (object instanceof Mesh && object.morphTargetInfluences) {
       morphWeights.push(object.morphTargetInfluences);
     }
   });
-  const neutralPose = morphWeights.map((weights) => [...weights]);
+  const clips = new Map(asset.animations.map((clip) => [clip.name, clip]));
+  const canWalk = bones.length > 0 && clips.has("Walking");
+  canvas.dataset.bones = String(bones.length);
+
+  function capturePose() {
+    return {
+      joints: bones.map((bone) => ({
+        position: bone.position.clone(),
+        rotation: bone.quaternion.clone(),
+        scale: bone.scale.clone(),
+      })),
+      morphs: morphWeights.map((weights) => [...weights]),
+    };
+  }
+
+  function copyPose(pose: ReturnType<typeof capturePose>) {
+    for (const [index, bone] of bones.entries()) {
+      const joint = pose.joints[index];
+      bone.position.copy(joint.position);
+      bone.quaternion.copy(joint.rotation);
+      bone.scale.copy(joint.scale);
+    }
+    for (const [index, weights] of morphWeights.entries()) {
+      for (let i = 0; i < weights.length; i++)
+        weights[i] = pose.morphs[index][i];
+    }
+  }
+
+  const restClip = clips.get("Rest");
+  const restAction = restClip ? mixer.clipAction(restClip).play() : undefined;
+  mixer.update(0);
+  const neutralPose = capturePose();
+  restAction?.stop();
+  copyPose(neutralPose);
   const frameInterval = 1000 / 30;
   const transitionSeconds = 0.24;
   let frame = 0;
   let lastTick: number | undefined;
   let elapsed = 0;
   let sinceDraw = 0;
-  let transition: { from: number[][]; time: number } | undefined;
+  let transition:
+    | { from: ReturnType<typeof capturePose>; time: number }
+    | undefined;
   let returnToIdle = false;
   let motion: MascotMotion = "Rest";
   let disposed = false;
@@ -157,20 +197,27 @@ export async function createElephantRenderer(
       const delta = Math.min(sinceDraw / 1000, 0.1);
       sinceDraw = 0;
       elapsed = Math.max(0, elapsed - frameInterval) % frameInterval;
+      if (transition) copyPose(neutralPose);
       if (action) mixer.update(delta);
       if (transition) {
         const blend = transition;
         blend.time += delta;
         const mix = MathUtils.smoothstep(blend.time, 0, transitionSeconds);
-        morphWeights.forEach((weights, meshIndex) => {
-          weights.forEach((target, index) => {
-            weights[index] = MathUtils.lerp(
-              blend.from[meshIndex][index],
-              action ? target : neutralPose[meshIndex][index],
+        for (const [index, bone] of bones.entries()) {
+          const joint = blend.from.joints[index];
+          bone.position.lerp(joint.position, 1 - mix);
+          bone.quaternion.slerp(joint.rotation, 1 - mix);
+          bone.scale.lerp(joint.scale, 1 - mix);
+        }
+        for (const [index, weights] of morphWeights.entries()) {
+          for (let i = 0; i < weights.length; i++) {
+            weights[i] = MathUtils.lerp(
+              blend.from.morphs[index][i],
+              weights[i],
               mix
             );
-          });
-        });
+          }
+        }
         if (mix === 1) transition = undefined;
       }
       renderer.render(scene, camera);
@@ -199,16 +246,18 @@ export async function createElephantRenderer(
 
   function setMotion(next: MascotMotion, immediate = false) {
     if (disposed || (motion === next && !immediate)) return;
-    const from = morphWeights.map((weights) => [...weights]);
+    const from = capturePose();
     motion = next;
     canvas.dataset.motion = next;
     returnToIdle = false;
     action?.stop();
-    const clip = asset.animations.find(({ name }) => name === next);
+    const clip = next === "Rest" ? undefined : clips.get(next);
     action = clip ? mixer.clipAction(clip).reset() : undefined;
     if (action && (next === "Greeting" || next === "Happy")) {
       action.setLoop(LoopOnce, 1);
       action.clampWhenFinished = true;
+    } else if (action && next === "Walking") {
+      action.setLoop(LoopRepeat, 2);
     }
     if (action) {
       // Slow the idle breathing, and leave time to read while the planner runs.
@@ -221,12 +270,7 @@ export async function createElephantRenderer(
     transition = immediate ? undefined : { from, time: 0 };
     // Stopping the previous action restores its starting pose. Put the last
     // displayed pose back until the next frame samples the new action.
-    const pose = immediate ? neutralPose : from;
-    morphWeights.forEach((weights, meshIndex) => {
-      weights.forEach((_, index) => {
-        weights[index] = pose[meshIndex][index];
-      });
-    });
+    copyPose(immediate ? neutralPose : from);
     if (immediate) renderer.render(scene, camera);
     syncLoop();
   }
@@ -234,8 +278,9 @@ export async function createElephantRenderer(
   function handleFinished(event: { action: typeof action }) {
     if (
       event.action === action &&
-      (motion === "Greeting" || motion === "Happy")
+      (motion === "Greeting" || motion === "Happy" || motion === "Walking")
     ) {
+      if (motion === "Walking") onWalkingFinished();
       returnToIdle = true;
     }
   }
@@ -271,5 +316,5 @@ export async function createElephantRenderer(
   document.addEventListener("visibilitychange", syncLoop);
   observer.observe(host);
   resize();
-  return { setMotion, dispose };
+  return { setMotion, dispose, canWalk };
 }

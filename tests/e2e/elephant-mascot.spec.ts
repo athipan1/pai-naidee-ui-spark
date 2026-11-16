@@ -294,6 +294,20 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(canvas).toHaveAttribute("data-motion", "Rest");
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  const walk = page.getByRole("button", { name: "ดูช้างเดิน" });
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-bones")))
+    .toBeGreaterThan(20);
+  await walk.click();
+  await expect(canvas).toHaveAttribute("data-motion", "Walking");
+  await expect(canvas).toHaveAttribute("data-motion", "Idle", {
+    timeout: 8000,
+  });
+  await walk.click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(canvas).toHaveAttribute("data-motion", "Rest");
+  await expect(walk).toBeDisabled();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await panel.screenshot({
     path: testInfo.outputPath("elephant-3d.png"),
     animations: "disabled",

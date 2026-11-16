@@ -1,6 +1,13 @@
 import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Compass, EyeOff, Minus, Search, Sparkles } from "lucide-react";
+import {
+  Compass,
+  EyeOff,
+  Footprints,
+  Minus,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   getMascotHidden,
@@ -21,6 +28,8 @@ const copy = {
   th: {
     title: "ช้างผู้ช่วยเที่ยว",
     close: "ย่อผู้ช่วยเที่ยว",
+    walk: "ดูช้างเดิน",
+    stopWalking: "หยุดเดิน",
     hide: "ซ่อนผู้ช่วยเที่ยว",
     restore: "แสดงผู้ช่วยเที่ยว",
     welcome: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
@@ -39,6 +48,8 @@ const copy = {
   en: {
     title: "Elephant travel assistant",
     close: "Minimize travel assistant",
+    walk: "Watch the elephant walk",
+    stopWalking: "Stop walking",
     hide: "Hide travel assistant",
     restore: "Show travel assistant",
     welcome: "Hi! Where would you like to go?",
@@ -83,6 +94,8 @@ export default function ElephantMascot({
   const [draft, setDraft] = useState("");
   const [greeting, setGreeting] = useState(false);
   const [resting, setResting] = useState(false);
+  const [walking, setWalking] = useState(false);
+  const [canWalk, setCanWalk] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
@@ -96,17 +109,22 @@ export default function ElephantMascot({
     resting,
     plannerStatus,
     greeting,
+    walking,
   });
   const motionRef = useRef({ motion, reducedMotion });
 
   useEffect(() => {
     setOpenFor(undefined);
     setGreeting(false);
+    setWalking(false);
   }, [key]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReducedMotion(media.matches);
+    const update = () => {
+      setReducedMotion(media.matches);
+      if (media.matches) setWalking(false);
+    };
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
@@ -126,8 +144,15 @@ export default function ElephantMascot({
     }, 15000);
     void import("./ElephantRenderer")
       .then(({ createElephantRenderer }) =>
-        createElephantRenderer(host, modelUrl, controller.signal, () =>
-          setVisual("fallback")
+        createElephantRenderer(
+          host,
+          modelUrl,
+          controller.signal,
+          () => {
+            setVisual("fallback");
+            setWalking(false);
+          },
+          () => setWalking(false)
         )
       )
       .then((view) => {
@@ -136,6 +161,7 @@ export default function ElephantMascot({
           return;
         }
         renderer.current = view;
+        setCanWalk(view.canWalk);
         view.setMotion(
           motionRef.current.motion,
           motionRef.current.reducedMotion
@@ -168,6 +194,7 @@ export default function ElephantMascot({
       ) {
         setOpenFor(undefined);
         setGreeting(false);
+        setWalking(false);
       }
     }
     document.addEventListener("pointerdown", closeOnOutsidePress);
@@ -177,6 +204,7 @@ export default function ElephantMascot({
 
   useEffect(() => {
     setResting(false);
+    setWalking(false);
     if (plannerStatus !== "idle") setGreeting(false);
   }, [plannerStatus]);
 
@@ -187,15 +215,22 @@ export default function ElephantMascot({
   }, [open, visual, greeting]);
 
   useEffect(() => {
-    if (!open || visual !== "ready" || resting || plannerStatus === "thinking")
+    if (
+      !open ||
+      visual !== "ready" ||
+      resting ||
+      walking ||
+      plannerStatus === "thinking"
+    )
       return;
     const timer = window.setTimeout(() => setResting(true), 12000);
     return () => window.clearTimeout(timer);
-  }, [open, plannerStatus, visual, resting]);
+  }, [open, plannerStatus, visual, resting, walking]);
 
   function minimize() {
     setOpenFor(undefined);
     setGreeting(false);
+    setWalking(false);
     toggle.current?.focus();
   }
 
@@ -309,6 +344,25 @@ export default function ElephantMascot({
               className="absolute inset-y-0 left-1/2 aspect-square -translate-x-1/2"
               aria-hidden="true"
             />
+            {visual === "ready" && canWalk && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute bottom-1 right-1 h-11 w-11"
+                aria-label={walking ? t.stopWalking : t.walk}
+                aria-pressed={walking}
+                title={walking ? t.stopWalking : t.walk}
+                disabled={reducedMotion || plannerStatus === "thinking"}
+                onClick={() => {
+                  setResting(false);
+                  setGreeting(false);
+                  setWalking(!walking);
+                }}
+              >
+                <Footprints aria-hidden="true" className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           {modelUrl && visual !== "ready" && (
             <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
