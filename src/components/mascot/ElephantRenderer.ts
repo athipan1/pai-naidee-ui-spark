@@ -1,11 +1,11 @@
 import {
   AnimationMixer,
   Box3,
-  Clock,
   DirectionalLight,
   Group,
   HemisphereLight,
   LoopOnce,
+  MathUtils,
   Mesh,
   PerspectiveCamera,
   Scene,
@@ -118,9 +118,21 @@ export async function createElephantRenderer(
   canvas.className = "block h-full w-full";
   host.append(canvas);
   const mixer = new AnimationMixer(asset.scene);
-  const clock = new Clock(false);
+  const morphWeights: number[][] = [];
+  asset.scene.traverse((object) => {
+    if (object instanceof Mesh && object.morphTargetInfluences) {
+      morphWeights.push(object.morphTargetInfluences);
+    }
+  });
+  const neutralPose = morphWeights.map((weights) => [...weights]);
+  const frameInterval = 1000 / 30;
+  const transitionSeconds = 0.24;
   let frame = 0;
-  let lastRender = 0;
+  let lastTick: number | undefined;
+  let elapsed = 0;
+  let sinceDraw = 0;
+  let transition: { from: number[][]; time: number } | undefined;
+  let returnToIdle = false;
   let motion: MascotMotion = "Rest";
   let disposed = false;
   let action: ReturnType<typeof mixer.clipAction> | undefined;
@@ -136,26 +148,61 @@ export async function createElephantRenderer(
   }
 
   function tick(time: number) {
-    if (!frame) return;
-    frame = window.requestAnimationFrame(tick);
-    if (time - lastRender < 31) return;
-    lastRender = time;
-    mixer.update(Math.min(clock.getDelta(), 0.1));
-    renderer.render(scene, camera);
+    frame = 0;
+    const tickDelta = lastTick === undefined ? frameInterval : time - lastTick;
+    elapsed += tickDelta;
+    sinceDraw += tickDelta;
+    lastTick = time;
+    if (elapsed + 1 >= frameInterval) {
+      const delta = Math.min(sinceDraw / 1000, 0.1);
+      sinceDraw = 0;
+      elapsed = Math.max(0, elapsed - frameInterval) % frameInterval;
+      if (action) mixer.update(delta);
+      if (transition) {
+        const blend = transition;
+        blend.time += delta;
+        const mix = MathUtils.smoothstep(blend.time, 0, transitionSeconds);
+        morphWeights.forEach((weights, meshIndex) => {
+          weights.forEach((target, index) => {
+            weights[index] = MathUtils.lerp(
+              blend.from[meshIndex][index],
+              action ? target : neutralPose[meshIndex][index],
+              mix
+            );
+          });
+        });
+        if (mix === 1) transition = undefined;
+      }
+      renderer.render(scene, camera);
+      if (returnToIdle) {
+        returnToIdle = false;
+        setMotion("Idle");
+      }
+    }
+    scheduleFrame();
+  }
+
+  function scheduleFrame() {
+    if (!frame && !disposed && !document.hidden && (action || transition)) {
+      frame = window.requestAnimationFrame(tick);
+    }
   }
 
   function syncLoop() {
     if (frame) window.cancelAnimationFrame(frame);
     frame = 0;
-    clock.stop();
-    if (disposed || document.hidden || motion === "Rest") return;
-    clock.start();
-    frame = window.requestAnimationFrame(tick);
+    lastTick = undefined;
+    elapsed = 0;
+    sinceDraw = 0;
+    scheduleFrame();
   }
 
-  function setMotion(next: MascotMotion) {
-    if (motion === next || disposed) return;
+  function setMotion(next: MascotMotion, immediate = false) {
+    if (disposed || (motion === next && !immediate)) return;
+    const from = morphWeights.map((weights) => [...weights]);
     motion = next;
+    canvas.dataset.motion = next;
+    returnToIdle = false;
     action?.stop();
     const clip = asset.animations.find(({ name }) => name === next);
     action = clip ? mixer.clipAction(clip).reset() : undefined;
@@ -163,10 +210,38 @@ export async function createElephantRenderer(
       action.setLoop(LoopOnce, 1);
       action.clampWhenFinished = true;
     }
-    action?.play();
+    if (action) {
+      // Slow the idle breathing, and leave time to read while the planner runs.
+      action
+        .setEffectiveTimeScale(
+          next === "Idle" ? 0.86 : next === "Thinking" ? 0.9 : 1
+        )
+        .play();
+    }
+    transition = immediate ? undefined : { from, time: 0 };
+    // Stopping the previous action restores its starting pose. Put the last
+    // displayed pose back until the next frame samples the new action.
+    const pose = immediate ? neutralPose : from;
+    morphWeights.forEach((weights, meshIndex) => {
+      weights.forEach((_, index) => {
+        weights[index] = pose[meshIndex][index];
+      });
+    });
+    if (immediate) renderer.render(scene, camera);
     syncLoop();
-    if (next === "Rest") renderer.render(scene, camera);
   }
+
+  function handleFinished(event: { action: typeof action }) {
+    if (
+      event.action === action &&
+      (motion === "Greeting" || motion === "Happy")
+    ) {
+      returnToIdle = true;
+    }
+  }
+
+  mixer.addEventListener("finished", handleFinished);
+  canvas.dataset.motion = motion;
 
   const observer = new ResizeObserver(resize);
   function dispose() {
@@ -176,6 +251,7 @@ export async function createElephantRenderer(
     observer.disconnect();
     document.removeEventListener("visibilitychange", syncLoop);
     canvas.removeEventListener("webglcontextlost", handleContextLost);
+    mixer.removeEventListener("finished", handleFinished);
     mixer.stopAllAction();
     mixer.uncacheRoot(asset.scene);
     disposeModel(asset.scene);

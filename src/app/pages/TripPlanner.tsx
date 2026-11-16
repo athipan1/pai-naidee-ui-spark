@@ -52,6 +52,12 @@ export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
  const [draft,setDraft]=useState(()=>getPlannerDraft(location.state));
  const [messages,setMessages]=useState<Message[]>([]);
  const [pending,setPending]=useState(false);
+ const request=useRef<AbortController | null>(null);
+ useEffect(()=>()=>{
+  const active=request.current;
+  request.current=null;
+  active?.abort();
+ },[]);
  const [mascotStatus,setMascotStatus]=useState<PlannerStatus>('idle');
  const appliedHandoff=useRef(location.key);
  useEffect(()=>{
@@ -85,17 +91,21 @@ export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
  const add=(role:Message['role'],text:string,plan?:TripPlanResponse)=>setMessages(m=>[...m,{id:Date.now()+Math.random(),role,text,plan}]);
  const submit=async(textOverride?:string)=>{
   const value=(textOverride??draft).trim();
-  if(!value||pending||facets.isLoading)return;
+  if(!value||request.current||facets.isLoading)return;
   setDraft('');add('user',value);setMascotStatus('idle');
   // Follow-up answers fill missing slots; a new full request starts a new plan.
-  const full=/\d+\s*(วัน|days?)/i.test(value)&&/(เที่ยว|trip|จังหวัด|งบ)/i.test(value)?value:[context,value].filter(Boolean).join(' ');
-  const parsed=parseTripIntent(full,facets.data?.provinces??[]);
+  const provinces=facets.data?.provinces??[];
+  const incoming=parseTripIntent(value,provinces);
+  const full=incoming.province&&incoming.days?value:[context,value].filter(Boolean).join(' ');
+  const parsed=full===value?incoming:parseTripIntent(full,provinces);
   setContext(full);
   const question=missingPrompt(parsed,th);
   if(question){add('assistant',question);return;}
+  const controller=new AbortController();
+  request.current=controller;
   setPending(true);setMascotStatus('thinking');
   try{
-   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),65000);
+   const timeout=setTimeout(()=>controller.abort(),65000);
    let result: TripPlanResponse | null = null;let usedFallback=false;
    try{
     const response=await fetch(API+'/api/ai/trip-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,province:parsed.province,days:parsed.days,people:parsed.people,budget:parsed.totalBudget,transport:parsed.transport}),signal:controller.signal});
@@ -112,19 +122,32 @@ export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
      result={province:parsed.province,days:Array.from({length:parsed.days},(_,i)=>({day:i+1,stops:(basic.stops||[]).filter(s=>s.day===i+1).map(s=>s.place)})),completeness:{status:basic.status,requestedDays:parsed.days,plannedDays:new Set((basic.stops||[]).map(s=>s.day)).size},provider:'smart_fallback',budget:{estimatedTotal:parsed.totalBudget}};
     }
    }finally{clearTimeout(timeout);}
+   if(request.current!==controller)return;
    setMascotStatus(result?.days?.some(day=>day.stops?.some(Boolean))?'success':'idle');
    const complete=result?.completeness?.status==='complete';
    const source=usedFallback||result?.provider==='smart_fallback'?(th?'Smart Planner สร้างแผนจากสถานที่และเส้นทางที่ตรวจสอบได้':'Smart Planner used checked destinations and roads'):result?.recovery?.googlePlacesUsed?(th?'AI + Smart Planner เสริมสถานที่จาก Google Maps':'AI + Smart Planner supplemented by Google Maps'):result?.recovery?(th?'AI + Smart Planner เติมเฉพาะส่วนที่ขาด':'AI + Smart Planner filled missing parts'):(th?'AI จัดแผนและตรวจเงื่อนไขแล้ว':'AI planned and checked the trip');
    add('assistant',`${source}\n${complete?(th?'จัดแผนครบตามจำนวนวันที่ขอ':'All requested days planned'):(th?'แผนบางส่วน: ยังมีวันที่หรือเส้นทางที่ตรวจสอบไม่ครบ':'Partial plan: some days or roads remain unverified')}\n${parsed.province} · ${parsed.days} ${th?'วัน':'days'} · ${money(parsed.totalBudget!)} ${th?'งบที่ระบุ':'requested budget'}`,result);
-  }catch(error){setMascotStatus('error');setDraft(previous=>previous||value);setContext(context);add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
-  finally{setPending(false);}
+  }catch(error){if(request.current!==controller)return;setMascotStatus('error');setDraft(previous=>previous||value);setContext(context);add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
+  finally{
+   if(request.current===controller){request.current=null;setPending(false);}
+  }
+ };
+ const resetChat=()=>{
+  const active=request.current;
+  request.current=null;
+  active?.abort();
+  setPending(false);
+  setMessages([]);
+  setContext('');
+  setDraft('');
+  setMascotStatus('idle');
  };
  return <div className="relative flex h-[100dvh] min-h-0 w-full max-w-full min-w-0 flex-col overflow-hidden bg-background">
   <header className="z-20 flex w-full min-w-0 shrink-0 items-center gap-2 border-b bg-background/95 px-3 py-3 backdrop-blur sm:gap-3 sm:px-4">
    <Link to="/" aria-label={th?'กลับหน้าแรก':'Home'} className="shrink-0 rounded-full p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5"/></Link>
    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Sparkles className="h-5 w-5"/></span>
    <div className="min-w-0 flex-1"><h1 className="font-semibold">PaiNaiDee AI</h1><p className="text-xs text-muted-foreground">{th?'ผู้ช่วยวางแผนเที่ยวส่วนตัว':'Your personal trip planner'}</p></div>
-   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');setMascotStatus('idle');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="shrink-0 rounded-full border p-2"><Plus className="h-5 w-5"/></button>
+   <button type="button" onClick={resetChat} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="shrink-0 rounded-full border p-2"><Plus className="h-5 w-5"/></button>
   </header>
   <main className="min-h-0 min-w-0 w-full flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2 py-4 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
    <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4">

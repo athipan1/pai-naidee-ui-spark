@@ -23,6 +23,7 @@ const copy = {
     close: "ย่อผู้ช่วยเที่ยว",
     hide: "ซ่อนผู้ช่วยเที่ยว",
     restore: "แสดงผู้ช่วยเที่ยว",
+    welcome: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
     label: "บอกทริปที่อยากไป",
     placeholder: "เชียงใหม่ 3 วัน งบ 6,000 บาท",
     review: "เปิดใน AI วางแผนเที่ยว",
@@ -40,6 +41,7 @@ const copy = {
     close: "Minimize travel assistant",
     hide: "Hide travel assistant",
     restore: "Show travel assistant",
+    welcome: "Hi! Where would you like to go?",
     label: "Describe your trip",
     placeholder: "Chiang Mai, 3 days, ฿6,000",
     review: "Open AI Trip Planner",
@@ -70,6 +72,7 @@ export default function ElephantMascot({
   const navigate = useNavigate();
   const panelId = useId();
   const titleId = useId();
+  const assistant = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -94,7 +97,7 @@ export default function ElephantMascot({
     plannerStatus,
     greeting,
   });
-  const motionRef = useRef(motion);
+  const motionRef = useRef({ motion, reducedMotion });
 
   useEffect(() => {
     setOpenFor(undefined);
@@ -109,9 +112,9 @@ export default function ElephantMascot({
   }, []);
 
   useEffect(() => {
-    motionRef.current = motion;
-    renderer.current?.setMotion(motion);
-  }, [motion]);
+    motionRef.current = { motion, reducedMotion };
+    renderer.current?.setMotion(motion, reducedMotion);
+  }, [motion, reducedMotion]);
 
   useEffect(() => {
     const host = stage.current;
@@ -133,7 +136,10 @@ export default function ElephantMascot({
           return;
         }
         renderer.current = view;
-        view.setMotion(motionRef.current);
+        view.setMotion(
+          motionRef.current.motion,
+          motionRef.current.reducedMotion
+        );
         setVisual("ready");
         if (!greeted.current) {
           greeted.current = true;
@@ -155,7 +161,24 @@ export default function ElephantMascot({
   useEffect(() => {
     if (!open) return;
     close.current?.focus();
+    function closeOnOutsidePress(event: PointerEvent) {
+      if (
+        event.target instanceof Node &&
+        !assistant.current?.contains(event.target)
+      ) {
+        setOpenFor(undefined);
+        setGreeting(false);
+      }
+    }
+    document.addEventListener("pointerdown", closeOnOutsidePress);
+    return () =>
+      document.removeEventListener("pointerdown", closeOnOutsidePress);
   }, [open]);
+
+  useEffect(() => {
+    setResting(false);
+    if (plannerStatus !== "idle") setGreeting(false);
+  }, [plannerStatus]);
 
   useEffect(() => {
     if (!open || visual !== "ready" || !greeting) return;
@@ -164,7 +187,8 @@ export default function ElephantMascot({
   }, [open, visual, greeting]);
 
   useEffect(() => {
-    if (!open || visual !== "ready" || plannerStatus === "thinking") return;
+    if (!open || visual !== "ready" || resting || plannerStatus === "thinking")
+      return;
     const timer = window.setTimeout(() => setResting(true), 12000);
     return () => window.clearTimeout(timer);
   }, [open, plannerStatus, visual, resting]);
@@ -214,6 +238,7 @@ export default function ElephantMascot({
 
   return (
     <aside
+      ref={assistant}
       className={`fixed right-[max(0.75rem,env(safe-area-inset-right))] z-[39] ${bottom}`}
       aria-label={t.title}
     >
@@ -241,7 +266,7 @@ export default function ElephantMascot({
         <section
           id={panelId}
           aria-labelledby={titleId}
-          className="absolute bottom-full right-0 mb-2 max-h-[min(28rem,calc(100dvh-12.5rem-env(safe-area-inset-bottom)))] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl"
+          className="absolute bottom-full right-0 mb-2 max-h-[min(28rem,calc(100dvh-12.5rem-env(safe-area-inset-bottom)))] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl lg:mb-7 lg:w-72"
           onKeyDown={(event) => {
             if (event.key === "Escape") minimize();
           }}
@@ -272,6 +297,7 @@ export default function ElephantMascot({
               <EyeOff aria-hidden="true" className="h-5 w-5" />
             </Button>
           </header>
+          <p className="mb-2 text-sm text-muted-foreground">{t.welcome}</p>
           <div className="relative mb-2 grid h-32 place-items-center overflow-hidden rounded-xl bg-primary/10">
             {(!modelUrl || visual !== "ready") && (
               <div className="pointer-events-none absolute inset-0 grid place-items-center p-2">
@@ -320,7 +346,10 @@ export default function ElephantMascot({
               id={`${panelId}-message`}
               value={draft}
               maxLength={500}
-              onChange={(event) => setDraft(event.target.value)}
+              onChange={(event) => {
+                setResting(false);
+                setDraft(event.target.value);
+              }}
               placeholder={t.placeholder}
               className="h-11 min-w-0 rounded-lg border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />

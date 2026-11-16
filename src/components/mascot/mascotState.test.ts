@@ -25,7 +25,12 @@ describe("elephant mascot", () => {
     expect(getMascotMotion({ ...idle, plannerStatus: "success" })).toBe(
       "Happy"
     );
-    expect(getMascotMotion({ ...idle, plannerStatus: "error" })).toBe("Idle");
+    expect(
+      getMascotMotion({ ...idle, plannerStatus: "error", greeting: true })
+    ).toBe("Idle");
+    expect(
+      getMascotMotion({ ...idle, resting: true, plannerStatus: "thinking" })
+    ).toBe("Thinking");
   });
 
   it("stops rendering motion in rest and reduced-motion modes", () => {

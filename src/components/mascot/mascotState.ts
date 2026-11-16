@@ -12,10 +12,11 @@ export function getMascotMotion({
   plannerStatus: PlannerStatus;
   greeting: boolean;
 }): MascotMotion {
-  if (reducedMotion || resting) return "Rest";
+  if (reducedMotion) return "Rest";
   if (plannerStatus === "thinking") return "Thinking";
-  if (greeting) return "Greeting";
+  if (resting) return "Rest";
   if (plannerStatus === "success") return "Happy";
+  if (greeting && plannerStatus === "idle") return "Greeting";
   return "Idle";
 }
 

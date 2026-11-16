@@ -2,7 +2,8 @@ import { existsSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 
 const title = "ช้างผู้ช่วยเที่ยว";
-const hasAsset = existsSync("src/components/mascot/assets/elephant.glb");
+const hasAsset =
+  !process.env.CI && existsSync("src/components/mascot/assets/elephant.glb");
 const plan = {
   province: "เชียงใหม่",
   provider: "ai",
@@ -33,7 +34,10 @@ test.beforeEach(async ({ page }) => {
   });
   await page.route("**/api/places/facets", (route) =>
     route.fulfill({
-      json: { provinces: ["เชียงใหม่"], categories: ["Nature"] },
+      json: {
+        provinces: ["เชียงใหม่", "ชลบุรี", "กรุงเทพฯ"],
+        categories: ["Nature"],
+      },
     })
   );
 });
@@ -52,6 +56,9 @@ test("the shared assistant can be minimized, hidden, restored and localized", as
   const nav = await page.locator("nav").last().boundingBox();
   const toggle = await launcher.boundingBox();
   expect(toggle!.y + toggle!.height).toBeLessThan(nav!.y);
+  await page.mouse.click(8, 130);
+  await expect(panel).toBeHidden();
+  await launcher.click();
   await page.keyboard.press("Escape");
   await expect(launcher).toBeFocused();
   await launcher.click();
@@ -99,17 +106,93 @@ test("hands off a draft and reuses the existing planner request only after expli
     page.getByRole("textbox", { name: "ข้อความถึง PaiNaiDee AI" })
   ).toHaveValue(prompt);
   expect(calls).toBe(0);
-  await page.getByRole("button", { name: "ส่งข้อความ" }).click();
+  const send = page.getByRole("button", { name: "ส่งข้อความ" });
+  await expect(send).toBeEnabled();
+  await send.evaluate((button) => {
+    const form = (button as HTMLButtonElement).form!;
+    form.requestSubmit();
+    form.requestSubmit();
+  });
   await launcher.click();
   await expect(
     page.getByText("AI กำลังจัดทริป", { exact: true })
   ).toBeVisible();
+  const activeCanvas = page.locator("aside canvas");
+  if (hasAsset) {
+    await expect(activeCanvas).toHaveAttribute("data-motion", "Thinking");
+  }
   release();
+  if (hasAsset) {
+    await expect(activeCanvas).toHaveAttribute("data-motion", "Happy");
+    await expect(activeCanvas).toHaveAttribute("data-motion", "Idle");
+  }
   await expect(
     page.getByText("แผนเที่ยวพร้อมแล้ว", { exact: true })
   ).toBeVisible();
   await expect(page.getByText("แผนเที่ยวรายวัน")).toBeAttached();
   expect(calls).toBe(1);
+});
+
+for (const { prompt, clarification } of [
+  {
+    prompt: "แนะนำสถานที่เที่ยวเชียงใหม่",
+    clarification: "อยากเที่ยวกี่วันครับ? (1–5 วัน)",
+  },
+  {
+    prompt: "อยากเที่ยวทะเลใกล้กรุงเทพ",
+    clarification: "อยากไปเที่ยวจังหวัดไหนครับ?",
+  },
+  {
+    prompt: "ช่วยวางแผนเที่ยวชลบุรี 2 วัน",
+    clarification: "ตั้งงบประมาณรวมไว้กี่บาทครับ?",
+  },
+]) {
+  test(`hands off “${prompt}” and asks for missing information without a request`, async ({
+    page,
+  }) => {
+    let calls = 0;
+    await page.route("**/api/ai/trip-plan", (route) => {
+      calls += 1;
+      return route.abort();
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: title }).click();
+    await page.getByRole("textbox", { name: "บอกทริปที่อยากไป" }).fill(prompt);
+    await page.getByRole("button", { name: "เปิดใน AI วางแผนเที่ยว" }).click();
+    await expect(
+      page.getByRole("textbox", { name: "ข้อความถึง PaiNaiDee AI" })
+    ).toHaveValue(prompt);
+    await page.getByRole("button", { name: "ส่งข้อความ" }).click();
+    await expect(page.getByText(clarification, { exact: true })).toBeVisible();
+    expect(calls).toBe(0);
+  });
+}
+
+test("accepts an English draft and sends the canonical province code", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem("painaidee.language", "en")
+  );
+  const prompt = "Plan a trip to Chiang Mai for 3 days, budget 6000 baht";
+  await page.route("**/api/ai/trip-plan", (route) => {
+    expect(route.request().postDataJSON()).toMatchObject({
+      message: prompt,
+      province: "เชียงใหม่",
+      days: 3,
+      budget: 6000,
+    });
+    return route.fulfill({ json: plan });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Elephant travel assistant" }).click();
+  await page.getByRole("textbox", { name: "Describe your trip" }).fill(prompt);
+  await page.getByRole("button", { name: "Open AI Trip Planner" }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Message PaiNaiDee AI" })
+  ).toHaveValue(prompt);
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByText("Day-by-day itinerary")).toBeVisible();
 });
 
 test("a planner rate-limit response keeps the draft available for an explicit retry", async ({
@@ -132,6 +215,11 @@ test("a planner rate-limit response keeps the draft available for an explicit re
   await send.click();
   await expect(page.getByText(/มีคำขอมากเกินไป/)).toBeVisible();
   await expect(message).toHaveValue(prompt);
+  await page.getByRole("button", { name: title }).click();
+  await expect(
+    page.getByText("จัดทริปไม่สำเร็จ ลองอีกครั้งในหน้าแผนเที่ยว")
+  ).toBeVisible();
+  await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
   expect(calls).toBe(1);
   await send.click();
   await expect(page.getByText("แผนเที่ยวรายวัน")).toBeVisible();
@@ -191,10 +279,15 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   const panel = page.getByRole("region", { name: title });
   const canvas = panel.locator("canvas");
   await expect(canvas).toBeVisible();
+  await expect(canvas).toHaveAttribute("data-motion", "Greeting");
   const greeting = await canvas.screenshot();
   await expect
     .poll(async () => (await canvas.screenshot()).equals(greeting))
     .toBe(false);
+  await expect(canvas).toHaveAttribute("data-motion", "Idle");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(canvas).toHaveAttribute("data-motion", "Rest");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await panel.screenshot({
     path: testInfo.outputPath("elephant-3d.png"),
     animations: "disabled",
