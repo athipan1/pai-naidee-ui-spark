@@ -286,6 +286,33 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   const canvas = panel.locator("canvas");
   await expect(canvas).toBeVisible();
   await expect(canvas).toHaveAttribute("data-motion", "Greeting");
+  const countPaintedPixels = async () =>
+    page.evaluate(
+      async (base64) => {
+        const source = new Image();
+        source.src = `data:image/png;base64,${base64}`;
+        await source.decode();
+        const sampler = document.createElement("canvas");
+        sampler.width = source.naturalWidth;
+        sampler.height = source.naturalHeight;
+        const context = sampler.getContext("2d")!;
+        context.drawImage(source, 0, 0);
+        const pixels = context.getImageData(
+          0,
+          0,
+          sampler.width,
+          sampler.height
+        ).data;
+        let count = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          // Distinguish the shaded blue elephant from the pale mint stage.
+          if (pixels[i + 1] < 200 && pixels[i + 2] - pixels[i] > 18) count++;
+        }
+        return count;
+      },
+      (await canvas.screenshot()).toString("base64")
+    );
+  await expect.poll(countPaintedPixels).toBeGreaterThan(100);
   const greeting = await canvas.screenshot();
   await expect
     .poll(async () => (await canvas.screenshot()).equals(greeting))

@@ -73,10 +73,13 @@ export async function createElephantRenderer(
 ) {
   signal.throwIfAborted();
   const canvas = document.createElement("canvas");
+  const touchChromium =
+    window.matchMedia("(pointer: coarse)").matches &&
+    /Chrome\//.test(navigator.userAgent);
   const context = canvas.getContext("webgl2", {
     alpha: true,
-    // The small mobile viewport already renders above CSS resolution.
-    antialias: !window.matchMedia("(pointer: coarse)").matches,
+    // WebKit can present a blank transparent canvas with multisampling off.
+    antialias: !touchChromium,
     powerPreference: "low-power",
   });
   if (!context) throw new Error("WebGL 2 unavailable");
