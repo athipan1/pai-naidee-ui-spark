@@ -38,6 +38,8 @@ export default defineConfig(({ mode }) => {
         injectRegister: 'inline',
         workbox: {
           globPatterns: ['**/*.{js,css,ico,png,jpg,jpeg,svg}'],
+          // These chunks are only needed after the user opens the elephant.
+          globIgnores: ['**/ElephantRenderer-*.js', '**/three-*.js'],
           navigateFallback: null,
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit
           runtimeCaching: [

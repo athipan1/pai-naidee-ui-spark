@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAttractionDetail } from '@/shared/hooks/useAttractionQueries';
 import { ArrowLeft, Send, Sparkles, LoaderCircle, Plus, Bot, UserRound } from 'lucide-react';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
@@ -9,7 +9,9 @@ import TripTimelineMap from './TripTimelineMap';
 import type { TripStop } from '@/shared/utils/tripPlanner';
 import type { AttractionDetail } from '@/shared/types/attraction';
 
-interface Props { currentLanguage: 'th' | 'en' }
+import { getPlannerDraft, type PlannerStatus } from '@/components/mascot/mascotState';
+
+interface Props { currentLanguage: 'th' | 'en'; onMascotStatus?: (status: PlannerStatus) => void }
 type TripPlanPlace = Pick<AttractionDetail, 'id' | 'coordinates' | 'description'> & Partial<AttractionDetail>;
 type TripPlanResponse = {
   province: string;
@@ -40,15 +42,26 @@ function planStops(plan: TripPlanResponse): TripStop[] {
   return [{place,day:day.day,order:index+1}];
  }));
 }
-export default function TripPlanner({currentLanguage}:Props){
+export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
  const th=currentLanguage==='th';
  const [searchParams]=useSearchParams();
+ const location=useLocation();
  const referenceId=searchParams.get('place') || undefined;
  const reference=useAttractionDetail(referenceId,{refetchInterval:false});
  const referenceApplied=useRef(false);
- const [draft,setDraft]=useState('');
+ const [draft,setDraft]=useState(()=>getPlannerDraft(location.state));
  const [messages,setMessages]=useState<Message[]>([]);
  const [pending,setPending]=useState(false);
+ const [mascotStatus,setMascotStatus]=useState<PlannerStatus>('idle');
+ const appliedHandoff=useRef(location.key);
+ useEffect(()=>{
+  if(appliedHandoff.current===location.key)return;
+  appliedHandoff.current=location.key;
+  const text=getPlannerDraft(location.state);
+  if(text)setDraft(text);
+ },[location.key,location.state]);
+ useEffect(()=>{onMascotStatus?.(mascotStatus);},[mascotStatus,onMascotStatus]);
+ useEffect(()=>()=>onMascotStatus?.('idle'),[onMascotStatus]);
  const [context,setContext]=useState('');
  const bottom=useRef<HTMLDivElement>(null);
  useEffect(()=>{
@@ -72,15 +85,15 @@ export default function TripPlanner({currentLanguage}:Props){
  const add=(role:Message['role'],text:string,plan?:TripPlanResponse)=>setMessages(m=>[...m,{id:Date.now()+Math.random(),role,text,plan}]);
  const submit=async(textOverride?:string)=>{
   const value=(textOverride??draft).trim();
-  if(!value||pending)return;
-  setDraft('');add('user',value);
+  if(!value||pending||facets.isLoading)return;
+  setDraft('');add('user',value);setMascotStatus('idle');
   // Follow-up answers fill missing slots; a new full request starts a new plan.
   const full=/\d+\s*(วัน|days?)/i.test(value)&&/(เที่ยว|trip|จังหวัด|งบ)/i.test(value)?value:[context,value].filter(Boolean).join(' ');
   const parsed=parseTripIntent(full,facets.data?.provinces??[]);
   setContext(full);
   const question=missingPrompt(parsed,th);
   if(question){add('assistant',question);return;}
-  setPending(true);
+  setPending(true);setMascotStatus('thinking');
   try{
    const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),65000);
    let result: TripPlanResponse | null = null;let usedFallback=false;
@@ -99,10 +112,11 @@ export default function TripPlanner({currentLanguage}:Props){
      result={province:parsed.province,days:Array.from({length:parsed.days},(_,i)=>({day:i+1,stops:(basic.stops||[]).filter(s=>s.day===i+1).map(s=>s.place)})),completeness:{status:basic.status,requestedDays:parsed.days,plannedDays:new Set((basic.stops||[]).map(s=>s.day)).size},provider:'smart_fallback',budget:{estimatedTotal:parsed.totalBudget}};
     }
    }finally{clearTimeout(timeout);}
+   setMascotStatus(result?.days?.some(day=>day.stops?.some(Boolean))?'success':'idle');
    const complete=result?.completeness?.status==='complete';
    const source=usedFallback||result?.provider==='smart_fallback'?(th?'Smart Planner สร้างแผนจากสถานที่และเส้นทางที่ตรวจสอบได้':'Smart Planner used checked destinations and roads'):result?.recovery?.googlePlacesUsed?(th?'AI + Smart Planner เสริมสถานที่จาก Google Maps':'AI + Smart Planner supplemented by Google Maps'):result?.recovery?(th?'AI + Smart Planner เติมเฉพาะส่วนที่ขาด':'AI + Smart Planner filled missing parts'):(th?'AI จัดแผนและตรวจเงื่อนไขแล้ว':'AI planned and checked the trip');
    add('assistant',`${source}\n${complete?(th?'จัดแผนครบตามจำนวนวันที่ขอ':'All requested days planned'):(th?'แผนบางส่วน: ยังมีวันที่หรือเส้นทางที่ตรวจสอบไม่ครบ':'Partial plan: some days or roads remain unverified')}\n${parsed.province} · ${parsed.days} ${th?'วัน':'days'} · ${money(parsed.totalBudget!)} ${th?'งบที่ระบุ':'requested budget'}`,result);
-  }catch(error){add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
+  }catch(error){setMascotStatus('error');setDraft(previous=>previous||value);setContext(context);add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
   finally{setPending(false);}
  };
  return <div className="relative flex h-[100dvh] min-h-0 w-full max-w-full min-w-0 flex-col overflow-hidden bg-background">
@@ -110,7 +124,7 @@ export default function TripPlanner({currentLanguage}:Props){
    <Link to="/" aria-label={th?'กลับหน้าแรก':'Home'} className="shrink-0 rounded-full p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5"/></Link>
    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Sparkles className="h-5 w-5"/></span>
    <div className="min-w-0 flex-1"><h1 className="font-semibold">PaiNaiDee AI</h1><p className="text-xs text-muted-foreground">{th?'ผู้ช่วยวางแผนเที่ยวส่วนตัว':'Your personal trip planner'}</p></div>
-   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="shrink-0 rounded-full border p-2"><Plus className="h-5 w-5"/></button>
+   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');setMascotStatus('idle');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="shrink-0 rounded-full border p-2"><Plus className="h-5 w-5"/></button>
   </header>
   <main className="min-h-0 min-w-0 w-full flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2 py-4 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
    <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4">

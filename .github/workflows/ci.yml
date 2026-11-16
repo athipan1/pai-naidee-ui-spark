@@ -147,6 +147,9 @@ jobs:
       - name: Test Android Chrome and iPhone Safari trip planning
         run: npm run test:e2e:trip-planner
 
+      - name: Test the elephant mascot across desktop and mobile browsers
+        run: npx playwright test --config=playwright.elephant-mascot.config.ts
+
       - name: Install API dependencies for browser cache fixture
         run: npm ci --prefix api
 
