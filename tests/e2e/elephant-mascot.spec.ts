@@ -372,8 +372,10 @@ test("peeks above navigation, retracts after the greeting and does not greet aga
     };
     new MutationObserver((mutations) => {
       for (const mutation of mutations) {
-        if (mutation.type === "attributes") observe(mutation.target as Element);
-        else if (mutation.addedNodes.length)
+        if (mutation.type === "attributes") {
+          if (mutation.oldValue) phases.add(mutation.oldValue);
+          observe(mutation.target as Element);
+        } else if (mutation.addedNodes.length)
           observe(document.querySelector("[data-peek]"));
       }
     }).observe(document, {
@@ -381,6 +383,7 @@ test("peeks above navigation, retracts after the greeting and does not greet aga
       childList: true,
       attributes: true,
       attributeFilter: ["data-peek"],
+      attributeOldValue: true,
     });
   });
   await page.goto("/");

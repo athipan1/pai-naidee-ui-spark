@@ -134,3 +134,12 @@
     );
   }
 }
+
+@media (min-width: 40rem) and (max-width: 63.99rem) and (min-height: 42rem) {
+  .elephant-peek[data-home] {
+    bottom: max(
+      0px,
+      calc(100dvh - 37rem - 6.5rem - env(safe-area-inset-bottom))
+    );
+  }
+}
