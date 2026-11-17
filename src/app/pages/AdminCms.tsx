@@ -63,8 +63,9 @@ class AdminRequestError extends Error {
 }
 function toPlaceForm(payload: DraftPayload): PlaceForm {
   const coordinate = (value: string | number | null | undefined) => value == null ? '' : String(value).trim();
-  const category = safeText(payload?.category) || empty.category;
-  const categories = Array.isArray(payload?.categories) && payload.categories.length
+  const referenceWithoutCategory = Boolean(payload?.googlePlaceId) && (!payload?.category || payload.category === 'attraction');
+  const category = referenceWithoutCategory ? '' : (safeText(payload?.category) || empty.category);
+  const categories = referenceWithoutCategory ? [] : Array.isArray(payload?.categories) && payload.categories.length
     ? [...new Set([category, ...stringList(payload.categories)])].slice(0, 8) : [category];
   return {
     name: safeText(payload?.name),
@@ -749,14 +750,14 @@ export default function AdminCms() {
         {editing && drafts.some(item => item.id === editing.id && isRecord(item.payload?.autoFillSource)) && (
           <div role="note" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">
             <p className="font-semibold">เติมข้อมูลตั้งต้นจาก TAT Open Data</p>
-            <p className="mt-1">ชื่อ หมวดหมู่ รายละเอียด และพิกัดที่พบมาจากชุดข้อมูลอิสระ ไม่ใช่ Google Places โปรดตรวจสอบชื่อภาษาอังกฤษและตำแหน่งทางเข้าจริงก่อนเผยแพร่</p>
+            <p className="mt-1">เฉพาะชื่อภาษาไทยและภาษาอังกฤษ (ถ้ามี) มาจาก TAT Open Data ไม่ใช่ Google Places หมวดหมู่ รายละเอียด และพิกัดต้องกรอกและยืนยันเอง</p>
             <a className="mt-2 inline-block underline" href="https://datacatalog.tat.or.th/dataset/tourist-attraction" target="_blank" rel="noopener noreferrer">ดูแหล่งข้อมูล TAT Open Data</a>
           </div>
         )}
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
-          {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อสถานที่ (หลัก) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
+          {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อหลัก / ภาษาอังกฤษ (ถ้ามี) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
           <fieldset className="min-w-0 space-y-3 rounded-xl border border-slate-200 p-4 sm:col-span-2">
             <legend className="px-1 text-sm font-medium">หมวดหมู่ * (เลือกได้หลายหมวดหมู่)</legend>
             <p className="text-xs text-slate-500">เลือกได้สูงสุด 8 หมวดหมู่ โดยหมวดแรกเป็นหมวดหลักสำหรับข้อมูลเดิม</p>
@@ -848,12 +849,14 @@ export default function AdminCms() {
           setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);
           void openDraft(draft).then(()=>{
             setMessage(status==='matched'
-              ? 'เติมชื่อ หมวดหมู่ รายละเอียด และพิกัดจาก TAT Open Data ที่ตรงกันแล้ว กรุณายืนยันข้อมูลและพิกัดก่อนเผยแพร่'
+              ? 'เติมชื่อไทยและชื่อหลักจาก TAT Open Data แล้ว ชื่ออังกฤษจะใช้เฉพาะเมื่อแหล่งข้อมูลมีให้ ส่วนหมวดหมู่ รายละเอียด และพิกัดให้กรอกเอง'
               : status==='source_unavailable'
-                ? 'สร้างฉบับร่างแล้ว แต่แหล่งข้อมูล TAT ไม่พร้อมใช้งาน กรุณากรอกข้อมูลเอง'
+                ? 'สร้างฉบับร่างแล้ว แต่ดาวน์โหลดชื่อจาก TAT ไม่สำเร็จ ยังไม่เติมชื่อให้ กรุณากรอกเองหรือค้นหาใหม่'
                 : status==='ambiguous_match'
-                  ? 'สร้างฉบับร่างแล้ว แต่มีข้อมูล TAT ชื่อซ้ำหลายรายการ กรุณาตรวจสอบและกรอกเอง'
-                  : 'เปิดฉบับร่างแล้ว ยังไม่พบข้อมูลอิสระที่ยืนยันได้ กรุณากรอกข้อมูลด้วยตนเอง');
+                  ? 'สร้างฉบับร่างแล้ว แต่ TAT มีชื่อซ้ำหลายรายการ กรุณาตรวจสอบและกรอกชื่อเอง'
+                  : status==='source_loading'
+                    ? 'สร้างฉบับร่างแล้ว กำลังเตรียมดัชนีชื่อจาก TAT ข้อมูลยังไม่ถูกเติม กรุณาลองใหม่ภายหลัง'
+                    : 'เปิดฉบับร่างแล้ว ยังไม่พบชื่อจากแหล่งอิสระที่ตรงกัน กรุณากรอกชื่อเอง');
           });
         }} />}
       {reconcile && tab === 'drafts' && <section id="cms-reconcile" className="scroll-mt-24 space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
