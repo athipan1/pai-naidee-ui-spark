@@ -2,6 +2,7 @@ const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
 const { isThaiProvince } = require('./thai-provinces.cjs');
+const { resolveIndependentDraft } = require('./smart-draft-autofill.cjs');
 const { finishDirectPublication } = require('./admin-direct-publication.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
@@ -245,36 +246,79 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.draft || { error: result.error });
   }));
 
-  // Google Discovery creates an ID-only draft. Google name and coordinates are
-  // never persisted; the administrator supplies verified place data later.
+  // Persist only Google Place ID; source fields are read independently from TAT.
   app.post('/api/admin/places/google-reference', requireAdmin, wrap(async (req, res) => {
     const placeId = typeof req.body?.placeId === 'string' ? req.body.placeId.trim() : '';
     if (!/^[A-Za-z0-9_-]{8,256}$/.test(placeId)) return res.status(400).json({ error: 'Invalid Google Place ID.' });
     const province = req.body?.province;
     if (!isThaiProvince(province)) return res.status(400).json({ error: 'Select a valid Thai province.' });
-    const sql = getSql();
-    const result = await sql.begin(async tx => {
+    const candidateName=req.body?.candidateName;
+    if(candidateName!==undefined && (typeof candidateName!=='string'||!candidateName.trim()||candidateName.length>160))
+      return res.status(400).json({error:'Invalid temporary lookup name.'});
+    // A Google preview name is a transient lookup key, not persisted content.
+    const enrichment=candidateName
+      ? await resolveIndependentDraft({province,candidateName})
+      : {status:'not_requested'};
+    const sql=getSql();
+    const result=await sql.begin(async tx=>{
       await tx`SELECT pg_advisory_xact_lock(hashtext(${'google-place-draft:'+placeId}))`;
-      const existing = await tx`SELECT id, payload->>'province' AS province FROM place_drafts
-        WHERE payload->>'googlePlaceId' = ${placeId} AND status = 'draft' LIMIT 1`;
-      if (existing.length) return existing[0].province === province
-        ? { code: 200, id: existing[0].id, existing: true }
-        : { code: 409, error: 'This Google Place ID already has a draft in a different province.' };
-      const linked = await tx`SELECT place_id FROM place_external_ids
-        WHERE namespace = 'google_places' AND external_id = ${placeId} LIMIT 1`;
-      if (linked.length) return { code: 409, error: 'This Google Place ID is already linked to a published place.' };
-      const payload = { name: 'รอยืนยันชื่อสถานที่', nameLocal: '', province,
-        category: 'attraction', description: '', lat: null, lng: null,
-        imageUrl: '', imageUrls: [], removedImageUrls: [],
-        googlePlaceId: placeId, verificationStatus: 'PENDING_VERIFICATION' };
-      const id = randomUUID();
-      await tx`INSERT INTO place_drafts (id, payload, author_id)
-        VALUES (${id}, ${tx.json(payload)}, ${req.auth.user.id})`;
-      return { code: 201, id, existing: false };
+      const existing=await tx`SELECT id,payload,status,
+        EXTRACT(EPOCH FROM updated_at)::text AS version FROM place_drafts
+        WHERE payload->>'googlePlaceId'=${placeId} AND status='draft' LIMIT 1`;
+      if(existing.length && existing[0].payload?.province!==province)
+        return {code:409,error:'This Google Place ID already has a draft in a different province.'};
+      const linked=await tx`SELECT place_id FROM place_external_ids
+        WHERE namespace='google_places' AND external_id=${placeId} LIMIT 1`;
+      if(linked.length)return {code:409,error:'This Google Place ID is already linked to a published place.'};
+      const matched=enrichment.status==='matched';
+      if(matched){
+        const duplicates=await tx`SELECT id FROM places
+          WHERE province=${province} AND (id=${enrichment.source.id}
+          OR LOWER(TRIM(COALESCE(name_local,'')))=LOWER(TRIM(${enrichment.fields.nameLocal}))
+          OR LOWER(TRIM(name))=LOWER(TRIM(${enrichment.fields.name}))) LIMIT 1`;
+        if(duplicates.length)return {code:409,error:'This place already exists in the published catalogue. Edit it instead.'};
+        const staged=await tx`SELECT id FROM place_drafts
+          WHERE status='draft' AND payload->'autoFillSource'->>'id'=${enrichment.source.id}
+          AND payload->>'googlePlaceId' <> ${placeId} LIMIT 1`;
+        if(staged.length)return {code:409,error:'A draft for this TAT attraction already exists.'};
+      }
+      const autoFillSource=matched?{
+        ...enrichment.source,matchedAt:new Date().toISOString(),reviewRequired:true
+      }:null;
+      if(existing.length){
+        const current=existing[0];
+        const untouched=current.payload?.name==='รอยืนยันชื่อสถานที่'
+          && current.payload?.lat==null && current.payload?.lng==null;
+        if(matched && untouched){
+          const updatedPayload={...current.payload,...enrichment.fields,autoFillSource};
+          const [updated]=await tx`UPDATE place_drafts SET payload=${tx.json(updatedPayload)},
+            updated_at=GREATEST(clock_timestamp(),updated_at+INTERVAL '1 microsecond')
+            WHERE id=${current.id} RETURNING id,status,payload,
+            EXTRACT(EPOCH FROM updated_at)::text AS version`;
+          return {code:200,id:current.id,existing:true,draft:updated,
+            autoFillStatus:'matched',englishNameFound:enrichment.englishNameFound};
+        }
+        return {code:200,id:current.id,existing:true,draft:current,
+          autoFillStatus:untouched?enrichment.status:'existing_preserved'};
+      }
+      const payload={name:'รอยืนยันชื่อสถานที่',nameLocal:'',province,
+        category:'attraction',description:'',lat:null,lng:null,
+        imageUrl:'',imageUrls:[],removedImageUrls:[],googlePlaceId:placeId,
+        verificationStatus:'PENDING_VERIFICATION',
+        ...(matched?{...enrichment.fields,autoFillSource}:{})};
+      const id=randomUUID();
+      const [created]=await tx`INSERT INTO place_drafts (id,payload,author_id)
+        VALUES (${id},${tx.json(payload)},${req.auth.user.id})
+        RETURNING id,status,payload,EXTRACT(EPOCH FROM updated_at)::text AS version`;
+      return {code:201,id,existing:false,draft:created,
+        autoFillStatus:enrichment.status,englishNameFound:matched?enrichment.englishNameFound:false};
     });
-    res.status(result.code).json(result.error ? { error: result.error } : {
-      id: result.id, status: 'draft', verificationStatus: 'PENDING_VERIFICATION',
-      existing: result.existing, coordinatesRequired: true });
+    res.status(result.code).json(result.error?{error:result.error}:{
+      id:result.id,status:'draft',verificationStatus:'PENDING_VERIFICATION',
+      existing:result.existing,coordinatesRequired:result.draft?.payload?.lat==null,
+      draft:result.draft,autoFillStatus:result.autoFillStatus,
+      englishNameFound:result.englishNameFound??false
+    });
   }));
 
   app.post('/api/admin/places', requireAdmin, wrap(async (req, res) => {
@@ -300,6 +344,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (!draft) return { code: 404, error: 'Editable draft not found.' };
       if (draft.status !== 'draft' || draft.version !== version) return { code: 409, error: 'Draft changed. Reload it before saving.' };
       if (typeof draft.payload?.googlePlaceId === 'string') parsed.value.googlePlaceId = draft.payload.googlePlaceId;
+      if (draft.payload?.autoFillSource) parsed.value.autoFillSource = draft.payload.autoFillSource;
       const [saved] = await tx`UPDATE place_drafts SET payload = ${tx.json(parsed.value)},
         updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
         WHERE id = ${req.params.draftId}
