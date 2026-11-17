@@ -11,12 +11,11 @@ test('exact TAT place+province match fills independently sourced fields with att
  const index=indexRecords([record()]);
  const matched=matchIndependentRecord(index,'ระยอง','หาดแหลมเจริญ');
  assert.equal(matched.status,'matched');
- assert.deepEqual(matched.fields,{
-  name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ',province:'ระยอง',
-  category:'Beach',categories:['Beach'],
-  description:'ชายหาดสาธารณะในจังหวัดระยอง มีพื้นที่พักผ่อนและบรรยากาศริมทะเล',
-  lat:12.65,lng:101.27
- });
+ assert.deepEqual(matched.fields,{name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ'});
+ assert.equal(matched.fields.lat,undefined);
+ assert.equal(matched.fields.lng,undefined);
+ assert.equal(matched.fields.description,undefined);
+ assert.equal(matched.fields.category,undefined);
  assert.equal(matched.source.id,'tat-12345678901234567');
  assert.equal(matched.source.license,'Open Data Common');
  assert.equal(matched.englishNameFound,true);
@@ -34,11 +33,16 @@ test('reject ambiguous matches; never guess a place or fabricate English transla
  assert.equal(unique.fields.name,unique.fields.nameLocal);
  assert.equal(unique.englishNameFound,false);
 });
-test('only quality-gated official rows are allowed into an auto-fill draft',()=>{
- for(const invalid of [
-  {ATT_LOCATION:''},{PROVINCE_NAME_TH:'ไม่ใช่จังหวัด'},{ATT_DETAIL_TH:'-'},
-  {ATT_CATEGORY:'3',ATT_TYPE:'99'},{ATT_LOCATION:'100.1, 12.6'},
+test('names-only matching accepts incomplete TAT rows but requires ID, Thai name and province',()=>{
+ for(const missing of [
+  {ATT_DETAIL_TH:'-'},{ATT_CATEGORY:'3',ATT_TYPE:'99'},
+  {ATT_LOCATION:''},{ATT_LOCATION:'100.1, 12.6'},
  ]){
+  const result=matchIndependentRecord(indexRecords([record(missing)]),'ระยอง','หาดแหลมเจริญ');
+  assert.equal(result.status,'matched','other fields do not block finding a name');
+  assert.deepEqual(Object.keys(result.fields).sort(),['name','nameLocal']);
+ }
+ for(const invalid of [{PROVINCE_NAME_TH:'จังหวัดที่ไม่มีจริง'},{ATT_NAME_TH:'-'},{ATT_ID:'invalid id'}]){
   assert.equal(matchIndependentRecord(indexRecords([record(invalid)]),'ระยอง','หาดแหลมเจริญ').status,'no_match');
  }
 });
@@ -63,4 +67,9 @@ test('source outage falls back safely without writing Google preview data',async
  const result=await resolveIndependentDraft({province:'ระยอง',candidateName:'หาดแหลมเจริญ',load:async()=>{throw Error('unavailable')}});
  assert.deepEqual(result,{status:'source_unavailable'});
  assert.equal((await resolveIndependentDraft({province:'invalid',candidateName:'beach',load:async()=>{throw Error('must not call')}})).status,'invalid_lookup');
+});
+test('name lookup is bounded while the source downloads in the background',async()=>{
+ const never=new Promise(()=>{});
+ const pending=await resolveIndependentDraft({province:'ระยอง',candidateName:'หาดแหลมเจริญ',load:()=>never,waitMs:2});
+ assert.deepEqual(pending,{status:'source_loading'});
 });
