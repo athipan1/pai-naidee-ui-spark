@@ -18,13 +18,18 @@ import {
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import type { MascotMotion } from "./mascotState";
+import {
+  activeMascot,
+  getMascotClipName,
+  type MascotCharacter,
+} from "./mascotCharacters";
 
 let cachedModel: { url: string; bytes: ArrayBuffer } | undefined;
 
 async function getModel(url: string, signal: AbortSignal) {
   if (cachedModel?.url === url) return cachedModel.bytes;
   const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error("Elephant asset unavailable");
+  if (!response.ok) throw new Error("Mascot asset unavailable");
   const bytes = await response.arrayBuffer();
   signal.throwIfAborted();
   cachedModel = { url, bytes };
@@ -69,7 +74,8 @@ export async function createElephantRenderer(
   url: string,
   signal: AbortSignal,
   onContextLost: () => void,
-  onWalkingFinished: () => void
+  onWalkingFinished: () => void,
+  character: MascotCharacter = activeMascot
 ) {
   signal.throwIfAborted();
   const canvas = document.createElement("canvas");
@@ -86,7 +92,7 @@ export async function createElephantRenderer(
 
   const renderer = new WebGLRenderer({ canvas, context, alpha: true });
   const scene = new Scene();
-  const camera = new PerspectiveCamera(31, 1, 0.1, 20);
+  const camera = new PerspectiveCamera(character.camera.fov, 1, 0.1, 20);
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   let asset: Awaited<ReturnType<GLTFLoader["parseAsync"]>>;
   try {
@@ -114,7 +120,7 @@ export async function createElephantRenderer(
   asset.scene.position.sub(center);
   rig.add(asset.scene);
   scene.add(rig);
-  camera.position.set(0.47, 0.16, 2.03);
+  camera.position.set(...character.camera.position);
   camera.lookAt(0, 0, 0);
   scene.add(new HemisphereLight(0xfff9f1, 0x94a5c0, 1.65));
   const key = new DirectionalLight(0xfff0de, 2.0);
@@ -134,7 +140,8 @@ export async function createElephantRenderer(
     }
   });
   const clips = new Map(asset.animations.map((clip) => [clip.name, clip]));
-  const canWalk = bones.length > 0 && clips.has("Walking");
+  const walkingClip = getMascotClipName(character, "Walking");
+  const canWalk = bones.length > 0 && !!walkingClip && clips.has(walkingClip);
   canvas.dataset.bones = String(bones.length);
 
   function capturePose() {
@@ -161,7 +168,8 @@ export async function createElephantRenderer(
     }
   }
 
-  const restClip = clips.get("Rest");
+  const restClipName = getMascotClipName(character, "Rest");
+  const restClip = restClipName ? clips.get(restClipName) : undefined;
   const restAction = restClip ? mixer.clipAction(restClip).play() : undefined;
   mixer.update(0);
   const neutralPose = capturePose();
@@ -255,11 +263,9 @@ export async function createElephantRenderer(
     canvas.dataset.motion = next;
     returnToIdle = false;
     action?.stop();
+    const clipName = getMascotClipName(character, next);
     const clip =
-      next === "Rest"
-        ? undefined
-        : (clips.get(next) ??
-          (next === "PeekGreeting" ? clips.get("Greeting") : undefined));
+      next === "Rest" || !clipName ? undefined : clips.get(clipName);
     action = clip ? mixer.clipAction(clip).reset() : undefined;
     if (
       action &&
