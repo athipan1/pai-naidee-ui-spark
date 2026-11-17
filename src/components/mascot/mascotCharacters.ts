@@ -9,6 +9,7 @@ export type MascotCharacter = {
   id: string;
   title: Record<"th" | "en", string>;
   fallbackEmoji: string;
+  ui: Record<"th" | "en", { walk: string; loading: string; fallback: string }>;
   assets: { model: string; portrait: string };
   animationClips: Partial<Record<MascotMotion, string>>;
   camera: {
@@ -25,6 +26,18 @@ const registry = {
       en: "Elephant travel assistant",
     },
     fallbackEmoji: "🐘",
+    ui: {
+      th: {
+        walk: "ดูช้างเดิน",
+        loading: "กำลังโหลดช้าง 3D",
+        fallback: "แสดงช้างแบบ 2D",
+      },
+      en: {
+        walk: "Watch the elephant walk",
+        loading: "Loading the 3D elephant",
+        fallback: "Showing the 2D elephant",
+      },
+    },
     assets: {
       model: "./assets/elephant.glb",
       portrait: "./assets/elephant.webp",
