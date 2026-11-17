@@ -2,6 +2,7 @@ export type PlannerStatus = "idle" | "thinking" | "success" | "error";
 export type MascotMotion =
   | "Idle"
   | "Greeting"
+  | "PeekGreeting"
   | "Thinking"
   | "Happy"
   | "Walking"

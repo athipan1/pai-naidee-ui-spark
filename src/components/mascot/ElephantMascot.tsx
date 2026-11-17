@@ -7,6 +7,7 @@ import {
   Minus,
   Search,
   Sparkles,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,9 @@ import {
   setMascotHidden,
   type PlannerStatus,
 } from "./mascotState";
+
+import { useMascotPeek } from "./useMascotPeek";
+import "./ElephantMascot.css";
 
 const assets = import.meta.glob<string>("./assets/elephant.{glb,webp}", {
   eager: true,
@@ -32,6 +36,7 @@ const copy = {
     stopWalking: "หยุดเดิน",
     hide: "ซ่อนผู้ช่วยเที่ยว",
     restore: "แสดงผู้ช่วยเที่ยว",
+    dismissGreeting: "ปิดข้อความทักทาย",
     welcome: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
     label: "บอกทริปที่อยากไป",
     placeholder: "เชียงใหม่ 3 วัน งบ 6,000 บาท",
@@ -52,6 +57,7 @@ const copy = {
     stopWalking: "Stop walking",
     hide: "Hide travel assistant",
     restore: "Show travel assistant",
+    dismissGreeting: "Dismiss greeting",
     welcome: "Hi! Where would you like to go?",
     label: "Describe your trip",
     placeholder: "Chiang Mai, 3 days, ฿6,000",
@@ -104,13 +110,24 @@ export default function ElephantMascot({
   );
   const [attempt, setAttempt] = useState(0);
   const open = !hidden && key === openFor;
-  const motion = getMascotMotion({
+  const peek = useMascotPeek(
+    pathname === "/" && !hidden && !open && !reducedMotion
+  );
+  const render3D = open || peek.live;
+  const panelMotion = getMascotMotion({
     reducedMotion,
     resting,
     plannerStatus,
     greeting,
     walking,
   });
+  const motion = open
+    ? panelMotion
+    : peek.phase === "greeting"
+      ? "PeekGreeting"
+      : peek.phase === "exiting"
+        ? "Rest"
+        : "Idle";
   const motionRef = useRef({ motion, reducedMotion });
 
   useEffect(() => {
@@ -136,7 +153,8 @@ export default function ElephantMascot({
 
   useEffect(() => {
     const host = stage.current;
-    if (!open || !host || !modelUrl) return;
+    if (!render3D || !host || !modelUrl) return;
+    setVisual("loading");
     const controller = new AbortController();
     const deadline = window.setTimeout(() => {
       controller.abort();
@@ -167,7 +185,7 @@ export default function ElephantMascot({
           motionRef.current.reducedMotion
         );
         setVisual("ready");
-        if (!greeted.current) {
+        if (open && !greeted.current) {
           greeted.current = true;
           setGreeting(true);
         }
@@ -182,7 +200,7 @@ export default function ElephantMascot({
       renderer.current?.dispose();
       renderer.current = null;
     };
-  }, [open, attempt]);
+  }, [render3D, open, attempt]);
 
   useEffect(() => {
     if (!open) return;
@@ -227,11 +245,20 @@ export default function ElephantMascot({
     return () => window.clearTimeout(timer);
   }, [open, plannerStatus, visual, resting, walking]);
 
-  function minimize() {
+  function showAssistant() {
+    peek.interrupt();
+    setVisual("loading");
+    setResting(false);
+    setOpenFor(key);
+  }
+
+  function minimize(animate = false) {
+    if (animate && !reducedMotion && pathname === "/") peek.dismiss();
     setOpenFor(undefined);
     setGreeting(false);
     setWalking(false);
-    toggle.current?.focus();
+    // The same launcher changes from the expanded control to the clipped tab.
+    window.requestAnimationFrame(() => toggle.current?.focus());
   }
 
   function updateHidden(value: boolean) {
@@ -265,7 +292,7 @@ export default function ElephantMascot({
       height={256}
     />
   ) : (
-    <span aria-hidden="true" className="text-3xl">
+    <span aria-hidden="true" className="text-5xl">
       🐘
     </span>
   );
@@ -277,33 +304,76 @@ export default function ElephantMascot({
       className={`fixed right-[max(0.75rem,env(safe-area-inset-right))] z-[39] ${bottom}`}
       aria-label={t.title}
     >
-      <Button
-        ref={toggle}
-        type="button"
-        variant={hidden ? "ghost" : "outline"}
-        className={`ml-auto flex h-12 w-12 rounded-full p-1 ${hidden ? "bg-background/80" : "bg-card shadow-md"}`}
-        aria-label={hidden ? t.restore : t.title}
-        aria-expanded={open}
-        aria-controls={open ? panelId : undefined}
-        onClick={() => {
-          if (hidden) updateHidden(false);
-          else if (open) minimize();
-          else {
-            setVisual("loading");
-            setResting(false);
-            setOpenFor(key);
-          }
-        }}
-      >
-        {hidden ? <EyeOff aria-hidden="true" className="h-4 w-4" /> : portrait}
-      </Button>
+      {!hidden && !open ? (
+        <div
+          className="elephant-peek"
+          data-peek={peek.phase}
+          data-home={pathname === "/" || undefined}
+        >
+          <div className="elephant-peek__crop" aria-hidden="true">
+            <div className="elephant-peek__character">
+              {(!peek.live || !modelUrl || visual !== "ready") && portrait}
+              {peek.live && <div ref={stage} className="absolute inset-0" />}
+            </div>
+          </div>
+          <button
+            ref={toggle}
+            type="button"
+            className="elephant-peek__trigger rounded-l-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring"
+            aria-label={t.title}
+            aria-expanded={false}
+            onClick={showAssistant}
+          />
+          {peek.phase === "greeting" && (
+            <div className="elephant-peek__bubble flex items-center rounded-2xl border bg-card text-card-foreground shadow-lg">
+              <button
+                type="button"
+                className="min-h-11 flex-1 rounded-l-2xl py-2 pl-3 text-left text-sm font-semibold leading-snug focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+                onClick={showAssistant}
+              >
+                {t.welcome}
+              </button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-11 w-11 shrink-0 rounded-r-2xl"
+                aria-label={t.dismissGreeting}
+                onClick={() => {
+                  toggle.current?.focus();
+                  peek.dismiss();
+                }}
+              >
+                <X aria-hidden="true" className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <Button
+          ref={toggle}
+          type="button"
+          variant={hidden ? "ghost" : "outline"}
+          className={`ml-auto flex h-12 w-12 rounded-full p-1 ${hidden ? "bg-background/80" : "bg-card shadow-md"}`}
+          aria-label={hidden ? t.restore : t.title}
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
+          onClick={hidden ? () => updateHidden(false) : () => minimize(true)}
+        >
+          {hidden ? (
+            <EyeOff aria-hidden="true" className="h-4 w-4" />
+          ) : (
+            portrait
+          )}
+        </Button>
+      )}
       {open && (
         <section
           id={panelId}
           aria-labelledby={titleId}
-          className="absolute bottom-full right-0 mb-2 max-h-[min(28rem,calc(100dvh-12.5rem-env(safe-area-inset-bottom)))] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl lg:mb-7 lg:w-72"
+          className="elephant-mascot-panel absolute bottom-full right-0 mb-2 max-h-[min(28rem,calc(100dvh-12.5rem-env(safe-area-inset-bottom)))] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl lg:mb-7 lg:w-72"
           onKeyDown={(event) => {
-            if (event.key === "Escape") minimize();
+            if (event.key === "Escape") minimize(true);
           }}
         >
           <header className="flex items-center gap-1">
@@ -317,7 +387,7 @@ export default function ElephantMascot({
               size="icon"
               className="h-11 w-11"
               aria-label={t.close}
-              onClick={minimize}
+              onClick={() => minimize(true)}
             >
               <Minus aria-hidden="true" className="h-5 w-5" />
             </Button>
@@ -389,41 +459,43 @@ export default function ElephantMascot({
               {plannerMessage}
             </p>
           )}
-          <form onSubmit={openPlanner} className="grid gap-2">
-            <label
-              htmlFor={`${panelId}-message`}
-              className="text-sm font-medium"
-            >
-              {t.label}
-            </label>
-            <input
-              id={`${panelId}-message`}
-              value={draft}
-              maxLength={500}
-              onChange={(event) => {
-                setResting(false);
-                setDraft(event.target.value);
-              }}
-              placeholder={t.placeholder}
-              className="h-11 min-w-0 rounded-lg border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <Button
-              type="submit"
-              className="min-h-11 gap-2 bg-teal-700 text-white hover:bg-teal-800"
-            >
-              <Sparkles aria-hidden="true" className="h-4 w-4" />
-              {t.review}
-            </Button>
-          </form>
+          {pathname !== "/trip-planner" && (
+            <form onSubmit={openPlanner} className="grid gap-2">
+              <label
+                htmlFor={`${panelId}-message`}
+                className="text-sm font-medium"
+              >
+                {t.label}
+              </label>
+              <input
+                id={`${panelId}-message`}
+                value={draft}
+                maxLength={500}
+                onChange={(event) => {
+                  setResting(false);
+                  setDraft(event.target.value);
+                }}
+                placeholder={t.placeholder}
+                className="h-11 min-w-0 rounded-lg border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <Button
+                type="submit"
+                className="min-h-11 gap-2 bg-teal-700 text-white hover:bg-teal-800"
+              >
+                <Sparkles aria-hidden="true" className="h-4 w-4" />
+                {t.review}
+              </Button>
+            </form>
+          )}
           <div className="mt-2 flex gap-1">
             <Button asChild variant="ghost" className="min-h-11 flex-1 gap-2">
-              <Link to="/discover?mode=map" onClick={minimize}>
+              <Link to="/discover?mode=map" onClick={() => minimize()}>
                 <Compass aria-hidden="true" className="h-4 w-4" />
                 {t.nearby}
               </Link>
             </Button>
             <Button asChild variant="ghost" className="min-h-11 flex-1 gap-2">
-              <Link to="/discover?mode=search" onClick={minimize}>
+              <Link to="/discover?mode=search" onClick={() => minimize()}>
                 <Search aria-hidden="true" className="h-4 w-4" />
                 {t.search}
               </Link>

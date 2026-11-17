@@ -255,9 +255,16 @@ export async function createElephantRenderer(
     canvas.dataset.motion = next;
     returnToIdle = false;
     action?.stop();
-    const clip = next === "Rest" ? undefined : clips.get(next);
+    const clip =
+      next === "Rest"
+        ? undefined
+        : (clips.get(next) ??
+          (next === "PeekGreeting" ? clips.get("Greeting") : undefined));
     action = clip ? mixer.clipAction(clip).reset() : undefined;
-    if (action && (next === "Greeting" || next === "Happy")) {
+    if (
+      action &&
+      (next === "Greeting" || next === "PeekGreeting" || next === "Happy")
+    ) {
       action.setLoop(LoopOnce, 1);
       action.clampWhenFinished = true;
     } else if (action && next === "Walking") {
@@ -282,7 +289,10 @@ export async function createElephantRenderer(
   function handleFinished(event: { action: typeof action }) {
     if (
       event.action === action &&
-      (motion === "Greeting" || motion === "Happy" || motion === "Walking")
+      (motion === "Greeting" ||
+        motion === "PeekGreeting" ||
+        motion === "Happy" ||
+        motion === "Walking")
     ) {
       if (motion === "Walking") onWalkingFinished();
       returnToIdle = true;

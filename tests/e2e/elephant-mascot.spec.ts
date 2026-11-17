@@ -26,6 +26,8 @@ const plan = {
 };
 
 test.beforeEach(async ({ page }) => {
+  await page.route("https://fonts.googleapis.com/**", (route) => route.abort());
+  await page.route("https://fonts.gstatic.com/**", (route) => route.abort());
   await page.route("**/api/**", (route) => {
     if (route.request().method() !== "GET") return route.abort();
     return route.fulfill({
@@ -349,4 +351,96 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await expect(panel.locator("canvas")).toBeVisible();
   expect(urls.filter((url) => url.endsWith(".glb"))).toHaveLength(1);
   expect(errors).toEqual([]);
+});
+
+test("peeks above navigation, retracts after the greeting and does not greet again", async ({
+  page,
+}) => {
+  const requests: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST") requests.push(request.url());
+  });
+  await page.addInitScript(() => {
+    const phases = new Set<string>();
+    const observe = (element: Element | null) => {
+      const phase = element?.getAttribute("data-peek");
+      if (phase) phases.add(phase);
+      document.documentElement.dataset.observedPeek = [...phases].join(" ");
+    };
+    new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === "attributes") observe(mutation.target as Element);
+        else if (mutation.addedNodes.length)
+          observe(document.querySelector("[data-peek]"));
+      }
+    }).observe(document, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["data-peek"],
+    });
+  });
+  await page.goto("/");
+  const peek = page.locator("[data-peek]");
+  const bubble = page.getByRole("button", {
+    name: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
+  });
+  await expect(bubble).toBeVisible({ timeout: 12_000 });
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-observed-peek",
+    /entering/
+  );
+  const nav = await page.locator("nav").last().boundingBox();
+  const bounds = await bubble.boundingBox();
+  expect(bounds!.y + bounds!.height).toBeLessThan(nav!.y);
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth)
+  ).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-observed-peek",
+    /exiting/,
+    { timeout: 10_000 }
+  );
+  await expect(bubble).toBeHidden();
+  await expect(peek).toHaveAttribute("data-peek", "idle");
+  await expect(peek.locator("canvas")).toHaveCount(0);
+  await page.reload();
+  await expect(peek).toHaveAttribute("data-peek", "idle");
+  expect(requests.filter((url) => url.endsWith("/api/ai/trip-plan"))).toEqual(
+    []
+  );
+});
+
+test("opens the existing assistant from the greeting and respects reduced motion", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const bubble = page.getByRole("button", {
+    name: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
+  });
+  await expect(bubble).toBeVisible({ timeout: 12_000 });
+  await bubble.click();
+  await expect(page.getByRole("region", { name: title })).toBeVisible();
+  await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
+  await expect(page.locator("[data-peek]")).toHaveAttribute(
+    "data-peek",
+    "idle"
+  );
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.evaluate(() =>
+    sessionStorage.removeItem("painaidee.elephant.peek-greeted")
+  );
+  await page.reload();
+  // Advance past the introductory delay without slowing the browser suite.
+  await page.clock.install();
+  await page.clock.runFor(4000);
+  await expect(bubble).toBeHidden();
+  await expect(page.locator("[data-peek]")).toHaveAttribute(
+    "data-peek",
+    "idle"
+  );
+  await page.getByRole("button", { name: title }).click();
+  await expect(page.getByRole("region", { name: title })).toBeVisible();
 });
