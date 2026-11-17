@@ -100,7 +100,7 @@ function cleanPlace(input, { draft = false } = {}) {
   };
 }
 
-function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {} }) {
+function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft }) {
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
@@ -257,7 +257,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       return res.status(400).json({error:'Invalid temporary lookup name.'});
     // A Google preview name is a transient lookup key, not persisted content.
     const enrichment=candidateName
-      ? await resolveIndependentDraft({province,candidateName})
+      ? await enrichDraft({province,candidateName})
       : {status:'not_requested'};
     const sql=getSql();
     const result=await sql.begin(async tx=>{
