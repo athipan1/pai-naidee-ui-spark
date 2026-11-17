@@ -227,7 +227,7 @@ export async function createElephantRenderer(
       renderer.render(scene, camera);
       if (returnToIdle) {
         returnToIdle = false;
-        setMotion("Idle");
+        setMotion(motion === "PeekGreeting" ? "Rest" : "Idle");
       }
     }
     scheduleFrame();

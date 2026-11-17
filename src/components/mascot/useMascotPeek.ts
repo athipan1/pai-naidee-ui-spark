@@ -44,7 +44,7 @@ export function useMascotPeek(available: boolean) {
         rememberGreeting();
         setLive(true);
         setPhase("entering");
-      }, 2600);
+      }, 3200);
     }
 
     if (document.readyState === "complete") schedule();

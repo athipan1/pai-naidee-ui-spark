@@ -396,6 +396,15 @@ test("peeks above navigation, retracts after the greeting and does not greet aga
   const nav = await page.locator("nav").last().boundingBox();
   const bounds = await bubble.boundingBox();
   expect(bounds!.y + bounds!.height).toBeLessThan(nav!.y);
+  const primaryAction = await page
+    .getByRole("button", { name: "AI วางแผนเที่ยว", exact: true })
+    .boundingBox();
+  const disjoint =
+    bounds!.y + bounds!.height <= primaryAction!.y ||
+    primaryAction!.y + primaryAction!.height <= bounds!.y ||
+    bounds!.x + bounds!.width <= primaryAction!.x ||
+    primaryAction!.x + primaryAction!.width <= bounds!.x;
+  expect(disjoint).toBe(true);
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
