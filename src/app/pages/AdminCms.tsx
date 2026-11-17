@@ -376,6 +376,15 @@ export default function AdminCms() {
     finally { if(requestSeq===geocodeRequestSeq.current)setGeocodeBusy(false); }
   }
 
+  function clearGeocodeSuggestions() {
+    ++geocodeRequestSeq.current;
+    setGeoCandidates([]);
+    setProposedCoordinate(null);
+    setGeocodeNote('');
+    setAutoGeoSuggestions(false);
+    setGeocodeBusy(false);
+  }
+
   // One bounded suggestion lookup after a TAT name match. No coordinate
   // changes reach the form or database until Admin selects and confirms a pin.
   async function suggestGeoapifyCoordinates(draft:Draft) {
@@ -841,7 +850,7 @@ export default function AdminCms() {
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
-          {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อหลัก / ภาษาอังกฤษ (ถ้ามี) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
+          {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อหลัก / ภาษาอังกฤษ (ถ้ามี) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => { clearGeocodeSuggestions(); setForm(current => ({ ...current, [key]: e.target.value })); }} required={key === 'name'} /></label>)}
           <fieldset className="min-w-0 space-y-3 rounded-xl border border-slate-200 p-4 sm:col-span-2">
             <legend className="px-1 text-sm font-medium">หมวดหมู่ * (เลือกได้หลายหมวดหมู่)</legend>
             <p className="text-xs text-slate-500">เลือกได้สูงสุด 8 หมวดหมู่ โดยหมวดแรกเป็นหมวดหลักสำหรับข้อมูลเดิม</p>
@@ -875,7 +884,7 @@ export default function AdminCms() {
         </section>
         <section id="cms-location" className="scroll-mt-24 space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">ระบบเสนอพิกัดจาก Geoapify หลังจับคู่ชื่อ TAT ได้ แต่ต้องเลือกและยืนยันหมุดเองก่อนพิกัดจึงเข้าช่องแบบฟอร์ม</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
-          <div className="grid min-w-0 gap-4 sm:grid-cols-3">{(['province','lat','lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium">{{province:'จังหวัด',lat:'ละติจูด',lng:'ลองจิจูด'}[key]}<input className={inputStyle} value={form[key]} inputMode={key === 'province' ? 'text' : 'decimal'} onChange={e => setForm(current => ({...current,[key]:e.target.value}))} /></label>)}</div>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-3">{(['province','lat','lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium">{{province:'จังหวัด',lat:'ละติจูด',lng:'ลองจิจูด'}[key]}<input className={inputStyle} value={form[key]} inputMode={key === 'province' ? 'text' : 'decimal'} onChange={e => {if(key==='province')clearGeocodeSuggestions();setForm(current => ({...current,[key]:e.target.value}));}} /></label>)}</div>
           {geocodeNote && <p aria-live="polite" className="text-sm text-slate-700">{geocodeNote}</p>}
           {geoCandidates.length > 0 && <div className="space-y-2" aria-label={autoGeoSuggestions?'พิกัดแนะนำจาก Geoapify':'ผลค้นหาพิกัด'}>{autoGeoSuggestions && <p className="text-sm font-semibold text-teal-900">พิกัดแนะนำอัตโนมัติจาก Geoapify (ยังไม่บันทึก)</p>}{geoCandidates.map((candidate, index) => <button key={`${candidate.source}-${index}`} type="button" onClick={() => setProposedCoordinate({ lat: candidate.lat, lng: candidate.lng })} className="flex w-full items-start justify-between gap-2 rounded-lg border bg-white p-3 text-left text-sm hover:border-teal-500"><span>{candidate.label}<span className="mt-1 block text-xs text-slate-500">{candidate.source} · {candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}{typeof candidate.confidence==='number'?' · ความมั่นใจ '+Math.round(candidate.confidence*100)+'%':''}</span></span><MapPin size={16} className="shrink-0 text-teal-600" /></button>)}</div>}
           <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-slate-200" />}>
