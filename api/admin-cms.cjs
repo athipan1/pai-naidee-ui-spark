@@ -1,6 +1,7 @@
 const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
+const { isThaiProvince } = require('./thai-provinces.cjs');
 const { finishDirectPublication } = require('./admin-direct-publication.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
@@ -249,16 +250,20 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   app.post('/api/admin/places/google-reference', requireAdmin, wrap(async (req, res) => {
     const placeId = typeof req.body?.placeId === 'string' ? req.body.placeId.trim() : '';
     if (!/^[A-Za-z0-9_-]{8,256}$/.test(placeId)) return res.status(400).json({ error: 'Invalid Google Place ID.' });
+    const province = req.body?.province;
+    if (!isThaiProvince(province)) return res.status(400).json({ error: 'Select a valid Thai province.' });
     const sql = getSql();
     const result = await sql.begin(async tx => {
       await tx`SELECT pg_advisory_xact_lock(hashtext(${'google-place-draft:'+placeId}))`;
-      const existing = await tx`SELECT id FROM place_drafts
+      const existing = await tx`SELECT id, payload->>'province' AS province FROM place_drafts
         WHERE payload->>'googlePlaceId' = ${placeId} AND status = 'draft' LIMIT 1`;
-      if (existing.length) return { code: 200, id: existing[0].id, existing: true };
+      if (existing.length) return existing[0].province === province
+        ? { code: 200, id: existing[0].id, existing: true }
+        : { code: 409, error: 'This Google Place ID already has a draft in a different province.' };
       const linked = await tx`SELECT place_id FROM place_external_ids
         WHERE namespace = 'google_places' AND external_id = ${placeId} LIMIT 1`;
       if (linked.length) return { code: 409, error: 'This Google Place ID is already linked to a published place.' };
-      const payload = { name: 'รอยืนยันชื่อสถานที่', nameLocal: '', province: 'ชลบุรี',
+      const payload = { name: 'รอยืนยันชื่อสถานที่', nameLocal: '', province,
         category: 'attraction', description: '', lat: null, lng: null,
         imageUrl: '', imageUrls: [], removedImageUrls: [],
         googlePlaceId: placeId, verificationStatus: 'PENDING_VERIFICATION' };
