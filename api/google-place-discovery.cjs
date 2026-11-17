@@ -2,7 +2,7 @@
 // Admin-only, ephemeral Google Places discovery. Never persist Google content.
 const {reserveGoogleDailyQuota}=require('./google-daily-usage.cjs');
 const {createRateLimiter}=require('./security.cjs');
-const {PROVINCE_EN}=require('./place-localizations.cjs');
+const {isThaiProvince,addressMatchesProvince}=require('./thai-provinces.cjs');
 const {normalizeName}=require('./place-discovery.cjs');
 const ENDPOINT='https://places.googleapis.com/v1/places:searchText';
 const MASK='places.id,places.displayName,places.location,places.formattedAddress,places.googleMapsUri';
@@ -17,7 +17,7 @@ function availability(env=process.env,now=Date.now()){
  return {enabled:reasons.length===0,reasons};
 }
 function validate(body){
- if(!body||body.province!=='ชลบุรี'||!Object.hasOwn(PROVINCE_EN,body.province)||!Number.isInteger(body.limit)||body.limit<1||body.limit>10||!Array.isArray(body.sources)||body.sources.length!==1||body.sources[0]!=='google')return null;
+ if(!body||!isThaiProvince(body.province)||!Number.isInteger(body.limit)||body.limit<1||body.limit>10||!Array.isArray(body.sources)||body.sources.length!==1||body.sources[0]!=='google')return null;
  return {province:body.province,limit:body.limit};
 }
 
@@ -60,27 +60,30 @@ async function discoverGoogle(input,{getSql,fetchImpl=fetch,reserve=reserveGoogl
  // Reuse existing durable search ledger. A search consumes quota even on HTTP failure.
  if(!await reserve('places_search',getSql))return {status:'quota_exhausted',candidates:[]};
  try{
-  const response=await fetchImpl(ENDPOINT,{method:'POST',signal:AbortSignal.timeout(7000),headers:{'Content-Type':'application/json','X-Goog-Api-Key':env.GOOGLE_PLACES_API_KEY,'X-Goog-FieldMask':MASK},body:JSON.stringify({textQuery:'สถานที่ท่องเที่ยว จังหวัดชลบุรี ประเทศไทย',languageCode:'th',regionCode:'TH',pageSize:input.limit,locationBias:{rectangle:{low:{latitude:12.45,longitude:100.65},high:{latitude:13.65,longitude:101.55}}}})});
+  const response=await fetchImpl(ENDPOINT,{method:'POST',signal:AbortSignal.timeout(7000),headers:{'Content-Type':'application/json','X-Goog-Api-Key':env.GOOGLE_PLACES_API_KEY,'X-Goog-FieldMask':MASK},body:JSON.stringify({textQuery:'สถานที่ท่องเที่ยว จังหวัด'+input.province+' ประเทศไทย',languageCode:'th',regionCode:'TH',pageSize:input.limit})});
   if(!response.ok)return {status:'unavailable',candidates:[]};
   const payload=await response.json();
   const seen=new Set(),candidates=[];
+  let excludedOutsideProvince=0;
   for(const p of Array.isArray(payload.places)?payload.places:[]){
    const id=typeof p.id==='string'?p.id:'',name=String(p.displayName?.text||'');
    if(!id||!name||seen.has(id))continue;
    seen.add(id);
+   const address=String(p.formattedAddress||'');
+   if(!addressMatchesProvince(address,input.province)){excludedOutsideProvince++;continue;}
    const lat=p.location?.latitude,lng=p.location?.longitude;
    // Google data is displayed only during this request. No database lookup, logs or writes.
-   candidates.push({source:'google',sourceId:'google:'+id,placeId:id,name,province:input.province,lat:Number.isFinite(lat)?lat:null,lng:Number.isFinite(lng)?lng:null,address:String(p.formattedAddress||''),mapsUrl:typeof p.googleMapsUri==='string'&&/^https:\/\/([\w-]+\.)?google\.com\//.test(p.googleMapsUri)?p.googleMapsUri:null,duplicateStatus:'not_checked',holds:['MANUAL_REVIEW','GOOGLE_CONTENT_NOT_FOR_IMPORT'],liveOnly:true});
+   candidates.push({source:'google',sourceId:'google:'+id,placeId:id,name,province:input.province,lat:Number.isFinite(lat)?lat:null,lng:Number.isFinite(lng)?lng:null,address,mapsUrl:typeof p.googleMapsUri==='string'&&/^https:\/\/([\w-]+\.)?google\.com\//.test(p.googleMapsUri)?p.googleMapsUri:null,duplicateStatus:'not_checked',holds:['MANUAL_REVIEW','GOOGLE_CONTENT_NOT_FOR_IMPORT'],liveOnly:true});
   }
   const existing=await readExistingImpl(getSql,input.province);
-  return {status:'ok',province:input.province,sources:[{source:'google',status:'ok'}],candidates:classifyCandidates(candidates,existing),automaticImport:false,publicationAllowed:false,liveOnly:true,warning:'Preview only. Google content must not be imported or stored; independently verify place and rights.'};
+  return {status:'ok',province:input.province,sources:[{source:'google',status:'ok'}],candidates:classifyCandidates(candidates,existing),excludedOutsideProvince,automaticImport:false,publicationAllowed:false,liveOnly:true,warning:'Preview only. Google content must not be imported or stored; independently verify place and rights.'};
  }catch{return {status:'unavailable',candidates:[],error:'Google search or duplicate verification unavailable; no results can be trusted.'};}
 }
 function registerGoogleDiscovery(app,{requireAdmin,getSql,fetchImpl}){
  app.post('/api/admin/google-place-discovery/search',requireAdmin,createRateLimiter({windowMs:60000,max:2,keyPrefix:'google-manual-discovery'}),async(req,res)=>{
   res.set('Cache-Control','no-store');
   const input=validate(req.body);
-  if(!input)return res.status(400).json({error:'Chonburi Google discovery pilot accepts 1–10 places only.'});
+  if(!input)return res.status(400).json({error:'Google discovery requires a supported Thai province and 1–10 places.'});
   const result=await discoverGoogle(input,{getSql,fetchImpl});
   return res.status(result.status==='disabled'?503:result.status==='quota_exhausted'?429:result.status==='unavailable'?502:200).json(result);
  });

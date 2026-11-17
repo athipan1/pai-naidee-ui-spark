@@ -149,8 +149,13 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     const minimal = await write('/places', {name:'Name only fixture'}, 201);
     assert.equal(minimal.payload.lat,null); assert.equal(minimal.payload.lng,null);
     await write(`/places/${minimal.id}/publish`,{version:minimal.version},400);
-    const referenced = await write('/places/google-reference',{placeId:'ChIJisolatedDraftRef1234'},201);
+    const referenced = await write('/places/google-reference',{placeId:'ChIJisolatedDraftRef1234',province:'ระยอง'},201);
     const row = (await (await admin('/places')).json()).drafts.find(d => d.id === referenced.id);
+    assert.equal(row.payload.province,'ระยอง','draft must keep selected province');
+    const again = await write('/places/google-reference',{placeId:'ChIJisolatedDraftRef1234',province:'ระยอง'},200);
+    assert.equal(again.id,referenced.id,'same province is idempotent');
+    await write('/places/google-reference',{placeId:'ChIJisolatedDraftRef1234',province:'ชลบุรี'},409);
+    await write('/places/google-reference',{placeId:'ChIJdifferentTestRef1234'},400);
     const saved = await write(`/places/${row.id}`,{...row.payload,name:'ชื่อที่ยืนยันแล้ว',version:row.version},200,'PUT');
     assert.equal(saved.payload.googlePlaceId,'ChIJisolatedDraftRef1234');
     assert.equal(saved.payload.lat,null); assert.equal(saved.payload.lng,null);
