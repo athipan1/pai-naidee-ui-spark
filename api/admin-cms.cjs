@@ -103,7 +103,7 @@ function cleanPlace(input, { draft = false } = {}) {
 }
 
 function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft }) {
-  if (enrichDraft === resolveIndependentDraft) warmNamesIndex();
+  if (process.env.RAILWAY_ENVIRONMENT_ID && enrichDraft === resolveIndependentDraft) warmNamesIndex();
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
