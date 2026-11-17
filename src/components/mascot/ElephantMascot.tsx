@@ -79,7 +79,11 @@ export default function ElephantMascot({
   language: "th" | "en";
   plannerStatus: PlannerStatus;
 }) {
-  const t = { ...copy[language], title: activeMascot.title[language] };
+  const t = {
+    ...copy[language],
+    ...activeMascot.ui[language],
+    title: activeMascot.title[language],
+  };
   const { pathname, key } = useLocation();
   const navigate = useNavigate();
   const panelId = useId();
