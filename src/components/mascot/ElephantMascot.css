@@ -130,7 +130,7 @@
     /* Leave the action buttons below the Home hero tappable on short phones. */
     bottom: max(
       0px,
-      calc(100dvh - 28rem - 6.5rem - env(safe-area-inset-bottom))
+      calc(100dvh - 31rem - 6.5rem - env(safe-area-inset-bottom))
     );
   }
 }
