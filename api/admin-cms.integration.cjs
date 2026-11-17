@@ -72,7 +72,14 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   app.use(express.json());
   const requireAdmin = authRoutes(app, { getSql, limitLogin: (_req, _res, next) => next() });
   registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage: createImageUpload(),
-    uploadImage: file => uploadImage(storage, file), invalidateSearchIndex });
+    uploadImage: file => uploadImage(storage, file), invalidateSearchIndex,
+    enrichDraft: async ({province,candidateName})=>candidateName==='หาดแหลมเจริญ'&&province==='ระยอง'
+      ? {status:'matched',englishNameFound:true,
+        source:{name:'Tourism Authority of Thailand — Open Data',url:'https://datacatalog.tat.or.th/dataset/tourist-attraction',id:'tat-fixture-2026',license:'Open Data Common'},
+        fields:{name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ',province:'ระยอง',
+          category:'Beach',categories:['Beach'],description:'ชายหาดสำหรับพักผ่อนริมทะเลในระยอง',
+          lat:12.65,lng:101.27}}
+      : {status:'no_match'} });
   registerRailwayMedia(app, { getSql, storage, requireAdmin });
   registerQualityReview(app, { getSql, requireAdmin });
   registerGoogleVerification(app, { getSql, requireAdmin });
@@ -159,6 +166,38 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     const saved = await write(`/places/${row.id}`,{...row.payload,name:'ชื่อที่ยืนยันแล้ว',version:row.version},200,'PUT');
     assert.equal(saved.payload.googlePlaceId,'ChIJisolatedDraftRef1234');
     assert.equal(saved.payload.lat,null); assert.equal(saved.payload.lng,null);
+  });
+
+  await t.test('Google reference draft auto-fills only independently sourced fields and preserves attribution on edit',async()=>{
+    const created=await write('/places/google-reference',{
+      placeId:'ChIJAutoFillReference1234',province:'ระยอง',candidateName:'หาดแหลมเจริญ'
+    },201);
+    assert.equal(created.autoFillStatus,'matched');
+    assert.equal(created.coordinatesRequired,false);
+    assert.equal(created.draft.payload.name,'Laem Charoen Beach');
+    assert.equal(created.draft.payload.nameLocal,'หาดแหลมเจริญ');
+    assert.deepEqual(created.draft.payload.categories,['Beach']);
+    assert.equal(created.draft.payload.lat,12.65);
+    assert.equal(created.draft.payload.lng,101.27);
+    assert.equal(created.draft.payload.autoFillSource.id,'tat-fixture-2026');
+    assert.equal(created.draft.payload.googlePlaceId,'ChIJAutoFillReference1234');
+    const edited=await write(`/places/${created.id}`,{
+      ...created.draft.payload,name:'Verified Independent Name',version:created.draft.version
+    },200,'PUT');
+    assert.equal(edited.payload.name,'Verified Independent Name');
+    assert.equal(edited.payload.autoFillSource.id,'tat-fixture-2026');
+    const again=await write('/places/google-reference',{
+      placeId:'ChIJAutoFillReference1234',province:'ระยอง',candidateName:'หาดแหลมเจริญ'
+    },200);
+    assert.equal(again.autoFillStatus,'existing_preserved');
+    assert.equal(again.draft.payload.name,'Verified Independent Name');
+    const fallback=await write('/places/google-reference',{
+      placeId:'ChIJNoMatchReference1234',province:'ระยอง',candidateName:'สถานที่ไม่มีข้อมูล'
+    },201);
+    assert.equal(fallback.autoFillStatus,'no_match');
+    assert.equal(fallback.draft.payload.name,'รอยืนยันชื่อสถานที่');
+    assert.equal(fallback.draft.payload.lat,null);
+    assert.equal(fallback.draft.payload.autoFillSource,undefined);
   });
 
   await t.test('candidate review uses live SQL rows, exports safely and cannot publish or mutate a draft', async () => {
