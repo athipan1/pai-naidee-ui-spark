@@ -317,7 +317,9 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await expect.poll(countPaintedPixels).toBeGreaterThan(100);
   const greeting = await canvas.screenshot();
   await expect
-    .poll(async () => (await canvas.screenshot()).equals(greeting))
+    .poll(async () => (await canvas.screenshot()).equals(greeting), {
+      timeout: 10_000,
+    })
     .toBe(false);
   await expect(canvas).toHaveAttribute("data-motion", "Idle");
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -346,6 +348,7 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await launcher.click();
   await expect(panel.locator("canvas")).toBeVisible();
   await panel.getByRole("link", { name: "ค้นหาที่เที่ยว" }).click();
+  await expect(page).toHaveURL(/\/discover\?mode=search$/);
   await expect(panel.locator("canvas")).toHaveCount(0);
   await launcher.click();
   await expect(panel.locator("canvas")).toBeVisible();

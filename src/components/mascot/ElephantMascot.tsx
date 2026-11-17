@@ -131,7 +131,7 @@ export default function ElephantMascot({
   const motionRef = useRef({ motion, reducedMotion });
 
   useEffect(() => {
-    setOpenFor(undefined);
+    setOpenFor((current) => (current === key ? current : undefined));
     setGreeting(false);
     setWalking(false);
   }, [key]);
