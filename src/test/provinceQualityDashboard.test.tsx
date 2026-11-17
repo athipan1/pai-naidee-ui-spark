@@ -16,7 +16,8 @@ describe('Admin Google Places discovery province selector',()=>{
    throw Error('Unexpected request: '+path+' '+JSON.stringify(options));
   });
   const user=userEvent.setup();
-  render(<ProvinceQualityDashboard api={api} onOpenCandidate={()=>{}} />);
+  const onDraftCreated=vi.fn();
+  render(<ProvinceQualityDashboard api={api} onOpenCandidate={()=>{}} onDraftCreated={onDraftCreated} />);
   const select=screen.getByLabelText('จังหวัด');
   expect(select.querySelectorAll('option')).toHaveLength(77);
   await user.selectOptions(select,'ระยอง');
@@ -32,6 +33,7 @@ describe('Admin Google Places discovery province selector',()=>{
   await waitFor(()=>expect(api.mock.calls.some(([path])=>path==='/places/google-reference')).toBe(true));
   const created=api.mock.calls.find(([path])=>path==='/places/google-reference');
   expect(JSON.parse(String(created?.[1]?.body))).toEqual({placeId:'ChIJRayongReference1234',province:'ระยอง',candidateName:'สถานที่ตัวอย่างจาก Google'});
+  expect(onDraftCreated).toHaveBeenCalledWith(expect.objectContaining({id:'draft-rayong',payload:expect.objectContaining({province:'ระยอง',nameLocal:'หาดแหลมเจริญ'})}),'matched');
  });
  it('clears results from previous province after the selection changes',async()=>{
   const api=vi.fn(async(path:string,options?:RequestInit):Promise<unknown>=>{
