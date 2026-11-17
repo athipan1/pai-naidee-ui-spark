@@ -10,7 +10,7 @@ database, paid API, or Admin CMS feature is required to change the active model.
    `<character-id>.webp` to `src/components/mascot/assets/`. Do not upload
    source or derivative assets publicly before redistribution rights are clear.
 2. Add the character to `registry` in `mascotCharacters.ts`, including its
-   bilingual title, fallback emoji, asset paths, camera and semantic-to-GLB
+   bilingual title, character-specific labels, fallback emoji, asset paths, camera and semantic-to-GLB
    animation-clip names.
 3. Set `VITE_MASCOT_CHARACTER=<character-id>` at **build time**, then rebuild.
    If the value is absent or unknown, the elephant remains the safe default.
