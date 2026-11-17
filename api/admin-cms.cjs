@@ -43,7 +43,9 @@ function cleanPlace(input, { draft = false } = {}) {
   let categories;
   const categoryInput = input?.categories;
   if (categoryInput !== undefined) {
-    if (!Array.isArray(categoryInput) || (!categoryInput.length && !(draft && !category)) || categoryInput.length > 8 ||
+    if (draft && !category && Array.isArray(categoryInput) && categoryInput.length === 0) {
+      categories = undefined; // An unfinished name-only draft may omit categories.
+    } else if (!Array.isArray(categoryInput) || !categoryInput.length || categoryInput.length > 8 ||
       categoryInput.some(item => typeof item !== 'string' || !item.trim() || item.trim().length > 120 || /[\u0000-\u001f\u007f<>]/.test(item))) {
       categories = null;
     } else {
