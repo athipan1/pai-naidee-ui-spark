@@ -2,7 +2,7 @@ const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
 const { isThaiProvince } = require('./thai-provinces.cjs');
-const { resolveIndependentDraft } = require('./smart-draft-autofill.cjs');
+const { resolveIndependentDraft, warmNamesIndex } = require('./smart-draft-autofill.cjs');
 const { finishDirectPublication } = require('./admin-direct-publication.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
@@ -43,7 +43,7 @@ function cleanPlace(input, { draft = false } = {}) {
   let categories;
   const categoryInput = input?.categories;
   if (categoryInput !== undefined) {
-    if (!Array.isArray(categoryInput) || !categoryInput.length || categoryInput.length > 8 ||
+    if (!Array.isArray(categoryInput) || (!categoryInput.length && !(draft && !category)) || categoryInput.length > 8 ||
       categoryInput.some(item => typeof item !== 'string' || !item.trim() || item.trim().length > 120 || /[\u0000-\u001f\u007f<>]/.test(item))) {
       categories = null;
     } else {
@@ -101,6 +101,7 @@ function cleanPlace(input, { draft = false } = {}) {
 }
 
 function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft }) {
+  if (enrichDraft === resolveIndependentDraft) warmNamesIndex();
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
@@ -302,7 +303,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           autoFillStatus:untouched?enrichment.status:'existing_preserved'};
       }
       const payload={name:'รอยืนยันชื่อสถานที่',nameLocal:'',province,
-        category:'attraction',description:'',lat:null,lng:null,
+        category:'',description:'',lat:null,lng:null,
         imageUrl:'',imageUrls:[],removedImageUrls:[],googlePlaceId:placeId,
         verificationStatus:'PENDING_VERIFICATION',
         ...(matched?{...enrichment.fields,autoFillSource}:{})};
