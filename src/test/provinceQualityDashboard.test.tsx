@@ -11,7 +11,7 @@ describe('Admin Google Places discovery province selector',()=>{
     status:'ok',excludedOutsideProvince:1,
     candidates:[{sourceId:'google:ChIJRayongReference1234',name:'สถานที่ตัวอย่างจาก Google',province:'ระยอง',lat:12.7,lng:101.3,duplicateStatus:'not_detected'}],
    };
-   if(path==='/places/google-reference')return {id:'draft-rayong',existing:false};
+   if(path==='/places/google-reference')return {id:'draft-rayong',existing:false,draft:{id:'draft-rayong',status:'draft',version:'1.000001',payload:{name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ',province:'ระยอง',category:'Beach',description:'Independent TAT record',lat:12.65,lng:101.27}},autoFillStatus:'matched'};
    if(path==='/province-quality')return {provinces:[]};
    throw Error('Unexpected request: '+path+' '+JSON.stringify(options));
   });
@@ -28,10 +28,10 @@ describe('Admin Google Places discovery province selector',()=>{
   expect(request).toBeDefined();
   expect(JSON.parse(String(request?.[1]?.body))).toEqual({province:'ระยอง',sources:['google'],limit:10});
   expect(screen.getByRole('status')).toHaveTextContent('กรอง 1 รายการ');
-  await user.click(screen.getByRole('button',{name:'สร้างฉบับร่าง'}));
+  await user.click(screen.getByRole('button',{name:'สร้างฉบับร่างและเติมข้อมูล'}));
   await waitFor(()=>expect(api.mock.calls.some(([path])=>path==='/places/google-reference')).toBe(true));
   const created=api.mock.calls.find(([path])=>path==='/places/google-reference');
-  expect(JSON.parse(String(created?.[1]?.body))).toEqual({placeId:'ChIJRayongReference1234',province:'ระยอง'});
+  expect(JSON.parse(String(created?.[1]?.body))).toEqual({placeId:'ChIJRayongReference1234',province:'ระยอง',candidateName:'สถานที่ตัวอย่างจาก Google'});
  });
  it('clears results from previous province after the selection changes',async()=>{
   const api=vi.fn(async(path:string,options?:RequestInit):Promise<unknown>=>{
