@@ -108,6 +108,9 @@ export default function AdminCms() {
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogTotal, setCatalogTotal] = useState(0);
   const [editing, setEditing] = useState<Pick<Draft, 'id' | 'version'> | null>(null);
+  // The Google preview name is only held in React memory for an explicit retry.
+  // It is never written to storage or into the draft payload.
+  const [nameLookupRetry,setNameLookupRetry]=useState<{draftId:string;placeId:string;province:string;candidateName:string}|null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [tab, setTab] = useState<AdminView>('overview');
@@ -363,6 +366,32 @@ export default function AdminCms() {
         result.providerConfigured ? 'ไม่พบตำแหน่งที่ตรงกัน ลองปรับชื่อหรือเลือกบนแผนที่' : 'ไม่พบในฐานข้อมูลเดิม หากเป็นสถานที่ใหม่สามารถเลือกหมุดเอง หรือกำหนด GEOAPIFY_API_KEY ใน Railway');
     } catch (error) { setGeocodeNote(error instanceof Error ? error.message : 'ค้นหาพิกัดไม่สำเร็จ'); }
     finally { setGeocodeBusy(false); }
+  }
+
+  async function retryNameLookup(){
+    if(!nameLookupRetry || !editing || editing.id!==nameLookupRetry.draftId)return;
+    if(dirty){setMessage('กรุณาบันทึกการแก้ไขปัจจุบันก่อนลองเติมชื่ออีกครั้ง');return;}
+    setBusy(true);
+    try{
+      const {placeId,province,candidateName}=nameLookupRetry;
+      const result=await api('/places/google-reference',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({placeId,province,candidateName}),
+      }) as {draft?:Draft;autoFillStatus?:string};
+      if(!result.draft)throw Error('ไม่พบฉบับร่างหลังตรวจชื่อ');
+      setDrafts(current=>[result.draft!,...current.filter(d=>d.id!==result.draft!.id)]);
+      await openDraft(result.draft);
+      if(result.autoFillStatus==='matched'){
+        setNameLookupRetry(null);
+        setMessage('เติมชื่อจาก TAT สำเร็จแล้ว กรุณาตรวจชื่อและกรอกหมวดหมู่ รายละเอียด และพิกัดเอง');
+      }else{
+        setMessage(result.autoFillStatus==='source_loading'
+          ? 'ดัชนีชื่อจาก TAT ยังอยู่ระหว่างโหลด กรุณาลองใหม่อีกครั้งภายหลัง'
+          : 'ยังไม่พบชื่อ TAT ที่ยืนยันได้ กรุณากรอกชื่อเอง');
+      }
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'ตรวจชื่อจากแหล่งอิสระไม่สำเร็จ');
+    }finally{setBusy(false);}
   }
 
   const visibleTags = form.tags ?? inheritedTags;
@@ -747,6 +776,15 @@ export default function AdminCms() {
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+        {editing && nameLookupRetry?.draftId === editing.id && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm">
+            <p>ชื่อจาก TAT ยังไม่พร้อมหรือยังจับคู่ไม่ได้ สามารถลองตรวจชื่ออีกครั้งได้โดยไม่สร้างฉบับร่างซ้ำ</p>
+            <button type="button" disabled={busy} onClick={()=>void retryNameLookup()}
+              className="mt-2 rounded-lg border border-amber-500 bg-white px-3 py-2 disabled:opacity-50">
+              ลองเติมชื่อจาก TAT อีกครั้ง
+            </button>
+          </div>
+        )}
         {editing && drafts.some(item => item.id === editing.id && isRecord(item.payload?.autoFillSource)) && (
           <div role="note" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">
             <p className="font-semibold">เติมข้อมูลตั้งต้นจาก TAT Open Data</p>
@@ -844,9 +882,13 @@ export default function AdminCms() {
       </fieldset></form>}
       {tab === 'quality' && <ProvinceQualityDashboard api={api}
         onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}}
-        onDraftCreated={(created,status)=>{
+        onDraftCreated={(created,status,candidateName)=>{
           const draft=created as unknown as Draft;
           setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);
+          setNameLookupRetry((status==='source_loading'||status==='source_unavailable')
+            && typeof draft.payload.googlePlaceId==='string'
+            ? {draftId:draft.id,placeId:draft.payload.googlePlaceId,province:String(draft.payload.province||''),candidateName}
+            : null);
           void openDraft(draft).then(()=>{
             setMessage(status==='matched'
               ? 'เติมชื่อไทยและชื่อหลักจาก TAT Open Data แล้ว ชื่ออังกฤษจะใช้เฉพาะเมื่อแหล่งข้อมูลมีให้ ส่วนหมวดหมู่ รายละเอียด และพิกัดให้กรอกเอง'
