@@ -1,6 +1,6 @@
 import {useState} from 'react';
 const THAI_PROVINCES = ["กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน","ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"];
-type DiscoveryCandidate={sourceId:string;name:string;lat:number|null;lng:number|null;mapsUrl?:string|null;duplicateStatus?:string;duplicateMatches?:{placeId:string;name:string;reason:string;distanceMeters:number|null}[];holds?:string[]};
+type DiscoveryCandidate={sourceId:string;name:string;province?:string;lat:number|null;lng:number|null;mapsUrl?:string|null;duplicateStatus?:string;duplicateMatches?:{placeId:string;name:string;reason:string;distanceMeters:number|null}[];holds?:string[]};
 type Candidate={id:string;version:string;status:string;state:string;payload:Record<string,string|number|null>;target_place_id?:string};
 type Province={province:string;existing:{total:number;missing_images:number;missing_details:number;last_verified:string|null};review:{discovered:number;duplicates:number;license_hold:number;coordinate_hold:number;approved:number;published:number;confirmed_new:number}};
 type Job={id:string;state:string;candidate_count:number;next_index:number;result:{draftId:string;state:string;holds:string[]}[]};
@@ -27,16 +27,17 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
   async function searchGoogle() {
     setDiscovery([]);setDiscoveryStatus('กำลังค้นหา...');
     try {
-      const result=await api('/google-place-discovery/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province,sources:['google'],limit:10})}) as {status?:string;candidates?:DiscoveryCandidate[];warning?:string};
+      const result=await api('/google-place-discovery/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({province,sources:['google'],limit:10})}) as {status?:string;candidates?:DiscoveryCandidate[];warning?:string;excludedOutsideProvince?:number};
       setDiscovery(result.candidates||[]);
-      setDiscoveryStatus(result.candidates?.length ? 'ตัวอย่างจาก Google '+result.candidates.length+' รายการ · แสดงชั่วคราวเท่านั้น ห้ามนำเข้าข้อมูล Google' : 'ไม่พบรายการในผลค้นหาชุดนี้ (ไม่ใช่การตรวจครบทั้งจังหวัด)');
+      setDiscoveryStatus((result.candidates?.length ? 'ตัวอย่างจาก Google '+result.candidates.length+' รายการ · แสดงชั่วคราวเท่านั้น ห้ามนำเข้าข้อมูล Google' : 'ไม่พบรายการในผลค้นหาชุดนี้ (ไม่ใช่การตรวจครบทั้งจังหวัด)') + (result.excludedOutsideProvince ? ' · กรอง '+result.excludedOutsideProvince+' รายการที่ยืนยันจังหวัดไม่ได้' : ''));
     } catch(e) {setDiscoveryStatus('ค้นหาไม่สำเร็จ: '+(e instanceof Error?e.message:'ไม่สามารถเชื่อมต่อบริการได้'));}
   }
   async function createReferenceDraft(candidate:DiscoveryCandidate) {
     if(candidate.duplicateStatus!=='not_detected')throw Error('สถานที่อาจซ้ำ ต้องตรวจสอบก่อนสร้างฉบับร่าง');
+    if(candidate.province && candidate.province!==province)throw Error('จังหวัดของผลค้นหาไม่ตรงกับจังหวัดที่เลือก กรุณาค้นหาใหม่');
     const placeId=candidate.sourceId.startsWith('google:')?candidate.sourceId.slice(7):'';
     if(!placeId)throw Error('ไม่พบ Google Place ID');
-    const result=await api('/places/google-reference',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({placeId})}) as {id:string;existing?:boolean};
+    const result=await api('/places/google-reference',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({placeId,province})}) as {id:string;existing?:boolean};
     setDraftResult((result.existing?'มีฉบับร่างนี้แล้ว':'สร้างฉบับร่างสำเร็จ')+' · รหัส '+result.id+' · ชื่อและพิกัดต้องได้รับการยืนยันโดย Admin ก่อนเผยแพร่');
     await loadQueue(1);
   }
@@ -46,10 +47,10 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
     <p className="text-sm text-slate-600">จำนวนด้านล่างเป็นข้อมูลที่ตรวจนับได้ ไม่ใช่จำนวนสถานที่ทั้งหมดที่ควรมี และไม่มีการเผยแพร่อัตโนมัติ</p>
     <button type="button" disabled={busy} className="rounded-xl border px-4 py-2" onClick={()=>void run(load)}>โหลดคิวและสถิติจังหวัด</button>
     {error&&<p role="alert" className="break-words text-sm text-red-700">{error}</p>}
-    {<label className="block text-sm">จังหวัด<select className="ml-2 rounded-lg border p-2" value={province} onChange={event=>{setProvince(event.target.value);void run(()=>loadQueue(1,event.target.value));}}>{THAI_PROVINCES.map(p=><option key={p}>{p}</option>)}</select></label>}
+    {<label className="block text-sm">จังหวัด<select className="ml-2 rounded-lg border p-2" value={province} disabled={busy} onChange={event=>{setDiscovery([]);setDiscoveryStatus('');setDraftResult('');setProvince(event.target.value);void run(()=>loadQueue(1,event.target.value));}}>{THAI_PROVINCES.map(p=><option key={p}>{p}</option>)}</select></label>}
     <div className="space-y-3 rounded-xl border p-3">
-      <button type="button" disabled={busy||province!=='ชลบุรี'} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void run(searchGoogle)}>ค้นหาสถานที่ท่องเที่ยวใหม่</button>
-      <p className="text-sm text-slate-600">Google Places (New) เฉพาะชลบุรี · สูงสุด 10 รายการต่อครั้ง · แสดงข้อมูลชั่วคราว ไม่บันทึกข้อมูล Google ลงฐานข้อมูล</p>
+      <button type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void run(searchGoogle)}>ค้นหาสถานที่ท่องเที่ยวใหม่</button>
+      <p className="text-sm text-slate-600">Google Places (New) เลือกค้นหาได้ทุกจังหวัด · สูงสุด 10 รายการต่อครั้ง · แสดงข้อมูลชั่วคราว ไม่บันทึกข้อมูล Google ลงฐานข้อมูล</p>
       {discoveryStatus&&<p role="status" className="text-sm">{discoveryStatus}</p>}
       {discovery.length>0&&<ul className="grid gap-3 sm:grid-cols-2">{discovery.map(c=><li key={c.sourceId} className="min-w-0 space-y-2 rounded-xl border p-3 text-sm">
         <h3 className="break-words font-semibold text-base">{c.name}</h3>
