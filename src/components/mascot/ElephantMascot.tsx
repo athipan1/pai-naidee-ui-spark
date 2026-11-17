@@ -18,15 +18,10 @@ import {
 } from "./mascotState";
 
 import { useMascotPeek } from "./useMascotPeek";
+import { activeMascot, resolveMascotAssets } from "./mascotCharacters";
 import "./ElephantMascot.css";
 
-const assets = import.meta.glob<string>("./assets/elephant.{glb,webp}", {
-  eager: true,
-  import: "default",
-  query: "?url",
-});
-const modelUrl = assets["./assets/elephant.glb"];
-const imageUrl = assets["./assets/elephant.webp"];
+const { modelUrl, imageUrl } = resolveMascotAssets(activeMascot);
 
 const copy = {
   th: {
@@ -84,7 +79,7 @@ export default function ElephantMascot({
   language: "th" | "en";
   plannerStatus: PlannerStatus;
 }) {
-  const t = copy[language];
+  const t = { ...copy[language], title: activeMascot.title[language] };
   const { pathname, key } = useLocation();
   const navigate = useNavigate();
   const panelId = useId();
@@ -170,7 +165,8 @@ export default function ElephantMascot({
             setVisual("fallback");
             setWalking(false);
           },
-          () => setWalking(false)
+          () => setWalking(false),
+          activeMascot
         )
       )
       .then((view) => {
@@ -293,7 +289,7 @@ export default function ElephantMascot({
     />
   ) : (
     <span aria-hidden="true" className="text-5xl">
-      🐘
+      {activeMascot.fallbackEmoji}
     </span>
   );
   const plannerMessage = plannerStatus === "idle" ? "" : t[plannerStatus];
@@ -301,6 +297,7 @@ export default function ElephantMascot({
   return (
     <aside
       ref={assistant}
+      data-mascot-id={activeMascot.id}
       className={`fixed right-[max(0.75rem,env(safe-area-inset-right))] z-[39] ${bottom}`}
       aria-label={t.title}
     >
