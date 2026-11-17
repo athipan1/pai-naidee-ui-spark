@@ -4,8 +4,9 @@ type DiscoveryCandidate={sourceId:string;name:string;province?:string;lat:number
 type Candidate={id:string;version:string;status:string;state:string;payload:Record<string,string|number|null>;target_place_id?:string};
 type Province={province:string;existing:{total:number;missing_images:number;missing_details:number;last_verified:string|null};review:{discovered:number;duplicates:number;license_hold:number;coordinate_hold:number;approved:number;published:number;confirmed_new:number}};
 type Job={id:string;state:string;candidate_count:number;next_index:number;result:{draftId:string;state:string;holds:string[]}[]};
-type Props={api:(path:string,options?:RequestInit)=>Promise<unknown>;onOpenCandidate:(candidate:Candidate)=>void};
-export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
+type DraftResponse={id:string;status:string;version:string;payload:Record<string,unknown>};
+type Props={api:(path:string,options?:RequestInit)=>Promise<unknown>;onOpenCandidate:(candidate:Candidate)=>void;onDraftCreated?:(draft:DraftResponse,autoFillStatus:string)=>void};
+export default function ProvinceQualityDashboard({api,onOpenCandidate,onDraftCreated}:Props) {
   const [provinces,setProvinces]=useState<Province[]>([]),[province,setProvince]=useState('ชลบุรี');
   const [queue,setQueue]=useState<Candidate[]>([]),[page,setPage]=useState(1),[total,setTotal]=useState(0);
   const [batch,setBatch]=useState<{province:string;candidates:unknown[]}|null>(null),[requestKey,setRequestKey]=useState('');
@@ -37,8 +38,10 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
     if(candidate.province && candidate.province!==province)throw Error('จังหวัดของผลค้นหาไม่ตรงกับจังหวัดที่เลือก กรุณาค้นหาใหม่');
     const placeId=candidate.sourceId.startsWith('google:')?candidate.sourceId.slice(7):'';
     if(!placeId)throw Error('ไม่พบ Google Place ID');
-    const result=await api('/places/google-reference',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({placeId,province})}) as {id:string;existing?:boolean};
-    setDraftResult((result.existing?'มีฉบับร่างนี้แล้ว':'สร้างฉบับร่างสำเร็จ')+' · รหัส '+result.id+' · ชื่อและพิกัดต้องได้รับการยืนยันโดย Admin ก่อนเผยแพร่');
+    const result=await api('/places/google-reference',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({placeId,province,candidateName:candidate.name})}) as {id:string;existing?:boolean;draft?:DraftResponse;autoFillStatus?:string};
+    const enriched=result.autoFillStatus==='matched';
+    setDraftResult((result.existing?'เปิดฉบับร่างเดิม':'สร้างฉบับร่างสำเร็จ')+' · '+(enriched?'เติมข้อมูลจาก TAT Open Data แล้ว กรุณาตรวจทานข้อมูลและพิกัด':'ยังไม่พบข้อมูลอิสระที่จับคู่ได้อย่างมั่นใจ กรุณากรอกข้อมูลด้วยตนเอง'));
+    if(result.draft&&onDraftCreated){onDraftCreated(result.draft,result.autoFillStatus||'not_requested');return;}
     await loadQueue(1);
   }
   const selected=provinces.find(p=>p.province===province);
@@ -57,10 +60,10 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate}:Props) {
         <p className="break-all text-slate-600">พิกัด: {c.lat===null||c.lng===null?'ไม่พบพิกัด':c.lat.toFixed(6)+', '+c.lng.toFixed(6)}</p>
         <p className={c.duplicateStatus==='not_detected'?'text-green-700':'text-amber-700'}>{c.duplicateStatus==='existing_place'?'พบ Google Place ID ที่มีอยู่แล้ว':c.duplicateStatus==='possible_duplicate'?'อาจซ้ำกับสถานที่เดิม':'ไม่พบรายการซ้ำจากการตรวจเบื้องต้น'}</p>
         {!!c.duplicateMatches?.length&&<p className="break-words text-slate-600">รายการที่ตรงกัน: {c.duplicateMatches.map(m=>m.name+' ('+(m.reason==='google_place_id'?'รหัส Google':m.reason==='name'?'ชื่อ':'พิกัดใกล้กัน')+')').join(', ')}</p>}
-        <p className="text-slate-600">สร้างฉบับร่างได้ทันทีโดยไม่บันทึกชื่อหรือพิกัดจาก Google · Admin กรอกและยืนยันข้อมูลก่อนเผยแพร่</p>
+        <p className="text-slate-600">สร้างฉบับร่างโดยค้นข้อมูลอิสระจาก TAT Open Data ก่อน · หากไม่มีรายการตรงกัน ระบบจะเว้นช่องไว้ให้กรอกเอง ไม่บันทึกข้อมูล Google</p>
         <div className="flex flex-wrap gap-2">
           {c.mapsUrl&&<a href={c.mapsUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border px-3 py-2">ดูใน Google Maps</a>}
-          <button type="button" disabled={busy||c.duplicateStatus!=='not_detected'} className="rounded-lg bg-teal-700 px-3 py-2 text-white disabled:opacity-50" onClick={()=>void run(()=>createReferenceDraft(c))}>สร้างฉบับร่าง</button>
+          <button type="button" disabled={busy||c.duplicateStatus!=='not_detected'} className="rounded-lg bg-teal-700 px-3 py-2 text-white disabled:opacity-50" onClick={()=>void run(()=>createReferenceDraft(c))}>สร้างฉบับร่างและเติมข้อมูล</button>
         </div>
       </li>)}</ul>}
       {draftResult&&<p role="status" className="break-all text-green-700">{draftResult}</p>}

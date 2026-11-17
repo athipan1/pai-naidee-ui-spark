@@ -13,6 +13,7 @@ import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboar
 
 type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls' | 'tags' | 'categories'>, string | null>> & {
   googlePlaceId?: string;
+  autoFillSource?: {name:string;url:string;id:string;license:string;matchedAt:string;reviewRequired:boolean};
   tags?: string[];
   categories?: string[];
   imageUrls?: string[];
@@ -745,6 +746,13 @@ export default function AdminCms() {
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+        {editing && drafts.some(item => item.id === editing.id && isRecord(item.payload?.autoFillSource)) && (
+          <div role="note" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">
+            <p className="font-semibold">เติมข้อมูลตั้งต้นจาก TAT Open Data</p>
+            <p className="mt-1">ชื่อ หมวดหมู่ รายละเอียด และพิกัดที่พบมาจากชุดข้อมูลอิสระ ไม่ใช่ Google Places โปรดตรวจสอบชื่อภาษาอังกฤษและตำแหน่งทางเข้าจริงก่อนเผยแพร่</p>
+            <a className="mt-2 inline-block underline" href="https://datacatalog.tat.or.th/dataset/tourist-attraction" target="_blank" rel="noopener noreferrer">ดูแหล่งข้อมูล TAT Open Data</a>
+          </div>
+        )}
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
@@ -833,7 +841,21 @@ export default function AdminCms() {
         </section>
         <div className="admin-save sticky bottom-2 z-10 rounded-xl border bg-white/95 p-2 shadow-lg backdrop-blur"><button className="w-full rounded-xl bg-teal-600 px-4 py-3.5 font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-50" disabled={busy} type="submit">{busy ? 'กำลังดำเนินการ...' : editing ? 'บันทึกการแก้ไขเป็นฉบับร่าง' : 'บันทึกสถานที่เป็นฉบับร่าง'}</button><p className="mt-2 text-center text-xs text-slate-500">ยังไม่เผยแพร่จนกว่าจะยืนยันในแท็บฉบับร่าง</p></div>
       </fieldset></form>}
-      {tab === 'quality' && <ProvinceQualityDashboard api={api} onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}} />}
+      {tab === 'quality' && <ProvinceQualityDashboard api={api}
+        onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}}
+        onDraftCreated={(created,status)=>{
+          const draft=created as unknown as Draft;
+          setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);
+          void openDraft(draft).then(()=>{
+            setMessage(status==='matched'
+              ? 'เติมชื่อ หมวดหมู่ รายละเอียด และพิกัดจาก TAT Open Data ที่ตรงกันแล้ว กรุณายืนยันข้อมูลและพิกัดก่อนเผยแพร่'
+              : status==='source_unavailable'
+                ? 'สร้างฉบับร่างแล้ว แต่แหล่งข้อมูล TAT ไม่พร้อมใช้งาน กรุณากรอกข้อมูลเอง'
+                : status==='ambiguous_match'
+                  ? 'สร้างฉบับร่างแล้ว แต่มีข้อมูล TAT ชื่อซ้ำหลายรายการ กรุณาตรวจสอบและกรอกเอง'
+                  : 'เปิดฉบับร่างแล้ว ยังไม่พบข้อมูลอิสระที่ยืนยันได้ กรุณากรอกข้อมูลด้วยตนเอง');
+          });
+        }} />}
       {reconcile && tab === 'drafts' && <section id="cms-reconcile" className="scroll-mt-24 space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
         <h2 className="text-lg font-bold">เปรียบเทียบฉบับร่างกับข้อมูลล่าสุด</h2>
         <p className="text-sm text-slate-600">ติ๊กเฉพาะการแก้ไขจากฉบับร่างที่ต้องการเก็บไว้ ช่องที่ไม่เลือกจะใช้ข้อมูลล่าสุดบนเว็บไซต์</p>
