@@ -329,7 +329,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await expect(page.getByText('Image currently unavailable.')).toBeVisible();
   await expect(preview).toHaveJSProperty('naturalWidth', 1);
 
-  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('Draft fixture');
+  await page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/).fill('Draft fixture');
   await page.getByLabel('จังหวัด', {exact:true}).fill('ชลบุรี');
   await page.getByLabel(/ละติจูด/).fill('13.2');
   await page.getByLabel(/ลองจิจูด/).fill('100.9');
@@ -372,7 +372,7 @@ test('TAT draft automatically suggests Geoapify coordinates but requires explici
   }});
   await login(page);
   await navigate(page,'คุณภาพรายจังหวัด');
-  await page.getByLabel('จังหวัด',{exact:true}).selectOption('ระยอง');
+  await page.locator('[data-testid="province-quality-dashboard"] select').selectOption('ระยอง');
   await page.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
   await expect(page.getByText('หาดแหลมเจริญ',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'สร้างฉบับร่างและเติมชื่อ'}).click();
@@ -399,14 +399,14 @@ test('name-only draft, explicit coordinates, unsaved changes and safe validation
   await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
   let automaticGeocodes = 0;
   page.on('request', req => {if(req.url().includes('/api/admin/geocode')) automaticGeocodes++;});
-  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('ร่างชื่ออย่างเดียว');
+  await page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/).fill('ร่างชื่ออย่างเดียว');
   await page.getByLabel(/ละติจูด/).fill('NaN');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   await expect(page.getByRole('status').filter({hasText:'กรุณากรอกพิกัดทั้งคู่'})).toBeVisible();
   await page.getByLabel(/ละติจูด/).fill('');
   page.once('dialog', dialog => dialog.dismiss());
   await navigate(page,'ฉบับร่าง');
-  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('ร่างชื่ออย่างเดียว');
+  await expect(page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/)).toHaveValue('ร่างชื่ออย่างเดียว');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   const draft = page.locator('article').filter({hasText:'ร่างชื่ออย่างเดียว'});
   await expect(draft).toBeVisible();
@@ -490,7 +490,7 @@ test('legacy and malformed drafts render independently without crashing the admi
 
   // An invalid record must not hide or break the valid drafts in the same response.
   await malformed.getByRole('button', { name: 'แก้ไขร่าง' }).click();
-  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('Malformed taxonomy');
+  await expect(page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/)).toHaveValue('Malformed taxonomy');
   await expect(page.getByRole('status')).toContainText('กรุณาตรวจสอบหัวข้อ หมวดหมู่');
   expect(pageErrors).toEqual([]);
 });
@@ -498,12 +498,12 @@ test('legacy and malformed drafts render independently without crashing the admi
 
 test('unsaved form survives reload without creating or saving a production draft', async ({page}) => {
   await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
-  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('แบบฟอร์มกู้คืน');
+  await page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/).fill('แบบฟอร์มกู้คืน');
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toContain('แบบฟอร์มกู้คืน');
   page.once('dialog', dialog => dialog.accept());
   await page.reload();
   await page.getByRole('button',{name:'กู้คืนแบบฟอร์ม',exact:true}).click();
-  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('แบบฟอร์มกู้คืน');
+  await expect(page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/)).toHaveValue('แบบฟอร์มกู้คืน');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();
