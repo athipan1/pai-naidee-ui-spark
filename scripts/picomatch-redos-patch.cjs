@@ -15,7 +15,7 @@ const hasUnboundedStarInRepeatedExtglob = body => {
   let inCharacterClass = false;
   for (const ch of body) {
     if (escaped) { escaped = false; continue; }
-    if (ch === '\\') { escaped = true; continue; }
+    if (ch === '\\\\') { escaped = true; continue; }
     if (ch === '[') { inCharacterClass = true; continue; }
     if (ch === ']' && inCharacterClass) { inCharacterClass = false; continue; }
     if (ch === '*' && !inCharacterClass) return true;
