@@ -1,0 +1,58 @@
+name: Temporary PR412 Dependency Security Repair
+
+on:
+  push:
+    branches:
+      - fix/name-only-autofill-20261118
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-lockfile:
+    # Only execute for the initial introduction of this temporary workflow.
+    if: "contains(github.event.head_commit.message, 'chore(ci): prepare PR412 security lockfile refresh')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          ref: fix/name-only-autofill-20261118
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Refresh vulnerable transitive dependencies without forced major versions
+        run: |
+          set +e
+          npm audit fix --package-lock-only --ignore-scripts --no-fund
+          rc=$?
+          set -e
+          echo "audit_fix_exit_code=$rc" >> "$GITHUB_STEP_SUMMARY"
+          npm ci --ignore-scripts
+      - name: Record remaining findings, do not waive security gate
+        run: |
+          npm audit --json > pr412-audit-after.json || true
+          node - <<'NODE'
+          const a=require('./pr412-audit-after.json');
+          console.log('Remaining vulnerabilities:',a.metadata?.vulnerabilities);
+          for(const [name,v] of Object.entries(a.vulnerabilities||{})){
+            if(['high','critical'].includes(v.severity)) console.log(name,v.severity,JSON.stringify(v.fixAvailable));
+          }
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pr412-security-refresh-evidence
+          path: pr412-audit-after.json
+          retention-days: 14
+      - name: Commit lockfile improvements only to the existing PR branch
+        run: |
+          if git diff --quiet -- package-lock.json package.json; then
+            echo "Nothing to update" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json package.json
+          git commit -m "chore(deps): refresh safe npm lockfile packages for security"
+          git push origin HEAD:fix/name-only-autofill-20261118
