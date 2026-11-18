@@ -30,7 +30,10 @@
     "audit:places": "node scripts/audit-place-catalog.mjs",
     "build:semantic-index": "node scripts/buildSemanticIndex.cjs",
     "check:supabase": "npx tsx scripts/check-supabase.ts",
-    "check:storage": "npx tsx scripts/check-storage.ts"
+    "check:storage": "npx tsx scripts/check-storage.ts",
+    "prebuild": "node scripts/picomatch-redos-patch.cjs root",
+    "prevercel-build": "node scripts/picomatch-redos-patch.cjs root",
+    "security:verify-picomatch": "node scripts/picomatch-redos-patch.cjs root --verify && node --test scripts/picomatch-redos-patch.node-test.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
