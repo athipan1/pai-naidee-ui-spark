@@ -38,7 +38,8 @@ src/**/*.test.ts
 src/test/
 
 # Scripts (assuming they are for local dev only)
-scripts/
+scripts/*
+!scripts/picomatch-redos-patch.cjs
 
 # Misc
 audit-report.json

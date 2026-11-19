@@ -63,8 +63,9 @@ class AdminRequestError extends Error {
 }
 function toPlaceForm(payload: DraftPayload): PlaceForm {
   const coordinate = (value: string | number | null | undefined) => value == null ? '' : String(value).trim();
-  const category = safeText(payload?.category) || empty.category;
-  const categories = Array.isArray(payload?.categories) && payload.categories.length
+  const referenceWithoutCategory = Boolean(payload?.googlePlaceId) && (!payload?.category || payload.category === 'attraction');
+  const category = referenceWithoutCategory ? '' : (safeText(payload?.category) || empty.category);
+  const categories = referenceWithoutCategory ? [] : Array.isArray(payload?.categories) && payload.categories.length
     ? [...new Set([category, ...stringList(payload.categories)])].slice(0, 8) : [category];
   return {
     name: safeText(payload?.name),
@@ -83,7 +84,7 @@ function toPlaceForm(payload: DraftPayload): PlaceForm {
 }
 
 const AdminCoordinatePicker = lazy(() => import('./AdminCoordinatePicker'));
-type GeocodeCandidate = { lat: number; lng: number; label: string; source: string };
+type GeocodeCandidate = { lat: number; lng: number; label: string; source: string; confidence?: number };
 const validCoordinate = (lat: number, lng: number) => Number.isFinite(lat) && Number.isFinite(lng) && lat >= 5 && lat <= 21 && lng >= 97 && lng <= 106;
 
 export default function AdminCms() {
@@ -107,6 +108,9 @@ export default function AdminCms() {
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogTotal, setCatalogTotal] = useState(0);
   const [editing, setEditing] = useState<Pick<Draft, 'id' | 'version'> | null>(null);
+  // The Google preview name is only held in React memory for an explicit retry.
+  // It is never written to storage or into the draft payload.
+  const [nameLookupRetry,setNameLookupRetry]=useState<{draftId:string;placeId:string;province:string;candidateName:string}|null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [tab, setTab] = useState<AdminView>('overview');
@@ -122,6 +126,8 @@ export default function AdminCms() {
   const [proposedCoordinate, setProposedCoordinate] = useState<{ lat: number; lng: number } | null>(null);
   const [geocodeBusy, setGeocodeBusy] = useState(false);
   const [geocodeNote, setGeocodeNote] = useState('');
+  const [autoGeoSuggestions,setAutoGeoSuggestions] = useState(false);
+  const geocodeRequestSeq = useRef(0);
   const [aiModels,setAiModels] = useState<{id:string;label:string}[]>([]);
   const [aiModel,setAiModel] = useState('');
   const [aiStructured,setAiStructured] = useState(false);
@@ -155,12 +161,15 @@ export default function AdminCms() {
   function confirmLeave() { return !dirty || window.confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากแบบฟอร์มและละทิ้งการแก้ไขหรือไม่?'); }
   function navigate(view: AdminView) {
     if (view !== tab && !confirmLeave()) return;
+    if (view !== tab) ++geocodeRequestSeq.current;
     if (view !== tab && dirty) { imageRequest.current?.abort(); setExistingImages([]); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); setInheritedTags([]); setTagInput(''); }
     if (view !== 'existing') catalogRequest.current?.abort();
     setTab(view); setDraftPage(1);
   }
   function startNew() {
     if (!confirmLeave()) return;
+    ++geocodeRequestSeq.current;
+    setAutoGeoSuggestions(false);
     imageRequest.current?.abort(); setForm({...empty}); setSavedForm(JSON.stringify(empty)); setEditing(null); setInheritedTags([]); setTagInput(''); setExistingImages([]); setGeoCandidates([]); setProposedCoordinate(null); setGeocodeNote(''); setMessage(''); setTab('new');
   }
   useEffect(() => {
@@ -352,16 +361,90 @@ export default function AdminCms() {
   }
 
   async function lookupCoordinates() {
+    const requestSeq=++geocodeRequestSeq.current;
+    setAutoGeoSuggestions(false);
     const name = (form.nameLocal || form.name).trim();
     if (name.length < 2 || !form.province.trim()) { setGeocodeNote('กรุณากรอกชื่อสถานที่และจังหวัดก่อน'); return; }
     setGeocodeBusy(true); setGeocodeNote(''); setGeoCandidates([]);
     try {
       const result = await api(`/geocode?name=${encodeURIComponent(name)}&province=${encodeURIComponent(form.province.trim())}`);
+      if(requestSeq!==geocodeRequestSeq.current)return;
       setGeoCandidates(result.candidates || []);
       setGeocodeNote(result.candidates?.length ? 'เลือกผลลัพธ์ด้านล่าง แล้วตรวจหมุดบนแผนที่ก่อนยืนยัน' :
         result.providerConfigured ? 'ไม่พบตำแหน่งที่ตรงกัน ลองปรับชื่อหรือเลือกบนแผนที่' : 'ไม่พบในฐานข้อมูลเดิม หากเป็นสถานที่ใหม่สามารถเลือกหมุดเอง หรือกำหนด GEOAPIFY_API_KEY ใน Railway');
-    } catch (error) { setGeocodeNote(error instanceof Error ? error.message : 'ค้นหาพิกัดไม่สำเร็จ'); }
-    finally { setGeocodeBusy(false); }
+    } catch (error) { if(requestSeq===geocodeRequestSeq.current)setGeocodeNote(error instanceof Error ? error.message : 'ค้นหาพิกัดไม่สำเร็จ'); }
+    finally { if(requestSeq===geocodeRequestSeq.current)setGeocodeBusy(false); }
+  }
+
+  function clearGeocodeSuggestions() {
+    ++geocodeRequestSeq.current;
+    setGeoCandidates([]);
+    setProposedCoordinate(null);
+    setGeocodeNote('');
+    setAutoGeoSuggestions(false);
+    setGeocodeBusy(false);
+  }
+
+  // One bounded suggestion lookup after a TAT name match. No coordinate
+  // changes reach the form or database until Admin selects and confirms a pin.
+  async function suggestGeoapifyCoordinates(draft:Draft) {
+    const payload=draftPayload(draft);
+    if (!payload?.autoFillSource || payload.lat!=null || payload.lng!=null) return;
+    const name=(safeText(payload.nameLocal)||safeText(payload.name)).trim();
+    const province=safeText(payload.province);
+    if(name.length<2 || !province)return;
+    const requestSeq=++geocodeRequestSeq.current;
+    setAutoGeoSuggestions(true);
+    setGeoCandidates([]);
+    setProposedCoordinate(null);
+    setGeocodeBusy(true);
+    setGeocodeNote('กำลังค้นหาพิกัดเสนอแนะจาก Geoapify โดยยังไม่บันทึกลงฉบับร่าง');
+    try{
+      const result=await api('/geocode?source=geoapify&name='+encodeURIComponent(name)+'&province='+encodeURIComponent(province)) as {
+        candidates?:GeocodeCandidate[];providerConfigured?:boolean;
+      };
+      if(requestSeq!==geocodeRequestSeq.current)return;
+      const candidates=(Array.isArray(result.candidates)?result.candidates:[])
+        .filter(item=>item.source==='Geoapify' && validCoordinate(item.lat,item.lng)).slice(0,5);
+      setGeoCandidates(candidates);
+      setGeocodeNote(candidates.length
+        ? 'Geoapify พบพิกัดเสนอแนะ '+candidates.length+' ตำแหน่ง ตรวจชื่อ จังหวัด และหมุดก่อนกด “ยืนยันใช้พิกัดนี้”'
+        : result.providerConfigured
+          ? 'Geoapify ไม่พบพิกัดที่ตรงชื่อและจังหวัดอย่างน่าเชื่อถือ โปรดค้นหาหรือปักหมุดเอง'
+          : 'ยังไม่สามารถใช้ Geoapify ได้ โปรดตรวจการตั้งค่าบน Railway หรือปักหมุดเอง');
+    }catch(error){
+      if(requestSeq===geocodeRequestSeq.current)
+        setGeocodeNote(error instanceof Error?'Geoapify: '+error.message:'ค้นหาพิกัดเสนอแนะไม่สำเร็จ');
+    }finally{
+      if(requestSeq===geocodeRequestSeq.current)setGeocodeBusy(false);
+    }
+  }
+
+  async function retryNameLookup(){
+    if(!nameLookupRetry || !editing || editing.id!==nameLookupRetry.draftId)return;
+    if(dirty){setMessage('กรุณาบันทึกการแก้ไขปัจจุบันก่อนลองเติมชื่ออีกครั้ง');return;}
+    setBusy(true);
+    try{
+      const {placeId,province,candidateName}=nameLookupRetry;
+      const result=await api('/places/google-reference',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({placeId,province,candidateName}),
+      }) as {draft?:Draft;autoFillStatus?:string};
+      if(!result.draft)throw Error('ไม่พบฉบับร่างหลังตรวจชื่อ');
+      setDrafts(current=>[result.draft!,...current.filter(d=>d.id!==result.draft!.id)]);
+      await openDraft(result.draft);
+      if(result.autoFillStatus==='matched'){
+        setNameLookupRetry(null);
+        setMessage('เติมชื่อจาก TAT สำเร็จแล้ว ระบบกำลังค้นหาพิกัดเสนอแนะจาก Geoapify ต้องยืนยันหมุดเอง');
+        void suggestGeoapifyCoordinates(result.draft);
+      }else{
+        setMessage(result.autoFillStatus==='source_loading'
+          ? 'ดัชนีชื่อจาก TAT ยังอยู่ระหว่างโหลด กรุณาลองใหม่อีกครั้งภายหลัง'
+          : 'ยังไม่พบชื่อ TAT ที่ยืนยันได้ กรุณากรอกชื่อเอง');
+      }
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'ตรวจชื่อจากแหล่งอิสระไม่สำเร็จ');
+    }finally{setBusy(false);}
   }
 
   const visibleTags = form.tags ?? inheritedTags;
@@ -509,6 +592,8 @@ export default function AdminCms() {
   }
 
   async function openDraft(draft: Draft) {
+    ++geocodeRequestSeq.current;
+    setAutoGeoSuggestions(false);
     const payload = draftPayload(draft);
     if (!payload) { setMessage('ข้อมูลหลักของฉบับร่างผิดรูปแบบ กรุณาให้ผู้ดูแลระบบตรวจสอบรายการนี้'); return; }
     const needsReview = draftWarnings(draft).length > 0;
@@ -746,17 +831,26 @@ export default function AdminCms() {
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
+        {editing && nameLookupRetry?.draftId === editing.id && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm">
+            <p>ชื่อจาก TAT ยังไม่พร้อมหรือยังจับคู่ไม่ได้ สามารถลองตรวจชื่ออีกครั้งได้โดยไม่สร้างฉบับร่างซ้ำ</p>
+            <button type="button" disabled={busy} onClick={()=>void retryNameLookup()}
+              className="mt-2 rounded-lg border border-amber-500 bg-white px-3 py-2 disabled:opacity-50">
+              ลองเติมชื่อจาก TAT อีกครั้ง
+            </button>
+          </div>
+        )}
         {editing && drafts.some(item => item.id === editing.id && isRecord(item.payload?.autoFillSource)) && (
           <div role="note" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">
             <p className="font-semibold">เติมข้อมูลตั้งต้นจาก TAT Open Data</p>
-            <p className="mt-1">ชื่อ หมวดหมู่ รายละเอียด และพิกัดที่พบมาจากชุดข้อมูลอิสระ ไม่ใช่ Google Places โปรดตรวจสอบชื่อภาษาอังกฤษและตำแหน่งทางเข้าจริงก่อนเผยแพร่</p>
+            <p className="mt-1">เฉพาะชื่อภาษาไทยและภาษาอังกฤษ (ถ้ามี) มาจาก TAT Open Data ไม่ใช่ Google Places หมวดหมู่ รายละเอียด และพิกัดต้องกรอกและยืนยันเอง</p>
             <a className="mt-2 inline-block underline" href="https://datacatalog.tat.or.th/dataset/tourist-attraction" target="_blank" rel="noopener noreferrer">ดูแหล่งข้อมูล TAT Open Data</a>
           </div>
         )}
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
         <h3 id="cms-general" className="scroll-mt-24 font-bold">ข้อมูลทั่วไปและที่ตั้ง</h3>
         <section className="grid min-w-0 gap-4 sm:grid-cols-2">
-          {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อสถานที่ (หลัก) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => setForm(current => ({ ...current, [key]: e.target.value }))} required={key === 'name'} /></label>)}
+          {(['name', 'nameLocal'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium"><span>{key === 'name' ? 'ชื่อหลัก / ภาษาอังกฤษ (ถ้ามี) *' : 'ชื่อภาษาไทย'}</span><input className={inputStyle} value={form[key]} inputMode="text" onChange={e => { clearGeocodeSuggestions(); setForm(current => ({ ...current, [key]: e.target.value })); }} required={key === 'name'} /></label>)}
           <fieldset className="min-w-0 space-y-3 rounded-xl border border-slate-200 p-4 sm:col-span-2">
             <legend className="px-1 text-sm font-medium">หมวดหมู่ * (เลือกได้หลายหมวดหมู่)</legend>
             <p className="text-xs text-slate-500">เลือกได้สูงสุด 8 หมวดหมู่ โดยหมวดแรกเป็นหมวดหลักสำหรับข้อมูลเดิม</p>
@@ -789,10 +883,10 @@ export default function AdminCms() {
           <div aria-label="ตัวอย่างหัวข้อที่จะเผยแพร่" className="space-y-2 rounded-lg border bg-white p-3"><p className="text-sm font-semibold">ตัวอย่างบนหน้ารายละเอียด ({visibleTags.length}/12)</p><div className="flex flex-wrap gap-2">{visibleTags.map(tag => <span key={tag} className="inline-flex max-w-full items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm"><span className="break-all">{localizedTag(tag, 'th')}</span><button type="button" aria-label={`ลบหัวข้อ ${localizedTag(tag, 'th')}`} onClick={() => removeTag(tag)} className="rounded-full p-0.5 text-red-700 hover:bg-red-50"><X size={14} /></button></span>)}{visibleTags.length === 0 && <p className="text-xs text-slate-500">ยังไม่มีหัวข้อที่เกี่ยวข้อง</p>}</div>{form.tags === undefined && <p className="text-xs text-teal-700">ยังไม่ได้เปลี่ยนหัวข้อ ระบบจะคงหัวข้อเดิมที่เผยแพร่ไว้</p>}</div>
         </section>
         <section id="cms-location" className="scroll-mt-24 space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">กรอกพิกัดเอง หรือค้นหาและยืนยันหมุดด้วยตนเอง ระบบไม่เติมพิกัดอัตโนมัติ</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
-          <div className="grid min-w-0 gap-4 sm:grid-cols-3">{(['province','lat','lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium">{{province:'จังหวัด',lat:'ละติจูด',lng:'ลองจิจูด'}[key]}<input className={inputStyle} value={form[key]} inputMode={key === 'province' ? 'text' : 'decimal'} onChange={e => setForm(current => ({...current,[key]:e.target.value}))} /></label>)}</div>
+          <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="flex items-center gap-2 font-semibold"><MapPin size={18} className="text-teal-700" /> ค้นหาและเลือกพิกัดบนแผนที่</h3><p className="mt-1 text-xs text-slate-600">ระบบเสนอพิกัดจาก Geoapify หลังจับคู่ชื่อ TAT ได้ แต่ต้องเลือกและยืนยันหมุดเองก่อนพิกัดจึงเข้าช่องแบบฟอร์ม</p></div><button type="button" disabled={geocodeBusy || !form.province.trim() || !(form.nameLocal || form.name).trim()} onClick={() => void lookupCoordinates()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{geocodeBusy ? 'กำลังค้นหา...' : 'ค้นหาพิกัด'}</button></div>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-3">{(['province','lat','lng'] as const).map(key => <label key={key} className="min-w-0 text-sm font-medium">{{province:'จังหวัด',lat:'ละติจูด',lng:'ลองจิจูด'}[key]}<input className={inputStyle} value={form[key]} inputMode={key === 'province' ? 'text' : 'decimal'} onChange={e => {if(key==='province')clearGeocodeSuggestions();setForm(current => ({...current,[key]:e.target.value}));}} /></label>)}</div>
           {geocodeNote && <p aria-live="polite" className="text-sm text-slate-700">{geocodeNote}</p>}
-          {geoCandidates.length > 0 && <div className="space-y-2">{geoCandidates.map((candidate, index) => <button key={`${candidate.source}-${index}`} type="button" onClick={() => setProposedCoordinate({ lat: candidate.lat, lng: candidate.lng })} className="flex w-full items-start justify-between gap-2 rounded-lg border bg-white p-3 text-left text-sm hover:border-teal-500"><span>{candidate.label}<span className="mt-1 block text-xs text-slate-500">{candidate.source} · {candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}</span></span><MapPin size={16} className="shrink-0 text-teal-600" /></button>)}</div>}
+          {geoCandidates.length > 0 && <div className="space-y-2" aria-label={autoGeoSuggestions?'พิกัดแนะนำจาก Geoapify':'ผลค้นหาพิกัด'}>{autoGeoSuggestions && <p className="text-sm font-semibold text-teal-900">พิกัดแนะนำอัตโนมัติจาก Geoapify (ยังไม่บันทึก)</p>}{geoCandidates.map((candidate, index) => <button key={`${candidate.source}-${index}`} type="button" onClick={() => setProposedCoordinate({ lat: candidate.lat, lng: candidate.lng })} className="flex w-full items-start justify-between gap-2 rounded-lg border bg-white p-3 text-left text-sm hover:border-teal-500"><span>{candidate.label}<span className="mt-1 block text-xs text-slate-500">{candidate.source} · {candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}{typeof candidate.confidence==='number'?' · ความมั่นใจ '+Math.round(candidate.confidence*100)+'%':''}</span></span><MapPin size={16} className="shrink-0 text-teal-600" /></button>)}</div>}
           <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-slate-200" />}>
             <AdminCoordinatePicker value={proposedCoordinate || (validCoordinate(Number(form.lat), Number(form.lng)) && form.lat.trim() && form.lng.trim() ? { lat: Number(form.lat), lng: Number(form.lng) } : null)} onChange={setProposedCoordinate} onSearch={query => api(`/geocode?name=${encodeURIComponent(query)}`)} />
           </Suspense>
@@ -843,17 +937,24 @@ export default function AdminCms() {
       </fieldset></form>}
       {tab === 'quality' && <ProvinceQualityDashboard api={api}
         onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}}
-        onDraftCreated={(created,status)=>{
+        onDraftCreated={(created,status,candidateName)=>{
           const draft=created as unknown as Draft;
           setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);
+          setNameLookupRetry((status==='source_loading'||status==='source_unavailable')
+            && typeof draft.payload.googlePlaceId==='string'
+            ? {draftId:draft.id,placeId:draft.payload.googlePlaceId,province:String(draft.payload.province||''),candidateName}
+            : null);
           void openDraft(draft).then(()=>{
+            if(status==='matched')void suggestGeoapifyCoordinates(draft);
             setMessage(status==='matched'
-              ? 'เติมชื่อ หมวดหมู่ รายละเอียด และพิกัดจาก TAT Open Data ที่ตรงกันแล้ว กรุณายืนยันข้อมูลและพิกัดก่อนเผยแพร่'
+              ? 'เติมชื่อจาก TAT Open Data แล้ว กำลังค้นหาพิกัดแนะนำจาก Geoapify โปรดตรวจหมุดและยืนยันเองก่อนบันทึก'
               : status==='source_unavailable'
-                ? 'สร้างฉบับร่างแล้ว แต่แหล่งข้อมูล TAT ไม่พร้อมใช้งาน กรุณากรอกข้อมูลเอง'
+                ? 'สร้างฉบับร่างแล้ว แต่ดาวน์โหลดชื่อจาก TAT ไม่สำเร็จ ยังไม่เติมชื่อให้ กรุณากรอกเองหรือค้นหาใหม่'
                 : status==='ambiguous_match'
-                  ? 'สร้างฉบับร่างแล้ว แต่มีข้อมูล TAT ชื่อซ้ำหลายรายการ กรุณาตรวจสอบและกรอกเอง'
-                  : 'เปิดฉบับร่างแล้ว ยังไม่พบข้อมูลอิสระที่ยืนยันได้ กรุณากรอกข้อมูลด้วยตนเอง');
+                  ? 'สร้างฉบับร่างแล้ว แต่ TAT มีชื่อซ้ำหลายรายการ กรุณาตรวจสอบและกรอกชื่อเอง'
+                  : status==='source_loading'
+                    ? 'สร้างฉบับร่างแล้ว กำลังเตรียมดัชนีชื่อจาก TAT ข้อมูลยังไม่ถูกเติม กรุณาลองใหม่ภายหลัง'
+                    : 'เปิดฉบับร่างแล้ว ยังไม่พบชื่อจากแหล่งอิสระที่ตรงกัน กรุณากรอกชื่อเอง');
           });
         }} />}
       {reconcile && tab === 'drafts' && <section id="cms-reconcile" className="scroll-mt-24 space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">

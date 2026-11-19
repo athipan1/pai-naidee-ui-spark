@@ -66,7 +66,28 @@ async function mockCms(page: Page) {
       return reply(200, { places: [pageNumber === 2 ? { ...place, name_local: 'ผลหน้าสอง' } : place], page: pageNumber, total: 31 });
     }
     if (pathname === '/api/admin/geocode') {
+      if(url.searchParams.get('source')==='geoapify'){
+        return reply(200,{candidates:[{
+          lat:12.655,lng:101.275,label:'หาดแหลมเจริญ, ระยอง ประเทศไทย',
+          source:'Geoapify',confidence:0.93
+        }],providerConfigured:true});
+      }
       return reply(200, { candidates: [{ lat: 13.25, lng: 100.95, label: 'หมุดจำลอง', source: 'fixture' }], providerConfigured: false });
+    }
+    if(pathname === '/api/admin/google-place-discovery/search' && method==='POST'){
+      return reply(200,{status:'ok',candidates:[{
+        sourceId:'google:ChIJGeoSuggestionTest1234',name:'หาดแหลมเจริญ',province:'ระยอง',
+        lat:12.654,lng:101.276,duplicateStatus:'not_detected',
+      }]});
+    }
+    if(pathname === '/api/admin/places/google-reference' && method==='POST'){
+      const draft={id:'geo-suggestion-draft',status:'draft',version:'1900000000.000111',payload:{
+        name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ',province:'ระยอง',
+        category:'',description:'',lat:null,lng:null,googlePlaceId:body().placeId,
+        autoFillSource:{name:'TAT Open Data',id:'tat-test',url:'https://datacatalog.tat.or.th/',license:'Open Data Common',matchedAt:'2026-11-18',reviewRequired:true},
+      }};
+      drafts=[draft,...drafts.filter(item=>item.id!==draft.id)];
+      return reply(201,{id:draft.id,existing:false,draft,autoFillStatus:'matched'});
     }
     if (pathname === `/api/admin/catalog/${place.id}/edit`) {
       const draft = structuredClone(existing);
@@ -148,7 +169,7 @@ async function mockCms(page: Page) {
   return { expire: () => { session = false; }, failNextUpload: () => { failUpload = true; },
     conflictNextPublish: () => { conflictOnPublish = true; },
     reconciled: () => ({ fields: retainedFields, gallery: retainedGallery }),
-    published: () => publishCount, catalogQueries };
+    published: () => publishCount, catalogQueries, draftsSnapshot:()=>structuredClone(drafts) };
 }
 
 async function navigate(page: Page, name: string) {
@@ -308,7 +329,7 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await expect(page.getByText('Image currently unavailable.')).toBeVisible();
   await expect(preview).toHaveJSProperty('naturalWidth', 1);
 
-  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('Draft fixture');
+  await page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/).fill('Draft fixture');
   await page.getByLabel('จังหวัด', {exact:true}).fill('ชลบุรี');
   await page.getByLabel(/ละติจูด/).fill('13.2');
   await page.getByLabel(/ลองจิจูด/).fill('100.9');
@@ -341,18 +362,51 @@ test('province dashboard shows counted data without a completeness claim or auto
 });
 
 
+test('TAT draft automatically suggests Geoapify coordinates but requires explicit map confirmation and save',async({page})=>{
+  const fixture=await mockCms(page);
+  let geoapifyQueries=0;
+  page.on('request',req=>{const u=new URL(req.url());if(u.pathname==='/api/admin/geocode'&&u.searchParams.get('source')==='geoapify'){
+    geoapifyQueries++;
+    expect(u.searchParams.get('name')).toBe('หาดแหลมเจริญ');
+    expect(u.searchParams.get('province')).toBe('ระยอง');
+  }});
+  await login(page);
+  await navigate(page,'คุณภาพรายจังหวัด');
+  await page.locator('[data-testid="province-quality-dashboard"] select').selectOption('ระยอง');
+  await page.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
+  await expect(page.getByText('หาดแหลมเจริญ',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'สร้างฉบับร่างและเติมชื่อ'}).click();
+  await expect(page.getByText(/พิกัดแนะนำอัตโนมัติจาก Geoapify/)).toBeVisible();
+  const location=page.locator('#cms-location');
+  await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
+  await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('');
+  expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')?.payload.lat).toBeNull();
+  await location.getByRole('button',{name:/หาดแหลมเจริญ, ระยอง/}).click();
+  await expect(page.getByLabel(/ละติจูด/)).toHaveValue(''); // A proposed marker is not confirmation.
+  await expect(location.getByRole('button',{name:'ยืนยันใช้พิกัดนี้'})).toBeVisible();
+  await location.getByRole('button',{name:'ยืนยันใช้พิกัดนี้'}).click();
+  await expect(page.getByLabel(/ละติจูด/)).toHaveValue('12.655000');
+  await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('101.275000');
+  expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')?.payload.lat).toBeNull(); // not persisted yet
+  await page.getByRole('button',{name:'บันทึกการแก้ไขเป็นฉบับร่าง'}).click();
+  const stored=fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft');
+  expect(stored?.payload.lat).toBe('12.655000');
+  expect(stored?.payload.lng).toBe('101.275000');
+  expect(geoapifyQueries).toBe(1); // exactly one provider lookup on this create action
+});
+
 test('name-only draft, explicit coordinates, unsaved changes and safe validation', async ({page}) => {
   await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
   let automaticGeocodes = 0;
   page.on('request', req => {if(req.url().includes('/api/admin/geocode')) automaticGeocodes++;});
-  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('ร่างชื่ออย่างเดียว');
+  await page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/).fill('ร่างชื่ออย่างเดียว');
   await page.getByLabel(/ละติจูด/).fill('NaN');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   await expect(page.getByRole('status').filter({hasText:'กรุณากรอกพิกัดทั้งคู่'})).toBeVisible();
   await page.getByLabel(/ละติจูด/).fill('');
   page.once('dialog', dialog => dialog.dismiss());
   await navigate(page,'ฉบับร่าง');
-  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('ร่างชื่ออย่างเดียว');
+  await expect(page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/)).toHaveValue('ร่างชื่ออย่างเดียว');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   const draft = page.locator('article').filter({hasText:'ร่างชื่ออย่างเดียว'});
   await expect(draft).toBeVisible();
@@ -436,7 +490,7 @@ test('legacy and malformed drafts render independently without crashing the admi
 
   // An invalid record must not hide or break the valid drafts in the same response.
   await malformed.getByRole('button', { name: 'แก้ไขร่าง' }).click();
-  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('Malformed taxonomy');
+  await expect(page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/)).toHaveValue('Malformed taxonomy');
   await expect(page.getByRole('status')).toContainText('กรุณาตรวจสอบหัวข้อ หมวดหมู่');
   expect(pageErrors).toEqual([]);
 });
@@ -444,12 +498,12 @@ test('legacy and malformed drafts render independently without crashing the admi
 
 test('unsaved form survives reload without creating or saving a production draft', async ({page}) => {
   await mockCms(page); await login(page); await navigate(page,'เพิ่ม / แก้ไข');
-  await page.getByLabel(/ชื่อสถานที่ \(หลัก\)/).fill('แบบฟอร์มกู้คืน');
+  await page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/).fill('แบบฟอร์มกู้คืน');
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toContain('แบบฟอร์มกู้คืน');
   page.once('dialog', dialog => dialog.accept());
   await page.reload();
   await page.getByRole('button',{name:'กู้คืนแบบฟอร์ม',exact:true}).click();
-  await expect(page.getByLabel(/ชื่อสถานที่ \(หลัก\)/)).toHaveValue('แบบฟอร์มกู้คืน');
+  await expect(page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ \(ถ้ามี\)/)).toHaveValue('แบบฟอร์มกู้คืน');
   await page.getByRole('button',{name:'บันทึกสถานที่เป็นฉบับร่าง'}).click();
   await expect(page.getByText(/บันทึกฉบับร่างสำเร็จ/)).toBeVisible();
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem('painaidee.admin.recovery'))).toBeNull();

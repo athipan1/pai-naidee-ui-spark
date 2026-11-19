@@ -76,9 +76,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     enrichDraft: async ({province,candidateName})=>candidateName==='หาดแหลมเจริญ'&&province==='ระยอง'
       ? {status:'matched',englishNameFound:true,
         source:{name:'Tourism Authority of Thailand — Open Data',url:'https://datacatalog.tat.or.th/dataset/tourist-attraction',id:'tat-fixture-2026',license:'Open Data Common'},
-        fields:{name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ',province:'ระยอง',
-          category:'Beach',categories:['Beach'],description:'ชายหาดสำหรับพักผ่อนริมทะเลในระยอง',
-          lat:12.65,lng:101.27}}
+        fields:{name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ'}}
       : {status:'no_match'} });
   registerRailwayMedia(app, { getSql, storage, requireAdmin });
   registerQualityReview(app, { getSql, requireAdmin });
@@ -173,12 +171,13 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
       placeId:'ChIJAutoFillReference1234',province:'ระยอง',candidateName:'หาดแหลมเจริญ'
     },201);
     assert.equal(created.autoFillStatus,'matched');
-    assert.equal(created.coordinatesRequired,false);
+    assert.equal(created.coordinatesRequired,true);
     assert.equal(created.draft.payload.name,'Laem Charoen Beach');
     assert.equal(created.draft.payload.nameLocal,'หาดแหลมเจริญ');
-    assert.deepEqual(created.draft.payload.categories,['Beach']);
-    assert.equal(created.draft.payload.lat,12.65);
-    assert.equal(created.draft.payload.lng,101.27);
+    assert.equal(created.draft.payload.category,'');
+    assert.equal(created.draft.payload.description,'');
+    assert.equal(created.draft.payload.lat,null);
+    assert.equal(created.draft.payload.lng,null);
     assert.equal(created.draft.payload.autoFillSource.id,'tat-fixture-2026');
     assert.equal(created.draft.payload.googlePlaceId,'ChIJAutoFillReference1234');
     const edited=await write(`/places/${created.id}`,{
@@ -186,6 +185,8 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     },200,'PUT');
     assert.equal(edited.payload.name,'Verified Independent Name');
     assert.equal(edited.payload.autoFillSource.id,'tat-fixture-2026');
+    assert.equal(edited.payload.lat,null,'editing a name-only draft keeps coordinates empty');
+    assert.equal(edited.payload.category,'','editing a name-only draft keeps category unselected');
     const again=await write('/places/google-reference',{
       placeId:'ChIJAutoFillReference1234',province:'ระยอง',candidateName:'หาดแหลมเจริญ'
     },200);

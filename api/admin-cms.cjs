@@ -2,7 +2,7 @@ const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
 const { geocodeCandidates } = require('./admin-geocode.cjs');
 const { isThaiProvince } = require('./thai-provinces.cjs');
-const { resolveIndependentDraft } = require('./smart-draft-autofill.cjs');
+const { resolveIndependentDraft, warmNamesIndex } = require('./smart-draft-autofill.cjs');
 const { finishDirectPublication } = require('./admin-direct-publication.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
@@ -43,7 +43,9 @@ function cleanPlace(input, { draft = false } = {}) {
   let categories;
   const categoryInput = input?.categories;
   if (categoryInput !== undefined) {
-    if (!Array.isArray(categoryInput) || !categoryInput.length || categoryInput.length > 8 ||
+    if (draft && !category && Array.isArray(categoryInput) && categoryInput.length === 0) {
+      categories = undefined; // An unfinished name-only draft may omit categories.
+    } else if (!Array.isArray(categoryInput) || !categoryInput.length || categoryInput.length > 8 ||
       categoryInput.some(item => typeof item !== 'string' || !item.trim() || item.trim().length > 120 || /[\u0000-\u001f\u007f<>]/.test(item))) {
       categories = null;
     } else {
@@ -101,6 +103,7 @@ function cleanPlace(input, { draft = false } = {}) {
 }
 
 function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft }) {
+  if (process.env.RAILWAY_ENVIRONMENT_ID && enrichDraft === resolveIndependentDraft) warmNamesIndex();
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
     catch (error) {
@@ -150,10 +153,12 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
 
   app.get('/api/admin/geocode', requireAdmin, wrap(async (req, res) => {
     if (typeof req.query.name !== 'string' || (req.query.province !== undefined && typeof req.query.province !== 'string') ||
-        req.query.name.length > 120 || String(req.query.province || '').length > 100) {
+        req.query.name.length > 120 || String(req.query.province || '').length > 100 ||
+        (req.query.source !== undefined && req.query.source !== 'geoapify')) {
       return res.status(400).json({ error: 'Invalid place name or province.' });
     }
     const result = await geocodeCandidates({ name: req.query.name, province: req.query.province,
+      geoapifyOnly: req.query.source === 'geoapify',
       listPlaces, apiKey: process.env.GEOAPIFY_API_KEY,
       resolveNames: async name => {
         const sql = getSql();
@@ -302,7 +307,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           autoFillStatus:untouched?enrichment.status:'existing_preserved'};
       }
       const payload={name:'รอยืนยันชื่อสถานที่',nameLocal:'',province,
-        category:'attraction',description:'',lat:null,lng:null,
+        category:'',description:'',lat:null,lng:null,
         imageUrl:'',imageUrls:[],removedImageUrls:[],googlePlaceId:placeId,
         verificationStatus:'PENDING_VERIFICATION',
         ...(matched?{...enrichment.fields,autoFillSource}:{})};

@@ -1,3 +1,5 @@
+'use strict';
+const {isThaiProvince,addressMatchesProvince}=require('./thai-provinces.cjs');
 const THAILAND_BOUNDS = { south: 5, north: 21, west: 97, east: 106 };
 
 // Verified alternate names of the same landmark, not nearby places or districts.
@@ -38,13 +40,15 @@ function isThailandCoordinate(lat, lng) {
     lng >= THAILAND_BOUNDS.west && lng <= THAILAND_BOUNDS.east;
 }
 
-async function geocodeCandidates({ name, province, listPlaces, apiKey, request = fetch, resolveNames = async () => [] }) {
+async function geocodeCandidates({ name, province, listPlaces, apiKey, request = fetch, resolveNames = async () => [], geoapifyOnly = false }) {
   const query = String(name || '').trim().slice(0, 120);
   const area = String(province || '').trim().slice(0, 100);
   if (query.length < 2) return { error: 'กรุณากรอกชื่อสถานที่อย่างน้อย 2 ตัวอักษร', candidates: [] };
+  if (geoapifyOnly && !isThaiProvince(area)) return { error: 'กรุณาเลือกจังหวัดไทยที่ถูกต้อง', candidates: [] };
 
-  const resolvedNames = await resolveNames(query);
-  const names = [...new Map([...searchNames(query), ...resolvedNames].filter(Boolean)
+  const resolvedNames = geoapifyOnly ? [] : await resolveNames(query);
+  // Automatic draft suggestions use exactly one TAT-verified name; no alias cascade.
+  const names = geoapifyOnly ? [query] : [...new Map([...searchNames(query), ...resolvedNames].filter(Boolean)
     .map(name => [normalized(name), name])).values()].slice(0, 6);
   const candidates = [];
   const addCandidate = candidate => {
@@ -52,7 +56,7 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
         candidates.some(existing => Math.abs(existing.lat - candidate.lat) < 0.00005 && Math.abs(existing.lng - candidate.lng) < 0.00005)) return;
     candidates.push(candidate);
   };
-  for (const lookupName of names) {
+  if (!geoapifyOnly) for (const lookupName of names) {
     const matches = await listPlaces({ search: lookupName, province: area, limit: 10 });
     for (const place of matches.attractions || []) {
       if (area && String(place.province || '').trim().toLocaleLowerCase() !== area.toLocaleLowerCase()) continue;
@@ -82,7 +86,16 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
             if (!isThailandCoordinate(lat, lng) || item.country_code?.toLowerCase() !== 'th') continue;
             // A municipal centroid is not a match for a landmark, even in the correct province.
             if (!names.some(name => matchesPlaceName(name, [item.name, item.address_line1, item.formatted]))) continue;
-            addCandidate({ lat, lng, label: String(item.formatted || item.name || lookupName).slice(0, 250), source: 'Geoapify' });
+            if (geoapifyOnly) {
+              // Never suggest a neighbouring province or an administrative centroid.
+              if (!addressMatchesProvince([item.state,item.formatted].filter(Boolean).join(', '),area)) continue;
+              if (['country','state','county','city','postcode','district','suburb'].includes(item.result_type)) continue;
+              if (!matchesPlaceName(lookupName,[item.name,item.address_line1])) continue;
+              if (item.rank?.confidence != null && Number(item.rank.confidence) < 0.7) continue;
+            }
+            addCandidate({ lat, lng, label: String(item.formatted || item.name || lookupName).slice(0, 250),
+              source: 'Geoapify', ...(Number.isFinite(Number(item.rank?.confidence)) && item.rank?.confidence != null
+                ? {confidence:Number(item.rank.confidence)} : {}) });
           }
         }
       } catch {

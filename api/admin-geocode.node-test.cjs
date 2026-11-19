@@ -98,3 +98,46 @@ test('Geoapify retries alternate names after an unrelated first response', async
   assert.equal(queried.length, 2);
   assert.deepEqual(searchNames('ตลาดน้ำอัมพวา'), ['ตลาดน้ำอัมพวา']);
 });
+
+
+test('Geoapify-only suggestions require selected province, exclude centroids and low confidence, and do not query Railway places', async () => {
+  let calls=0;
+  const result=await geocodeCandidates({
+    name:'หาดแหลมเจริญ', province:'ระยอง', apiKey:'test-only', geoapifyOnly:true,
+    listPlaces:()=>assert.fail('automatic suggestions must not reuse catalog matches'),
+    resolveNames:()=>assert.fail('do not request alias lookups for automatic suggestions'),
+    request:async url=>{
+      calls++;
+      const params=new URL(url).searchParams;
+      assert.equal(params.get('text'),'หาดแหลมเจริญ, ระยอง, Thailand');
+      assert.equal(params.get('limit'),'5');
+      return {ok:true,json:async()=>({results:[
+        {lat:12.65,lon:101.25,country_code:'th',state:'Rayong',name:'หาดแหลมเจริญ',formatted:'หาดแหลมเจริญ, Rayong, Thailand',result_type:'amenity',rank:{confidence:0.92}},
+        {lat:12.7,lon:101.3,country_code:'th',state:'Chon Buri',name:'หาดแหลมเจริญ',formatted:'หาดแหลมเจริญ, Chon Buri, Thailand',rank:{confidence:0.94}},
+        {lat:12.6,lon:101.4,country_code:'th',state:'ระยอง',name:'เมืองระยอง',formatted:'Rayong Thailand',result_type:'city',rank:{confidence:0.98}},
+        {lat:12.68,lon:101.21,country_code:'th',state:'ระยอง',name:'หาดแหลมเจริญ',formatted:'หาดแหลมเจริญ ระยอง',rank:{confidence:0.2}},
+        {lat:12.68,lon:101.2,country_code:'la',state:'ระยอง',name:'หาดแหลมเจริญ',formatted:'หาดแหลมเจริญ ระยอง'},
+      ]})};
+    }
+  });
+  assert.equal(calls,1,'single Geoapify call for one TAT-verified name');
+  assert.equal(result.candidates.length,1);
+  assert.equal(result.candidates[0].source,'Geoapify');
+  assert.equal(result.candidates[0].confidence,0.92);
+  assert.equal(result.candidates[0].lat,12.65);
+});
+test('Geoapify-only requires a real province; manual geocoding remains backward compatible', async () => {
+  const invalid=await geocodeCandidates({
+    name:'หาดแหลมเจริญ',province:'invalid',apiKey:'test-only',geoapifyOnly:true,
+    listPlaces:()=>assert.fail('no catalog queries'),
+    request:()=>assert.fail('no paid requests on invalid province')
+  });
+  assert.match(invalid.error,/จังหวัด/);
+  const noKey=await geocodeCandidates({
+    name:'หาดแหลมเจริญ',province:'ระยอง',geoapifyOnly:true,
+    listPlaces:()=>assert.fail('no catalog queries'),
+    request:()=>assert.fail('provider requires API key')
+  });
+  assert.equal(noKey.providerConfigured,false);
+  assert.deepEqual(noKey.candidates,[]);
+});
