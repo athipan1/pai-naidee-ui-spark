@@ -442,8 +442,8 @@ test('TAT miss uses Geoapify fallback names and proposed coordinates without per
   await page.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
   await expect(page.getByText('ชื่อชั่วคราวจาก Google',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'สร้างฉบับร่างและเติมชื่อ'}).click();
-  await expect(page.getByRole('note').getByText(/Geoapify \/ OpenStreetMap/)).toBeVisible();
-  await expect(page.getByLabel(/ชื่อหลัก \/ ภาษาอังกฤษ/)).toHaveValue('Rayong Community Market');
+ await expect(page.getByText(/Geoapify.*OpenStreetMap contributors/)).toBeVisible();
+ await expect(page.getByLabel(/ชื่อหลัก.*ภาษาอังกฤษ/)).toHaveValue('Rayong Community Market');
   await expect(page.getByLabel('ชื่อภาษาไทย')).toHaveValue('ตลาดชุมชนระยอง');
   await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
   await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('');
@@ -473,14 +473,14 @@ test('Google daily 429 switches to Geoapify Discovery and requires human confirm
  await page.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
  await expect(page.getByText(/Google Places ใช้โควตาประจำวันครบแล้ว/)).toBeVisible();
  await expect(page.getByText('Rayong Community Market',{exact:true})).toBeVisible();
- await expect(page.getByText(/Geoapify \\u00b7 \\u00a9 OpenStreetMap contributors/)).toBeVisible();
+ await expect(page.getByText(/Geoapify.*OpenStreetMap contributors/)).toBeVisible();
  expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')).toBeUndefined();
  await page.getByRole('button',{name:'ตรวจสอบก่อนสร้างฉบับร่าง'}).click();
  const review=page.getByRole('group',{name:'ยืนยันข้อมูลก่อนสร้างฉบับร่าง'});
  await expect(review).toContainText('ระยอง');
  expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')).toBeUndefined();
  await review.getByRole('button',{name:'ยืนยันสร้างฉบับร่าง'}).click();
- await expect(page.getByLabel(/ชื่อหลัก \\/ ภาษาอังกฤษ/)).toHaveValue('Rayong Community Market');
+ await expect(page.getByLabel(/ชื่อหลัก.*ภาษาอังกฤษ/)).toHaveValue('Rayong Community Market');
  await expect(page.getByLabel('ชื่อภาษาไทย')).toHaveValue('ตลาดชุมชนระยอง');
  await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
  await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('');
