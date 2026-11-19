@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {validate,placeProperties,signCandidate,verifyCandidate,discover}=require('./geoapify-place-discovery.cjs');
+const {validate,signCandidate,verifyCandidate,discover}=require('./geoapify-place-discovery.cjs');
 const SECRET='unit-test-existing-geoapify-api-key';
 const ID='51a1f444490668134059dc0a96dfac6c';
 const province='ระยอง';
