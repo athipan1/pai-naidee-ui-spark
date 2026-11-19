@@ -32,7 +32,10 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/**", (route) => {
     if (route.request().method() !== "GET") return route.abort();
     return route.fulfill({
-      json: { data: [], total: 0, items: [], places: [] },
+      json: {
+        attractions: [], total: 0, page: 1, limit: 10,
+        data: [], items: [], places: [],
+      },
     });
   });
   await page.route("**/api/places/facets", (route) =>
