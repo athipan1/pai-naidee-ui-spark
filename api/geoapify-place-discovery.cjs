@@ -4,7 +4,6 @@
 const {createHmac,timingSafeEqual}=require('node:crypto');
 const {isThaiProvince,addressMatchesProvince}=require('./thai-provinces.cjs');
 const {isThailandCoordinate}=require('./admin-geocode.cjs');
-const {normalizeName}=require('./place-discovery.cjs');
 const {readExisting,classifyCandidates}=require('./google-place-discovery.cjs');
 const {createRateLimiter}=require('./security.cjs');
 const {PROVINCE_EN}=require('./place-localizations.cjs');
