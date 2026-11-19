@@ -2,8 +2,9 @@ import { existsSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 
 const title = "ช้างผู้ช่วยเที่ยว";
-const hasAsset =
-  !process.env.CI && existsSync("src/components/mascot/assets/elephant.glb");
+// Asset-dependent browser cases must also run in an authorized private CI
+// when the real rigged GLB is provisioned. Public CI without assets still skips.
+const hasAsset = existsSync("src/components/mascot/assets/elephant.glb");
 const plan = {
   province: "เชียงใหม่",
   provider: "ai",
