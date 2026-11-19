@@ -14,7 +14,7 @@ const incomplete = { id: 'legacy-fixture', status: 'draft', version: '1900000000
   ...payload, name: 'Legacy fixture', nameLocal: 'ร่างเก่า', lat: null, lng: undefined,
 } };
 
-async function mockCms(page: Page, draftMode: 'tat'|'geoapify' = 'tat') {
+async function mockCms(page: Page, draftMode: 'tat'|'geoapify' = 'tat', googleQuotaExhausted = false) {
   let session = false;
   let failUpload = false;
   let publishCount = 0;
@@ -75,10 +75,34 @@ async function mockCms(page: Page, draftMode: 'tat'|'geoapify' = 'tat') {
       return reply(200, { candidates: [{ lat: 13.25, lng: 100.95, label: 'หมุดจำลอง', source: 'fixture' }], providerConfigured: false });
     }
     if(pathname === '/api/admin/google-place-discovery/search' && method==='POST'){
+      if(googleQuotaExhausted)return reply(429,{status:'quota_exhausted',candidates:[]});
       return reply(200,{status:'ok',candidates:[{
         sourceId:'google:ChIJGeoSuggestionTest1234',name:draftMode==='geoapify'?'ชื่อชั่วคราวจาก Google':'หาดแหลมเจริญ',province:'ระยอง',
         lat:12.654,lng:101.276,duplicateStatus:'not_detected',
       }]});
+    }
+    if(pathname === '/api/admin/geoapify-place-discovery/search' && method==='POST'){
+      return reply(200,{status:'ok',candidates:[{
+        source:'geoapify',sourceId:'geoapify:fixture-source-id-12345678',
+        candidateToken:'fixture-signed-geoapify-token',
+        name:'Rayong Community Market',nameLocal:'ตลาดชุมชนระยอง',
+        province:'ระยอง',lat:12.65,lng:101.25,
+        address:'ตลาดชุมชนระยอง, ระยอง',
+        duplicateStatus:'not_detected',duplicateMatches:[],
+      }]});
+    }
+    if(pathname === '/api/admin/places/geoapify-reference' && method==='POST'){
+      if(body().candidateToken!=='fixture-signed-geoapify-token'||body().province!=='ระยอง')
+        return reply(400,{error:'Invalid Geoapify selection'});
+      const draft={id:'geo-suggestion-draft',status:'draft',version:'1900000000.000111',
+        payload:{name:'Rayong Community Market',nameLocal:'ตลาดชุมชนระยอง',
+          province:'ระยอง',category:'',description:'',lat:null,lng:null,
+          autoFillSource:{name:'Geoapify / OpenStreetMap',id:'geoapify-fixture-id',
+            url:'https://www.geoapify.com/',attribution:'© OpenStreetMap contributors',
+            license:'ODbL 1.0',reviewRequired:true}}};
+      drafts=[draft,...drafts.filter(item=>item.id!==draft.id)];
+      return reply(201,{id:draft.id,existing:false,draft,autoFillStatus:'geoapify_matched',
+        geoapifySuggestion:{lat:12.65,lng:101.25,label:'ตลาดชุมชนระยอง',source:'Geoapify'}});
     }
     if(pathname === '/api/admin/places/google-reference' && method==='POST'){
       const draft={id:'geo-suggestion-draft',status:'draft',version:'1900000000.000111',payload:{
@@ -439,6 +463,41 @@ test('TAT miss uses Geoapify fallback names and proposed coordinates without per
   expect(saved?.payload.lng).toBe('101.250000');
   expect(saved?.payload.autoFillSource?.name).toBe('Geoapify / OpenStreetMap');
   expect(extraGeoCalls).toBe(0,'backend returned existing Geoapify proposal, no redundant lookup');
+});
+
+test('Google daily 429 switches to Geoapify Discovery and requires human confirmation before draft coordinates',async({page})=>{
+ const fixture=await mockCms(page,'geoapify',true);
+ await login(page);
+ await navigate(page,'คุณภาพรายจังหวัด');
+ await page.locator('[data-testid="province-quality-dashboard"] select').selectOption('ระยอง');
+ await page.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
+ await expect(page.getByText(/Google Places ใช้โควตาประจำวันครบแล้ว/)).toBeVisible();
+ await expect(page.getByText('Rayong Community Market',{exact:true})).toBeVisible();
+ await expect(page.getByText(/Geoapify \\u00b7 \\u00a9 OpenStreetMap contributors/)).toBeVisible();
+ expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')).toBeUndefined();
+ await page.getByRole('button',{name:'ตรวจสอบก่อนสร้างฉบับร่าง'}).click();
+ const review=page.getByRole('group',{name:'ยืนยันข้อมูลก่อนสร้างฉบับร่าง'});
+ await expect(review).toContainText('ระยอง');
+ expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')).toBeUndefined();
+ await review.getByRole('button',{name:'ยืนยันสร้างฉบับร่าง'}).click();
+ await expect(page.getByLabel(/ชื่อหลัก \\/ ภาษาอังกฤษ/)).toHaveValue('Rayong Community Market');
+ await expect(page.getByLabel('ชื่อภาษาไทย')).toHaveValue('ตลาดชุมชนระยอง');
+ await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
+ await expect(page.getByLabel(/ลองจิจูด/)).toHaveValue('');
+ const stored=fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft');
+ expect(stored?.payload.lat).toBeNull();
+ expect(stored?.payload.lng).toBeNull();
+ expect(JSON.stringify(stored?.payload)).not.toContain('googlePlaceId');
+ const location=page.locator('#cms-location');
+ await expect(location.getByText(/พิกัดแนะนำอัตโนมัติจาก Geoapify/)).toBeVisible();
+ await location.getByRole('button',{name:/ตลาดชุมชนระยอง/}).click();
+ await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
+ await location.getByRole('button',{name:'ยืนยันใช้พิกัดนี้'}).click();
+ await expect(page.getByLabel(/ละติจูด/)).toHaveValue('12.650000');
+ expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')?.payload.lat).toBeNull();
+ await page.getByRole('button',{name:'บันทึกการแก้ไขเป็นฉบับร่าง'}).click();
+ expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')?.payload.lat).toBe('12.650000');
+ expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')?.payload.autoFillSource?.name).toBe('Geoapify / OpenStreetMap');
 });
 
 test('name-only draft, explicit coordinates, unsaved changes and safe validation', async ({page}) => {
