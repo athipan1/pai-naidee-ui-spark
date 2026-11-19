@@ -3,6 +3,7 @@ const { randomUUID } = require('node:crypto');
 const { geocodeCandidates, resolveGeoapifyDraft } = require('./admin-geocode.cjs');
 const { isThaiProvince } = require('./thai-provinces.cjs');
 const { resolveIndependentDraft, warmNamesIndex } = require('./smart-draft-autofill.cjs');
+const { verifyCandidate:verifyGeoapifyDiscoveryCandidate } = require('./geoapify-place-discovery.cjs');
 const { finishDirectPublication } = require('./admin-direct-publication.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
@@ -332,6 +333,64 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       existing:result.existing,coordinatesRequired:result.draft?.payload?.lat==null,
       draft:result.draft,autoFillStatus:result.autoFillStatus,
       englishNameFound:result.englishNameFound??false,
+      geoapifySuggestion:result.geoapifySuggestion||null
+    });
+  }));
+
+  // Draft creation is explicitly confirmed by Admin. The signed result
+  // originates from our server-side Geoapify Places lookup, not browser text.
+  app.post('/api/admin/places/geoapify-reference', requireAdmin, wrap(async (req,res)=>{
+    const item=verifyGeoapifyDiscoveryCandidate(req.body?.candidateToken,
+      req.auth.user.id,process.env.GEOAPIFY_API_KEY);
+    if(!item||req.body?.province!==item.province)
+      return res.status(400).json({error:'The Geoapify result is invalid or expired. Search again.'});
+    const sql=getSql();
+    const result=await sql.begin(async tx=>{
+      // Serialize all new Geoapify drafts per province to prevent concurrent
+      // duplicate entries across nearby locations or variant source IDs.
+      await tx`SELECT pg_advisory_xact_lock(hashtext(${'geoapify-draft:'+item.province}))`;
+      const published=await tx`SELECT id FROM places WHERE province=${item.province}
+        AND (
+          LOWER(TRIM(name))=LOWER(TRIM(${item.name}))
+          OR (${item.nameLocal}<>'' AND LOWER(TRIM(COALESCE(name_local,'')))=LOWER(TRIM(${item.nameLocal})))
+          OR (lat IS NOT NULL AND lng IS NOT NULL
+            AND ABS(lat-${item.lat})<0.001 AND ABS(lng-${item.lng})<0.001)
+        ) LIMIT 1`;
+      if(published.length)return {code:409,error:'This place already exists or is nearby in the published catalogue. Review it instead.'};
+      const sourceId='geoapify-'+item.id;
+      const staged=await tx`SELECT id,status,payload,
+        EXTRACT(EPOCH FROM updated_at)::text AS version
+        FROM place_drafts WHERE status='draft' AND payload->>'province'=${item.province}
+        AND (
+          payload->'autoFillSource'->>'id'=${sourceId}
+          OR LOWER(TRIM(payload->>'name'))=LOWER(TRIM(${item.name}))
+          OR (${item.nameLocal}<>'' AND LOWER(TRIM(COALESCE(payload->>'nameLocal','')))=LOWER(TRIM(${item.nameLocal})))
+          OR (NULLIF(payload->>'lat','') IS NOT NULL AND NULLIF(payload->>'lng','') IS NOT NULL
+            AND ABS((payload->>'lat')::numeric-${item.lat})<0.001
+            AND ABS((payload->>'lng')::numeric-${item.lng})<0.001)
+        ) LIMIT 1`;
+      if(staged.length)return {code:200,id:staged[0].id,existing:true,draft:staged[0],
+        autoFillStatus:'existing_preserved'};
+      const autoFillSource={id:sourceId,name:'Geoapify / OpenStreetMap',
+        url:'https://www.geoapify.com/',license:'ODbL 1.0',
+        attribution:'© OpenStreetMap contributors',
+        matchedAt:new Date().toISOString(),reviewRequired:true};
+      const payload={name:item.name,nameLocal:item.nameLocal,province:item.province,
+        category:'',description:'',lat:null,lng:null,
+        imageUrl:'',imageUrls:[],removedImageUrls:[],
+        verificationStatus:'PENDING_VERIFICATION',autoFillSource};
+      const id=randomUUID();
+      const [draft]=await tx`INSERT INTO place_drafts (id,payload,author_id)
+        VALUES (${id},${tx.json(payload)},${req.auth.user.id})
+        RETURNING id,status,payload,EXTRACT(EPOCH FROM updated_at)::text AS version`;
+      return {code:201,id,existing:false,draft,autoFillStatus:'geoapify_matched',
+        geoapifySuggestion:{lat:item.lat,lng:item.lng,source:'Geoapify',
+          label:item.nameLocal||item.name}};
+    });
+    res.status(result.code).json(result.error?{error:result.error}:{
+      id:result.id,existing:result.existing,draft:result.draft,
+      status:'draft',coordinatesRequired:result.draft?.payload?.lat==null,
+      autoFillStatus:result.autoFillStatus,
       geoapifySuggestion:result.geoapifySuggestion||null
     });
   }));
