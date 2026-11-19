@@ -88,7 +88,7 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
             if (!names.some(name => matchesPlaceName(name, [item.name, item.address_line1, item.formatted]))) continue;
             if (geoapifyOnly) {
               // Never suggest a neighbouring province or an administrative centroid.
-              if (!addressMatchesProvince([item.state,item.formatted].filter(Boolean).join(', '),area)) continue;
+              if (!item.state || !addressMatchesProvince(String(item.state),area)) continue;
               if (['country','state','county','city','postcode','district','suburb'].includes(item.result_type)) continue;
               if (!matchesPlaceName(lookupName,[item.name,item.address_line1])) continue;
               if (item.rank?.confidence != null && Number(item.rank.confidence) < 0.7) continue;
@@ -122,7 +122,7 @@ async function resolveGeoapifyDraft({province,candidateName,apiKey,request=fetch
     if(!item||typeof item!=='object')return false;
     const lat=Number(item.lat),lng=Number(item.lon);
     if(!isThailandCoordinate(lat,lng)||String(item.country_code||'').toLowerCase()!=='th')return false;
-    if(!addressMatchesProvince([item.state,item.formatted].filter(Boolean).join(', '),province))return false;
+    if(!item.state||!addressMatchesProvince(String(item.state),province))return false;
     if(['country','state','county','city','postcode','district','suburb','street'].includes(item.result_type))return false;
     if(!Number.isFinite(Number(item.rank?.confidence))||Number(item.rank?.confidence)<0.8)return false;
     return typeof item.name==='string'&&item.name.trim().length>=2;
