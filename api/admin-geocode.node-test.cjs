@@ -183,7 +183,7 @@ test('Geoapify fallback rejects city centroids, wrong province and mismatched na
  ]){
    const r=await resolveGeoapifyDraft({
      province:'ระยอง',candidateName:'หาดแหลมเจริญ',apiKey:'key',
-     request:async url=>({ok:true,json:async()=>({results:[{
+     request:async()=>({ok:true,json:async()=>({results:[{
        lat:12.65,lon:101.25,place_id:'geo-test',
        name:'หาดแหลมเจริญ',state:'Rayong',formatted:'หาดแหลมเจริญ ระยอง',
        country_code:'th',result_type:'amenity',rank:{confidence:0.95},
