@@ -5,6 +5,7 @@ const { once } = require('node:events');
 const express = require('express');
 const { authRoutes, hashPassword, hashToken } = require('./railway-admin-auth.cjs');
 const { registerAdminCms } = require('./admin-cms.cjs');
+const { signCandidate: signGeoapifyCandidate } = require('./geoapify-place-discovery.cjs');
 const { registerQualityReview } = require('./place-quality-review.cjs');
 const { registerGoogleVerification } = require('./google-place-verification.cjs');
 const { registerPlaceReviewWorkflow } = require('./place-review-workflow.cjs');
@@ -240,6 +241,53 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(second.autoFillStatus,'existing_preserved');
     assert.equal(second.geoapifySuggestion,null);
     assert.equal(second.draft.payload.name,'Verified Admin Name');
+  });
+
+  await t.test('Geoapify Discovery requires signed Admin review, checks duplicates and keeps coordinates unconfirmed',async()=>{
+    const previousKey=process.env.GEOAPIFY_API_KEY;
+    const key='isolated-geoapify-token-key-example';
+    process.env.GEOAPIFY_API_KEY=key;
+    try{
+      const id='51a1f444490668134059dc0a96dfac6c';
+      const item={id,name:'Rayong Sunset Viewpoint',nameLocal:'จุดชมพระอาทิตย์ระยอง',
+        province:'ระยอง',lat:12.432,lng:101.234};
+      const candidateToken=signGeoapifyCandidate(item,'test-admin',key);
+      await write('/places/geoapify-reference',{province:'ชลบุรี',candidateToken},400);
+      await write('/places/geoapify-reference',{province:'ระยอง',candidateToken:candidateToken+'x'},400);
+      const created=await write('/places/geoapify-reference',{province:'ระยอง',candidateToken},201);
+      assert.equal(created.autoFillStatus,'geoapify_matched');
+      assert.equal(created.coordinatesRequired,true);
+      assert.equal(created.draft.payload.name,'Rayong Sunset Viewpoint');
+      assert.equal(created.draft.payload.nameLocal,'จุดชมพระอาทิตย์ระยอง');
+      assert.equal(created.draft.payload.lat,null);
+      assert.equal(created.draft.payload.lng,null);
+      assert.equal(created.draft.payload.category,'');
+      assert.equal(created.draft.payload.autoFillSource.name,'Geoapify / OpenStreetMap');
+      assert.equal(created.draft.payload.autoFillSource.attribution,'© OpenStreetMap contributors');
+      assert.equal(created.draft.payload.autoFillSource.id,'geoapify-'+id);
+      assert.equal(created.geoapifySuggestion.lat,12.432);
+      assert.equal(created.geoapifySuggestion.lng,101.234);
+      const repeated=await write('/places/geoapify-reference',{province:'ระยอง',candidateToken},200);
+      assert.equal(repeated.existing,true);
+      assert.equal(repeated.id,created.id);
+      assert.equal(repeated.geoapifySuggestion,null);
+      const edited=await write('/places/'+created.id,{
+        ...created.draft.payload,name:'Verified independent name',version:created.draft.version
+      },200,'PUT');
+      assert.equal(edited.payload.name,'Verified independent name');
+      assert.equal(edited.payload.autoFillSource.id,'geoapify-'+id);
+      assert.equal(edited.payload.lat,null);
+      const reused=await write('/places/geoapify-reference',{province:'ระยอง',candidateToken},200);
+      assert.equal(reused.draft.payload.name,'Verified independent name','never overwrite Admin edits');
+      const alreadyPublished=signGeoapifyCandidate({
+        ...item,id:'51b2f444490668134059dc0a96dfac6e',province:'ชลบุรี',
+        name:'Other Fixture',nameLocal:'รายการจำลอง',lat:13.6,lng:101.1
+      },'test-admin',key);
+      await write('/places/geoapify-reference',{province:'ชลบุรี',candidateToken:alreadyPublished},409);
+    }finally{
+      if(previousKey===undefined)delete process.env.GEOAPIFY_API_KEY;
+      else process.env.GEOAPIFY_API_KEY=previousKey;
+    }
   });
 
   await t.test('candidate review uses live SQL rows, exports safely and cannot publish or mutate a draft', async () => {
