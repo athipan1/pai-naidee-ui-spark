@@ -165,7 +165,13 @@ async function mockCms(page: Page, draftMode: 'tat'|'geoapify' = 'tat') {
     }
     if (draft && method === 'PUT') {
       if (body().version !== draft.version) return reply(409, { error: 'Draft changed.' });
-      draft.payload = body();
+      // Match the real API: the Google identifier and independent-source
+      // attribution cannot be erased by the draft editing form.
+      const previous = draft.payload as Record<string, unknown>;
+      draft.payload = { ...body(),
+        ...(typeof previous.googlePlaceId === 'string' ? { googlePlaceId: previous.googlePlaceId } : {}),
+        ...(previous.autoFillSource ? { autoFillSource: previous.autoFillSource } : {}),
+      };
       draft.version = '1900000000.000003';
       return reply(200, draft);
     }
