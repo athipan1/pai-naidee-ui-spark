@@ -38,3 +38,7 @@ coverage/
 # Playwright reports
 playwright-report/
 test-results/
+
+# Licensed mascot assets are provisioned only for private local validation.
+# Keep GLB, textures, portraits and Blender sources out of public commits.
+src/components/mascot/assets/
