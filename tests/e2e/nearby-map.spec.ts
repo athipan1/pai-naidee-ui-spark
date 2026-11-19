@@ -187,6 +187,10 @@ test("radius, popup keyboard, navigation and cleanup during zoom", async ({
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
   const count = requests.length;
+  // The last radius selected before navigation must actually be 20 km.
+  await expect(
+    page.getByRole("button", { name: "20 กม.", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
   await page.locator(".leaflet-control-zoom-in").click();
   await page.locator(".leaflet-control-zoom-out").click();
   expect(requests.length).toBe(count);
@@ -199,6 +203,14 @@ test("radius, popup keyboard, navigation and cleanup during zoom", async ({
   await expect(
     page.getByRole("button", { name: "5 กม.", exact: true })
   ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("button", { name: "20 กม.", exact: true })
+  ).toHaveAttribute("aria-pressed", "false");
+  // Restored place must show data matching its 5 km default rather than
+  // keeping the prior visit's 20 km label after browser Back navigation.
+  await expect(page.getByTestId("real-nearby-places")).toContainText(
+    "ภายใน 5 กม."
+  );
   expect(forbidden).toEqual([]);
   expect(errors).toEqual([]);
 });
