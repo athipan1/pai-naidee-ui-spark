@@ -525,8 +525,16 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         return { status: 200, placeId: current.id, published: true, updated: true };
       }
       const placeId = `cms:${draft.id}`;
-      await tx`INSERT INTO places (id, name, name_local, province, category, categories, description, tags, lat, lng, image_url, source_name)
-        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${tx.json(p.categories || [p.category])}, ${p.description}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, 'PaiNaiDee Admin CMS')`;
+      // Preserve independent-source credit when Admin ultimately publishes a
+      // reviewed draft, including required OpenStreetMap attribution.
+      const source=draft.payload?.autoFillSource;
+      const publishedSourceName=source?.name==='Geoapify / OpenStreetMap'
+        ? 'Geoapify · © OpenStreetMap contributors'
+        : (source?.name || 'PaiNaiDee Admin CMS');
+      const publishedSourceUrl=typeof source?.url==='string' && source.url.startsWith('https://')
+        ? source.url : null;
+      await tx`INSERT INTO places (id, name, name_local, province, category, categories, description, tags, lat, lng, image_url, source_name, source_url)
+        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${tx.json(p.categories || [p.category])}, ${p.description}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, ${publishedSourceName}, ${publishedSourceUrl})`;
       for (const url of p.imageUrls) await preservePlaceImage(tx, placeId, url, p.name);
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
