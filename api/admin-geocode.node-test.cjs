@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { geocodeCandidates, isThailandCoordinate, matchesPlaceName, searchNames } = require('./admin-geocode.cjs');
+const { geocodeCandidates, resolveGeoapifyDraft, isThailandCoordinate, matchesPlaceName, searchNames } = require('./admin-geocode.cjs');
 
 test('geocoding searches existing Railway places without a paid provider', async () => {
   const calls = [];
@@ -140,4 +140,89 @@ test('Geoapify-only requires a real province; manual geocoding remains backward 
   });
   assert.equal(noKey.providerConfigured,false);
   assert.deepEqual(noKey.candidates,[]);
+});
+
+test('TAT fallback safely proposes bilingual names and coordinates sourced exclusively from Geoapify',async()=>{
+ const calls=[];
+ const response=await resolveGeoapifyDraft({
+   candidateName:'หาดแหลมเจริญ',province:'ระยอง',apiKey:'existing-railway-key',
+   request:async url=>{
+     const u=new URL(url),lang=u.searchParams.get('lang');calls.push(lang);
+     assert.equal(u.hostname,'api.geoapify.com');
+     assert.equal(u.searchParams.get('filter'),'countrycode:th');
+     assert.equal(u.searchParams.get('limit'),'5');
+     assert.equal(u.searchParams.get('text'),'หาดแหลมเจริญ, ระยอง, Thailand');
+     return {ok:true,json:async()=>({results:[{
+       lat:12.65,lon:101.25,place_id:'geo-rayong-beach',
+       state:'Rayong',country_code:'th',result_type:'amenity',rank:{confidence:0.95},
+       name:lang==='th'?'หาดแหลมเจริญ':'Laem Charoen Beach',
+       formatted:lang==='th'?'หาดแหลมเจริญ, ระยอง':'Laem Charoen Beach, Rayong'
+     }]})};
+   }
+ });
+ assert.deepEqual(calls.sort(),['en','th']);
+ assert.equal(response.status,'geoapify_matched');
+ assert.deepEqual(response.fields,{name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ'});
+ assert.equal(response.suggestion.lat,12.65);
+ assert.equal(response.suggestion.lng,101.25);
+ assert.equal(response.suggestion.source,'Geoapify');
+ assert.equal(response.source.id,'geoapify-geo-rayong-beach');
+ assert.equal(response.source.attribution,'© OpenStreetMap contributors');
+ assert.equal(response.fields.lat,undefined);
+ assert.equal(response.fields.description,undefined);
+ assert.equal(response.fields.category,undefined);
+});
+test('Geoapify fallback rejects city centroids, wrong province and mismatched names',async()=>{
+ for(const change of [
+   {state:'Chon Buri',formatted:'Rayong Beach, Chon Buri'},
+   {result_type:'city'},
+   {name:'เทศบาลเมืองระยอง'},
+   {rank:{confidence:0.4}},
+   {country_code:'la'},
+   {lat:30},
+ ]){
+   const r=await resolveGeoapifyDraft({
+     province:'ระยอง',candidateName:'หาดแหลมเจริญ',apiKey:'key',
+     request:async()=>({ok:true,json:async()=>({results:[{
+       lat:12.65,lon:101.25,place_id:'geo-test',
+       name:'หาดแหลมเจริญ',state:'Rayong',formatted:'หาดแหลมเจริญ ระยอง',
+       country_code:'th',result_type:'amenity',rank:{confidence:0.95},
+       ...change,
+     }]})})
+   });
+   assert.equal(r.status,'geoapify_no_match',JSON.stringify(change));
+ }
+});
+test('Geoapify fallback rejects two independently matching locations',async()=>{
+ const r=await resolveGeoapifyDraft({
+   province:'ระยอง',candidateName:'หาดแหลมเจริญ',apiKey:'key',
+   request:async()=>({ok:true,json:async()=>({results:[
+     {lat:12.65,lon:101.25,place_id:'geo-one',name:'หาดแหลมเจริญ',state:'Rayong',formatted:'หาดแหลมเจริญ ระยอง',country_code:'th',result_type:'amenity',rank:{confidence:0.9}},
+     {lat:12.9,lon:101.3,place_id:'geo-two',name:'หาดแหลมเจริญ',state:'Rayong',formatted:'หาดแหลมเจริญ ระยอง',country_code:'th',result_type:'amenity',rank:{confidence:0.92}},
+   ]})})
+ });
+ assert.equal(r.status,'geoapify_ambiguous');
+});
+test('Geoapify fallback leaves absent language blank without inventing a translation',async()=>{
+ const r=await resolveGeoapifyDraft({
+   province:'ระยอง',candidateName:'หาดแหลมเจริญ',apiKey:'key',
+   request:async()=>({ok:true,json:async()=>({results:[
+     {lat:12.65,lon:101.25,name:'หาดแหลมเจริญ',state:'Rayong',formatted:'หาดแหลมเจริญ ระยอง',
+       country_code:'th',result_type:'amenity',rank:{confidence:0.95}}
+   ]})})
+ });
+ assert.equal(r.status,'geoapify_matched');
+ assert.deepEqual(r.fields,{name:'หาดแหลมเจริญ',nameLocal:'หาดแหลมเจริญ'});
+ assert.equal(r.englishNameFound,false);
+});
+test('Geoapify fallback does not call provider without key or valid province, and tolerates network failures',async()=>{
+ const invalid=await resolveGeoapifyDraft({province:'invalid',candidateName:'หาดแหลมเจริญ',
+   apiKey:'key',request:()=>assert.fail('invalid lookup must not use provider')});
+ assert.equal(invalid.status,'geoapify_invalid_lookup');
+ const missing=await resolveGeoapifyDraft({province:'ระยอง',candidateName:'หาดแหลมเจริญ',
+   request:()=>assert.fail('no key must not use provider')});
+ assert.equal(missing.status,'geoapify_unavailable');
+ const outage=await resolveGeoapifyDraft({province:'ระยอง',candidateName:'หาดแหลมเจริญ',
+   apiKey:'key',request:()=>{throw Error('network unavailable')}});
+ assert.equal(outage.status,'geoapify_no_match');
 });

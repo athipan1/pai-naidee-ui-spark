@@ -1,6 +1,6 @@
 const { InvalidImageError } = require('./railway-media.cjs');
 const { randomUUID } = require('node:crypto');
-const { geocodeCandidates } = require('./admin-geocode.cjs');
+const { geocodeCandidates, resolveGeoapifyDraft } = require('./admin-geocode.cjs');
 const { isThaiProvince } = require('./thai-provinces.cjs');
 const { resolveIndependentDraft, warmNamesIndex } = require('./smart-draft-autofill.cjs');
 const { finishDirectPublication } = require('./admin-direct-publication.cjs');
@@ -102,7 +102,7 @@ function cleanPlace(input, { draft = false } = {}) {
   };
 }
 
-function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft }) {
+function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft, enrichGeoapify = resolveGeoapifyDraft }) {
   if (process.env.RAILWAY_ENVIRONMENT_ID && enrichDraft === resolveIndependentDraft) warmNamesIndex();
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
@@ -251,7 +251,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.draft || { error: result.error });
   }));
 
-  // Persist only Google Place ID; source fields are read independently from TAT.
+  // Persist only Google Place ID; source fields are read independently from TAT or Geoapify.
   app.post('/api/admin/places/google-reference', requireAdmin, wrap(async (req, res) => {
     const placeId = typeof req.body?.placeId === 'string' ? req.body.placeId.trim() : '';
     if (!/^[A-Za-z0-9_-]{8,256}$/.test(placeId)) return res.status(400).json({ error: 'Invalid Google Place ID.' });
@@ -261,9 +261,16 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     if(candidateName!==undefined && (typeof candidateName!=='string'||!candidateName.trim()||candidateName.length>160))
       return res.status(400).json({error:'Invalid temporary lookup name.'});
     // A Google preview name is a transient lookup key, not persisted content.
-    const enrichment=candidateName
+    let enrichment=candidateName
       ? await enrichDraft({province,candidateName})
       : {status:'not_requested'};
+    // If TAT is unavailable or has no unique record, use the existing Railway
+    // Geoapify key. Never fall back to stored Google preview names or points.
+    if(candidateName && enrichment.status!=='matched' &&
+       (process.env.GEOAPIFY_API_KEY || enrichGeoapify!==resolveGeoapifyDraft)){
+      const geo=await enrichGeoapify({province,candidateName,apiKey:process.env.GEOAPIFY_API_KEY});
+      if(geo.status==='geoapify_matched')enrichment=geo;
+    }
     const sql=getSql();
     const result=await sql.begin(async tx=>{
       await tx`SELECT pg_advisory_xact_lock(hashtext(${'google-place-draft:'+placeId}))`;
@@ -275,17 +282,17 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       const linked=await tx`SELECT place_id FROM place_external_ids
         WHERE namespace='google_places' AND external_id=${placeId} LIMIT 1`;
       if(linked.length)return {code:409,error:'This Google Place ID is already linked to a published place.'};
-      const matched=enrichment.status==='matched';
+      const matched=enrichment.status==='matched'||enrichment.status==='geoapify_matched';
       if(matched){
         const duplicates=await tx`SELECT id FROM places
           WHERE province=${province} AND (id=${enrichment.source.id}
-          OR LOWER(TRIM(COALESCE(name_local,'')))=LOWER(TRIM(${enrichment.fields.nameLocal}))
+          OR (${enrichment.fields.nameLocal}<>'' AND LOWER(TRIM(COALESCE(name_local,'')))=LOWER(TRIM(${enrichment.fields.nameLocal})))
           OR LOWER(TRIM(name))=LOWER(TRIM(${enrichment.fields.name}))) LIMIT 1`;
         if(duplicates.length)return {code:409,error:'This place already exists in the published catalogue. Edit it instead.'};
         const staged=await tx`SELECT id FROM place_drafts
           WHERE status='draft' AND payload->'autoFillSource'->>'id'=${enrichment.source.id}
           AND payload->>'googlePlaceId' <> ${placeId} LIMIT 1`;
-        if(staged.length)return {code:409,error:'A draft for this TAT attraction already exists.'};
+        if(staged.length)return {code:409,error:'A draft for this independent-source attraction already exists.'};
       }
       const autoFillSource=matched?{
         ...enrichment.source,matchedAt:new Date().toISOString(),reviewRequired:true
@@ -301,7 +308,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
             WHERE id=${current.id} RETURNING id,status,payload,
             EXTRACT(EPOCH FROM updated_at)::text AS version`;
           return {code:200,id:current.id,existing:true,draft:updated,
-            autoFillStatus:'matched',englishNameFound:enrichment.englishNameFound};
+            autoFillStatus:enrichment.status,englishNameFound:enrichment.englishNameFound,
+            geoapifySuggestion:enrichment.status==='geoapify_matched'?enrichment.suggestion:null};
         }
         return {code:200,id:current.id,existing:true,draft:current,
           autoFillStatus:untouched?enrichment.status:'existing_preserved'};
@@ -316,13 +324,15 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         VALUES (${id},${tx.json(payload)},${req.auth.user.id})
         RETURNING id,status,payload,EXTRACT(EPOCH FROM updated_at)::text AS version`;
       return {code:201,id,existing:false,draft:created,
-        autoFillStatus:enrichment.status,englishNameFound:matched?enrichment.englishNameFound:false};
+        autoFillStatus:enrichment.status,englishNameFound:matched?enrichment.englishNameFound:false,
+        geoapifySuggestion:enrichment.status==='geoapify_matched'?enrichment.suggestion:null};
     });
     res.status(result.code).json(result.error?{error:result.error}:{
       id:result.id,status:'draft',verificationStatus:'PENDING_VERIFICATION',
       existing:result.existing,coordinatesRequired:result.draft?.payload?.lat==null,
       draft:result.draft,autoFillStatus:result.autoFillStatus,
-      englishNameFound:result.englishNameFound??false
+      englishNameFound:result.englishNameFound??false,
+      geoapifySuggestion:result.geoapifySuggestion||null
     });
   }));
 
@@ -515,8 +525,16 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         return { status: 200, placeId: current.id, published: true, updated: true };
       }
       const placeId = `cms:${draft.id}`;
-      await tx`INSERT INTO places (id, name, name_local, province, category, categories, description, tags, lat, lng, image_url, source_name)
-        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${tx.json(p.categories || [p.category])}, ${p.description}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, 'PaiNaiDee Admin CMS')`;
+      // Preserve independent-source credit when Admin ultimately publishes a
+      // reviewed draft, including required OpenStreetMap attribution.
+      const source=draft.payload?.autoFillSource;
+      const publishedSourceName=source?.name==='Geoapify / OpenStreetMap'
+        ? 'Geoapify · © OpenStreetMap contributors'
+        : (source?.name || 'PaiNaiDee Admin CMS');
+      const publishedSourceUrl=typeof source?.url==='string' && source.url.startsWith('https://')
+        ? source.url : null;
+      await tx`INSERT INTO places (id, name, name_local, province, category, categories, description, tags, lat, lng, image_url, source_name, source_url)
+        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${tx.json(p.categories || [p.category])}, ${p.description}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, ${publishedSourceName}, ${publishedSourceUrl})`;
       for (const url of p.imageUrls) await preservePlaceImage(tx, placeId, url, p.name);
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 

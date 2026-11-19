@@ -88,7 +88,7 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
             if (!names.some(name => matchesPlaceName(name, [item.name, item.address_line1, item.formatted]))) continue;
             if (geoapifyOnly) {
               // Never suggest a neighbouring province or an administrative centroid.
-              if (!addressMatchesProvince([item.state,item.formatted].filter(Boolean).join(', '),area)) continue;
+              if (!item.state || !addressMatchesProvince(String(item.state),area)) continue;
               if (['country','state','county','city','postcode','district','suburb'].includes(item.result_type)) continue;
               if (!matchesPlaceName(lookupName,[item.name,item.address_line1])) continue;
               if (item.rank?.confidence != null && Number(item.rank.confidence) < 0.7) continue;
@@ -107,4 +107,94 @@ async function geocodeCandidates({ name, province, listPlaces, apiKey, request =
   return { candidates: candidates.slice(0, 10), providerConfigured: Boolean(apiKey) };
 }
 
-module.exports = { geocodeCandidates, isThailandCoordinate, matchesPlaceName, searchNames };
+
+// Name + coordinate fallback for an Admin-created draft only. The lookup key
+// may originate in an ephemeral Google preview; its text is never persisted.
+// Source names and coordinates are exclusively from independently returned
+// Geoapify records (primarily OSM), with attribution retained on the draft.
+async function resolveGeoapifyDraft({province,candidateName,apiKey,request=fetch}){
+  if(!apiKey)return {status:'geoapify_unavailable'};
+  if(!isThaiProvince(province)||typeof candidateName!=='string'||
+     candidateName.trim().length<2||candidateName.length>160)
+    return {status:'geoapify_invalid_lookup'};
+  const query=candidateName.trim();
+  const isPoi=item=>{
+    if(!item||typeof item!=='object')return false;
+    const lat=Number(item.lat),lng=Number(item.lon);
+    if(!isThailandCoordinate(lat,lng)||String(item.country_code||'').toLowerCase()!=='th')return false;
+    if(!item.state||!addressMatchesProvince(String(item.state),province))return false;
+    if(['country','state','county','city','postcode','district','suburb','street'].includes(item.result_type))return false;
+    if(!Number.isFinite(Number(item.rank?.confidence))||Number(item.rank?.confidence)<0.8)return false;
+    return typeof item.name==='string'&&item.name.trim().length>=2;
+  };
+  // Bounded to two requests, parallel, without guessing either translation.
+  const languages=['th','en'];
+  const responses=await Promise.all(languages.map(async lang=>{
+    const params=new URLSearchParams({
+      text:[query,province,'Thailand'].join(', '),
+      filter:'countrycode:th',format:'json',lang,limit:'5',apiKey
+    });
+    try{
+      const response=await request('https://api.geoapify.com/v1/geocode/search?'+params,{
+        signal:AbortSignal.timeout(6000),headers:{Accept:'application/json'}
+      });
+      if(!response.ok)return {lang,results:[]};
+      const data=await response.json();
+      return {lang,results:Array.isArray(data?.results)?data.results.filter(isPoi):[]};
+    }catch{
+      return {lang,results:[]};
+    }
+  }));
+  const entries=responses.flatMap(r=>r.results.map(item=>({lang:r.lang,item})));
+  // The Google preview is used to identify the matching independent feature,
+  // never as a fallback value for a draft field.
+  const anchors=entries.filter(({item})=>matchesPlaceName(query,[item.name]));
+  if(!anchors.length)return {status:'geoapify_no_match'};
+  const sameFeature=(a,b)=>{
+    const idA=String(a.place_id||''),idB=String(b.place_id||'');
+    if(idA&&idB&&idA===idB)return true;
+    return Math.abs(Number(a.lat)-Number(b.lat))<=0.00015 &&
+      Math.abs(Number(a.lon)-Number(b.lon))<=0.00015;
+  };
+  const unique=[];
+  for(const entry of anchors){
+    if(!unique.some(x=>sameFeature(x.item,entry.item)))unique.push(entry);
+  }
+  // Multiple equally matching attractions must be chosen manually.
+  if(unique.length!==1)return {status:'geoapify_ambiguous'};
+  const anchor=unique[0].item;
+  const related=entries.filter(({item})=>sameFeature(anchor,item));
+  const names=related.flatMap(({item,lang})=>{
+    const result=[{value:item.name,lang}];
+    const international=item.name_international;
+    if(international&&typeof international==='object'){
+      for(const language of ['th','en'])result.push({value:international[language],lang:language});
+    }
+    return result;
+  });
+  const clean=value=>typeof value==='string'
+    ? value.replace(/<[^>]*>/g,' ').replace(/[\u0000-\u001f\u007f<>]/g,' ').replace(/\s+/g,' ').trim().slice(0,160):'';
+  const thai=names.map(n=>({...n,value:clean(n.value)}))
+    .find(n=>n.lang==='th'&&/[\u0e01-\u0e5b]/.test(n.value))?.value||'';
+  const english=names.map(n=>({...n,value:clean(n.value)}))
+    .find(n=>n.lang==='en'&&/[a-z]/i.test(n.value)&&!/[\u0e01-\u0e5b]/.test(n.value))?.value||'';
+  if(!thai&&!english)return {status:'geoapify_no_match'};
+  const lat=Number(anchor.lat),lng=Number(anchor.lon);
+  const rawId=String(anchor.place_id||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,110);
+  const sourceId='geoapify-'+(rawId||lat.toFixed(5)+'-'+lng.toFixed(5));
+  return {
+    status:'geoapify_matched',
+    source:{id:sourceId,name:'Geoapify / OpenStreetMap',
+      url:'https://www.geoapify.com/',license:'ODbL 1.0',
+      attribution:'© OpenStreetMap contributors'},
+    fields:{name:english||thai,nameLocal:thai},
+    englishNameFound:Boolean(english),
+    // Only a suggested marker; NEVER store these coordinates in the draft
+    // until Admin explicitly confirms a map pin and saves the draft.
+    suggestion:{lat,lng,source:'Geoapify',
+      label:clean(anchor.formatted)||thai||english,
+      confidence:Number(anchor.rank.confidence)}
+  };
+}
+
+module.exports = { geocodeCandidates, resolveGeoapifyDraft, isThailandCoordinate, matchesPlaceName, searchNames };

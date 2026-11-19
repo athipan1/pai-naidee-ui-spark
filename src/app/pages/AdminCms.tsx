@@ -420,6 +420,18 @@ export default function AdminCms() {
     }
   }
 
+  function showGeoapifyDraftSuggestion(candidate?:GeocodeCandidate|null) {
+    ++geocodeRequestSeq.current;
+    setAutoGeoSuggestions(true);
+    setProposedCoordinate(null);
+    setGeoCandidates(candidate && candidate.source==='Geoapify'
+      && validCoordinate(candidate.lat,candidate.lng) ? [candidate] : []);
+    setGeocodeBusy(false);
+    setGeocodeNote(candidate && candidate.source==='Geoapify'
+      ? 'Geoapify เสนอชื่อและพิกัดสำหรับสถานที่นี้ โปรดตรวจชื่อและตำแหน่งบนแผนที่ แล้วกดยืนยันใช้พิกัดนี้ก่อนบันทึก'
+      : 'Geoapify เติมชื่อแล้ว แต่ยังไม่มีพิกัดที่ยืนยันได้ โปรดค้นหาพิกัดหรือปักหมุดเอง');
+  }
+
   async function retryNameLookup(){
     if(!nameLookupRetry || !editing || editing.id!==nameLookupRetry.draftId)return;
     if(dirty){setMessage('กรุณาบันทึกการแก้ไขปัจจุบันก่อนลองเติมชื่ออีกครั้ง');return;}
@@ -429,14 +441,19 @@ export default function AdminCms() {
       const result=await api('/places/google-reference',{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({placeId,province,candidateName}),
-      }) as {draft?:Draft;autoFillStatus?:string};
+      }) as {draft?:Draft;autoFillStatus?:string;geoapifySuggestion?:GeocodeCandidate|null};
       if(!result.draft)throw Error('ไม่พบฉบับร่างหลังตรวจชื่อ');
       setDrafts(current=>[result.draft!,...current.filter(d=>d.id!==result.draft!.id)]);
       await openDraft(result.draft);
-      if(result.autoFillStatus==='matched'){
+      if(result.autoFillStatus==='matched'||result.autoFillStatus==='geoapify_matched'){
         setNameLookupRetry(null);
-        setMessage('เติมชื่อจาก TAT สำเร็จแล้ว ระบบกำลังค้นหาพิกัดเสนอแนะจาก Geoapify ต้องยืนยันหมุดเอง');
-        void suggestGeoapifyCoordinates(result.draft);
+        if(result.autoFillStatus==='matched'){
+          setMessage('เติมชื่อจาก TAT สำเร็จแล้ว กำลังเสนอพิกัดจาก Geoapify');
+          void suggestGeoapifyCoordinates(result.draft);
+        }else{
+          setMessage('เติมชื่อไทย/อังกฤษที่ Geoapify มีให้แล้ว โปรดตรวจชื่อและยืนยันหมุดก่อนบันทึก');
+          showGeoapifyDraftSuggestion(result.geoapifySuggestion);
+        }
       }else{
         setMessage(result.autoFillStatus==='source_loading'
           ? 'ดัชนีชื่อจาก TAT ยังอยู่ระหว่างโหลด กรุณาลองใหม่อีกครั้งภายหลัง'
@@ -842,9 +859,15 @@ export default function AdminCms() {
         )}
         {editing && drafts.some(item => item.id === editing.id && isRecord(item.payload?.autoFillSource)) && (
           <div role="note" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">
-            <p className="font-semibold">เติมข้อมูลตั้งต้นจาก TAT Open Data</p>
-            <p className="mt-1">เฉพาะชื่อภาษาไทยและภาษาอังกฤษ (ถ้ามี) มาจาก TAT Open Data ไม่ใช่ Google Places หมวดหมู่ รายละเอียด และพิกัดต้องกรอกและยืนยันเอง</p>
-            <a className="mt-2 inline-block underline" href="https://datacatalog.tat.or.th/dataset/tourist-attraction" target="_blank" rel="noopener noreferrer">ดูแหล่งข้อมูล TAT Open Data</a>
+            {String(drafts.find(item=>item.id===editing.id)?.payload?.autoFillSource?.name||'').startsWith('Geoapify') ? <>
+              <p className="font-semibold">ชื่อสถานที่จาก Geoapify / OpenStreetMap (สำรองเมื่อ TAT ไม่พบ)</p>
+              <p className="mt-1">ตรวจชื่อไทยและอังกฤษที่มีอยู่จริง พร้อมยืนยันหมุด Geoapify ก่อนบันทึกพิกัด หมวดหมู่และรายละเอียดให้ Admin กรอกเอง</p>
+              <a className="mt-2 inline-block underline" href="https://www.geoapify.com/" target="_blank" rel="noopener noreferrer">Geoapify · © OpenStreetMap contributors</a>
+            </> : <>
+              <p className="font-semibold">เติมข้อมูลตั้งต้นจาก TAT Open Data</p>
+              <p className="mt-1">เฉพาะชื่อภาษาไทยและภาษาอังกฤษ (ถ้ามี) มาจาก TAT Open Data ไม่ใช่ Google Places หมวดหมู่ รายละเอียด และพิกัดต้องกรอกและยืนยันเอง</p>
+              <a className="mt-2 inline-block underline" href="https://datacatalog.tat.or.th/dataset/tourist-attraction" target="_blank" rel="noopener noreferrer">ดูแหล่งข้อมูล TAT Open Data</a>
+            </>}
           </div>
         )}
         <nav aria-label="หมวดแบบฟอร์ม" className="flex flex-wrap gap-2 text-sm">{[['general','ข้อมูลทั่วไป'],['location','ที่ตั้งและพิกัด'],['gallery','รูปภาพและแกลเลอรี']].map(([id,label]) => <a key={id} href={`#cms-${id}`} className="rounded-lg border bg-slate-50 px-3 py-2">{label}</a>)}</nav>
@@ -937,16 +960,19 @@ export default function AdminCms() {
       </fieldset></form>}
       {tab === 'quality' && <ProvinceQualityDashboard api={api}
         onOpenCandidate={candidate=>{const draft=candidate as Draft;setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);setTab('drafts');}}
-        onDraftCreated={(created,status,candidateName)=>{
+        onDraftCreated={(created,status,candidateName,geoapifySuggestion)=>{
           const draft=created as unknown as Draft;
           setDrafts(current=>[draft,...current.filter(item=>item.id!==draft.id)]);
-          setNameLookupRetry((status==='source_loading'||status==='source_unavailable')
+          setNameLookupRetry((['source_loading','source_unavailable','no_match','ambiguous_match'].includes(status))
             && typeof draft.payload.googlePlaceId==='string'
             ? {draftId:draft.id,placeId:draft.payload.googlePlaceId,province:String(draft.payload.province||''),candidateName}
             : null);
           void openDraft(draft).then(()=>{
             if(status==='matched')void suggestGeoapifyCoordinates(draft);
-            setMessage(status==='matched'
+            if(status==='geoapify_matched')showGeoapifyDraftSuggestion(geoapifySuggestion);
+            setMessage(status==='geoapify_matched'
+              ? 'เติมชื่อจาก Geoapify / OpenStreetMap แล้ว โปรดตรวจชื่อและยืนยันพิกัดแนะนำก่อนบันทึก'
+              : status==='matched'
               ? 'เติมชื่อจาก TAT Open Data แล้ว กำลังค้นหาพิกัดแนะนำจาก Geoapify โปรดตรวจหมุดและยืนยันเองก่อนบันทึก'
               : status==='source_unavailable'
                 ? 'สร้างฉบับร่างแล้ว แต่ดาวน์โหลดชื่อจาก TAT ไม่สำเร็จ ยังไม่เติมชื่อให้ กรุณากรอกเองหรือค้นหาใหม่'
