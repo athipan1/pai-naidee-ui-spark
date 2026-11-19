@@ -442,7 +442,7 @@ test('TAT miss uses Geoapify fallback names and proposed coordinates without per
   await page.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
   await expect(page.getByText('ชื่อชั่วคราวจาก Google',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'สร้างฉบับร่างและเติมชื่อ'}).click();
- await expect(page.getByText(/Geoapify.*OpenStreetMap contributors/)).toBeVisible();
+ await expect(page.getByRole('link',{name:/Geoapify.*OpenStreetMap contributors/})).toBeVisible();
  await expect(page.getByLabel(/ชื่อหลัก.*ภาษาอังกฤษ/)).toHaveValue('Rayong Community Market');
   await expect(page.getByLabel('ชื่อภาษาไทย')).toHaveValue('ตลาดชุมชนระยอง');
   await expect(page.getByLabel(/ละติจูด/)).toHaveValue('');
@@ -471,9 +471,9 @@ test('Google daily 429 switches to Geoapify Discovery and requires human confirm
  await navigate(page,'คุณภาพรายจังหวัด');
  await page.locator('[data-testid="province-quality-dashboard"] select').selectOption('ระยอง');
  await page.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
- await expect(page.getByText(/Google Places ใช้โควตาประจำวันครบแล้ว/)).toBeVisible();
+ await expect(page.getByRole('status').filter({hasText:'Google Places ใช้โควตาประจำวันครบแล้ว สามารถค้นต่อด้วย Geoapify'})).toBeVisible();
  await expect(page.getByText('Rayong Community Market',{exact:true})).toBeVisible();
- await expect(page.getByText(/Geoapify.*OpenStreetMap contributors/)).toBeVisible();
+ await expect(page.locator('[data-testid="province-quality-dashboard"]').getByText('Geoapify · © OpenStreetMap contributors',{exact:true})).toBeVisible();
  expect(fixture.draftsSnapshot().find(d=>d.id==='geo-suggestion-draft')).toBeUndefined();
  await page.getByRole('button',{name:'ตรวจสอบก่อนสร้างฉบับร่าง'}).click();
  const review=page.getByRole('group',{name:'ยืนยันข้อมูลก่อนสร้างฉบับร่าง'});
