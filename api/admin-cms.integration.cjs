@@ -77,7 +77,17 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
       ? {status:'matched',englishNameFound:true,
         source:{name:'Tourism Authority of Thailand — Open Data',url:'https://datacatalog.tat.or.th/dataset/tourist-attraction',id:'tat-fixture-2026',license:'Open Data Common'},
         fields:{name:'Laem Charoen Beach',nameLocal:'หาดแหลมเจริญ'}}
-      : {status:'no_match'} });
+      : {status:'no_match'},
+    enrichGeoapify:async ({province,candidateName})=>
+      province==='ระยอง'&&candidateName==='ชื่อชั่วคราวจาก Google'
+        ? {status:'geoapify_matched',englishNameFound:true,
+           fields:{name:'Rayong Community Market',nameLocal:'ตลาดชุมชนระยอง'},
+           source:{name:'Geoapify / OpenStreetMap',url:'https://www.geoapify.com/',
+             id:'geoapify-fixture-rayong',license:'ODbL 1.0',
+             attribution:'© OpenStreetMap contributors'},
+           suggestion:{lat:12.65,lng:101.25,label:'ตลาดชุมชนระยอง, ระยอง',
+             source:'Geoapify',confidence:0.94}}
+        : {status:'geoapify_no_match'} });
   registerRailwayMedia(app, { getSql, storage, requireAdmin });
   registerQualityReview(app, { getSql, requireAdmin });
   registerGoogleVerification(app, { getSql, requireAdmin });
@@ -199,6 +209,37 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(fallback.draft.payload.name,'รอยืนยันชื่อสถานที่');
     assert.equal(fallback.draft.payload.lat,null);
     assert.equal(fallback.draft.payload.autoFillSource,undefined);
+  });
+
+  await t.test('TAT-miss uses Geoapify name fallback but only proposes coordinates until Admin confirms them',async()=>{
+    const first=await write('/places/google-reference',{
+      placeId:'ChIJGeoFallbackReview1234',province:'ระยอง',candidateName:'ชื่อชั่วคราวจาก Google'
+    },201);
+    assert.equal(first.autoFillStatus,'geoapify_matched');
+    assert.equal(first.coordinatesRequired,true);
+    assert.equal(first.draft.payload.name,'Rayong Community Market');
+    assert.equal(first.draft.payload.nameLocal,'ตลาดชุมชนระยอง');
+    assert.equal(first.draft.payload.category,'');
+    assert.equal(first.draft.payload.description,'');
+    assert.equal(first.draft.payload.lat,null);
+    assert.equal(first.draft.payload.lng,null);
+    assert.equal(first.draft.payload.autoFillSource.id,'geoapify-fixture-rayong');
+    assert.equal(first.draft.payload.autoFillSource.attribution,'© OpenStreetMap contributors');
+    assert.equal(first.geoapifySuggestion.lat,12.65);
+    assert.equal(first.geoapifySuggestion.lng,101.25);
+    assert.equal(JSON.stringify(first.draft.payload).includes('ชื่อชั่วคราวจาก Google'),false);
+    const edited=await write('/places/'+first.id,{
+      ...first.draft.payload,name:'Verified Admin Name',version:first.draft.version
+    },200,'PUT');
+    assert.equal(edited.payload.name,'Verified Admin Name');
+    assert.equal(edited.payload.autoFillSource.id,'geoapify-fixture-rayong');
+    assert.equal(edited.payload.lat,null);
+    const second=await write('/places/google-reference',{
+      placeId:'ChIJGeoFallbackReview1234',province:'ระยอง',candidateName:'ชื่อชั่วคราวจาก Google'
+    },200);
+    assert.equal(second.autoFillStatus,'existing_preserved');
+    assert.equal(second.geoapifySuggestion,null);
+    assert.equal(second.draft.payload.name,'Verified Admin Name');
   });
 
   await t.test('candidate review uses live SQL rows, exports safely and cannot publish or mutate a draft', async () => {
