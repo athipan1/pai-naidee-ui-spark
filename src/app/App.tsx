@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect, Suspense, lazy } from "react";
 import { MediaProvider } from "@/shared/contexts/MediaProvider";
 import { UIProvider } from "@/shared/contexts/UIContext";
@@ -12,6 +12,8 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
 import { listenForPlacePublications } from "@/shared/utils/placePublication";
+import ElephantMascot from "@/components/mascot/ElephantMascot";
+import type { PlannerStatus } from "@/components/mascot/mascotState";
 import { getInitialLanguage } from "@/shared/i18n/initialLanguage";
 
 // Lazy load new consolidated routes
@@ -71,6 +73,10 @@ const queryClient = new QueryClient({
 });
 
 const AppContent = () => {
+  const { pathname } = useLocation();
+  const [plannerStatus, setPlannerStatus] = useState<PlannerStatus>('idle');
+  const showMascot = pathname === '/' || pathname === '/discover' ||
+    pathname === '/trip-planner' || /^\/attraction\/[^/]+$/.test(pathname);
   useEffect(() => listenForPlacePublications(queryClient), []);
   const [currentLanguage, setCurrentLanguage] = useState<"th" | "en">(() => {
     try {
@@ -139,7 +145,7 @@ const AppContent = () => {
             }
           />
           <Route path="/community/*" element={<Navigate to="/discover" replace />} />
-          <Route path="/trip-planner" element={<TripPlanner currentLanguage={currentLanguage} />} />
+          <Route path="/trip-planner" element={<TripPlanner currentLanguage={currentLanguage} onMascotStatus={setPlannerStatus} />} />
           <Route path="/privacy" element={<LegalPage kind="privacy" />} />
           <Route path="/terms" element={<LegalPage kind="terms" />} />
           {/* Legacy Route Redirects */}
@@ -178,6 +184,7 @@ const AppContent = () => {
           {/* --- End PaiNaiDee Example Routes --- */}
         </Routes>
       </Suspense>
+      {showMascot && <ElephantMascot language={currentLanguage} plannerStatus={pathname === '/trip-planner' ? plannerStatus : 'idle'} />}
       <DevTools />
     </>
   );

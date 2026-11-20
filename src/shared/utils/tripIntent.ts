@@ -1,4 +1,5 @@
 import type { TripStyle, TransportMode } from './tripPlanner';
+import provinceNames from '../../../api/province-names.en.json';
 
 export interface TripIntent {
   province: string;
@@ -12,6 +13,7 @@ export interface TripIntent {
   issues: string[];
 }
 
+const englishNames: Record<string, string> = provinceNames;
 const thaiDigits = '๐๑๒๓๔๕๖๗๘๙';
 const normalizeNumbers = (value: string) => value.replace(/[๐-๙]/g, digit => String(thaiDigits.indexOf(digit)));
 const numberFrom = (value: string): number | null => {
@@ -22,9 +24,13 @@ const numberFrom = (value: string): number | null => {
 
 export function parseTripIntent(text: string, availableProvinces: string[]): TripIntent {
   const query = normalizeNumbers(text).trim();
-  const compact = query.replace(/\s+/g, '');
+  const compact = query.toLowerCase().replace(/\s+/g, '');
   const province = [...availableProvinces].sort((a, b) => b.length - a.length)
-    .find(name => compact.includes(name.replace(/\s+/g, ''))) ?? '';
+    .find(name => {
+      const english = englishNames[name];
+      return compact.includes(name.replace(/\s+/g, '').toLowerCase())
+        || Boolean(english && new RegExp(`\\b${english.replaceAll(' ', '\\s*')}\\b`, 'i').test(query));
+    }) ?? '';
   const daysMatch = query.match(/(\d{1,2})\s*(?:วัน|days?)/i);
   const peopleMatch = query.match(/(?:จำนวน|ไป|ทั้งหมด|ผู้เดินทาง)?\s*(\d{1,2})\s*(?:คน|persons?|people)/i);
   const budgetMatch = query.match(/(?:งบ(?:ประมาณ)?|budget|ไม่เกิน|มีเงิน)\s*(?:รวม|ทั้งหมด|ราว|ประมาณ|ไม่เกิน|ที่)?\s*(?:฿|บาท)?\s*([\d,]+)\s*(?:บาท)?/i)

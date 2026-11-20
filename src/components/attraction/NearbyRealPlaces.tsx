@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useNearbyAttractions } from "@/shared/hooks/useAttractionQueries";
 import { parsePlaceCoordinates } from "@/shared/utils/placeDetail";
@@ -21,10 +22,19 @@ export default function NearbyRealPlaces({
   currentLanguage: "th" | "en";
 }) {
   const th = currentLanguage === "th";
+  const { pathname } = useLocation();
   const [radius, setRadius] = useState<number>(5);
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
   const section = useRef<HTMLDivElement>(null);
+
+  // React Router may reuse a mounted detail route while navigating between
+  // attractions. Start each visited place at the documented 5 km default,
+  // including after Back, instead of leaking the prior page's selected radius.
+  useEffect(() => {
+    setRadius(5);
+    setActive(false);
+  }, [pathname, place.id]);
   const coordinates = useMemo(
     () => parsePlaceCoordinates(place.coordinates),
     [place.coordinates]

@@ -187,18 +187,38 @@ test("radius, popup keyboard, navigation and cleanup during zoom", async ({
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
   const count = requests.length;
+  // The last radius selected before navigation must actually be 20 km.
+  await expect(
+    page.getByRole("button", { name: "20 กม.", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
   await page.locator(".leaflet-control-zoom-in").click();
   await page.locator(".leaflet-control-zoom-out").click();
   expect(requests.length).toBe(count);
   const list = page.getByTestId("real-nearby-places");
   await list.getByRole("link", { name: /^ดูรายละเอียด:/ }).click();
   await expect(page).toHaveURL(/nearby-place/);
+  // A URL update can precede React's committed route. Verify the destination
+  // rendered before Back so this checks a completed place-to-place journey.
+  await expect(
+    page.getByRole("heading", { name: near.nameLocal, exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "5 กม.", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
   await page.goBack();
   await expect(page).toHaveURL(new RegExp(place.id));
   await page.locator("#location").scrollIntoViewIfNeeded();
   await expect(
     page.getByRole("button", { name: "5 กม.", exact: true })
   ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("button", { name: "20 กม.", exact: true })
+  ).toHaveAttribute("aria-pressed", "false");
+  // Restored place must show data matching its 5 km default rather than
+  // keeping the prior visit's 20 km label after browser Back navigation.
+  await expect(page.getByTestId("real-nearby-places")).toContainText(
+    "ภายใน 5 กม."
+  );
   expect(forbidden).toEqual([]);
   expect(errors).toEqual([]);
 });

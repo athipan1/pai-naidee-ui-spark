@@ -115,7 +115,7 @@ const Index = ({ currentLanguage, onLanguageChange }: IndexProps) => {
         />
 
         <section className="border-b border-border/30 bg-card/30 py-6" aria-label={currentLanguage === "th" ? "เริ่มต้นท่องเที่ยว" : "Start exploring"}>
-          <div className="container mx-auto flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="container mx-auto flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between lg:pr-20">
             <div>
               <h2 className="text-xl font-bold">{currentLanguage === "th" ? "เริ่มต้นทริปที่ใช่สำหรับคุณ" : "Find your next memorable trip"}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{currentLanguage === "th" ? "ดูสถานที่แนะนำที่นี่ หรือไปหน้าสำรวจเพื่อค้นหา กรอง และดูแผนที่อย่างละเอียด" : "Browse highlights here, or use Discover for detailed search, filters, and maps."}</p>

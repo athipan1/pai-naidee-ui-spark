@@ -38,6 +38,8 @@ export default defineConfig(({ mode }) => {
         injectRegister: 'inline',
         workbox: {
           globPatterns: ['**/*.{js,css,ico,png,jpg,jpeg,svg}'],
+          // These chunks are only needed after the user opens the elephant.
+          globIgnores: ['**/ElephantRenderer-*.js'],
           navigateFallback: null,
           maximumFileSizeToCacheInBytes: 3000000, // 3MB limit
           runtimeCaching: [
@@ -126,8 +128,7 @@ export default defineConfig(({ mode }) => {
             ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover'],
             query: ['@tanstack/react-query'],
             icons: ['lucide-react'],
-            leaflet: ['leaflet', 'react-leaflet'],
-            three: ['three', '@react-three/fiber', '@react-three/drei']
+            leaflet: ['leaflet', 'react-leaflet']
           }
         }
       },

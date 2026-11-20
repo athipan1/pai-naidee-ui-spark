@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAttractionDetail } from '@/shared/hooks/useAttractionQueries';
 import { ArrowLeft, Send, Sparkles, LoaderCircle, Plus, Bot, UserRound } from 'lucide-react';
 import { getRailwayPlaceFacets } from '@/services/railway-api.service';
@@ -9,7 +9,9 @@ import TripTimelineMap from './TripTimelineMap';
 import type { TripStop } from '@/shared/utils/tripPlanner';
 import type { AttractionDetail } from '@/shared/types/attraction';
 
-interface Props { currentLanguage: 'th' | 'en' }
+import { getPlannerDraft, type PlannerStatus } from '@/components/mascot/mascotState';
+
+interface Props { currentLanguage: 'th' | 'en'; onMascotStatus?: (status: PlannerStatus) => void }
 type TripPlanPlace = Pick<AttractionDetail, 'id' | 'coordinates' | 'description'> & Partial<AttractionDetail>;
 type TripPlanResponse = {
   province: string;
@@ -40,15 +42,39 @@ function planStops(plan: TripPlanResponse): TripStop[] {
   return [{place,day:day.day,order:index+1}];
  }));
 }
-export default function TripPlanner({currentLanguage}:Props){
+export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
  const th=currentLanguage==='th';
  const [searchParams]=useSearchParams();
+ const location=useLocation();
  const referenceId=searchParams.get('place') || undefined;
  const reference=useAttractionDetail(referenceId,{refetchInterval:false});
  const referenceApplied=useRef(false);
- const [draft,setDraft]=useState('');
+ const composer=useRef<HTMLTextAreaElement>(null);
+ useEffect(()=>{
+  if(location.state && typeof location.state==='object' &&
+     Object.prototype.hasOwnProperty.call(location.state,'mascotTripDraft')) {
+   composer.current?.focus({preventScroll:true});
+  }
+ },[location.key,location.state]);
+ const [draft,setDraft]=useState(()=>getPlannerDraft(location.state));
  const [messages,setMessages]=useState<Message[]>([]);
  const [pending,setPending]=useState(false);
+ const request=useRef<AbortController | null>(null);
+ useEffect(()=>()=>{
+  const active=request.current;
+  request.current=null;
+  active?.abort();
+ },[]);
+ const [mascotStatus,setMascotStatus]=useState<PlannerStatus>('idle');
+ const appliedHandoff=useRef(location.key);
+ useEffect(()=>{
+  if(appliedHandoff.current===location.key)return;
+  appliedHandoff.current=location.key;
+  const text=getPlannerDraft(location.state);
+  if(text)setDraft(text);
+ },[location.key,location.state]);
+ useEffect(()=>{onMascotStatus?.(mascotStatus);},[mascotStatus,onMascotStatus]);
+ useEffect(()=>()=>onMascotStatus?.('idle'),[onMascotStatus]);
  const [context,setContext]=useState('');
  const bottom=useRef<HTMLDivElement>(null);
  useEffect(()=>{
@@ -72,17 +98,21 @@ export default function TripPlanner({currentLanguage}:Props){
  const add=(role:Message['role'],text:string,plan?:TripPlanResponse)=>setMessages(m=>[...m,{id:Date.now()+Math.random(),role,text,plan}]);
  const submit=async(textOverride?:string)=>{
   const value=(textOverride??draft).trim();
-  if(!value||pending)return;
-  setDraft('');add('user',value);
+  if(!value||request.current||facets.isLoading)return;
+  setDraft('');add('user',value);setMascotStatus('idle');
   // Follow-up answers fill missing slots; a new full request starts a new plan.
-  const full=/\d+\s*(วัน|days?)/i.test(value)&&/(เที่ยว|trip|จังหวัด|งบ)/i.test(value)?value:[context,value].filter(Boolean).join(' ');
-  const parsed=parseTripIntent(full,facets.data?.provinces??[]);
+  const provinces=facets.data?.provinces??[];
+  const incoming=parseTripIntent(value,provinces);
+  const full=incoming.province&&incoming.days?value:[context,value].filter(Boolean).join(' ');
+  const parsed=full===value?incoming:parseTripIntent(full,provinces);
   setContext(full);
   const question=missingPrompt(parsed,th);
   if(question){add('assistant',question);return;}
-  setPending(true);
+  const controller=new AbortController();
+  request.current=controller;
+  setPending(true);setMascotStatus('thinking');
   try{
-   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),65000);
+   const timeout=setTimeout(()=>controller.abort(),65000);
    let result: TripPlanResponse | null = null;let usedFallback=false;
    try{
     const response=await fetch(API+'/api/ai/trip-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:full,province:parsed.province,days:parsed.days,people:parsed.people,budget:parsed.totalBudget,transport:parsed.transport}),signal:controller.signal});
@@ -99,18 +129,32 @@ export default function TripPlanner({currentLanguage}:Props){
      result={province:parsed.province,days:Array.from({length:parsed.days},(_,i)=>({day:i+1,stops:(basic.stops||[]).filter(s=>s.day===i+1).map(s=>s.place)})),completeness:{status:basic.status,requestedDays:parsed.days,plannedDays:new Set((basic.stops||[]).map(s=>s.day)).size},provider:'smart_fallback',budget:{estimatedTotal:parsed.totalBudget}};
     }
    }finally{clearTimeout(timeout);}
+   if(request.current!==controller)return;
+   setMascotStatus(result?.days?.some(day=>day.stops?.some(Boolean))?'success':'idle');
    const complete=result?.completeness?.status==='complete';
    const source=usedFallback||result?.provider==='smart_fallback'?(th?'Smart Planner สร้างแผนจากสถานที่และเส้นทางที่ตรวจสอบได้':'Smart Planner used checked destinations and roads'):result?.recovery?.googlePlacesUsed?(th?'AI + Smart Planner เสริมสถานที่จาก Google Maps':'AI + Smart Planner supplemented by Google Maps'):result?.recovery?(th?'AI + Smart Planner เติมเฉพาะส่วนที่ขาด':'AI + Smart Planner filled missing parts'):(th?'AI จัดแผนและตรวจเงื่อนไขแล้ว':'AI planned and checked the trip');
    add('assistant',`${source}\n${complete?(th?'จัดแผนครบตามจำนวนวันที่ขอ':'All requested days planned'):(th?'แผนบางส่วน: ยังมีวันที่หรือเส้นทางที่ตรวจสอบไม่ครบ':'Partial plan: some days or roads remain unverified')}\n${parsed.province} · ${parsed.days} ${th?'วัน':'days'} · ${money(parsed.totalBudget!)} ${th?'งบที่ระบุ':'requested budget'}`,result);
-  }catch(error){add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
-  finally{setPending(false);}
+  }catch(error){if(request.current!==controller)return;setMascotStatus('error');setDraft(previous=>previous||value);setContext(context);add('assistant',error instanceof Error&&error.name==='AbortError'?(th?'การสร้างแผนใช้เวลานานเกินไป กรุณาลองใหม่':'Request timed out. Please retry.'):(error instanceof Error?error.message:(th?'เกิดข้อผิดพลาด กรุณาลองใหม่':'Something went wrong.')));}
+  finally{
+   if(request.current===controller){request.current=null;setPending(false);}
+  }
+ };
+ const resetChat=()=>{
+  const active=request.current;
+  request.current=null;
+  active?.abort();
+  setPending(false);
+  setMessages([]);
+  setContext('');
+  setDraft('');
+  setMascotStatus('idle');
  };
  return <div className="relative flex h-[100dvh] min-h-0 w-full max-w-full min-w-0 flex-col overflow-hidden bg-background">
   <header className="z-20 flex w-full min-w-0 shrink-0 items-center gap-2 border-b bg-background/95 px-3 py-3 backdrop-blur sm:gap-3 sm:px-4">
    <Link to="/" aria-label={th?'กลับหน้าแรก':'Home'} className="shrink-0 rounded-full p-2 hover:bg-muted"><ArrowLeft className="h-5 w-5"/></Link>
    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/15 text-teal-500"><Sparkles className="h-5 w-5"/></span>
    <div className="min-w-0 flex-1"><h1 className="font-semibold">PaiNaiDee AI</h1><p className="text-xs text-muted-foreground">{th?'ผู้ช่วยวางแผนเที่ยวส่วนตัว':'Your personal trip planner'}</p></div>
-   <button type="button" onClick={()=>{setMessages([]);setContext('');setDraft('');}} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="shrink-0 rounded-full border p-2"><Plus className="h-5 w-5"/></button>
+   <button type="button" onClick={resetChat} aria-label={th?'เริ่มแชตใหม่':'New chat'} className="shrink-0 rounded-full border p-2"><Plus className="h-5 w-5"/></button>
   </header>
   <main className="min-h-0 min-w-0 w-full flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2 py-4 sm:px-6" aria-label={th?'บทสนทนาวางแผนเที่ยว':'Trip planning conversation'}>
    <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4">
@@ -130,7 +174,7 @@ export default function TripPlanner({currentLanguage}:Props){
   </main>
   <form onSubmit={e=>{e.preventDefault();void submit();}} className="z-30 w-full min-w-0 shrink-0 border-t bg-background px-2 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-3">
    <div className="mx-auto flex w-full min-w-0 max-w-3xl items-end gap-2 rounded-3xl border bg-card p-2 shadow-sm">
-    <textarea aria-label={th?'ข้อความถึง PaiNaiDee AI':'Message PaiNaiDee AI'} rows={1} maxLength={500} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void submit();}}} placeholder={th?'ถามเรื่องทริปหรือบอกสถานที่ที่อยากไป...':'Ask about your next trip...'} className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-base outline-none"/>
+    <textarea ref={composer} aria-label={th?'ข้อความถึง PaiNaiDee AI':'Message PaiNaiDee AI'} rows={1} maxLength={500} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void submit();}}} placeholder={th?'ถามเรื่องทริปหรือบอกสถานที่ที่อยากไป...':'Ask about your next trip...'} className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-base outline-none"/>
     <button type="submit" disabled={pending||!draft.trim()||facets.isLoading} aria-label={th?'ส่งข้อความ':'Send'} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-500 text-slate-950 disabled:opacity-40"><Send className="h-5 w-5"/></button>
    </div>
    {facets.isError&&<p className="mx-auto mt-1 max-w-3xl text-xs text-red-500">{th?'ไม่สามารถโหลดรายชื่อจังหวัดได้ กรุณาลองใหม่':'Unable to load provinces. Please retry.'}</p>}
