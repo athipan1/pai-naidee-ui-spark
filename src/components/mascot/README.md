@@ -23,6 +23,8 @@ an Admin CMS upload/publish workflow. It does not change stored production data.
 A separate, permissioned Admin workflow is needed if non-developers must upload
 and publish characters at runtime.
 
-The current PR deliberately keeps Tripo-derived GLB/portraits out of the public
-repository until asset redistribution rights have been verified. Public CI
-cannot claim to have tested the actual 3D asset if it was unavailable.
+The public PaiNaiDee origin loads the approved Side-Peek GLB and WebP from
+the existing Railway bucket via two versioned API routes. The API checks the
+size and SHA-256 before serving them. To update the public model, coordinate
+the bucket objects, backend manifest and frontend URLs in one release. Keep
+the Blender source and private QA assets in private storage.

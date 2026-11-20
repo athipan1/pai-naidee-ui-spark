@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const { registerMascotAssets } = require('./mascot-assets.cjs');
 const cors = require('cors');
 const { randomUUID } = require('node:crypto');
 const { registerAdminCms } = require('./admin-cms.cjs');
@@ -47,6 +48,7 @@ app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store, max-a
 app.use('/api', createRateLimiter({ windowMs: 60_000, max: 180 }));
 
 const storage = createRailwayMediaStorage();
+registerMascotAssets(app, storage);
 const requireAdmin = authRoutes(app, { getSql, limitLogin: createRateLimiter({ windowMs: 15 * 60_000, max: 10, keyPrefix: 'admin-login' }) });
 registerAdminCms(app, {
   getSql,
