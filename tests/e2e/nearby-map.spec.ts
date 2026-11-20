@@ -197,6 +197,14 @@ test("radius, popup keyboard, navigation and cleanup during zoom", async ({
   const list = page.getByTestId("real-nearby-places");
   await list.getByRole("link", { name: /^ดูรายละเอียด:/ }).click();
   await expect(page).toHaveURL(/nearby-place/);
+  // A URL update can precede React's committed route. Verify the destination
+  // rendered before Back so this checks a completed place-to-place journey.
+  await expect(
+    page.getByRole("heading", { name: near.nameLocal, exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "5 กม.", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
   await page.goBack();
   await expect(page).toHaveURL(new RegExp(place.id));
   await page.locator("#location").scrollIntoViewIfNeeded();
