@@ -111,13 +111,7 @@ export async function createElephantRenderer(
     signal.throwIfAborted();
   }
 
-  const bounds = new Box3().setFromObject(asset.scene);
-  const center = bounds.getCenter(new Vector3());
-  const size = bounds.getSize(new Vector3());
-  const scale = 1 / Math.max(size.x, size.y, size.z);
   const rig = new Group();
-  rig.scale.setScalar(scale);
-  asset.scene.position.sub(center);
   rig.add(asset.scene);
   scene.add(rig);
   camera.position.set(...character.camera.position);
@@ -129,6 +123,8 @@ export async function createElephantRenderer(
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
   canvas.className = "block h-full w-full";
+  // Never expose the default 300x150 drawing buffer or an unfitted camera.
+  canvas.style.visibility = "hidden";
   host.append(canvas);
   const mixer = new AnimationMixer(asset.scene);
   const bones: Bone[] = [];
@@ -175,6 +171,27 @@ export async function createElephantRenderer(
   const neutralPose = capturePose();
   restAction?.stop();
   copyPose(neutralPose);
+  // Include sampled animated skin positions, rather than framing the bind pose
+  // and changing scale after the first visible frame. This envelope stays fixed.
+  const bounds = new Box3().setFromObject(asset.scene, true);
+  for (const clip of asset.animations) {
+    const sample = mixer.clipAction(clip).reset().play();
+    for (const fraction of [0, 0.25, 0.5, 0.75, 1]) {
+      mixer.setTime(clip.duration * fraction);
+      asset.scene.updateMatrixWorld(true);
+      bounds.union(new Box3().setFromObject(asset.scene, true));
+    }
+    sample.stop();
+  }
+  copyPose(neutralPose);
+  const center = bounds.getCenter(new Vector3());
+  const size = bounds.getSize(new Vector3());
+  const scale = 1 / Math.max(size.x, size.y, size.z);
+  rig.scale.setScalar(scale);
+  asset.scene.position.sub(center);
+  const radius = (size.length() * scale) / 2;
+  const cameraDirection = camera.position.clone().normalize();
+  const minimumDistance = camera.position.length();
   const frameInterval = 1000 / 30;
   const transitionSeconds = 0.24;
   let frame = 0;
@@ -194,9 +211,22 @@ export async function createElephantRenderer(
     const { clientWidth, clientHeight } = host;
     if (!clientWidth || !clientHeight) return;
     camera.aspect = clientWidth / clientHeight;
+    const halfFov = MathUtils.degToRad(camera.fov / 2);
+    const limitingFov = Math.min(
+      halfFov,
+      Math.atan(Math.tan(halfFov) * camera.aspect)
+    );
+    camera.position
+      .copy(cameraDirection)
+      .multiplyScalar(
+        Math.max(minimumDistance, radius / Math.sin(limitingFov) / 0.9)
+      );
+    camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
     renderer.setSize(clientWidth, clientHeight, false);
     renderer.render(scene, camera);
+    canvas.dataset.ready = "true";
+    canvas.style.visibility = "visible";
   }
 
   function tick(time: number) {
@@ -264,8 +294,7 @@ export async function createElephantRenderer(
     returnToIdle = false;
     action?.stop();
     const clipName = getMascotClipName(character, next);
-    const clip =
-      next === "Rest" || !clipName ? undefined : clips.get(clipName);
+    const clip = next === "Rest" || !clipName ? undefined : clips.get(clipName);
     action = clip ? mixer.clipAction(clip).reset() : undefined;
     if (
       action &&

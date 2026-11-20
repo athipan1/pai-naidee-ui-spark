@@ -25,6 +25,8 @@ export default defineConfig({
       },
     },
     { name: "iPhone Safari - iPhone 13", use: { ...devices["iPhone 13"] } },
+    { name: "iPhone Safari - iPhone 15", use: { ...devices["iPhone 15"] } },
+    { name: "iPhone Safari - small", use: { ...devices["iPhone SE"] } },
     { name: "Tablet Safari - iPad Mini", use: { ...devices["iPad Mini"] } },
     { name: "Desktop Safari", use: { ...devices["Desktop Safari"] } },
   ],

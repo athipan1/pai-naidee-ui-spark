@@ -33,8 +33,13 @@ test.beforeEach(async ({ page }) => {
     if (route.request().method() !== "GET") return route.abort();
     return route.fulfill({
       json: {
-        attractions: [], total: 0, page: 1, limit: 10,
-        data: [], items: [], places: [],
+        attractions: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        data: [],
+        items: [],
+        places: [],
       },
     });
   });
@@ -59,15 +64,11 @@ test("the shared assistant can be minimized, hidden, restored and localized", as
   await expect(
     page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" })
   ).toBeFocused();
+  // Expanded assistant has one close control and no duplicate launcher.
+  await expect(launcher).toHaveCount(0);
   const nav = await page.locator("nav").last().boundingBox();
-  const toggle = await launcher.boundingBox();
-  expect(toggle!.y + toggle!.height).toBeLessThan(nav!.y);
-  if (page.viewportSize()!.width >= 1024) {
-    const planner = await page
-      .getByRole("button", { name: "AI วางแผนเที่ยว", exact: true })
-      .boundingBox();
-    expect(planner!.x + planner!.width).toBeLessThan(toggle!.x);
-  }
+  const panelBounds = await panel.boundingBox();
+  expect(panelBounds!.y + panelBounds!.height).toBeLessThan(nav!.y);
   await page.mouse.click(8, 130);
   await expect(panel).toBeHidden();
   await launcher.click();
@@ -117,6 +118,9 @@ test("hands off a draft and reuses the existing planner request only after expli
   await expect(
     page.getByRole("textbox", { name: "ข้อความถึง PaiNaiDee AI" })
   ).toHaveValue(prompt);
+  await expect(
+    page.getByRole("textbox", { name: "ข้อความถึง PaiNaiDee AI" })
+  ).toBeFocused();
   expect(calls).toBe(0);
   const send = page.getByRole("button", { name: "ส่งข้อความ" });
   await expect(send).toBeEnabled();
@@ -125,23 +129,16 @@ test("hands off a draft and reuses the existing planner request only after expli
     form.requestSubmit();
     form.requestSubmit();
   });
-  await launcher.click();
-  await expect(
-    page.getByText("AI กำลังจัดทริป", { exact: true })
-  ).toBeVisible();
-  const activeCanvas = page.locator("aside canvas");
-  if (hasAsset) {
-    await expect(activeCanvas).toHaveAttribute("data-motion", "Thinking");
-  }
+  await expect(page.getByRole("region", { name: title })).toHaveCount(0);
+  await expect(launcher).toHaveCount(0);
+  await expect(page.locator("aside canvas")).toHaveCount(0);
+  await expect(send).toBeDisabled();
   release();
-  if (hasAsset) {
-    await expect(activeCanvas).toHaveAttribute("data-motion", "Happy");
-    await expect(activeCanvas).toHaveAttribute("data-motion", "Idle");
-  }
-  await expect(
-    page.getByText("แผนเที่ยวพร้อมแล้ว", { exact: true })
-  ).toBeVisible();
-  await expect(page.getByText("แผนเที่ยวรายวัน")).toBeAttached();
+  await expect(page.getByText("แผนเที่ยวรายวัน")).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.getByRole("region", { name: title })).toHaveCount(0);
+  await expect(launcher).toHaveCount(0);
+  await expect(page.locator("aside canvas")).toHaveCount(0);
   expect(calls).toBe(1);
 });
 
@@ -227,11 +224,8 @@ test("a planner rate-limit response keeps the draft available for an explicit re
   await send.click();
   await expect(page.getByText(/มีคำขอมากเกินไป/)).toBeVisible();
   await expect(message).toHaveValue(prompt);
-  await page.getByRole("button", { name: title }).click();
-  await expect(
-    page.getByText("จัดทริปไม่สำเร็จ ลองอีกครั้งในหน้าแผนเที่ยว")
-  ).toBeVisible();
-  await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
+  await expect(page.getByRole("region", { name: title })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: title })).toHaveCount(0);
   expect(calls).toBe(1);
   await send.click();
   await expect(page.getByText("แผนเที่ยวรายวัน")).toBeVisible();
@@ -263,7 +257,6 @@ test("WebGL-disabled clients can use the planner and see the portrait fallback",
 
 test("loads the real elephant on demand, cleans up its canvas and reuses its bytes", async ({
   page,
-  browserName,
 }, testInfo) => {
   test.skip(
     !hasAsset,
@@ -282,11 +275,7 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   const available = await page.evaluate(
     () => !!document.createElement("canvas").getContext("webgl2")
   );
-  if (!available && browserName === "webkit") {
-    await launcher.click();
-    await expect(page.getByText("แสดงช้างแบบ 2D")).toBeVisible();
-    return;
-  }
+  expect(available).toBe(true);
   await launcher.click();
   const panel = page.getByRole("region", { name: title });
   const canvas = panel.locator("canvas");
@@ -462,4 +451,191 @@ test("opens the existing assistant from the greeting and respects reduced motion
   );
   await page.getByRole("button", { name: title }).click();
   await expect(page.getByRole("region", { name: title })).toBeVisible();
+});
+
+for (const target of ["island", "search", "hero", "navigation"] as const) {
+  test(`greeting leaves the ${target} target clickable`, async ({ page }) => {
+    await page.clock.install();
+    await page.goto("/");
+    await expect(page.locator(".elephant-peek__bubble")).toBeVisible({
+      timeout: 12000,
+    });
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+    const control =
+      target === "island"
+        ? page.getByRole("button", { name: "Search for เกาะ", exact: true })
+        : target === "search"
+          ? page.getByRole("combobox", { name: "คุณอยากไปเที่ยวที่ไหน?" })
+          : target === "hero"
+            ? page.getByRole("button", { name: "AI วางแผนเที่ยว", exact: true })
+            : page
+                .locator("nav")
+                .last()
+                .getByRole("link", { name: "สำรวจ", exact: true });
+    await expect(control).toBeVisible();
+    await control.evaluate((element) =>
+      element.scrollIntoView({ block: "center" })
+    );
+    await page.clock.runFor(100);
+    await expect(page.locator(".elephant-peek__bubble")).toBeVisible();
+    await expect
+      .poll(async () => {
+        // Scroll events and ResizeObserver are delivered outside the virtual clock.
+        // Advance subsequent frames while waiting for the placement to settle.
+        await page.clock.runFor(100);
+        return await control.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return [0.2, 0.5, 0.8].every((x) =>
+            [0.2, 0.5, 0.8].every((y) => {
+              const hit = document.elementFromPoint(
+                rect.left + rect.width * x,
+                rect.top + rect.height * y
+              );
+              return hit === element || (!!hit && element.contains(hit));
+            })
+          );
+        });
+      })
+      .toBe(true);
+    await expect(page.locator(".elephant-peek__bubble")).toBeVisible();
+    await control.click();
+    await page.clock.resume();
+    if (target === "search") {
+      await control.fill("เชียงใหม่");
+      await control.press("Enter");
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === "/discover" &&
+          url.searchParams.get("q") ===
+            (target === "search" ? "เชียงใหม่" : "เกาะ") &&
+          url.searchParams.get("mode") === "search"
+      );
+    } else if (target === "hero")
+      await expect(page).toHaveURL(/\/trip-planner$/);
+    else if (target === "navigation")
+      await expect(page).toHaveURL(/\/discover$/);
+    else
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === "/discover" &&
+          url.searchParams.get("q") ===
+            (target === "search" ? "เชียงใหม่" : "เกาะ") &&
+          url.searchParams.get("mode") === "search"
+      );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth
+      )
+    ).toBe(true);
+  });
+}
+
+test("first painted ready frame, resize and reopen keep the animated skin inside the canvas", async ({
+  page,
+}) => {
+  test.skip(!hasAsset, "Requires the owner's private rigged GLB.");
+  await page.addInitScript(() => {
+    sessionStorage.setItem("painaidee.elephant.peek-greeted", "true");
+    const frames: {
+      width: number;
+      height: number;
+      count: number;
+      margin: number;
+    }[] = [];
+    Object.assign(window, { mascotFrames: frames });
+    const sampled = new WeakMap<HTMLCanvasElement, string>();
+    const original = WebGL2RenderingContext.prototype.drawElements;
+    WebGL2RenderingContext.prototype.drawElements = function (...args) {
+      Reflect.apply(original, this, args);
+      const canvas = this.canvas;
+      if (
+        !(canvas instanceof HTMLCanvasElement) ||
+        !canvas.closest("aside") ||
+        this.getParameter(this.FRAMEBUFFER_BINDING)
+      )
+        return;
+      const width = this.drawingBufferWidth,
+        height = this.drawingBufferHeight;
+      const size = `${width}x${height}`;
+      if (sampled.get(canvas) === size) return;
+      const pixels = new Uint8Array(width * height * 4);
+      this.readPixels(
+        0,
+        0,
+        width,
+        height,
+        this.RGBA,
+        this.UNSIGNED_BYTE,
+        pixels
+      );
+      let count = 0,
+        margin = Math.min(width, height);
+      for (let y = 0; y < height; y++)
+        for (let x = 0; x < width; x++) {
+          if (pixels[(y * width + x) * 4 + 3] > 32) {
+            count++;
+            margin = Math.min(margin, x, y, width - x - 1, height - y - 1);
+          }
+        }
+      if (count) {
+        sampled.set(canvas, size);
+        frames.push({ width, height, count, margin });
+      }
+    };
+  });
+  await page.goto("/");
+  const launcher = page.getByRole("button", { name: title, exact: true });
+  await launcher.click();
+  const canvas = page.locator("aside canvas[data-ready='true']");
+  await expect(canvas).toBeVisible({ timeout: 18_000 });
+  const frames = () =>
+    page.evaluate(
+      () =>
+        (
+          window as unknown as {
+            mascotFrames: {
+              width: number;
+              height: number;
+              count: number;
+              margin: number;
+            }[];
+          }
+        ).mascotFrames
+    );
+  await expect.poll(async () => (await frames()).length).toBe(1);
+  await page.setViewportSize({ width: 640, height: 360 });
+  await canvas.evaluate((element) => {
+    const host = element.parentElement!;
+    host.style.width = "96px";
+    host.style.height = "96px";
+  });
+  await expect(canvas).toBeVisible();
+  const resizedPixels = await page.evaluate(() =>
+    Math.floor(96 * Math.min(devicePixelRatio || 1, 1.25))
+  );
+  await expect(canvas).toHaveAttribute("width", String(resizedPixels));
+  await expect(canvas).toHaveAttribute("height", String(resizedPixels));
+  const resized = await canvas.evaluate((element) => ({
+    width: (element as HTMLCanvasElement).width,
+    height: (element as HTMLCanvasElement).height,
+  }));
+  await expect
+    .poll(async () =>
+      (await frames()).some(
+        (frame) =>
+          frame.width === resized.width && frame.height === resized.height
+      )
+    )
+    .toBe(true);
+  const beforeReopen = (await frames()).length;
+  await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
+  await launcher.click();
+  await expect(canvas).toBeVisible();
+  await expect
+    .poll(async () => (await frames()).length)
+    .toBeGreaterThan(beforeReopen);
+  for (const frame of await frames()) {
+    expect(frame.count).toBeGreaterThan(100);
+    expect(frame.margin).toBeGreaterThan(2);
+  }
 });

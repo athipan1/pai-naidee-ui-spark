@@ -79,7 +79,7 @@
   height: calc(var(--peek-size) * 0.75);
 }
 .elephant-peek__bubble {
-  position: absolute;
+  position: fixed;
   right: max(
     calc(var(--peek-size) - 0.45rem),
     calc(env(safe-area-inset-right) + 4.5rem)
@@ -90,7 +90,7 @@
     calc(100vw - var(--peek-size) - 1rem - env(safe-area-inset-left))
   );
   pointer-events: auto;
-  animation: elephant-peek-bubble 180ms ease-out;
+  animation: none;
 }
 .elephant-peek__bubble::after {
   content: "";
@@ -115,7 +115,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .elephant-mascot-panel {
-    animation: elephant-peek-bubble 180ms ease-out;
+    animation: none;
   }
 }
 
@@ -142,4 +142,10 @@
       calc(100dvh - 37rem - 6.5rem - env(safe-area-inset-bottom))
     );
   }
+}
+
+/* Preserve a reachable 44px target when the full greeting hot zone cannot fit. */
+.elephant-peek[data-crowded] .elephant-peek__trigger {
+  width: 2.75rem;
+  height: 2.75rem;
 }

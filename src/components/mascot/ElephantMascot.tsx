@@ -17,6 +17,7 @@ import {
   type PlannerStatus,
 } from "./mascotState";
 
+import { useBubblePlacement } from "./useBubblePlacement";
 import { useMascotPeek } from "./useMascotPeek";
 import { activeMascot, resolveMascotAssets } from "./mascotCharacters";
 import "./ElephantMascot.css";
@@ -108,9 +109,19 @@ export default function ElephantMascot({
     "loading"
   );
   const [attempt, setAttempt] = useState(0);
-  const open = !hidden && key === openFor;
+  const inPlanner = pathname === "/trip-planner";
+  const open = !inPlanner && !hidden && key === openFor;
   const peek = useMascotPeek(
-    pathname === "/" && !hidden && !open && !reducedMotion
+    (pathname === "/" || pathname === "/discover") &&
+      !hidden &&
+      !open &&
+      !reducedMotion
+  );
+  const bubble = useRef<HTMLDivElement>(null);
+  const bubblePosition = useBubblePlacement(
+    bubble,
+    toggle,
+    !inPlanner && !hidden && !open ? peek.phase : undefined
   );
   const render3D = open || peek.live;
   const panelMotion = getMascotMotion({
@@ -246,6 +257,7 @@ export default function ElephantMascot({
   }, [open, plannerStatus, visual, resting, walking]);
 
   function showAssistant() {
+    if (inPlanner) return;
     peek.interrupt();
     setVisual("loading");
     setResting(false);
@@ -298,6 +310,10 @@ export default function ElephantMascot({
   );
   const plannerMessage = plannerStatus === "idle" ? "" : t[plannerStatus];
 
+  // The Planner owns conversation, focus and status announcements on this route.
+  // Do not mount a second composer, launcher or pointer-intercepting overlay.
+  if (inPlanner) return null;
+
   return (
     <aside
       ref={assistant}
@@ -326,7 +342,11 @@ export default function ElephantMascot({
             onClick={showAssistant}
           />
           {peek.phase === "greeting" && (
-            <div className="elephant-peek__bubble flex items-center rounded-2xl border bg-card text-card-foreground shadow-lg">
+            <div
+              ref={bubble}
+              style={bubblePosition}
+              className="elephant-peek__bubble flex items-center rounded-2xl border bg-card text-card-foreground shadow-lg"
+            >
               <button
                 type="button"
                 className="min-h-11 flex-1 rounded-l-2xl py-2 pl-3 text-left text-sm font-semibold leading-snug focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
@@ -350,7 +370,7 @@ export default function ElephantMascot({
             </div>
           )}
         </div>
-      ) : (
+      ) : hidden ? (
         <Button
           ref={toggle}
           type="button"
@@ -367,12 +387,12 @@ export default function ElephantMascot({
             portrait
           )}
         </Button>
-      )}
+      ) : null}
       {open && (
         <section
           id={panelId}
           aria-labelledby={titleId}
-          className="elephant-mascot-panel absolute bottom-full right-0 mb-2 max-h-[min(28rem,calc(100dvh-12.5rem-env(safe-area-inset-bottom)))] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl lg:mb-7 lg:w-72"
+          className="elephant-mascot-panel absolute bottom-0 right-0 max-h-[min(28rem,calc(100dvh-9rem-env(safe-area-inset-bottom)))] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl lg:mb-7 lg:w-72"
           onKeyDown={(event) => {
             if (event.key === "Escape") minimize(true);
           }}

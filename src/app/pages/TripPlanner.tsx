@@ -49,6 +49,13 @@ export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
  const referenceId=searchParams.get('place') || undefined;
  const reference=useAttractionDetail(referenceId,{refetchInterval:false});
  const referenceApplied=useRef(false);
+ const composer=useRef<HTMLTextAreaElement>(null);
+ useEffect(()=>{
+  if(location.state && typeof location.state==='object' &&
+     Object.prototype.hasOwnProperty.call(location.state,'mascotTripDraft')) {
+   composer.current?.focus({preventScroll:true});
+  }
+ },[location.key,location.state]);
  const [draft,setDraft]=useState(()=>getPlannerDraft(location.state));
  const [messages,setMessages]=useState<Message[]>([]);
  const [pending,setPending]=useState(false);
@@ -167,7 +174,7 @@ export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
   </main>
   <form onSubmit={e=>{e.preventDefault();void submit();}} className="z-30 w-full min-w-0 shrink-0 border-t bg-background px-2 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-3">
    <div className="mx-auto flex w-full min-w-0 max-w-3xl items-end gap-2 rounded-3xl border bg-card p-2 shadow-sm">
-    <textarea aria-label={th?'ข้อความถึง PaiNaiDee AI':'Message PaiNaiDee AI'} rows={1} maxLength={500} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void submit();}}} placeholder={th?'ถามเรื่องทริปหรือบอกสถานที่ที่อยากไป...':'Ask about your next trip...'} className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-base outline-none"/>
+    <textarea ref={composer} aria-label={th?'ข้อความถึง PaiNaiDee AI':'Message PaiNaiDee AI'} rows={1} maxLength={500} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void submit();}}} placeholder={th?'ถามเรื่องทริปหรือบอกสถานที่ที่อยากไป...':'Ask about your next trip...'} className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-base outline-none"/>
     <button type="submit" disabled={pending||!draft.trim()||facets.isLoading} aria-label={th?'ส่งข้อความ':'Send'} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-500 text-slate-950 disabled:opacity-40"><Send className="h-5 w-5"/></button>
    </div>
    {facets.isError&&<p className="mx-auto mt-1 max-w-3xl text-xs text-red-500">{th?'ไม่สามารถโหลดรายชื่อจังหวัดได้ กรุณาลองใหม่':'Unable to load provinces. Please retry.'}</p>}
