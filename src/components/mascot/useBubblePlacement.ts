@@ -86,17 +86,18 @@ export function useBubblePlacement(
         { x: anchorBounds.left - width - 12, y: anchorBounds.top },
       ];
       for (let y = bottom - height; y >= top; y -= 12) {
-        candidates.push({ x: right - width, y }, { x: left, y });
+        candidates.push(
+          { x: anchorBounds.left - width - 12, y },
+          { x: right - width, y },
+          { x: left, y }
+        );
       }
-      candidates.sort(
-        (a, b) =>
-          Math.abs(
-            a.y + height / 2 - (anchorBounds.top + anchorBounds.height / 2)
-          ) -
-          Math.abs(
-            b.y + height / 2 - (anchorBounds.top + anchorBounds.height / 2)
-          )
-      );
+      const score = ({ x, y }: { x: number; y: number }) =>
+        Math.abs(
+          y + height / 2 - (anchorBounds.top + anchorBounds.height / 2)
+        ) +
+        Math.abs(x - (anchorBounds.left - width - 12)) * 0.25;
+      candidates.sort((a, b) => score(a) - score(b));
       const candidate = candidates.find(
         ({ x, y }) =>
           x >= left &&

@@ -401,6 +401,15 @@ test("peeks above navigation, retracts after the greeting and does not greet aga
     bounds!.x + bounds!.width <= primaryAction!.x ||
     primaryAction!.x + primaryAction!.width <= bounds!.x;
   expect(disjoint).toBe(true);
+  if (page.viewportSize()!.width >= 1024) {
+    const speech = await page.locator(".elephant-peek__bubble").boundingBox();
+    const character = await page
+      .locator(".elephant-peek__trigger")
+      .boundingBox();
+    expect(Math.abs(character!.x - (speech!.x + speech!.width))).toBeLessThan(
+      24
+    );
+  }
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
