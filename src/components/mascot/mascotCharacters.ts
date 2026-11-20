@@ -57,8 +57,9 @@ const registry = {
 } satisfies Record<string, MascotCharacter>;
 
 export type MascotCharacterId = keyof typeof registry;
-export const mascotCharacters: Readonly<Record<MascotCharacterId, MascotCharacter>> =
-  registry;
+export const mascotCharacters: Readonly<
+  Record<MascotCharacterId, MascotCharacter>
+> = registry;
 
 export function getMascotCharacter(id: string | undefined): MascotCharacter {
   return Object.prototype.hasOwnProperty.call(registry, id ?? "")
@@ -83,9 +84,21 @@ export function resolveMascotAssets(character: MascotCharacter): {
   modelUrl: string | undefined;
   imageUrl: string | undefined;
 } {
+  // The public website serves the approved files through Railway. Local and
+  // preview builds can use their own test assets without fetching production.
+  const productionElephant =
+    character.id === "elephant" &&
+    typeof window !== "undefined" &&
+    window.location.origin === "https://pai-naidee-ui-spark.vercel.app";
+  const media =
+    "https://painaidee-api-production.up.railway.app/api/media/mascot";
   return {
-    modelUrl: assetUrls[character.assets.model],
-    imageUrl: assetUrls[character.assets.portrait],
+    modelUrl:
+      assetUrls[character.assets.model] ??
+      (productionElephant ? `${media}/7a57a070bddb/elephant.glb` : undefined),
+    imageUrl:
+      assetUrls[character.assets.portrait] ??
+      (productionElephant ? `${media}/6d33c7eae9c8/elephant.webp` : undefined),
   };
 }
 
@@ -95,8 +108,6 @@ export function getMascotClipName(
 ): string | undefined {
   return (
     character.animationClips[motion] ??
-    (motion === "PeekGreeting"
-      ? character.animationClips.Greeting
-      : undefined)
+    (motion === "PeekGreeting" ? character.animationClips.Greeting : undefined)
   );
 }
