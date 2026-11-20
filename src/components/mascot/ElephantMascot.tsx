@@ -296,10 +296,11 @@ export default function ElephantMascot({
   const portrait = imageUrl ? (
     <img
       src={imageUrl}
+      data-mascot-portrait=""
       alt=""
       decoding="async"
       fetchPriority="low"
-      className="h-full w-full object-contain"
+      className="absolute inset-0 m-auto block h-[68%] w-[68%] object-contain"
       width={256}
       height={256}
     />
@@ -424,7 +425,10 @@ export default function ElephantMascot({
             </Button>
           </header>
           <p className="mb-2 text-sm text-muted-foreground">{t.welcome}</p>
-          <div className="relative mb-2 grid h-32 place-items-center overflow-hidden rounded-xl bg-primary/10">
+          <div
+            data-mascot-stage=""
+            className="relative mb-2 grid h-32 place-items-center overflow-hidden rounded-xl bg-primary/10"
+          >
             {(!modelUrl || visual !== "ready") && (
               <div className="pointer-events-none absolute inset-0 grid place-items-center p-2">
                 {portrait}

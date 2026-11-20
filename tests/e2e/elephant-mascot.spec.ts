@@ -541,7 +541,7 @@ for (const target of ["island", "search", "hero", "navigation"] as const) {
 
 test("first painted ready frame, resize and reopen keep the animated skin inside the canvas", async ({
   page,
-}) => {
+}, testInfo) => {
   test.skip(!hasAsset, "Requires the owner's private rigged GLB.");
   await page.addInitScript(() => {
     sessionStorage.setItem("painaidee.elephant.peek-greeted", "true");
@@ -647,4 +647,92 @@ test("first painted ready frame, resize and reopen keep the animated skin inside
     expect(frame.count).toBeGreaterThan(100);
     expect(frame.margin).toBeGreaterThan(2);
   }
+  await testInfo.attach("first-ready-frame-bounds", {
+    body: JSON.stringify(await frames()),
+    contentType: "application/json",
+  });
+});
+
+test("the loading portrait stays fitted while the real GLB is delayed", async ({
+  page,
+}, testInfo) => {
+  test.skip(!hasAsset, "Requires the private candidate and its portrait.");
+  await page.addInitScript(() =>
+    sessionStorage.setItem("painaidee.elephant.peek-greeted", "true")
+  );
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/*.glb", async (route) => {
+    await pending;
+    await route.continue();
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: title, exact: true }).click();
+  const stage = page.locator("[data-mascot-stage]");
+  const portrait = stage.locator("img[data-mascot-portrait]");
+  try {
+    await expect(portrait).toBeVisible();
+    await expect
+      .poll(() =>
+        portrait.evaluate((image) => (image as HTMLImageElement).naturalWidth)
+      )
+      .toBe(256);
+    const frame = (await stage.boundingBox())!;
+    const image = (await portrait.boundingBox())!;
+    expect(image.y - frame.y).toBeGreaterThan(16);
+    expect(frame.y + frame.height - image.y - image.height).toBeGreaterThan(16);
+    expect(image.x).toBeGreaterThanOrEqual(frame.x);
+    expect(image.x + image.width).toBeLessThanOrEqual(frame.x + frame.width);
+    const pixels = await page.evaluate(
+      async (base64) => {
+        const source = new Image();
+        source.src = `data:image/png;base64,${base64}`;
+        await source.decode();
+        const sample = document.createElement("canvas");
+        sample.width = source.naturalWidth;
+        sample.height = source.naturalHeight;
+        const context = sample.getContext("2d")!;
+        context.drawImage(source, 0, 0);
+        const data = context.getImageData(
+          0,
+          0,
+          sample.width,
+          sample.height
+        ).data;
+        let count = 0,
+          margin = Math.min(sample.width, sample.height);
+        for (let y = 0; y < sample.height; y++)
+          for (let x = 0; x < sample.width; x++) {
+            const i = (y * sample.width + x) * 4;
+            if (data[i + 1] < 200 && data[i + 2] - data[i] > 18) {
+              count++;
+              margin = Math.min(
+                margin,
+                x,
+                y,
+                sample.width - x - 1,
+                sample.height - y - 1
+              );
+            }
+          }
+        return { count, margin };
+      },
+      (
+        await stage.screenshot({
+          path: testInfo.outputPath("loading-portrait.png"),
+        })
+      ).toString("base64")
+    );
+    expect(pixels.count).toBeGreaterThan(100);
+    expect(pixels.margin).toBeGreaterThan(2);
+  } finally {
+    release();
+  }
+  await expect(stage.locator("canvas[data-ready='true']")).toBeVisible({
+    timeout: 18000,
+  });
+  await expect(portrait).toHaveCount(0);
+  await expect(stage.locator("canvas")).toHaveAttribute("data-bones", "29");
 });
