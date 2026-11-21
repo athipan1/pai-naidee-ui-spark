@@ -426,7 +426,11 @@ test("peeks above navigation, retracts after the greeting and does not greet aga
   );
   await expect(bubble).toBeHidden();
   await expect(peek).toHaveAttribute("data-peek", "idle");
-  await expect(peek.locator("canvas")).toHaveCount(0);
+  if (hasAsset) {
+    await expect(peek.locator('canvas[data-motion="Idle"]')).toBeVisible();
+  } else {
+    await expect(peek.locator("canvas")).toHaveCount(0);
+  }
   await page.reload();
   await expect(peek).toHaveAttribute("data-peek", "idle");
   expect(requests.filter((url) => url.endsWith("/api/ai/trip-plan"))).toEqual(
@@ -682,8 +686,10 @@ test("the loading portrait stays fitted while the real GLB is delayed", async ({
       .toBe(256);
     const frame = (await stage.boundingBox())!;
     const image = (await portrait.boundingBox())!;
-    expect(image.y - frame.y).toBeGreaterThan(16);
-    expect(frame.y + frame.height - image.y - image.height).toBeGreaterThan(16);
+    expect(image.y - frame.y).toBeGreaterThan(frame.height * 0.12);
+    expect(frame.y + frame.height - image.y - image.height).toBeGreaterThan(
+      frame.height * 0.12
+    );
     expect(image.x).toBeGreaterThanOrEqual(frame.x);
     expect(image.x + image.width).toBeLessThanOrEqual(frame.x + frame.width);
     await portrait.scrollIntoViewIfNeeded();
@@ -848,7 +854,7 @@ test("a crowded edge uses a 44 px launcher without taking focus from a dialog", 
     blocker.textContent = "Edge control";
     Object.assign(blocker.style, {
       position: "fixed",
-      right: "54px",
+      right: "42px",
       top: "0",
       height: "100vh",
       width: "90px",
@@ -859,6 +865,11 @@ test("a crowded edge uses a 44 px launcher without taking focus from a dialog", 
   const peek = page.locator("[data-peek]");
   const launcher = peek.getByRole("button", { name: title, exact: true });
   await expect(peek).toHaveAttribute("data-compact", "true");
+  await expect(peek.locator(".elephant-peek__crop")).toBeVisible();
+  await expect(
+    peek.locator("[data-mascot-portrait], .elephant-peek__emoji")
+  ).toBeVisible();
+  await expect(launcher.locator("svg")).toHaveCount(0);
   await expect
     .poll(async () => {
       const rect = await launcher.boundingBox();
@@ -898,4 +909,107 @@ test("the opened panel leaves the Home planner action clickable", async ({
   await expect(action).toBeVisible();
   await action.click();
   await expect(page).toHaveURL(/\/trip-planner$/);
+});
+
+test("tries a smaller elephant before using the compact portrait", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const launcher = page.getByRole("button", { name: title, exact: true });
+  await launcher.waitFor();
+  await launcher.evaluate((trigger) => {
+    const blocker = document.createElement("button");
+    blocker.textContent = "Edge control";
+    const width = trigger.getBoundingClientRect().width;
+    Object.assign(blocker.style, {
+      position: "fixed",
+      top: "0",
+      height: "100vh",
+      right: `${width + 5}px`,
+      width: "95px",
+    });
+    document.body.append(blocker);
+  });
+  const peek = page.locator("[data-peek]");
+  await expect
+    .poll(() =>
+      peek.evaluate((el) =>
+        Number(el.style.getPropertyValue("--mascot-peek-scale"))
+      )
+    )
+    .toBeLessThan(1);
+  await expect(peek).not.toHaveAttribute("data-compact", "true");
+  await expect(launcher).toBeVisible();
+  await expect(launcher.locator("svg")).toHaveCount(0);
+});
+
+test("the resting rig paints 60–70% of its silhouette in the Home crop", async ({
+  page,
+}) => {
+  test.skip(!hasAsset, "The approved GLB is installed in private visual QA.");
+  await page.addInitScript(() => {
+    sessionStorage.setItem("painaidee.elephant.peek-greeted", "true");
+    const fractions: number[] = [];
+    Object.assign(window, { mascotRigCrop: fractions });
+    const draw = WebGL2RenderingContext.prototype.drawElements;
+    WebGL2RenderingContext.prototype.drawElements = function (...args) {
+      Reflect.apply(draw, this, args);
+      const canvas = this.canvas;
+      if (
+        !(canvas instanceof HTMLCanvasElement) ||
+        canvas.dataset.motion !== "Idle" ||
+        this.getParameter(this.FRAMEBUFFER_BINDING) ||
+        fractions.length >= 5
+      )
+        return;
+      const crop = canvas.closest(".elephant-peek__crop");
+      if (!crop) return;
+      const { drawingBufferWidth: width, drawingBufferHeight: height } = this;
+      const pixels = new Uint8Array(width * height * 4);
+      this.readPixels(
+        0,
+        0,
+        width,
+        height,
+        this.RGBA,
+        this.UNSIGNED_BYTE,
+        pixels
+      );
+      const box = canvas.getBoundingClientRect();
+      const clip = crop.getBoundingClientRect();
+      let full = 0;
+      let shown = 0;
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] <= 32) continue;
+        full++;
+        const index = (i - 3) / 4;
+        const x = box.left + (((index % width) + 0.5) / width) * box.width;
+        const y =
+          box.bottom -
+          ((Math.floor(index / width) + 0.5) / height) * box.height;
+        if (
+          x >= clip.left &&
+          x < clip.right &&
+          y >= clip.top &&
+          y < clip.bottom
+        )
+          shown++;
+      }
+      if (full) fractions.push(shown / full);
+    };
+  });
+  await page.goto("/");
+  await expect(
+    page.locator('[data-peek="idle"][data-rig] canvas[data-ready="true"]')
+  ).toBeVisible({ timeout: 25_000 });
+  const samples = () =>
+    page.evaluate(
+      () => (window as unknown as { mascotRigCrop: number[] }).mascotRigCrop
+    );
+  await expect.poll(async () => (await samples()).length).toBe(5);
+  for (const ratio of await samples()) {
+    expect(ratio).toBeGreaterThanOrEqual(0.6);
+    expect(ratio).toBeLessThanOrEqual(0.7);
+  }
 });

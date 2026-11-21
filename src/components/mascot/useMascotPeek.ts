@@ -13,7 +13,11 @@ function hasGreeted() {
   }
 }
 
-export function useMascotPeek(available: boolean, visualReady: boolean) {
+export function useMascotPeek(
+  available: boolean,
+  visualReady: boolean,
+  animate: boolean
+) {
   const [phase, setPhase] = useState<PeekPhase>("idle");
   const greeted = useRef(hasGreeted());
   const [live, setLive] = useState(false);
@@ -33,17 +37,17 @@ export function useMascotPeek(available: boolean, visualReady: boolean) {
       setPhase("idle");
       return;
     }
-    if (greeted.current) return;
-
     let timer: number;
     function schedule() {
       window.clearTimeout(timer);
-      if (greeted.current || document.hidden) return;
+      if (document.hidden) return;
       timer = window.setTimeout(() => {
-        if (greeted.current || document.hidden) return;
-        rememberGreeting();
+        if (document.hidden) return;
         setLive(true);
-        setPhase("preparing");
+        if (animate && !greeted.current) {
+          rememberGreeting();
+          setPhase("preparing");
+        }
       }, 3200);
     }
 
@@ -55,7 +59,7 @@ export function useMascotPeek(available: boolean, visualReady: boolean) {
       window.removeEventListener("load", schedule);
       window.clearTimeout(timer);
     };
-  }, [available]);
+  }, [available, animate]);
 
   useEffect(() => {
     if (!available || phase === "idle") return;
@@ -83,7 +87,7 @@ export function useMascotPeek(available: boolean, visualReady: boolean) {
 
   return {
     phase: available ? phase : "idle",
-    live: available && phase !== "idle" && live,
+    live: available && live,
     dismiss: () => setPhase("exiting"),
     interrupt,
   };

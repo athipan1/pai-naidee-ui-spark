@@ -6,11 +6,12 @@ import {
 } from "react";
 
 const controls =
-  'button, a[href], input, textarea, select, [role="button"], [role="combobox"], nav, .leaflet-container';
+  'button, a[href], input, textarea, select, [role="button"], [role="combobox"], .leaflet-container';
 const modalSelector =
   '[role="dialog"][aria-modal="true"], dialog[open], [data-state="open"][role="dialog"]';
 const gap = 8;
 const compactSize = 44;
+const peekScales = [1, 0.88, 0.76];
 
 type Bounds = { left: number; top: number; right: number; bottom: number };
 
@@ -125,7 +126,13 @@ export function useBubblePlacement(
         right: left + width,
         bottom: top + height - gap,
       };
-      const occupied = [...document.querySelectorAll(controls)]
+      // Sticky navigation reserves its full strip, while ordinary nav wrappers
+      // leave their unused space available. Their controls are measured below.
+      const bars = [...document.querySelectorAll("nav")].filter((element) => {
+        const position = getComputedStyle(element).position;
+        return position === "fixed" || position === "sticky";
+      });
+      const occupied = [...document.querySelectorAll(controls), ...bars]
         .filter(
           (element) =>
             !root.contains(element) && element.getClientRects().length
@@ -157,24 +164,44 @@ export function useBubblePlacement(
       if (!launcher) return;
       launcher.style.removeProperty("--mascot-launcher-y");
       launcher.style.removeProperty("--mascot-launcher-x");
+      launcher.style.removeProperty("--mascot-peek-scale");
       const bounds = launcher.getBoundingClientRect();
-      const full =
-        peek && (phase === "idle" || phase === "preparing")
-          ? {
-              ...bounds,
-              left: bounds.right - Math.max(compactSize, bounds.width * 0.62),
-              top: bounds.bottom - Math.max(compactSize, bounds.height * 0.6),
-              right: bounds.right,
+      // Browser layout rounds vw and percentage widths differently. Anchor
+      // the measured box inside the visual viewport before trying positions.
+      const rightEdge = Math.min(bounds.right, viewportBounds.right);
+      const resting = phase === "idle" || phase === "preparing";
+      let shift: number | undefined;
+      let x = rightEdge - bounds.right;
+      let scale = 1;
+      if (peek) {
+        for (const candidate of peekScales) {
+          const width = bounds.width * candidate;
+          const height = bounds.height * candidate;
+          shift = findSlot(
+            {
+              left:
+                rightEdge - Math.max(compactSize, width * (resting ? 0.62 : 1)),
+              right: rightEdge,
+              top:
+                bounds.bottom -
+                Math.max(compactSize, height * (resting ? 0.6 : 1)),
               bottom: bounds.bottom,
-            }
-          : bounds;
-      const fullShift = findSlot(full, viewportBounds, occupied);
-      const isCompact = !!peek && fullShift === undefined;
-      let shift = fullShift;
-      let x = 0;
+            },
+            viewportBounds,
+            occupied
+          );
+          if (shift !== undefined) {
+            scale = candidate;
+            break;
+          }
+        }
+      } else {
+        shift = findSlot(bounds, viewportBounds, occupied);
+      }
+      const isCompact = !!peek && shift === undefined;
       if (isCompact) {
         for (const right of [
-          Math.min(bounds.right, viewportBounds.right - gap),
+          rightEdge - gap,
           viewportBounds.left + gap + compactSize,
         ]) {
           shift = findSlot(
@@ -193,6 +220,7 @@ export function useBubblePlacement(
           }
         }
       }
+      launcher.style.setProperty("--mascot-peek-scale", String(scale));
       launcher.toggleAttribute("data-unavailable", shift === undefined);
       launcher.style.setProperty("--mascot-launcher-x", `${x}px`);
       launcher.style.setProperty("--mascot-launcher-y", `${shift ?? 0}px`);
@@ -209,9 +237,10 @@ export function useBubblePlacement(
         left: left + gap,
         right: left + width - gap,
       };
-      const adjacent = bounds.left - speech.width - 12;
-      const centered = bounds.top + shift + (bounds.height - speech.height) / 2;
       const launcherBounds = launcher.getBoundingClientRect();
+      const adjacent = launcherBounds.left - speech.width - 12;
+      const centered =
+        launcherBounds.top + (launcherBounds.height - speech.height) / 2;
       for (const x of [adjacent, inner.right - speech.width, inner.left]) {
         const rect = {
           left: x,
