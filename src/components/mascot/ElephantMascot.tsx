@@ -362,11 +362,11 @@ export default function ElephantMascot({
             <div
               ref={bubble}
               style={bubblePosition.style}
-              className="elephant-peek__bubble flex items-center rounded-2xl border bg-card text-card-foreground shadow-lg"
+              className="elephant-peek__bubble flex items-center rounded-2xl border"
             >
               <button
                 type="button"
-                className="min-h-11 flex-1 rounded-l-2xl py-2 pl-3 text-left text-sm font-semibold leading-snug focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+                className="min-h-11 flex-1 rounded-l-2xl py-2 pl-3 text-left text-sm font-semibold leading-snug"
                 onClick={showAssistant}
               >
                 {t.welcome}

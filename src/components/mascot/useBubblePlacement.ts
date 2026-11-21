@@ -87,7 +87,13 @@ function placePanel(
   );
 }
 
-const hiddenStyle: CSSProperties = { visibility: "hidden" };
+type BubbleStyle = CSSProperties & {
+  "--mascot-tail-x"?: string;
+  "--mascot-tail-y"?: string;
+  "--mascot-tail-angle"?: string;
+};
+
+const hiddenStyle: BubbleStyle = { visibility: "hidden" };
 
 /** Measure interaction zones on layout and viewport events, never per animation frame. */
 export function useBubblePlacement(
@@ -97,7 +103,7 @@ export function useBubblePlacement(
   phase: string | undefined
 ) {
   const [compact, setCompact] = useState(false);
-  const [style, setStyle] = useState<CSSProperties>(hiddenStyle);
+  const [style, setStyle] = useState<BubbleStyle>(hiddenStyle);
 
   useLayoutEffect(() => {
     const root = assistant.current;
@@ -250,12 +256,32 @@ export function useBubblePlacement(
         };
         const dy = findSlot(rect, inner, [...occupied, launcherBounds]);
         if (dy !== undefined) {
+          const bubbleTop = centered + dy;
+          const besideElephant = rect.right <= launcherBounds.left;
+          const aboveElephant = bubbleTop + speech.height <= launcherBounds.top;
+          const elephantCenterX =
+            launcherBounds.left + launcherBounds.width / 2;
+          const elephantCenterY =
+            launcherBounds.top + launcherBounds.height / 2;
           setStyle({
             left: x,
-            top: centered + dy,
+            top: bubbleTop,
             right: "auto",
             bottom: "auto",
             visibility: "visible",
+            "--mascot-tail-x": besideElephant
+              ? "100%"
+              : `clamp(1rem, ${elephantCenterX - x}px, 100% - 1rem)`,
+            "--mascot-tail-y": besideElephant
+              ? `clamp(1rem, ${elephantCenterY - bubbleTop}px, 100% - 1rem)`
+              : aboveElephant
+                ? "100%"
+                : "0%",
+            "--mascot-tail-angle": besideElephant
+              ? "45deg"
+              : aboveElephant
+                ? "135deg"
+                : "-45deg",
           });
           return;
         }
