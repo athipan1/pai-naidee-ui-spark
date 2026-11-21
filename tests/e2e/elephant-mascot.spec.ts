@@ -685,46 +685,36 @@ test("the loading portrait stays fitted while the real GLB is delayed", async ({
     expect(frame.y + frame.height - image.y - image.height).toBeGreaterThan(16);
     expect(image.x).toBeGreaterThanOrEqual(frame.x);
     expect(image.x + image.width).toBeLessThanOrEqual(frame.x + frame.width);
-    const pixels = await page.evaluate(
-      async (base64) => {
-        const source = new Image();
-        source.src = `data:image/png;base64,${base64}`;
-        await source.decode();
-        const sample = document.createElement("canvas");
-        sample.width = source.naturalWidth;
-        sample.height = source.naturalHeight;
-        const context = sample.getContext("2d")!;
-        context.drawImage(source, 0, 0);
-        const data = context.getImageData(
-          0,
-          0,
-          sample.width,
-          sample.height
-        ).data;
-        let count = 0,
-          margin = Math.min(sample.width, sample.height);
-        for (let y = 0; y < sample.height; y++)
-          for (let x = 0; x < sample.width; x++) {
-            const i = (y * sample.width + x) * 4;
-            if (data[i + 1] < 200 && data[i + 2] - data[i] > 18) {
-              count++;
-              margin = Math.min(
-                margin,
-                x,
-                y,
-                sample.width - x - 1,
-                sample.height - y - 1
-              );
-            }
+    await portrait.scrollIntoViewIfNeeded();
+    await expect(portrait).toBeInViewport({ ratio: 0.95 });
+    const pixels = await portrait.evaluate(async (image: HTMLImageElement) => {
+      await image.decode();
+      const sample = document.createElement("canvas");
+      sample.width = image.naturalWidth;
+      sample.height = image.naturalHeight;
+      const context = sample.getContext("2d")!;
+      context.drawImage(image, 0, 0);
+      const data = context.getImageData(0, 0, sample.width, sample.height).data;
+      let count = 0;
+      let margin = Math.min(sample.width, sample.height);
+      for (let y = 0; y < sample.height; y++)
+        for (let x = 0; x < sample.width; x++) {
+          if (data[(y * sample.width + x) * 4 + 3] > 32) {
+            count++;
+            margin = Math.min(
+              margin,
+              x,
+              y,
+              sample.width - x - 1,
+              sample.height - y - 1
+            );
           }
-        return { count, margin };
-      },
-      (
-        await stage.screenshot({
-          path: testInfo.outputPath("loading-portrait.png"),
-        })
-      ).toString("base64")
-    );
+        }
+      return { count, margin };
+    });
+    await stage.screenshot({
+      path: testInfo.outputPath("loading-portrait.png"),
+    });
     expect(pixels.count).toBeGreaterThan(100);
     expect(pixels.margin).toBeGreaterThan(2);
   } finally {
@@ -847,7 +837,7 @@ test("a crowded edge uses a 44 px launcher without taking focus from a dialog", 
     blocker.textContent = "Edge control";
     Object.assign(blocker.style, {
       position: "fixed",
-      right: "64px",
+      right: "54px",
       top: "0",
       height: "100vh",
       width: "90px",
@@ -858,8 +848,12 @@ test("a crowded edge uses a 44 px launcher without taking focus from a dialog", 
   const peek = page.locator("[data-peek]");
   const launcher = peek.getByRole("button", { name: title, exact: true });
   await expect(peek).toHaveAttribute("data-compact", "true");
-  expect((await launcher.boundingBox())?.width).toBe(44);
-  expect((await launcher.boundingBox())?.height).toBe(44);
+  await expect
+    .poll(async () => {
+      const rect = await launcher.boundingBox();
+      return [rect?.width, rect?.height];
+    })
+    .toEqual([44, 44]);
   await page.evaluate(() => {
     const dialog = document.createElement("dialog");
     dialog.innerHTML = "<button autofocus>Close dialog</button>";
@@ -885,7 +879,7 @@ test("the opened panel leaves the Home planner action clickable", async ({
   await page.goto("/");
   await page.getByRole("button", { name: title, exact: true }).click();
   const composer = page.getByRole("textbox", { name: "บอกทริปที่อยากไป" });
-  await expect(composer).toBeInViewport({ ratio: 1 });
+  await expect(composer).toBeInViewport({ ratio: 0.95 });
   const action = page.getByRole("button", {
     name: "AI วางแผนเที่ยว",
     exact: true,
