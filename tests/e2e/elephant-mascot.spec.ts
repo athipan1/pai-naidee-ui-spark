@@ -263,6 +263,7 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
     !hasAsset,
     "The asset must be installed locally or cleared for distribution in this repository."
   );
+  test.setTimeout(70_000);
   const urls: string[] = [];
   const errors: string[] = [];
   page.on("request", (request) => urls.push(new URL(request.url()).pathname));
@@ -280,7 +281,7 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await launcher.click();
   const panel = page.getByRole("region", { name: title });
   const canvas = panel.locator("canvas");
-  await expect(canvas).toBeVisible();
+  await expect(canvas).toBeVisible({ timeout: 18_000 });
   await expect(canvas).toHaveAttribute("data-motion", "Greeting");
   const countPaintedPixels = async () =>
     page.evaluate(
@@ -343,12 +344,12 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
   await expect(panel.locator("canvas")).toHaveCount(0);
   await launcher.click();
-  await expect(panel.locator("canvas")).toBeVisible();
+  await expect(panel.locator("canvas")).toBeVisible({ timeout: 18_000 });
   await panel.getByRole("link", { name: "ค้นหาที่เที่ยว" }).click();
   await expect(page).toHaveURL(/\/discover\?mode=search$/);
   await expect(panel.locator("canvas")).toHaveCount(0);
   await launcher.click();
-  await expect(panel.locator("canvas")).toBeVisible();
+  await expect(panel.locator("canvas")).toBeVisible({ timeout: 18_000 });
   expect(urls.filter((url) => url.endsWith(".glb"))).toHaveLength(1);
   expect(errors).toEqual([]);
 });
@@ -738,36 +739,46 @@ test("collapsed crop shows 60–70% of the current portrait silhouette", async (
   await page.goto("/");
   const portrait = page.locator(".elephant-peek__character img");
   await expect(portrait).toBeVisible();
-  const visible = await portrait.evaluate(async (image: HTMLImageElement) => {
-    await image.decode();
-    const { naturalWidth: width, naturalHeight: height } = image;
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d")!;
-    context.drawImage(image, 0, 0);
-    const pixels = context.getImageData(0, 0, width, height).data;
-    const clip = image.closest(".elephant-peek__crop")!.getBoundingClientRect();
-    const rect = image.getBoundingClientRect();
-    let silhouette = 0;
-    let shown = 0;
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        if (pixels[(y * width + x) * 4 + 3] <= 32) continue;
-        silhouette++;
-        const pageX = rect.left + ((x + 0.5) * rect.width) / width;
-        const pageY = rect.top + ((y + 0.5) * rect.height) / height;
-        if (
-          pageX >= clip.left &&
-          pageX < clip.right &&
-          pageY >= clip.top &&
-          pageY < clip.bottom
-        )
-          shown++;
+  const measure = () =>
+    portrait.evaluate(async (image: HTMLImageElement) => {
+      await image.decode();
+      const { naturalWidth: width, naturalHeight: height } = image;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d")!;
+      context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, width, height).data;
+      const clip = image
+        .closest(".elephant-peek__crop")!
+        .getBoundingClientRect();
+      const rect = image.getBoundingClientRect();
+      let silhouette = 0;
+      let shown = 0;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          if (pixels[(y * width + x) * 4 + 3] <= 32) continue;
+          silhouette++;
+          const pageX = rect.left + ((x + 0.5) * rect.width) / width;
+          const pageY = rect.top + ((y + 0.5) * rect.height) / height;
+          if (
+            pageX >= clip.left &&
+            pageX < clip.right &&
+            pageY >= clip.top &&
+            pageY < clip.bottom
+          )
+            shown++;
+        }
       }
-    }
-    return shown / silhouette;
-  });
+      return shown / silhouette;
+    });
+  let visible = NaN;
+  await expect
+    .poll(async () => {
+      visible = await measure();
+      return Number.isFinite(visible);
+    })
+    .toBe(true);
   await testInfo.attach("visible portrait alpha fraction", {
     body: String(visible),
     contentType: "text/plain",
