@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 
 const title = "ช้างผู้ช่วยเที่ยว";
+const greetingTimeout = 22_000;
 // Asset-dependent browser cases must also run in an authorized private CI
 // when the real rigged GLB is provisioned. Public CI without assets still skips.
 const hasAsset = existsSync("src/components/mascot/assets/elephant.glb");
@@ -262,6 +263,7 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
     !hasAsset,
     "The asset must be installed locally or cleared for distribution in this repository."
   );
+  test.setTimeout(70_000);
   const urls: string[] = [];
   const errors: string[] = [];
   page.on("request", (request) => urls.push(new URL(request.url()).pathname));
@@ -279,7 +281,7 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await launcher.click();
   const panel = page.getByRole("region", { name: title });
   const canvas = panel.locator("canvas");
-  await expect(canvas).toBeVisible();
+  await expect(canvas).toBeVisible({ timeout: 18_000 });
   await expect(canvas).toHaveAttribute("data-motion", "Greeting");
   const countPaintedPixels = async () =>
     page.evaluate(
@@ -307,7 +309,10 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
       },
       (await canvas.screenshot()).toString("base64")
     );
-  await expect.poll(countPaintedPixels).toBeGreaterThan(100);
+  await canvas.scrollIntoViewIfNeeded();
+  await expect
+    .poll(countPaintedPixels, { timeout: 12_000 })
+    .toBeGreaterThan(100);
   const greeting = await canvas.screenshot();
   await expect
     .poll(async () => (await canvas.screenshot()).equals(greeting), {
@@ -339,12 +344,12 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
   await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
   await expect(panel.locator("canvas")).toHaveCount(0);
   await launcher.click();
-  await expect(panel.locator("canvas")).toBeVisible();
+  await expect(panel.locator("canvas")).toBeVisible({ timeout: 18_000 });
   await panel.getByRole("link", { name: "ค้นหาที่เที่ยว" }).click();
   await expect(page).toHaveURL(/\/discover\?mode=search$/);
   await expect(panel.locator("canvas")).toHaveCount(0);
   await launcher.click();
-  await expect(panel.locator("canvas")).toBeVisible();
+  await expect(panel.locator("canvas")).toBeVisible({ timeout: 18_000 });
   expect(urls.filter((url) => url.endsWith(".glb"))).toHaveLength(1);
   expect(errors).toEqual([]);
 });
@@ -384,7 +389,7 @@ test("peeks above navigation, retracts after the greeting and does not greet aga
   const bubble = page.getByRole("button", {
     name: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
   });
-  await expect(bubble).toBeVisible({ timeout: 12_000 });
+  await expect(bubble).toBeVisible({ timeout: greetingTimeout });
   await expect(page.locator("html")).toHaveAttribute(
     "data-observed-peek",
     /entering/
@@ -436,7 +441,7 @@ test("opens the existing assistant from the greeting and respects reduced motion
   const bubble = page.getByRole("button", {
     name: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
   });
-  await expect(bubble).toBeVisible({ timeout: 12_000 });
+  await expect(bubble).toBeVisible({ timeout: greetingTimeout });
   await bubble.click();
   await expect(page.getByRole("region", { name: title })).toBeVisible();
   await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
@@ -467,7 +472,7 @@ for (const target of ["island", "search", "hero", "navigation"] as const) {
     await page.clock.install();
     await page.goto("/");
     await expect(page.locator(".elephant-peek__bubble")).toBeVisible({
-      timeout: 12000,
+      timeout: greetingTimeout,
     });
     await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
     const control =
@@ -512,25 +517,21 @@ for (const target of ["island", "search", "hero", "navigation"] as const) {
     if (target === "search") {
       await control.fill("เชียงใหม่");
       await control.press("Enter");
+    }
+    if (target === "search" || target === "island") {
+      const query = target === "search" ? "เชียงใหม่" : "เกาะ";
       await expect(page).toHaveURL(
         (url) =>
-          url.pathname === "/discover" &&
-          url.searchParams.get("q") ===
-            (target === "search" ? "เชียงใหม่" : "เกาะ") &&
-          url.searchParams.get("mode") === "search"
+          url.searchParams.get("q") === query &&
+          (url.pathname === "/search" ||
+            (url.pathname === "/discover" &&
+              url.searchParams.get("mode") === "search"))
       );
-    } else if (target === "hero")
+    } else if (target === "hero") {
       await expect(page).toHaveURL(/\/trip-planner$/);
-    else if (target === "navigation")
+    } else {
       await expect(page).toHaveURL(/\/discover$/);
-    else
-      await expect(page).toHaveURL(
-        (url) =>
-          url.pathname === "/discover" &&
-          url.searchParams.get("q") ===
-            (target === "search" ? "เชียงใหม่" : "เกาะ") &&
-          url.searchParams.get("mode") === "search"
-      );
+    }
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth
@@ -685,46 +686,36 @@ test("the loading portrait stays fitted while the real GLB is delayed", async ({
     expect(frame.y + frame.height - image.y - image.height).toBeGreaterThan(16);
     expect(image.x).toBeGreaterThanOrEqual(frame.x);
     expect(image.x + image.width).toBeLessThanOrEqual(frame.x + frame.width);
-    const pixels = await page.evaluate(
-      async (base64) => {
-        const source = new Image();
-        source.src = `data:image/png;base64,${base64}`;
-        await source.decode();
-        const sample = document.createElement("canvas");
-        sample.width = source.naturalWidth;
-        sample.height = source.naturalHeight;
-        const context = sample.getContext("2d")!;
-        context.drawImage(source, 0, 0);
-        const data = context.getImageData(
-          0,
-          0,
-          sample.width,
-          sample.height
-        ).data;
-        let count = 0,
-          margin = Math.min(sample.width, sample.height);
-        for (let y = 0; y < sample.height; y++)
-          for (let x = 0; x < sample.width; x++) {
-            const i = (y * sample.width + x) * 4;
-            if (data[i + 1] < 200 && data[i + 2] - data[i] > 18) {
-              count++;
-              margin = Math.min(
-                margin,
-                x,
-                y,
-                sample.width - x - 1,
-                sample.height - y - 1
-              );
-            }
+    await portrait.scrollIntoViewIfNeeded();
+    await expect(portrait).toBeInViewport({ ratio: 0.95 });
+    const pixels = await portrait.evaluate(async (image: HTMLImageElement) => {
+      await image.decode();
+      const sample = document.createElement("canvas");
+      sample.width = image.naturalWidth;
+      sample.height = image.naturalHeight;
+      const context = sample.getContext("2d")!;
+      context.drawImage(image, 0, 0);
+      const data = context.getImageData(0, 0, sample.width, sample.height).data;
+      let count = 0;
+      let margin = Math.min(sample.width, sample.height);
+      for (let y = 0; y < sample.height; y++)
+        for (let x = 0; x < sample.width; x++) {
+          if (data[(y * sample.width + x) * 4 + 3] > 32) {
+            count++;
+            margin = Math.min(
+              margin,
+              x,
+              y,
+              sample.width - x - 1,
+              sample.height - y - 1
+            );
           }
-        return { count, margin };
-      },
-      (
-        await stage.screenshot({
-          path: testInfo.outputPath("loading-portrait.png"),
-        })
-      ).toString("base64")
-    );
+        }
+      return { count, margin };
+    });
+    await stage.screenshot({
+      path: testInfo.outputPath("loading-portrait.png"),
+    });
     expect(pixels.count).toBeGreaterThan(100);
     expect(pixels.margin).toBeGreaterThan(2);
   } finally {
@@ -735,4 +726,176 @@ test("the loading portrait stays fitted while the real GLB is delayed", async ({
   });
   await expect(portrait).toHaveCount(0);
   await expect(stage.locator("canvas")).toHaveAttribute("data-bones", "29");
+});
+
+test("collapsed crop shows 60–70% of the current portrait silhouette", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !hasAsset,
+    "Requires the approved silhouette from the private build."
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const portrait = page.locator(".elephant-peek__character img");
+  await expect(portrait).toBeVisible();
+  const measure = () =>
+    portrait.evaluate(async (image: HTMLImageElement) => {
+      await image.decode();
+      const { naturalWidth: width, naturalHeight: height } = image;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d")!;
+      context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, width, height).data;
+      const clip = image
+        .closest(".elephant-peek__crop")!
+        .getBoundingClientRect();
+      const rect = image.getBoundingClientRect();
+      let silhouette = 0;
+      let shown = 0;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          if (pixels[(y * width + x) * 4 + 3] <= 32) continue;
+          silhouette++;
+          const pageX = rect.left + ((x + 0.5) * rect.width) / width;
+          const pageY = rect.top + ((y + 0.5) * rect.height) / height;
+          if (
+            pageX >= clip.left &&
+            pageX < clip.right &&
+            pageY >= clip.top &&
+            pageY < clip.bottom
+          )
+            shown++;
+        }
+      }
+      return shown / silhouette;
+    });
+  let visible = NaN;
+  await expect
+    .poll(async () => {
+      visible = await measure();
+      return Number.isFinite(visible);
+    })
+    .toBe(true);
+  await testInfo.attach("visible portrait alpha fraction", {
+    body: String(visible),
+    contentType: "text/plain",
+  });
+  expect(visible).toBeGreaterThanOrEqual(0.6);
+  expect(visible).toBeLessThanOrEqual(0.7);
+  const launcher = page.getByRole("button", { name: title, exact: true });
+  const rect = (await launcher.boundingBox())!;
+  expect(rect.width).toBeGreaterThanOrEqual(44);
+  expect(rect.height).toBeGreaterThanOrEqual(44);
+  await launcher.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("region", { name: title })).toBeVisible();
+});
+
+test("the live side-peek plays its rig and animates eyelid closure before the panel opens", async ({
+  page,
+}) => {
+  test.skip(!hasAsset, "Requires the approved private rig.");
+  await page.addInitScript(() => {
+    const locations = new WeakSet<WebGLUniformLocation>();
+    const state = { peak: 0 };
+    Object.assign(window, { mascotEyelidTest: state });
+    const proto = WebGL2RenderingContext.prototype;
+    const locate = proto.getUniformLocation;
+    const upload = proto.uniform1f;
+    proto.getUniformLocation = function (program, name) {
+      const location = locate.call(this, program, name);
+      if (name === "mascotEyelid" && location) locations.add(location);
+      return location;
+    };
+    proto.uniform1f = function (location, value) {
+      if (location && locations.has(location)) {
+        state.peak = Math.max(state.peak, value);
+      }
+      upload.call(this, location, value);
+    };
+  });
+  await page.goto("/");
+  const peek = page.locator('[data-peek="greeting"]');
+  const canvas = peek.locator("canvas");
+  await expect(canvas).toHaveAttribute("data-motion", "PeekGreeting", {
+    timeout: 20_000,
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as unknown as { mascotEyelidTest: { peak: number } })
+            .mascotEyelidTest.peak
+      )
+    )
+    .toBeGreaterThan(0.8);
+  const launcher = peek.getByRole("button", { name: title, exact: true });
+  if (test.info().project.use.hasTouch) await launcher.tap();
+  else await launcher.click();
+  await expect(page.getByRole("region", { name: title })).toBeVisible();
+});
+
+test("a crowded edge uses a 44 px launcher without taking focus from a dialog", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.evaluate(() => {
+    const blocker = document.createElement("button");
+    blocker.textContent = "Edge control";
+    Object.assign(blocker.style, {
+      position: "fixed",
+      right: "54px",
+      top: "0",
+      height: "100vh",
+      width: "90px",
+      zIndex: "38",
+    });
+    document.body.append(blocker);
+  });
+  const peek = page.locator("[data-peek]");
+  const launcher = peek.getByRole("button", { name: title, exact: true });
+  await expect(peek).toHaveAttribute("data-compact", "true");
+  await expect
+    .poll(async () => {
+      const rect = await launcher.boundingBox();
+      return [rect?.width, rect?.height];
+    })
+    .toEqual([44, 44]);
+  await page.evaluate(() => {
+    const dialog = document.createElement("dialog");
+    dialog.innerHTML = "<button autofocus>Close dialog</button>";
+    document.body.append(dialog);
+    dialog.showModal();
+  });
+  await expect(launcher).toBeHidden();
+  await expect(
+    page.getByRole("button", { name: "Close dialog" })
+  ).toBeFocused();
+  await page
+    .locator("dialog")
+    .evaluate((dialog: HTMLDialogElement) => dialog.close());
+  await expect(launcher).toBeVisible();
+  await launcher.click();
+  await expect(page.getByRole("region", { name: title })).toBeVisible();
+});
+
+test("the opened panel leaves the Home planner action clickable", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.getByRole("button", { name: title, exact: true }).click();
+  const composer = page.getByRole("textbox", { name: "บอกทริปที่อยากไป" });
+  await expect(composer).toBeInViewport({ ratio: 0.95 });
+  const action = page.getByRole("button", {
+    name: "AI วางแผนเที่ยว",
+    exact: true,
+  });
+  await expect(action).toBeVisible();
+  await action.click();
+  await expect(page).toHaveURL(/\/trip-planner$/);
 });

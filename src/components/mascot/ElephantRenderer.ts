@@ -17,6 +17,7 @@ import {
 } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+import { bindElephantBlink } from "./elephantBlink";
 import type { MascotMotion } from "./mascotState";
 import {
   activeMascot,
@@ -24,14 +25,22 @@ import {
   type MascotCharacter,
 } from "./mascotCharacters";
 
-let cachedModel: { url: string; bytes: ArrayBuffer } | undefined;
+let cachedModel: { url: string; bytes: Promise<ArrayBuffer> } | undefined;
 
-async function getModel(url: string, signal: AbortSignal) {
+function getModel(url: string) {
   if (cachedModel?.url === url) return cachedModel.bytes;
-  const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error("Mascot asset unavailable");
-  const bytes = await response.arrayBuffer();
-  signal.throwIfAborted();
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15000);
+  const bytes = fetch(url, { signal: controller.signal })
+    .then((response) => {
+      if (!response.ok) throw new Error("Mascot asset unavailable");
+      return response.arrayBuffer();
+    })
+    .catch((error: unknown) => {
+      if (cachedModel?.bytes === bytes) cachedModel = undefined;
+      throw error;
+    })
+    .finally(() => window.clearTimeout(timeout));
   cachedModel = { url, bytes };
   return bytes;
 }
@@ -96,7 +105,9 @@ export async function createElephantRenderer(
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   let asset: Awaited<ReturnType<GLTFLoader["parseAsync"]>>;
   try {
-    asset = await loader.parseAsync(await getModel(url, signal), "");
+    const bytes = await getModel(url);
+    signal.throwIfAborted();
+    asset = await loader.parseAsync(bytes, "");
   } catch (error) {
     // A damaged response is retryable.
     if (!signal.aborted) cachedModel = undefined;
@@ -127,6 +138,7 @@ export async function createElephantRenderer(
   canvas.style.visibility = "hidden";
   host.append(canvas);
   const mixer = new AnimationMixer(asset.scene);
+  const updateBlink = bindElephantBlink(asset.scene);
   const bones: Bone[] = [];
   const morphWeights: number[][] = [];
   asset.scene.traverse((object) => {
@@ -204,6 +216,7 @@ export async function createElephantRenderer(
   let returnToIdle = false;
   let motion: MascotMotion = "Rest";
   let disposed = false;
+  let visible = true;
   let action: ReturnType<typeof mixer.clipAction> | undefined;
 
   function resize() {
@@ -236,7 +249,9 @@ export async function createElephantRenderer(
     sinceDraw += tickDelta;
     lastTick = time;
     if (elapsed + 1 >= frameInterval) {
-      const delta = Math.min(sinceDraw / 1000, 0.1);
+      // Visibility changes reset the clock. While visible, keep clip timing on
+      // slow renderers instead of making every dropped frame extend the action.
+      const delta = sinceDraw / 1000;
       sinceDraw = 0;
       elapsed = Math.max(0, elapsed - frameInterval) % frameInterval;
       if (transition) copyPose(neutralPose);
@@ -262,6 +277,11 @@ export async function createElephantRenderer(
         }
         if (mix === 1) transition = undefined;
       }
+      updateBlink(
+        motion === "Greeting" || motion === "PeekGreeting"
+          ? action?.time
+          : undefined
+      );
       renderer.render(scene, camera);
       if (returnToIdle) {
         returnToIdle = false;
@@ -272,7 +292,13 @@ export async function createElephantRenderer(
   }
 
   function scheduleFrame() {
-    if (!frame && !disposed && !document.hidden && (action || transition)) {
+    if (
+      !frame &&
+      !disposed &&
+      visible &&
+      !document.hidden &&
+      (action || transition)
+    ) {
       frame = window.requestAnimationFrame(tick);
     }
   }
@@ -290,11 +316,18 @@ export async function createElephantRenderer(
     if (disposed || (motion === next && !immediate)) return;
     const from = capturePose();
     motion = next;
+    updateBlink();
     canvas.dataset.motion = next;
     returnToIdle = false;
     action?.stop();
     const clipName = getMascotClipName(character, next);
-    const clip = next === "Rest" || !clipName ? undefined : clips.get(clipName);
+    const clip =
+      next === "Rest"
+        ? undefined
+        : (clipName && clips.get(clipName)) ||
+          (next === "PeekGreeting"
+            ? clips.get(character.animationClips.Greeting ?? "")
+            : undefined);
     action = clip ? mixer.clipAction(clip).reset() : undefined;
     if (
       action &&
@@ -338,11 +371,18 @@ export async function createElephantRenderer(
   canvas.dataset.motion = motion;
 
   const observer = new ResizeObserver(resize);
+  const intersection = new IntersectionObserver(([entry]) => {
+    const onscreen = entry.isIntersecting && entry.intersectionRect.height > 0;
+    if (visible === onscreen) return;
+    visible = onscreen;
+    syncLoop();
+  });
   function dispose() {
     if (disposed) return;
     disposed = true;
     syncLoop();
     observer.disconnect();
+    intersection.disconnect();
     document.removeEventListener("visibilitychange", syncLoop);
     canvas.removeEventListener("webglcontextlost", handleContextLost);
     mixer.removeEventListener("finished", handleFinished);
@@ -364,6 +404,7 @@ export async function createElephantRenderer(
   canvas.addEventListener("webglcontextlost", handleContextLost);
   document.addEventListener("visibilitychange", syncLoop);
   observer.observe(host);
+  intersection.observe(host);
   resize();
   return { setMotion, dispose, canWalk };
 }
