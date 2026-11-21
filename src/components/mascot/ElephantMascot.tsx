@@ -362,28 +362,31 @@ export default function ElephantMascot({
             <div
               ref={bubble}
               style={bubblePosition.style}
-              className="elephant-peek__bubble flex items-center rounded-2xl border"
+              className="elephant-peek__bubble"
+              data-positioned={bubblePosition.style.visibility === "visible" || undefined}
             >
-              <button
-                type="button"
-                className="min-h-11 flex-1 rounded-l-2xl py-2 pl-3 text-left text-sm font-semibold leading-snug"
-                onClick={showAssistant}
-              >
-                {t.welcome}
-              </button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11 shrink-0 rounded-r-2xl"
-                aria-label={t.dismissGreeting}
-                onClick={() => {
-                  toggle.current?.focus();
-                  peek.dismiss();
-                }}
-              >
-                <X aria-hidden="true" className="h-4 w-4" />
-              </Button>
+              <div className="elephant-peek__bubble-surface">
+                <button
+                  type="button"
+                  className="min-h-11 flex-1 rounded-l-2xl py-2 pl-3 text-left text-sm font-semibold leading-snug"
+                  onClick={showAssistant}
+                >
+                  {t.welcome}
+                </button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-11 w-11 shrink-0 rounded-r-2xl"
+                  aria-label={t.dismissGreeting}
+                  onClick={() => {
+                    toggle.current?.focus();
+                    peek.dismiss();
+                  }}
+                >
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </div>

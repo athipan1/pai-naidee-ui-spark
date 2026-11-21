@@ -191,9 +191,10 @@
 }
 
 .elephant-peek__bubble {
-  --mascot-greeting-background: #08d9c4;
-  --mascot-greeting-border: #00afa8;
-  --mascot-greeting-text: #073e42;
+  --mascot-greeting-background: #e0f7ff;
+  --mascot-greeting-border: #38bdf8;
+  --mascot-greeting-text: #075985;
+  --mascot-greeting-glow: 0 0 16px rgb(56 189 248 / 24%);
   position: fixed;
   right: max(
     calc(var(--peek-size) - 0.45rem),
@@ -204,41 +205,62 @@
     14rem,
     calc(100vw - var(--peek-size) - 1rem - env(safe-area-inset-left))
   );
-  pointer-events: auto;
-  animation: none;
+}
+.dark .elephant-peek__bubble {
+  --mascot-greeting-glow: 0 0 20px rgb(56 189 248 / 34%);
+}
+.elephant-peek__bubble-surface {
+  position: relative;
+  display: flex;
+  align-items: center;
   background-color: var(--mascot-greeting-background);
-  border-color: var(--mascot-greeting-border);
+  border: 2px solid var(--mascot-greeting-border);
+  border-radius: 20px;
   color: var(--mascot-greeting-text);
-  box-shadow: 0 6px 18px rgb(7 62 66 / 22%);
+  box-shadow: 0 4px 12px rgb(7 89 133 / 16%), var(--mascot-greeting-glow);
+  pointer-events: auto;
+  transform-origin: var(--mascot-tail-x, 100%) var(--mascot-tail-y, 50%);
 }
-.elephant-peek__bubble > button {
+.elephant-peek__bubble-surface > button {
   color: inherit;
 }
-.elephant-peek__bubble > button:hover {
-  background-color: rgb(7 62 66 / 8%);
+.elephant-peek__bubble-surface > button:hover {
+  background-color: rgb(7 89 133 / 8%);
   color: inherit;
 }
-.elephant-peek__bubble > button:focus-visible {
+.elephant-peek__bubble-surface > button:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: -3px;
 }
-.elephant-peek__bubble::after {
+.elephant-peek__bubble-surface::after {
   content: "";
   position: absolute;
   top: var(--mascot-tail-y, 50%);
   left: var(--mascot-tail-x, 100%);
-  width: 0.6rem;
-  height: 0.6rem;
+  width: 0.7rem;
+  height: 0.7rem;
   background: var(--mascot-greeting-background);
-  border: 1px solid var(--mascot-greeting-border);
-  border-width: 1px 1px 0 0;
+  border: solid var(--mascot-greeting-border);
+  border-width: 2px 2px 0 0;
   transform: translate(-50%, -50%) rotate(var(--mascot-tail-angle, 45deg));
   pointer-events: none;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .elephant-peek__bubble[data-positioned] .elephant-peek__bubble-surface {
+    animation: elephant-greeting-bounce 360ms ease-out both;
+  }
+}
+
+@keyframes elephant-greeting-bounce {
+  0% { transform: scale(0.94); }
+  58% { transform: scale(1); }
+  77% { transform: scale(0.985); }
+  100% { transform: scale(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .elephant-peek__character,
-  .elephant-peek__bubble {
+  .elephant-peek__character {
     animation: none !important;
   }
 }
