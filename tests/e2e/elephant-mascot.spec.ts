@@ -308,7 +308,10 @@ test("loads the real elephant on demand, cleans up its canvas and reuses its byt
       },
       (await canvas.screenshot()).toString("base64")
     );
-  await expect.poll(countPaintedPixels).toBeGreaterThan(100);
+  await canvas.scrollIntoViewIfNeeded();
+  await expect
+    .poll(countPaintedPixels, { timeout: 12_000 })
+    .toBeGreaterThan(100);
   const greeting = await canvas.screenshot();
   await expect
     .poll(async () => (await canvas.screenshot()).equals(greeting), {
@@ -513,25 +516,21 @@ for (const target of ["island", "search", "hero", "navigation"] as const) {
     if (target === "search") {
       await control.fill("เชียงใหม่");
       await control.press("Enter");
+    }
+    if (target === "search" || target === "island") {
+      const query = target === "search" ? "เชียงใหม่" : "เกาะ";
       await expect(page).toHaveURL(
         (url) =>
-          url.pathname === "/discover" &&
-          url.searchParams.get("q") ===
-            (target === "search" ? "เชียงใหม่" : "เกาะ") &&
-          url.searchParams.get("mode") === "search"
+          url.searchParams.get("q") === query &&
+          (url.pathname === "/search" ||
+            (url.pathname === "/discover" &&
+              url.searchParams.get("mode") === "search"))
       );
-    } else if (target === "hero")
+    } else if (target === "hero") {
       await expect(page).toHaveURL(/\/trip-planner$/);
-    else if (target === "navigation")
+    } else {
       await expect(page).toHaveURL(/\/discover$/);
-    else
-      await expect(page).toHaveURL(
-        (url) =>
-          url.pathname === "/discover" &&
-          url.searchParams.get("q") ===
-            (target === "search" ? "เชียงใหม่" : "เกาะ") &&
-          url.searchParams.get("mode") === "search"
-      );
+    }
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth

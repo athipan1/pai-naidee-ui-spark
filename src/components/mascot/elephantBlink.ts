@@ -1,8 +1,10 @@
 import { Group, Mesh, MeshStandardMaterial, LinearInterpolant } from "three";
 
 // The approved rig has painted eyes and no eyelid bones or morph targets.
+const closedStart = 0.68;
+const closedEnd = 0.73;
 const blink = new LinearInterpolant(
-  new Float32Array([0, 0.6, 0.68, 0.73, 0.84]),
+  new Float32Array([0, 0.6, closedStart, closedEnd, 0.84]),
   new Float32Array([0, 0, 1, 1, 0]),
   1
 );
@@ -59,7 +61,16 @@ export function bindElephantBlink(model: Group) {
         );
     };
   });
+  let previousTime = 0;
   return (time?: number) => {
-    eyelid.value = time === undefined ? 0 : blink.evaluate(time)[0];
+    if (time === undefined) {
+      previousTime = 0;
+      eyelid.value = 0;
+      return;
+    }
+    // Preserve a visible closed pose if one render misses the blink window.
+    const skippedClosure = previousTime < closedStart && time > closedEnd;
+    eyelid.value = skippedClosure ? 1 : blink.evaluate(time)[0];
+    previousTime = time;
   };
 }
