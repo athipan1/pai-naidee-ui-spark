@@ -219,7 +219,7 @@ export default function ElephantMascot({
 
   useEffect(() => {
     if (!open) return;
-    close.current?.focus();
+    close.current?.focus({ preventScroll: true });
     function closeOnOutsidePress(event: PointerEvent) {
       if (
         event.target instanceof Node &&
@@ -274,7 +274,9 @@ export default function ElephantMascot({
     setGreeting(false);
     setWalking(false);
     // The same launcher changes from the expanded control to the clipped tab.
-    window.requestAnimationFrame(() => toggle.current?.focus());
+    window.requestAnimationFrame(() =>
+      toggle.current?.focus({ preventScroll: true })
+    );
   }
 
   function updateHidden(value: boolean) {

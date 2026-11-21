@@ -249,7 +249,9 @@ export async function createElephantRenderer(
     sinceDraw += tickDelta;
     lastTick = time;
     if (elapsed + 1 >= frameInterval) {
-      const delta = Math.min(sinceDraw / 1000, 0.1);
+      // Visibility changes reset the clock. While visible, keep clip timing on
+      // slow renderers instead of making every dropped frame extend the action.
+      const delta = sinceDraw / 1000;
       sinceDraw = 0;
       elapsed = Math.max(0, elapsed - frameInterval) % frameInterval;
       if (transition) copyPose(neutralPose);
@@ -370,7 +372,9 @@ export async function createElephantRenderer(
 
   const observer = new ResizeObserver(resize);
   const intersection = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting && entry.intersectionRect.height > 0;
+    const onscreen = entry.isIntersecting && entry.intersectionRect.height > 0;
+    if (visible === onscreen) return;
+    visible = onscreen;
     syncLoop();
   });
   function dispose() {

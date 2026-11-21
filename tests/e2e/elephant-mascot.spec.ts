@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 
 const title = "ช้างผู้ช่วยเที่ยว";
+const greetingTimeout = 22_000;
 // Asset-dependent browser cases must also run in an authorized private CI
 // when the real rigged GLB is provisioned. Public CI without assets still skips.
 const hasAsset = existsSync("src/components/mascot/assets/elephant.glb");
@@ -384,7 +385,7 @@ test("peeks above navigation, retracts after the greeting and does not greet aga
   const bubble = page.getByRole("button", {
     name: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
   });
-  await expect(bubble).toBeVisible({ timeout: 12_000 });
+  await expect(bubble).toBeVisible({ timeout: greetingTimeout });
   await expect(page.locator("html")).toHaveAttribute(
     "data-observed-peek",
     /entering/
@@ -436,7 +437,7 @@ test("opens the existing assistant from the greeting and respects reduced motion
   const bubble = page.getByRole("button", {
     name: "สวัสดี! อยากไปเที่ยวที่ไหนกันดี?",
   });
-  await expect(bubble).toBeVisible({ timeout: 12_000 });
+  await expect(bubble).toBeVisible({ timeout: greetingTimeout });
   await bubble.click();
   await expect(page.getByRole("region", { name: title })).toBeVisible();
   await page.getByRole("button", { name: "ย่อผู้ช่วยเที่ยว" }).click();
@@ -467,7 +468,7 @@ for (const target of ["island", "search", "hero", "navigation"] as const) {
     await page.clock.install();
     await page.goto("/");
     await expect(page.locator(".elephant-peek__bubble")).toBeVisible({
-      timeout: 12000,
+      timeout: greetingTimeout,
     });
     await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
     const control =

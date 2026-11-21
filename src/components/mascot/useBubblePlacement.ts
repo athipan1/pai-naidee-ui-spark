@@ -241,6 +241,11 @@ export function useBubblePlacement(
         place();
       });
     }
+    function onScroll(event: Event) {
+      if (!(event.target instanceof Node) || !root?.contains(event.target)) {
+        schedule();
+      }
+    }
     const resize = new ResizeObserver(schedule);
     resize.observe(document.body);
     if (bubble.current) resize.observe(bubble.current);
@@ -253,7 +258,7 @@ export function useBubblePlacement(
       attributeFilter: ["open", "aria-modal", "data-state"],
     });
     window.addEventListener("resize", schedule);
-    window.addEventListener("scroll", schedule, true);
+    window.addEventListener("scroll", onScroll, true);
     window.visualViewport?.addEventListener("resize", schedule);
     window.visualViewport?.addEventListener("scroll", schedule);
     place();
@@ -262,7 +267,7 @@ export function useBubblePlacement(
       resize.disconnect();
       mutations.disconnect();
       window.removeEventListener("resize", schedule);
-      window.removeEventListener("scroll", schedule, true);
+      window.removeEventListener("scroll", onScroll, true);
       window.visualViewport?.removeEventListener("resize", schedule);
       window.visualViewport?.removeEventListener("scroll", schedule);
     };
