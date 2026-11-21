@@ -146,6 +146,23 @@
   );
 }
 
+[data-constrained] .elephant-mascot-composer {
+  grid-template-columns: minmax(0, 1fr) 44px;
+}
+
+[data-constrained] .elephant-mascot-composer label {
+  grid-column: 1 / -1;
+}
+
+[data-constrained] .elephant-mascot-composer button {
+  width: 44px;
+  padding: 0;
+}
+
+[data-constrained] .elephant-mascot-composer button span {
+  display: none;
+}
+
 .elephant-peek__bubble {
   position: fixed;
   right: max(

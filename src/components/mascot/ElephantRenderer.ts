@@ -216,6 +216,7 @@ export async function createElephantRenderer(
   let returnToIdle = false;
   let motion: MascotMotion = "Rest";
   let disposed = false;
+  let visible = true;
   let action: ReturnType<typeof mixer.clipAction> | undefined;
 
   function resize() {
@@ -289,7 +290,13 @@ export async function createElephantRenderer(
   }
 
   function scheduleFrame() {
-    if (!frame && !disposed && !document.hidden && (action || transition)) {
+    if (
+      !frame &&
+      !disposed &&
+      visible &&
+      !document.hidden &&
+      (action || transition)
+    ) {
       frame = window.requestAnimationFrame(tick);
     }
   }
@@ -362,11 +369,16 @@ export async function createElephantRenderer(
   canvas.dataset.motion = motion;
 
   const observer = new ResizeObserver(resize);
+  const intersection = new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting && entry.intersectionRect.height > 0;
+    syncLoop();
+  });
   function dispose() {
     if (disposed) return;
     disposed = true;
     syncLoop();
     observer.disconnect();
+    intersection.disconnect();
     document.removeEventListener("visibilitychange", syncLoop);
     canvas.removeEventListener("webglcontextlost", handleContextLost);
     mixer.removeEventListener("finished", handleFinished);
@@ -388,6 +400,7 @@ export async function createElephantRenderer(
   canvas.addEventListener("webglcontextlost", handleContextLost);
   document.addEventListener("visibilitychange", syncLoop);
   observer.observe(host);
+  intersection.observe(host);
   resize();
   return { setMotion, dispose, canWalk };
 }

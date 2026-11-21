@@ -849,7 +849,7 @@ test("a crowded edge uses a 44 px launcher without taking focus from a dialog", 
       position: "fixed",
       right: "64px",
       top: "0",
-      bottom: "0",
+      height: "100vh",
       width: "90px",
       zIndex: "38",
     });
@@ -884,6 +884,8 @@ test("the opened panel leaves the Home planner action clickable", async ({
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("button", { name: title, exact: true }).click();
+  const composer = page.getByRole("textbox", { name: "บอกทริปที่อยากไป" });
+  await expect(composer).toBeInViewport({ ratio: 1 });
   const action = page.getByRole("button", {
     name: "AI วางแผนเที่ยว",
     exact: true,

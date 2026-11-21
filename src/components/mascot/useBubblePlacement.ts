@@ -75,6 +75,7 @@ function placePanel(
 
   // On a very small visual viewport, keep the opened composer scrollable.
   const canFit = best.height >= 144;
+  panel.toggleAttribute("data-constrained", canFit && best.height < 300);
   panel.style.setProperty(
     "--mascot-panel-space",
     canFit ? `${best.height}px` : ""

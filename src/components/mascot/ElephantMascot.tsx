@@ -139,7 +139,7 @@ export default function ElephantMascot({
     ? panelMotion
     : peek.phase === "greeting"
       ? "PeekGreeting"
-      : peek.phase === "exiting"
+      : peek.phase === "exiting" || peek.phase === "preparing"
         ? "Rest"
         : "Idle";
   const motionRef = useRef({ motion, reducedMotion });
@@ -431,6 +431,36 @@ export default function ElephantMascot({
               <EyeOff aria-hidden="true" className="h-5 w-5" />
             </Button>
           </header>
+          <form
+            onSubmit={openPlanner}
+            className="elephant-mascot-composer mb-2 grid gap-2"
+          >
+            <label
+              htmlFor={`${panelId}-message`}
+              className="text-sm font-medium"
+            >
+              {t.label}
+            </label>
+            <input
+              id={`${panelId}-message`}
+              value={draft}
+              maxLength={500}
+              onChange={(event) => {
+                setResting(false);
+                setDraft(event.target.value);
+              }}
+              placeholder={t.placeholder}
+              className="h-11 min-w-0 rounded-lg border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <Button
+              type="submit"
+              aria-label={t.review}
+              className="min-h-11 gap-2 bg-teal-700 text-white hover:bg-teal-800"
+            >
+              <Sparkles aria-hidden="true" className="h-4 w-4" />
+              <span>{t.review}</span>
+            </Button>
+          </form>
           <p className="mb-2 text-sm text-muted-foreground">{t.welcome}</p>
           <div
             data-mascot-stage=""
@@ -490,34 +520,6 @@ export default function ElephantMascot({
             <p role="status" className="mb-2 text-xs text-muted-foreground">
               {plannerMessage}
             </p>
-          )}
-          {pathname !== "/trip-planner" && (
-            <form onSubmit={openPlanner} className="grid gap-2">
-              <label
-                htmlFor={`${panelId}-message`}
-                className="text-sm font-medium"
-              >
-                {t.label}
-              </label>
-              <input
-                id={`${panelId}-message`}
-                value={draft}
-                maxLength={500}
-                onChange={(event) => {
-                  setResting(false);
-                  setDraft(event.target.value);
-                }}
-                placeholder={t.placeholder}
-                className="h-11 min-w-0 rounded-lg border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              <Button
-                type="submit"
-                className="min-h-11 gap-2 bg-teal-700 text-white hover:bg-teal-800"
-              >
-                <Sparkles aria-hidden="true" className="h-4 w-4" />
-                {t.review}
-              </Button>
-            </form>
           )}
           <div className="mt-2 flex gap-1">
             <Button asChild variant="ghost" className="min-h-11 flex-1 gap-2">
