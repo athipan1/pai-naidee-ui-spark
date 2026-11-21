@@ -1,5 +1,7 @@
 .elephant-peek {
-  --peek-size: clamp(6.25rem, 22vw, 9.25rem);
+  --peek-size: calc(
+    clamp(6.25rem, 22vw, 9.25rem) * var(--mascot-peek-scale, 1)
+  );
   /* The production portrait has transparent margins. Show its face and upper
      body, tucking the bottom and trailing edge behind the launcher boundary. */
   --peek-idle-x: 20%;
@@ -94,21 +96,34 @@
   height: 100%;
 }
 
+.elephant-peek[data-rig] {
+  --peek-idle-x: 18%;
+  --peek-idle-y: 40%;
+}
+
 .elephant-peek[data-compact] .elephant-peek__crop {
-  display: none;
+  inset: auto 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: hsl(var(--card));
+  box-shadow: 0 1px 5px hsl(222 35% 12% / 0.2);
+}
+
+.elephant-peek[data-compact] .elephant-peek__character {
+  transform: none;
+  animation: none;
+}
+
+.elephant-peek[data-compact] .elephant-peek__emoji {
+  font-size: 28px;
+  transform: none;
 }
 
 .elephant-peek[data-compact] .elephant-peek__trigger {
   width: 44px;
   height: 44px;
-}
-
-.elephant-peek__trigger > svg {
-  display: none;
-}
-
-.elephant-peek[data-compact] .elephant-peek__trigger > svg {
-  display: block;
+  border-radius: 50%;
 }
 
 [data-mascot-restore] {
@@ -161,6 +176,18 @@
 
 [data-constrained] .elephant-mascot-composer button span {
   display: none;
+}
+
+[data-constrained] .elephant-mascot-visual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44%;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-constrained] [data-mascot-stage] {
+  height: clamp(4rem, calc(var(--mascot-panel-space) - 8.75rem), 7rem);
+  min-width: 0;
 }
 
 .elephant-peek__bubble {

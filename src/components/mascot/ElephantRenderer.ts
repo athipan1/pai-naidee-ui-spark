@@ -204,7 +204,7 @@ export async function createElephantRenderer(
   const radius = (size.length() * scale) / 2;
   const cameraDirection = camera.position.clone().normalize();
   const minimumDistance = camera.position.length();
-  const frameInterval = 1000 / 30;
+  const launcher = host.closest("[data-peek]");
   const transitionSeconds = 0.24;
   let frame = 0;
   let lastTick: number | undefined;
@@ -244,6 +244,7 @@ export async function createElephantRenderer(
 
   function tick(time: number) {
     frame = 0;
+    const frameInterval = 1000 / (launcher && motion === "Idle" ? 12 : 30);
     const tickDelta = lastTick === undefined ? frameInterval : time - lastTick;
     elapsed += tickDelta;
     sinceDraw += tickDelta;

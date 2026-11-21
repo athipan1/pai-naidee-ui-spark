@@ -112,11 +112,9 @@ export default function ElephantMascot({
   const inPlanner = pathname === "/trip-planner";
   const open = !inPlanner && !hidden && key === openFor;
   const peek = useMascotPeek(
-    (pathname === "/" || pathname === "/discover") &&
-      !hidden &&
-      !open &&
-      !reducedMotion,
-    !modelUrl || visual !== "loading"
+    (pathname === "/" || pathname === "/discover") && !hidden && !open,
+    !modelUrl || visual !== "loading",
+    !reducedMotion
   );
   const bubble = useRef<HTMLDivElement>(null);
   const bubblePosition = useBubblePlacement(
@@ -137,11 +135,13 @@ export default function ElephantMascot({
   });
   const motion = open
     ? panelMotion
-    : peek.phase === "greeting"
-      ? "PeekGreeting"
-      : peek.phase === "exiting" || peek.phase === "preparing"
-        ? "Rest"
-        : "Idle";
+    : reducedMotion
+      ? "Rest"
+      : peek.phase === "greeting"
+        ? "PeekGreeting"
+        : peek.phase === "exiting" || peek.phase === "preparing"
+          ? "Rest"
+          : "Idle";
   const motionRef = useRef({ motion, reducedMotion });
 
   useEffect(() => {
@@ -334,10 +334,15 @@ export default function ElephantMascot({
           data-peek={peek.phase}
           data-compact={bubblePosition.compact || undefined}
           data-home={pathname === "/" || undefined}
+          data-rig={
+            (render3D && !bubblePosition.compact && visual === "ready") ||
+            undefined
+          }
         >
           <div className="elephant-peek__crop" aria-hidden="true">
             <div className="elephant-peek__character">
               {(peek.phase === "preparing" ||
+                bubblePosition.compact ||
                 !render3D ||
                 !modelUrl ||
                 visual !== "ready") &&
@@ -348,13 +353,11 @@ export default function ElephantMascot({
           <button
             ref={toggle}
             type="button"
-            className={`elephant-peek__trigger ${bubblePosition.compact ? "grid place-items-center rounded-full border bg-card shadow-md" : "rounded-l-xl"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring`}
+            className="elephant-peek__trigger rounded-l-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring"
             aria-label={t.title}
             aria-expanded={false}
             onClick={showAssistant}
-          >
-            <Sparkles aria-hidden="true" className="h-5 w-5" />
-          </button>
+          />
           {peek.phase === "greeting" && (
             <div
               ref={bubble}
@@ -463,40 +466,42 @@ export default function ElephantMascot({
               <span>{t.review}</span>
             </Button>
           </form>
-          <p className="mb-2 text-sm text-muted-foreground">{t.welcome}</p>
-          <div
-            data-mascot-stage=""
-            className="relative mb-2 grid h-32 place-items-center overflow-hidden rounded-xl bg-primary/10"
-          >
-            {(!modelUrl || visual !== "ready") && (
-              <div className="pointer-events-none absolute inset-0 grid place-items-center p-2">
-                {portrait}
-              </div>
-            )}
+          <div className="elephant-mascot-visual">
+            <p className="mb-2 text-sm text-muted-foreground">{t.welcome}</p>
             <div
-              ref={stage}
-              className="absolute inset-y-0 left-1/2 aspect-square -translate-x-1/2"
-              aria-hidden="true"
-            />
-            {visual === "ready" && canWalk && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute bottom-1 right-1 h-11 w-11"
-                aria-label={walking ? t.stopWalking : t.walk}
-                aria-pressed={walking}
-                title={walking ? t.stopWalking : t.walk}
-                disabled={reducedMotion || plannerStatus === "thinking"}
-                onClick={() => {
-                  setResting(false);
-                  setGreeting(false);
-                  setWalking(!walking);
-                }}
-              >
-                <Footprints aria-hidden="true" className="h-4 w-4" />
-              </Button>
-            )}
+              data-mascot-stage=""
+              className="relative mb-2 grid h-32 place-items-center overflow-hidden rounded-xl bg-primary/10"
+            >
+              {(!modelUrl || visual !== "ready") && (
+                <div className="pointer-events-none absolute inset-0 grid place-items-center p-2">
+                  {portrait}
+                </div>
+              )}
+              <div
+                ref={stage}
+                className="absolute inset-y-0 left-1/2 aspect-square -translate-x-1/2"
+                aria-hidden="true"
+              />
+              {visual === "ready" && canWalk && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute bottom-1 right-1 h-11 w-11"
+                  aria-label={walking ? t.stopWalking : t.walk}
+                  aria-pressed={walking}
+                  title={walking ? t.stopWalking : t.walk}
+                  disabled={reducedMotion || plannerStatus === "thinking"}
+                  onClick={() => {
+                    setResting(false);
+                    setGreeting(false);
+                    setWalking(!walking);
+                  }}
+                >
+                  <Footprints aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
           {modelUrl && visual !== "ready" && (
             <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
