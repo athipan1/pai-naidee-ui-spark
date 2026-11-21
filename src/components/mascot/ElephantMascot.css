@@ -1,9 +1,15 @@
 .elephant-peek {
   --peek-size: clamp(6.25rem, 22vw, 9.25rem);
-  --peek-edge: max(0.75rem, env(safe-area-inset-right));
+  /* The production portrait has transparent margins. Show its face and upper
+     body, tucking the bottom and trailing edge behind the launcher boundary. */
+  --peek-idle-x: 20%;
+  --peek-idle-y: 39%;
+  --peek-edge: max(0px, calc(0.75rem - env(safe-area-inset-right)));
   position: absolute;
-  inset-inline-end: calc(-1 * var(--peek-edge));
+  right: calc(-1 * var(--peek-edge));
   bottom: 0;
+  margin-bottom: calc(-1 * var(--mascot-launcher-y, 0px));
+  margin-right: calc(-1 * var(--mascot-launcher-x, 0px));
   width: var(--peek-size);
   height: var(--peek-size);
   pointer-events: none;
@@ -12,7 +18,7 @@
 .elephant-peek__crop {
   position: absolute;
   inset: 0;
-  overflow: clip;
+  overflow: hidden;
   border-bottom-left-radius: 1.5rem;
 }
 
@@ -21,63 +27,125 @@
   inset: 0;
   display: grid;
   place-items: center;
-  transform-origin: 75% 33%;
-  transform: translateX(48%) rotate(-13deg);
+  transform: translate(var(--peek-idle-x), var(--peek-idle-y));
+}
+
+.elephant-peek__character [data-mascot-portrait] {
+  width: 100%;
+  height: 100%;
+}
+
+/* The 3D camera fits the full animated rig with margin for movement. */
+.elephant-peek__stage {
+  position: absolute;
+  inset: -18%;
+}
+
+.elephant-peek__character .elephant-peek__emoji {
+  transform: translateY(-18%);
 }
 
 .elephant-peek[data-peek="entering"] .elephant-peek__character {
   animation: elephant-peek-in 520ms cubic-bezier(0.2, 0.75, 0.3, 1) both;
 }
+
 .elephant-peek[data-peek="greeting"] .elephant-peek__character {
-  transform: translateX(4%) rotate(-5deg);
+  transform: none;
 }
+
 .elephant-peek[data-peek="exiting"] .elephant-peek__character {
   animation: elephant-peek-out 420ms ease-in-out both;
 }
 
 @keyframes elephant-peek-in {
   from {
-    transform: translateX(48%) rotate(-13deg);
-  }
-  38% {
-    transform: translateX(30%) rotate(-20deg);
+    transform: translate(var(--peek-idle-x), var(--peek-idle-y));
   }
   to {
-    transform: translateX(4%) rotate(-5deg);
+    transform: translate(0, 0);
   }
 }
+
 @keyframes elephant-peek-out {
   from {
-    transform: translateX(4%) rotate(-5deg);
+    transform: translate(0, 0);
   }
   to {
-    transform: translateX(48%) rotate(-13deg);
-  }
-}
-@keyframes elephant-peek-bubble {
-  from {
-    opacity: 0;
-    transform: translateX(0.35rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+    transform: translate(var(--peek-idle-x), var(--peek-idle-y));
   }
 }
 
 .elephant-peek__trigger {
   position: absolute;
-  bottom: 0.65rem;
-  right: env(safe-area-inset-right);
-  width: clamp(2.75rem, 12vw, 3.5rem);
-  height: 3.75rem;
+  right: 0;
+  bottom: 0;
+  width: max(44px, 62%);
+  height: max(44px, 60%);
   pointer-events: auto;
 }
-.elephant-peek[data-peek="entering"] .elephant-peek__trigger,
-.elephant-peek[data-peek="greeting"] .elephant-peek__trigger {
-  width: calc(var(--peek-size) * 0.72 - env(safe-area-inset-right));
-  height: calc(var(--peek-size) * 0.75);
+
+.elephant-peek:is(
+    [data-peek="entering"],
+    [data-peek="greeting"],
+    [data-peek="exiting"]
+  )
+  .elephant-peek__trigger {
+  width: 100%;
+  height: 100%;
 }
+
+.elephant-peek[data-compact] .elephant-peek__crop {
+  display: none;
+}
+
+.elephant-peek[data-compact] .elephant-peek__trigger {
+  width: 44px;
+  height: 44px;
+}
+
+.elephant-peek__trigger > svg {
+  display: none;
+}
+
+.elephant-peek[data-compact] .elephant-peek__trigger > svg {
+  display: block;
+}
+
+[data-mascot-restore] {
+  position: relative;
+  top: var(--mascot-launcher-y, 0px);
+}
+
+.elephant-mascot[data-obscured] {
+  display: none;
+}
+
+[data-mascot-id] [data-unavailable],
+.elephant-peek[data-peek="preparing"] .elephant-peek__stage {
+  visibility: hidden;
+}
+
+.elephant-mascot-panel {
+  transform: translateY(
+    calc(
+      0px - var(--mascot-viewport-inset, 0px) - var(--mascot-panel-offset, 0px)
+    )
+  );
+  max-height: min(
+    28rem,
+    var(
+      --mascot-panel-space,
+      max(
+        5rem,
+        calc(
+          var(--mascot-viewport-height, 100dvh) - 9rem -
+            env(safe-area-inset-bottom)
+        )
+      )
+    )
+  );
+}
+
 .elephant-peek__bubble {
   position: fixed;
   right: max(
@@ -113,12 +181,6 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .elephant-mascot-panel {
-    animation: none;
-  }
-}
-
 @media (min-width: 64rem) and (min-height: 42rem) {
   .elephant-peek[data-home] {
     bottom: clamp(3.75rem, 9dvh, 5rem);
@@ -142,10 +204,4 @@
       calc(100dvh - 37rem - 6.5rem - env(safe-area-inset-bottom))
     );
   }
-}
-
-/* Preserve a reachable 44px target when the full greeting hot zone cannot fit. */
-.elephant-peek[data-crowded] .elephant-peek__trigger {
-  width: 2.75rem;
-  height: 2.75rem;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-type PeekPhase = "idle" | "entering" | "greeting" | "exiting";
+type PeekPhase = "idle" | "preparing" | "entering" | "greeting" | "exiting";
 
 const greetingKey = "painaidee.elephant.peek-greeted";
 const phaseDuration = { entering: 520, greeting: 6200, exiting: 420 };
@@ -13,7 +13,7 @@ function hasGreeted() {
   }
 }
 
-export function useMascotPeek(available: boolean) {
+export function useMascotPeek(available: boolean, visualReady: boolean) {
   const [phase, setPhase] = useState<PeekPhase>("idle");
   const greeted = useRef(hasGreeted());
   const [live, setLive] = useState(false);
@@ -43,7 +43,7 @@ export function useMascotPeek(available: boolean) {
         if (greeted.current || document.hidden) return;
         rememberGreeting();
         setLive(true);
-        setPhase("entering");
+        setPhase("preparing");
       }, 3200);
     }
 
@@ -59,6 +59,10 @@ export function useMascotPeek(available: boolean) {
 
   useEffect(() => {
     if (!available || phase === "idle") return;
+    if (phase === "preparing") {
+      if (visualReady) setPhase("entering");
+      return;
+    }
     const next = {
       entering: "greeting",
       greeting: "exiting",
@@ -69,7 +73,7 @@ export function useMascotPeek(available: boolean) {
       phaseDuration[phase]
     );
     return () => window.clearTimeout(timer);
-  }, [available, phase]);
+  }, [available, phase, visualReady]);
 
   function interrupt() {
     if (!greeted.current) rememberGreeting();

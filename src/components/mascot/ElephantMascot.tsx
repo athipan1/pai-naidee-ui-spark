@@ -115,15 +115,19 @@ export default function ElephantMascot({
     (pathname === "/" || pathname === "/discover") &&
       !hidden &&
       !open &&
-      !reducedMotion
+      !reducedMotion,
+    !modelUrl || visual !== "loading"
   );
   const bubble = useRef<HTMLDivElement>(null);
   const bubblePosition = useBubblePlacement(
     bubble,
     toggle,
-    !inPlanner && !hidden && !open ? peek.phase : undefined
+    assistant,
+    inPlanner ? undefined : open ? "panel" : hidden ? "restore" : peek.phase
   );
-  const render3D = open || peek.live;
+  const render3D =
+    open ||
+    (peek.live && (!bubblePosition.compact || peek.phase === "preparing"));
   const panelMotion = getMascotMotion({
     reducedMotion,
     resting,
@@ -305,7 +309,7 @@ export default function ElephantMascot({
       height={256}
     />
   ) : (
-    <span aria-hidden="true" className="text-5xl">
+    <span aria-hidden="true" className="elephant-peek__emoji text-5xl">
       {activeMascot.fallbackEmoji}
     </span>
   );
@@ -319,33 +323,40 @@ export default function ElephantMascot({
     <aside
       ref={assistant}
       data-mascot-id={activeMascot.id}
-      className={`fixed right-[max(0.75rem,env(safe-area-inset-right))] z-[39] ${bottom}`}
+      className={`elephant-mascot fixed right-[max(0.75rem,env(safe-area-inset-right))] z-[39] ${bottom}`}
       aria-label={t.title}
     >
       {!hidden && !open ? (
         <div
           className="elephant-peek"
           data-peek={peek.phase}
+          data-compact={bubblePosition.compact || undefined}
           data-home={pathname === "/" || undefined}
         >
           <div className="elephant-peek__crop" aria-hidden="true">
             <div className="elephant-peek__character">
-              {(!peek.live || !modelUrl || visual !== "ready") && portrait}
-              {peek.live && <div ref={stage} className="absolute inset-0" />}
+              {(peek.phase === "preparing" ||
+                !render3D ||
+                !modelUrl ||
+                visual !== "ready") &&
+                portrait}
+              {render3D && <div ref={stage} className="elephant-peek__stage" />}
             </div>
           </div>
           <button
             ref={toggle}
             type="button"
-            className="elephant-peek__trigger rounded-l-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring"
+            className={`elephant-peek__trigger ${bubblePosition.compact ? "grid place-items-center rounded-full border bg-card shadow-md" : "rounded-l-xl"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring`}
             aria-label={t.title}
             aria-expanded={false}
             onClick={showAssistant}
-          />
+          >
+            <Sparkles aria-hidden="true" className="h-5 w-5" />
+          </button>
           {peek.phase === "greeting" && (
             <div
               ref={bubble}
-              style={bubblePosition}
+              style={bubblePosition.style}
               className="elephant-peek__bubble flex items-center rounded-2xl border bg-card text-card-foreground shadow-lg"
             >
               <button
@@ -375,25 +386,21 @@ export default function ElephantMascot({
         <Button
           ref={toggle}
           type="button"
-          variant={hidden ? "ghost" : "outline"}
-          className={`ml-auto flex h-12 w-12 rounded-full p-1 ${hidden ? "bg-background/80" : "bg-card shadow-md"}`}
-          aria-label={hidden ? t.restore : t.title}
-          aria-expanded={open}
-          aria-controls={open ? panelId : undefined}
-          onClick={hidden ? () => updateHidden(false) : () => minimize(true)}
+          variant="ghost"
+          className="ml-auto flex h-12 w-12 rounded-full bg-background/80 p-1"
+          data-mascot-restore=""
+          aria-label={t.restore}
+          aria-expanded={false}
+          onClick={() => updateHidden(false)}
         >
-          {hidden ? (
-            <EyeOff aria-hidden="true" className="h-4 w-4" />
-          ) : (
-            portrait
-          )}
+          <EyeOff aria-hidden="true" className="h-4 w-4" />
         </Button>
       ) : null}
       {open && (
         <section
           id={panelId}
           aria-labelledby={titleId}
-          className="elephant-mascot-panel absolute bottom-0 right-0 max-h-[min(28rem,calc(100dvh-9rem-env(safe-area-inset-bottom)))] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl lg:mb-7 lg:w-72"
+          className="elephant-mascot-panel absolute bottom-0 right-0 w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-3 text-card-foreground shadow-xl lg:mb-7 lg:w-72"
           onKeyDown={(event) => {
             if (event.key === "Escape") minimize(true);
           }}

@@ -45,8 +45,7 @@ const registry = {
     animationClips: {
       Idle: "Idle",
       Greeting: "Greeting",
-      // The current rig only exports Greeting; Side-Peek reuses this clip.
-      PeekGreeting: "Greeting",
+      PeekGreeting: "PeekGreeting",
       Thinking: "Thinking",
       Happy: "Happy",
       Walking: "Walking",

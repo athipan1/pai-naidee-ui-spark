@@ -23,8 +23,7 @@ describe("mascot character registry", () => {
     expect(character.camera.position).toEqual([0.47, 0.16, 2.03]);
     expect(getMascotClipName(character, "Thinking")).toBe("Thinking");
     expect(getMascotClipName(character, "Walking")).toBe("Walking");
-    // Do not reference a nonexistent PeekGreeting clip in the current GLB.
-    expect(getMascotClipName(character, "PeekGreeting")).toBe("Greeting");
+    expect(getMascotClipName(character, "PeekGreeting")).toBe("PeekGreeting");
   });
 
   it("allows different clip names and gracefully falls back to greeting", () => {
