@@ -191,6 +191,9 @@
 }
 
 .elephant-peek__bubble {
+  --mascot-greeting-background: #08d9c4;
+  --mascot-greeting-border: #00afa8;
+  --mascot-greeting-text: #073e42;
   position: fixed;
   right: max(
     calc(var(--peek-size) - 0.45rem),
@@ -203,18 +206,33 @@
   );
   pointer-events: auto;
   animation: none;
+  background-color: var(--mascot-greeting-background);
+  border-color: var(--mascot-greeting-border);
+  color: var(--mascot-greeting-text);
+  box-shadow: 0 6px 18px rgb(7 62 66 / 22%);
+}
+.elephant-peek__bubble > button {
+  color: inherit;
+}
+.elephant-peek__bubble > button:hover {
+  background-color: rgb(7 62 66 / 8%);
+  color: inherit;
+}
+.elephant-peek__bubble > button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
 }
 .elephant-peek__bubble::after {
   content: "";
   position: absolute;
-  top: 50%;
-  right: -0.34rem;
+  top: var(--mascot-tail-y, 50%);
+  left: var(--mascot-tail-x, 100%);
   width: 0.6rem;
   height: 0.6rem;
-  background: hsl(var(--card));
-  border: solid hsl(var(--border));
+  background: var(--mascot-greeting-background);
+  border: 1px solid var(--mascot-greeting-border);
   border-width: 1px 1px 0 0;
-  transform: translateY(-50%) rotate(45deg);
+  transform: translate(-50%, -50%) rotate(var(--mascot-tail-angle, 45deg));
   pointer-events: none;
 }
 
