@@ -397,6 +397,35 @@ test('province dashboard shows counted data without a completeness claim or auto
 });
 
 
+test('Google discovery loads a new page after an all-duplicate first page',async({page})=>{
+  const fixture=await mockCms(page);
+  const requests: Array<{province:string;pageToken?:string}>=[];
+  await page.route('**/api/admin/google-place-discovery/search',async route=>{
+    const request=route.request().postDataJSON();
+    requests.push(request);
+    const published={sourceId:'google:published',name:'สถานที่เผยแพร่แล้ว',province:'ระยอง',
+      lat:null,lng:null,duplicateStatus:'existing_place'};
+    const newPlace={...published,sourceId:'google:new',name:'สถานที่จากหน้าถัดไป',duplicateStatus:'not_detected'};
+    await route.fulfill({json:request.pageToken
+      ? {candidates:[published,newPlace],nextPageToken:null}
+      : {candidates:[published],nextPageToken:'rayong-next-page'}});
+  });
+  await login(page);
+  await navigate(page,'คุณภาพรายจังหวัด');
+  const dashboard=page.getByTestId('province-quality-dashboard');
+  await dashboard.locator('select').selectOption('ระยอง');
+  await dashboard.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}).click();
+  await expect(dashboard.getByRole('button',{name:'สร้างฉบับร่างและเติมชื่อ'})).toBeDisabled();
+  expect(requests).toHaveLength(1);
+  const draftCount=fixture.draftsSnapshot().length;
+  await dashboard.getByRole('button',{name:'ค้นหาสถานที่เพิ่ม'}).click();
+  await expect(dashboard.getByRole('heading',{name:'สถานที่จากหน้าถัดไป'})).toBeVisible();
+  await expect(dashboard.getByRole('heading',{name:'สถานที่เผยแพร่แล้ว'})).toHaveCount(1);
+  await expect(dashboard.getByRole('button',{name:'ค้นหาสถานที่เพิ่ม'})).toHaveCount(0);
+  expect(requests[1]).toMatchObject({province:'ระยอง',pageToken:'rayong-next-page'});
+  expect(fixture.draftsSnapshot()).toHaveLength(draftCount);
+});
+
 test('TAT draft automatically suggests Geoapify coordinates but requires explicit map confirmation and save',async({page})=>{
   const fixture=await mockCms(page);
   let geoapifyQueries=0;

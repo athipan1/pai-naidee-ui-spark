@@ -1,6 +1,6 @@
 import {useState} from 'react';
 const THAI_PROVINCES = ["กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน","ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"];
-type DiscoveryCandidate={sourceId:string;source?:'google'|'geoapify';candidateToken?:string;name:string;nameLocal?:string;address?:string;province?:string;lat:number|null;lng:number|null;mapsUrl?:string|null;duplicateStatus?:string;duplicateMatches?:{placeId:string;name:string;reason:string;distanceMeters:number|null}[];holds?:string[]};
+type DiscoveryCandidate={sourceId:string;source?:'google'|'geoapify';candidateToken?:string;name:string;nameLocal?:string;address?:string;province?:string;lat:number|null;lng:number|null;mapsUrl?:string|null;duplicateStatus?:string;duplicateMatches?:{placeId:string;name:string;reason:string;distanceMeters:number|null;isDraft?:boolean}[];holds?:string[]};
 type Candidate={id:string;version:string;status:string;state:string;payload:Record<string,string|number|null>;target_place_id?:string};
 type Province={province:string;existing:{total:number;missing_images:number;missing_details:number;last_verified:string|null};review:{discovered:number;duplicates:number;license_hold:number;coordinate_hold:number;approved:number;published:number;confirmed_new:number}};
 type Job={id:string;state:string;candidate_count:number;next_index:number;result:{draftId:string;state:string;holds:string[]}[]};
@@ -12,6 +12,7 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate,onDraftCre
   const [queue,setQueue]=useState<Candidate[]>([]),[page,setPage]=useState(1),[total,setTotal]=useState(0);
   const [batch,setBatch]=useState<{province:string;candidates:unknown[]}|null>(null),[requestKey,setRequestKey]=useState('');
   const [discovery,setDiscovery]=useState<DiscoveryCandidate[]>([]),[discoveryStatus,setDiscoveryStatus]=useState('');
+  const [nextGooglePageToken,setNextGooglePageToken]=useState<string|null>(null);
   const [draftResult,setDraftResult]=useState('');
   const [googleQuotaExhausted,setGoogleQuotaExhausted]=useState(false),[confirmGeoapify,setConfirmGeoapify]=useState<string|null>(null);
   const [job,setJob]=useState<Job|null>(null),[jobId,setJobId]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
@@ -28,7 +29,7 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate,onDraftCre
     setBatch({province:value.province,candidates:value.candidates});setRequestKey(crypto.randomUUID());setJob(null);
   }
   async function searchGeoapify(fallback=false) {
-    setDiscovery([]);setConfirmGeoapify(null);
+    setDiscovery([]);setConfirmGeoapify(null);setNextGooglePageToken(null);
     setDiscoveryStatus(fallback
       ? 'Google Places ใช้โควตาประจำวันครบแล้ว กำลังค้นหาจาก Geoapify...'
       : 'กำลังค้นหาสถานที่จาก Geoapify...');
@@ -47,24 +48,40 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate,onDraftCre
       setDiscoveryStatus('Geoapify ค้นหาไม่สำเร็จ: '+(e instanceof Error?e.message:'ไม่สามารถเชื่อมต่อบริการได้'));
     }
   }
-  async function searchGoogle() {
+  async function searchGoogle(pageToken?:string) {
     if(googleQuotaExhausted){await searchGeoapify(true);return;}
-    setDiscovery([]);setConfirmGeoapify(null);setDiscoveryStatus('กำลังค้นหา Google Places...');
+    if(!pageToken){
+      setDiscovery([]);setConfirmGeoapify(null);setNextGooglePageToken(null);
+    }
+    setDiscoveryStatus(pageToken?'กำลังค้นหาสถานที่เพิ่มจาก Google Places...':'กำลังค้นหา Google Places...');
     try {
       const result=await api('/google-place-discovery/search',{
         method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({province,sources:['google'],limit:10})
-      }) as {status?:string;candidates?:DiscoveryCandidate[];excludedOutsideProvince?:number};
-      setDiscovery(result.candidates||[]);
-      setDiscoveryStatus((result.candidates?.length
-        ? 'ตัวอย่างจาก Google '+result.candidates.length+' รายการ · แสดงชั่วคราวเท่านั้น ห้ามนำเข้าข้อมูล Google'
-        : 'ไม่พบรายการในผลค้นหาชุดนี้ (ไม่ใช่การตรวจครบทั้งจังหวัด)')
-        +(result.excludedOutsideProvince?' · กรอง '+result.excludedOutsideProvince+' รายการที่ยืนยันจังหวัดไม่ได้':''));
+        body:JSON.stringify({province,sources:['google'],limit:10,pageToken})
+      }) as {candidates?:DiscoveryCandidate[];nextPageToken?:string|null;excludedOutsideProvince?:number};
+      const candidatesById=new Map((pageToken?discovery:[]).map(candidate=>[candidate.sourceId,candidate]));
+      for(const candidate of result.candidates??[])candidatesById.set(candidate.sourceId,candidate);
+      const results=[...candidatesById.values()];
+      const availableCount=results.filter(candidate=>candidate.duplicateStatus==='not_detected').length;
+      const nextToken=result.nextPageToken||null;
+      setDiscovery(results);
+      setNextGooglePageToken(nextToken);
+      setDiscoveryStatus('ผลสะสมจาก Google '+results.length+' รายการ · ยังไม่พบว่าซ้ำ '+availableCount
+        +' แห่ง · ซ้ำหรืออาจซ้ำ '+(results.length-availableCount)+' แห่ง'
+        +(result.excludedOutsideProvince?' · กรอง '+result.excludedOutsideProvince+' รายการที่ยืนยันจังหวัดไม่ได้':'')
+        +(nextToken?'':' · ดูผลครบทุกหน้าของคำค้นนี้แล้ว')
+        +' · แสดงชั่วคราวเท่านั้น ห้ามนำเข้าข้อมูล Google');
     } catch(e) {
       const reason=e instanceof Error?e.message:'ไม่สามารถเชื่อมต่อบริการได้';
       if(/(?:HTTP\s*429|quota_exhausted)/i.test(reason)) {
-        setGoogleQuotaExhausted(true);
-        await searchGeoapify(true);
+        setGoogleQuotaExhausted(true);setNextGooglePageToken(null);
+        if(pageToken)setDiscoveryStatus('ค้นหาหน้าถัดไปไม่ได้เพราะโควตา Google หมด ผลเดิมยังเปิดดูได้');
+        else await searchGeoapify(true);
+      }else if(pageToken&&reason==='invalid_page_token'){
+        setNextGooglePageToken(null);
+        setDiscoveryStatus('โหลดหน้าถัดไปไม่ได้ กรุณากด “ค้นหาสถานที่ท่องเที่ยวใหม่” เพื่อเริ่มค้นอีกครั้ง');
+      }else if(/too many requests/i.test(reason)){
+        setDiscoveryStatus('ค้นหาถี่เกินไป กรุณารอสักครู่แล้วลองอีกครั้ง');
       }else setDiscoveryStatus('Google ค้นหาไม่สำเร็จ: '+reason+' · สามารถค้นด้วย Geoapify แทนได้');
     }
   }
@@ -108,10 +125,10 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate,onDraftCre
     <p className="text-sm text-slate-600">จำนวนด้านล่างเป็นข้อมูลที่ตรวจนับได้ ไม่ใช่จำนวนสถานที่ทั้งหมดที่ควรมี และไม่มีการเผยแพร่อัตโนมัติ</p>
     <button type="button" disabled={busy} className="rounded-xl border px-4 py-2" onClick={()=>void run(load)}>โหลดคิวและสถิติจังหวัด</button>
     {error&&<p role="alert" className="break-words text-sm text-red-700">{error}</p>}
-    {<label className="block text-sm">จังหวัด<select className="ml-2 rounded-lg border p-2" value={province} disabled={busy} onChange={event=>{setDiscovery([]);setConfirmGeoapify(null);setDiscoveryStatus('');setDraftResult('');setProvince(event.target.value);void run(()=>loadQueue(1,event.target.value));}}>{THAI_PROVINCES.map(p=><option key={p}>{p}</option>)}</select></label>}
+    {<label className="block text-sm">จังหวัด<select className="ml-2 rounded-lg border p-2" value={province} disabled={busy} onChange={event=>{setDiscovery([]);setConfirmGeoapify(null);setNextGooglePageToken(null);setDiscoveryStatus('');setDraftResult('');setProvince(event.target.value);void run(()=>loadQueue(1,event.target.value));}}>{THAI_PROVINCES.map(p=><option key={p}>{p}</option>)}</select></label>}
     <div className="space-y-3 rounded-xl border p-3">
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void run(searchGoogle)}>ค้นหาสถานที่ท่องเที่ยวใหม่</button>
+        <button type="button" disabled={busy} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void run(()=>searchGoogle())}>ค้นหาสถานที่ท่องเที่ยวใหม่</button>
         <button type="button" disabled={busy} className="rounded-lg border border-teal-700 px-4 py-2 text-teal-800 disabled:opacity-50" onClick={()=>void run(()=>searchGeoapify())}>ค้นหาด้วย Geoapify</button>
       </div>
       {googleQuotaExhausted&&<p role="status" className="rounded-lg bg-amber-50 p-2 text-sm text-amber-900">Google Places ใช้โควตาประจำวันครบแล้ว สามารถค้นต่อด้วย Geoapify โดยไม่เพิ่มโควตา Google</p>}
@@ -121,8 +138,8 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate,onDraftCre
         <h3 className="break-words font-semibold text-base">{c.name}</h3>
         {c.source==='geoapify'&&<><p className="text-xs text-teal-700">Geoapify · © OpenStreetMap contributors</p>{c.nameLocal&&c.nameLocal!==c.name&&<p className="text-sm">ชื่อไทย: {c.nameLocal}</p>}{c.address&&<p className="break-words text-xs text-slate-600">{c.address}</p>}</>}
         <p className="break-all text-slate-600">พิกัด: {c.lat===null||c.lng===null?'ไม่พบพิกัด':c.lat.toFixed(6)+', '+c.lng.toFixed(6)}</p>
-        <p className={c.duplicateStatus==='not_detected'?'text-green-700':'text-amber-700'}>{c.duplicateStatus==='existing_place'?'พบ Google Place ID ที่มีอยู่แล้ว':c.duplicateStatus==='possible_duplicate'?'อาจซ้ำกับสถานที่เดิม':'ไม่พบรายการซ้ำจากการตรวจเบื้องต้น'}</p>
-        {!!c.duplicateMatches?.length&&<p className="break-words text-slate-600">รายการที่ตรงกัน: {c.duplicateMatches.map(m=>m.name+' ('+(m.reason==='google_place_id'?'รหัส Google':m.reason==='name'?'ชื่อ':'พิกัดใกล้กัน')+')').join(', ')}</p>}
+        <p className={c.duplicateStatus==='not_detected'?'text-green-700':'text-amber-700'}>{c.duplicateStatus==='existing_place'?'พบ Google Place ID ที่มีอยู่แล้ว':c.duplicateStatus==='existing_draft'?'พบฉบับร่างของสถานที่นี้แล้ว':c.duplicateStatus==='possible_duplicate'?'อาจซ้ำกับสถานที่เดิม':'ไม่พบรายการซ้ำจากการตรวจเบื้องต้น'}</p>
+        {!!c.duplicateMatches?.length&&<p className="break-words text-slate-600">รายการที่ตรงกัน: {c.duplicateMatches.map(m=>m.name+(m.isDraft?' [ฉบับร่าง]':'')+' ('+(m.reason==='google_place_id'?'รหัส Google':m.reason==='name'?'ชื่อ':'พิกัดใกล้กัน')+')').join(', ')}</p>}
         <p className="text-slate-600">{c.source==='geoapify'
           ? 'ชื่อมาจาก Geoapify/OpenStreetMap · ต้องยืนยันสถานที่ก่อนสร้าง Draft และตรวจหมุดก่อนบันทึกพิกัด'
           : 'สร้างฉบับร่างจาก TAT ก่อน หากไม่พบใช้ Geoapify เสนอชื่อไทย/อังกฤษและพิกัด (ถ้ามี) · ต้องยืนยันหมุดก่อนบันทึก · ไม่คัดลอกข้อมูล Google ลงฐานข้อมูล'}</p>
@@ -140,6 +157,9 @@ export default function ProvinceQualityDashboard({api,onOpenCandidate,onDraftCre
           <button type="button" disabled={busy} className="mt-2 rounded-lg bg-teal-700 px-3 py-2 text-white disabled:opacity-50" onClick={()=>void run(()=>createReferenceDraft(c))}>ยืนยันสร้างฉบับร่าง</button>
         </div>}
       </li>)}</ul>}
+      {nextGooglePageToken&&<button type="button" disabled={busy}
+        className="rounded-lg border border-teal-700 px-4 py-2 text-teal-800 disabled:opacity-50"
+        onClick={()=>void run(()=>searchGoogle(nextGooglePageToken))}>ค้นหาสถานที่เพิ่ม</button>}
       {draftResult&&<p role="status" className="break-all text-green-700">{draftResult}</p>}
     </div>
     {selected&&<div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">{[
