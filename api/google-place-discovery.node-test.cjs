@@ -83,3 +83,47 @@ test('duplicate matching by Google ID, name and coordinates',()=>{
  assert.deepEqual(rows.map(x=>x.duplicateStatus),['existing_place','possible_duplicate','possible_duplicate','not_detected']);
  assert.equal(rows[0].duplicateMatches[0].reason,'google_place_id');
 });
+
+test('passes the continuation token to Google and reserves quota for each requested page',async()=>{
+ const province='ระยอง';
+ const requests=[];
+ const reserved=[];
+ const options={env,reserve:async kind=>{reserved.push(kind);return true},
+  readExistingImpl:async(_getSql,selected,includeDrafts)=>{
+   assert.equal(selected,province);
+   assert.equal(includeDrafts,true);
+   return [{id:'draft-1',isDraft:true,name:'รอยืนยันชื่อสถานที่',lat:null,lng:null,
+    external_ids:[{source:'google_places',id:'draft-google-id'}]}];
+  },
+  fetchImpl:async(_url,opts)=>{
+   assert.ok(opts.headers['X-Goog-FieldMask'].split(',').includes('nextPageToken'));
+   const body=JSON.parse(opts.body);
+   requests.push(body);
+   return {ok:true,json:async()=>body.pageToken
+    ? {places:[{id:'new-id',displayName:{text:'วัดใหม่'},formattedAddress:province}]}
+    : {nextPageToken:'next-page',places:[{id:'draft-google-id',displayName:{text:'วัดเดิม'},formattedAddress:province}]}};
+  }};
+ const first=await discoverGoogle(validate({...input,province}),options);
+ assert.equal(first.nextPageToken,'next-page');
+ assert.equal(first.candidates[0].duplicateStatus,'existing_draft');
+ assert.equal(first.candidates[0].duplicateMatches[0].isDraft,true);
+ const second=await discoverGoogle(validate({...input,province,pageToken:first.nextPageToken}),options);
+ assert.deepEqual(requests[1],{...requests[0],pageToken:'next-page'});
+ assert.deepEqual(reserved,['places_search','places_search']);
+ assert.equal(second.nextPageToken,null);
+ assert.equal(second.candidates[0].duplicateStatus,'not_detected');
+ for(const pageToken of ['','with spaces','x'.repeat(4097),null,[],123]){
+  assert.equal(validate({...input,pageToken}),null);
+ }
+});
+
+test('rejects expired continuation and does not call the provider if its daily quota is exhausted',async()=>{
+ const page={...input,pageToken:'next-page'};
+ const exhausted=await discoverGoogle(page,{env,reserve:async()=>false,fetchImpl:async()=>{
+  assert.fail('must not call Google');
+ }});
+ assert.equal(exhausted.status,'quota_exhausted');
+ const expired=await discoverGoogle(page,{env,reserve:async()=>true,
+  fetchImpl:async()=>({ok:false,status:400})});
+ assert.equal(expired.status,'invalid_page_token');
+});

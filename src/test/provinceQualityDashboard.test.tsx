@@ -108,3 +108,59 @@ describe('Admin Google Places discovery province selector',()=>{
   expect(screen.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'})).toBeEnabled();
  });
 });
+
+describe('Admin Google Places pagination',()=>{
+ const repeated={
+  sourceId:'google:published',name:'แหล่งเที่ยวเดิม',lat:null,lng:null,duplicateStatus:'existing_place',
+ };
+ const newPlace={
+  sourceId:'google:new',name:'แหล่งเที่ยวใหม่',lat:null,lng:null,duplicateStatus:'not_detected',
+ };
+
+ it('lets the admin continue from an all-duplicate page, deduplicates results and stops at the end',async()=>{
+  const api=vi.fn(async(path:string,options?:RequestInit):Promise<unknown>=>{
+   if(path.startsWith('/candidate-queue'))return {candidates:[],total:0};
+   if(path!=='/google-place-discovery/search')throw Error('Unexpected request '+path);
+   return JSON.parse(String(options?.body)).pageToken
+    ? {candidates:[repeated,newPlace],nextPageToken:null}
+    : {candidates:[repeated],nextPageToken:'rayong-page-two'};
+  });
+  const user=userEvent.setup();
+  render(<ProvinceQualityDashboard api={api} onOpenCandidate={()=>{}}/>);
+  await user.selectOptions(screen.getByLabelText('จังหวัด'),'ระยอง');
+  await user.click(screen.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}));
+  expect(await screen.findByText(/ยังไม่พบว่าซ้ำ 0 แห่ง/)).toBeVisible();
+  expect(screen.getByRole('button',{name:'สร้างฉบับร่างและเติมชื่อ'})).toBeDisabled();
+  expect(api.mock.calls.filter(([path])=>path.includes('discovery/search'))).toHaveLength(1);
+
+  await user.click(screen.getByRole('button',{name:'ค้นหาสถานที่เพิ่ม'}));
+  expect(await screen.findByText('แหล่งเที่ยวใหม่')).toBeVisible();
+  expect(screen.getAllByText('แหล่งเที่ยวเดิม')).toHaveLength(1);
+  expect(screen.getByText(/ยังไม่พบว่าซ้ำ 1 แห่ง/)).toHaveTextContent('ดูผลครบทุกหน้าของคำค้นนี้แล้ว');
+  expect(screen.queryByRole('button',{name:'ค้นหาสถานที่เพิ่ม'})).not.toBeInTheDocument();
+  const calls=api.mock.calls.filter(([path])=>path==='/google-place-discovery/search');
+  expect(calls.map(([,options])=>JSON.parse(String(options?.body)))).toEqual([
+   {province:'ระยอง',sources:['google'],limit:10},
+   {province:'ระยอง',sources:['google'],limit:10,pageToken:'rayong-page-two'},
+  ]);
+ });
+
+ it('keeps the results when quota runs out and lets the admin choose Geoapify',async()=>{
+  const api=vi.fn(async(path:string,options?:RequestInit):Promise<unknown>=>{
+   if(path==='/geoapify-place-discovery/search')return {candidates:[]};
+   if(path!=='/google-place-discovery/search')throw Error('Unexpected request '+path);
+   if(JSON.parse(String(options?.body)).pageToken)throw Error('HTTP 429');
+   return {candidates:[newPlace],nextPageToken:'next-page'};
+  });
+  const user=userEvent.setup();
+  render(<ProvinceQualityDashboard api={api} onOpenCandidate={()=>{}}/>);
+  await user.click(screen.getByRole('button',{name:'ค้นหาสถานที่ท่องเที่ยวใหม่'}));
+  await user.click(await screen.findByRole('button',{name:'ค้นหาสถานที่เพิ่ม'}));
+  expect(await screen.findByText(/โควตา Google หมด/)).toBeVisible();
+  expect(screen.getByText('แหล่งเที่ยวใหม่')).toBeVisible();
+  expect(screen.queryByRole('button',{name:'ค้นหาสถานที่เพิ่ม'})).not.toBeInTheDocument();
+  expect(api.mock.calls.some(([path])=>path==='/geoapify-place-discovery/search')).toBe(false);
+  await user.click(screen.getByRole('button',{name:'ค้นหาด้วย Geoapify'}));
+  expect(api.mock.calls.some(([path])=>path==='/geoapify-place-discovery/search')).toBe(true);
+ });
+});
