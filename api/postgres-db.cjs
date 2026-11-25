@@ -25,37 +25,93 @@ const VERIFIED_WIKIMEDIA_MEDIA = require('./curated-wikimedia-media.json');
 const VERIFIED_MISSING_MEDIA = require('./verified-missing-commons-media.json');
 const USER_PROVIDED_MEDIA = require('./user-provided-place-media.json');
 const { PROVINCE_EN, DESCRIPTION_EN } = require('./place-localizations.cjs');
-const { buildPlaceSearch } = require('./place-search.cjs');
-const { rankPlaces } = require('./smart-search.cjs');
+const { escapeLike, normalizeSearch } = require('./place-search.cjs');
+const { prepareSearchIndex, rankSearchIndex } = require('./smart-search.cjs');
 
+const SEARCH_INDEX_TTL_MS = 30_000;
 let sqlClient = null;
 let searchIndex = null;
-let searchIndexExpires = 0;
+let normalizedDescriptions = new Map();
 
-async function getSearchIndex() {
-  if (searchIndex && Date.now() < searchIndexExpires) return searchIndex;
+async function readSearchIndex(sql, { search = '', catalog = false } = {}) {
+  const query = search.trim();
+  const prefix = `${escapeLike(query)}%`;
+  const partial = `%${prefix}`;
+  const allowPartial = normalizeSearch(query).length >= 2;
+  // Public refresh and Admin direct matching each see place and alias data in
+  // one PostgreSQL statement. Direct scores are only computed for Admin.
+  const directScore = query ? sql`,
+    CASE WHEN LOWER(TRIM(p.id)) = LOWER(TRIM(${query})) THEN 1300 ELSE COALESCE((
+      SELECT MAX(CASE
+        WHEN LOWER(TRIM(entry.label)) = LOWER(TRIM(${query})) THEN entry.exact_score
+        WHEN ${allowPartial} AND TRIM(entry.label) ILIKE ${prefix} THEN entry.prefix_score
+        WHEN ${allowPartial} AND TRIM(entry.label) ILIKE ${partial} THEN entry.partial_score
+        ELSE 0 END)
+      FROM (
+        SELECT p.name AS label, 1200 AS exact_score, 950 AS prefix_score, 780 AS partial_score
+        UNION ALL SELECT p.name_local, 1200, 950, 780
+        UNION ALL SELECT unnest(a.aliases), 1100, 950, 780
+        UNION ALL SELECT p.id, 1300, 950, 780
+        UNION ALL SELECT p.province, 360, 340, 320
+        UNION ALL SELECT p.province_en, 360, 340, 320
+      ) AS entry
+    ), 0) END AS direct_score` : sql``;
+  const imageColumn = catalog ? sql`, COALESCE(NULLIF(p.image_url, ''), first_media.url) AS catalog_image` : sql``;
+  const imageJoin = catalog ? sql`LEFT JOIN (
+    SELECT DISTINCT ON (place_id) place_id, url FROM media
+    ORDER BY place_id, (id LIKE 'wikimedia:%') ASC, created_at ASC, id ASC
+  ) first_media ON first_media.place_id = p.id` : sql``;
+  const places = await sql`
+    SELECT p.id, p.name, p.name_local, p.province, p.province_en, p.category,
+      p.categories, p.description, p.description_en, p.tags, p.rating,
+      COALESCE(a.aliases, ARRAY[]::text[]) AS aliases ${directScore} ${imageColumn}
+    FROM places p
+    LEFT JOIN (
+      SELECT place_id, array_agg(alias_name) AS aliases
+      FROM place_aliases WHERE status = 'approved' GROUP BY place_id
+    ) a ON a.place_id = p.id
+    ${imageJoin}
+  `;
+  // Admin always reads current text from PostgreSQL. Reuse only the pure
+  // normalization result for identical strings from the preceding statement.
+  // Replacing the map bounds retention to one catalogue's descriptions.
+  const descriptions = new Map();
+  const prepared = prepareSearchIndex(places, text => {
+    const normalized = normalizedDescriptions.get(text) ?? normalizeSearch(text);
+    descriptions.set(text, normalized);
+    return normalized;
+  });
+  normalizedDescriptions = descriptions;
+  return prepared;
+}
+
+function invalidateSearchIndex() {
+  searchIndex = null;
+}
+
+function getSearchIndex() {
+  if (searchIndex && Date.now() < searchIndex.expires) return searchIndex.promise;
   const sql = getSql();
-  const places = await sql`SELECT id, name, name_local, province, province_en, category, categories, description, description_en, tags, rating FROM places`;
-  const aliases = await sql`SELECT place_id, alias_name FROM place_aliases WHERE status = 'approved'`;
-  const byId = new Map();
-  for (const alias of aliases) byId.set(alias.place_id, [...(byId.get(alias.place_id) || []), alias.alias_name]);
-  for (const place of places) place.aliases = byId.get(place.id) || [];
-  searchIndex = places;
-  searchIndexExpires = Date.now() + 30_000;
-  return places;
+  const entry = { expires: Date.now() + SEARCH_INDEX_TTL_MS };
+  searchIndex = entry;
+  entry.promise = readSearchIndex(sql).catch(error => {
+    if (searchIndex === entry) invalidateSearchIndex();
+    throw error;
+  });
+  return entry.promise;
 }
 
 async function suggestPlaces(query, limit = 6) {
   if (typeof query !== 'string' || query.trim().length < 2) return [];
   const count = Math.min(8, Math.max(1, Number(limit) || 6));
-  return rankPlaces(await getSearchIndex(), query).slice(0, count).map(place => ({
+  return rankSearchIndex(await getSearchIndex(), query).slice(0, count).map(place => ({
     id: place.id, name: place.name, nameLocal: place.name_local,
     province: place.province, category: place.category,
   }));
 }
 
 async function listPlaceFacets() {
-  const places = await getSearchIndex();
+  const places = (await getSearchIndex()).map(({ place }) => place);
   return {
     provinces: [...new Set(places.map(place => place.province).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th')),
     categories: [...new Set(places.flatMap(place => [place.category, ...normalizeJsonArray(place.categories)]).filter(Boolean))].sort(),
@@ -560,13 +616,31 @@ async function listNearbyPlaces(options) {
   };
 }
 
-async function listPlaces({ page = 1, limit = 10, category = '', province = '', search = '' } = {}) {
+async function listPlaces({ page = 1, limit = 10, category = '', province = '', search = '', fresh = false } = {}) {
   const sql = getSql();
-  const safePage = Math.max(1, Number(page) || 1);
-  const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
+  const requestedPage = Math.trunc(Number(page));
+  const safePage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, Math.floor(Number.MAX_SAFE_INTEGER / 50)) : 1;
+  const safeLimit = Math.min(50, Math.max(1, Math.trunc(Number(limit)) || 10));
   const offset = (safePage - 1) * safeLimit;
-  if (typeof search === 'string' && search.trim()) {
-    const matches = rankPlaces(await getSearchIndex(), search, String(category || ''), String(province || ''));
+  const query = typeof search === 'string' ? search.trim().slice(0, 200) : '';
+  const categoryValue = typeof category === 'string' ? category.trim() : '';
+  const provinceValue = typeof province === 'string' ? province.trim() : '';
+
+  if (fresh) {
+    // Rank, count and page one live statement's results. The Admin card only
+    // needs the selected image URL so it avoids hydrating the full gallery.
+    const index = await readSearchIndex(sql, { search: query, catalog: true });
+    const matches = rankSearchIndex(index, query, categoryValue, provinceValue);
+    const attractions = matches.slice(offset, offset + safeLimit).map(row => ({
+      id: row.id, name: row.name, nameLocal: row.name_local || row.name,
+      province: row.province, publishedPrimaryImage: row.catalog_image,
+    }));
+    return { attractions, total: matches.length, page: safePage, limit: safeLimit };
+  }
+
+  if (query || provinceValue) {
+    const index = query ? await getSearchIndex() : await readSearchIndex(sql);
+    const matches = rankSearchIndex(index, query, categoryValue, provinceValue);
     const ids = matches.slice(offset, offset + safeLimit).map(place => place.id);
     if (!ids.length) return { attractions: [], total: matches.length, page: safePage, limit: safeLimit };
     const rows = await sql`
@@ -583,80 +657,28 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
     const byId = new Map(rows.map(place => [place.id, normalizePlace(place)]));
     return { attractions: ids.map(id => byId.get(id)).filter(Boolean), total: matches.length, page: safePage, limit: safeLimit };
   }
-  const categoryValue = category?.trim() || null;
-  const provinceValue = province?.trim() || null;
-  const { searchValue, searchPattern, flexibleNamePattern, aliasPlaceId } = buildPlaceSearch(search);
 
+  const categoryFilter = categoryValue ? sql`
+    WHERE LOWER(p.category) = LOWER(${categoryValue}) OR EXISTS (
+      SELECT 1 FROM jsonb_array_elements_text(p.categories) AS value WHERE LOWER(value) = LOWER(${categoryValue})
+    )` : sql``;
   const rows = await sql`
-    SELECT
-      p.*,
-      COALESCE(
-        json_agg(
-          json_build_object(
-            'id', m.id,
-            'url', m.url,
-            'type', m.type,
-            'title', m.title,
-            'description', m.description,
-            'creatorName', m.creator_name, 'licenseName', m.license_name,
-            'licenseUrl', m.license_url, 'sourcePage', m.source_page
-          ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC
-        ) FILTER (WHERE m.id IS NOT NULL),
-        '[]'::json
-      ) AS media
-    FROM places p
-    LEFT JOIN media m ON m.place_id = p.id
-    WHERE
-      (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}) OR EXISTS (
-        SELECT 1 FROM jsonb_array_elements_text(p.categories) AS value WHERE LOWER(value) = LOWER(${categoryValue})
-      ))
-      AND (${provinceValue}::text IS NULL OR LOWER(p.province) = LOWER(${provinceValue}) OR LOWER(p.province_en) = LOWER(${provinceValue}))
-      AND (
-        ${searchValue}::text IS NULL OR
-        p.id = ${aliasPlaceId} OR
-        p.name ILIKE ${searchPattern} OR
-        p.name_local ILIKE ${searchPattern} OR
-        p.name ILIKE ${flexibleNamePattern} OR
-        p.name_local ILIKE ${flexibleNamePattern} OR
-        p.description ILIKE ${searchPattern} OR
-        p.description_en ILIKE ${searchPattern} OR
-        p.province ILIKE ${searchPattern} OR
-        p.province_en ILIKE ${searchPattern}
-      )
+    SELECT p.*, COALESCE(json_agg(json_build_object(
+      'id', m.id, 'url', m.url, 'type', m.type, 'title', m.title,
+      'description', m.description, 'creatorName', m.creator_name,
+      'licenseName', m.license_name, 'licenseUrl', m.license_url,
+      'sourcePage', m.source_page
+    ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC)
+    FILTER (WHERE m.id IS NOT NULL), '[]'::json) AS media
+    FROM places p LEFT JOIN media m ON m.place_id = p.id
+    ${categoryFilter}
     GROUP BY p.id
     ORDER BY p.rating DESC, p.name ASC, p.id ASC
     LIMIT ${safeLimit}
     OFFSET ${offset}
   `;
-
-  const countRows = await sql`
-    SELECT COUNT(*)::int AS count
-    FROM places p
-    WHERE
-      (${categoryValue}::text IS NULL OR LOWER(p.category) = LOWER(${categoryValue}) OR EXISTS (
-        SELECT 1 FROM jsonb_array_elements_text(p.categories) AS value WHERE LOWER(value) = LOWER(${categoryValue})
-      ))
-      AND (${provinceValue}::text IS NULL OR LOWER(p.province) = LOWER(${provinceValue}) OR LOWER(p.province_en) = LOWER(${provinceValue}))
-      AND (
-        ${searchValue}::text IS NULL OR
-        p.id = ${aliasPlaceId} OR
-        p.name ILIKE ${searchPattern} OR
-        p.name_local ILIKE ${searchPattern} OR
-        p.name ILIKE ${flexibleNamePattern} OR
-        p.name_local ILIKE ${flexibleNamePattern} OR
-        p.description ILIKE ${searchPattern} OR
-        p.description_en ILIKE ${searchPattern} OR
-        p.province ILIKE ${searchPattern} OR
-        p.province_en ILIKE ${searchPattern}
-      )
-  `;
-
-  return {
-    attractions: rows.map(normalizePlace),
-    total: Number(countRows[0]?.count) || 0,
-    page: safePage,
-    limit: safeLimit,
-  };
+  const [count] = await sql`SELECT COUNT(*)::int AS count FROM places p ${categoryFilter}`;
+  return { attractions: rows.map(normalizePlace), total: count.count, page: safePage, limit: safeLimit };
 }
 
 async function getPlaceById(id) {
@@ -705,8 +727,8 @@ async function pingDatabase() {
 }
 
 async function closeDatabase() {
-  searchIndex = null;
-  searchIndexExpires = 0;
+  invalidateSearchIndex();
+  normalizedDescriptions.clear();
   if (sqlClient) {
     await sqlClient.end({ timeout: 5 });
     sqlClient = null;
@@ -715,7 +737,7 @@ async function closeDatabase() {
 
 module.exports = {
   getSql,
-  invalidateSearchIndex: () => { searchIndex = null; searchIndexExpires = 0; },
+  invalidateSearchIndex,
   closeDatabase,
   ensureSchema,
   ensureSchemaTables,

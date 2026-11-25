@@ -661,3 +661,52 @@ test('newer catalog search wins over a delayed response and province reaches the
   await expect(page.getByText('ใหม่',{exact:true})).toBeVisible();
   await expect(page.getByText('เก่า',{exact:true})).toHaveCount(0);
 });
+
+test('catalog distinguishes a service error from empty results and recovers', async ({ page }, testInfo) => {
+  await mockCms(page);
+  await login(page);
+  await navigate(page, 'สถานที่ทั้งหมด');
+  await expect(page.getByText(place.name_local, { exact: true })).toBeVisible();
+  await page.route('**/api/admin/catalog?**', async route => {
+    const q = new URL(route.request().url()).searchParams.get('q');
+    if (q === 'ผิดพลาด') return route.fulfill({ status: 503, json: { error: 'Admin CMS is unavailable.' } });
+    if (q === 'ไม่มีข้อมูล') return route.fulfill({ json: { places: [], total: 0, page: 1 } });
+    return route.fallback();
+  });
+  const search = page.getByRole('textbox', { name: 'ค้นหาสถานที่เดิม' });
+  const submit = page.getByRole('button', { name: 'ค้นหา', exact: true });
+  await search.fill('ผิดพลาด');
+  await submit.click();
+  await expect(page.getByRole('alert')).toContainText('โหลดผลค้นหาไม่สำเร็จ');
+  await expect(page.getByText(/ไม่พบสถานที่/)).toHaveCount(0);
+  await search.fill('ไม่มีข้อมูล');
+  await submit.click();
+  await expect(page.getByText(/ไม่พบสถานที่/)).toBeVisible();
+  await expect(page.getByText('โหลดผลค้นหาไม่สำเร็จ', { exact: false })).toHaveCount(0);
+  await search.fill(place.name);
+  await submit.click();
+  await expect(page.getByRole('link', { name: 'ดูสถานที่' })).toHaveAttribute('href', `/attraction/${place.id}`);
+  await page.screenshot({ path: testInfo.outputPath('admin-cms.png'), fullPage: true });
+});
+
+test('public search opens the expected bilingual result', async ({ page }, testInfo) => {
+  await mockCms(page);
+  const exact = { id: 'search-fixture-singha-park', name: 'Singha Park Chiang Rai', nameLocal: 'สิงห์ปาร์คเชียงราย',
+    province: 'เชียงราย', provinceEn: null, category: 'Nature', categories: ['Nature'], rating: 4.5,
+    reviewCount: 0, tags: [], description: 'สวนและไร่ชาในจังหวัดเชียงราย',
+    coordinates: { lat: 19.85, lng: 99.74 }, image: '', images: [] };
+  await page.route('**/api/places**', async route => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/' + exact.id)) return route.fulfill({ json: exact });
+    if (url.pathname.endsWith('/facets')) return route.fulfill({ json: { provinces: ['เชียงราย'], categories: ['Nature'] } });
+    if (url.pathname.endsWith('/suggest')) return route.fulfill({ json: { suggestions: [exact] } });
+    const attractions = url.searchParams.get('search') === exact.name ? [exact] : [];
+    return route.fulfill({ json: { attractions, total: attractions.length, page: 1, limit: 30 } });
+  });
+  await page.goto(`/discover?mode=search&q=${encodeURIComponent(exact.name)}`);
+  await expect(page.getByRole('heading', { name: exact.nameLocal })).toBeVisible();
+  await expect(page.getByText(/คุณหมายถึง/)).toHaveCount(0);
+  await page.screenshot({ path: testInfo.outputPath('public-search.png'), fullPage: true });
+  await page.getByRole('button', { name: 'ดูรายละเอียด' }).click();
+  await expect(page).toHaveURL(new RegExp(`/attraction/${exact.id}$`));
+});

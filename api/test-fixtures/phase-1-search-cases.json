@@ -1,0 +1,156 @@
+[
+  {
+    "query": "Ao Nang Beach",
+    "id": "curated-ao-nang-beach",
+    "province": "กระบี่",
+    "province_en": "Krabi",
+    "before": 0
+  },
+  {
+    "query": "Chiang Rai Clock Tower",
+    "id": "cms:337ef962-4c27-43e5-8f57-ef52bb976fb9",
+    "province": "เชียงราย",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Hariphunchai National Museum",
+    "id": "cms:bc7ab054-e82c-420b-93d7-15cc978ddb2e",
+    "province": "ลำพูน",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Honghompaya Lanna",
+    "id": "tat-20260204141052001",
+    "province": "เชียงราย",
+    "province_en": "Chiang Rai",
+    "before": 0
+  },
+  {
+    "query": "Kamphaeng Phet National Museum",
+    "id": "cms:8dff609e-71b6-42bf-a11d-02bef5630dbd",
+    "province": "กำแพงเพชร",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Khum Chao Luang Mueang Phrae",
+    "id": "cms:552d8d89-d78f-4e5e-966c-76092a1b725a",
+    "province": "แพร่",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Lam Nam Nan National Park",
+    "id": "cms:c22cedc4-f961-44eb-9d49-de457ac2c473",
+    "province": "อุตรดิตถ์",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "อุทยานแห่งชาติลำน้ำน่าน",
+    "id": "cms:c22cedc4-f961-44eb-9d49-de457ac2c473",
+    "province": "อุตรดิตถ์",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Mu Ko Ang Thong National Park",
+    "id": "curated-mu-ko-ang-thong-national-park",
+    "province": "สุราษฎร์ธานี",
+    "province_en": "Surat Thani",
+    "before": 0
+  },
+  {
+    "query": "อุทยานแห่งชาติหมู่เกาะอ่างทอง",
+    "id": "curated-mu-ko-ang-thong-national-park",
+    "province": "สุราษฎร์ธานี",
+    "province_en": "Surat Thani",
+    "before": 0
+  },
+  {
+    "query": "Museum of Nonthaburi",
+    "id": "cms:d93affed-23ef-42ba-b6ac-4ef38c20ab6c",
+    "province": "นนทบุรี",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Nang Rong Waterfall",
+    "id": "curated-nang-rong-waterfall",
+    "province": "นครนายก",
+    "province_en": "Nakhon Nayok",
+    "before": 0
+  },
+  {
+    "query": "Phra Chedi Klang Nam Mangrove Nature Trail / Rayong Mangrove Boardwalk",
+    "id": "cms:df0b6d1e-584e-4c61-80eb-edcfadab9214",
+    "province": "ระยอง",
+    "province_en": null,
+    "before": 1
+  },
+  {
+    "query": "Phraya Phichai Dap Hak Museum (Uttaradit Provincial Hall)",
+    "id": "cms:9f1f1d8a-da4c-4fab-8a80-becc858e3e28",
+    "province": "อุตรดิตถ์",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Provincial Phutthamonthon Park of Uttaradit",
+    "id": "cms:a5b99485-e081-4cd5-9b21-9124e540eb40",
+    "province": "อุตรดิตถ์",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "หาดไร่เลย์",
+    "id": "curated-railay-beach",
+    "province": "กระบี่",
+    "province_en": "Krabi",
+    "before": 0
+  },
+  {
+    "query": "Rayong Sea",
+    "id": "cms:b0917f79-1e4b-405b-ac9d-f68dd32ccba2",
+    "province": "ระยอง",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Rayong Urban Forest Project / Forest in the City Rayong (Phra Chedi Klang Nam Mangrove)",
+    "id": "cms:acd5055d-f10e-46d0-a98d-df59c4b84949",
+    "province": "ระยอง",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Singha Park Chiang Rai",
+    "id": "cms:eb70b916-adf2-4ca8-bc25-2e64ebe384e8",
+    "province": "เชียงราย",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Sunflower Field at Dok Krai Reservoir / Thung Tan Tawan Ang Kep Nam Dok Krai",
+    "id": "cms:1b44b3f4-94ee-4100-adf0-132d2ffa92f2",
+    "province": "ระยอง",
+    "province_en": null,
+    "before": 0
+  },
+  {
+    "query": "Takiantia Cultural Village",
+    "id": "tat-2016010510155820163",
+    "province": "ชลบุรี",
+    "province_en": "Chon Buri",
+    "before": 0
+  },
+  {
+    "query": "Wat Khao Bo Kwang Thong",
+    "id": "tat-2015120421550718075",
+    "province": "ชลบุรี",
+    "province_en": "Chon Buri",
+    "before": 0
+  }
+]

@@ -40,7 +40,7 @@ test('CMS stores independent multiple categories without weakening legacy primar
   }
 });
 
-test('Admin catalog reuses public smart search and supports browsing existing places', async () => {
+test('Admin catalog requests fresh hybrid search and supports browsing existing places', async () => {
   const routes = new Map();
   const app = {
     get: (path, ...handlers) => routes.set(path, handlers.at(-1)),
@@ -61,9 +61,12 @@ test('Admin catalog reuses public smart search and supports browsing existing pl
   let body;
   await route({ query: { q: 'วัดภูมโนรมย์' } }, { json: value => { body = value; } });
   assert.equal(calls[0].search, 'วัดภูมโนรมย์');
+  assert.equal(calls[0].fresh, true);
   assert.equal(body.places[0].name_local, 'วัดรอยพระพุทธบาทภูมโนรมย์');
-  await route({ query: {} }, { json: value => { body = value; } });
+  await route({ query: { category: 'Culture', province: 'Mukdahan' } }, { json: value => { body = value; } });
   assert.equal(calls[1].search, '');
+  assert.equal(calls[1].category, 'Culture');
+  assert.equal(calls[1].province, 'Mukdahan');
   assert.equal(body.total, 1);
 });
 
@@ -115,4 +118,21 @@ test('ID-only Google draft cannot pass publication validation without admin coor
   assert.ok(cleanPlace(result.value).errors.length);
   for(const input of [{lat:'NaN',lng:100},{lat:13,lng:''},{lat:99,lng:100},{lat:[],lng:100}])
     assert.ok(cleanPlace({name:'ชื่อใหม่',...input},{draft:true}).errors.length);
+});
+
+test('Admin catalog reports database failures without leaking internal details', async () => {
+  const routes = new Map();
+  registerAdminCms({
+    get: (path, ...handlers) => routes.set(path, handlers.at(-1)), post() {}, put() {}, delete() {},
+  }, {
+    listPlaces: async () => { throw new Error('private failure details'); },
+    requireAdmin: (_req, _res, next) => next(),
+    storage: { single: () => (_req, _res, next) => next() },
+  });
+  let status;
+  let body;
+  const res = { status: code => { status = code; return res; }, json: value => { body = value; } };
+  await routes.get('/api/admin/catalog')({ query: { q: 'ชื่อสถานที่' } }, res);
+  assert.equal(status, 503);
+  assert.deepEqual(body, { error: 'Admin CMS is unavailable.' });
 });

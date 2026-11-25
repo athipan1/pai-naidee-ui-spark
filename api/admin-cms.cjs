@@ -143,11 +143,10 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   }));
 
   app.get('/api/admin/catalog', requireAdmin, wrap(async (req, res) => {
-    const q = String(req.query.q || '').trim().slice(0, 100);
-    const page = Math.min(100, Math.max(1, Math.trunc(Number(req.query.page) || 1)));
-    // Reuse the public search ranking, normalization and aliases so an admin
-    // can find every place that public visitors can find.
-    const result = await listPlaces({ search: q, province: String(req.query.province || '').trim().slice(0, 120), page, limit: 30 });
+    const filter = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
+    const page = Math.max(1, Math.trunc(Number(req.query.page)) || 1);
+    const result = await listPlaces({ search: filter(req.query.q, 200), province: filter(req.query.province, 120),
+      category: filter(req.query.category, 120), page, limit: 30, fresh: true });
     res.json({ places: result.attractions.map(place => ({ id: place.id, name: place.name,
       name_local: place.nameLocal, province: place.province, imageUrl: place.publishedPrimaryImage || place.imageUrl || null })), total: result.total, page });
   }));

@@ -214,12 +214,14 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Upload Admin CMS screenshots
+      - name: Upload Admin Catalog and Public Search screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: admin-cms-screenshots
-          path: test-results/admin-cms/**/admin-cms.png
+          path: |
+            test-results/admin-cms/**/admin-cms.png
+            test-results/admin-cms/**/public-search.png
           if-no-files-found: ignore
           retention-days: 14
 

@@ -144,6 +144,7 @@ export default function AdminCms() {
   const [draftError, setDraftError] = useState('');
   const [reloadDrafts, setReloadDrafts] = useState(0);
   const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState('');
   const [provinceFilter, setProvinceFilter] = useState('');
   const [catalogProvince, setCatalogProvince] = useState('');
   const [draftFilter, setDraftFilter] = useState('');
@@ -291,22 +292,39 @@ export default function AdminCms() {
     return () => controller.abort();
   }, [isAdmin, api, reloadDrafts]);
 
-  useEffect(() => {
-    if (tab !== 'existing' || !isAdmin || searched) return;
+  const findPlaces = useCallback(async (page: number, query: string, province: string) => {
     catalogRequest.current?.abort();
-    const controller = new AbortController(); catalogRequest.current = controller;
-    void api('/catalog?page=1', { signal: controller.signal })
-      .then(data => {
-        if (controller.signal.aborted) return;
-        setCatalog(data.places || []);
-        setCatalogTotal(data.total || 0);
-        setCatalogPage(1);
-        setCatalogQuery('');
-        setSearched(true);
-      })
-      .catch(error => { if (!controller.signal.aborted) setMessage(error.message); });
-    return () => controller.abort();
-  }, [tab, isAdmin, searched, api]);
+    const controller = new AbortController();
+    catalogRequest.current = controller;
+    setCatalogLoading(true);
+    setCatalogError('');
+    try {
+      const params = new URLSearchParams({ q: query.trim(), province: province.trim(), page: String(page) });
+      const result = await api(`/catalog?${params}`, { signal: controller.signal });
+      if (controller.signal.aborted) return;
+      setCatalogQuery(query.trim());
+      setCatalogProvince(province.trim());
+      setCatalog(result.places);
+      setCatalogTotal(result.total);
+      setCatalogPage(result.page);
+      setSearched(true);
+    } catch {
+      if (!controller.signal.aborted) setCatalogError('โหลดผลค้นหาไม่สำเร็จ กรุณาลองอีกครั้ง');
+    } finally {
+      if (!controller.signal.aborted) setCatalogLoading(false);
+    }
+  }, [api]);
+
+  useEffect(() => {
+    if (tab === 'existing' && isAdmin && !searched) void findPlaces(1, '', '');
+  }, [tab, isAdmin, searched, findPlaces]);
+
+  useEffect(() => {
+    if (tab !== 'existing') {
+      catalogRequest.current?.abort();
+      setCatalogLoading(false);
+    }
+  }, [tab]);
 
   useEffect(() => {
     if(!isAdmin || !token) return;
@@ -519,18 +537,6 @@ export default function AdminCms() {
       setForm({ ...empty }); setSavedForm(JSON.stringify(empty)); setEditing(null); setInheritedTags([]); setTagInput(''); setTab('drafts'); setProposedCoordinate(null); setGeoCandidates([]); setMessage('บันทึกฉบับร่างสำเร็จ ยังไม่ปรากฏบนเว็บไซต์จนกว่าจะกดเผยแพร่');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'บันทึกไม่สำเร็จ'); }
     finally { setBusy(false); }
-  }
-
-  async function findPlaces(page: number, query: string, province = provinceFilter) {
-    catalogRequest.current?.abort();
-    const controller = new AbortController(); catalogRequest.current = controller;
-    setCatalogLoading(true); setMessage('');
-    try {
-      const result = await api(`/catalog?q=${encodeURIComponent(query)}&province=${encodeURIComponent(province.trim())}&page=${page}`, { signal: controller.signal });
-      if (controller.signal.aborted) return;
-      setCatalogQuery(query); setCatalogProvince(province); setCatalog(result.places); setCatalogTotal(result.total); setCatalogPage(page); setSearched(true);
-    } catch (error) { if (!controller.signal.aborted) setMessage(error instanceof Error ? error.message : 'ค้นหาไม่สำเร็จ'); }
-    finally { if (!controller.signal.aborted) setCatalogLoading(false); }
   }
 
   async function manageAliases(place: CatalogPlace) {
@@ -825,18 +831,19 @@ export default function AdminCms() {
       {message && <div role="status" aria-live="polite" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">{message}</div>}
       {tab === 'existing' && <section className="space-y-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
         <div><h2 className="flex items-center gap-2 text-xl font-bold"><Search className="text-teal-600" /> ค้นหาสถานที่เดิม</h2><p className="mt-1 text-sm text-slate-500">แสดงสถานที่ที่มีอยู่ใน Railway และค้นหาได้ด้วยชื่อเต็ม ชื่อย่อ หรือจังหวัด</p></div>
-        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search.trim()); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span>พบ {catalogTotal} สถานที่ {catalogQuery ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setProvinceFilter(''); void findPlaces(1, '', ''); }}>แสดงทั้งหมด</button></div>
-        {searched && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
+        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search, provinceFilter); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span aria-live="polite">{searched && !catalogLoading && !catalogError && <>พบ {catalogTotal} สถานที่ {catalogQuery || catalogProvince ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</>}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setProvinceFilter(''); void findPlaces(1, '', ''); }}>แสดงทั้งหมด</button></div>
+        {searched && !catalogLoading && !catalogError && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
         {catalogLoading && <p role="status">กำลังค้นหาสถานที่...</p>}
-        <div role="table" aria-label="สถานที่ที่เผยแพร่แล้ว" className="overflow-hidden rounded-xl border">
+        {catalogError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{catalogError}</p>}
+        {!catalogLoading && !catalogError && catalog.length > 0 && <div role="table" aria-label="สถานที่ที่เผยแพร่แล้ว" className="overflow-hidden rounded-xl border">
           <div role="row" className="hidden grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] items-center gap-3 border-b bg-slate-50 p-4 text-xs font-semibold text-slate-600 xl:grid"><span role="columnheader">สถานที่</span><span role="columnheader">จังหวัด</span><span role="columnheader">สถานะ</span><span role="columnheader">การจัดการ</span></div>
           {catalog.map(place => <div role="row" key={place.id} className="grid min-w-0 gap-3 border-b p-4 last:border-0 xl:grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] xl:items-center">
             <div role="cell" className="flex min-w-0 items-center gap-3">{place.imageUrl ? <OptimizedImage src={place.imageUrl} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 shrink-0 rounded-xl object-cover" /> : <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-100"><MapPin className="text-slate-400" /></span>}<div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p>{place.name_local && <p className="break-words text-xs text-slate-500">{place.name}</p>}</div></div>
             <p role="cell" className="text-sm text-slate-600">{place.province}</p><span role="cell" className="w-fit rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">เผยแพร่แล้ว</span>
             <div role="cell" className="flex flex-wrap gap-2"><Link className="rounded-lg border px-3 py-2 text-xs" to={`/attraction/${encodeURIComponent(place.id)}`}>ดูสถานที่</Link><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-lg border px-3 py-2 text-xs text-teal-800">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800">แก้ไขสถานที่ที่เผยแพร่แล้ว</button></div>
           </div>)}
-        </div>
+        </div>}
         {aliasPlace && <section className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-4" aria-label="จัดการชื่อเรียกสถานที่">
           <div className="flex items-center justify-between gap-2"><h3 className="font-semibold">ชื่อเรียกอื่น: {aliasPlace.name_local || aliasPlace.name}</h3><button type="button" className="text-sm underline" onClick={() => setAliasPlace(null)}>ปิด</button></div>
           <p className="text-xs text-slate-600">ชื่อที่เพิ่มจะรอตรวจสอบก่อน จึงไม่กระทบผลค้นหาบนเว็บไซต์ทันที</p>
@@ -844,7 +851,7 @@ export default function AdminCms() {
           {placeAliases.length === 0 && <p className="text-sm text-slate-500">ยังไม่มีชื่อเรียกเพิ่มเติม</p>}
           <div className="space-y-2">{placeAliases.map(alias => <div key={alias.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-3"><div><p className="font-medium">{alias.alias_name}</p><p className="text-xs text-slate-500">{alias.language} · {alias.status === 'approved' ? 'อนุมัติแล้ว' : alias.status === 'rejected' ? 'ปฏิเสธแล้ว' : 'รอตรวจสอบ'}</p></div>{alias.status === 'pending' && <div className="flex gap-2"><button type="button" disabled={busy} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs text-white disabled:opacity-50" onClick={() => void reviewAlias(alias, 'approved')}>อนุมัติ</button><button type="button" disabled={busy} className="rounded-lg border px-3 py-2 text-xs disabled:opacity-50" onClick={() => void reviewAlias(alias, 'rejected')}>ปฏิเสธ</button></div>}</div>)}</div>
         </section>}
-        {catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery, catalogProvince)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery, catalogProvince)}>ถัดไป</button></div>}
+        {!catalogLoading && !catalogError && catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery, catalogProvince)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery, catalogProvince)}>ถัดไป</button></div>}
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>

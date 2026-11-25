@@ -14,8 +14,8 @@ const PLACE_NAME_ALIASES = Object.freeze({
   ],
 });
 
-function normalizeAlias(value) {
-  return value.normalize('NFKC').toLowerCase()
+function normalizeSearch(value) {
+  return String(value || '').normalize('NFKC').toLowerCase()
     .replace(/[\s\u200B-\u200D\uFEFF\p{P}\p{S}]+/gu, '');
 }
 
@@ -33,9 +33,9 @@ function buildPlaceSearch(search) {
     return { searchValue: null, searchPattern: null, flexibleNamePattern: null, aliasPlaceId: null };
   }
 
-  const normalized = normalizeAlias(searchValue);
+  const normalized = normalizeSearch(searchValue);
   const aliasPlaceId = Object.entries(PLACE_NAME_ALIASES)
-    .find(([, aliases]) => aliases.some(alias => normalizeAlias(alias) === normalized))?.[0] || null;
+    .find(([, aliases]) => aliases.some(alias => normalizeSearch(alias) === normalized))?.[0] || null;
 
   // Accept shorter commonly spoken Thai temple names, e.g. "วัดภูมโนรมย์",
   // and words separated by spaces, e.g. "วัดพระพุทธบาท ภูมโนรมย์".
@@ -51,4 +51,4 @@ function buildPlaceSearch(search) {
   };
 }
 
-module.exports = { PLACE_NAME_ALIASES, buildPlaceSearch };
+module.exports = { PLACE_NAME_ALIASES, buildPlaceSearch, normalizeSearch, escapeLike };
