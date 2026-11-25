@@ -100,3 +100,59 @@ test('nationwide regression: aliases, partial names and one-character typos', ()
   assert.equal(rankPlaces(places, 'zzzzzzzzzzzz').length, 0);
   assert.deepEqual(rankPlaces(places, 'วัดแจ้ง').map(place => place.id), ['bangkok-temple']);
 });
+
+test('all 22 Phase 1 exact-name regressions keep their expected Place IDs', () => {
+  const cases = require('./test-fixtures/phase-1-search-cases.json');
+  const places = cases.reduce((byId, row) => {
+    const place = byId.get(row.id);
+    if (place) place.name_local = row.query;
+    else byId.set(row.id, { id: row.id, name: row.query, province: row.province, province_en: row.province_en });
+    return byId;
+  }, new Map());
+  assert.equal(cases.length, 22);
+  for (const row of cases) {
+    for (const province of ['', row.province]) {
+      assert.equal(rankPlaces([...places.values()], row.query, '', province)[0]?.id, row.id, row.query);
+    }
+  }
+});
+
+test('all 77 shared province mappings resolve Thai and English with null and empty province_en', () => {
+  const { PROVINCE_EN } = require('./place-localizations.cjs');
+  const places = Object.keys(PROVINCE_EN).map((th, index) => ({
+    id: th, name: `Location ${index}`, province: th === 'กรุงเทพฯ' ? 'กรุงเทพมหานคร' : th,
+    province_en: index % 2 === 0 ? null : '',
+  }));
+  assert.equal(places.length, 77);
+  for (const [th, en] of Object.entries(PROVINCE_EN)) {
+    assert.deepEqual(rankPlaces(places, en).map(row => row.id), [th], en);
+    assert.deepEqual(rankPlaces(places, `จังหวัด${th}`).map(row => row.id), [th], th);
+    assert.deepEqual(rankPlaces(places, '', '', en.toUpperCase().replaceAll(' ', ' \u200B  ')).map(row => row.id), [th], en);
+  }
+});
+
+test('full primary names, approved aliases, prefix and partial names rank in that order', () => {
+  const places = [
+    { id: 'primary', name: 'Nan', province: 'กระบี่', category: 'Park' },
+    { id: 'alias', name: 'Community Garden', aliases: ['Nan'], province: 'กระบี่', category: 'Park' },
+    { id: 'prefix', name: 'Nan Orchard', province: 'น่าน', category: 'Park' },
+    { id: 'partial', name: 'Little Nan Orchard', province: 'น่าน', category: 'Park' },
+  ];
+  assert.deepEqual(rankPlaces(places, 'Ｎａｎ').map(p => p.id), ['primary', 'alias', 'prefix', 'partial']);
+  assert.deepEqual(rankPlaces(places, 'Nan', 'Park', 'Krabi').map(p => p.id), ['primary', 'alias']);
+  assert.equal(rankPlaces(places, 'Nan', 'Beach', 'Krabi').length, 0);
+  assert.equal(rankPlaces(places, 'Nan', '', '!!!').length, 0);
+});
+
+test('embedded province fragments preserve partial names and natural discovery stays scoped', () => {
+  const places = [
+    { id: 'beach', name: 'Ao Nang Beach', name_local: 'หาดอ่าวนาง', province: 'กระบี่', category: 'Beach' },
+    { id: 'temple', name: 'Wat Phumin', name_local: 'วัดภูมินทร์', province: 'น่าน', category: 'Culture' },
+    { id: 'outside', name: 'Another Temple', name_local: 'วัดแห่งอื่น', province: 'กระบี่', category: 'Culture' },
+  ];
+  assert.equal(rankPlaces(places, 'Ao Nan')[0]?.id, 'beach');
+  assert.equal(rankPlaces(places, 'หาดอ่าว\u200bนาง!')[0]?.id, 'beach');
+  assert.deepEqual(rankPlaces(places, 'temple in Nan').map(p => p.id), ['temple']);
+  assert.deepEqual(rankPlaces(places, 'วัดในน่าน').map(p => p.id), ['temple']);
+  assert.deepEqual(rankPlaces(places, 'zz'), []);
+});

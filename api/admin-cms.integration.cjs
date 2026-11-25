@@ -563,12 +563,54 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.deepEqual((await (await publicApi(`/api/places/${placeId}`)).json()).categories, categories);
   });
 
+  await t.test('fresh Admin lookup, stable hybrid pages and public cache invalidation', async () => {
+    const query = new URLSearchParams({search: 'Consistency Garden'});
+    const readPublic = async () => (await publicApi(`/api/places?${query}`)).json();
+    const readAdmin = async (params) => (await admin(`/catalog?${new URLSearchParams(params)}`)).json();
+    assert.equal((await readPublic()).total, 0); // warm this process's search cache
+    await sql`INSERT INTO places (id, name, name_local, province, province_en, category, lat, lng)
+      SELECT 'phase2-' || n, 'Consistency Garden ' || n, 'สวนทดสอบ ' || n,
+        'เชียงราย', NULL, 'Nature', 19.8, 99.7 FROM generate_series(1, 35) AS n`;
+    const params = { q: 'Consistency Garden', province: 'ChiangRai', category: 'Nature' };
+    const first = await readAdmin({ ...params, page: '1' });
+    const second = await readAdmin({ ...params, page: '2' });
+    assert.equal(first.total, 35);
+    assert.equal(second.total, 35);
+    assert.deepEqual([first.places.length, second.places.length], [30, 5]);
+    assert.equal(new Set([...first.places, ...second.places].map(row => row.id)).size, 35);
+    assert.deepEqual((await readAdmin({ q: 'phase2-1' })).places[0]?.id, 'phase2-1');
+    assert.deepEqual((await readAdmin({ q: 'Consistency Garden 1', category: 'Culture' })).places, []);
+    assert.deepEqual((await readAdmin({ q: 'Consistency Garden 1', province: 'Nan' })).places, []);
+    assert.equal((await readAdmin({ q: 'Consistncy Garden 1' })).places[0]?.id, 'phase2-1');
+    assert.equal((await readPublic()).total, 0, 'independent database change may take up to the public TTL');
+    const fresh = await makeDraft({ name: 'Unambiguous Orchard Chiang Rai', nameLocal: 'สวนผลไม้ตัวอย่าง',
+      province: 'เชียงราย', category: 'Nature', lat: 19.81, lng: 99.72 });
+    query.set('search', fresh.payload.name);
+    assert.equal((await readPublic()).total, 0);
+    const {placeId: publishedId} = await publish(fresh);
+    assert.equal((await readPublic()).attractions[0]?.id, publishedId);
+    const edit = await write(`/catalog/${publishedId}/edit`, {}, 201);
+    const changed = await write(`/places/${edit.id}`, { ...edit.payload, version: edit.version,
+      name: 'Renamed Forest Path', nameLocal: 'เส้นทางป่าทดสอบ', province: 'น่าน',
+      category: 'Park', categories: ['Park'], description: 'violet-ridge-marker' }, 200, 'PUT');
+    await publish(changed);
+    assert.equal((await readPublic()).attractions.some(row => row.id === publishedId), false);
+    query.set('search', 'violet-ridge-marker');
+    query.set('category', 'Park');
+    query.set('province', 'Nan');
+    assert.equal((await readPublic()).attractions[0]?.id, publishedId);
+    assert.equal((await readAdmin({ q: 'Renamed Forest Path', province: 'Nan', category: 'Park' })).places[0]?.id, publishedId);
+  });
+
   await t.test('approved aliases appear in search and rejected or duplicate aliases do not', async () => {
     const path = `/catalog/${placeId}/aliases`;
     const approved = { aliasName: 'Unique Synonym Fixture', language: 'en' };
     const alias = await write(path, approved, 201);
     await write(path, approved, 409);
+    const suggestionUrl = '/api/places/suggest?q=Unique%20Synonym%20Fixture';
+    assert.deepEqual((await (await publicApi(suggestionUrl)).json()).suggestions, []);
     await write(`/aliases/${alias.id}/review`, { status: 'approved' });
+    assert.equal((await (await publicApi(suggestionUrl)).json()).suggestions[0]?.id, placeId);
     const rejected = await write(path, { aliasName: 'Unlisted Word Fixture', language: 'en' }, 201);
     await write(`/aliases/${rejected.id}/review`, { status: 'rejected' });
     const byAlias = await (await admin('/catalog?q=Unique%20Synonym%20Fixture&page=1')).json();
