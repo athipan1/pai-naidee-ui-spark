@@ -31,6 +31,7 @@ const { prepareSearchIndex, rankSearchIndex } = require('./smart-search.cjs');
 const SEARCH_INDEX_TTL_MS = 30_000;
 let sqlClient = null;
 let searchIndex = null;
+let normalizedDescriptions = new Map();
 
 async function readSearchIndex(sql, { search = '', catalog = false } = {}) {
   const query = search.trim();
@@ -71,7 +72,17 @@ async function readSearchIndex(sql, { search = '', catalog = false } = {}) {
     ) a ON a.place_id = p.id
     ${imageJoin}
   `;
-  return prepareSearchIndex(places);
+  // Admin always reads current text from PostgreSQL. Reuse only the pure
+  // normalization result for identical strings from the preceding statement.
+  // Replacing the map bounds retention to one catalogue's descriptions.
+  const descriptions = new Map();
+  const prepared = prepareSearchIndex(places, text => {
+    const normalized = normalizedDescriptions.get(text) ?? normalizeSearch(text);
+    descriptions.set(text, normalized);
+    return normalized;
+  });
+  normalizedDescriptions = descriptions;
+  return prepared;
 }
 
 function invalidateSearchIndex() {
@@ -717,6 +728,7 @@ async function pingDatabase() {
 
 async function closeDatabase() {
   invalidateSearchIndex();
+  normalizedDescriptions.clear();
   if (sqlClient) {
     await sqlClient.end({ timeout: 5 });
     sqlClient = null;

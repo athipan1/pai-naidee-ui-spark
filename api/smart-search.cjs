@@ -47,12 +47,12 @@ function placeNames(place) {
   return [...new Set([...primary, ...aliases, ...variants])];
 }
 
-function prepareSearchIndex(places) {
+function prepareSearchIndex(places, normalizeDescription = normalize) {
   return places.map(place => ({
     place,
     provinces: placeProvinces(place),
     categories: [place.category, ...(Array.isArray(place.categories) ? place.categories : [])].map(normalize),
-    description: normalize(`${place.description || ''} ${place.description_en || place.descriptionEn || ''}`),
+    description: normalizeDescription(`${place.description || ''} ${place.description_en || place.descriptionEn || ''}`),
     ...nameVariants(place),
   }));
 }
