@@ -84,21 +84,20 @@ export default function SearchView({
   });
   const facets = useQuery({
     queryKey: ["places", "facets"],
-    queryFn: getRailwayPlaceFacets,
+    queryFn: ({ signal }) => getRailwayPlaceFacets(signal),
     staleTime: 5 * 60_000,
   });
   const categories = facets.data?.categories ?? [];
   const provinces = facets.data?.provinces ?? [];
   const nearbyMatches = useQuery({
     queryKey: ["places", "search-alternatives", query],
-    queryFn: () => getRailwayPlaceSuggestions(query),
+    queryFn: ({ signal }) => getRailwayPlaceSuggestions(query, signal),
     enabled:
       !isLoading &&
       !error &&
       (data?.total ?? 0) === 0 &&
       query.trim().length >= 2,
     staleTime: 30_000,
-    retry: 1,
   });
   const suggestions = (nearbyMatches.data ?? []).filter(
     (place) =>

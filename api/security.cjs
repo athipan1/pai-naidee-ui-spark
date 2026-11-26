@@ -29,6 +29,7 @@ function buildCorsOptions(env = process.env) {
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Retry-After'],
     credentials: false,
     maxAge: 86400,
   };
@@ -41,10 +42,17 @@ function createRateLimiter({
   now = () => Date.now(),
 } = {}) {
   const buckets = new Map();
+  let sweepAt = 0;
 
   return (req, res, next) => {
     const key = `${keyPrefix}:${req.ip || req.socket?.remoteAddress || 'unknown'}`;
     const current = now();
+    if (current >= sweepAt) {
+      for (const [name, bucket] of buckets) {
+        if (current >= bucket.resetAt) buckets.delete(name);
+      }
+      sweepAt = current + windowMs;
+    }
     const existing = buckets.get(key);
 
     if (!existing || current >= existing.resetAt) {
@@ -61,11 +69,25 @@ function createRateLimiter({
     res.setHeader('RateLimit-Reset', String(Math.ceil(existing.resetAt / 1000)));
 
     if (existing.count > max) {
+      res.setHeader('Cache-Control', 'no-store');
+      res.setHeader('Retry-After', String(Math.max(1, Math.ceil((existing.resetAt - current) / 1000))));
       res.status(429).json({ error: 'Too many requests. Please try again later.' });
       return;
     }
 
     next();
+  };
+}
+
+function createRailwayApiRateLimiter({ now } = {}) {
+  // Redistribute the existing 180 requests/minute allowance. Public media can
+  // no longer spend the capacity reserved for API data and authenticated routes.
+  const limitData = createRateLimiter({ max: 120, now });
+  const limitPublicMedia = createRateLimiter({ max: 60, now });
+  return (req, res, next) => {
+    const isPublicMediaRead = (req.method === 'GET' || req.method === 'HEAD') &&
+      /^\/media\/(?:cms\/[^/]+|mascot\/[a-f0-9]{12}\/elephant\.(?:glb|webp))\/?$/i.test(req.path);
+    return (isPublicMediaRead ? limitPublicMedia : limitData)(req, res, next);
   };
 }
 
@@ -194,6 +216,7 @@ function isUuid(value) {
 module.exports = {
   buildCorsOptions,
   createRateLimiter,
+  createRailwayApiRateLimiter,
   createRoleGuard,
   getBearerToken,
   isUuid,

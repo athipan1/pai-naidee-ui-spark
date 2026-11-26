@@ -27,14 +27,15 @@ const SearchSection = ({ currentLanguage, onSearch }: SearchSectionProps) => {
       setSuggestions([]);
       return;
     }
+    const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      getRailwayPlaceSuggestions(term).then(items => {
+      getRailwayPlaceSuggestions(term, controller.signal).then(items => {
         if (id === requestId.current) setSuggestions(items);
       }).catch(() => {
         if (id === requestId.current) setSuggestions([]);
       });
     }, 250);
-    return () => { window.clearTimeout(timer); requestId.current++; };
+    return () => { window.clearTimeout(timer); controller.abort(); requestId.current++; };
   }, [query, showSuggestions]);
 
   const selectSuggestion = (place: PlaceSuggestion) => {

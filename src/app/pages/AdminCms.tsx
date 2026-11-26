@@ -2,13 +2,14 @@ declare const __PAINAIDEE_BUILD__: string;
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { announcePlacePublication } from '@/shared/utils/placePublication';
+import { retryAfterTime } from '@/shared/utils/retryAfter';
 import { Link } from 'react-router-dom';
 import { CloudUpload, ImagePlus, MapPin, Plus, Search, ShieldCheck, X } from 'lucide-react';
 import { getApiBaseUrl } from '@/services/railway-api.service';
 import { ADMIN_PLACE_CATEGORIES, hasThaiCategoryLabel, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
 import DuplicateResolutionDialog, { type DuplicateCandidate } from '@/components/admin/DuplicateResolutionDialog';
 import AdminMediaPreview from '@/components/admin/AdminMediaPreview';
-import OptimizedImage from '@/components/common/OptimizedImage';
+import CatalogThumbnail from '@/components/admin/CatalogThumbnail';
 import AdminWorkspace, { type AdminView } from '@/components/admin/AdminWorkspace';
 import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboard';
 
@@ -61,7 +62,7 @@ function draftTitle(draft: Draft): string {
   return safeText(payload?.nameLocal) || safeText(payload?.name) || 'ฉบับร่างที่ไม่มีชื่อ';
 }
 class AdminRequestError extends Error {
-  constructor(message: string, readonly status: number, readonly details?: { code?: string; existingPlaces?: DuplicateCandidate[] }) { super(message); }
+  constructor(message: string, readonly status: number, readonly details?: { code?: string; existingPlaces?: DuplicateCandidate[] }, readonly retryAt = 0) { super(message); }
 }
 function toPlaceForm(payload: DraftPayload): PlaceForm {
   const coordinate = (value: string | number | null | undefined) => value == null ? '' : String(value).trim();
@@ -149,6 +150,8 @@ export default function AdminCms() {
   const [reloadDrafts, setReloadDrafts] = useState(0);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState('');
+  const [catalogRetryAt, setCatalogRetryAt] = useState(0);
+  const [catalogFailedParams, setCatalogFailedParams] = useState<{ page: number; query: string; province: string } | null>(null);
   const [provinceFilter, setProvinceFilter] = useState('');
   const [catalogProvince, setCatalogProvince] = useState('');
   const [draftFilter, setDraftFilter] = useState('');
@@ -156,7 +159,15 @@ export default function AdminCms() {
   const [uploadProgress, setUploadProgress] = useState<{done: number; total: number} | null>(null);
   const [overviewTotal, setOverviewTotal] = useState<number | null>(null);
   const [overviewError, setOverviewError] = useState('');
+  const overviewFetchedRevision = useRef(-1);
   const catalogRequest = useRef<AbortController | null>(null);
+  const catalogPendingKey = useRef('');
+  const catalogCooldown = useRef(0);
+  useEffect(() => {
+    if (!catalogRetryAt) return;
+    const timer = window.setTimeout(() => setCatalogRetryAt(0), Math.min(2_147_483_647, Math.max(0, catalogRetryAt - Date.now())));
+    return () => window.clearTimeout(timer);
+  }, [catalogRetryAt]);
   useEffect(() => {
     if (reconcile?.draftId && tab === 'drafts') {
       document.getElementById('cms-reconcile')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -216,6 +227,9 @@ export default function AdminCms() {
   const clearSession = useCallback((notice = '') => {
     try { window.sessionStorage.removeItem('painaidee.admin.token'); } catch { /* Storage may be disabled. */ }
     setToken(null);
+    overviewFetchedRevision.current = -1;
+    catalogCooldown.current = 0;
+    setCatalogRetryAt(0);
     setIsAdmin(false);
     setIsLoading(false);
     setSessionError(notice);
@@ -233,7 +247,8 @@ export default function AdminCms() {
   const api = useCallback(async (path: string, options: RequestInit = {}) => {
     const response = await requestAdmin(path, options);
     const data = await response.json().catch(() => null);
-    if (!response.ok) throw new AdminRequestError(data?.error || data?.errors?.join(', ') || `HTTP ${response.status}`, response.status, data);
+    if (!response.ok) throw new AdminRequestError(data?.error || data?.errors?.join(', ') || `HTTP ${response.status}`, response.status, data,
+      response.status === 429 ? retryAfterTime(response.headers.get('Retry-After')) : 0);
     if (!data) throw new Error('เซิร์ฟเวอร์ตอบกลับในรูปแบบที่ไม่ถูกต้อง');
     return data;
   }, [requestAdmin]);
@@ -290,20 +305,41 @@ export default function AdminCms() {
   }, [isAdmin, api]);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || tab !== 'overview' || catalogCooldown.current > Date.now() || overviewFetchedRevision.current === reloadDrafts) return;
     const controller = new AbortController();
-    void api('/catalog?page=1', {signal: controller.signal}).then(data => { if (!controller.signal.aborted) { setOverviewTotal(data.total); setOverviewError(''); } }).catch(() => { if (!controller.signal.aborted) setOverviewError('โหลดจำนวนสถานที่ไม่สำเร็จ'); });
+    void api('/catalog?page=1', { signal: controller.signal }).then(data => {
+      if (controller.signal.aborted) return;
+      overviewFetchedRevision.current = reloadDrafts;
+      setOverviewTotal(data.total);
+      setOverviewError('');
+    }).catch(error => {
+      if (controller.signal.aborted) return;
+      if (error instanceof AdminRequestError && error.status === 429) {
+        catalogCooldown.current = error.retryAt;
+        setCatalogRetryAt(error.retryAt);
+      }
+      setOverviewError('โหลดจำนวนสถานที่ไม่สำเร็จ');
+    });
     return () => controller.abort();
-  }, [isAdmin, api, reloadDrafts]);
+  }, [isAdmin, api, reloadDrafts, tab]);
 
   const findPlaces = useCallback(async (page: number, query: string, province: string) => {
+    if (catalogCooldown.current > Date.now()) {
+      setCatalogFailedParams({ page, query, province });
+      setCatalogError('ระบบได้รับคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่');
+      return;
+    }
+    const params = new URLSearchParams({ q: query.trim(), province: province.trim(), page: String(page) });
+    const key = params.toString();
+    if (catalogPendingKey.current === key && !catalogRequest.current?.signal.aborted) return;
     catalogRequest.current?.abort();
     const controller = new AbortController();
     catalogRequest.current = controller;
+    catalogPendingKey.current = key;
     setCatalogLoading(true);
     setCatalogError('');
+    setCatalogFailedParams(null);
     try {
-      const params = new URLSearchParams({ q: query.trim(), province: province.trim(), page: String(page) });
       const result = await api(`/catalog?${params}`, { signal: controller.signal });
       if (controller.signal.aborted) return;
       setCatalogQuery(query.trim());
@@ -312,9 +348,18 @@ export default function AdminCms() {
       setCatalogTotal(result.total);
       setCatalogPage(result.page);
       setSearched(true);
-    } catch {
-      if (!controller.signal.aborted) setCatalogError('โหลดผลค้นหาไม่สำเร็จ กรุณาลองอีกครั้ง');
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      setCatalogFailedParams({ page, query, province });
+      if (error instanceof AdminRequestError && error.status === 429) {
+        catalogCooldown.current = error.retryAt;
+        setCatalogRetryAt(error.retryAt);
+        setCatalogError('ระบบได้รับคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่');
+      } else {
+        setCatalogError('โหลดผลค้นหาไม่สำเร็จ กรุณาลองอีกครั้ง');
+      }
     } finally {
+      if (catalogRequest.current === controller) catalogPendingKey.current = '';
       if (!controller.signal.aborted) setCatalogLoading(false);
     }
   }, [api]);
@@ -847,7 +892,7 @@ export default function AdminCms() {
       </section>}
       {tab === 'overview' && <section className="space-y-5" aria-label="ภาพรวมข้อมูล">
         <div className="grid gap-4 sm:grid-cols-3">{[{label:'สถานที่ที่เผยแพร่ทั้งหมด', value:overviewTotal, note:'จำนวนจากแค็ตตาล็อกจริง'}, {label:'ฉบับร่างในรายการล่าสุด', value:draftLoading || draftError ? null : activeDrafts.length, note:'จากฉบับร่างล่าสุดไม่เกิน 100 รายการ'}, {label:'ประวัติเผยแพร่ในรายการล่าสุด', value:draftLoading || draftError ? null : publishedDrafts.length, note:'ประวัติ CMS ไม่ใช่จำนวนสถานที่ทั้งหมด'}].map(item => <article key={item.label} className="rounded-2xl border bg-white p-6 shadow-sm"><p className="text-sm text-slate-600">{item.label}</p><p className="my-3 text-4xl font-bold tracking-tight text-teal-900">{item.value === null ? '—' : item.value.toLocaleString('th-TH')}</p><p className="text-xs text-slate-500">{item.note}</p></article>)}</div>
-        {overviewError && <p role="alert">{overviewError} <button type="button" className="underline" onClick={() => setReloadDrafts(n => n + 1)}>ลองใหม่</button></p>}
+        {overviewError && <p role="alert">{overviewError} <button type="button" className="underline" disabled={Boolean(catalogRetryAt)} onClick={() => setReloadDrafts(n => n + 1)}>ลองใหม่</button></p>}
         <div className="rounded-2xl border bg-white p-6 sm:p-8"><p className="text-xs font-semibold text-teal-800">เริ่มต้นจากชื่อสถานที่</p><h2 className="mt-2 text-xl font-bold">เก็บจุดหมายใหม่ไว้เป็นฉบับร่าง</h2><p className="mt-2 max-w-xl text-sm text-slate-600">เพิ่มรายละเอียดและพิกัดด้วยตนเอง จากนั้นแอดมินกดเผยแพร่เพื่อแสดงบนเว็บไซต์ได้เลย</p><button type="button" onClick={startNew} className="mt-5 rounded-xl bg-teal-800 px-5 py-3 text-sm font-semibold text-white">สร้างฉบับร่าง</button></div>
       </section>}
       {recovery && <section role="status" className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-5"><h2 className="font-bold">พบแบบฟอร์มที่ยังไม่ได้บันทึก</h2><p className="text-sm">กู้คืนข้อมูลชั่วคราวจากแท็บนี้ แล้วตรวจสอบก่อนบันทึกลงระบบ</p><div className="flex flex-wrap gap-2"><button type="button" className="rounded-xl bg-teal-800 px-4 py-2 text-white" onClick={() => {setForm(recovery.form);setSavedForm(recovery.saved);setEditing(recovery.editing);setTab('new');setRecovery(null);}}>กู้คืนแบบฟอร์ม</button><button type="button" className="rounded-xl border px-4 py-2" onClick={() => setRecovery(null)}>ละทิ้งข้อมูลชั่วคราว</button></div></section>}
@@ -856,15 +901,15 @@ export default function AdminCms() {
       {message && <div role="status" aria-live="polite" className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">{message}</div>}
       {tab === 'existing' && <section className="space-y-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
         <div><h2 className="flex items-center gap-2 text-xl font-bold"><Search className="text-teal-600" /> ค้นหาสถานที่เดิม</h2><p className="mt-1 text-sm text-slate-500">แสดงสถานที่ที่มีอยู่ใน Railway และค้นหาได้ด้วยชื่อเต็ม ชื่อย่อ หรือจังหวัด</p></div>
-        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search, provinceFilter); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={busy} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span aria-live="polite">{searched && !catalogLoading && !catalogError && <>พบ {catalogTotal} สถานที่ {catalogQuery || catalogProvince ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</>}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy} onClick={() => { setSearch(''); setProvinceFilter(''); void findPlaces(1, '', ''); }}>แสดงทั้งหมด</button></div>
+        <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search, provinceFilter); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={busy || Boolean(catalogRetryAt)} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span aria-live="polite">{searched && !catalogLoading && !catalogError && <>พบ {catalogTotal} สถานที่ {catalogQuery || catalogProvince ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</>}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy || Boolean(catalogRetryAt)} onClick={() => { setSearch(''); setProvinceFilter(''); void findPlaces(1, '', ''); }}>แสดงทั้งหมด</button></div>
         {searched && !catalogLoading && !catalogError && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
         {catalogLoading && <p role="status">กำลังค้นหาสถานที่...</p>}
-        {catalogError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{catalogError}</p>}
+        {catalogError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{catalogError} {catalogFailedParams && <button type="button" className="underline disabled:opacity-50" disabled={Boolean(catalogRetryAt)} onClick={() => void findPlaces(catalogFailedParams.page, catalogFailedParams.query, catalogFailedParams.province)}>ลองโหลดผลค้นหาใหม่</button>}</p>}
         {!catalogLoading && !catalogError && catalog.length > 0 && <div role="table" aria-label="สถานที่ที่เผยแพร่แล้ว" className="overflow-hidden rounded-xl border">
           <div role="row" className="hidden grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] items-center gap-3 border-b bg-slate-50 p-4 text-xs font-semibold text-slate-600 xl:grid"><span role="columnheader">สถานที่</span><span role="columnheader">จังหวัด</span><span role="columnheader">สถานะ</span><span role="columnheader">การจัดการ</span></div>
           {catalog.map(place => <div role="row" key={place.id} className="grid min-w-0 gap-3 border-b p-4 last:border-0 xl:grid-cols-[minmax(0,1fr)_7rem_6rem_minmax(15rem,auto)] xl:items-center">
-            <div role="cell" className="flex min-w-0 items-center gap-3">{place.imageUrl ? <OptimizedImage src={place.imageUrl} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 shrink-0 rounded-xl object-cover" /> : <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-100"><MapPin className="text-slate-400" /></span>}<div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p>{place.name_local && <p className="break-words text-xs text-slate-500">{place.name}</p>}</div></div>
+            <div role="cell" className="flex min-w-0 items-center gap-3"><CatalogThumbnail src={place.imageUrl} /><div className="min-w-0"><p className="break-words font-semibold">{place.name_local || place.name}</p>{place.name_local && <p className="break-words text-xs text-slate-500">{place.name}</p>}</div></div>
             <p role="cell" className="text-sm text-slate-600">{place.province}</p><span role="cell" className="w-fit rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">เผยแพร่แล้ว</span>
             <div role="cell" className="flex flex-wrap gap-2"><Link className="rounded-lg border px-3 py-2 text-xs" to={`/attraction/${encodeURIComponent(place.id)}`}>ดูสถานที่</Link><button type="button" disabled={busy} onClick={() => void manageAliases(place)} className="rounded-lg border px-3 py-2 text-xs text-teal-800">ชื่อเรียกอื่น</button><button type="button" disabled={busy} onClick={() => void editExisting(place)} className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800">แก้ไขสถานที่ที่เผยแพร่แล้ว</button></div>
           </div>)}

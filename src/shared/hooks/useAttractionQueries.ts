@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as attractionAPI from '@/services/attraction.service';
 import { getRailwayNearbyAttractions } from '@/services/railway-api.service';
 import { AttractionDetail } from '@/shared/types/attraction';
+import { RateLimitError } from '@/shared/utils/retryAfter';
 
 // Query keys for consistent cache management
 export const attractionKeys = {
@@ -22,9 +23,9 @@ export const useAttractionDetail = (id: string | undefined, options?: {
 }) => {
   return useQuery({
     queryKey: attractionKeys.detail(id || ''),
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       if (!id) throw new Error('Attraction ID is required');
-      return attractionAPI.attractionService.getAttractionDetail(id);
+      return attractionAPI.attractionService.getAttractionDetail(id, signal);
     },
     enabled: !!id && (options?.enabled !== false),
     staleTime: 0,
@@ -32,7 +33,7 @@ export const useAttractionDetail = (id: string | undefined, options?: {
     gcTime: options?.cacheTime || 10 * 60 * 1000, // 10 minutes (was cacheTime in v4)
     retry: (failureCount, error) => {
       // Don't retry if attraction not found
-      if (error.message.includes('not found')) return false;
+      if (error instanceof RateLimitError || error.message.includes('not found')) return false;
       return failureCount < 2;
     },
     throwOnError: false, // Handle errors in component
@@ -55,12 +56,12 @@ export const useAttractions = (filters?: {
 }) => {
   return useQuery({
     queryKey: attractionKeys.list(filters || {}),
-    queryFn: () => attractionAPI.attractionService.getAttractions(filters),
+    queryFn: ({ signal }) => attractionAPI.attractionService.getAttractions({ ...filters, signal }),
     enabled: options?.enabled !== false,
     staleTime: 0,
     refetchInterval: 30_000,
     gcTime: 8 * 60 * 1000, // 8 minutes
-    retry: 2,
+    retry: (count, error) => !(error instanceof RateLimitError) && count < 2,
     throwOnError: false,
     meta: {
       errorMessage: 'Failed to load attractions list'
@@ -74,16 +75,16 @@ export const useAllAttractions = (filters?: { category?: string; province?: stri
   return useQuery({
     queryKey: [...attractionKeys.lists(), 'all-pages', filters || {}],
     enabled: options?.enabled !== false,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const limit = 50;
-      const first = await attractionAPI.attractionService.getAttractions({ ...filters, page: 1, limit });
+      const first = await attractionAPI.attractionService.getAttractions({ ...filters, page: 1, limit, signal });
       const attractions = [...first.attractions];
       // Bound client-side work. Raise this bound only alongside a server-side
       // catalogue strategy; a partial catalogue must never appear complete.
       const maxPages = 20;
       let page = 2;
       while (attractions.length < first.total && page <= maxPages) {
-        const next = await attractionAPI.attractionService.getAttractions({ ...filters, page, limit });
+        const next = await attractionAPI.attractionService.getAttractions({ ...filters, page, limit, signal });
         if (next.attractions.length === 0) throw new Error('Incomplete attractions catalogue');
         attractions.push(...next.attractions);
         page += 1;
@@ -94,7 +95,7 @@ export const useAllAttractions = (filters?: { category?: string; province?: stri
     staleTime: 0,
     refetchInterval: 30_000,
     gcTime: 8 * 60 * 1000,
-    retry: 2,
+    retry: (count, error) => !(error instanceof RateLimitError) && count < 2,
     throwOnError: false,
   });
 };
@@ -109,7 +110,7 @@ export const useNearbyAttractions = (location: { lat: number; lng: number } | nu
     enabled: !!location,
     staleTime: excludeId ? 30_000 : 0,
     refetchInterval: excludeId ? false : 30_000,
-    retry: 1,
+    retry: (count, error) => !(error instanceof RateLimitError) && count < 1,
   });
 };
 

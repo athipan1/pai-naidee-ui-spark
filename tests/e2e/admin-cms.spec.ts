@@ -690,6 +690,51 @@ test('catalog distinguishes a service error from empty results and recovers', as
   await page.screenshot({ path: testInfo.outputPath('admin-cms.png'), fullPage: true });
 });
 
+test('catalog defers off-screen thumbnails and waits for Retry-After without retrying automatically', async ({ page }, testInfo) => {
+  await mockCms(page);
+  const thumbnails = Array.from({ length: 30 }, (_, index) => ({
+    ...place, id: `thumbnail-fixture-${index}`, name_local: `รูปตัวอย่าง ${index + 1}`,
+    imageUrl: `${baseURL}/api/media/cms/${String(index).padStart(8, '0')}-1111-8111-8111-111111111111.png`,
+  }));
+  const imageRequests = new Set<string>();
+  let searchRequests = 0;
+  await page.route('**/api/media/cms/**', async route => {
+    imageRequests.add(new URL(route.request().url()).pathname);
+    await route.fulfill({ contentType: 'image/png', body: imageBytes });
+  });
+  await page.route('**/api/admin/catalog?**', async route => {
+    const query = new URL(route.request().url()).searchParams.get('q');
+    if (query === 'รอทดสอบ' && ++searchRequests === 1) {
+      return route.fulfill({ status: 429, headers: { 'Retry-After': '3' }, json: { error: 'Rate limited' } });
+    }
+    return route.fulfill({ json: { places: thumbnails, total: thumbnails.length, page: 1 } });
+  });
+  await login(page);
+  await navigate(page, 'สถานที่ทั้งหมด');
+  await expect(page.getByRole('table')).toBeVisible();
+  await expect.poll(() => imageRequests.size).toBeGreaterThan(0);
+  expect(imageRequests.size).toBeLessThan(15);
+  const finalRow = page.getByRole('row').filter({ hasText: 'รูปตัวอย่าง 30' });
+  await expect(finalRow.locator('img')).toHaveCount(0);
+  await finalRow.scrollIntoViewIfNeeded();
+  await expect(finalRow.locator('img')).toHaveCount(1);
+  await expect.poll(() => imageRequests.has('/api/media/cms/00000029-1111-8111-8111-111111111111.png')).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('catalog-lazy-thumbnails.png') });
+
+  const search = page.getByRole('textbox', { name: 'ค้นหาสถานที่เดิม' });
+  await search.fill('รอทดสอบ');
+  await search.press('Enter');
+  const retry = page.getByRole('button', { name: 'ลองโหลดผลค้นหาใหม่' });
+  await expect(page.getByRole('alert')).toContainText('ระบบได้รับคำขอมากเกินไป');
+  await expect(retry).toBeDisabled();
+  await page.screenshot({ path: testInfo.outputPath('catalog-retry-after.png') });
+  await expect(retry).toBeEnabled({ timeout: 8000 });
+  expect(searchRequests).toBe(1);
+  await retry.click();
+  await expect(page.getByRole('table')).toBeVisible();
+  expect(searchRequests).toBe(2);
+});
+
 test('public search opens the expected bilingual result', async ({ page }, testInfo) => {
   await mockCms(page);
   const exact = { id: 'search-fixture-singha-park', name: 'Singha Park Chiang Rai', nameLocal: 'สิงห์ปาร์คเชียงราย',

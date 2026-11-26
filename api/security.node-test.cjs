@@ -1,13 +1,49 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { app: railwayApp } = require('./railway-server.cjs');
+const express = require('express');
 const {
+  createRailwayApiRateLimiter,
   createRoleGuard,
   isUuid,
   validateCreatePlacePayload,
   validateTalkPayload,
   validateUpdatePlacePayload,
 } = require('./security.cjs');
+
+test('public media and API data enforce independent request budgets and reset', async t => {
+  const app = express();
+  let time = 0;
+  app.use('/api', createRailwayApiRateLimiter({ now: () => time }));
+  app.use((_req, res) => res.sendStatus(200));
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise(resolve => server.once('listening', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const get = async (path, method = 'GET') => {
+    const response = await fetch(`http://127.0.0.1:${server.address().port}/api${path}`, { method });
+    await response.text();
+    return response;
+  };
+
+  for (let i = 0; i < 59; i++) assert.equal((await get('/media/cms/image.jpg?w=256')).status, 200);
+  assert.equal((await get('/media/mascot/7a57a070bddb/elephant.glb', 'HEAD')).status, 200);
+  time = 1_500;
+  const limited = await get('/media/cms/image.jpg?w=640');
+  assert.equal(limited.status, 429);
+  assert.equal(limited.headers.get('retry-after'), '59');
+  assert.equal(limited.headers.get('cache-control'), 'no-store');
+
+  const data = ['/admin/catalog', '/places', '/places/nearby', '/places/example', '/admin/media/image.jpg'];
+  for (const path of data) assert.equal((await get(path)).status, 200);
+  for (let i = data.length; i < 120; i++) assert.equal((await get('/places')).status, 200);
+  assert.equal((await get('/media/cms/image.jpg', 'POST')).status, 429);
+  assert.equal((await get('/admin/catalog')).status, 429);
+  time = 60_000;
+  assert.equal((await get('/media/cms/image.jpg')).status, 200);
+  assert.equal((await get('/admin/catalog')).status, 429);
+  time = 61_500;
+  assert.equal((await get('/admin/catalog')).status, 200);
+});
 
 function mockResponse() {
   return {

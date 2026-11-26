@@ -1,9 +1,11 @@
 import type { AttractionDetail } from "@/shared/types/attraction";
 import type { SearchResult } from "@/shared/types/search";
 import { withPublishedPlaceImages } from '@/shared/utils/publishedPlaceImages';
+import { RateLimitError, retryAfterTime } from '@/shared/utils/retryAfter';
 
 const DEFAULT_API_BASE_URL = "https://painaidee-api-production.up.railway.app";
 const REQUEST_TIMEOUT_MS = 8_000;
+let retryAt = 0;
 
 function getApiBaseUrl(): string {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim();
@@ -13,6 +15,8 @@ function getApiBaseUrl(): string {
 }
 
 async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  signal?.throwIfAborted();
+  if (Date.now() < retryAt) throw new RateLimitError(retryAt);
   const controller = new AbortController();
   const abort = () => controller.abort(signal?.reason);
   if (signal?.aborted) abort();
@@ -27,6 +31,10 @@ async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
     });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        retryAt = Math.max(retryAt, retryAfterTime(response.headers.get('Retry-After')));
+        throw new RateLimitError(retryAt);
+      }
       if (response.status === 404) {
         throw new Error("Attraction not found");
       }
@@ -75,14 +83,14 @@ export interface PlaceFacets {
   categories: string[];
 }
 
-export function getRailwayPlaceFacets(): Promise<PlaceFacets> {
-  return requestJson<PlaceFacets>('/api/places/facets');
+export function getRailwayPlaceFacets(signal?: AbortSignal): Promise<PlaceFacets> {
+  return requestJson<PlaceFacets>('/api/places/facets', signal);
 }
 
-export async function getRailwayPlaceSuggestions(query: string): Promise<PlaceSuggestion[]> {
+export async function getRailwayPlaceSuggestions(query: string, signal?: AbortSignal): Promise<PlaceSuggestion[]> {
   if (query.trim().length < 2) return [];
   const params = new URLSearchParams({ q: query.trim().slice(0, 120), limit: '6' });
-  const result = await requestJson<{ suggestions: PlaceSuggestion[] }>(`/api/places/suggest?${params}`);
+  const result = await requestJson<{ suggestions: PlaceSuggestion[] }>(`/api/places/suggest?${params}`, signal);
   return result.suggestions;
 }
 
@@ -107,8 +115,9 @@ export async function getRailwayNearbyAttractions(options: {
 
 export async function getRailwayAttractionDetail(
   id: string,
+  signal?: AbortSignal,
 ): Promise<AttractionDetail> {
-  const place = await requestJson<AttractionDetail>(`/api/places/${encodeURIComponent(id)}`);
+  const place = await requestJson<AttractionDetail>(`/api/places/${encodeURIComponent(id)}`, signal);
   return withPublishedPlaceImages(place);
 }
 
@@ -118,6 +127,7 @@ export async function getRailwayAttractions(options?: {
   category?: string;
   province?: string;
   search?: string;
+  signal?: AbortSignal;
 }): Promise<RailwayAttractionsResponse> {
   const params = new URLSearchParams();
   params.set("page", String(options?.page || 1));
@@ -128,7 +138,7 @@ export async function getRailwayAttractions(options?: {
   if (options?.search) params.set("search", options.search);
 
   const response = await requestJson<RailwayAttractionsResponse>(
-    `/api/places?${params.toString()}`,
+    `/api/places?${params.toString()}`, options?.signal,
   );
   return { ...response, attractions: response.attractions.map(withPublishedPlaceImages) };
 }
