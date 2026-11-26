@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ImageOff } from "lucide-react";
-import { cmsImageSrcSet } from "@/shared/utils/cmsImageDelivery";
+import { ImageOff, RotateCcw } from "lucide-react";
+import { cmsImageFilename, cmsImageSrcSet } from "@/shared/utils/cmsImageDelivery";
+import { retryPublicMedia } from "@/shared/utils/publicMediaRetry";
+import { RateLimitError } from "@/shared/utils/retryAfter";
 
 interface OptimizedImageProps {
   src: string;
@@ -58,6 +60,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onError,
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
+  const recovery = useRef<{ controller: AbortController; objectUrl?: string }>();
+  const [failedSource, setFailedSource] = useState('');
+  const [retryMessage, setRetryMessage] = useState('');
+  const [retrying, setRetrying] = useState(false);
   const [failed, setFailed] = useState(false);
   const [imageState, setImageState] = useState<"loading" | "loaded" | "error">(
     "loading"
@@ -82,6 +88,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         : "loading"
     );
     setFailed(false);
+    setFailedSource('');
+    setRetryMessage('');
+    setRetrying(false);
+    return () => {
+      recovery.current?.controller.abort();
+      if (recovery.current?.objectUrl) URL.revokeObjectURL(recovery.current.objectUrl);
+      recovery.current = undefined;
+    };
   }, [src, fallbackSrc]);
 
   const displayWidth = Number(width);
@@ -93,9 +107,35 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onLoad?.();
   };
 
+  async function recoverImage() {
+    if (!failedSource || retrying) return;
+    const attempt = { controller: new AbortController(), objectUrl: undefined as string | undefined };
+    recovery.current = attempt;
+    setRetrying(true);
+    setRetryMessage('');
+    try {
+      const blob = await retryPublicMedia(failedSource, attempt.controller.signal);
+      attempt.controller.signal.throwIfAborted();
+      attempt.objectUrl = URL.createObjectURL(blob);
+      setCurrentSrc(attempt.objectUrl);
+      setImageState('loading');
+      setFailed(false);
+      setFailedSource('');
+    } catch (error) {
+      if (!attempt.controller.signal.aborted) {
+        setRetryMessage(error instanceof RateLimitError ? error.message : unavailableLabel);
+      }
+    } finally {
+      if (!attempt.controller.signal.aborted) setRetrying(false);
+    }
+  }
+
   const handleImageError = () => {
     setFailed(true);
     onError?.();
+    if (currentSrc === src && cmsImageFilename(src) && !imageRef.current?.closest('button, a')) {
+      setFailedSource(imageRef.current?.currentSrc || src);
+    }
     if (fallbackSrc && currentSrc !== normalizeImageUrl(fallbackSrc)) {
       setCurrentSrc(normalizeImageUrl(fallbackSrc));
       return;
@@ -114,12 +154,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   return (
     <div className={`relative ${className}`}>
+      {failedSource && <button type="button" aria-label="ลองโหลดรูปใหม่" title={retryMessage || 'ลองโหลดรูปใหม่'}
+        className="absolute left-1 top-1 z-20 rounded bg-background p-1 text-foreground shadow"
+        disabled={retrying} onClick={event => { event.preventDefault(); event.stopPropagation(); void recoverImage(); }}><RotateCcw size={16} /></button>}
       {(failed || !src || src.startsWith("/placeholder-")) && (
         <span
           role="status"
-          className="absolute bottom-1 left-1 z-10 rounded bg-background/90 px-2 text-xs"
+          className="pointer-events-none absolute bottom-1 left-1 z-10 rounded bg-background/90 px-2 text-xs"
         >
-          {unavailableLabel}
+          {retryMessage || unavailableLabel}
         </span>
       )}
       {imageState === "loading" && (
@@ -140,6 +183,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       ) : (
         // The img must not be display:none: browsers will defer a hidden lazy image indefinitely.
         <img
+          key={currentSrc}
           ref={imageRef}
           alt={alt}
           loading={loading}

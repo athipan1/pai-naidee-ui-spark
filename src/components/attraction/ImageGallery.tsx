@@ -92,16 +92,7 @@ export default function ImageGallery({
             <CarouselContent className="ml-0">
               {images.map((image, i) => (
                 <CarouselItem key={`${image}-${i}`} className="pl-0">
-                  <button
-                    ref={i === index ? trigger : undefined}
-                    type="button"
-                    className="block aspect-[4/3] w-full cursor-zoom-in overflow-hidden focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary focus-visible:-outline-offset-4 sm:aspect-[2/1] lg:aspect-[16/10]"
-                    aria-label={label(i)}
-                    onClick={() => {
-                      setSelected(i);
-                      setOpen(true);
-                    }}
-                  >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-[2/1] lg:aspect-[16/10]">
                     <OptimizedImage
                       unavailableLabel={
                         th
@@ -117,7 +108,14 @@ export default function ImageGallery({
                       width="1200"
                       height="750"
                     />
-                  </button>
+                    <button
+                      ref={i === index ? trigger : undefined}
+                      type="button"
+                      className="absolute inset-0 cursor-zoom-in focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary focus-visible:-outline-offset-4"
+                      aria-label={label(i)}
+                      onClick={() => { setSelected(i); setOpen(true); }}
+                    />
+                  </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -142,15 +140,9 @@ export default function ImageGallery({
         {images.length >= 3 && (
           <div className="hidden min-h-0 grid-rows-2 gap-3 lg:grid">
             {images.slice(1, 3).map((image, i) => (
-              <button
-                type="button"
+              <div
                 key={image}
-                aria-label={label(i + 1)}
-                className="relative min-h-0 overflow-hidden rounded-3xl bg-muted focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary"
-                onClick={() => {
-                  move(i + 1);
-                  setOpen(true);
-                }}
+                className="relative min-h-0 overflow-hidden rounded-3xl bg-muted"
               >
                 <OptimizedImage
                   unavailableLabel={
@@ -167,7 +159,10 @@ export default function ImageGallery({
                   cmsMaxWidth={1200}
                   sizes="400px"
                 />
-              </button>
+                <button type="button" aria-label={label(i + 1)}
+                  className="absolute inset-0 focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary"
+                  onClick={() => { move(i + 1); setOpen(true); }} />
+              </div>
             ))}
           </div>
         )}

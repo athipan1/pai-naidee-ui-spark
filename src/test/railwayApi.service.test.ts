@@ -5,6 +5,7 @@ import {
   getRailwayAttractions,
   getRailwayNearbyAttractions,
 } from "@/services/railway-api.service";
+import { RateLimitError, retryAfterTime } from '@/shared/utils/retryAfter';
 
 describe("Railway attraction API client", () => {
   afterEach(() => {
@@ -106,5 +107,22 @@ describe("Railway attraction API client", () => {
     expect(url.searchParams.get('lng')).toBe('100.48889');
     expect(url.searchParams.get('radiusKm')).toBe('10');
     expect(result.attractions[0].distanceKm).toBe(0.4);
+  });
+
+  it('honors Retry-After across public endpoints without issuing automatic retries', async () => {
+    const now = Date.now() - 120_000;
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(null, { status: 429, headers: { 'Retry-After': '2' } }))
+      .mockResolvedValueOnce(Response.json({ attractions: [], total: 0, page: 1, limit: 10 }));
+
+    await expect(getRailwayAttractions()).rejects.toMatchObject({ retryAt: now + 2000 });
+    await expect(getRailwayAttractionDetail('another-place')).rejects.toBeInstanceOf(RateLimitError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    clock.mockReturnValue(now + 2000);
+    await expect(getRailwayAttractions()).resolves.toMatchObject({ total: 0 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(retryAfterTime(new Date(120_000).toUTCString(), 60_000)).toBe(120_000);
+    expect(retryAfterTime(null, 60_000)).toBe(120_000);
   });
 });

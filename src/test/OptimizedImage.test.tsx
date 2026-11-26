@@ -16,7 +16,7 @@ describe('OptimizedImage', () => {
     render(<OptimizedImage src="https://example.org/missing.jpg" alt="Unknown place" />);
     const image = screen.getByRole('img', { name: 'Unknown place' });
     fireEvent.error(image);
-    expect(image).toHaveAttribute('src', '/placeholder-attraction.svg');
+    expect(screen.getByRole('img', { name: 'Unknown place' })).toHaveAttribute('src', '/placeholder-attraction.svg');
   });
 
   it('uses a local SVG immediately when the API returns no photo', () => {
@@ -44,16 +44,19 @@ it('selects CMS variants for the presentation size and keeps legacy URLs intact'
   expect(image).toHaveAttribute('srcset', ` ${original}?w=256 256w, ${original}?w=640 640w, ${original}?w=1200 1200w`.trim());
   expect(image).toHaveAttribute('fetchpriority', 'high');
   rerender(<OptimizedImage src={legacy} alt="CMS image" />);
-  expect(image).toHaveAttribute('src', legacy);
-  expect(image).not.toHaveAttribute('srcset');
+  const legacyImage = screen.getByRole('img', { name: 'CMS image' });
+  expect(legacyImage).toHaveAttribute('src', legacy);
+  expect(legacyImage).not.toHaveAttribute('srcset');
 });
 
 it('falls back without replaying failed CMS variants', () => {
   render(<OptimizedImage src="https://painaidee-api-production.up.railway.app/api/media/cms/00111111-1111-8111-8111-111111111111.jpg" alt="Place" />);
   const image = screen.getByRole('img', { name: 'Place' });
   fireEvent.error(image);
-  expect(image).not.toHaveAttribute('srcset');
-  expect(image).toHaveAttribute('src', '/placeholder-attraction.svg');
-  fireEvent.error(image);
+  const fallback = screen.getByRole('img', { name: 'Place' });
+  expect(fallback).not.toBe(image);
+  expect(fallback).not.toHaveAttribute('srcset');
+  expect(fallback).toHaveAttribute('src', '/placeholder-attraction.svg');
+  fireEvent.error(fallback);
   expect(screen.getByText('Image unavailable')).toBeInTheDocument();
 });

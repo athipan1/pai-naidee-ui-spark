@@ -20,6 +20,7 @@ const { createRailwayMediaStorage, registerRailwayMedia, uploadImage, createImag
 const {
   buildCorsOptions,
   createRateLimiter,
+  createRailwayApiRateLimiter,
   validateTalkPayload,
 } = require('./security.cjs');
 const {
@@ -45,7 +46,7 @@ app.set('trust proxy', 1);
 app.use(cors(buildCorsOptions()));
 app.use(express.json({ limit: '256kb' }));
 app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store, max-age=0'); next(); });
-app.use('/api', createRateLimiter({ windowMs: 60_000, max: 180 }));
+app.use('/api', createRailwayApiRateLimiter());
 
 const storage = createRailwayMediaStorage();
 registerMascotAssets(app, storage);

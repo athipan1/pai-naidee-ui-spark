@@ -84,7 +84,7 @@ export default function TripPlanner({currentLanguage,onMascotStatus}:Props){
   const text=th?`อยากเที่ยว${place.province} โดยสนใจ ${place.nameLocal || place.name}`:`Plan a trip in ${place.provinceEn || place.province}, interested in ${place.name}`;
   setDraft(previous=>previous || text);
  },[reference.data,th]);
- const facets=useQuery({queryKey:['places','facets'],queryFn:getRailwayPlaceFacets,staleTime:300000});
+ const facets=useQuery({queryKey:['places','facets'],queryFn:({signal})=>getRailwayPlaceFacets(signal),staleTime:300000});
  useEffect(()=>{
   // Effects must return only a cleanup function or undefined. Some browser
   // implementations return a non-function value from scrollIntoView; returning

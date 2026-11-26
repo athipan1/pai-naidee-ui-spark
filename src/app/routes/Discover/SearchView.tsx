@@ -22,6 +22,7 @@ import {
 } from "@/services/railway-api.service";
 import { localizedCategory } from "@/shared/i18n/placeLocalization";
 import { uniqueAttractionsById } from "@/shared/utils/uniqueAttractions";
+import { RateLimitError } from '@/shared/utils/retryAfter';
 const ResultsMap = lazy(() => import("./ResultsMap"));
 
 interface SearchViewProps {
@@ -84,21 +85,21 @@ export default function SearchView({
   });
   const facets = useQuery({
     queryKey: ["places", "facets"],
-    queryFn: getRailwayPlaceFacets,
+    queryFn: ({ signal }) => getRailwayPlaceFacets(signal),
     staleTime: 5 * 60_000,
   });
   const categories = facets.data?.categories ?? [];
   const provinces = facets.data?.provinces ?? [];
   const nearbyMatches = useQuery({
     queryKey: ["places", "search-alternatives", query],
-    queryFn: () => getRailwayPlaceSuggestions(query),
+    queryFn: ({ signal }) => getRailwayPlaceSuggestions(query, signal),
     enabled:
       !isLoading &&
       !error &&
       (data?.total ?? 0) === 0 &&
       query.trim().length >= 2,
     staleTime: 30_000,
-    retry: 1,
+    retry: (count, error) => !(error instanceof RateLimitError) && count < 1,
   });
   const suggestions = (nearbyMatches.data ?? []).filter(
     (place) =>

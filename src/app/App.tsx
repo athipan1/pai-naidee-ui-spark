@@ -12,6 +12,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { SkipLink, useResponsiveTextSize } from "@/components/common/AccessibilityUtils";
 import { listenForPlacePublications } from "@/shared/utils/placePublication";
+import { RateLimitError } from '@/shared/utils/retryAfter';
 import ElephantMascot from "@/components/mascot/ElephantMascot";
 import type { PlannerStatus } from "@/components/mascot/mascotState";
 import { getInitialLanguage } from "@/shared/i18n/initialLanguage";
@@ -60,7 +61,7 @@ const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime in v5)
       retry: (failureCount, error) => {
         // Don't retry for 404 errors
-        if (error?.message?.includes('not found')) return false;
+        if (error instanceof RateLimitError || error?.message?.includes('not found')) return false;
         return failureCount < 3;
       },
       refetchOnWindowFocus: true, // Refetch when window gains focus

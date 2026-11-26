@@ -289,7 +289,7 @@ it("replaces a broken gallery image with the shared fallback", () => {
   render(<ImageGallery images={[primary]} alt="Place" language="en" />);
   const img = screen.getByRole("img", { name: "Place · Photo 1" });
   fireEvent.error(img);
-  expect(img).toHaveAttribute("src", "/placeholder-attraction.svg");
+  expect(screen.getByRole("img", { name: "Place · Photo 1" })).toHaveAttribute("src", "/placeholder-attraction.svg");
 });
 
 it("keeps a loaded image visible when only its translated alt text changes", () => {

@@ -1,5 +1,6 @@
 import { AttractionDetail } from '@/shared/types/attraction';
 import { SearchResult } from '@/shared/types/search';
+import { RateLimitError } from '@/shared/utils/retryAfter';
 import {
   getRailwayAttractionDetail,
   getRailwayAttractions,
@@ -14,12 +15,13 @@ const getApiErrorMessage = (error: unknown): string => {
 };
 
 // [REFACTORED] Get attraction details by ID from Railway API
-const getAttractionDetail = async (id: string): Promise<AttractionDetail> => {
+const getAttractionDetail = async (id: string, signal?: AbortSignal): Promise<AttractionDetail> => {
   console.log("✅ Calling Railway API to fetch attraction detail for id:", id);
   try {
-    const attraction = await getRailwayAttractionDetail(id);
+    const attraction = await getRailwayAttractionDetail(id, signal);
     return attraction;
   } catch (error) {
+    if (signal?.aborted || error instanceof RateLimitError) throw error;
     console.error(`❌ Error fetching attraction detail from Railway API for id ${id}:`, error);
 
     throw new Error(`Failed to fetch attraction details. ${getApiErrorMessage(error)}`);
@@ -33,6 +35,7 @@ const getAttractions = async (options?: {
   category?: string;
   province?: string;
   search?: string;
+  signal?: AbortSignal;
 }): Promise<{
   attractions: SearchResult[];
   total: number;
@@ -49,8 +52,10 @@ const getAttractions = async (options?: {
       category: options?.category,
       province: options?.province,
       search: options?.search,
+      signal: options?.signal,
     });
   } catch (error) {
+    if (options?.signal?.aborted || error instanceof RateLimitError) throw error;
     console.error(`❌ Error fetching attractions from Railway API:`, error);
     throw new Error(`Failed to fetch attractions. ${getApiErrorMessage(error)}`);
   }
