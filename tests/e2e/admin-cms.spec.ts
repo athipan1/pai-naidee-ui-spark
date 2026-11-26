@@ -293,7 +293,7 @@ test('login, failed credentials, logout, and an expired session during a request
   await expect(page.getByRole('alert')).toContainText('เซสชันหมดอายุ');
 });
 
-test('catalog pagination, aliases, numeric and empty coordinates, and saving an edit draft', async ({ page }) => {
+test('catalog pagination, aliases, numeric and empty coordinates, and saving an edit draft', async ({ page }, testInfo) => {
   const fixture = await mockCms(page);
   const pageErrors: string[] = [];
   page.on('pageerror', error => pageErrors.push(error.message));
@@ -304,10 +304,28 @@ test('catalog pagination, aliases, numeric and empty coordinates, and saving an 
   await page.getByRole('button', { name: 'ค้นหา', exact: true }).click();
   await expect(page.getByText('(ตามคำค้นล่าสุด)')).toBeVisible();
   await search.fill('คำที่ยังไม่ส่ง');
-  await page.getByRole('button', { name: 'ถัดไป' }).click();
+  const topPager = page.getByRole('navigation', { name: 'หน้าผลค้นหาด้านบน' });
+  const bottomPager = page.getByRole('navigation', { name: 'หน้าผลค้นหาด้านล่าง' });
+  await expect(topPager).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await topPager.screenshot({ path: testInfo.outputPath('catalog-pagination-top.png') });
+  await page.evaluate(() => document.documentElement.classList.add('dark'));
+  await expect(topPager.getByRole('combobox', { name: 'เลือกหน้า' })).toBeVisible();
+  await topPager.screenshot({ path: testInfo.outputPath('catalog-pagination-dark.png') });
+  await page.evaluate(() => document.documentElement.classList.remove('dark'));
+  const requestsBeforePaging = fixture.catalogQueries.length;
+  await topPager.getByRole('button', { name: 'ถัดไป', exact: true }).click();
   await expect(page.getByText('ผลหน้าสอง')).toBeVisible();
+  await expect(topPager.getByRole('combobox', { name: 'เลือกหน้า' })).toHaveValue('2');
+  await expect(bottomPager.getByRole('combobox', { name: 'เลือกหน้า' })).toHaveValue('2');
+  expect(fixture.catalogQueries).toHaveLength(requestsBeforePaging + 1);
   expect(fixture.catalogQueries.at(-1)).toBe('รายการจำลอง');
-  await page.getByRole('button', { name: 'ก่อนหน้า' }).click();
+  await bottomPager.getByRole('button', { name: 'ก่อนหน้า', exact: true }).click();
+  await expect(topPager.getByRole('combobox', { name: 'เลือกหน้า' })).toHaveValue('1');
+  await topPager.getByRole('combobox', { name: 'เลือกหน้า' }).selectOption('2');
+  await expect(page.getByText('ผลหน้าสอง')).toBeVisible();
+  await topPager.getByRole('combobox', { name: 'เลือกหน้า' }).selectOption('1');
+  await expect(topPager.getByRole('combobox', { name: 'เลือกหน้า' })).toHaveValue('1');
 
   await page.getByRole('button', { name: 'ชื่อเรียกอื่น' }).click();
   for (const [name, action, result] of [['ชื่อจำลองหนึ่ง', 'อนุมัติ', 'อนุมัติแล้ว'], ['ชื่อจำลองสอง', 'ปฏิเสธ', 'ปฏิเสธแล้ว']]) {
@@ -714,7 +732,7 @@ test('catalog defers off-screen thumbnails and waits for Retry-After without ret
   await page.route('**/api/media/cms/**', async route => {
     const path = new URL(route.request().url()).pathname;
     imageRequests.add(path);
-    if (path === finalPath && (route.request().resourceType() === 'image' || ++recoveryRequests === 1)) {
+    if (path === finalPath && ++recoveryRequests === 1) {
       return route.fulfill({ status: 429, headers: { 'Retry-After': '3' }, json: { error: 'Media busy' } });
     }
     await route.fulfill({ contentType: 'image/png', body: imageBytes });
@@ -734,19 +752,14 @@ test('catalog defers off-screen thumbnails and waits for Retry-After without ret
   const finalRow = page.getByRole('row').filter({ hasText: 'รูปตัวอย่าง 30' });
   await expect(finalRow.locator('img')).toHaveCount(0);
   await finalRow.scrollIntoViewIfNeeded();
-  await expect(finalRow.locator('img')).toHaveCount(1);
   const retryImage = finalRow.getByRole('button', { name: 'ลองโหลดรูปใหม่' });
   await expect(retryImage).toBeVisible();
-  expect(recoveryRequests).toBe(0);
-  await retryImage.click();
+  expect(recoveryRequests).toBe(1);
   await expect(finalRow.getByRole('status')).toContainText('HTTP 429');
   await retryImage.click();
   expect(recoveryRequests).toBe(1);
-  await expect.poll(async () => {
-    if (await retryImage.isVisible()) await retryImage.click();
-    return recoveryRequests;
-  }, { timeout: 8000, intervals: [500] }).toBe(2);
   await expect(finalRow.locator('img')).toHaveJSProperty('naturalWidth', 1);
+  expect(recoveryRequests).toBe(2);
   await page.screenshot({ path: testInfo.outputPath('catalog-lazy-thumbnails.png') });
 
   const search = page.getByRole('textbox', { name: 'ค้นหาสถานที่เดิม' });
