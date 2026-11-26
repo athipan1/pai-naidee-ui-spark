@@ -1,6 +1,7 @@
 'use strict';
 
 const { createHash, randomUUID } = require('node:crypto');
+const { isGooglePlaceId } = require('./admin-direct-publication.cjs');
 
 const fields = ['name', 'nameLocal', 'description', 'descriptionEn', 'province', 'coordinates', 'categories', 'tags'];
 const clearable = new Set(['nameLocal', 'description', 'descriptionEn', 'tags']);
@@ -17,7 +18,7 @@ function externalIdentities(payload) {
     'Geoapify / OpenStreetMap': 'geoapify',
   };
   return [
-    typeof payload.googlePlaceId === 'string' && payload.googlePlaceId && { namespace: 'google_places', external_id: payload.googlePlaceId },
+    isGooglePlaceId(payload.googlePlaceId) && { namespace: 'google_places', external_id: payload.googlePlaceId },
     typeof source?.id === 'string' && source.id && Object.hasOwn(sources, source.name) &&
       { namespace: sources[source.name], external_id: source.id },
   ].filter(Boolean);
@@ -118,7 +119,7 @@ function applySelection(base, source, choices, imageUrls, primaryImage, publishe
 }
 
 function validateRequest(body) {
-  const { targetPlaceId, sourceVersion, targetVersion, galleryVersion, editVersion, choices, imageUrls, primaryImage, preview } = body || {};
+  const { targetPlaceId, sourceVersion, targetVersion, galleryVersion, editVersion, choices, imageUrls, primaryImage, preview, confirmGoogleIdentity } = body || {};
   if (typeof targetPlaceId !== 'string' || !targetPlaceId || targetPlaceId.length > 200 || !version(sourceVersion) ||
     !version(targetVersion) || typeof galleryVersion !== 'string' || !/^[a-f0-9]{64}$/.test(galleryVersion) ||
     (editVersion !== null && !version(editVersion)) ||
@@ -127,9 +128,11 @@ function validateRequest(body) {
       !(['keep', 'draft'].includes(choice) || choice === 'clear' && clearable.has(field) || choice === 'merge' && mergeable.has(field))) ||
     !Array.isArray(imageUrls) || imageUrls.length > 20 || imageUrls.some(url => typeof url !== 'string' || url.length > 2000) ||
     (primaryImage !== undefined && (typeof primaryImage !== 'string' || primaryImage.length > 2000)) ||
-    (preview !== undefined && typeof preview !== 'boolean')) return null;
+    (preview !== undefined && typeof preview !== 'boolean') ||
+    (confirmGoogleIdentity !== undefined && typeof confirmGoogleIdentity !== 'boolean')) return null;
   return { targetPlaceId, sourceVersion, targetVersion, galleryVersion, editVersion, choices: Object.fromEntries(
-    Object.entries(choices).sort(([a], [b]) => a.localeCompare(b))), imageUrls: distinct(imageUrls), primaryImage, preview: preview === true };
+    Object.entries(choices).sort(([a], [b]) => a.localeCompare(b))), imageUrls: distinct(imageUrls), primaryImage,
+    ...(confirmGoogleIdentity === true && { confirmGoogleIdentity: true }), preview: preview === true };
 }
 
 async function readDraft(sql, id, lock) {
@@ -156,6 +159,15 @@ async function comparison(sql, draft, id, lock) {
   return { place, edit: edits[0] || null, gallery };
 }
 
+function reviewableGoogleId(payload, cleanPlace) {
+  const { googlePlaceId, name } = payload;
+  // The reference endpoint validates and stores only the provider ID. The
+  // existing manual publish policy requires completed, independently entered
+  // place fields; a placeholder or incomplete import is not confirmation.
+  return isGooglePlaceId(googlePlaceId) && name !== 'รอยืนยันชื่อสถานที่' && !cleanPlace(payload).errors.length
+    ? googlePlaceId : null;
+}
+
 function registerDuplicateResolution(app, { requireAdmin, wrap, getSql, cleanPlace, verifyMedia }) {
   const path = '/api/admin/places/:draftId/duplicate-resolution';
   app.get(path, requireAdmin, wrap(async (req, res) => {
@@ -178,6 +190,7 @@ function registerDuplicateResolution(app, { requireAdmin, wrap, getSql, cleanPla
         .map(key => [key, source.payload[key]])), published: snapshot(data.place), existingEdit: data.edit,
       gallery: data.gallery.urls, sourceVersion: source.version, targetVersion: data.place.version,
       galleryVersion: data.gallery.version, fields,
+      googlePlaceIdForReview: reviewableGoogleId(source.payload, cleanPlace),
     });
   }));
 
@@ -222,6 +235,9 @@ function registerDuplicateResolution(app, { requireAdmin, wrap, getSql, cleanPla
       }
       if (source.version !== request.sourceVersion)
         return error(409, 'DRAFT_VERSION_CONFLICT', 'ฉบับร่างต้นทางเปลี่ยนแล้ว กรุณาเปรียบเทียบใหม่');
+      const confirmedGoogleId = request.confirmGoogleIdentity ? reviewableGoogleId(source.payload, cleanPlace) : null;
+      if (request.confirmGoogleIdentity && !confirmedGoogleId)
+        return error(400, 'GOOGLE_IDENTITY_NOT_CONFIRMABLE', 'กรุณาตรวจสอบและกรอกข้อมูลฉบับร่าง Google ให้ครบก่อนยืนยันรหัสสถานที่');
       if (!preview) await tx`LOCK TABLE media IN SHARE MODE`;
       const data = await comparison(tx, source, request.targetPlaceId, !preview);
       if (data.error) return data;
@@ -247,10 +263,14 @@ function registerDuplicateResolution(app, { requireAdmin, wrap, getSql, cleanPla
       // identity fields. An external identity collision is always rejected.
       const changedIdentity = ['name', 'nameLocal', 'province'].some(field => parsed.value[field] !== published[field]);
       if (others.some(candidate => candidate.identity_match || changedIdentity)) return duplicateResponse(others, true);
-      if (preview) return { status: 200, preview: { ...parsed.value,
+      if (preview) return { status: 200, confirmedGoogleId, preview: { ...parsed.value,
         imageUrls: distinct([...data.gallery.urls, ...galleryUrls(parsed.value)]).filter(url => !parsed.value.removedImageUrls.includes(url)) } };
 
-      const metadata = { sourceDraftIds: distinct([...(base._duplicateEdit?.sourceDraftIds || []), source.id]),
+      const googleIdentityConfirmations = new Map((base._duplicateEdit?.googleIdentityConfirmations ?? [])
+        .map(confirmation => [confirmation.id, confirmation]));
+      if (confirmedGoogleId && !googleIdentityConfirmations.has(confirmedGoogleId))
+        googleIdentityConfirmations.set(confirmedGoogleId, { id: confirmedGoogleId, confirmedBy: req.auth.user.id });
+      const metadata = { googleIdentityConfirmations: [...googleIdentityConfirmations.values()], sourceDraftIds: distinct([...(base._duplicateEdit?.sourceDraftIds || []), source.id]),
         galleryVersion: data.gallery.version,
         externalIds: [...new Map([...(base._duplicateEdit?.externalIds || []), ...externalIdentities(source.payload)]
           .map(identity => [JSON.stringify(identity), identity])).values()] };

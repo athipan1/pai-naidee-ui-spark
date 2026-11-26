@@ -15,7 +15,7 @@ type PlaceData = {
 export type ResolutionDraft = { id: string; status: string; target_place_id?: string; payload: PlaceData; version: string };
 type Comparison = {
   source: PlaceData; published: PlaceData; existingEdit: ResolutionDraft | null; gallery: string[];
-  sourceVersion: string; targetVersion: string; galleryVersion: string;
+  sourceVersion: string; targetVersion: string; galleryVersion: string; googlePlaceIdForReview?: string | null;
 };
 type Request = (path: string, options?: RequestInit) => Promise<Response>;
 type Choice = 'keep' | 'draft' | 'merge' | 'clear';
@@ -56,6 +56,8 @@ export default function DuplicateResolutionDialog({
   const [images, setImages] = useState<string[]>([]);
   const [primaryImage, setPrimaryImage] = useState<string>();
   const [preview, setPreview] = useState<PlaceData | null>(null);
+  const [confirmGoogleIdentity, setConfirmGoogleIdentity] = useState(false);
+  const [confirmedGoogleId, setConfirmedGoogleId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [imagePage, setImagePage] = useState(0);
@@ -76,6 +78,8 @@ export default function DuplicateResolutionDialog({
       setPrimaryImage(undefined);
       setImagePage(0);
       setPreview(null);
+      setConfirmGoogleIdentity(false);
+      setConfirmedGoogleId(null);
       setReviewExisting(false);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'โหลดข้อมูลเปรียบเทียบไม่สำเร็จ'); }
     finally { setBusy(false); }
@@ -91,11 +95,12 @@ export default function DuplicateResolutionDialog({
           targetPlaceId: selected, sourceVersion: comparison.sourceVersion, targetVersion: comparison.targetVersion,
           galleryVersion: comparison.galleryVersion, editVersion: comparison.existingEdit?.version ?? null,
           choices, imageUrls: images, primaryImage, preview: previewOnly,
+          ...(confirmGoogleIdentity && { confirmGoogleIdentity }),
         }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || data.errors?.join(', ') || 'ดำเนินการไม่สำเร็จ');
-      if (previewOnly) setPreview(data.preview);
+      if (previewOnly) { setPreview(data.preview); setConfirmedGoogleId(data.confirmedGoogleId ?? null); }
       else { close(); openDraft(data.draft); }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'ดำเนินการไม่สำเร็จ');
@@ -178,6 +183,21 @@ export default function DuplicateResolutionDialog({
               </label>
             </section>;
           })}
+          {comparison.googlePlaceIdForReview && <section className="space-y-2 rounded-lg border p-3">
+            <h3 className="font-semibold">Google Place ID</h3>
+            <p className="break-all text-sm">{comparison.googlePlaceIdForReview}</p>
+            <p className="text-sm">ตรวจว่ารหัสนี้ระบุสถานที่เป้าหมายเดียวกันก่อนยืนยัน</p>
+            <a className="inline-flex min-h-11 items-center text-sm font-medium underline"
+              href={`https://www.google.com/maps/search/?${new URLSearchParams({
+                api: '1', query: target?.name || comparison.published.name || 'Place',
+                query_place_id: comparison.googlePlaceIdForReview,
+              })}`} target="_blank" rel="noreferrer">ตรวจสถานที่ใน Google Maps</a>
+            <label className="flex min-h-11 items-center gap-2 text-sm">
+              <input type="checkbox" checked={confirmGoogleIdentity}
+                onChange={event => setConfirmGoogleIdentity(event.target.checked)} />
+              ตรวจสอบแล้วว่าเป็นสถานที่เดียวกัน และให้ผูกรหัสนี้เมื่อเผยแพร่
+            </label>
+          </section>}
           {imageCards.length > 0 && <section className="space-y-2 rounded-lg border p-3">
             <h3 className="font-semibold">รูปภาพหลักและแกลเลอรี</h3>
             {Boolean(current.removedImageUrls?.length) && <p className="text-sm">
@@ -212,6 +232,7 @@ export default function DuplicateResolutionDialog({
           <dl className="grid gap-2 sm:grid-cols-2">{fields.map(field => <div key={field} className={detailsStyle}>
             <dt className="font-medium">{fieldLabels[field]}</dt><dd>{fieldValue(preview, field) || '—'}</dd>
           </div>)}</dl>
+          {confirmedGoogleId && <p className="break-all text-sm">Google Place ID ที่จะผูกเมื่อเผยแพร่ {confirmedGoogleId}</p>}
           <p className="text-sm">รูปภาพทั้งหมด {preview.imageUrls?.length || 0} รูป</p>
           {preview.imageUrl && <AdminMediaPreview url={preview.imageUrl} base={base} request={request} alt="ตัวอย่างรูปหลัก"
             className="h-28 w-40 rounded-lg object-cover" />}

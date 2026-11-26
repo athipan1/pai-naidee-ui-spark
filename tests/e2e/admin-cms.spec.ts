@@ -714,6 +714,8 @@ test('public search opens the expected bilingual result', async ({ page }, testI
 
 test('duplicate dialog compares selected fields and stages a draft without republishing', async ({ page }, testInfo) => {
   const server = await mockCms(page);
+  const googleId = 'ChIJConfirmedBrowserFixture123';
+  const confirmations: Array<boolean | undefined> = [];
   const source = { id: 'duplicate-source', status: 'draft', version: '1900000000.000015',
     payload: { ...payload, nameLocal: 'ชื่อไทยจากต้นทาง', description: '' } };
   server.seedDraft(source);
@@ -728,12 +730,15 @@ test('duplicate dialog compares selected fields and stages a draft without repub
   await page.route('**/api/admin/places/duplicate-source/duplicate-resolution*', route => {
     if (route.request().method() === 'GET') return route.fulfill({ json: {
       source: source.payload, published: payload, gallery: [], existingEdit: null, sourceVersion: source.version,
-      targetVersion: '1900000000.000016', galleryVersion: 'a'.repeat(64),
+      targetVersion: '1900000000.000016', galleryVersion: 'a'.repeat(64), googlePlaceIdForReview: googleId,
     } });
     const body = route.request().postDataJSON();
     expect(body.choices).toEqual({ nameLocal: 'draft' });
     expect(body.targetPlaceId).toBe(place.id);
-    if (body.preview) return route.fulfill({ json: { preview: staged.payload } });
+    confirmations.push(body.confirmGoogleIdentity);
+    expect(body).not.toHaveProperty('googlePlaceId');
+    if (body.preview) return route.fulfill({ json: { preview: staged.payload,
+      confirmedGoogleId: body.confirmGoogleIdentity ? googleId : null } });
     commits++;
     return route.fulfill({ status: 201, json: { draft: staged } });
   });
@@ -789,11 +794,20 @@ test('duplicate dialog compares selected fields and stages a draft without repub
   await page.evaluate(() => document.documentElement.classList.remove('dark'));
   await dialog.getByRole('button', { name: 'ดูตัวอย่างก่อนยืนยัน' }).click();
   await expect(dialog.getByRole('heading', { name: 'ตัวอย่างก่อนยืนยัน' })).toBeAttached();
+  expect(confirmations).toEqual([undefined]);
+  await dialog.getByRole('button', { name: 'กลับไปเลือกข้อมูล' }).click();
+  const identity = dialog.getByRole('checkbox', { name: /ตรวจสอบแล้วว่าเป็นสถานที่เดียวกัน/ });
+  await expect(identity).not.toBeChecked();
+  await expect(dialog.getByRole('link', { name: 'ตรวจสถานที่ใน Google Maps' })).toHaveAttribute('href', new RegExp(googleId));
+  await identity.check();
+  await previewButton.click();
+  await expect(dialog.getByText('Google Place ID ที่จะผูกเมื่อเผยแพร่ ' + googleId)).toBeVisible();
   expect(commits).toBe(0);
   await dialog.getByRole('button', { name: 'ยืนยันการนำเข้าฉบับร่าง' }).click();
   await expect(page.getByRole('heading', { name: 'แก้ไขข้อมูลฉบับร่าง' })).toBeVisible();
   await expect(page.getByLabel('ชื่อภาษาไทย', { exact: true })).toHaveValue(source.payload.nameLocal);
   expect(commits).toBe(1);
+  expect(confirmations).toEqual([undefined, true, true]);
   expect(server.published()).toBe(0);
   expect(server.draftsSnapshot().some(draft => draft.id === source.id)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('duplicate-edit-draft.png') });

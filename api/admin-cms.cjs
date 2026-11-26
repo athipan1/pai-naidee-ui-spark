@@ -4,7 +4,7 @@ const { geocodeCandidates, resolveGeoapifyDraft } = require('./admin-geocode.cjs
 const { isThaiProvince } = require('./thai-provinces.cjs');
 const { resolveIndependentDraft, warmNamesIndex } = require('./smart-draft-autofill.cjs');
 const { verifyCandidate:verifyGeoapifyDiscoveryCandidate } = require('./geoapify-place-discovery.cjs');
-const { finishDirectPublication } = require('./admin-direct-publication.cjs');
+const { finishDirectPublication, isGooglePlaceId } = require('./admin-direct-publication.cjs');
 const { findDuplicatePlaces, duplicateResponse, registerDuplicateResolution, gallerySnapshot } = require('./admin-duplicate-resolution.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
@@ -121,7 +121,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     try { await handler(req, res); }
     catch (error) {
       if(error?.code==='23503' && req.method === 'DELETE') return res.status(409).json({error:'This draft has linked review or import history and cannot be deleted safely.'});
-      if(error?.code==='PUBLICATION_DUPLICATE')return res.status(409).json({error:'External identity already belongs to another place.'});
+      if(error?.code==='PUBLICATION_DUPLICATE')return res.status(409).json({code:'EXTERNAL_IDENTITY_CONFLICT',error:'External identity already belongs to another place.'});
       console.error('Admin CMS failed.');
       res.status(503).json({ error: 'Admin CMS is unavailable.' });
     }
@@ -268,7 +268,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   // Persist only Google Place ID; source fields are read independently from TAT or Geoapify.
   app.post('/api/admin/places/google-reference', requireAdmin, wrap(async (req, res) => {
     const placeId = typeof req.body?.placeId === 'string' ? req.body.placeId.trim() : '';
-    if (!/^[A-Za-z0-9_-]{8,256}$/.test(placeId)) return res.status(400).json({ error: 'Invalid Google Place ID.' });
+    if (!isGooglePlaceId(placeId)) return res.status(400).json({ error: 'Invalid Google Place ID.' });
     const province = req.body?.province;
     if (!isThaiProvince(province)) return res.status(400).json({ error: 'Select a valid Thai province.' });
     const candidateName=req.body?.candidateName;
@@ -291,11 +291,11 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       const existing=await tx`SELECT id,payload,status,
         EXTRACT(EPOCH FROM updated_at)::text AS version FROM place_drafts
         WHERE payload->>'googlePlaceId'=${placeId} AND status='draft' LIMIT 1`;
-      if(existing.length && existing[0].payload?.province!==province)
-        return {code:409,error:'This Google Place ID already has a draft in a different province.'};
       const linked=await tx`SELECT place_id FROM place_external_ids
         WHERE namespace='google_places' AND external_id=${placeId} LIMIT 1`;
-      if(linked.length)return {code:409,error:'This Google Place ID is already linked to a published place.'};
+      if(linked.length)return {code:409,error:'This Google Place ID is already linked to a published place.',placeId:linked[0].place_id};
+      if(existing.length && existing[0].payload?.province!==province)
+        return {code:409,error:'This Google Place ID already has a draft in a different province.'};
       const matched=enrichment.status==='matched'||enrichment.status==='geoapify_matched';
       if(matched){
         const duplicates=await tx`SELECT id FROM places
@@ -341,7 +341,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         autoFillStatus:enrichment.status,englishNameFound:matched?enrichment.englishNameFound:false,
         geoapifySuggestion:enrichment.status==='geoapify_matched'?enrichment.suggestion:null};
     });
-    res.status(result.code).json(result.error?{error:result.error}:{
+    res.status(result.code).json(result.error?{error:result.error,...(result.placeId && {placeId:result.placeId})}:{
       id:result.id,status:'draft',verificationStatus:'PENDING_VERIFICATION',
       existing:result.existing,coordinatesRequired:result.draft?.payload?.lat==null,
       draft:result.draft,autoFillStatus:result.autoFillStatus,

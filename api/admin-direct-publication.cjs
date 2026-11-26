@@ -2,16 +2,27 @@
 const {audit}=require('./place-review-workflow.cjs');
 const {payloadHash}=require('./place-review-evidence.cjs');
 
+const isGooglePlaceId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{8,256}$/.test(value);
+
 // An administrator's publication decision is not an independent quality review.
 // Preserve historical evidence, but never present it as verification of this edit.
 async function finishDirectPublication(tx,draft,placeId,actorId) {
   const [review]=await tx`SELECT state FROM place_reviews WHERE draft_id=${draft.id} FOR UPDATE`;
+  const duplicateEdit = draft.payload._duplicateEdit;
+  // Collision hints also include unconfirmed references and independent-source
+  // matches. Only explicit, server-recorded Google confirmations become links.
+  const confirmations = duplicateEdit?.googleIdentityConfirmations ?? [];
   const publication={publicationMode:'admin_direct',qualityReviewPerformed:false,
-    ...(draft.payload._duplicateEdit ? { sourceDraftIds: draft.payload._duplicateEdit.sourceDraftIds } : {}) };
-  if(draft.payload.googlePlaceId) {
-    const id=draft.payload.googlePlaceId;
+    ...(duplicateEdit ? { sourceDraftIds: duplicateEdit.sourceDraftIds } : {}),
+    ...(confirmations.length ? { googleIdentityConfirmations: confirmations } : {}) };
+  const googleClaims = new Map();
+  if (draft.payload.googlePlaceId) googleClaims.set(draft.payload.googlePlaceId, actorId);
+  for (const { id, confirmedBy } of confirmations) {
+    if (isGooglePlaceId(id)) googleClaims.set(id, confirmedBy);
+  }
+  for (const [id, reviewer] of googleClaims) {
     await tx`INSERT INTO place_external_ids(namespace,external_id,place_id,reviewed_by)
-      VALUES('google_places',${id},${placeId},${actorId}) ON CONFLICT(namespace,external_id) DO NOTHING`;
+      VALUES('google_places',${id},${placeId},${reviewer}) ON CONFLICT(namespace,external_id) DO NOTHING`;
     const [owner]=await tx`SELECT place_id FROM place_external_ids WHERE namespace='google_places' AND external_id=${id}`;
     if(owner?.place_id!==placeId)throw Object.assign(Error('Identity already claimed'),{code:'PUBLICATION_DUPLICATE'});
   }
@@ -21,4 +32,4 @@ async function finishDirectPublication(tx,draft,placeId,actorId) {
   await audit(tx,draft.id,actorId,'direct_publish',review?.state||'DISCOVERED','PUBLISHED',publication,payloadHash(draft.payload),
     'Published directly by administrator; independent evidence review was not performed.');
 }
-module.exports={finishDirectPublication};
+module.exports={finishDirectPublication,isGooglePlaceId};

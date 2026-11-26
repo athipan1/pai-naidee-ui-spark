@@ -5,7 +5,7 @@ const { once } = require('node:events');
 const express = require('express');
 const { authRoutes, hashPassword, hashToken } = require('./railway-admin-auth.cjs');
 const { registerAdminCms } = require('./admin-cms.cjs');
-const { readExisting } = require('./google-place-discovery.cjs');
+const { classifyCandidates, readExisting } = require('./google-place-discovery.cjs');
 const { signCandidate: signGeoapifyCandidate } = require('./geoapify-place-discovery.cjs');
 const { registerQualityReview } = require('./place-quality-review.cjs');
 const { registerGoogleVerification } = require('./google-place-verification.cjs');
@@ -655,6 +655,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(review.preview.imageUrls.length, 2);
     assert.equal((await compare()).existingEdit, null, 'preview is read-only');
     assert.equal((await write(path, { ...selection(initial), choices: { description: 'draft' } }, 400)).code, 'INVALID_SELECTION');
+    assert.equal((await write(path, { ...selection(initial), confirmGoogleIdentity: true }, 400)).code, 'GOOGLE_IDENTITY_NOT_CONFIRMABLE');
 
     const open = await write(`/catalog/${targetId}/edit`, {}, 201);
     assert.equal((await write(path, selection(initial), 409)).code, 'EDIT_DRAFT_VERSION_CONFLICT');
@@ -734,6 +735,95 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
       selectedFields: ['description'], retainGallery: true });
     assert.equal((await publish(refreshed)).placeId, placeId);
     assert.equal((await sql`SELECT count(*) AS count FROM media WHERE place_id = ${placeId}`)[0].count, '1');
+  });
+
+  await t.test('duplicate resolution links only explicitly confirmed Google identities, atomically and once', async () => {
+    const primary = (await (await upload('image/png', fixturePng(132))).json()).imageUrl;
+    const name = 'Google identity resolution fixture';
+    const nameLocal = 'สถานที่ทดสอบยืนยันรหัสกูเกิล';
+    const original = await makeDraft({ name, nameLocal, imageUrl: primary, description: 'Original' });
+    const { placeId } = await publish(original);
+    const originalMedia = await sql`SELECT id, url FROM media WHERE place_id = ${placeId}`;
+    const ids = ['ChIJStagedUnconfirmed123', 'ChIJConfirmedForDuplicate123', 'ChIJConcurrentClaim123'];
+    const [unconfirmed, confirmed, contested] = ids;
+    const otherTableOwner = 'fixture-other';
+    const count = (await sql`SELECT count(*) AS count FROM places`)[0].count;
+
+    const resolve = async (googlePlaceId, confirmGoogleIdentity) => {
+      const reference = await write('/places/google-reference', { placeId: googlePlaceId, province: fixture.province }, 201);
+      const source = await write(`/places/${reference.id}`, { ...fixture, name, nameLocal, description: googlePlaceId,
+        version: reference.draft.version }, 200, 'PUT');
+      const conflict = await publish(source, 409);
+      assert.equal(conflict.conflictType, 'EXACT_NAME_MATCH');
+      assert.equal(conflict.existingPlaces[0].placeId, placeId);
+      const path = `/places/${source.id}/duplicate-resolution`;
+      const compared = await (await admin(`${path}?targetPlaceId=${encodeURIComponent(placeId)}`)).json();
+      const selection = { targetPlaceId: placeId, sourceVersion: compared.sourceVersion, targetVersion: compared.targetVersion,
+        galleryVersion: compared.galleryVersion, editVersion: null, choices: { description: 'draft' }, imageUrls: [],
+        ...(confirmGoogleIdentity && { confirmGoogleIdentity }),
+        // The client can confirm, but cannot supply the identity being linked.
+        googlePlaceId: 'ChIJUntrustedClientValue123',
+        _duplicateEdit: { externalIds: [{ namespace: 'tat', external_id: 'not-verified' }] },
+      };
+      const preview = await write(path, { ...selection, preview: true });
+      assert.equal(compared.googlePlaceIdForReview, googlePlaceId);
+      assert.equal(preview.confirmedGoogleId, confirmGoogleIdentity ? googlePlaceId : null);
+      assert.equal(preview.preview.description, googlePlaceId);
+      const { draft } = await write(path, selection, 201);
+      assert.equal((await write(path, selection)).draft.id, draft.id);
+      assert.equal((await sql`SELECT external_id FROM place_external_ids WHERE external_id = ${googlePlaceId}`).length, 0);
+      return draft;
+    };
+
+    await publish(await resolve(unconfirmed, false));
+    assert.equal((await sql`SELECT external_id FROM place_external_ids WHERE place_id = ${placeId}`).length, 0);
+
+    const draft = await resolve(confirmed, true);
+    const saved = await write(`/places/${draft.id}`, { ...draft.payload, version: draft.version,
+      googlePlaceId: 'ChIJUntrustedEditValue123', _duplicateEdit: {} }, 200, 'PUT');
+    const results = await Promise.all([publish(saved), publish(saved)]);
+    assert.deepEqual(results.map(result => result.placeId), [placeId, placeId]);
+    const records = await sql`SELECT namespace, external_id, place_id, reviewed_by FROM place_external_ids WHERE place_id = ${placeId}`;
+    assert.deepEqual([...records], [{ namespace: 'google_places', external_id: confirmed, place_id: placeId, reviewed_by: 'test-admin' }]);
+    const events = await sql`SELECT evidence FROM place_review_events WHERE draft_id = ${saved.id} AND action = 'direct_publish'`;
+    assert.equal(events.length, 1);
+    assert.deepEqual(events[0].evidence.googleIdentityConfirmations, [{ id: confirmed, confirmedBy: 'test-admin' }]);
+
+    const found = classifyCandidates([{ placeId: confirmed, name: 'Renamed upstream', lat: null, lng: null, holds: [] }],
+      await readExisting(getSql, fixture.province, true))[0];
+    assert.equal(found.duplicateStatus, 'existing_place');
+    assert.ok(found.duplicateMatches.some(match => match.placeId === placeId && match.reason === 'google_place_id'));
+    const blocked = await write('/places/google-reference', { placeId: confirmed, province: 'ระยอง' }, 409);
+    assert.equal(blocked.placeId, placeId);
+
+    const pending = await resolve(contested, true);
+    // Simulate a claim after the ownership SELECT, inside the isolated DB.
+    // The publish must unwind even after it has begun changing the target.
+    await sql.unsafe(`CREATE FUNCTION cms_test_late_identity_claim() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.description = 'ChIJConcurrentClaim123' THEN
+        INSERT INTO place_external_ids(namespace, external_id, place_id, reviewed_by)
+          VALUES ('google_places', 'ChIJConcurrentClaim123', 'fixture-other', 'test-admin');
+      END IF; RETURN NEW; END $$`);
+    await sql`CREATE TRIGGER cms_test_late_identity_claim BEFORE UPDATE OF description ON places
+      FOR EACH ROW EXECUTE FUNCTION cms_test_late_identity_claim()`;
+    try {
+      assert.equal((await publish(pending, 409)).code, 'EXTERNAL_IDENTITY_CONFLICT');
+    } finally {
+      await sql`DROP TRIGGER cms_test_late_identity_claim ON places`;
+      await sql`DROP FUNCTION cms_test_late_identity_claim()`;
+    }
+    const [current] = await sql`SELECT description, image_url FROM places WHERE id = ${placeId}`;
+    assert.deepEqual(current, { description: confirmed, image_url: primary });
+    assert.equal((await sql`SELECT status FROM place_drafts WHERE id = ${pending.id}`)[0].status, 'draft');
+    assert.equal((await sql`SELECT id FROM place_review_events WHERE draft_id = ${pending.id}`).length, 0);
+    assert.equal((await sql`SELECT external_id FROM place_external_ids WHERE external_id = ${contested}`).length, 0);
+
+    await sql`INSERT INTO place_external_ids(namespace, external_id, place_id, reviewed_by)
+      VALUES ('google_places', ${contested}, ${otherTableOwner}, 'test-admin')`;
+    assert.equal((await publish(pending, 409)).code, 'EXTERNAL_IDENTITY_CONFLICT');
+    assert.equal((await sql`SELECT place_id FROM place_external_ids WHERE external_id = ${contested}`)[0].place_id, otherTableOwner);
+    assert.equal((await sql`SELECT count(*) AS count FROM places`)[0].count, count);
+    assert.deepEqual(await sql`SELECT id, url FROM media WHERE place_id = ${placeId}`, originalMedia);
   });
 
   await t.test('duplicate candidates distinguish external identity and ambiguous names', async () => {
