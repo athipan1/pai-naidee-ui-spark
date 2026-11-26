@@ -5,7 +5,7 @@ const { once } = require('node:events');
 const express = require('express');
 const { authRoutes, hashPassword, hashToken } = require('./railway-admin-auth.cjs');
 const { registerAdminCms } = require('./admin-cms.cjs');
-const { readExisting } = require('./google-place-discovery.cjs');
+const { classifyCandidates, readExisting } = require('./google-place-discovery.cjs');
 const { signCandidate: signGeoapifyCandidate } = require('./geoapify-place-discovery.cjs');
 const { registerQualityReview } = require('./place-quality-review.cjs');
 const { registerGoogleVerification } = require('./google-place-verification.cjs');
@@ -14,7 +14,7 @@ const { applyPlaceReviewSchema } = require('./place-review-schema.cjs');
 const {fixturePng}=require('./test-fixtures/image.cjs');
 const {registerProvinceReviewPipeline}=require('./province-review-pipeline.cjs');
 const {boundaryPlan,storeApprovedBoundary}=require('./import-province-boundary.cjs');
-const { createImageUpload, registerRailwayMedia, uploadImage, MAX_IMAGE_BYTES } = require('./railway-media.cjs');
+const { createImageUpload, registerRailwayMedia, uploadImage, MAX_IMAGE_BYTES, verifyDraftMedia } = require('./railway-media.cjs');
 const { ensureAiSettings, MODEL_OPTIONS, registerAiSettingsRoutes } = require('./ai-model-settings.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
 const { closeDatabase, ensureSchemaTables, getSql, invalidateSearchIndex, listPlaces } = require('./postgres-db.cjs');
@@ -75,6 +75,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   const requireAdmin = authRoutes(app, { getSql, limitLogin: (_req, _res, next) => next() });
   registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage: createImageUpload(),
     uploadImage: file => uploadImage(storage, file), invalidateSearchIndex,
+    verifyMedia: (url, known) => verifyDraftMedia(storage, url, known),
     enrichDraft: async ({province,candidateName})=>candidateName==='หาดแหลมเจริญ'&&province==='ระยอง'
       ? {status:'matched',englishNameFound:true,
         source:{name:'Tourism Authority of Thailand — Open Data',url:'https://datacatalog.tat.or.th/dataset/tourist-attraction',id:'tat-fixture-2026',license:'Open Data Common'},
@@ -134,7 +135,7 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
   await t.test('auth protects every admin route, rejects invalid/expired/disabled sessions and revokes logout', async () => {
     const guarded = [
       ['GET', '/me'], ['POST', '/logout'], ['GET', '/places'], ['POST', '/places'], ['PUT', '/places/x'],
-      ['POST', '/places/x/publish'], ['GET', '/catalog'], ['GET', '/taxonomy'], ['GET', '/geocode'], ['POST', '/catalog/x/edit'],
+      ['POST', '/places/x/publish'], ['GET', '/places/x/duplicate-resolution'], ['POST', '/places/x/duplicate-resolution'], ['GET', '/catalog'], ['GET', '/taxonomy'], ['GET', '/geocode'], ['POST', '/catalog/x/edit'],
       ['GET', '/catalog/x/aliases'], ['POST', '/catalog/x/aliases'], ['POST', '/aliases/x/review'],
       ['GET', '/catalog/x/media'], ['GET', '/media/1a111111-1111-4111-8111-111111111111.png'],
       ['POST', '/media'], ['GET', '/ai/models'], ['GET', '/ai/models/validate'], ['PUT', '/ai/models'],
@@ -619,6 +620,229 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     assert.equal(rejectedAlias.status, 'rejected');
     const other = await write('/catalog/fixture-other/aliases', approved, 201);
     await write(`/aliases/${other.id}/review`, { status: 'approved' }, 409);
+  });
+
+  await t.test('duplicate resolution preserves identity, edits, media, and replay receipts', async () => {
+    const main = (await (await upload('image/png', fixturePng(130))).json()).imageUrl;
+    const extra = (await (await upload('image/png', fixturePng(131))).json()).imageUrl;
+    const target = await makeDraft({ name: 'Resolution fixture', nameLocal: 'สถานที่อ้างอิง',
+      imageUrl: main, description: 'Published Thai detail', descriptionEn: 'Published English detail', tags: ['Water'] });
+    const { placeId: targetId } = await publish(target);
+    await sql`UPDATE media SET creator_name = 'Fixture Photographer', license_name = 'Fixture license' WHERE place_id = ${targetId}`;
+    const source = await makeDraft({ name: 'Resolution fixture', nameLocal: 'สถานที่ปรับใหม่',
+      imageUrl: extra, description: '', descriptionEn: 'Replacement English detail', tags: ['water', 'Trail'] });
+    const duplicate = await publish(source, 409);
+    assert.equal(duplicate.code, 'DUPLICATE_PLACE');
+    assert.equal(duplicate.conflictType, 'EXACT_NAME_MATCH');
+    assert.equal(duplicate.existingPlaces[0].placeId, targetId);
+    assert.equal(duplicate.existingPlaces[0].imageUrl, main);
+    await publish(await makeDraft({ name: 'Resolution fixture', nameLocal: 'สถานที่อ้างอิง', province: 'ระยอง' }));
+    assert.equal((await publish({ ...source, version: '1900000000.000001' }, 409)).code, 'DRAFT_VERSION_CONFLICT');
+
+    const path = `/places/${source.id}/duplicate-resolution`;
+    await admin(`${path}?targetPlaceId=fixture-other`, { status: 409 });
+    const compare = () => admin(`${path}?targetPlaceId=${encodeURIComponent(targetId)}`).then(res => res.json());
+    const selection = compared => ({
+      targetPlaceId: targetId, sourceVersion: compared.sourceVersion, targetVersion: compared.targetVersion,
+      galleryVersion: compared.galleryVersion, editVersion: compared.existingEdit?.version ?? null,
+      choices: { nameLocal: 'draft', descriptionEn: 'draft', tags: 'merge' }, imageUrls: [extra], primaryImage: extra,
+    });
+    const initial = await compare();
+    assert.equal(initial.existingEdit, null, 'opening the comparison does not create a draft');
+    assert.deepEqual(initial.gallery, [main]);
+    const review = await write(path, { ...selection(initial), preview: true });
+    assert.equal(review.preview.description, 'Published Thai detail');
+    assert.equal(review.preview.imageUrls.length, 2);
+    assert.equal((await compare()).existingEdit, null, 'preview is read-only');
+    assert.equal((await write(path, { ...selection(initial), choices: { description: 'draft' } }, 400)).code, 'INVALID_SELECTION');
+    assert.equal((await write(path, { ...selection(initial), confirmGoogleIdentity: true }, 400)).code, 'GOOGLE_IDENTITY_NOT_CONFIRMABLE');
+
+    const open = await write(`/catalog/${targetId}/edit`, {}, 201);
+    assert.equal((await write(path, selection(initial), 409)).code, 'EDIT_DRAFT_VERSION_CONFLICT');
+    const current = await write(`/places/${open.id}`,
+      { ...open.payload, version: open.version, description: 'Pending Thai edit' }, 200, 'PUT');
+    const compared = await compare();
+    assert.equal(compared.existingEdit.version, current.version);
+    const invalid = await write(path, { ...selection(compared), imageUrls: ['https://example.test/not-in-source.png'] }, 400);
+    assert.equal(invalid.code, 'INVALID_MEDIA_REFERENCE');
+    await sql`UPDATE media SET license_name = 'Latest fixture license' WHERE place_id = ${targetId}`;
+    assert.equal((await write(path, selection(compared), 409)).code, 'GALLERY_VERSION_CONFLICT');
+    const final = selection(await compare());
+    await sql`ALTER TABLE place_drafts ADD CONSTRAINT duplicate_receipt_fixture CHECK (NOT (payload ? '_duplicateReceipt'))`;
+    try { await write(path, final, 503); }
+    finally { await sql`ALTER TABLE place_drafts DROP CONSTRAINT duplicate_receipt_fixture`; }
+    assert.equal((await compare()).existingEdit.version, current.version, 'failed receipt rolls back the edit change');
+    const results = await Promise.all([write(path, final), write(path, final)]);
+    assert.equal(results[0].draft.id, current.id);
+    assert.equal(results[1].draft.id, current.id);
+    assert.equal(results.filter(item => item.replayed).length, 1);
+    const merged = results[0].draft;
+    assert.deepEqual(merged.payload.tags, ['Water', 'Trail']);
+    assert.equal(merged.payload.description, 'Pending Thai edit');
+    assert.equal(merged.payload.descriptionEn, 'Replacement English detail');
+    assert.equal(merged.payload.imageUrl, extra);
+    const before = (await sql`SELECT count(*) AS count FROM places`)[0].count;
+    assert.equal((await publish(merged)).placeId, targetId);
+    assert.equal((await sql`SELECT count(*) AS count FROM places`)[0].count, before);
+    const rows = await sql`SELECT url, creator_name, license_name FROM media WHERE place_id = ${targetId} ORDER BY url`;
+    assert.equal(rows.length, 2);
+    assert.deepEqual(rows.find(row => row.url === main), { url: main, creator_name: 'Fixture Photographer', license_name: 'Latest fixture license' });
+    assert.ok(objects.has(`cms/${new URL(main).pathname.split('/').pop()}`));
+    assert.ok(objects.has(`cms/${new URL(extra).pathname.split('/').pop()}`));
+    const [sourceRow] = await sql`SELECT status, payload FROM place_drafts WHERE id = ${source.id}`;
+    assert.equal(sourceRow.status, 'draft');
+    assert.equal(sourceRow.payload.nameLocal, source.payload.nameLocal);
+    const linked = await admin(path).then(res => res.json());
+    assert.equal(linked.linkedDraft.id, merged.id);
+    assert.equal(linked.linkedDraft.status, 'published');
+    assert.equal((await write(path, final)).draft.id, merged.id);
+    const detail = await (await publicApi(`/api/places/${targetId}`)).json();
+    assert.equal(detail.nameLocal, 'สถานที่ปรับใหม่');
+    assert.equal(detail.descriptionEn, 'Replacement English detail');
+    assert.equal(detail.publishedPrimaryImage, extra);
+    const query = encodeURIComponent('สถานที่ปรับใหม่');
+    assert.equal((await (await publicApi(`/api/places?search=${query}`)).json()).attractions[0].id, targetId);
+    assert.equal((await (await admin(`/catalog?q=${query}`)).json()).places[0].id, targetId);
+    const [event] = await sql`SELECT evidence FROM place_review_events WHERE draft_id = ${merged.id} AND action = 'direct_publish'`;
+    assert.deepEqual(event.evidence.sourceDraftIds, [source.id]);
+  });
+
+  await t.test('resolution creates one edit draft and rechecks published and gallery versions', async () => {
+    const { placeId } = await publish(await makeDraft({ name: 'Fresh resolution fixture', nameLocal: 'ทดสอบร่างแก้ไขใหม่',
+      descriptionEn: 'Keep legacy English detail' }));
+    const source = await makeDraft({ name: 'Fresh resolution fixture', nameLocal: 'ทดสอบร่างแก้ไขใหม่', description: 'Updated fixture' });
+    const path = `/places/${source.id}/duplicate-resolution`;
+    const compare = () => admin(`${path}?targetPlaceId=${encodeURIComponent(placeId)}`).then(res => res.json());
+    const selection = compared => ({
+      targetPlaceId: placeId, sourceVersion: compared.sourceVersion, targetVersion: compared.targetVersion,
+      galleryVersion: compared.galleryVersion, editVersion: null, choices: { description: 'draft' }, imageUrls: [],
+    });
+    const first = await compare();
+    await sql`UPDATE places SET updated_at = updated_at + INTERVAL '1 microsecond' WHERE id = ${placeId}`;
+    assert.equal((await write(path, selection(first), 409)).code, 'TARGET_PLACE_VERSION_CONFLICT');
+    const final = selection(await compare());
+    const { draft } = await write(path, final, 201);
+    assert.equal(draft.target_place_id, placeId);
+    assert.equal(draft.payload.descriptionEn, 'Keep legacy English detail');
+    assert.equal((await write(path, final)).draft.id, draft.id);
+    await sql`INSERT INTO media (id,place_id,url,title) VALUES ('gallery-after-transfer',${placeId},
+      'https://fixture.example.test/later-image.jpg','Newly associated media')`;
+    assert.equal((await publish(draft, 409)).code, 'GALLERY_VERSION_CONFLICT');
+    const comparison = await admin(`/places/${draft.id}/reconcile`).then(res => res.json());
+    assert.equal(comparison.stale, true);
+    const refreshed = await write(`/places/${draft.id}/reconcile`, { version: draft.version,
+      expectedPlaceVersion: comparison.placeVersion, expectedGalleryVersion: comparison.galleryVersion,
+      selectedFields: ['description'], retainGallery: true });
+    assert.equal((await publish(refreshed)).placeId, placeId);
+    assert.equal((await sql`SELECT count(*) AS count FROM media WHERE place_id = ${placeId}`)[0].count, '1');
+  });
+
+  await t.test('duplicate resolution links only explicitly confirmed Google identities, atomically and once', async () => {
+    const primary = (await (await upload('image/png', fixturePng(132))).json()).imageUrl;
+    const name = 'Google identity resolution fixture';
+    const nameLocal = 'สถานที่ทดสอบยืนยันรหัสกูเกิล';
+    const original = await makeDraft({ name, nameLocal, imageUrl: primary, description: 'Original' });
+    const { placeId } = await publish(original);
+    const originalMedia = await sql`SELECT id, url FROM media WHERE place_id = ${placeId}`;
+    const ids = ['ChIJStagedUnconfirmed123', 'ChIJConfirmedForDuplicate123', 'ChIJConcurrentClaim123'];
+    const [unconfirmed, confirmed, contested] = ids;
+    const otherTableOwner = 'fixture-other';
+    const count = (await sql`SELECT count(*) AS count FROM places`)[0].count;
+
+    const resolve = async (googlePlaceId, confirmGoogleIdentity) => {
+      const reference = await write('/places/google-reference', { placeId: googlePlaceId, province: fixture.province }, 201);
+      const source = await write(`/places/${reference.id}`, { ...fixture, name, nameLocal, description: googlePlaceId,
+        version: reference.draft.version }, 200, 'PUT');
+      const conflict = await publish(source, 409);
+      assert.equal(conflict.conflictType, 'EXACT_NAME_MATCH');
+      assert.equal(conflict.existingPlaces[0].placeId, placeId);
+      const path = `/places/${source.id}/duplicate-resolution`;
+      const compared = await (await admin(`${path}?targetPlaceId=${encodeURIComponent(placeId)}`)).json();
+      const selection = { targetPlaceId: placeId, sourceVersion: compared.sourceVersion, targetVersion: compared.targetVersion,
+        galleryVersion: compared.galleryVersion, editVersion: null, choices: { description: 'draft' }, imageUrls: [],
+        ...(confirmGoogleIdentity && { confirmGoogleIdentity }),
+        // The client can confirm, but cannot supply the identity being linked.
+        googlePlaceId: 'ChIJUntrustedClientValue123',
+        _duplicateEdit: { externalIds: [{ namespace: 'tat', external_id: 'not-verified' }] },
+      };
+      const preview = await write(path, { ...selection, preview: true });
+      assert.equal(compared.googlePlaceIdForReview, googlePlaceId);
+      assert.equal(preview.confirmedGoogleId, confirmGoogleIdentity ? googlePlaceId : null);
+      assert.equal(preview.preview.description, googlePlaceId);
+      const { draft } = await write(path, selection, 201);
+      assert.equal((await write(path, selection)).draft.id, draft.id);
+      assert.equal((await sql`SELECT external_id FROM place_external_ids WHERE external_id = ${googlePlaceId}`).length, 0);
+      return draft;
+    };
+
+    await publish(await resolve(unconfirmed, false));
+    assert.equal((await sql`SELECT external_id FROM place_external_ids WHERE place_id = ${placeId}`).length, 0);
+
+    const draft = await resolve(confirmed, true);
+    const saved = await write(`/places/${draft.id}`, { ...draft.payload, version: draft.version,
+      googlePlaceId: 'ChIJUntrustedEditValue123', _duplicateEdit: {} }, 200, 'PUT');
+    const results = await Promise.all([publish(saved), publish(saved)]);
+    assert.deepEqual(results.map(result => result.placeId), [placeId, placeId]);
+    const records = await sql`SELECT namespace, external_id, place_id, reviewed_by FROM place_external_ids WHERE place_id = ${placeId}`;
+    assert.deepEqual([...records], [{ namespace: 'google_places', external_id: confirmed, place_id: placeId, reviewed_by: 'test-admin' }]);
+    const events = await sql`SELECT evidence FROM place_review_events WHERE draft_id = ${saved.id} AND action = 'direct_publish'`;
+    assert.equal(events.length, 1);
+    assert.deepEqual(events[0].evidence.googleIdentityConfirmations, [{ id: confirmed, confirmedBy: 'test-admin' }]);
+
+    const found = classifyCandidates([{ placeId: confirmed, name: 'Renamed upstream', lat: null, lng: null, holds: [] }],
+      await readExisting(getSql, fixture.province, true))[0];
+    assert.equal(found.duplicateStatus, 'existing_place');
+    assert.ok(found.duplicateMatches.some(match => match.placeId === placeId && match.reason === 'google_place_id'));
+    const blocked = await write('/places/google-reference', { placeId: confirmed, province: 'ระยอง' }, 409);
+    assert.equal(blocked.placeId, placeId);
+
+    const pending = await resolve(contested, true);
+    // Simulate a claim after the ownership SELECT, inside the isolated DB.
+    // The publish must unwind even after it has begun changing the target.
+    await sql.unsafe(`CREATE FUNCTION cms_test_late_identity_claim() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.description = 'ChIJConcurrentClaim123' THEN
+        INSERT INTO place_external_ids(namespace, external_id, place_id, reviewed_by)
+          VALUES ('google_places', 'ChIJConcurrentClaim123', 'fixture-other', 'test-admin');
+      END IF; RETURN NEW; END $$`);
+    await sql`CREATE TRIGGER cms_test_late_identity_claim BEFORE UPDATE OF description ON places
+      FOR EACH ROW EXECUTE FUNCTION cms_test_late_identity_claim()`;
+    try {
+      assert.equal((await publish(pending, 409)).code, 'EXTERNAL_IDENTITY_CONFLICT');
+    } finally {
+      await sql`DROP TRIGGER cms_test_late_identity_claim ON places`;
+      await sql`DROP FUNCTION cms_test_late_identity_claim()`;
+    }
+    const [current] = await sql`SELECT description, image_url FROM places WHERE id = ${placeId}`;
+    assert.deepEqual(current, { description: confirmed, image_url: primary });
+    assert.equal((await sql`SELECT status FROM place_drafts WHERE id = ${pending.id}`)[0].status, 'draft');
+    assert.equal((await sql`SELECT id FROM place_review_events WHERE draft_id = ${pending.id}`).length, 0);
+    assert.equal((await sql`SELECT external_id FROM place_external_ids WHERE external_id = ${contested}`).length, 0);
+
+    await sql`INSERT INTO place_external_ids(namespace, external_id, place_id, reviewed_by)
+      VALUES ('google_places', ${contested}, ${otherTableOwner}, 'test-admin')`;
+    assert.equal((await publish(pending, 409)).code, 'EXTERNAL_IDENTITY_CONFLICT');
+    assert.equal((await sql`SELECT place_id FROM place_external_ids WHERE external_id = ${contested}`)[0].place_id, otherTableOwner);
+    assert.equal((await sql`SELECT count(*) AS count FROM places`)[0].count, count);
+    assert.deepEqual(await sql`SELECT id, url FROM media WHERE place_id = ${placeId}`, originalMedia);
+  });
+
+  await t.test('duplicate candidates distinguish external identity and ambiguous names', async () => {
+    const target = await publish(await makeDraft({ name: 'Ambiguous fixture', nameLocal: 'ชื่อร่วมตัวอย่าง' }));
+    await sql`INSERT INTO places (id,name,province,category,lat,lng)
+      VALUES ('second-duplicate-fixture','Ambiguous fixture','ชลบุรี','Culture',13.2,100.9)`;
+    await sql`INSERT INTO place_external_ids(namespace,external_id,place_id,reviewed_by)
+      VALUES ('google_places','external-identity-fixture',${target.placeId},'test-admin')`;
+    const source = await makeDraft({ name: 'Ambiguous fixture', nameLocal: 'ชื่อร่วมตัวอย่าง' });
+    const ambiguous = await publish(source, 409);
+    assert.equal(ambiguous.conflictType, 'MULTIPLE_CONFLICT_CANDIDATES');
+    assert.equal(ambiguous.existingPlaces.length, 2);
+    assert.ok(ambiguous.existingPlaces.every(item => item.canResolve));
+    const identity = await makeDraft({ name: 'External identity fixture', nameLocal: 'ชื่อเฉพาะรหัสภายนอก' });
+    await sql`UPDATE place_drafts SET payload = payload || '{"googlePlaceId":"external-identity-fixture"}'::jsonb WHERE id = ${identity.id}`;
+    const external = await publish(identity, 409);
+    assert.equal(external.conflictType, 'EXTERNAL_IDENTITY_MATCH');
+    assert.equal(external.existingPlaces[0].placeId, target.placeId);
+    assert.deepEqual(external.existingPlaces[0].reasons, ['EXTERNAL_IDENTITY_MATCH']);
   });
 
   await t.test('admin publishes without evidence or approval, logs an honest direct decision, and rejects exact duplicates', async () => {

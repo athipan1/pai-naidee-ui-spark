@@ -51,6 +51,21 @@ function publicMediaUrl(filename) {
   return `${base.replace(/\/$/, '')}/api/media/cms/${filename}`;
 }
 
+async function verifyDraftMedia(storage, url, knownMedia) {
+  let filename;
+  try { filename = new URL(url).pathname.split('/').pop(); } catch { return false; }
+  if (!filenamePattern.test(filename) || publicMediaUrl(filename) !== url) return knownMedia;
+  if (!storage) return false;
+  try {
+    await storage.client.send(new HeadObjectCommand({ Bucket: storage.bucket, Key: `cms/${filename}` }),
+      { abortSignal: AbortSignal.timeout(3000) });
+    return true;
+  } catch (error) {
+    if (isMissingObject(error)) return false;
+    throw error;
+  }
+}
+
 function variantKey(filename, width) {
   return `cms/variants/v1/${filename}/${width}.webp`;
 }
@@ -278,4 +293,4 @@ async function uploadImage(storage, file, clientSignal) {
   }
 }
 
-module.exports = { createRailwayMediaStorage, registerRailwayMedia, uploadImage, createImageUpload, InvalidImageError, MAX_IMAGE_BYTES };
+module.exports = { createRailwayMediaStorage, registerRailwayMedia, uploadImage, createImageUpload, InvalidImageError, MAX_IMAGE_BYTES, verifyDraftMedia };

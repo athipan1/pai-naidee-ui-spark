@@ -204,6 +204,7 @@ async function mockCms(page: Page, draftMode: 'tat'|'geoapify' = 'tat', googleQu
   return { expire: () => { session = false; }, failNextUpload: () => { failUpload = true; },
     conflictNextPublish: () => { conflictOnPublish = true; },
     reconciled: () => ({ fields: retainedFields, gallery: retainedGallery }),
+    seedDraft: (draft: typeof incomplete) => { drafts = [draft, ...drafts]; },
     published: () => publishCount, catalogQueries, draftsSnapshot:()=>structuredClone(drafts) };
 }
 
@@ -709,4 +710,105 @@ test('public search opens the expected bilingual result', async ({ page }, testI
   await page.screenshot({ path: testInfo.outputPath('public-search.png'), fullPage: true });
   await page.getByRole('button', { name: 'ดูรายละเอียด' }).click();
   await expect(page).toHaveURL(new RegExp(`/attraction/${exact.id}$`));
+});
+
+test('duplicate dialog compares selected fields and stages a draft without republishing', async ({ page }, testInfo) => {
+  const server = await mockCms(page);
+  const googleId = 'ChIJConfirmedBrowserFixture123';
+  const confirmations: Array<boolean | undefined> = [];
+  const source = { id: 'duplicate-source', status: 'draft', version: '1900000000.000015',
+    payload: { ...payload, nameLocal: 'ชื่อไทยจากต้นทาง', description: '' } };
+  server.seedDraft(source);
+  const duplicate = { placeId: place.id, name: place.name, nameLocal: place.name_local, province: place.province,
+    category: 'Culture', lat: 13.2, lng: 100.9, imageUrl, reasons: ['EXACT_NAME_MATCH'], canResolve: true };
+  let commits = 0;
+  const staged = { id: 'resolution-edit', status: 'draft', target_place_id: place.id, version: '1900000000.000019',
+    payload: { ...payload, nameLocal: source.payload.nameLocal } };
+  await page.route('**/api/admin/places/duplicate-source/publish', route => route.fulfill({ status: 409, json: {
+    code: 'DUPLICATE_PLACE', error: 'พบสถานที่นี้ในระบบแล้ว', conflictType: 'EXACT_NAME_MATCH', existingPlaces: [duplicate],
+  } }));
+  await page.route('**/api/admin/places/duplicate-source/duplicate-resolution*', route => {
+    if (route.request().method() === 'GET') return route.fulfill({ json: {
+      source: source.payload, published: payload, gallery: [], existingEdit: null, sourceVersion: source.version,
+      targetVersion: '1900000000.000016', galleryVersion: 'a'.repeat(64), googlePlaceIdForReview: googleId,
+    } });
+    const body = route.request().postDataJSON();
+    expect(body.choices).toEqual({ nameLocal: 'draft' });
+    expect(body.targetPlaceId).toBe(place.id);
+    confirmations.push(body.confirmGoogleIdentity);
+    expect(body).not.toHaveProperty('googlePlaceId');
+    if (body.preview) return route.fulfill({ json: { preview: staged.payload,
+      confirmedGoogleId: body.confirmGoogleIdentity ? googleId : null } });
+    commits++;
+    return route.fulfill({ status: 201, json: { draft: staged } });
+  });
+  await page.route('**/api/admin/places/resolution-edit/reconcile', route => route.fulfill({ json: { latest: payload, stale: false } }));
+  await page.on('dialog', dialog => dialog.accept());
+  await login(page);
+  await navigate(page, 'ฉบับร่าง');
+  const article = page.locator('article').filter({ hasText: source.payload.nameLocal });
+  const publishButton = article.getByRole('button', { name: 'เผยแพร่', exact: true });
+  await publishButton.click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'พบสถานที่นี้ในระบบแล้ว' })).toBeVisible();
+  await expect(dialog.getByRole('link', { name: 'ดูข้อมูลสถานที่เดิม' })).toHaveAttribute('href', '/attraction/fixture-place');
+  await expect(dialog.getByText('ชื่อและจังหวัดตรงกัน')).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('duplicate-dialog.png') });
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(publishButton).toBeVisible();
+  await publishButton.click();
+  await dialog.getByRole('button', { name: 'กลับไปแก้ไขฉบับร่าง' }).click();
+  await expect(page.getByRole('heading', { name: 'แก้ไขข้อมูลฉบับร่าง' })).toBeVisible();
+  await expect(page.getByLabel('ชื่อภาษาไทย', { exact: true })).toHaveValue(source.payload.nameLocal);
+  expect(commits).toBe(0);
+  await navigate(page, 'ฉบับร่าง');
+  await publishButton.click();
+
+  await dialog.getByRole('button', { name: 'นำข้อมูลฉบับร่างไปปรับปรุงสถานที่เดิม' }).click();
+  await expect(dialog.getByRole('heading', { name: 'เปรียบเทียบฉบับร่างกับสถานที่เดิม' })).toBeVisible();
+  await expect(dialog.getByLabel('เลือกข้อมูล รายละเอียดภาษาไทย')).toHaveValue('keep');
+  await expect(dialog.getByLabel('เลือกข้อมูล รายละเอียดภาษาไทย').locator('option[value=draft]')).toHaveJSProperty('disabled', true);
+  await dialog.getByLabel('เลือกข้อมูล ชื่อภาษาไทย').selectOption('draft');
+  expect(await dialog.evaluate(node => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('duplicate-comparison.png') });
+  const previewButton = dialog.getByRole('button', { name: 'ดูตัวอย่างก่อนยืนยัน' });
+  const readContrast = () => previewButton.evaluate(node => {
+    const luminance = (css: string) => {
+      const components = css.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+      if (!components || components.length !== 3 || !css.startsWith('rgb')) throw Error(`Expected RGB color: ${css}`);
+      return components.map(value => value / 255)
+        .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+        .reduce((total, value, i) => total + value * [0.2126, 0.7152, 0.0722][i], 0);
+    };
+    const { color, backgroundColor } = getComputedStyle(node);
+    const [a, b] = [luminance(color), luminance(backgroundColor)].sort((left, right) => right - left);
+    return (a + 0.05) / (b + 0.05);
+  });
+  const light = await dialog.evaluate(node => getComputedStyle(node).backgroundColor);
+  expect(await readContrast()).toBeGreaterThanOrEqual(4.5);
+  await page.evaluate(() => document.documentElement.classList.add('dark'));
+  await expect.poll(() => dialog.evaluate(node => getComputedStyle(node).backgroundColor)).not.toBe(light);
+  expect(await readContrast()).toBeGreaterThanOrEqual(4.5);
+  await page.screenshot({ path: testInfo.outputPath('duplicate-comparison-dark.png') });
+  await page.evaluate(() => document.documentElement.classList.remove('dark'));
+  await dialog.getByRole('button', { name: 'ดูตัวอย่างก่อนยืนยัน' }).click();
+  await expect(dialog.getByRole('heading', { name: 'ตัวอย่างก่อนยืนยัน' })).toBeAttached();
+  expect(confirmations).toEqual([undefined]);
+  await dialog.getByRole('button', { name: 'กลับไปเลือกข้อมูล' }).click();
+  const identity = dialog.getByRole('checkbox', { name: /ตรวจสอบแล้วว่าเป็นสถานที่เดียวกัน/ });
+  await expect(identity).not.toBeChecked();
+  await expect(dialog.getByRole('link', { name: 'ตรวจสถานที่ใน Google Maps' })).toHaveAttribute('href', new RegExp(googleId));
+  await identity.check();
+  await previewButton.click();
+  await expect(dialog.getByText('Google Place ID ที่จะผูกเมื่อเผยแพร่ ' + googleId)).toBeVisible();
+  expect(commits).toBe(0);
+  await dialog.getByRole('button', { name: 'ยืนยันการนำเข้าฉบับร่าง' }).click();
+  await expect(page.getByRole('heading', { name: 'แก้ไขข้อมูลฉบับร่าง' })).toBeVisible();
+  await expect(page.getByLabel('ชื่อภาษาไทย', { exact: true })).toHaveValue(source.payload.nameLocal);
+  expect(commits).toBe(1);
+  expect(confirmations).toEqual([undefined, true, true]);
+  expect(server.published()).toBe(0);
+  expect(server.draftsSnapshot().some(draft => draft.id === source.id)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('duplicate-edit-draft.png') });
 });
