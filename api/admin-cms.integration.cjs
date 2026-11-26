@@ -19,6 +19,7 @@ const { ensureAiSettings, MODEL_OPTIONS, registerAiSettingsRoutes } = require('.
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
 const { closeDatabase, ensureSchemaTables, getSql, invalidateSearchIndex, listPlaces } = require('./postgres-db.cjs');
 const { app: publicApp } = require('./railway-server.cjs');
+const { createRailwayApiRateLimiter } = require('./security.cjs');
 
 const password = 'cms-fixture-admin-password';
 const email = 'cms-admin@example.test';
@@ -71,6 +72,9 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     return { Body: [bytes], ETag: etag, ContentLength: bytes.length };
   } } };
   const app = express();
+  let applyRateLimit = false;
+  const limitApi = createRailwayApiRateLimiter();
+  app.use('/api', (req, res, next) => applyRateLimit ? limitApi(req, res, next) : next());
   app.use(express.json());
   const requireAdmin = authRoutes(app, { getSql, limitLogin: (_req, _res, next) => next() });
   registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage: createImageUpload(),
@@ -969,4 +973,48 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     await sql`DELETE FROM places WHERE id LIKE 'nearby-%'`;
   });
 
+  await t.test('two signed-in sessions sharing one IP can search, save and publish after media quota is full', async () => {
+    await signIn();
+    const firstToken = token;
+    await signIn();
+    const secondToken = token;
+    assert.notEqual(firstToken, secondToken);
+    const draft = await makeDraft({name: 'Rate budget isolation fixture', nameLocal: 'ตรวจแยกโควตา'});
+    const png = await fixturePng();
+    const uploaded = await (await upload('image/png', png)).json();
+    const file = new URL(uploaded.imageUrl ?? uploaded.url).pathname.split('/').pop();
+    assert.ok(file);
+    const get = (path, session) => fetch(base + path, {
+      headers: session ? { Authorization: 'Bearer ' + session } : {},
+    });
+    applyRateLimit = true;
+    try {
+      for (let i = 0; i < 20; i++) {
+        const res = await get('/api/admin/media/' + file, i % 2 ? firstToken : secondToken);
+        assert.equal(res.status, 200);
+        await res.arrayBuffer();
+      }
+      const privateLimit = await get('/api/admin/media/' + file, firstToken);
+      assert.equal(privateLimit.status, 429);
+      assert.ok(Number(privateLimit.headers.get('retry-after')) > 0);
+      for (let i = 0; i < 40; i++) {
+        const res = await get('/api/media/cms/' + file);
+        assert.equal(res.status, 404); // unpublished object keeps its private status
+        await res.arrayBuffer();
+      }
+      const publicLimit = await get('/api/media/cms/' + file);
+      assert.equal(publicLimit.status, 429);
+      assert.ok(Number(publicLimit.headers.get('retry-after')) > 0);
+      const catalog = await admin('/catalog?q=Other+Fixture');
+      assert.equal(catalog.headers.get('ratelimit-remaining'), '119');
+      await admin('/places');
+      const saved = await write('/places/' + draft.id, {...draft.payload, version: draft.version, description: 'Quota isolation verified'}, 200, 'PUT');
+      const result = await publish(saved);
+      assert.ok(result.placeId);
+      const confirmed = await publicApi('/api/places/' + result.placeId);
+      assert.equal((await confirmed.json()).id, result.placeId);
+    } finally {
+      applyRateLimit = false;
+    }
+  });
 });

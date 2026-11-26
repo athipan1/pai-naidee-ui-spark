@@ -51,7 +51,9 @@ describe('Catalog media queue', () => {
     await vi.advanceTimersByTimeAsync(59_999);
     expect(fetchMock).toHaveBeenCalledTimes(36);
     await vi.advanceTimersByTimeAsync(1);
-    await expect(jobs[36].promise).resolves.toBeInstanceOf(Blob);
+    const blob = await jobs[36].promise;
+    expect(blob.type).toBe('image/png');
+    expect(await blob.text()).toBe('fixture');
     expect(fetchMock).toHaveBeenCalledTimes(37);
     jobs.forEach(job => job.release());
   });
@@ -71,7 +73,9 @@ describe('Catalog media queue', () => {
     await vi.advanceTimersByTimeAsync(4999);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     await vi.advanceTimersByTimeAsync(1);
-    await expect(queued.promise).resolves.toBeInstanceOf(Blob);
+    const blob = await queued.promise;
+    expect(blob.type).toBe('image/png');
+    expect(await blob.text()).toBe('fixture');
     expect(fetchMock.mock.calls).toHaveLength(2);
     expect(fetchMock).toHaveBeenLastCalledWith('/visible', expect.anything());
     rejected.release();
