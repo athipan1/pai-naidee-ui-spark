@@ -761,9 +761,24 @@ test('duplicate dialog compares selected fields and stages a draft without repub
   await dialog.getByLabel('เลือกข้อมูล ชื่อภาษาไทย').selectOption('draft');
   expect(await dialog.evaluate(node => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('duplicate-comparison.png') });
+  const previewButton = dialog.getByRole('button', { name: 'ดูตัวอย่างก่อนยืนยัน' });
+  const readContrast = () => previewButton.evaluate(node => {
+    const luminance = (css: string) => {
+      const components = css.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+      if (!components || components.length !== 3 || !css.startsWith('rgb')) throw Error(`Expected RGB color: ${css}`);
+      return components.map(value => value / 255)
+        .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+        .reduce((total, value, i) => total + value * [0.2126, 0.7152, 0.0722][i], 0);
+    };
+    const { color, backgroundColor } = getComputedStyle(node);
+    const [a, b] = [luminance(color), luminance(backgroundColor)].sort((left, right) => right - left);
+    return (a + 0.05) / (b + 0.05);
+  });
   const light = await dialog.evaluate(node => getComputedStyle(node).backgroundColor);
+  expect(await readContrast()).toBeGreaterThanOrEqual(4.5);
   await page.evaluate(() => document.documentElement.classList.add('dark'));
   await expect.poll(() => dialog.evaluate(node => getComputedStyle(node).backgroundColor)).not.toBe(light);
+  expect(await readContrast()).toBeGreaterThanOrEqual(4.5);
   await page.screenshot({ path: testInfo.outputPath('duplicate-comparison-dark.png') });
   await page.evaluate(() => document.documentElement.classList.remove('dark'));
   await dialog.getByRole('button', { name: 'ดูตัวอย่างก่อนยืนยัน' }).click();

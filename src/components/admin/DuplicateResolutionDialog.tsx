@@ -31,8 +31,8 @@ const reasonLabels: Record<string, string> = {
   EXACT_NAME_MATCH: 'ชื่อและจังหวัดตรงกัน',
   EXTERNAL_IDENTITY_MATCH: 'รหัสสถานที่จากแหล่งข้อมูลตรงกัน',
 };
-const buttonStyle = 'min-h-11 rounded-lg border px-3 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50';
-const primaryStyle = `${buttonStyle} bg-primary text-primary-foreground`;
+const buttonStyle = 'min-h-11 rounded-lg border px-3 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-800 dark:focus-visible:ring-teal-300 disabled:opacity-50';
+const primaryStyle = `${buttonStyle} bg-teal-800 text-white hover:bg-teal-900 dark:bg-teal-300 dark:text-slate-950 dark:hover:bg-teal-200`;
 const detailsStyle = 'min-w-0 rounded-lg bg-muted/60 p-3 text-sm [overflow-wrap:anywhere] whitespace-pre-wrap';
 
 function fieldValue(data: PlaceData, field: Field) {
@@ -117,7 +117,7 @@ export default function DuplicateResolutionDialog({
     >
       <DialogHeader className="px-4 pb-3 pt-5 pr-10 sm:px-6">
         <DialogTitle>{heading}</DialogTitle>
-        <DialogDescription>นำข้อมูลที่เลือกไปปรับปรุงฉบับร่างของสถานที่เดิมได้ แล้วตรวจสอบก่อนเผยแพร่</DialogDescription>
+        <DialogDescription className="text-slate-600 dark:text-slate-300">นำข้อมูลที่เลือกไปปรับปรุงฉบับร่างของสถานที่เดิมได้ แล้วตรวจสอบก่อนเผยแพร่</DialogDescription>
       </DialogHeader>
       <div className="min-h-0 overflow-y-auto overflow-x-hidden px-4 py-2 sm:px-6" aria-busy={busy}>
         {message && <p role="alert" className="mb-3 rounded-lg border border-destructive/50 p-3 text-sm">{message}</p>}
@@ -160,7 +160,7 @@ export default function DuplicateResolutionDialog({
             const status = draft === baseValue && draft ? 'ข้อมูลเหมือนกัน' : !draft ? 'ข้อมูลฉบับร่างว่าง'
               : !baseValue ? 'มีข้อมูลใหม่' : published !== baseValue ? 'ข้อมูลขัดแย้งกัน' : 'ข้อมูลเปลี่ยนแปลง';
             return <section className="space-y-2 rounded-lg border p-3" key={field}>
-              <h3 className="font-semibold">{fieldLabels[field]} <span className="text-xs font-normal text-muted-foreground">{status}</span></h3>
+              <h3 className="font-semibold">{fieldLabels[field]} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">{status}</span></h3>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className={detailsStyle}><div className="font-medium">เผยแพร่แล้ว</div>{published || '—'}
                   {comparison.existingEdit && baseValue !== published && <><div className="mt-2 font-medium">ฉบับร่างแก้ไขเดิม</div>{baseValue || '—'}</>}
