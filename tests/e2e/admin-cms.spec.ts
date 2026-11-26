@@ -753,6 +753,12 @@ test('duplicate dialog compares selected fields and stages a draft without repub
   await expect(dialog).toHaveCount(0);
   await expect(publishButton).toBeVisible();
   await publishButton.click();
+  await dialog.getByRole('button', { name: 'กลับไปแก้ไขฉบับร่าง' }).click();
+  await expect(page.getByRole('heading', { name: 'แก้ไขข้อมูลฉบับร่าง' })).toBeVisible();
+  await expect(page.getByLabel('ชื่อภาษาไทย', { exact: true })).toHaveValue(source.payload.nameLocal);
+  expect(commits).toBe(0);
+  await navigate(page, 'ฉบับร่าง');
+  await publishButton.click();
 
   await dialog.getByRole('button', { name: 'นำข้อมูลฉบับร่างไปปรับปรุงสถานที่เดิม' }).click();
   await expect(dialog.getByRole('heading', { name: 'เปรียบเทียบฉบับร่างกับสถานที่เดิม' })).toBeVisible();

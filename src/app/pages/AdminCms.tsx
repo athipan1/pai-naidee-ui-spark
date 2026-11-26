@@ -119,7 +119,7 @@ export default function AdminCms() {
   const [tab, setTab] = useState<AdminView>('overview');
   const [searched, setSearched] = useState(false);
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
-  const [duplicate, setDuplicate] = useState<{ draftId: string; candidates: DuplicateCandidate[]; focus?: HTMLElement } | null>(null);
+  const [duplicate, setDuplicate] = useState<{ source: Draft; candidates: DuplicateCandidate[]; focus?: HTMLElement } | null>(null);
   const [reconcile, setReconcile] = useState<{ draftId: string; data: ReconcileData; selected: string[]; retainGallery: boolean } | null>(null);
   const [aliasPlace, setAliasPlace] = useState<CatalogPlace | null>(null);
   const [placeAliases, setPlaceAliases] = useState<PlaceAlias[]>([]);
@@ -762,7 +762,7 @@ export default function AdminCms() {
       setMessage(`เผยแพร่สำเร็จ: ${result.placeId}`);
     } catch (error) {
       if (error instanceof AdminRequestError && error.details?.code === 'DUPLICATE_PLACE' && error.details.existingPlaces?.length) {
-        setDuplicate({ draftId: draft.id, candidates: error.details.existingPlaces, focus });
+        setDuplicate({ source: draft, candidates: error.details.existingPlaces, focus });
         return;
       }
       if (error instanceof AdminRequestError && error.details?.code === 'SOURCE_ALREADY_RESOLVED') {
@@ -1017,8 +1017,9 @@ export default function AdminCms() {
                     : 'เปิดฉบับร่างแล้ว ยังไม่พบชื่อจากแหล่งอิสระที่ตรงกัน กรุณากรอกชื่อเอง');
           });
         }} />}
-      {duplicate && <DuplicateResolutionDialog draftId={duplicate.draftId} candidates={duplicate.candidates} base={base}
+      {duplicate && <DuplicateResolutionDialog draftId={duplicate.source.id} candidates={duplicate.candidates} base={base}
         request={requestAdmin} returnFocus={duplicate.focus} close={() => setDuplicate(null)}
+        returnToSource={() => { setDuplicate(null); void openDraft(duplicate.source); }}
         openDraft={draft => { setReloadDrafts(count => count + 1); if (draft.status === 'draft') void openDraft(draft);
           else setMessage('ข้อมูลจากฉบับร่างนี้ถูกเผยแพร่ที่สถานที่เดิมแล้ว'); }} />}
       {reconcile && tab === 'drafts' && <section id="cms-reconcile" className="scroll-mt-24 space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">

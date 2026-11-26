@@ -43,10 +43,10 @@ function fieldValue(data: PlaceData, field: Field) {
 }
 
 export default function DuplicateResolutionDialog({
-  draftId, candidates, base, request, close, openDraft, returnFocus,
+  draftId, candidates, base, request, close, openDraft, returnToSource, returnFocus,
 }: {
   draftId: string; candidates: DuplicateCandidate[]; base: string; request: Request;
-  close: () => void; openDraft: (draft: ResolutionDraft) => void;
+  close: () => void; returnToSource: () => void; openDraft: (draft: ResolutionDraft) => void;
   returnFocus?: HTMLElement | null;
 }) {
   const [selected, setSelected] = useState(candidates.length === 1 ? candidates[0].placeId : '');
@@ -218,7 +218,7 @@ export default function DuplicateResolutionDialog({
         </section>}
       </div>
       <div className="flex flex-wrap justify-end gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <button type="button" className={buttonStyle} disabled={busy} onClick={close}>กลับไปแก้ไขฉบับร่าง</button>
+        <button type="button" className={buttonStyle} disabled={busy} onClick={returnToSource}>กลับไปแก้ไขฉบับร่าง</button>
         {!comparison && <button type="button" disabled={busy || !target?.canResolve} className={primaryStyle} onClick={() => void load()}>นำข้อมูลฉบับร่างไปปรับปรุงสถานที่เดิม</button>}
         {comparison && message && <button type="button" disabled={busy} className={buttonStyle} onClick={() => void load()}>โหลดข้อมูลล่าสุด</button>}
         {comparison && (!comparison.existingEdit || reviewExisting) && (preview ? <>
