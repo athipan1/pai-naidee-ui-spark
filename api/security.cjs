@@ -80,14 +80,21 @@ function createRateLimiter({
 }
 
 function createRailwayApiRateLimiter({ now } = {}) {
-  // Redistribute the existing 180 requests/minute allowance. Public media can
-  // no longer spend the capacity reserved for API data and authenticated routes.
+  // Keep both kinds of image reads inside the existing media budget. A
+  // separate ceiling protects the shared pool from private preview traffic.
   const limitData = createRateLimiter({ max: 120, now });
-  const limitPublicMedia = createRateLimiter({ max: 60, now });
+  const limitMedia = createRateLimiter({ max: 60, now });
+  const limitPrivateMedia = createRateLimiter({ max: 20, now });
   return (req, res, next) => {
-    const isPublicMediaRead = (req.method === 'GET' || req.method === 'HEAD') &&
-      /^\/media\/(?:cms\/[^/]+|mascot\/[a-f0-9]{12}\/elephant\.(?:glb|webp))\/?$/i.test(req.path);
-    return (isPublicMediaRead ? limitPublicMedia : limitData)(req, res, next);
+    if (req.method === 'GET' || req.method === 'HEAD') {
+      if (/^\/admin\/media\/[^/]+\/?$/i.test(req.path)) {
+        return limitPrivateMedia(req, res, () => limitMedia(req, res, next));
+      }
+      if (/^\/media\/(?:cms\/[^/]+|mascot\/[a-f0-9]{12}\/elephant\.(?:glb|webp))\/?$/i.test(req.path)) {
+        return limitMedia(req, res, next);
+      }
+    }
+    return limitData(req, res, next);
   };
 }
 

@@ -339,6 +339,11 @@ test('catalog pagination, aliases, numeric and empty coordinates, and saving an 
 
 test('image preview and failure, create and publish, AI settings, and responsive layout', async ({ page }, testInfo) => {
   const fixture = await mockCms(page);
+  let previewRequests = 0;
+  await page.route(`**/api/admin/media/${filename}?w=640`, async route => {
+    if (++previewRequests === 1) return route.fulfill({ status: 429, headers: { 'Retry-After': '3' }, json: { error: 'Media busy' } });
+    return route.fallback();
+  });
   page.on('dialog', dialog => dialog.accept());
   await login(page);
   await navigate(page, 'การตั้งค่า AI');
@@ -358,8 +363,14 @@ test('image preview and failure, create and publish, AI settings, and responsive
   await page.locator('input[type=file]').setInputFiles(image);
   await page.getByRole('group', { name: 'ตัวอย่างภาพหลัก' }).scrollIntoViewIfNeeded();
   expect((await privatePreviewRequest).headers().authorization).toMatch(/^Bearer /);
+  const retryPreview = page.getByRole('group', { name: 'ตัวอย่างภาพหลัก' }).getByRole('button', { name: 'ลองโหลดรูปใหม่' });
+  await expect(retryPreview).toBeDisabled();
+  await expect(retryPreview).toBeEnabled({ timeout: 8000 });
+  expect(previewRequests).toBe(1);
+  await retryPreview.click();
   const preview = page.getByRole('img', { name: 'ตัวอย่างภาพสถานที่' });
   await expect(preview).toHaveJSProperty('naturalWidth', 1);
+  expect(previewRequests).toBe(2);
   fixture.failNextUpload();
   await page.locator('input[type=file]').setInputFiles(image);
   await expect(page.getByText('Image currently unavailable.')).toBeVisible();
@@ -697,9 +708,15 @@ test('catalog defers off-screen thumbnails and waits for Retry-After without ret
     imageUrl: `${baseURL}/api/media/cms/${String(index).padStart(8, '0')}-1111-8111-8111-111111111111.png`,
   }));
   const imageRequests = new Set<string>();
+  let finalImageRequests = 0;
+  const finalPath = '/api/media/cms/00000029-1111-8111-8111-111111111111.png';
   let searchRequests = 0;
   await page.route('**/api/media/cms/**', async route => {
-    imageRequests.add(new URL(route.request().url()).pathname);
+    const path = new URL(route.request().url()).pathname;
+    imageRequests.add(path);
+    if (path === finalPath && ++finalImageRequests <= 2) {
+      return route.fulfill({ status: 429, headers: { 'Retry-After': '3' }, json: { error: 'Media busy' } });
+    }
     await route.fulfill({ contentType: 'image/png', body: imageBytes });
   });
   await page.route('**/api/admin/catalog?**', async route => {
@@ -718,7 +735,18 @@ test('catalog defers off-screen thumbnails and waits for Retry-After without ret
   await expect(finalRow.locator('img')).toHaveCount(0);
   await finalRow.scrollIntoViewIfNeeded();
   await expect(finalRow.locator('img')).toHaveCount(1);
-  await expect.poll(() => imageRequests.has('/api/media/cms/00000029-1111-8111-8111-111111111111.png')).toBe(true);
+  const retryImage = finalRow.getByRole('button', { name: 'ลองโหลดรูปใหม่' });
+  await expect(retryImage).toBeVisible();
+  expect(finalImageRequests).toBe(1);
+  await retryImage.click();
+  await expect(finalRow.getByRole('status')).toContainText('HTTP 429');
+  await retryImage.click();
+  expect(finalImageRequests).toBe(2);
+  await expect.poll(async () => {
+    if (await retryImage.isVisible()) await retryImage.click();
+    return finalImageRequests;
+  }, { timeout: 8000, intervals: [500] }).toBe(3);
+  await expect(finalRow.locator('img')).toHaveJSProperty('naturalWidth', 1);
   await page.screenshot({ path: testInfo.outputPath('catalog-lazy-thumbnails.png') });
 
   const search = page.getByRole('textbox', { name: 'ค้นหาสถานที่เดิม' });

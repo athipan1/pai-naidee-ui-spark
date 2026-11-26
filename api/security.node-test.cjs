@@ -25,7 +25,9 @@ test('public media and API data enforce independent request budgets and reset', 
     return response;
   };
 
-  for (let i = 0; i < 59; i++) assert.equal((await get('/media/cms/image.jpg?w=256')).status, 200);
+  for (let i = 0; i < 20; i++) assert.equal((await get('/admin/media/image.jpg')).status, 200);
+  assert.equal((await get('/admin/media/image.jpg', 'HEAD')).status, 429);
+  for (let i = 0; i < 39; i++) assert.equal((await get('/media/cms/image.jpg?w=256')).status, 200);
   assert.equal((await get('/media/mascot/7a57a070bddb/elephant.glb', 'HEAD')).status, 200);
   time = 1_500;
   const limited = await get('/media/cms/image.jpg?w=640');
@@ -33,9 +35,11 @@ test('public media and API data enforce independent request budgets and reset', 
   assert.equal(limited.headers.get('retry-after'), '59');
   assert.equal(limited.headers.get('cache-control'), 'no-store');
 
-  const data = ['/admin/catalog', '/places', '/places/nearby', '/places/example', '/admin/media/image.jpg'];
+  const data = ['/admin/catalog', '/places', '/places/nearby', '/places/example'];
   for (const path of data) assert.equal((await get(path)).status, 200);
-  for (let i = data.length; i < 120; i++) assert.equal((await get('/places')).status, 200);
+  assert.equal((await get('/admin/places/draft', 'PUT')).status, 200);
+  assert.equal((await get('/admin/places/draft/publish', 'POST')).status, 200);
+  for (let i = data.length + 2; i < 120; i++) assert.equal((await get('/places')).status, 200);
   assert.equal((await get('/media/cms/image.jpg', 'POST')).status, 429);
   assert.equal((await get('/admin/catalog')).status, 429);
   time = 60_000;
