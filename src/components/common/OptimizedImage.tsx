@@ -155,12 +155,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   return (
     <div className={`relative ${className}`}>
       {failedSource && <button type="button" aria-label="ลองโหลดรูปใหม่" title={retryMessage || 'ลองโหลดรูปใหม่'}
-        className="absolute right-1 top-1 z-10 rounded bg-background p-1 text-foreground shadow"
+        className="absolute left-1 top-1 z-20 rounded bg-background p-1 text-foreground shadow"
         disabled={retrying} onClick={event => { event.preventDefault(); event.stopPropagation(); void recoverImage(); }}><RotateCcw size={16} /></button>}
       {(failed || !src || src.startsWith("/placeholder-")) && (
         <span
           role="status"
-          className="absolute bottom-1 left-1 z-10 rounded bg-background/90 px-2 text-xs"
+          className="pointer-events-none absolute bottom-1 left-1 z-10 rounded bg-background/90 px-2 text-xs"
         >
           {retryMessage || unavailableLabel}
         </span>
@@ -183,6 +183,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       ) : (
         // The img must not be display:none: browsers will defer a hidden lazy image indefinitely.
         <img
+          key={currentSrc}
           ref={imageRef}
           alt={alt}
           loading={loading}

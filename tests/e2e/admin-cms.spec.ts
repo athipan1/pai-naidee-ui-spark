@@ -708,13 +708,13 @@ test('catalog defers off-screen thumbnails and waits for Retry-After without ret
     imageUrl: `${baseURL}/api/media/cms/${String(index).padStart(8, '0')}-1111-8111-8111-111111111111.png`,
   }));
   const imageRequests = new Set<string>();
-  let finalImageRequests = 0;
+  let recoveryRequests = 0;
   const finalPath = '/api/media/cms/00000029-1111-8111-8111-111111111111.png';
   let searchRequests = 0;
   await page.route('**/api/media/cms/**', async route => {
     const path = new URL(route.request().url()).pathname;
     imageRequests.add(path);
-    if (path === finalPath && ++finalImageRequests <= 2) {
+    if (path === finalPath && (route.request().resourceType() === 'image' || ++recoveryRequests === 1)) {
       return route.fulfill({ status: 429, headers: { 'Retry-After': '3' }, json: { error: 'Media busy' } });
     }
     await route.fulfill({ contentType: 'image/png', body: imageBytes });
@@ -737,15 +737,15 @@ test('catalog defers off-screen thumbnails and waits for Retry-After without ret
   await expect(finalRow.locator('img')).toHaveCount(1);
   const retryImage = finalRow.getByRole('button', { name: 'ลองโหลดรูปใหม่' });
   await expect(retryImage).toBeVisible();
-  expect(finalImageRequests).toBe(1);
+  expect(recoveryRequests).toBe(0);
   await retryImage.click();
   await expect(finalRow.getByRole('status')).toContainText('HTTP 429');
   await retryImage.click();
-  expect(finalImageRequests).toBe(2);
+  expect(recoveryRequests).toBe(1);
   await expect.poll(async () => {
     if (await retryImage.isVisible()) await retryImage.click();
-    return finalImageRequests;
-  }, { timeout: 8000, intervals: [500] }).toBe(3);
+    return recoveryRequests;
+  }, { timeout: 8000, intervals: [500] }).toBe(2);
   await expect(finalRow.locator('img')).toHaveJSProperty('naturalWidth', 1);
   await page.screenshot({ path: testInfo.outputPath('catalog-lazy-thumbnails.png') });
 

@@ -107,9 +107,8 @@ const AttractionCard = ({
   if (variant === 'discovery') return (
     <article data-testid="attraction-card" className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm motion-safe:transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <button type="button" className="block h-full w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-primary" onClick={() => onCardClick(id)} aria-label={displayName}>
-          <OptimizedImage src={image} alt={displayName} width={480} height={360} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw" className="h-full w-full object-cover" unavailableLabel={currentLanguage === 'th' ? 'รูปภาพไม่พร้อมใช้งาน' : 'Image unavailable'} />
-        </button>
+        <OptimizedImage src={image} alt={displayName} width={480} height={360} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw" className="h-full w-full object-cover" unavailableLabel={currentLanguage === 'th' ? 'รูปภาพไม่พร้อมใช้งาน' : 'Image unavailable'} />
+        <button type="button" className="absolute inset-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-primary" onClick={() => onCardClick(id)} aria-label={displayName} />
         <Button type="button" size="icon" variant="secondary" onClick={handleFavoriteToggle} aria-pressed={isFavorite} aria-label={currentLanguage === 'th' ? (isFavorite ? 'ลบออกจากรายการโปรด' : 'เพิ่มในรายการโปรด') : (isFavorite ? 'Remove from favorites' : 'Add to favorites')} className="absolute right-3 top-3 h-11 w-11 rounded-full bg-background text-foreground shadow-sm">
           <Heart className={`h-5 w-5 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
         </Button>
