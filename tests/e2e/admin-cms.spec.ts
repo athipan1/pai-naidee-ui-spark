@@ -723,7 +723,10 @@ test('catalog defers off-screen thumbnails and waits for Retry-After without ret
 
   const search = page.getByRole('textbox', { name: 'ค้นหาสถานที่เดิม' });
   await search.fill('รอทดสอบ');
-  await search.press('Enter');
+  await search.evaluate((input: HTMLInputElement) => {
+    input.form?.requestSubmit();
+    input.form?.requestSubmit();
+  });
   const retry = page.getByRole('button', { name: 'ลองโหลดผลค้นหาใหม่' });
   await expect(page.getByRole('alert')).toContainText('ระบบได้รับคำขอมากเกินไป');
   await expect(retry).toBeDisabled();

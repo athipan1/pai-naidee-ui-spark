@@ -22,6 +22,7 @@ import {
 } from "@/services/railway-api.service";
 import { localizedCategory } from "@/shared/i18n/placeLocalization";
 import { uniqueAttractionsById } from "@/shared/utils/uniqueAttractions";
+import { RateLimitError } from '@/shared/utils/retryAfter';
 const ResultsMap = lazy(() => import("./ResultsMap"));
 
 interface SearchViewProps {
@@ -98,6 +99,7 @@ export default function SearchView({
       (data?.total ?? 0) === 0 &&
       query.trim().length >= 2,
     staleTime: 30_000,
+    retry: (count, error) => !(error instanceof RateLimitError) && count < 1,
   });
   const suggestions = (nearbyMatches.data ?? []).filter(
     (place) =>
