@@ -6,7 +6,8 @@ const {payloadHash}=require('./place-review-evidence.cjs');
 // Preserve historical evidence, but never present it as verification of this edit.
 async function finishDirectPublication(tx,draft,placeId,actorId) {
   const [review]=await tx`SELECT state FROM place_reviews WHERE draft_id=${draft.id} FOR UPDATE`;
-  const publication={publicationMode:'admin_direct',qualityReviewPerformed:false};
+  const publication={publicationMode:'admin_direct',qualityReviewPerformed:false,
+    ...(draft.payload._duplicateEdit ? { sourceDraftIds: draft.payload._duplicateEdit.sourceDraftIds } : {}) };
   if(draft.payload.googlePlaceId) {
     const id=draft.payload.googlePlaceId;
     await tx`INSERT INTO place_external_ids(namespace,external_id,place_id,reviewed_by)

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { CloudUpload, ImagePlus, MapPin, Plus, Search, ShieldCheck, X } from 'lucide-react';
 import { getApiBaseUrl } from '@/services/railway-api.service';
 import { ADMIN_PLACE_CATEGORIES, hasThaiCategoryLabel, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
+import DuplicateResolutionDialog, { type DuplicateCandidate } from '@/components/admin/DuplicateResolutionDialog';
 import AdminMediaPreview from '@/components/admin/AdminMediaPreview';
 import OptimizedImage from '@/components/common/OptimizedImage';
 import AdminWorkspace, { type AdminView } from '@/components/admin/AdminWorkspace';
@@ -13,6 +14,7 @@ import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboar
 
 type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'imageUrls' | 'removedImageUrls' | 'tags' | 'categories'>, string | null>> & {
   googlePlaceId?: string;
+  _duplicateReceipt?: { editId: string };
   autoFillSource?: {name:string;url:string;id:string;license:string;matchedAt:string;reviewRequired:boolean};
   tags?: string[];
   categories?: string[];
@@ -23,10 +25,10 @@ type DraftPayload = Partial<Record<Exclude<keyof PlaceForm, 'lat' | 'lng' | 'ima
 };
 type Draft = { id: string; review_state?: string; updated_at?: string; status: string; payload: DraftPayload; version: string; target_place_id?: string };
 type CatalogPlace = { id: string; name: string; name_local: string | null; province: string; imageUrl?: string | null };
-type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; placeVersion: string; placeUpdatedAt: string; fields: string[] };
+type ReconcileData = { draft: DraftPayload; latest: DraftPayload; version: string; stale: boolean; galleryVersion?: string; placeVersion: string; placeUpdatedAt: string; fields: string[] };
 type ExistingImage = { id: string; url: string; title: string };
 type PlaceAlias = { id: string; alias_name: string; language: string; status: string };
-type PlaceForm = { name: string; nameLocal: string; province: string; category: string; categories: string[]; description: string; tags?: string[]; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
+type PlaceForm = { name: string; nameLocal: string; province: string; category: string; categories: string[]; description: string; descriptionEn?: string; tags?: string[]; lat: string; lng: string; imageUrl: string; imageUrls: string[]; removedImageUrls: string[] };
 const empty: PlaceForm = { name: '', nameLocal: '', province: '', category: 'Culture', categories: ['Culture'], description: '', tags: [], lat: '', lng: '', imageUrl: '', imageUrls: [], removedImageUrls: [] };
 const tagKey = (value: string) => localizedTag(value, 'th').trim().normalize('NFC').toLocaleLowerCase();
 const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -59,7 +61,7 @@ function draftTitle(draft: Draft): string {
   return safeText(payload?.nameLocal) || safeText(payload?.name) || 'ฉบับร่างที่ไม่มีชื่อ';
 }
 class AdminRequestError extends Error {
-  constructor(message: string, readonly status: number) { super(message); }
+  constructor(message: string, readonly status: number, readonly details?: { code?: string; existingPlaces?: DuplicateCandidate[] }) { super(message); }
 }
 function toPlaceForm(payload: DraftPayload): PlaceForm {
   const coordinate = (value: string | number | null | undefined) => value == null ? '' : String(value).trim();
@@ -74,6 +76,7 @@ function toPlaceForm(payload: DraftPayload): PlaceForm {
     category,
     categories,
     description: safeText(payload?.description),
+    descriptionEn: typeof payload?.descriptionEn === 'string' ? payload.descriptionEn : undefined,
     tags: Array.isArray(payload?.tags) ? stringList(payload.tags) : undefined,
     imageUrl: safeText(payload?.imageUrl),
     imageUrls: Array.isArray(payload?.imageUrls) ? stringList(payload.imageUrls) : (typeof payload?.imageUrl === 'string' && payload.imageUrl ? [payload.imageUrl] : []),
@@ -116,6 +119,7 @@ export default function AdminCms() {
   const [tab, setTab] = useState<AdminView>('overview');
   const [searched, setSearched] = useState(false);
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
+  const [duplicate, setDuplicate] = useState<{ draftId: string; candidates: DuplicateCandidate[]; focus?: HTMLElement } | null>(null);
   const [reconcile, setReconcile] = useState<{ draftId: string; data: ReconcileData; selected: string[]; retainGallery: boolean } | null>(null);
   const [aliasPlace, setAliasPlace] = useState<CatalogPlace | null>(null);
   const [placeAliases, setPlaceAliases] = useState<PlaceAlias[]>([]);
@@ -229,7 +233,7 @@ export default function AdminCms() {
   const api = useCallback(async (path: string, options: RequestInit = {}) => {
     const response = await requestAdmin(path, options);
     const data = await response.json().catch(() => null);
-    if (!response.ok) throw new AdminRequestError(data?.error || data?.errors?.join(', ') || `HTTP ${response.status}`, response.status);
+    if (!response.ok) throw new AdminRequestError(data?.error || data?.errors?.join(', ') || `HTTP ${response.status}`, response.status, data);
     if (!data) throw new Error('เซิร์ฟเวอร์ตอบกลับในรูปแบบที่ไม่ถูกต้อง');
     return data;
   }, [requestAdmin]);
@@ -582,6 +586,7 @@ export default function AdminCms() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ version: reconcile.data.version,
           expectedPlaceVersion: reconcile.data.placeVersion,
+          expectedGalleryVersion: reconcile.data.galleryVersion,
           expectedPlaceUpdatedAt: reconcile.data.placeUpdatedAt,
           selectedFields: reconcile.selected, retainGallery: reconcile.retainGallery }),
       });
@@ -707,6 +712,17 @@ export default function AdminCms() {
     finally { setBusy(false); }
   }
 
+  async function openLinkedDraft(draft: Draft) {
+    setBusy(true);
+    try {
+      const data = await api(`/places/${encodeURIComponent(draft.id)}/duplicate-resolution`);
+      if (data.linkedDraft?.status === 'draft') await openDraft(data.linkedDraft);
+      else if (data.linkedDraft) setMessage('ข้อมูลจากฉบับร่างนี้ถูกเผยแพร่ที่สถานที่เดิมแล้ว');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'ไม่พบฉบับร่างแก้ไขเดิม');
+    } finally { setBusy(false); }
+  }
+
   async function publish(draft: Draft) {
     const payload = draftPayload(draft);
     if (!payload || draftWarnings(draft).length) {
@@ -733,6 +749,7 @@ export default function AdminCms() {
         return;
       } finally { setBusy(false); }
     }
+    const focus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     if (!window.confirm(`เผยแพร่ “${draftTitle(draft)}” บนเว็บไซต์จริงหรือไม่?`)) return;
     setBusy(true); setMessage('');
     try {
@@ -744,6 +761,14 @@ export default function AdminCms() {
       setReloadDrafts(count => count + 1);
       setMessage(`เผยแพร่สำเร็จ: ${result.placeId}`);
     } catch (error) {
+      if (error instanceof AdminRequestError && error.details?.code === 'DUPLICATE_PLACE' && error.details.existingPlaces?.length) {
+        setDuplicate({ draftId: draft.id, candidates: error.details.existingPlaces, focus });
+        return;
+      }
+      if (error instanceof AdminRequestError && error.details?.code === 'SOURCE_ALREADY_RESOLVED') {
+        await openLinkedDraft(draft);
+        return;
+      }
       // A place may change between the preflight comparison and the locked
       // publication transaction. Recover by opening the explicit field picker.
       if (error instanceof AdminRequestError && error.status === 409 && draft.target_place_id) {
@@ -906,6 +931,8 @@ export default function AdminCms() {
           </fieldset>
         </section>
         <label className="block text-sm font-medium"><span>รายละเอียดสถานที่</span><textarea className={`${inputStyle} min-h-36 resize-y`} value={form.description} onChange={e => setForm(current => ({ ...current, description: e.target.value }))} placeholder="จุดเด่น ประวัติ การเดินทาง และข้อมูลที่เป็นประโยชน์..." /></label>
+        <label className="block text-sm font-medium"><span>รายละเอียดภาษาอังกฤษ</span><textarea className={`${inputStyle} min-h-28 resize-y`}
+          value={form.descriptionEn ?? ''} onChange={e => setForm(current => ({ ...current, descriptionEn: e.target.value }))} /></label>
         <section aria-label="จัดการหัวข้อที่เกี่ยวข้อง" className="space-y-3 rounded-xl border border-teal-100 bg-teal-50/40 p-4">
           <div><h3 className="font-semibold">หัวข้อที่เกี่ยวข้อง</h3><p className="mt-1 text-xs text-slate-600">เลือกหัวข้อเดิม หรือพิมพ์หัวข้อใหม่ได้สูงสุด 12 รายการ · จะแสดงใต้รายละเอียดสถานที่เมื่อเผยแพร่</p></div>
           <div className="flex flex-wrap gap-2"><input aria-label="พิมพ์หัวข้อที่เกี่ยวข้อง" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={tagInput} maxLength={60} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(tagInput); } }} placeholder="เช่น ทะเลหมอก จุดชมวิว" /><button type="button" disabled={!tagInput.trim() || visibleTags.length >= 12} onClick={() => addTag(tagInput)} className="rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50">เพิ่มหัวข้อ</button></div>
@@ -990,13 +1017,17 @@ export default function AdminCms() {
                     : 'เปิดฉบับร่างแล้ว ยังไม่พบชื่อจากแหล่งอิสระที่ตรงกัน กรุณากรอกชื่อเอง');
           });
         }} />}
+      {duplicate && <DuplicateResolutionDialog draftId={duplicate.draftId} candidates={duplicate.candidates} base={base}
+        request={requestAdmin} returnFocus={duplicate.focus} close={() => setDuplicate(null)}
+        openDraft={draft => { setReloadDrafts(count => count + 1); if (draft.status === 'draft') void openDraft(draft);
+          else setMessage('ข้อมูลจากฉบับร่างนี้ถูกเผยแพร่ที่สถานที่เดิมแล้ว'); }} />}
       {reconcile && tab === 'drafts' && <section id="cms-reconcile" className="scroll-mt-24 space-y-3 rounded-2xl border border-amber-300 bg-white p-4 shadow-sm" aria-label="เปรียบเทียบข้อมูลล่าสุด">
         <h2 className="text-lg font-bold">เปรียบเทียบฉบับร่างกับข้อมูลล่าสุด</h2>
         <p className="text-sm text-slate-600">ติ๊กเฉพาะการแก้ไขจากฉบับร่างที่ต้องการเก็บไว้ ช่องที่ไม่เลือกจะใช้ข้อมูลล่าสุดบนเว็บไซต์</p>
         {reconcile.data.fields.filter(field => field !== 'lng' && field !== 'category').map(field => {
           const isCoordinate = field === 'lat';
           const isCategory = field === 'categories';
-          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหลัก',categories:'หมวดหมู่ทั้งหมด',description:'รายละเอียด',tags:'หัวข้อที่เกี่ยวข้อง',lat:'พิกัด (ละติจูดและลองจิจูด)',imageUrl:'รูปหลัก'};
+          const names: Record<string,string> = {name:'ชื่อ',nameLocal:'ชื่อภาษาไทย',province:'จังหวัด',category:'หมวดหลัก',categories:'หมวดหมู่ทั้งหมด',description:'รายละเอียด',descriptionEn:'รายละเอียดภาษาอังกฤษ',tags:'หัวข้อที่เกี่ยวข้อง',lat:'พิกัด (ละติจูดและลองจิจูด)',imageUrl:'รูปหลัก'};
           const display = (payload: DraftPayload) => isCoordinate
             ? `${payload.lat ?? '(ว่าง)'}, ${payload.lng ?? '(ว่าง)'}`
             : field === 'tags' ? (payload.tags?.map(tag => localizedTag(tag, 'th')).join(', ') ?? '(คงหัวข้อเดิม)')
@@ -1041,7 +1072,7 @@ export default function AdminCms() {
             : Array.isArray(tags) ? (tags.length === 0 ? <span>ไม่มีหัวข้อ</span> : stringList(tags).map(tag => <span key={tag} className="rounded-full border bg-slate-50 px-2 py-1">{localizedTag(tag, 'th')}</span>))
             : <span>โปรดตรวจสอบหัวข้อ</span>}</div>
           {warnings.length > 0 && <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"><strong>ฉบับร่างนี้มีข้อมูลผิดรูปแบบ:</strong> {warnings.join(' · ')} กรุณาเปิดแก้ไขและบันทึกใหม่ก่อนเผยแพร่</div>}
-          {draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3"><button type="button" disabled={!canEdit} className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold disabled:opacity-50" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy || warnings.length > 0} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}
+          {draft.status === 'draft' && <div className="flex flex-wrap gap-2 border-t pt-3">{payload?._duplicateReceipt && <button type="button" disabled={busy} className="rounded-xl border px-4 py-2.5 text-sm font-semibold" onClick={() => void openLinkedDraft(draft)}>เปิดฉบับร่างที่เชื่อมไว้</button>}<button type="button" disabled={!canEdit} className="flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold disabled:opacity-50" onClick={() => void openDraft(draft)}>แก้ไขร่าง</button><button type="button" disabled={busy || warnings.length > 0} className="flex-1 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50" onClick={() => void publish(draft)}>เผยแพร่</button><button type="button" disabled={busy} className="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50" onClick={() => void deleteDraft(draft)}>ลบฉบับร่าง</button></div>}
         </article>;})}
         <div className="flex items-center gap-3"><button type="button" disabled={draftPage === 1} onClick={() => setDraftPage(p => p-1)} className="rounded-xl border px-4 py-2">หน้าร่างก่อนหน้า</button><span>หน้า {draftPage}</span><button type="button" disabled={visibleDrafts.length <= draftPage*10} onClick={() => setDraftPage(p => p+1)} className="rounded-xl border px-4 py-2">หน้าร่างถัดไป</button></div>
       </section>}      {tab === 'history' && <section className="space-y-4">

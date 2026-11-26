@@ -16,7 +16,7 @@ const { registerBasicTripRoadRoutes } = require('./basic-trip-road.cjs');
 const { registerAiHealthRoutes } = require('./ai-health-check.cjs');
 const { ensureAiSettings,registerAiSettingsRoutes } = require('./ai-model-settings.cjs');
 const { authRoutes } = require('./railway-admin-auth.cjs');
-const { createRailwayMediaStorage, registerRailwayMedia, uploadImage, createImageUpload } = require('./railway-media.cjs');
+const { createRailwayMediaStorage, registerRailwayMedia, uploadImage, createImageUpload, verifyDraftMedia } = require('./railway-media.cjs');
 const {
   buildCorsOptions,
   createRateLimiter,
@@ -56,6 +56,7 @@ registerAdminCms(app, {
   requireAdmin,
   storage: createImageUpload(),
   uploadImage: (file, signal) => uploadImage(storage, file, signal),
+  verifyMedia: (url, known) => verifyDraftMedia(storage, url, known),
   invalidateSearchIndex,
 });
 registerRailwayMedia(app, { getSql, storage, requireAdmin });

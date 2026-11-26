@@ -5,6 +5,7 @@ const { isThaiProvince } = require('./thai-provinces.cjs');
 const { resolveIndependentDraft, warmNamesIndex } = require('./smart-draft-autofill.cjs');
 const { verifyCandidate:verifyGeoapifyDiscoveryCandidate } = require('./geoapify-place-discovery.cjs');
 const { finishDirectPublication } = require('./admin-direct-publication.cjs');
+const { findDuplicatePlaces, duplicateResponse, registerDuplicateResolution, gallerySnapshot } = require('./admin-duplicate-resolution.cjs');
 const { aliasKey, validateAlias } = require('./place-alias.cjs');
 
 
@@ -28,10 +29,19 @@ function validateImageUrl(imageUrl) {
   }
 }
 
-async function preservePlaceImage(tx, placeId, url, title) {
+async function preservePlaceImage(tx, placeId, url, title, reuseCredit = false) {
   if (!url) return;
   const existing = await tx`SELECT id FROM media WHERE place_id = ${placeId} AND url = ${url} AND type = 'image' LIMIT 1`;
-  if (!existing.length) await tx`INSERT INTO media (id, place_id, url, type, title)
+  if (existing.length) return;
+  if (reuseCredit) {
+    const copied = await tx`INSERT INTO media (id, place_id, url, type, title, description, creator_name, license_name, license_url, source_page)
+      SELECT ${`cms-media:${randomUUID()}`}, ${placeId}, url, type, title, description, creator_name, license_name, license_url, source_page
+      FROM media WHERE url = ${url} AND type = 'image'
+      ORDER BY (creator_name IS NOT NULL OR license_name IS NOT NULL OR source_page IS NOT NULL) DESC, id
+      LIMIT 1 RETURNING id`;
+    if (copied.length) return;
+  }
+  await tx`INSERT INTO media (id, place_id, url, type, title)
     VALUES (${`cms-media:${randomUUID()}`}, ${placeId}, ${url}, 'image', ${title})`;
 }
 
@@ -62,6 +72,7 @@ function cleanPlace(input, { draft = false } = {}) {
   const lng = number(input?.lng);
   const imageUrl = text(input?.imageUrl, 2000);
   const errors = [];
+  if (typeof input?.descriptionEn === 'string' && input.descriptionEn.length > 10000) errors.push('English description is too long.');
   if (categories === null) errors.push('Choose between 1 and 8 valid categories.');
   // Omitted tags mean "leave the published tags unchanged" for legacy drafts.
   // An explicit empty array is different: it means the admin removed every tag.
@@ -99,11 +110,12 @@ function cleanPlace(input, { draft = false } = {}) {
     value: { name, nameLocal: text(input?.nameLocal, 200), province, category,
       ...(categories === undefined || categories === null ? {} : { categories }),
       ...(tags === undefined ? {} : { tags }),
-      description: text(input?.description, 10000), lat: missingCoordinates ? null : lat, lng: missingCoordinates ? null : lng, imageUrl, imageUrls: [...new Set([imageUrl, ...imageUrls].filter(Boolean))], removedImageUrls: Array.isArray(removedImageUrls) ? [...new Set(removedImageUrls)] : [] },
+      description: text(input?.description, 10000),
+      ...(typeof input?.descriptionEn === 'string' ? { descriptionEn: text(input.descriptionEn, 10000) } : {}), lat: missingCoordinates ? null : lat, lng: missingCoordinates ? null : lng, imageUrl, imageUrls: [...new Set([imageUrl, ...imageUrls].filter(Boolean))], removedImageUrls: Array.isArray(removedImageUrls) ? [...new Set(removedImageUrls)] : [] },
   };
 }
 
-function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft, enrichGeoapify = resolveGeoapifyDraft }) {
+function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uploadImage, verifyMedia = async (_url, known) => known, invalidateSearchIndex = () => {}, enrichDraft = resolveIndependentDraft, enrichGeoapify = resolveGeoapifyDraft }) {
   if (process.env.RAILWAY_ENVIRONMENT_ID && enrichDraft === resolveIndependentDraft) warmNamesIndex();
   const wrap = (handler) => async (req, res) => {
     try { await handler(req, res); }
@@ -114,6 +126,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       res.status(503).json({ error: 'Admin CMS is unavailable.' });
     }
   };
+
+  registerDuplicateResolution(app, { requireAdmin, wrap, getSql, cleanPlace, verifyMedia });
 
   app.get('/api/admin/places', requireAdmin, wrap(async (_req, res) => {
     const sql = getSql();
@@ -234,7 +248,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
 
   app.post('/api/admin/catalog/:placeId/edit', requireAdmin, wrap(async (req, res) => {
     const result = await getSql().begin(async tx => {
-      const [place] = await tx`SELECT id, name, name_local, province, category, categories, description, tags, lat, lng, image_url
+      const [place] = await tx`SELECT id, name, name_local, province, category, categories, description, description_en, tags, lat, lng, image_url
         FROM places WHERE id = ${req.params.placeId} FOR UPDATE`;
       if (!place) return { code: 404, error: 'Place not found.' };
       const existing = await tx`SELECT id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version
@@ -242,7 +256,7 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (existing.length) return { code: 200, draft: existing[0] };
       const id = randomUUID();
       const payload = { name: place.name, nameLocal: place.name_local || '', province: place.province,
-        category: place.category, categories: Array.isArray(place.categories) && place.categories.length ? place.categories : [place.category], description: place.description || '', tags: place.tags || [], lat: place.lat, lng: place.lng, imageUrl: place.image_url || '', imageUrls: [], removedImageUrls: [] };
+        category: place.category, categories: Array.isArray(place.categories) && place.categories.length ? place.categories : [place.category], description: place.description || '', descriptionEn: place.description_en || '', tags: place.tags || [], lat: place.lat, lng: place.lng, imageUrl: place.image_url || '', imageUrls: [], removedImageUrls: [] };
       const [draft] = await tx`INSERT INTO place_drafts (id, payload, author_id, target_place_id, target_updated_at)
         SELECT ${id}, ${tx.json(payload)}, ${req.auth.user.id}, id, updated_at FROM places WHERE id = ${place.id}
         RETURNING id, status, target_place_id, payload, EXTRACT(EPOCH FROM updated_at)::text AS version`;
@@ -418,6 +432,11 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       if (draft.status !== 'draft' || draft.version !== version) return { code: 409, error: 'Draft changed. Reload it before saving.' };
       if (typeof draft.payload?.googlePlaceId === 'string') parsed.value.googlePlaceId = draft.payload.googlePlaceId;
       if (draft.payload?.autoFillSource) parsed.value.autoFillSource = draft.payload.autoFillSource;
+      for (const key of ['_duplicateEdit', '_duplicateReceipt']) {
+        if (draft.payload?.[key]) parsed.value[key] = draft.payload[key];
+      }
+      if (parsed.value.descriptionEn === undefined && draft.payload?.descriptionEn !== undefined)
+        parsed.value.descriptionEn = draft.payload.descriptionEn;
       const [saved] = await tx`UPDATE place_drafts SET payload = ${tx.json(parsed.value)},
         updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
         WHERE id = ${req.params.draftId}
@@ -443,10 +462,10 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     res.status(result.code).json(result.error ? { error: result.error } : { deleted: true });
   }));
 
-  const editableFields = ['name', 'nameLocal', 'province', 'category', 'categories', 'description', 'tags', 'lat', 'lng', 'imageUrl'];
+  const editableFields = ['name', 'nameLocal', 'descriptionEn', 'province', 'category', 'categories', 'description', 'tags', 'lat', 'lng', 'imageUrl'];
   const placeSnapshot = place => ({
     name: place.name, nameLocal: place.name_local || '', province: place.province,
-    category: place.category, categories: Array.isArray(place.categories) && place.categories.length ? place.categories : [place.category], description: place.description || '', tags: place.tags || [], lat: Number(place.lat),
+    category: place.category, categories: Array.isArray(place.categories) && place.categories.length ? place.categories : [place.category], description: place.description || '', descriptionEn: place.description_en || '', tags: place.tags || [], lat: Number(place.lat),
     lng: Number(place.lng), imageUrl: place.image_url || '',
   });
   // A stale draft is never rebased implicitly. Admin must review and choose every field to retain.
@@ -459,14 +478,17 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
     // Converting timestamps to JavaScript Date first loses microseconds and can
     // incorrectly report a conflicting draft as safe to publish.
     const [place] = await sql`SELECT p.name, p.name_local, p.province, p.category, p.categories, p.tags,
-      p.description, p.lat, p.lng, p.image_url, p.updated_at,
+      p.description, p.description_en, p.lat, p.lng, p.image_url, p.updated_at,
       p.updated_at IS DISTINCT FROM d.target_updated_at AS stale,
       EXTRACT(EPOCH FROM p.updated_at)::text AS place_version
       FROM places p JOIN place_drafts d ON d.id = ${draft.id}
       WHERE p.id = ${draft.target_place_id}`;
     if (!place) return res.status(404).json({ error: 'Published place not found.' });
+    const galleryVersion = draft.payload._duplicateEdit
+      ? (await gallerySnapshot(sql, draft.target_place_id, place.image_url)).version : undefined;
     res.json({ draft: draft.payload, latest: placeSnapshot(place), version: draft.version,
-      stale: place.stale, placeVersion: place.place_version,
+      stale: place.stale || (galleryVersion !== undefined && galleryVersion !== draft.payload._duplicateEdit.galleryVersion),
+      galleryVersion, placeVersion: place.place_version,
       placeUpdatedAt: new Date(place.updated_at).toISOString(),
       fields: editableFields });
   }));
@@ -511,6 +533,14 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
       }
       const parsed = cleanPlace(payload);
       if (parsed.errors.length) return { code: 400, errors: parsed.errors };
+      if (draft.payload.googlePlaceId) parsed.value.googlePlaceId = draft.payload.googlePlaceId;
+      if (draft.payload.autoFillSource) parsed.value.autoFillSource = draft.payload.autoFillSource;
+      if (draft.payload._duplicateEdit) {
+        const galleryVersion = (await gallerySnapshot(tx, draft.target_place_id, place.image_url)).version;
+        if (galleryVersion !== req.body.expectedGalleryVersion)
+          return { code: 409, error: 'แกลเลอรีเปลี่ยนอีกครั้ง กรุณาเปรียบเทียบใหม่' };
+        parsed.value._duplicateEdit = { ...draft.payload._duplicateEdit, galleryVersion };
+      }
       // Copy the version entirely inside PostgreSQL. Converting it through a
       // JavaScript Date would lose microseconds and make this draft stale again.
       const [saved] = await tx`UPDATE place_drafts SET payload = ${tx.json(parsed.value)},
@@ -526,28 +556,28 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
   app.post('/api/admin/places/:draftId/publish', requireAdmin, wrap(async (req, res) => {
     const sql = getSql();
     const result = await sql.begin(async tx => {
+      // Acquire the catalogue lock before draft or place row locks. Resolution
+      // uses the same ordering and direct publication still serializes checks.
+      await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
       const [draft] = await tx`SELECT *, EXTRACT(EPOCH FROM updated_at)::text AS version
         FROM place_drafts WHERE id = ${req.params.draftId} FOR UPDATE`;
       if (!draft) return { status: 404, error: 'Draft not found.' };
       if (draft.status === 'published') return { status: 200, placeId: draft.published_place_id, published: true };
       if (!draftVersion(req.body?.version)) return { status: 400, error: 'Draft version required. Reload the draft.' };
-      if (draft.version !== req.body.version) return { status: 409, error: 'Draft changed. Reload it before publishing.' };
+      if (draft.version !== req.body.version) return { status: 409, code: 'DRAFT_VERSION_CONFLICT', error: 'Draft changed. Reload it before publishing.' };
       const parsed = cleanPlace(draft.payload);
       if (parsed.errors.length) return { status: 400, errors: parsed.errors };
       const p = parsed.value;
       if (draft.payload?.googlePlaceId && p.name === 'รอยืนยันชื่อสถานที่')
         return { status: 400, error: 'Admin must verify and enter the place name before publishing.' };
-      // Serialize the duplicate check and write, including publications of different drafts.
-      await tx`LOCK TABLE places IN SHARE ROW EXCLUSIVE MODE`;
-      // Admin direct publication retains payload, identity, conflict and duplicate protection.
-      // An exact normalized name in the same province must not create a second place.
       if (!draft.target_place_id) {
-        const duplicates = await tx`SELECT id FROM places
-          WHERE LOWER(TRIM(province)) = LOWER(TRIM(${p.province}))
-          AND (LOWER(TRIM(name)) IN (LOWER(TRIM(${p.name})), LOWER(TRIM(${p.nameLocal || p.name})))
-            OR LOWER(TRIM(COALESCE(name_local,''))) IN (LOWER(TRIM(${p.name})), LOWER(TRIM(${p.nameLocal || p.name}))))
-          LIMIT 1`;
-        if (duplicates.length) return {status:409,error:'A place with this name already exists in this province. Edit the existing place instead.'};
+        if (draft.payload._duplicateReceipt) {
+          const [linked] = await tx`SELECT id FROM place_drafts WHERE id = ${draft.payload._duplicateReceipt.editId}`;
+          if (linked) return { status: 409, code: 'SOURCE_ALREADY_RESOLVED',
+            error: 'นำข้อมูลไปยังฉบับร่างแก้ไขแล้ว กรุณาตรวจสอบฉบับร่างเดิม' };
+        }
+        const matches = await findDuplicatePlaces(tx, { ...p, googlePlaceId: draft.payload.googlePlaceId, autoFillSource: draft.payload.autoFillSource });
+        if (matches.length) return duplicateResponse(matches);
       }
       if (draft.target_place_id) {
         const [current] = await tx`SELECT id, name, name_local, province, lat, lng, image_url,
@@ -555,14 +585,33 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           FROM places WHERE id = ${draft.target_place_id} FOR UPDATE`;
         if (!current) return { status: 404, error: 'Original place no longer exists.' };
         if (!current.version_matches)
-          return { status: 409, error: 'Place changed since this draft was created. Review the latest place before updating.' };
+          return { status: 409, code: 'TARGET_PLACE_VERSION_CONFLICT', error: 'Place changed since this draft was created. Review the latest place before updating.' };
+        if (draft.payload._duplicateEdit) {
+          await tx`LOCK TABLE media IN SHARE ROW EXCLUSIVE MODE`;
+          const gallery = await gallerySnapshot(tx, current.id, current.image_url);
+          if (gallery.version !== draft.payload._duplicateEdit.galleryVersion)
+            return { status: 409, code: 'GALLERY_VERSION_CONFLICT', error: 'แกลเลอรีเปลี่ยนแล้ว กรุณาตรวจสอบรูปในฉบับร่างอีกครั้ง' };
+          const changedIdentity = p.name !== current.name || p.nameLocal !== (current.name_local || '') || p.province !== current.province;
+          const externalIds = draft.payload._duplicateEdit.externalIds || [];
+          if (externalIds.length) {
+            const [conflict] = await tx`SELECT p.place_id FROM place_external_ids p
+              JOIN jsonb_to_recordset(${tx.json(externalIds)}::jsonb) AS i(namespace TEXT, external_id TEXT)
+                USING (namespace, external_id)
+              WHERE p.place_id <> ${current.id} LIMIT 1`;
+            if (conflict)
+              return { status: 409, code: 'EXTERNAL_IDENTITY_CONFLICT', error: 'รหัสสถานที่ภายนอกถูกผูกกับสถานที่อื่น' };
+          }
+          const others = (await findDuplicatePlaces(tx, { ...p, googlePlaceId: draft.payload.googlePlaceId, autoFillSource: draft.payload.autoFillSource }))
+            .filter(candidate => candidate.id !== current.id && (candidate.identity_match || changedIdentity));
+          if (others.length) return duplicateResponse(others, true);
+        }
         // Explicit removal only: never erase existing gallery images merely because a draft omitted them.
         // Verify every removal belongs to this place, and do not remove the selected primary.
         if (p.removedImageUrls.includes(p.imageUrl)) return { status: 400, error: 'The primary image cannot be removed.' };
         if (p.removedImageUrls.length) {
           const existingMedia = await tx`SELECT url FROM media WHERE place_id = ${current.id} AND type = 'image'`;
           const known = new Set([current.image_url, ...existingMedia.map(item => item.url)].filter(Boolean));
-          if (p.removedImageUrls.some(url => !known.has(url))) return { status: 409, error: 'Gallery changed. Reload the place before removing images.' };
+          if (p.removedImageUrls.some(url => !known.has(url))) return { status: 409, code: 'GALLERY_VERSION_CONFLICT', error: 'Gallery changed. Reload the place before removing images.' };
           for (const url of p.removedImageUrls) {
             await tx`DELETE FROM media WHERE place_id = ${current.id} AND type = 'image' AND url = ${url}`;
           }
@@ -571,12 +620,14 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
           category = ${p.category},
           categories = CASE WHEN ${p.categories !== undefined} THEN ${tx.json(p.categories || [])}::jsonb ELSE categories END,
           description = ${p.description},
+          description_en = CASE WHEN ${p.descriptionEn !== undefined} THEN ${p.descriptionEn || null} ELSE description_en END,
+          province_en = CASE WHEN province = ${p.province} THEN province_en ELSE NULL END,
           tags = CASE WHEN ${p.tags !== undefined} THEN ${tx.json(p.tags || [])}::jsonb ELSE tags END,
           lat = ${p.lat}, lng = ${p.lng},
           image_url = ${p.imageUrl || null}, updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
           WHERE id = ${draft.target_place_id}`;
         if (current.image_url && current.image_url !== p.imageUrl && !p.removedImageUrls.includes(current.image_url)) await preservePlaceImage(tx, current.id, current.image_url, current.name);
-        for (const url of p.imageUrls.filter(url => !p.removedImageUrls.includes(url))) await preservePlaceImage(tx, current.id, url, p.name);
+        for (const url of p.imageUrls.filter(url => !p.removedImageUrls.includes(url))) await preservePlaceImage(tx, current.id, url, p.name, Boolean(draft.payload._duplicateEdit));
         await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${current.id}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
         await finishDirectPublication(tx, draft, current.id, req.auth.user.id);
@@ -591,8 +642,8 @@ function registerAdminCms(app, { getSql, listPlaces, requireAdmin, storage, uplo
         : (source?.name || 'PaiNaiDee Admin CMS');
       const publishedSourceUrl=typeof source?.url==='string' && source.url.startsWith('https://')
         ? source.url : null;
-      await tx`INSERT INTO places (id, name, name_local, province, category, categories, description, tags, lat, lng, image_url, source_name, source_url)
-        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${tx.json(p.categories || [p.category])}, ${p.description}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, ${publishedSourceName}, ${publishedSourceUrl})`;
+      await tx`INSERT INTO places (id, name, name_local, province, category, categories, description, description_en, tags, lat, lng, image_url, source_name, source_url)
+        VALUES (${placeId}, ${p.name}, ${p.nameLocal}, ${p.province}, ${p.category}, ${tx.json(p.categories || [p.category])}, ${p.description}, ${p.descriptionEn || null}, ${tx.json(p.tags || [])}, ${p.lat}, ${p.lng}, ${p.imageUrl || null}, ${publishedSourceName}, ${publishedSourceUrl})`;
       for (const url of p.imageUrls) await preservePlaceImage(tx, placeId, url, p.name);
       await tx`UPDATE place_drafts SET status = 'published', published_place_id = ${placeId}, updated_at = clock_timestamp() WHERE id = ${draft.id}`;
 
