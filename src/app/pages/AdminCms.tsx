@@ -10,6 +10,7 @@ import { ADMIN_PLACE_CATEGORIES, hasThaiCategoryLabel, localizedCategory, locali
 import DuplicateResolutionDialog, { type DuplicateCandidate } from '@/components/admin/DuplicateResolutionDialog';
 import AdminMediaPreview from '@/components/admin/AdminMediaPreview';
 import CatalogThumbnail from '@/components/admin/CatalogThumbnail';
+import CatalogPagination from '@/components/admin/CatalogPagination';
 import AdminWorkspace, { type AdminView } from '@/components/admin/AdminWorkspace';
 import ProvinceQualityDashboard from '@/components/admin/ProvinceQualityDashboard';
 
@@ -161,6 +162,7 @@ export default function AdminCms() {
   const [overviewError, setOverviewError] = useState('');
   const overviewFetchedRevision = useRef(-1);
   const catalogRequest = useRef<AbortController | null>(null);
+  const catalogTop = useRef<HTMLDivElement>(null);
   const catalogPendingKey = useRef('');
   const catalogCooldown = useRef(0);
   useEffect(() => {
@@ -363,6 +365,12 @@ export default function AdminCms() {
       if (!controller.signal.aborted) setCatalogLoading(false);
     }
   }, [api]);
+
+  function changeCatalogPage(page: number, fromBottom = false) {
+    if (page === catalogPage) return;
+    if (fromBottom) catalogTop.current?.scrollIntoView({ block: 'start' });
+    void findPlaces(page, catalogQuery, catalogProvince);
+  }
 
   useEffect(() => {
     if (tab === 'existing' && isAdmin && !searched) void findPlaces(1, '', '');
@@ -903,6 +911,9 @@ export default function AdminCms() {
         <div><h2 className="flex items-center gap-2 text-xl font-bold"><Search className="text-teal-600" /> ค้นหาสถานที่เดิม</h2><p className="mt-1 text-sm text-slate-500">แสดงสถานที่ที่มีอยู่ใน Railway และค้นหาได้ด้วยชื่อเต็ม ชื่อย่อ หรือจังหวัด</p></div>
         <form className="flex min-w-0 flex-wrap gap-2" onSubmit={event => { event.preventDefault(); void findPlaces(1, search, provinceFilter); }}><input aria-label="ค้นหาสถานที่เดิม" className={`${inputStyle} mt-0 min-w-0 flex-1`} value={search} onChange={e => setSearch(e.target.value)} placeholder="ชื่อไทย / English / ชื่อบางส่วน" /><input aria-label="กรองจังหวัด" className={`${inputStyle} mt-0 sm:max-w-48`} value={provinceFilter} onChange={e => setProvinceFilter(e.target.value)} placeholder="จังหวัด (ทุกจังหวัด)" /><button type="submit" disabled={busy || Boolean(catalogRetryAt)} className="rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white disabled:opacity-50">ค้นหา</button></form>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500"><span aria-live="polite">{searched && !catalogLoading && !catalogError && <>พบ {catalogTotal} สถานที่ {catalogQuery || catalogProvince ? '(ตามคำค้นล่าสุด)' : '(ทั้งหมด)'}</>}</span><button type="button" className="font-medium text-teal-700 underline" disabled={busy || Boolean(catalogRetryAt)} onClick={() => { setSearch(''); setProvinceFilter(''); void findPlaces(1, '', ''); }}>แสดงทั้งหมด</button></div>
+        <div ref={catalogTop} className="scroll-mt-24">
+          {!catalogError && <CatalogPagination position="top" page={catalogPage} total={catalogTotal} disabled={busy || catalogLoading || Boolean(catalogRetryAt)} onPage={changeCatalogPage} />}
+        </div>
         {searched && !catalogLoading && !catalogError && !catalog.length && <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบสถานที่ ลองใช้คำค้นที่สั้นลงหรือชื่อจังหวัด</p>}
         {catalogLoading && <p role="status">กำลังค้นหาสถานที่...</p>}
         {catalogError && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{catalogError} {catalogFailedParams && <button type="button" className="underline disabled:opacity-50" disabled={Boolean(catalogRetryAt)} onClick={() => void findPlaces(catalogFailedParams.page, catalogFailedParams.query, catalogFailedParams.province)}>ลองโหลดผลค้นหาใหม่</button>}</p>}
@@ -921,7 +932,7 @@ export default function AdminCms() {
           {placeAliases.length === 0 && <p className="text-sm text-slate-500">ยังไม่มีชื่อเรียกเพิ่มเติม</p>}
           <div className="space-y-2">{placeAliases.map(alias => <div key={alias.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-3"><div><p className="font-medium">{alias.alias_name}</p><p className="text-xs text-slate-500">{alias.language} · {alias.status === 'approved' ? 'อนุมัติแล้ว' : alias.status === 'rejected' ? 'ปฏิเสธแล้ว' : 'รอตรวจสอบ'}</p></div>{alias.status === 'pending' && <div className="flex gap-2"><button type="button" disabled={busy} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs text-white disabled:opacity-50" onClick={() => void reviewAlias(alias, 'approved')}>อนุมัติ</button><button type="button" disabled={busy} className="rounded-lg border px-3 py-2 text-xs disabled:opacity-50" onClick={() => void reviewAlias(alias, 'rejected')}>ปฏิเสธ</button></div>}</div>)}</div>
         </section>}
-        {!catalogLoading && !catalogError && catalogTotal > 30 && <div className="flex items-center justify-between gap-3 border-t pt-4"><button type="button" disabled={busy || catalogPage === 1} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage - 1, catalogQuery, catalogProvince)}>ก่อนหน้า</button><span className="text-sm text-slate-500">หน้า {catalogPage} / {Math.ceil(catalogTotal / 30)}</span><button type="button" disabled={busy || catalogPage * 30 >= catalogTotal} className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40" onClick={() => void findPlaces(catalogPage + 1, catalogQuery, catalogProvince)}>ถัดไป</button></div>}
+        {!catalogLoading && !catalogError && <CatalogPagination position="bottom" page={catalogPage} total={catalogTotal} disabled={busy || Boolean(catalogRetryAt)} onPage={page => changeCatalogPage(page, true)} />}
       </section>}
       {tab === 'new' && <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-7"><fieldset disabled={busy} className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-xl font-bold">{editing ? 'แก้ไขข้อมูลฉบับร่าง' : 'เพิ่มสถานที่ใหม่'}</h2><p className="mt-1 text-sm text-slate-500">เริ่มจากชื่ออย่างเดียวได้ · เติมข้อมูลให้ครบก่อนกดเผยแพร่</p></div>{editing && <button type="button" className="text-sm font-medium text-teal-700 underline" onClick={() => { if (!confirmLeave()) return; setEditing(null); setForm({ ...empty }); setInheritedTags([]); setTagInput(''); setProposedCoordinate(null); setGeoCandidates([]); setGeocodeNote(''); setSavedForm(JSON.stringify(empty)); void loadExistingImages(); }}>เริ่มรายการใหม่</button>}</div>
