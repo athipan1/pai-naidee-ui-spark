@@ -38,7 +38,9 @@ test.beforeEach(async ({ page }) => {
     );
     if (detail) return route.fulfill({ json: detail });
     const search = url.searchParams.get("search") || "";
-    const filtered = places.filter(
+    const sort = url.searchParams.get("sort");
+    const source = sort === "latest" ? places.slice(0, 10) : sort === "rotation" ? places.slice(10) : places;
+    const filtered = source.filter(
       (place) =>
         (!search ||
           place.name.includes(search) ||
@@ -56,6 +58,7 @@ test.beforeEach(async ({ page }) => {
         total: filtered.length,
         page,
         limit,
+        sort: sort || undefined,
       },
     });
   });
@@ -76,6 +79,8 @@ test("visible search, real filters, pagination, history, map and favorite surviv
   await page.goto("/discover");
   const search = page.getByRole("searchbox", { name: "ค้นหาสถานที่" });
   await expect(search).toBeVisible();
+  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
+  await page.getByRole("button", { name: "ดูสถานที่ทั้งหมด", exact: true }).click();
   await expect(page.getByTestId("attraction-card")).toHaveCount(20);
   await page.getByRole("button", { name: "เพิ่มในรายการโปรด" }).first().click();
   await page.getByRole("button", { name: "ถัดไป" }).click();
@@ -111,6 +116,8 @@ test("visible search, real filters, pagination, history, map and favorite surviv
   await expect(search).toHaveValue("จุดหมาย 1");
   await page.getByRole("button", { name: "ล้างทั้งหมด" }).click();
   await expect(search).toHaveValue("");
+  await expect(page.getByTestId("discovery-highlights")).toBeVisible();
+  await page.getByRole("button", { name: "ดูสถานที่ทั้งหมด", exact: true }).click();
   const firstCard = page.getByTestId("attraction-card").first();
   const image = await firstCard.locator("img").getAttribute("src");
   await firstCard
@@ -137,7 +144,8 @@ test("zero results, clearing, language toggle, loading and retry remain usable",
   ).toBeVisible();
   await expect(page.getByRole("searchbox")).toBeVisible();
   await page.getByRole("button", { name: "ล้างคำค้นหา" }).click();
-  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
+  await expect(page.getByTestId("rotating-places").getByTestId("attraction-card")).toHaveCount(20);
   await page.getByRole("button", { name: "Switch to English" }).click();
   await expect(
     page.getByRole("searchbox", { name: "Search places" })
@@ -165,7 +173,8 @@ test("query responses cannot overwrite newer query and typing does not fetch eac
   page,
 }) => {
   await page.goto("/discover?mode=search");
-  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
+  await expect(page.getByTestId("rotating-places").getByTestId("attraction-card")).toHaveCount(20);
   const requests: string[] = [];
   await page.route("**/api/places?**", async (route) => {
     const query =
@@ -202,7 +211,8 @@ test("viewport matrix has no overflow and captures desktop and mobile evidence",
   page,
 }, testInfo) => {
   await page.goto("/discover");
-  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
+  await expect(page.getByTestId("rotating-places").getByTestId("attraction-card")).toHaveCount(20);
   const sizes = [
     [320, 568],
     [360, 800],
@@ -272,6 +282,7 @@ test("cached destination images remain visible after map and grid remounts", asy
   page,
 }) => {
   await page.goto("/discover");
+  await page.getByRole("button", { name: "ดูสถานที่ทั้งหมด", exact: true }).click();
   const firstImage = page.getByTestId("attraction-card").first().locator("img");
   await expect(firstImage).toHaveCSS("opacity", "1");
   await expect
