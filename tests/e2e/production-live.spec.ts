@@ -49,7 +49,8 @@ test('mobile visitor can browse without horizontal overflow and see a loaded des
     (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0,
   )).toBe(true);
 
-  await page.goto('/discover');
+  // Explicit catalogue mode works both before and after integrated discovery is deployed.
+  await page.goto('/discover?mode=search&browse=all');
   await expect(page.getByRole('button', { name: /Map view|มุมมองแผนที่/ })).toBeVisible();
 });
 
