@@ -333,3 +333,59 @@ test("cached destination images remain visible after map and grid remounts", asy
       .toBeGreaterThan(0);
   }
 });
+
+// The header arrow is an explicit home action, while browser history remains unchanged.
+test("Explore header returns directly home from search and nearby, not the previous tab", async ({ page }) => {
+  await page.goto("/discover");
+  const headerHome = page.locator("header").getByRole("button", { name: "กลับหน้าหลัก", exact: true });
+  await expect(page.getByRole("tab", { name: "ค้นหา", exact: true })).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("tab", { name: "ใกล้ฉัน", exact: true }).click();
+  await expect(page.getByRole("tab", { name: "ใกล้ฉัน", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL(/mode=map/);
+  await headerHome.click();
+  await expect(page).toHaveURL("/");
+  const homeNav = page.getByRole("navigation").getByRole("link", { name: "สำรวจ", exact: true }).first();
+  await homeNav.click();
+  await expect(page.getByRole("tab", { name: "ค้นหา", exact: true })).toHaveAttribute("aria-selected", "true");
+  await headerHome.click();
+  await expect(page).toHaveURL("/");
+});
+
+test("browser back still returns to the previous Explore tab", async ({ page }) => {
+  await page.goto("/discover");
+  const search = page.getByRole("tab", { name: "ค้นหา", exact: true });
+  const nearby = page.getByRole("tab", { name: "ใกล้ฉัน", exact: true });
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  const initialHistoryLength = await page.evaluate(() => history.length);
+  await nearby.click();
+  await expect(page).toHaveURL(/mode=map/);
+  await expect(nearby).toHaveAttribute("aria-selected", "true");
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength + 1);
+  await nearby.click();
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength + 1);
+  await page.goBack();
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL("/discover");
+  await page.goForward();
+  await expect(nearby).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL(/mode=map/);
+});
+
+test("keyboard tab focus does not create history until explicit activation", async ({ page }) => {
+  await page.goto("/discover");
+  const search = page.getByRole("tab", { name: "ค้นหา", exact: true });
+  const nearby = page.getByRole("tab", { name: "ใกล้ฉัน", exact: true });
+  await search.focus();
+  const initialHistoryLength = await page.evaluate(() => history.length);
+  await search.press("ArrowRight");
+  await expect(nearby).toBeFocused();
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength);
+  await nearby.press("Enter");
+  await expect(nearby).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL(/mode=map/);
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength + 1);
+  await page.goBack();
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL("/discover");
+});

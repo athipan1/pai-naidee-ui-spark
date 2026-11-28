@@ -35,8 +35,8 @@ const DiscoverLayout = ({
               variant="ghost"
               size="icon"
               className="h-11 w-11 shrink-0"
-              aria-label={th ? "ย้อนกลับ" : "Go back"}
-              onClick={() => navigate(-1)}
+              aria-label={th ? "กลับหน้าหลัก" : "Back to home"}
+              onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -60,7 +60,12 @@ const DiscoverLayout = ({
       <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 lg:px-8">
         <Tabs
           value={browsing ? "search" : "map"}
-          onValueChange={(value) => setMode(value as DiscoveryMode)}
+          // Radix automatic focus activation can fire alongside a pointer press.
+          // Only explicit activation should create a navigable history entry.
+          activationMode="manual"
+          onValueChange={(value) => {
+            if (value !== (browsing ? "search" : "map")) setMode(value as DiscoveryMode);
+          }}
         >
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-xl bg-muted p-1 sm:w-fit">
             <TabsTrigger

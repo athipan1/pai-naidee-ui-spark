@@ -537,3 +537,10 @@ test('unified discovery automatically appends the next batch, preserves cards an
   await expect(page.getByRole('heading', {name:'Filtered place',exact:true})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });
+
+test('direct Nearby links have a deterministic English home action', async ({ page }) => {
+  await page.goto('/discover?mode=map');
+  await expect(page.getByRole('tab', {name:'Nearby',exact:true})).toHaveAttribute('aria-selected','true');
+  await page.locator('header').getByRole('button', {name:'Back to home',exact:true}).click();
+  await expect(page).toHaveURL('/');
+});
