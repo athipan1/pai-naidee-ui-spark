@@ -14,7 +14,7 @@ function getApiBaseUrl(): string {
   return (configured || DEFAULT_API_BASE_URL).replace(/\/+$/, "").replace(/\/api$/i, "");
 }
 
-async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+async function requestJson<T>(path: string, signal?: AbortSignal, body?: unknown): Promise<T> {
   signal?.throwIfAborted();
   if (Date.now() < retryAt) throw new RateLimitError(retryAt);
   const controller = new AbortController();
@@ -26,7 +26,8 @@ async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   try {
     const response = await fetch(`${getApiBaseUrl()}${path}`, {
       cache: 'no-store',
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...(body !== undefined ? { "Content-Type": "application/json" } : {}) },
+      ...(body !== undefined ? { method: "POST", body: JSON.stringify(body) } : {}),
       signal: controller.signal,
     });
 
@@ -146,6 +147,45 @@ export async function getRailwayAttractions(options?: {
   // Do not label an old backend's catalogue order as newest during staggered deployments.
   if (options?.sort && response.sort !== options.sort) throw new Error('Discovery ordering is unavailable');
   return { ...response, attractions: response.attractions.map(withPublishedPlaceImages) };
+}
+
+export interface DiscoveryEntry {
+  id: string;
+  province: string;
+  category: string;
+  categories: string[];
+  publishedAt: string;
+}
+
+export async function getDiscoveryIndex(signal?: AbortSignal): Promise<DiscoveryEntry[]> {
+  const entries = new Map<string, DiscoveryEntry>();
+  let cursor: string | null = "";
+  // Bounded metadata requests; never silently pretend an incomplete index is complete.
+  for (let page = 0; page < 40; page++) {
+    const params = new URLSearchParams(cursor ? { after: cursor } : {});
+    const result: { entries: DiscoveryEntry[]; nextCursor: string | null } =
+      await requestJson(`/api/places/discovery-index?${params}`, signal);
+    if (!Array.isArray(result.entries) || !(result.nextCursor === null || typeof result.nextCursor === "string"))
+      throw new Error("Discovery index unavailable");
+    for (const entry of result.entries) {
+      if (typeof entry.id === "string" && typeof entry.category === "string" &&
+          typeof entry.province === "string" && Array.isArray(entry.categories))
+        entries.set(entry.id, entry);
+    }
+    if (result.nextCursor === null) return [...entries.values()];
+    if (result.nextCursor === cursor) throw new Error("Discovery cursor did not advance");
+    cursor = result.nextCursor;
+  }
+  throw new Error("Discovery index exceeds the supported size");
+}
+
+export async function getDiscoveryBatch(ids: string[], signal?: AbortSignal): Promise<SearchResult[]> {
+  const result = await requestJson<{ attractions: SearchResult[] }>("/api/places/discovery-batch", signal, { ids });
+  const byId = new Map(result.attractions.map(place => [place.id, withPublishedPlaceImages(place)]));
+  return [...new Set(ids)].flatMap(id => {
+    const place = byId.get(id);
+    return place ? [place] : [];
+  });
 }
 
 export { getApiBaseUrl };

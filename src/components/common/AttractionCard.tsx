@@ -12,7 +12,8 @@ import type { AttractionPhotoCredit } from '@/shared/types/attraction';
 import { localizedProvince, localizedDescription, localizedCategory, localizedTag } from '@/shared/i18n/placeLocalization';
 
 interface AttractionCardProps {
-  variant?: "default" | "discovery";
+  variant?: "default" | "discovery" | "discovery-compact";
+  isNew?: boolean;
   priority?: boolean;
   id: string;
   name: string;
@@ -36,6 +37,7 @@ interface AttractionCardProps {
 const AttractionCard = ({
   variant = "default",
   priority = false,
+  isNew = false,
   id,
   name,
   nameLocal,
@@ -104,23 +106,23 @@ const AttractionCard = ({
     }
   };
 
-  if (variant === 'discovery') return (
+  if (variant === 'discovery' || variant === 'discovery-compact') return (
     <article data-testid="attraction-card" className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm motion-safe:transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <OptimizedImage src={image} alt={displayName} width={480} height={360} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw" className="h-full w-full object-cover" unavailableLabel={currentLanguage === 'th' ? 'รูปภาพไม่พร้อมใช้งาน' : 'Image unavailable'} />
+        <OptimizedImage src={image} alt={displayName} width={480} height={360} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} sizes={variant === "discovery-compact" ? "(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw" : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"} className="h-full w-full object-cover" unavailableLabel={currentLanguage === 'th' ? 'รูปภาพไม่พร้อมใช้งาน' : 'Image unavailable'} />
         <button type="button" className="absolute inset-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-primary" onClick={() => onCardClick(id)} aria-label={displayName} />
         <Button type="button" size="icon" variant="secondary" onClick={handleFavoriteToggle} aria-pressed={isFavorite} aria-label={currentLanguage === 'th' ? (isFavorite ? 'ลบออกจากรายการโปรด' : 'เพิ่มในรายการโปรด') : (isFavorite ? 'Remove from favorites' : 'Add to favorites')} className="absolute right-3 top-3 h-11 w-11 rounded-full bg-background text-foreground shadow-sm">
           <Heart className={`h-5 w-5 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
         </Button>
         {imageCredit && <a href={imageCredit.sourcePage} target="_blank" rel="noopener noreferrer" className="absolute bottom-2 right-2 max-w-[90%] truncate rounded bg-black/80 px-2 py-1 text-xs text-white">© {imageCredit.photographer} · {imageCredit.licenseName}</a>}
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-        <span className="w-fit rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">{localizedCategory(category, currentLanguage)}</span>
-        <h3 className="min-h-14 text-lg font-semibold leading-7"><button className="line-clamp-2 text-left hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" onClick={() => onCardClick(id)} title={displayName}>{displayName}</button></h3>
+      <div className={variant === "discovery-compact" ? "flex flex-1 min-w-0 flex-col gap-2 p-3" : "flex flex-1 flex-col gap-3 p-4 sm:p-5"}>
+        <span className="w-fit max-w-full break-words rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">{isNew ? (currentLanguage === "th" ? "เพิ่มใหม่" : "New") : localizedCategory(category, currentLanguage)}</span>
+        <h3 className={variant === "discovery-compact" ? "min-h-10 break-words text-sm font-semibold leading-5 sm:text-base" : "min-h-14 text-lg font-semibold leading-7"}><button className="line-clamp-2 text-left hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" onClick={() => onCardClick(id)} title={displayName}>{displayName}</button></h3>
         <p className="flex items-center gap-1.5 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0" />{displayProvince}</p>
-        <p className="line-clamp-2 min-h-10 text-sm leading-5 text-muted-foreground">{displayDescription}</p>
+        <p className={variant === "discovery-compact" ? "sr-only" : "line-clamp-2 min-h-10 text-sm leading-5 text-muted-foreground"}>{displayDescription}</p>
         {reviewCount > 0 && rating > 0 && <p className="flex items-center gap-1 text-sm"><Star className="h-4 w-4" />{rating} <span className="text-muted-foreground">({reviewCount} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})</span></p>}
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
+        <div className={variant === "discovery-compact" ? "sr-only focus-within:not-sr-only" : "mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3"}>
           <Button variant="ghost" className="min-h-11 px-0 text-primary" onClick={() => onCardClick(id)}>{currentLanguage === 'th' ? 'ดูรายละเอียด' : 'View details'}<Navigation className="ml-2 h-4 w-4" /></Button>
           <Button variant="ghost" size="icon" className="h-11 w-11" onClick={handleShare} aria-label={currentLanguage === 'th' ? 'แชร์สถานที่นี้' : 'Share this place'}><Share className="h-4 w-4" /></Button>
         </div>

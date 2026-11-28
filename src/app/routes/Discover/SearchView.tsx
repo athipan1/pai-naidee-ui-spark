@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import AttractionCard from "@/components/common/AttractionCard";
 import DiscoveryHighlights from "./DiscoveryHighlights";
+import { recordInterest, recordSearchInterest } from "./discoveryPreferences";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import {
   getRailwayPlaceFacets,
@@ -152,10 +153,8 @@ export default function SearchView({
                 priority={index === 0}
                 currentLanguage={currentLanguage}
                 isFavorite={favorites.includes(attraction.id)}
-                onFavoriteToggle={toggleFavorite}
-                onCardClick={(id) =>
-                  navigate(`/attraction/${encodeURIComponent(id)}`)
-                }
+                onFavoriteToggle={id => { recordInterest(attraction, favorites.includes(id) ? -4 : 4); toggleFavorite(id); }}
+                onCardClick={(id) => { recordInterest(attraction, 2); navigate(`/attraction/${encodeURIComponent(id)}`); }}
               />
             ));
 
@@ -170,6 +169,9 @@ export default function SearchView({
           className="flex gap-2"
           onSubmit={(event) => {
             event.preventDefault();
+            recordSearchInterest(draft, categories, provinces);
+            const matchedCategory = categories.find(name => localizedCategory(name,currentLanguage) === draft.trim());
+            if (matchedCategory && matchedCategory !== draft.trim()) recordInterest({category:matchedCategory},2);
             onSearch(draft.trim());
           }}
         >
@@ -228,7 +230,7 @@ export default function SearchView({
               variant={category === name ? "default" : "outline"}
               className="min-h-11 rounded-full"
               aria-pressed={category === name}
-              onClick={() => onFiltersChange?.({ category: name, province })}
+              onClick={() => { recordInterest({category:name}, 2); onFiltersChange?.({ category: name, province }); }}
             >
               {localizedCategory(name, currentLanguage)}
             </Button>
@@ -271,7 +273,7 @@ export default function SearchView({
               aria-label={th ? "กรองจังหวัด" : "Filter province"}
               value={province}
               onChange={(event) =>
-                onFiltersChange?.({ category, province: event.target.value })
+                { recordInterest({province:event.target.value}, 2); onFiltersChange?.({ category, province: event.target.value }); }
               }
               className="h-12 w-full min-w-0 rounded-lg border border-input bg-background px-3"
             >
@@ -292,7 +294,7 @@ export default function SearchView({
               aria-label={th ? "กรองประเภทสถานที่" : "Filter place type"}
               value={category}
               onChange={(event) =>
-                onFiltersChange?.({ category: event.target.value, province })
+                { recordInterest({category:event.target.value}, 2); onFiltersChange?.({ category: event.target.value, province }); }
               }
               className="h-12 w-full min-w-0 rounded-lg border border-input bg-background px-3"
             >

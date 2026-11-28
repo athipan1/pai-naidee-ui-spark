@@ -28,6 +28,8 @@ const {
   getPlaceById,
   listPlaces,
   listPlaceFacets,
+  listDiscoveryIndex,
+  listDiscoveryBatch,
   suggestPlaces,
   listNearbyPlaces,
   parseNearbyOptions,
@@ -87,6 +89,22 @@ app.get('/api/places', async (req, res) => {
   } catch (error) {
     console.error('GET /api/places failed:', error?.message || error);
     res.status(503).json({ error: 'Places database is unavailable.' });
+  }
+});
+
+app.get('/api/places/discovery-index', async (req, res) => {
+  try { res.json(await listDiscoveryIndex({ after: req.query.after ?? '' })); }
+  catch (error) {
+    if (error instanceof RangeError) return res.status(400).json({ error: 'Invalid discovery cursor.' });
+    res.status(503).json({ error: 'Discovery index unavailable.' });
+  }
+});
+
+app.post('/api/places/discovery-batch', async (req, res) => {
+  try { res.json(await listDiscoveryBatch(req.body?.ids)); }
+  catch (error) {
+    if (error instanceof RangeError) return res.status(400).json({ error: 'Invalid discovery IDs.' });
+    res.status(503).json({ error: 'Discovery places unavailable.' });
   }
 });
 
