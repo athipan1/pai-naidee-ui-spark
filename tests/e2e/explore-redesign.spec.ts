@@ -353,9 +353,39 @@ test("Explore header returns directly home from search and nearby, not the previ
 
 test("browser back still returns to the previous Explore tab", async ({ page }) => {
   await page.goto("/discover");
-  await page.getByRole("tab", { name: "ใกล้ฉัน", exact: true }).click();
+  const search = page.getByRole("tab", { name: "ค้นหา", exact: true });
+  const nearby = page.getByRole("tab", { name: "ใกล้ฉัน", exact: true });
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  const initialHistoryLength = await page.evaluate(() => history.length);
+  await nearby.click();
   await expect(page).toHaveURL(/mode=map/);
+  await expect(nearby).toHaveAttribute("aria-selected", "true");
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength + 1);
+  await nearby.click();
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength + 1);
   await page.goBack();
-  await expect(page.getByRole("tab", { name: "ค้นหา", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL("/discover");
+  await page.goForward();
+  await expect(nearby).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL(/mode=map/);
+});
+
+test("keyboard tab focus does not create history until explicit activation", async ({ page }) => {
+  await page.goto("/discover");
+  const search = page.getByRole("tab", { name: "ค้นหา", exact: true });
+  const nearby = page.getByRole("tab", { name: "ใกล้ฉัน", exact: true });
+  await search.focus();
+  const initialHistoryLength = await page.evaluate(() => history.length);
+  await search.press("ArrowRight");
+  await expect(nearby).toBeFocused();
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength);
+  await nearby.press("Enter");
+  await expect(nearby).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL(/mode=map/);
+  expect(await page.evaluate(() => history.length)).toBe(initialHistoryLength + 1);
+  await page.goBack();
+  await expect(search).toHaveAttribute("aria-selected", "true");
   await expect(page).toHaveURL("/discover");
 });

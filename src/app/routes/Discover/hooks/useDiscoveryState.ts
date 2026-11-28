@@ -128,7 +128,8 @@ export const useDiscoveryState = () => {
       newParams.set("sort", updatedState.filters.sortBy);
     }
 
-    setSearchParams(newParams);
+    // Re-selecting the current URL must not add a duplicate history entry.
+    if (newParams.toString() !== searchParams.toString()) setSearchParams(newParams);
   };
 
   // Helper functions for common state updates
