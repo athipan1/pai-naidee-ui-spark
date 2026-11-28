@@ -35,6 +35,7 @@ const getAttractions = async (options?: {
   category?: string;
   province?: string;
   search?: string;
+  sort?: 'latest' | 'rotation';
   signal?: AbortSignal;
 }): Promise<{
   attractions: SearchResult[];
@@ -52,6 +53,7 @@ const getAttractions = async (options?: {
       category: options?.category,
       province: options?.province,
       search: options?.search,
+      sort: options?.sort,
       signal: options?.signal,
     });
   } catch (error) {

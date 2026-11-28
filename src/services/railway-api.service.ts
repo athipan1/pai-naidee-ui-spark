@@ -56,6 +56,7 @@ async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export interface RailwayAttractionsResponse {
   attractions: SearchResult[];
+  sort?: 'latest' | 'rotation';
   total: number;
   page: number;
   limit: number;
@@ -127,6 +128,7 @@ export async function getRailwayAttractions(options?: {
   category?: string;
   province?: string;
   search?: string;
+  sort?: 'latest' | 'rotation';
   signal?: AbortSignal;
 }): Promise<RailwayAttractionsResponse> {
   const params = new URLSearchParams();
@@ -136,10 +138,13 @@ export async function getRailwayAttractions(options?: {
   if (options?.category) params.set("category", options.category);
   if (options?.province) params.set("province", options.province);
   if (options?.search) params.set("search", options.search);
+  if (options?.sort) params.set("sort", options.sort);
 
   const response = await requestJson<RailwayAttractionsResponse>(
     `/api/places?${params.toString()}`, options?.signal,
   );
+  // Do not label an old backend's catalogue order as newest during staggered deployments.
+  if (options?.sort && response.sort !== options.sort) throw new Error('Discovery ordering is unavailable');
   return { ...response, attractions: response.attractions.map(withPublishedPlaceImages) };
 }
 

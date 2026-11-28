@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import AttractionCard from "@/components/common/AttractionCard";
+import DiscoveryHighlights from "./DiscoveryHighlights";
 import { useAttractions } from "@/shared/hooks/useAttractionQueries";
 import {
   getRailwayPlaceFacets,
@@ -75,6 +76,7 @@ export default function SearchView({
   useEffect(() => {
     setDraft(query);
   }, [query]);
+  const showDiscovery = !query.trim() && !category && !province && page === 1 && !params.has("view") && params.get("browse") !== "all";
   const pageSize = 20;
   const { data, error, isLoading, refetch } = useAttractions({
     page,
@@ -82,7 +84,7 @@ export default function SearchView({
     search: query || undefined,
     category: category || undefined,
     province: province || undefined,
-  });
+  }, { enabled: !showDiscovery });
   const facets = useQuery({
     queryKey: ["places", "facets"],
     queryFn: ({ signal }) => getRailwayPlaceFacets(signal),
@@ -124,7 +126,7 @@ export default function SearchView({
   };
   const clearAll = () => {
     const next = new URLSearchParams(params);
-    ["q", "cat", "category", "prov", "page"].forEach((key) => next.delete(key));
+    ["q", "cat", "category", "prov", "page", "browse", "view"].forEach((key) => next.delete(key));
     next.set("mode", "search");
     setDraft("");
     setParams(next);
@@ -248,7 +250,7 @@ export default function SearchView({
               </span>
             )}
           </Button>
-          {(query || category || province) && (
+          {(query || category || province || params.get("browse") === "all" || params.has("view")) && (
             <Button
               variant="ghost"
               className="min-h-11 gap-2 text-muted-foreground"
@@ -319,6 +321,10 @@ export default function SearchView({
           </div>
         )}
       </section>
+      {showDiscovery ? (
+        <DiscoveryHighlights currentLanguage={currentLanguage} favorites={favorites}
+          onFavoriteToggle={toggleFavorite} onBrowseAll={() => updateParam("browse", "all")} />
+      ) : <>
       {(query || category || province) && (
         <div
           className="flex flex-wrap gap-2 text-sm"
@@ -515,6 +521,7 @@ export default function SearchView({
           </Button>
         </nav>
       )}
+      </>}
     </div>
   );
 }

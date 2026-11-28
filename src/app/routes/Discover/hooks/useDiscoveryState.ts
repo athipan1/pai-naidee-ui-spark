@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export type DiscoveryMode = "feed" | "category" | "search" | "map" | "trending";
@@ -20,15 +21,23 @@ export interface DiscoveryState {
 export const useDiscoveryState = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const legacyMode = searchParams.get("mode");
+  useEffect(() => {
+    if (legacyMode !== "feed" && legacyMode !== "trending") return;
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.set("mode", "search");
+      return next;
+    }, { replace: true });
+  }, [legacyMode, setSearchParams]);
+
   // Parse URL parameters to determine discovery state
   const state: DiscoveryState = (() => {
     const requestedMode = searchParams.get("mode");
     const mode: DiscoveryMode = [
-      "feed",
       "category",
       "search",
       "map",
-      "trending",
     ].includes(requestedMode || "")
       ? (requestedMode as DiscoveryMode)
       : "search";
@@ -128,7 +137,7 @@ export const useDiscoveryState = () => {
   const setQuery = (query: string) => updateState({ query, mode: "search" });
 
   const setCategory = (category: string) =>
-    updateState({ category, mode: category ? "category" : "feed" });
+    updateState({ category, mode: category ? "category" : "search" });
   const setSearchFilters = (filters: { category: string; province: string }) =>
     updateState({ ...filters, mode: "search" });
 
@@ -144,7 +153,7 @@ export const useDiscoveryState = () => {
   // Reset to feed mode
   const resetToFeed = () => {
     updateState({
-      mode: "feed",
+      mode: "search",
       query: "",
       category: "",
       province: "",

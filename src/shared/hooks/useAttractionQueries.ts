@@ -50,6 +50,7 @@ export const useAttractions = (filters?: {
   category?: string;
   province?: string;
   search?: string;
+  sort?: 'latest' | 'rotation';
 }, options?: {
   enabled?: boolean;
   staleTime?: number;

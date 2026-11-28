@@ -81,6 +81,7 @@ app.get('/api/places', async (req, res) => {
       category: req.query.category,
       province: req.query.province,
       search: req.query.search,
+      sort: req.query.sort,
     });
     res.json(result);
   } catch (error) {
