@@ -1,5 +1,6 @@
 import { Heart, MapPin, Star, Navigation, Share, Bookmark, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import {
   DropdownMenu,
@@ -32,6 +33,7 @@ interface AttractionCardProps {
   currentLanguage: "th" | "en";
   onFavoriteToggle: (id: string) => void;
   onCardClick: (id: string) => void;
+  onProvinceSelect?: (province: string) => void;
 }
 
 const AttractionCard = ({
@@ -55,6 +57,7 @@ const AttractionCard = ({
   currentLanguage,
   onFavoriteToggle,
   onCardClick,
+  onProvinceSelect,
 }: AttractionCardProps) => {
   const imageCredit = mediaCredits?.find(credit => credit.url === image);
 
@@ -119,7 +122,11 @@ const AttractionCard = ({
       <div className={variant === "discovery-compact" ? "flex flex-1 min-w-0 flex-col gap-2 p-3" : "flex flex-1 flex-col gap-3 p-4 sm:p-5"}>
         <span className="w-fit max-w-full break-words rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">{isNew ? (currentLanguage === "th" ? "เพิ่มใหม่" : "New") : localizedCategory(category, currentLanguage)}</span>
         <h3 className={variant === "discovery-compact" ? "min-h-10 break-words text-sm font-semibold leading-5 sm:text-base" : "min-h-14 text-lg font-semibold leading-7"}><button className="line-clamp-2 text-left hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" onClick={() => onCardClick(id)} title={displayName}>{displayName}</button></h3>
-        <p className="flex items-center gap-1.5 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0" />{displayProvince}</p>
+        <p className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0" />{onProvinceSelect && province ? (
+          <Link className="min-w-0 break-words underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+            to={`/discover?mode=search&prov=${encodeURIComponent(province)}`}
+            onClick={() => onProvinceSelect(province)}>{displayProvince}</Link>
+        ) : displayProvince}</p>
         <p className={variant === "discovery-compact" ? "sr-only" : "line-clamp-2 min-h-10 text-sm leading-5 text-muted-foreground"}>{displayDescription}</p>
         {reviewCount > 0 && rating > 0 && <p className="flex items-center gap-1 text-sm"><Star className="h-4 w-4" />{rating} <span className="text-muted-foreground">({reviewCount} {currentLanguage === 'th' ? 'รีวิว' : 'reviews'})</span></p>}
         <div className={variant === "discovery-compact" ? "sr-only focus-within:not-sr-only" : "mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3"}>

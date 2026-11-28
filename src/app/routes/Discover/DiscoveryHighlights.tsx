@@ -69,6 +69,7 @@ function DiscoveryFeed({ entries, currentLanguage, favorites, onFavoriteToggle }
       {places.map((place,index)=><AttractionCard key={place.id} {...place} variant="discovery-compact"
         isNew={freshIds.has(place.id)} priority={index===0} currentLanguage={currentLanguage}
         isFavorite={favorites.includes(place.id)}
+        onProvinceSelect={province=>recordInterest({province},2)}
         onFavoriteToggle={id=>{recordInterest(place,favorites.includes(id)?-4:4);onFavoriteToggle(id);}}
         onCardClick={id=>{recordInterest(place,2);navigate("/attraction/"+encodeURIComponent(id));}} />)}
     </div>

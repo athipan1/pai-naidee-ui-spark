@@ -87,6 +87,9 @@ export async function createElephantRenderer(
   character: MascotCharacter = activeMascot
 ) {
   signal.throwIfAborted();
+  // Do not allocate a GPU context while a model download is still pending.
+  const bytes = await getModel(url);
+  signal.throwIfAborted();
   const canvas = document.createElement("canvas");
   const touchChromium =
     window.matchMedia("(pointer: coarse)").matches &&
@@ -105,8 +108,6 @@ export async function createElephantRenderer(
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   let asset: Awaited<ReturnType<GLTFLoader["parseAsync"]>>;
   try {
-    const bytes = await getModel(url);
-    signal.throwIfAborted();
     asset = await loader.parseAsync(bytes, "");
   } catch (error) {
     // A damaged response is retryable.
@@ -220,7 +221,7 @@ export async function createElephantRenderer(
   let action: ReturnType<typeof mixer.clipAction> | undefined;
 
   function resize() {
-    if (disposed) return;
+    if (disposed || !host.isConnected) return;
     const { clientWidth, clientHeight } = host;
     if (!clientWidth || !clientHeight) return;
     camera.aspect = clientWidth / clientHeight;
@@ -244,6 +245,7 @@ export async function createElephantRenderer(
 
   function tick(time: number) {
     frame = 0;
+    if (disposed || !host.isConnected || document.hidden) return;
     const frameInterval = 1000 / (launcher && motion === "Idle" ? 12 : 30);
     const tickDelta = lastTick === undefined ? frameInterval : time - lastTick;
     elapsed += tickDelta;

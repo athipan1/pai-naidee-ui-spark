@@ -29,9 +29,18 @@ export function MapBounds({
 }) {
   const map = useMap();
   useEffect(() => {
-    const observer = new ResizeObserver(() => map.invalidateSize());
-    observer.observe(map.getContainer());
-    return () => observer.disconnect();
+    let active = true;
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => {
+      // A notification may already be queued when React removes the map.
+      if (active && container.isConnected) map.invalidateSize({ animate: false, pan: false });
+    });
+    observer.observe(container);
+    return () => {
+      active = false;
+      observer.disconnect();
+      if (container.isConnected) map.stop();
+    };
   }, [map]);
   useEffect(() => {
     if (target) map.setView(target, zoom ?? 6, { animate: false });

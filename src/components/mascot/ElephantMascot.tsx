@@ -170,6 +170,17 @@ export default function ElephantMascot({
     if (!render3D || !host || !modelUrl) return;
     setVisual("loading");
     const controller = new AbortController();
+    const release = () => {
+      controller.abort();
+      renderer.current?.dispose();
+      renderer.current = null;
+    };
+    // A full-document navigation does not guarantee React effect cleanup.
+    // Preserve bfcache pages; release GPU resources only on actual exit.
+    const onPageHide = (event: PageTransitionEvent) => {
+      if (!event.persisted) release();
+    };
+    window.addEventListener("pagehide", onPageHide);
     const deadline = window.setTimeout(() => {
       controller.abort();
       setVisual("fallback");
@@ -211,9 +222,8 @@ export default function ElephantMascot({
       .finally(() => window.clearTimeout(deadline));
     return () => {
       window.clearTimeout(deadline);
-      controller.abort();
-      renderer.current?.dispose();
-      renderer.current = null;
+      window.removeEventListener("pagehide", onPageHide);
+      release();
     };
   }, [render3D, open, attempt]);
 

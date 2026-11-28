@@ -150,6 +150,7 @@ export default function SearchView({
                 priority={index === 0}
                 currentLanguage={currentLanguage}
                 isFavorite={favorites.includes(attraction.id)}
+                onProvinceSelect={province => recordInterest({ province }, 2)}
                 onFavoriteToggle={id => { recordInterest(attraction, favorites.includes(id) ? -4 : 4); toggleFavorite(id); }}
                 onCardClick={(id) => { recordInterest(attraction, 2); navigate(`/attraction/${encodeURIComponent(id)}`); }}
               />

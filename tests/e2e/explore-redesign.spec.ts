@@ -112,8 +112,10 @@ test("visible search, real filters, pagination, history, map and favorite surviv
   await expect(page.locator(".leaflet-popup")).toHaveCount(0);
   await expect(page.getByTestId("attraction-card")).toHaveCount(20);
   await expect(page.getByRole("heading", { name: "จุดหมาย 0", exact: true })).toBeVisible();
-  // Province links from other pages retain server-side filtering.
-  await page.goto("/discover?mode=search&prov="+encodeURIComponent("ชลบุรี"), {waitUntil:"domcontentloaded"});
+  // Follow a real in-app province link, without tearing down the document.
+  const provinceLink = page.getByTestId("attraction-card").filter({has:page.getByRole("heading",{name:"จุดหมาย 1",exact:true})}).getByRole("link",{name:"ชลบุรี",exact:true});
+  await expect(provinceLink).toHaveAttribute("href","/discover?mode=search&prov="+encodeURIComponent("ชลบุรี"));
+  await provinceLink.click();
   await expect(page.getByRole("button", { name: "ตัวกรอง", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ล้างทั้งหมด", exact: true })).toHaveCount(0);
   await expect(page).toHaveURL(/prov=/);
@@ -143,6 +145,24 @@ test("visible search, real filters, pagination, history, map and favorite surviv
     page.getByRole("button", { name: "ลบออกจากรายการโปรด" })
   ).toBeVisible();
   expect(paidCalls).toEqual([]);
+});
+
+test("full document navigation after map disposal keeps province links functional", async ({page}) => {
+  const errors: string[] = [];
+  page.on("pageerror", error=>errors.push(error.message));
+  page.on("crash", ()=>errors.push("Page crashed"));
+  await page.goto("/discover?view=map");
+  await expect(page.locator(".leaflet-marker-icon")).toHaveCount(19);
+  await page.locator(".leaflet-marker-icon").first().click();
+  await expect(page.locator(".leaflet-popup")).toBeVisible();
+  await page.getByRole("button",{name:"มุมมองตาราง",exact:true}).click();
+  await expect(page.locator("[data-marker-count]")).toHaveCount(0);
+  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+  // Retain the full-document regression independently of the normal SPA journey.
+  await page.goto("/discover?mode=search&prov="+encodeURIComponent("ชลบุรี"),{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("heading",{name:/พบ 62 สถานที่/})).toBeVisible();
+  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+  expect(errors).toEqual([]);
 });
 
 test("zero results, clearing, language toggle, loading and retry remain usable", async ({
