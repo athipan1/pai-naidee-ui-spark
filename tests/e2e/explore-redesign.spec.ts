@@ -106,8 +106,14 @@ test("visible search, real filters, pagination, history, map and favorite surviv
     page.locator(".leaflet-popup").getByRole("link", { name: "ดูรายละเอียด" })
   ).toBeVisible();
   await page.getByRole("button", { name: "มุมมองตาราง" }).click();
+  // Complete the user-visible transition before initiating a separate document navigation.
+  // This also verifies that the map and popup have actually been disposed.
+  await expect(page.locator("[data-marker-count]")).toHaveCount(0);
+  await expect(page.locator(".leaflet-popup")).toHaveCount(0);
+  await expect(page.getByTestId("attraction-card")).toHaveCount(20);
+  await expect(page.getByRole("heading", { name: "จุดหมาย 0", exact: true })).toBeVisible();
   // Province links from other pages retain server-side filtering.
-  await page.goto("/discover?mode=search&prov="+encodeURIComponent("ชลบุรี"));
+  await page.goto("/discover?mode=search&prov="+encodeURIComponent("ชลบุรี"), {waitUntil:"domcontentloaded"});
   await expect(page.getByRole("button", { name: "ตัวกรอง", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ล้างทั้งหมด", exact: true })).toHaveCount(0);
   await expect(page).toHaveURL(/prov=/);
