@@ -144,6 +144,8 @@ test('Railway production app keeps public place API read-only while gating CMS w
   const placeRoutes = routes.filter(({ path }) => path === '/api/places' || path.startsWith('/api/places/'));
   assert.deepEqual(placeRoutes, [
     { path: '/api/places', methods: ['get'] },
+    { path: '/api/places/discovery-index', methods: ['get'] },
+    { path: '/api/places/discovery-batch', methods: ['get'] },
     { path: '/api/places/suggest', methods: ['get'] },
     { path: '/api/places/facets', methods: ['get'] },
     { path: '/api/places/nearby', methods: ['get'] },
@@ -162,6 +164,8 @@ test('Railway app rejects unauthenticated place writes without contacting the da
   const address = server.address();
   for (const [method, path] of [
     ['POST', '/api/places'],
+    ['POST', '/api/places/discovery-batch'],
+    ['PUT', '/api/places/discovery-index'],
     ['PUT', '/api/places/test-place'],
     ['PATCH', '/api/places/test-place'],
     ['DELETE', '/api/places/test-place'],

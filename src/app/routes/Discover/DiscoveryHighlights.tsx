@@ -1,115 +1,110 @@
 import { useEffect, useRef, useState } from "react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import AttractionCard from "@/components/common/AttractionCard";
-import { useAttractions } from "@/shared/hooks/useAttractionQueries";
+import { getDiscoveryIndex, getDiscoveryBatch, type DiscoveryEntry } from "@/services/railway-api.service";
 import { uniqueAttractionsById } from "@/shared/utils/uniqueAttractions";
-import type { SearchResult } from "@/shared/types/search";
+import { RateLimitError } from "@/shared/utils/retryAfter";
+import { isNewPlace, rankDiscovery, readPreferences, recordInterest, setPersonalization } from "./discoveryPreferences";
 
-const ROTATION_KEY = "painaidee.discovery.nextPage";
 const PAGE_SIZE = 20;
-function readPage() {
-  try {
-    const page = Number(sessionStorage.getItem(ROTATION_KEY));
-    return Number.isSafeInteger(page) && page > 0 && page <= 100000 ? page : 1;
-  } catch { return 1; }
-}
-function savePage(page: number) {
-  try { sessionStorage.setItem(ROTATION_KEY, String(page)); } catch { /* optional session storage */ }
-}
+// Ephemeral presentation history only, not a profile or analytics identifier.
+const recentShown = new Set<string>();
+const remember = (ids: string[]) => {
+  for (const id of ids) { recentShown.delete(id); recentShown.add(id); }
+  while (recentShown.size > 80) recentShown.delete(recentShown.values().next().value!);
+};
 interface Props {
   currentLanguage: "th" | "en";
   favorites: string[];
   onFavoriteToggle: (id: string) => void;
   onBrowseAll: () => void;
 }
-export default function DiscoveryHighlights({ currentLanguage, favorites, onFavoriteToggle, onBrowseAll }: Props) {
+function DiscoveryFeed({ entries, currentLanguage, favorites, onFavoriteToggle }: Props & { entries: DiscoveryEntry[] }) {
   const th = currentLanguage === "th";
   const navigate = useNavigate();
-  const [page, setPage] = useState(readPage);
-  const [paused, setPaused] = useState(false);
-  const [interaction, setInteraction] = useState(false);
-  const rail = useRef<HTMLDivElement>(null);
-  const latest = useAttractions({ page: 1, limit: 10, sort: "latest" });
-  const rotation = useAttractions({ page, limit: PAGE_SIZE, sort: "rotation" });
-  const newest = uniqueAttractionsById(latest.data?.attractions ?? []);
-  const newestIds = new Set(newest.map(place => place.id));
-  const older = uniqueAttractionsById(rotation.data?.attractions ?? []).filter(place => !newestIds.has(place.id));
-  const pages = Math.max(1, Math.ceil((rotation.data?.total ?? 0) / PAGE_SIZE));
+  const [now] = useState(Date.now);
+  const [plan] = useState(() => rankDiscovery(entries, readPreferences(), recentShown, now));
+  const [session] = useState(() => Math.random().toString(36).slice(2));
+  const [profile, setProfile] = useState(readPreferences);
+  const sentinel = useRef<HTMLDivElement>(null);
+  const batch = useInfiniteQuery({
+    queryKey: ["attractions", "discovery-feed", session],
+    queryFn: ({ pageParam, signal }) => getDiscoveryBatch(plan.slice(pageParam, pageParam+PAGE_SIZE).map(x=>x.id), signal),
+    initialPageParam: 0,
+    getNextPageParam: (_last, _pages, offset) => offset+PAGE_SIZE < plan.length ? offset+PAGE_SIZE : undefined,
+    enabled: plan.length>0,
+    gcTime: 0, staleTime: Infinity, refetchOnWindowFocus: false, refetchOnReconnect: false,
+    retry: (count, error) => !(error instanceof RateLimitError) && count < 1,
+  });
+  const places = uniqueAttractionsById(batch.data?.pages.flat() ?? []);
+  const freshIds = new Set(plan.filter(x=>isNewPlace(x,now)).map(x=>x.id));
+  const { fetchNextPage, hasNextPage, isFetching, isFetchNextPageError, isError } = batch;
   useEffect(() => {
-    if (!rotation.data) return;
-    if (page > pages) setPage(1);
-    else savePage(page >= pages ? 1 : page + 1);
-  }, [page, pages, rotation.data]);
-
+    if (batch.data) remember((batch.data.pages[batch.data.pages.length-1] ?? []).map(x=>x.id));
+  }, [batch.data]);
   useEffect(() => {
-    if (paused || interaction || newest.length < 2) return;
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const timer = window.setInterval(() => {
-      const element = rail.current;
-      if (!element || media.matches || document.visibilityState !== "visible") return;
-      const rect = element.getBoundingClientRect();
-      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
-      if (element.matches(":hover") || element.contains(document.activeElement)) return;
-      const first = element.firstElementChild as HTMLElement | null;
-      if (!first) return;
-      const atEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 4;
-      if (atEnd) element.scrollTo({ left: 0, behavior: "smooth" });
-      else element.scrollBy({ left: first.offsetWidth + 16, behavior: "smooth" });
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, [paused, interaction, newest.length]);
-
-  const card = (place: SearchResult, priority = false) => (
-    <AttractionCard key={place.id} {...place} variant="discovery" priority={priority}
-      currentLanguage={currentLanguage} isFavorite={favorites.includes(place.id)}
-      onFavoriteToggle={onFavoriteToggle}
-      onCardClick={id => navigate("/attraction/" + encodeURIComponent(id))} />
-  );
-  const failure = (retry: () => void) => (
-    <div role="alert" className="rounded-xl border p-4 text-sm text-muted-foreground">
-      {th ? "ยังโหลดสถานที่ไม่ได้" : "Could not load places"}
-      <Button variant="link" onClick={retry}>{th ? "ลองอีกครั้ง" : "Retry"}</Button>
+    const target=sentinel.current;
+    if (!target || !hasNextPage || isFetching || isError || typeof IntersectionObserver==="undefined") return;
+    const observer=new IntersectionObserver(items=>{
+      if(items.some(item=>item.isIntersecting) && document.visibilityState==="visible") void fetchNextPage({ cancelRefetch: false });
+    }, {rootMargin:"160px"});
+    observer.observe(target);
+    return ()=>observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetching, isError]);
+  return <>
+    <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+      <label className="flex min-h-11 items-center gap-2">
+        <input type="checkbox" className="h-5 w-5 accent-primary" checked={profile.enabled}
+          onChange={e=>setProfile(setPersonalization(e.target.checked))} />
+        {th ? "แนะนำตามความสนใจของฉัน" : "Personalize my recommendations"}
+      </label>
+      {profile.enabled && <Button variant="ghost" size="sm" onClick={()=>setProfile(setPersonalization(true))}>{th?"รีเซ็ตความสนใจ":"Reset interests"}</Button>}
     </div>
-  );
-  return (
-    <div className="min-w-0 space-y-6" data-testid="discovery-highlights">
-      <section className="min-w-0 space-y-3" aria-labelledby="latest-discovery-heading">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="latest-discovery-heading" className="text-lg font-semibold">{th ? "สถานที่เพิ่มใหม่ล่าสุด" : "Recently added places"}</h2>
-          {newest.length > 1 && <Button variant="outline" size="sm" className="min-h-11"
-            onClick={() => setPaused(value => !value)} aria-pressed={paused}>
-            {paused ? (th ? "เล่นต่อ" : "Resume rotation") : (th ? "หยุดเลื่อน" : "Pause rotation")}
-          </Button>}
-        </div>
-        {latest.isLoading ? <Skeleton className="h-64 rounded-xl" /> : latest.error ? failure(() => void latest.refetch()) :
-          newest.length ? (
-            <div ref={rail} className="flex min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
-              data-testid="latest-places" tabIndex={0} aria-label={th ? "สถานที่เพิ่มล่าสุด เลื่อนเพื่อดูเพิ่มเติม" : "Recently added places, scroll for more"}
-              onPointerDown={() => setInteraction(true)} onPointerUp={() => setInteraction(false)}
-              onPointerCancel={() => setInteraction(false)} onPointerLeave={() => setInteraction(false)}>
-              {newest.map((place, index) => (
-                <div key={place.id} className="w-[min(80vw,300px)] shrink-0 snap-start">{card(place, index === 0)}</div>
-              ))}
-            </div>
-          ) : <p className="text-sm text-muted-foreground">{th ? "ยังไม่มีสถานที่เผยแพร่" : "No published places yet"}</p>}
-      </section>
-      <section className="space-y-3" aria-labelledby="rotation-discovery-heading">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="rotation-discovery-heading" className="text-lg font-semibold">{th ? "ออกไปค้นพบสถานที่ใหม่" : "Discover more places"}</h2>
-          {pages > 1 && <Button variant="outline" className="min-h-11"
-            disabled={rotation.isFetching} onClick={() => setPage(current => current >= pages ? 1 : current + 1)}>
-            {th ? "เปลี่ยนชุดสถานที่" : "Show another set"}
-          </Button>}
-        </div>
-        {rotation.isLoading ? <Skeleton className="h-64 rounded-xl" /> : rotation.error ? failure(() => void rotation.refetch()) :
-          older.length ? <div data-testid="rotating-places" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{older.map(place => card(place))}</div>
-          : <p className="text-sm text-muted-foreground">{th ? "ยังไม่มีสถานที่อื่นในชุดนี้" : "No other places in this set"}</p>}
-      </section>
-      <div className="flex justify-center">
-        <Button variant="outline" className="min-h-11" onClick={onBrowseAll}>{th ? "ดูสถานที่ทั้งหมด" : "Browse all places"}</Button>
-      </div>
+    <p className="text-xs text-muted-foreground">{th ? "เปิดเพื่อใช้หมวดหมู่และจังหวัดที่คุณสนใจ เก็บเฉพาะในเบราว์เซอร์นี้ การตั้งค่ามีผลเมื่อกลับมาหน้าสำรวจอีกครั้ง" : "Opt in to use category and province interests stored only in this browser. Changes apply on the next visit."}</p>
+    {batch.isLoading && <Skeleton className="h-64 rounded-xl" />}
+    <div data-testid="discovery-grid" className="grid min-w-0 grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+      {places.map((place,index)=><AttractionCard key={place.id} {...place} variant="discovery-compact"
+        isNew={freshIds.has(place.id)} priority={index===0} currentLanguage={currentLanguage}
+        isFavorite={favorites.includes(place.id)}
+        onProvinceSelect={province=>recordInterest({province},2)}
+        onFavoriteToggle={id=>{recordInterest(place,favorites.includes(id)?-4:4);onFavoriteToggle(id);}}
+        onCardClick={id=>{recordInterest(place,2);navigate("/attraction/"+encodeURIComponent(id));}} />)}
     </div>
-  );
+    {isError && <div role="alert" className="rounded-xl border p-3 text-sm">
+      {th?"โหลดสถานที่ไม่สำเร็จ":"Could not load places"}
+      <Button variant="link" onClick={()=>void (isFetchNextPageError?fetchNextPage({cancelRefetch:false}):batch.refetch())}>{th?"ลองอีกครั้ง":"Retry"}</Button>
+    </div>}
+    {!batch.isLoading && !isError && !places.length && !hasNextPage && <p>{th?"ยังไม่มีสถานที่เผยแพร่":"No published places yet"}</p>}
+    {hasNextPage && <div ref={sentinel} data-testid="discovery-sentinel" className="min-h-12 text-center text-sm text-muted-foreground" role="status">
+      {isFetching ? (th?"กำลังโหลดสถานที่เพิ่มเติม…":"Loading more places…") : (th?"เลื่อนลงเพื่อดูสถานที่เพิ่มเติม":"Scroll for more places")}
+      {typeof IntersectionObserver==="undefined" && !isFetching && <Button variant="link" onClick={()=>void fetchNextPage({cancelRefetch:false})}>{th?"โหลดเพิ่มเติม":"Load more"}</Button>}
+    </div>}
+    {!hasNextPage && places.length>0 && !isError && <p className="text-center text-sm text-muted-foreground">{th?"ดูครบทุกสถานที่ในชุดนี้แล้ว":"You have reached the end of this set"}</p>}
+  </>;
+}
+export default function DiscoveryHighlights(props: Props) {
+  const th=props.currentLanguage==="th";
+  const index=useQuery({
+    queryKey:["attractions","discovery-index"],
+    queryFn:({signal})=>getDiscoveryIndex(signal),
+    staleTime:0, refetchOnMount:"always", refetchOnWindowFocus:false, refetchOnReconnect:false,
+    retry:(count,error)=>!(error instanceof RateLimitError)&&count<1,
+  });
+  // Freeze the index for this visit. Publication changes are picked up on the next visit.
+  const [snapshot,setSnapshot]=useState<DiscoveryEntry[]|null>(null);
+  useEffect(()=>{
+    if(!snapshot && index.data && !index.isFetching && !index.isError)setSnapshot(index.data);
+  },[snapshot,index.data,index.isFetching,index.isError]);
+  return <section data-testid="discovery-highlights" className="min-w-0 space-y-3" aria-labelledby="discovery-heading">
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <h2 id="discovery-heading" className="text-lg font-semibold">{th?"ออกไปค้นพบสถานที่ใหม่":"Discover more places"}</h2>
+      <Button variant="outline" size="sm" className="min-h-11" onClick={props.onBrowseAll}>{th?"ดูสถานที่ทั้งหมด":"Browse all places"}</Button>
+    </div>
+    {snapshot ? <DiscoveryFeed {...props} entries={snapshot}/> : index.isError ?
+      <div role="alert">{th?"ยังโหลดคำแนะนำไม่ได้":"Recommendations unavailable"} <Button variant="link" onClick={()=>void index.refetch()}>{th?"ลองอีกครั้ง":"Retry"}</Button></div> :
+      <Skeleton className="h-64 rounded-xl"/>}
+  </section>;
 }

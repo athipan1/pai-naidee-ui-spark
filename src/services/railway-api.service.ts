@@ -148,4 +148,45 @@ export async function getRailwayAttractions(options?: {
   return { ...response, attractions: response.attractions.map(withPublishedPlaceImages) };
 }
 
+export interface DiscoveryEntry {
+  id: string;
+  province: string;
+  category: string;
+  categories: string[];
+  publishedAt: string;
+}
+
+export async function getDiscoveryIndex(signal?: AbortSignal): Promise<DiscoveryEntry[]> {
+  const entries = new Map<string, DiscoveryEntry>();
+  let cursor: string | null = "";
+  // Bounded metadata requests; never silently pretend an incomplete index is complete.
+  for (let page = 0; page < 40; page++) {
+    const params = new URLSearchParams(cursor ? { after: cursor } : {});
+    const result: { entries: DiscoveryEntry[]; nextCursor: string | null } =
+      await requestJson(`/api/places/discovery-index?${params}`, signal);
+    if (!Array.isArray(result.entries) || !(result.nextCursor === null || typeof result.nextCursor === "string"))
+      throw new Error("Discovery index unavailable");
+    for (const entry of result.entries) {
+      if (typeof entry.id === "string" && typeof entry.category === "string" &&
+          typeof entry.province === "string" && Array.isArray(entry.categories))
+        entries.set(entry.id, entry);
+    }
+    if (result.nextCursor === null) return [...entries.values()];
+    if (result.nextCursor === cursor) throw new Error("Discovery cursor did not advance");
+    cursor = result.nextCursor;
+  }
+  throw new Error("Discovery index exceeds the supported size");
+}
+
+export async function getDiscoveryBatch(ids: string[], signal?: AbortSignal): Promise<SearchResult[]> {
+  const params = new URLSearchParams();
+  for (const id of ids) params.append("id", id);
+  const result = await requestJson<{ attractions: SearchResult[] }>(`/api/places/discovery-batch?${params}`, signal);
+  const byId = new Map(result.attractions.map(place => [place.id, withPublishedPlaceImages(place)]));
+  return [...new Set(ids)].flatMap(id => {
+    const place = byId.get(id);
+    return place ? [place] : [];
+  });
+}
+
 export { getApiBaseUrl };

@@ -688,6 +688,40 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
   return { attractions: rows.map(normalizePlace), total: count.count, page: safePage, limit: safeLimit, ...(discoverySort ? { sort: discoverySort } : {}) };
 }
 
+// Public catalogue metadata only: no draft, user history or media payload.
+async function listDiscoveryIndex({ after = '' } = {}) {
+  if (typeof after !== 'string' || after.length > 200) throw new RangeError('Invalid discovery cursor');
+  const sql = getSql();
+  const rows = await sql`SELECT id, province, category, categories, created_at
+    FROM places WHERE id > ${after} ORDER BY id ASC LIMIT 501`;
+  const entries = rows.slice(0, 500).map(row => ({
+    id: row.id, province: row.province, category: row.category,
+    categories: normalizeJsonArray(row.categories).filter(value => typeof value === 'string'),
+    publishedAt: row.created_at,
+  }));
+  return { entries, nextCursor: rows.length > 500 ? entries[entries.length - 1].id : null };
+}
+
+async function listDiscoveryBatch(ids) {
+  if (!Array.isArray(ids) || ids.length < 1 || ids.length > 20 ||
+    ids.some(id => typeof id !== 'string' || !id.trim() || id.length > 200))
+    throw new RangeError('Invalid discovery IDs');
+  const uniqueIds = [...new Set(ids)];
+  const sql = getSql();
+  const rows = await sql`
+    SELECT p.*, COALESCE(json_agg(json_build_object(
+      'id', m.id, 'url', m.url, 'type', m.type, 'title', m.title,
+      'description', m.description, 'creatorName', m.creator_name,
+      'licenseName', m.license_name, 'licenseUrl', m.license_url,
+      'sourcePage', m.source_page
+    ) ORDER BY (m.id LIKE 'wikimedia:%') ASC, m.created_at ASC, m.id ASC)
+    FILTER (WHERE m.id IS NOT NULL), '[]'::json) AS media
+    FROM places p LEFT JOIN media m ON m.place_id = p.id
+    WHERE p.id IN ${sql(uniqueIds)} GROUP BY p.id`;
+  const byId = new Map(rows.map(row => [row.id, normalizePlace(row)]));
+  return { attractions: uniqueIds.map(id => byId.get(id)).filter(Boolean) };
+}
+
 async function getPlaceById(id) {
   const sql = getSql();
   const rows = await sql`
@@ -751,6 +785,8 @@ module.exports = {
   getPlaceById,
   listPlaces,
   listPlaceFacets,
+  listDiscoveryIndex,
+  listDiscoveryBatch,
   suggestPlaces,
   listNearbyPlaces,
   parseNearbyOptions,
