@@ -4,11 +4,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
   X,
-  SlidersHorizontal,
   Map,
   Grid3X3,
   List,
-  RotateCcw,
   MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -72,7 +70,6 @@ export default function SearchView({
         ? "list"
         : "grid";
   const [draft, setDraft] = useState(query);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [favorites, setFavorites] = useState(readFavorites);
   useEffect(() => {
     setDraft(query);
@@ -162,7 +159,7 @@ export default function SearchView({
     <div className="space-y-5 px-4 pb-4 sm:px-6 lg:px-8">
       <section
         className="space-y-4 rounded-2xl border border-border/60 bg-card p-3 shadow-sm sm:p-5"
-        aria-label={th ? "ค้นหาและกรองสถานที่" : "Search and filter places"}
+        aria-label={th ? "ค้นหาและเลือกหมวดหมู่สถานที่" : "Search and choose a place category"}
       >
         <form
           role="search"
@@ -217,10 +214,10 @@ export default function SearchView({
           aria-label={th ? "หมวดหมู่สถานที่" : "Place categories"}
         >
           <Button
-            variant={!category ? "default" : "outline"}
+            variant={showDiscovery ? "default" : "outline"}
             className="min-h-11 rounded-full"
-            aria-pressed={!category}
-            onClick={() => onFiltersChange?.({ category: "", province })}
+            aria-pressed={showDiscovery}
+            onClick={clearAll}
           >
             {th ? "ทั้งหมด" : "All"}
           </Button>
@@ -236,89 +233,13 @@ export default function SearchView({
             </Button>
           ))}
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
-          <Button
-            variant="outline"
-            className="min-h-11 gap-2"
-            aria-expanded={filtersOpen}
-            aria-controls="explore-filters"
-            onClick={() => setFiltersOpen((open) => !open)}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            {th ? "ตัวกรอง" : "Filters"}
-            {(category || province) && (
-              <span className="rounded-full bg-primary/10 px-2 text-primary">
-                {Number(!!category) + Number(!!province)}
-              </span>
-            )}
-          </Button>
-          {(query || category || province || params.get("browse") === "all" || params.has("view")) && (
-            <Button
-              variant="ghost"
-              className="min-h-11 gap-2 text-muted-foreground"
-              onClick={clearAll}
-            >
-              <RotateCcw className="h-4 w-4" />
-              {th ? "ล้างทั้งหมด" : "Reset all"}
-            </Button>
-          )}
-        </div>
-        <div
-          id="explore-filters"
-          className={`${filtersOpen ? "grid" : "hidden"} gap-3 sm:grid-cols-2`}
-        >
-          <label className="min-w-0 space-y-1 text-sm font-medium">
-            <span>{th ? "จังหวัด" : "Province"}</span>
-            <select
-              aria-label={th ? "กรองจังหวัด" : "Filter province"}
-              value={province}
-              onChange={(event) =>
-                { recordInterest({province:event.target.value}, 2); onFiltersChange?.({ category, province: event.target.value }); }
-              }
-              className="h-12 w-full min-w-0 rounded-lg border border-input bg-background px-3"
-            >
-              <option value="">{th ? "ทุกจังหวัด" : "All provinces"}</option>
-              {province && !provinces.includes(province) && (
-                <option value={province}>{province}</option>
-              )}
-              {provinces.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="min-w-0 space-y-1 text-sm font-medium">
-            <span>{th ? "ประเภทสถานที่" : "Place type"}</span>
-            <select
-              aria-label={th ? "กรองประเภทสถานที่" : "Filter place type"}
-              value={category}
-              onChange={(event) =>
-                { recordInterest({category:event.target.value}, 2); onFiltersChange?.({ category: event.target.value, province }); }
-              }
-              className="h-12 w-full min-w-0 rounded-lg border border-input bg-background px-3"
-            >
-              <option value="">{th ? "ทุกประเภท" : "All types"}</option>
-              {category && !categories.includes(category) && (
-                <option value={category}>
-                  {localizedCategory(category, currentLanguage)}
-                </option>
-              )}
-              {categories.map((name) => (
-                <option key={name} value={name}>
-                  {localizedCategory(name, currentLanguage)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
         {facets.isError && (
           <div className="text-sm text-destructive" role="alert">
             {th
-              ? "โหลดตัวเลือกตัวกรองไม่สำเร็จ"
-              : "Could not load filter options."}
+              ? "โหลดหมวดหมู่ไม่สำเร็จ"
+              : "Could not load categories."}
             <Button variant="link" onClick={() => facets.refetch()}>
-              {th ? "ลองอีกครั้ง" : "Retry filters"}
+              {th ? "ลองอีกครั้ง" : "Retry categories"}
             </Button>
           </div>
         )}
@@ -436,9 +357,6 @@ export default function SearchView({
                 ? "ลองเปลี่ยนคำค้นหา จังหวัด หรือประเภทสถานที่"
                 : "Try another name, province, or place type."}
             </p>
-            <Button variant="outline" onClick={clearAll}>
-              {th ? "ล้างทั้งหมด" : "Reset all"}
-            </Button>
             {nearbyMatches.isLoading && (
               <p role="status">
                 {th ? "กำลังค้นหาชื่อใกล้เคียง…" : "Looking for similar names…"}

@@ -106,8 +106,10 @@ test("visible search, real filters, pagination, history, map and favorite surviv
     page.locator(".leaflet-popup").getByRole("link", { name: "ดูรายละเอียด" })
   ).toBeVisible();
   await page.getByRole("button", { name: "มุมมองตาราง" }).click();
-  await page.getByRole("button", { name: "ตัวกรอง", exact: true }).click();
-  await page.getByLabel("กรองจังหวัด").selectOption("ชลบุรี");
+  // Province links from other pages retain server-side filtering.
+  await page.goto("/discover?mode=search&prov="+encodeURIComponent("ชลบุรี"));
+  await expect(page.getByRole("button", { name: "ตัวกรอง", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "ล้างทั้งหมด", exact: true })).toHaveCount(0);
   await expect(page).toHaveURL(/prov=/);
   await expect(
     page.getByRole("heading", { name: /พบ 62 สถานที่/ })
@@ -116,7 +118,7 @@ test("visible search, real filters, pagination, history, map and favorite surviv
   await search.press("Enter");
   await expect(page).toHaveURL(/q=/);
   await expect(search).toHaveValue("จุดหมาย 1");
-  await page.getByRole("button", { name: "ล้างทั้งหมด" }).click();
+  await page.getByRole("button", { name: "ทั้งหมด", exact: true }).click();
   await expect(search).toHaveValue("");
   await expect(page.getByTestId("discovery-highlights")).toBeVisible();
   await page.getByRole("button", { name: "ดูสถานที่ทั้งหมด", exact: true }).click();

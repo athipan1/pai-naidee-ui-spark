@@ -104,21 +104,21 @@ test('search redirects and opens a Railway-backed place', async ({ page }) => {
   await expect(page.getByTitle('Admin Panel')).toHaveCount(0);
 });
 
-test('mobile search keeps filters and view controls accessible in a compact disclosure', async ({ page }) => {
+test('mobile search uses category chips and All instead of a filter toolbar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/discover?mode=search&q=%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88');
-  const filters = page.getByRole('button', { name: 'Filters' });
-  await expect(filters).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('button', { name: 'Filters', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Reset all', exact: true })).toHaveCount(0);
   await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
-  await expect(page.getByLabel('Filter province')).toBeHidden();
-  await filters.click();
-  await expect(filters).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByLabel('Filter province')).toBeVisible();
-  await expect(page.getByLabel('Filter place type')).toBeVisible();
+  await expect(page.getByLabel('Filter province')).toHaveCount(0);
+  await expect(page.getByLabel('Filter place type')).toHaveCount(0);
   await page.getByRole('button', { name: 'List view' }).click();
-  await filters.click();
-  await expect(filters).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'All', exact: true }).click();
+  await expect(page.getByTestId('discovery-highlights')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'All', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('searchbox')).toHaveValue('');
+  expect(new URL(page.url()).searchParams.has('view')).toBe(false);
 });
 
 test('mobile search shows one Wat Phu Manorom result for alternate Thai place names', async ({ page }) => {
@@ -190,10 +190,9 @@ test('mobile search filters Railway results by province and category and keeps s
       (!category || item.category === category));
     return route.fulfill({ json: { attractions: matches, total: matches.length, page: 1, limit: 50 } });
   });
-  await page.goto('/discover?mode=search&q=วัด');
-  await page.getByRole('button', { name: 'Filters' }).click();
-  await page.getByRole('combobox', { name: 'Filter province' }).selectOption('มุกดาหาร');
-  await page.getByRole('combobox', { name: 'Filter place type' }).selectOption('Culture');
+  // Existing shared province links still work without the filter disclosure.
+  await page.goto('/discover?mode=search&q=วัด&prov='+encodeURIComponent('มุกดาหาร'));
+  await page.getByRole('button', { name: 'Culture', exact: true }).click();
   await expect(page).toHaveURL(/prov=%E0%B8%A1%E0%B8%B8%E0%B8%81%E0%B8%94%E0%B8%B2%E0%B8%AB%E0%B8%B2%E0%B8%A3/);
   await expect(page).toHaveURL(/cat=Culture/);
   await expect(page.getByTestId('attraction-card')).toHaveCount(1);
@@ -529,7 +528,7 @@ test('unified discovery automatically appends the next batch, preserves cards an
   await expect(page.getByRole('heading', {name:'Filtered place',exact:true})).toBeVisible();
   const preference = await page.evaluate(()=>JSON.parse(localStorage.getItem('painaidee.discovery.preferences.v1')||'{}'));
   expect(preference.scores['category:Nature']).toBeGreaterThan(0);
-  await page.getByRole('button', {name:'Reset all'}).click();
+  await page.getByRole('button', {name:'All',exact:true}).click();
   await expect(highlights).toBeVisible();
   await page.getByRole('checkbox', {name:'Personalize my recommendations'}).uncheck();
   expect(await page.evaluate(()=>localStorage.getItem('painaidee.discovery.preferences.v1'))).toBeNull();
