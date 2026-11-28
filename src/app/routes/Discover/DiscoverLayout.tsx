@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { ArrowLeft, Compass, Map, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, Compass, Map, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +7,6 @@ import {
   useDiscoveryState,
   type DiscoveryMode,
 } from "./hooks/useDiscoveryState";
-import FeedView from "./FeedView";
 import SearchView from "./SearchView";
 const MapView = lazy(() => import("./MapView"));
 import BottomNavigation from "@/components/common/BottomNavigation";
@@ -25,7 +24,7 @@ const DiscoverLayout = ({
   const navigate = useNavigate();
   const { state, setMode, setQuery, setSearchFilters } = useDiscoveryState();
   const th = currentLanguage === "th";
-  const browsing = state.mode === "search" || state.mode === "category";
+  const browsing = state.mode !== "map";
 
   return (
     <div className="discovery-theme min-h-screen bg-muted/20 pb-[calc(6rem+env(safe-area-inset-bottom))]">
@@ -60,29 +59,16 @@ const DiscoverLayout = ({
       </header>
       <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 lg:px-8">
         <Tabs
-          value={
-            state.mode === "category"
-              ? "search"
-              : state.mode === "trending"
-                ? "feed"
-                : state.mode
-          }
+          value={browsing ? "search" : "map"}
           onValueChange={(value) => setMode(value as DiscoveryMode)}
         >
-          <TabsList className="grid h-auto w-full grid-cols-3 rounded-xl bg-muted p-1 sm:w-fit">
+          <TabsList className="grid h-auto w-full grid-cols-2 rounded-xl bg-muted p-1 sm:w-fit">
             <TabsTrigger
               value="search"
               className="min-h-11 gap-2 rounded-lg px-3 sm:px-6"
             >
               <Search className="h-4 w-4" />
               {th ? "ค้นหา" : "Search"}
-            </TabsTrigger>
-            <TabsTrigger
-              value="feed"
-              className="min-h-11 gap-2 rounded-lg px-3 sm:px-6"
-            >
-              <Sparkles className="h-4 w-4" />
-              {th ? "ฟีด" : "Feed"}
             </TabsTrigger>
             <TabsTrigger
               value="map"
@@ -122,7 +108,7 @@ const DiscoverLayout = ({
             province={state.province}
             onFiltersChange={setSearchFilters}
           />
-        ) : state.mode === "map" ? (
+        ) : (
           <Suspense
             fallback={
               <p role="status" className="p-6">
@@ -140,13 +126,6 @@ const DiscoverLayout = ({
               }}
             />
           </Suspense>
-        ) : (
-          <FeedView
-            currentLanguage={currentLanguage}
-            onBrowseAll={() =>
-              setSearchFilters({ category: "", province: state.province })
-            }
-          />
         )}
       </main>
       <BottomNavigation currentLanguage={currentLanguage} />

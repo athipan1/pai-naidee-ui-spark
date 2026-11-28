@@ -616,7 +616,7 @@ async function listNearbyPlaces(options) {
   };
 }
 
-async function listPlaces({ page = 1, limit = 10, category = '', province = '', search = '', fresh = false } = {}) {
+async function listPlaces({ page = 1, limit = 10, category = '', province = '', search = '', fresh = false, sort = '' } = {}) {
   const sql = getSql();
   const requestedPage = Math.trunc(Number(page));
   const safePage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, Math.floor(Number.MAX_SAFE_INTEGER / 50)) : 1;
@@ -658,10 +658,17 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
     return { attractions: ids.map(id => byId.get(id)).filter(Boolean), total: matches.length, page: safePage, limit: safeLimit };
   }
 
-  const categoryFilter = categoryValue ? sql`
+  // Only unfiltered public discovery uses these additive sort modes.
+  const discoverySort = !categoryValue && (sort === 'latest' || sort === 'rotation') ? sort : '';
+  const categoryFilter = discoverySort === 'rotation' ? sql`WHERE p.id NOT IN (
+    SELECT id FROM places ORDER BY created_at DESC, id ASC LIMIT 10
+  )` : categoryValue ? sql`
     WHERE LOWER(p.category) = LOWER(${categoryValue}) OR EXISTS (
       SELECT 1 FROM jsonb_array_elements_text(p.categories) AS value WHERE LOWER(value) = LOWER(${categoryValue})
     )` : sql``;
+  const sortOrder = discoverySort === 'latest' ? sql`p.created_at DESC, p.id ASC`
+    : discoverySort === 'rotation' ? sql`ROW_NUMBER() OVER (PARTITION BY p.province ORDER BY p.created_at DESC, p.id ASC), p.province ASC, p.id ASC`
+      : sql`p.rating DESC, p.name ASC, p.id ASC`;
   const rows = await sql`
     SELECT p.*, COALESCE(json_agg(json_build_object(
       'id', m.id, 'url', m.url, 'type', m.type, 'title', m.title,
@@ -673,12 +680,12 @@ async function listPlaces({ page = 1, limit = 10, category = '', province = '', 
     FROM places p LEFT JOIN media m ON m.place_id = p.id
     ${categoryFilter}
     GROUP BY p.id
-    ORDER BY p.rating DESC, p.name ASC, p.id ASC
+    ORDER BY ${sortOrder}
     LIMIT ${safeLimit}
     OFFSET ${offset}
   `;
   const [count] = await sql`SELECT COUNT(*)::int AS count FROM places p ${categoryFilter}`;
-  return { attractions: rows.map(normalizePlace), total: count.count, page: safePage, limit: safeLimit };
+  return { attractions: rows.map(normalizePlace), total: count.count, page: safePage, limit: safeLimit, ...(discoverySort ? { sort: discoverySort } : {}) };
 }
 
 async function getPlaceById(id) {

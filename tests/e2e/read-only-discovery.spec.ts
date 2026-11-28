@@ -30,7 +30,7 @@ test.beforeEach(async ({ page }, testInfo) => {
       await route.fulfill({ json: place });
     } else {
       const match = !url.searchParams.get('search') || 'เชียงใหม่'.includes(url.searchParams.get('search')!);
-      await route.fulfill({ json: { attractions: match ? [place] : [], total: match ? 1 : 0, page: 1, limit: 100 } });
+      await route.fulfill({ json: { attractions: match ? [place] : [], total: match ? 1 : 0, page: 1, limit: 100, sort: url.searchParams.get('sort') || undefined } });
     }
   });
 });
@@ -60,12 +60,13 @@ test('language choice translates the Railway feed and details and persists acros
   await expect(page.getByRole('button', { name: 'Switch to ไทย' })).toBeVisible();
 });
 
-test('discover feed hides the duplicate home search hero but keeps detailed search available', async ({ page }) => {
+test('legacy feed opens integrated discovery and keeps detailed search available', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/discover?mode=feed');
   await expect(page.getByRole('heading', { name: 'Discover' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: /Where do you want to go/ })).toHaveCount(0);
-  await page.getByRole('tab', { name: 'Search' }).click();
+  await expect(page.getByRole('tab', { name: 'Feed' })).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: 'Search' })).toHaveAttribute('aria-selected', 'true');
   await expect(page).toHaveURL(/mode=search/);
   await expect(page.getByText('Doi Inthanon').first()).toBeVisible();
 });
@@ -494,3 +495,34 @@ test('production page never loads the missing external registerSW.js script', as
   expect(missingRegistrationRequests).toEqual([]);
 });
 
+
+test('integrated discovery shows latest and a rotating set only until a search or filter is applied', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.unroute('**/api/places**');
+  const item = (id: string) => ({ ...place, id, name: id, nameLocal: id });
+  await page.route('**/api/places**', route => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/facets')) return route.fulfill({json: {provinces: ['เชียงใหม่'], categories: ['Nature']}});
+    const sort = url.searchParams.get('sort');
+    const pageNumber = Number(url.searchParams.get('page') || 1);
+    const attractions = sort === 'latest' ? [item('New place')] : sort === 'rotation' ?
+      [item(pageNumber === 1 ? 'Older first' : 'Older second')] : [item('Filtered place')];
+    return route.fulfill({json: {attractions, total: sort === 'rotation' ? 40 : 1, page: pageNumber, limit: 20, sort}});
+  });
+  await page.goto('/discover');
+  const highlights = page.getByTestId('discovery-highlights');
+  await expect(highlights.getByRole('heading', {name: 'New place', exact: true})).toBeVisible();
+  await expect(highlights.getByRole('heading', {name: 'Older first', exact: true})).toBeVisible();
+  await page.getByRole('button', {name: 'Show another set'}).click();
+  await expect(highlights.getByRole('heading', {name: 'Older second', exact: true})).toBeVisible();
+  await page.getByRole('button', {name: 'Nature', exact: true}).click();
+  await expect(highlights).toHaveCount(0);
+  await expect(page.getByRole('heading', {name: 'Filtered place', exact: true})).toBeVisible();
+  await page.getByRole('button', {name: 'Reset all'}).click();
+  await expect(highlights).toBeVisible();
+  await page.getByRole('button', {name: 'Browse all places'}).click();
+  await expect(highlights).toHaveCount(0);
+  await expect(page.getByRole('heading', {name: 'Filtered place', exact: true})).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});

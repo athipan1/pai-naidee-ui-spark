@@ -136,6 +136,30 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
     return admin('/media', { method: 'POST', body, status });
   };
 
+  await t.test('discovery latest and rotation are ordered by first publication, exclude drafts and do not overlap', async () => {
+    try {
+      for (let index = 0; index < 13; index++) {
+        await sql`INSERT INTO places (id, name, province, category, lat, lng, created_at, updated_at)
+          VALUES (${'discovery-fixture-' + index}, ${'Discovery fixture ' + index}, ${index % 2 ? 'ชลบุรี' : 'ระยอง'}, 'Culture', 13.2, 100.9,
+            ${new Date(Date.UTC(2090, 0, index + 1))}, NOW())`;
+      }
+      const latest = await (await publicApi('/api/places?sort=latest&page=1&limit=10')).json();
+      assert.equal(latest.sort, 'latest');
+      assert.deepEqual(latest.attractions.map(p => p.id), Array.from({length: 10}, (_, i) => 'discovery-fixture-' + (12-i)));
+      await sql`UPDATE places SET updated_at = '2099-01-01' WHERE id = 'discovery-fixture-0'`;
+      const afterEdit = await listPlaces({sort: 'latest', limit: 10});
+      assert.deepEqual(afterEdit.attractions.map(p => p.id), latest.attractions.map(p => p.id));
+      const rotation = await (await publicApi('/api/places?sort=rotation&limit=20')).json();
+      assert.equal(rotation.sort, 'rotation');
+      assert.equal(rotation.total, latest.total - 10);
+      assert.ok(rotation.attractions.some(p => p.id === 'discovery-fixture-0'));
+      assert.ok(rotation.attractions.every(p => !latest.attractions.some(n => n.id === p.id)));
+      assert.equal(new Set(rotation.attractions.map(p => p.id)).size, rotation.attractions.length);
+    } finally {
+      await sql`DELETE FROM places WHERE id LIKE 'discovery-fixture-%'`;
+    }
+  });
+
   await t.test('auth protects every admin route, rejects invalid/expired/disabled sessions and revokes logout', async () => {
     const guarded = [
       ['GET', '/me'], ['POST', '/logout'], ['GET', '/places'], ['POST', '/places'], ['PUT', '/places/x'],
