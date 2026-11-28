@@ -35,8 +35,8 @@ const DiscoverLayout = ({
               variant="ghost"
               size="icon"
               className="h-11 w-11 shrink-0"
-              aria-label={th ? "ย้อนกลับ" : "Go back"}
-              onClick={() => navigate(-1)}
+              aria-label={th ? "กลับหน้าหลัก" : "Back to home"}
+              onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
