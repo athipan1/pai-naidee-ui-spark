@@ -43,7 +43,7 @@ function DiscoveryFeed({ entries, currentLanguage, favorites, onFavoriteToggle }
   const freshIds = new Set(plan.filter(x=>isNewPlace(x,now)).map(x=>x.id));
   const { fetchNextPage, hasNextPage, isFetching, isFetchNextPageError, isError } = batch;
   useEffect(() => {
-    if (batch.data) remember(batch.data.pages.flat().map(x=>x.id));
+    if (batch.data) remember((batch.data.pages[batch.data.pages.length-1] ?? []).map(x=>x.id));
   }, [batch.data]);
   useEffect(() => {
     const target=sentinel.current;

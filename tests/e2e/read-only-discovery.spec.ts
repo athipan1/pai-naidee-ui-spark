@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { mockDiscovery } from './fixtures/mock-discovery';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 
@@ -25,6 +26,7 @@ test.beforeEach(async ({ page }, testInfo) => {
     await page.addInitScript(() => window.localStorage.setItem('painaidee.language', 'en'));
   }
   await page.route('**/api/places**', async route => {
+    if (await mockDiscovery(route, [place])) return;
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/railway-test-1')) {
       await route.fulfill({ json: place });
@@ -37,7 +39,7 @@ test.beforeEach(async ({ page }, testInfo) => {
 
 test('language choice translates the Railway feed and details and persists across navigation and reload', async ({ page }) => {
   await page.goto('/discover?mode=feed');
-  await expect(page.getByText('สถานที่ท่องเที่ยวในจังหวัดเชียงใหม่').first()).toBeVisible();
+  await expect(page.getByRole('heading', {name: 'ดอยอินทนนท์', exact: true})).toBeVisible();
   await expect(page.getByText('เชียงใหม่').first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Switch to English' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'th');
@@ -244,34 +246,21 @@ test('detail page recommends only real nearby places and never itself', async ({
   await expect(section.getByRole('link', { name: /Doi Inthanon/ })).toHaveCount(0);
 });
 
-test('integrated discovery shows each destination only once across latest and rotating places', async ({ page }) => {
+test('unified discovery shows every destination once even with duplicated API entries', async ({ page }) => {
   const destinations = Array.from({ length: 12 }, (_, index) => ({
-    ...place,
-    id: `destination-${index}`,
+    ...place, id: `destination-${index}`,
     name: index === 1 ? 'Amphawa Floating Market' : `Destination ${index}`,
-    nameLocal: index === 1 ? 'ตลาดน้ำอัมพวา' : `Destination ${index}`,
+    nameLocal: `Destination ${index}`,
   }));
   await page.unroute('**/api/places**');
-  const requestedSorts = new Set<string>();
-  await page.route('**/api/places**', route => {
-    const url = new URL(route.request().url());
-    if (url.pathname.endsWith('/facets')) return route.fulfill({ json: { provinces: ['เชียงใหม่'], categories: ['Nature'] } });
-    const sort = url.searchParams.get('sort') || '';
-    requestedSorts.add(sort);
-    // Include duplicate IDs within each response and across both sections to
-    // verify defensive client deduplication even during a catalogue refresh.
-    const attractions = sort === 'latest'
-      ? [...destinations.slice(0, 10), destinations[1]]
-      : [...destinations.slice(10), destinations[1], destinations[10]];
-    return route.fulfill({ json: { attractions, total: sort === 'latest' ? 12 : 2, page: 1, limit: sort === 'latest' ? 10 : 20, sort } });
+  await page.route('**/api/places**', async route => {
+    if (await mockDiscovery(route, [...destinations, destinations[1]])) return;
+    return route.fulfill({json:{provinces:['เชียงใหม่'], categories:['Nature']}});
   });
-
   await page.goto('/discover?mode=feed');
-  await expect(page.getByRole('heading', { name: 'Recently added places', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Discover more places', exact: true })).toBeVisible();
-  await expect(page.getByTestId('latest-places').getByTestId('attraction-card')).toHaveCount(10);
-  await expect(page.getByTestId('rotating-places').getByTestId('attraction-card')).toHaveCount(2);
-  expect([...requestedSorts].sort()).toEqual(['latest', 'rotation']);
+  await expect(page.getByRole('heading', { name: 'Recently added places', exact: true })).toHaveCount(0);
+  await expect(page.getByTestId('discovery-grid').getByTestId('attraction-card')).toHaveCount(12);
   await expect(page.locator('img[alt="Amphawa Floating Market"]')).toHaveCount(1);
   for (const destination of destinations) {
     await expect(page.getByRole('heading', { name: destination.name, exact: true })).toHaveCount(1);
@@ -508,33 +497,44 @@ test('production page never loads the missing external registerSW.js script', as
 });
 
 
-test('integrated discovery shows latest and a rotating set only until a search or filter is applied', async ({ page }) => {
+test('unified discovery automatically appends the next batch, preserves cards and hides on filters', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.unroute('**/api/places**');
-  const item = (id: string) => ({ ...place, id, name: id, nameLocal: id });
-  await page.route('**/api/places**', route => {
-    const url = new URL(route.request().url());
-    if (url.pathname.endsWith('/facets')) return route.fulfill({json: {provinces: ['เชียงใหม่'], categories: ['Nature']}});
-    const sort = url.searchParams.get('sort');
-    const pageNumber = Number(url.searchParams.get('page') || 1);
-    const attractions = sort === 'latest' ? [item('New place')] : sort === 'rotation' ?
-      [item(pageNumber === 1 ? 'Older first' : 'Older second')] : [item('Filtered place')];
-    return route.fulfill({json: {attractions, total: sort === 'rotation' ? 40 : 1, page: pageNumber, limit: 20, sort}});
+  const entries = Array.from({length: 41}, (_,i)=>({...place,id:'item-'+i,name:'Place '+i,nameLocal:'Place '+i,
+    publishedAt:i===0?new Date().toISOString():'2020-01-01T00:00:00Z'}));
+  const requested: string[][] = [];
+  await page.route('**/api/places**', async route => {
+    const path = new URL(route.request().url()).pathname;
+    if(path.endsWith('/discovery-batch')) requested.push(route.request().postDataJSON().ids);
+    if(await mockDiscovery(route, entries)) return;
+    if(path.endsWith('/facets'))return route.fulfill({json:{provinces:['เชียงใหม่'],categories:['Nature']}});
+    return route.fulfill({json:{attractions:[{...place,id:'filtered',name:'Filtered place'}],total:1,page:1,limit:20}});
   });
   await page.goto('/discover');
   const highlights = page.getByTestId('discovery-highlights');
-  await expect(highlights.getByRole('heading', {name: 'New place', exact: true})).toBeVisible();
-  await expect(highlights.getByRole('heading', {name: 'Older first', exact: true})).toBeVisible();
-  await page.getByRole('button', {name: 'Show another set'}).click();
-  await expect(highlights.getByRole('heading', {name: 'Older second', exact: true})).toBeVisible();
-  await page.getByRole('button', {name: 'Nature', exact: true}).click();
+  const cards = highlights.getByTestId('attraction-card');
+  await expect(cards).toHaveCount(20);
+  await expect(highlights.getByText('New', {exact:true})).toHaveCount(1);
+  await expect(page.getByRole('button', {name:'Show another set'})).toHaveCount(0);
+  const initial = await cards.locator('h3').allTextContents();
+  await page.getByTestId('discovery-sentinel').scrollIntoViewIfNeeded();
+  await expect(cards).toHaveCount(40);
+  expect((await cards.locator('h3').allTextContents()).slice(0,20)).toEqual(initial);
+  expect(new Set(requested.flat()).size).toBe(40);
+  expect(requested.every(ids=>ids.length===20)).toBe(true);
+  await page.getByRole('checkbox', {name:'Personalize my recommendations'}).check();
+  await page.getByRole('button', {name:'Nature',exact:true}).click();
   await expect(highlights).toHaveCount(0);
-  await expect(page.getByRole('heading', {name: 'Filtered place', exact: true})).toBeVisible();
-  await page.getByRole('button', {name: 'Reset all'}).click();
+  await expect(page.getByRole('heading', {name:'Filtered place',exact:true})).toBeVisible();
+  const preference = await page.evaluate(()=>JSON.parse(localStorage.getItem('painaidee.discovery.preferences.v1')||'{}'));
+  expect(preference.scores['category:Nature']).toBeGreaterThan(0);
+  await page.getByRole('button', {name:'Reset all'}).click();
   await expect(highlights).toBeVisible();
-  await page.getByRole('button', {name: 'Browse all places'}).click();
+  await page.getByRole('checkbox', {name:'Personalize my recommendations'}).uncheck();
+  expect(await page.evaluate(()=>localStorage.getItem('painaidee.discovery.preferences.v1'))).toBeNull();
+  await page.getByRole('button', {name:'Browse all places'}).click();
   await expect(highlights).toHaveCount(0);
-  await expect(page.getByRole('heading', {name: 'Filtered place', exact: true})).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await expect(page.getByRole('heading', {name:'Filtered place',exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });

@@ -143,10 +143,20 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
           VALUES (${'discovery-fixture-' + index}, ${'Discovery fixture ' + index}, ${index % 2 ? 'ชลบุรี' : 'ระยอง'}, 'Culture', 13.2, 100.9,
             ${new Date(Date.UTC(2090, 0, index + 1))}, NOW())`;
       }
+      const index = await (await publicApi('/api/places/discovery-index')).json();
+      assert.ok(index.entries.some(p => p.id === 'discovery-fixture-0'));
+      assert.ok(index.entries.every(p => Object.keys(p).sort().join(',') === 'categories,category,id,province,publishedAt'));
+      const batch = await (await request('/api/places/discovery-batch', {origin:publicBase,auth:false,method:'POST',
+        body:{ids:['discovery-fixture-2','missing-draft','discovery-fixture-0','discovery-fixture-2']}})).json();
+      assert.deepEqual(batch.attractions.map(p=>p.id),['discovery-fixture-2','discovery-fixture-0']);
+      await request('/api/places/discovery-batch',{origin:publicBase,auth:false,method:'POST',status:400,body:{ids:Array(21).fill('fixture-other')}});
+      await request('/api/places/discovery-batch',{origin:publicBase,auth:false,method:'POST',status:400,body:{ids:[{bad:'id'}]}});
       const latest = await (await publicApi('/api/places?sort=latest&page=1&limit=10')).json();
       assert.equal(latest.sort, 'latest');
       assert.deepEqual(latest.attractions.map(p => p.id), Array.from({length: 10}, (_, i) => 'discovery-fixture-' + (12-i)));
       await sql`UPDATE places SET updated_at = '2099-01-01' WHERE id = 'discovery-fixture-0'`;
+      const indexAfter = await (await publicApi('/api/places/discovery-index')).json();
+      assert.equal(indexAfter.entries.find(p=>p.id==='discovery-fixture-0').publishedAt,index.entries.find(p=>p.id==='discovery-fixture-0').publishedAt);
       const afterEdit = await listPlaces({sort: 'latest', limit: 10});
       assert.deepEqual(afterEdit.attractions.map(p => p.id), latest.attractions.map(p => p.id));
       const rotation = await (await publicApi('/api/places?sort=rotation&limit=20')).json();

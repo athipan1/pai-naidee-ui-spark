@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockDiscovery } from "./fixtures/mock-discovery";
 
 const places = Array.from({ length: 125 }, (_, index) => ({
   id: `explore-${index}`,
@@ -23,6 +24,7 @@ test.beforeEach(async ({ page }) => {
     route.fulfill({ body: "", contentType: "text/css" })
   );
   await page.route("**/api/places**", async (route) => {
+    if (await mockDiscovery(route, places)) return;
     const url = new URL(route.request().url());
     if (url.pathname.endsWith("/facets"))
       return route.fulfill({
@@ -79,7 +81,7 @@ test("visible search, real filters, pagination, history, map and favorite surviv
   await page.goto("/discover");
   const search = page.getByRole("searchbox", { name: "ค้นหาสถานที่" });
   await expect(search).toBeVisible();
-  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
+  await expect(page.getByTestId("discovery-grid").getByTestId("attraction-card")).toHaveCount(20);
   await page.getByRole("button", { name: "ดูสถานที่ทั้งหมด", exact: true }).click();
   await expect(page.getByTestId("attraction-card")).toHaveCount(20);
   await page.getByRole("button", { name: "เพิ่มในรายการโปรด" }).first().click();
@@ -144,8 +146,7 @@ test("zero results, clearing, language toggle, loading and retry remain usable",
   ).toBeVisible();
   await expect(page.getByRole("searchbox")).toBeVisible();
   await page.getByRole("button", { name: "ล้างคำค้นหา" }).click();
-  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
-  await expect(page.getByTestId("rotating-places").getByTestId("attraction-card")).toHaveCount(20);
+  await expect(page.getByTestId("discovery-grid").getByTestId("attraction-card")).toHaveCount(20);
   await page.getByRole("button", { name: "Switch to English" }).click();
   await expect(
     page.getByRole("searchbox", { name: "Search places" })
@@ -173,8 +174,7 @@ test("query responses cannot overwrite newer query and typing does not fetch eac
   page,
 }) => {
   await page.goto("/discover?mode=search");
-  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
-  await expect(page.getByTestId("rotating-places").getByTestId("attraction-card")).toHaveCount(20);
+  await expect(page.getByTestId("discovery-grid").getByTestId("attraction-card")).toHaveCount(20);
   const requests: string[] = [];
   await page.route("**/api/places?**", async (route) => {
     const query =
@@ -211,8 +211,7 @@ test("viewport matrix has no overflow and captures desktop and mobile evidence",
   page,
 }, testInfo) => {
   await page.goto("/discover");
-  await expect(page.getByTestId("latest-places").getByTestId("attraction-card")).toHaveCount(10);
-  await expect(page.getByTestId("rotating-places").getByTestId("attraction-card")).toHaveCount(20);
+  await expect(page.getByTestId("discovery-grid").getByTestId("attraction-card")).toHaveCount(20);
   const sizes = [
     [320, 568],
     [360, 800],

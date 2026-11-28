@@ -70,18 +70,19 @@ export function rankDiscovery(entries: DiscoveryEntry[], profile: Preferences, r
   const result: DiscoveryEntry[] = [];
   const ordered = (compare: (a: typeof pool[number], b: typeof pool[number]) => number) =>
     [...pool].sort((a,b) => a.seen-b.seen || compare(a,b) || a.random-b.random || a.entry.id.localeCompare(b.entry.id));
-  const latest = ordered((a,b) => Number(b.fresh)-Number(a.fresh) || (Date.parse(b.entry.publishedAt)||0)-(Date.parse(a.entry.publishedAt)||0));
-  const relevant = ordered((a,b) => b.score-a.score);
+  const latest = ordered((a,b) => (Date.parse(b.entry.publishedAt)||0)-(Date.parse(a.entry.publishedAt)||0)).filter(x=>x.fresh);
+  const relevant = ordered((a,b) => b.score-a.score).filter(x=>x.score>0);
   const varied = ordered(() => 0);
   let latestCursor = 0, relevantCursor = 0, variedCursor = 0;
   const take = (list: typeof pool, cursor: number, predicate: (x: typeof pool[number]) => boolean, provinces: Set<string>) => {
     let selected = -1;
     // Prefer a different province within the current unseen/seen tier.
+    let considered=0;
     for (let i=cursor;i<list.length;i++) {
       const x=list[i];
       if (!remaining.has(x.entry.id) || !predicate(x)) continue;
       if (selected < 0) selected=i;
-      if (x.seen !== list[selected].seen) break;
+      if (x.seen !== list[selected].seen || ++considered > 32) break;
       if (!provinces.has(x.entry.province)) { selected=i; break; }
     }
     if(selected<0)return cursor;
