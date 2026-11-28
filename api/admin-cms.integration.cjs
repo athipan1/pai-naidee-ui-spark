@@ -146,11 +146,15 @@ test('Admin CMS HTTP and PostgreSQL integration', async t => {
       const index = await (await publicApi('/api/places/discovery-index')).json();
       assert.ok(index.entries.some(p => p.id === 'discovery-fixture-0'));
       assert.ok(index.entries.every(p => Object.keys(p).sort().join(',') === 'categories,category,id,province,publishedAt'));
-      const batch = await (await request('/api/places/discovery-batch', {origin:publicBase,auth:false,method:'POST',
-        body:{ids:['discovery-fixture-2','missing-draft','discovery-fixture-0','discovery-fixture-2']}})).json();
+      const batchPath = ids => '/api/places/discovery-batch?' + new URLSearchParams(ids.map(id=>['id',id]));
+      const batch = await (await publicApi(batchPath(['discovery-fixture-2','missing-draft','discovery-fixture-0','discovery-fixture-2']))).json();
       assert.deepEqual(batch.attractions.map(p=>p.id),['discovery-fixture-2','discovery-fixture-0']);
-      await request('/api/places/discovery-batch',{origin:publicBase,auth:false,method:'POST',status:400,body:{ids:Array(21).fill('fixture-other')}});
-      await request('/api/places/discovery-batch',{origin:publicBase,auth:false,method:'POST',status:400,body:{ids:[{bad:'id'}]}});
+      const single = await (await publicApi(batchPath(['discovery-fixture-0']))).json();
+      assert.deepEqual(single.attractions.map(p=>p.id),['discovery-fixture-0']);
+      await publicApi(batchPath(Array(21).fill('fixture-other')),400);
+      await publicApi('/api/places/discovery-batch?id[bad]=x',400);
+      await publicApi('/api/places/discovery-batch',400);
+      await request('/api/places/discovery-batch',{origin:publicBase,auth:false,method:'POST',status:404,body:{ids:['fixture-other']}});
       const latest = await (await publicApi('/api/places?sort=latest&page=1&limit=10')).json();
       assert.equal(latest.sort, 'latest');
       assert.deepEqual(latest.attractions.map(p => p.id), Array.from({length: 10}, (_, i) => 'discovery-fixture-' + (12-i)));

@@ -505,7 +505,7 @@ test('unified discovery automatically appends the next batch, preserves cards an
   const requested: string[][] = [];
   await page.route('**/api/places**', async route => {
     const path = new URL(route.request().url()).pathname;
-    if(path.endsWith('/discovery-batch')) requested.push(route.request().postDataJSON().ids);
+    if(path.endsWith('/discovery-batch')) requested.push(new URL(route.request().url()).searchParams.getAll('id'));
     if(await mockDiscovery(route, entries)) return;
     if(path.endsWith('/facets'))return route.fulfill({json:{provinces:['เชียงใหม่'],categories:['Nature']}});
     return route.fulfill({json:{attractions:[{...place,id:'filtered',name:'Filtered place'}],total:1,page:1,limit:20}});

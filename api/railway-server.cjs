@@ -100,8 +100,10 @@ app.get('/api/places/discovery-index', async (req, res) => {
   }
 });
 
-app.post('/api/places/discovery-batch', async (req, res) => {
-  try { res.json(await listDiscoveryBatch(req.body?.ids)); }
+app.get('/api/places/discovery-batch', async (req, res) => {
+  // Repeated query parameters carry public place IDs only, never interests or user identifiers.
+  const ids = typeof req.query.id === 'string' ? [req.query.id] : req.query.id;
+  try { res.json(await listDiscoveryBatch(ids)); }
   catch (error) {
     if (error instanceof RangeError) return res.status(400).json({ error: 'Invalid discovery IDs.' });
     res.status(503).json({ error: 'Discovery places unavailable.' });

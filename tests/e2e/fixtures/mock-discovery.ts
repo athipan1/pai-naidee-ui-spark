@@ -11,7 +11,7 @@ export async function mockDiscovery<T extends Entry>(route: Route, entries: T[])
     return true;
   }
   if (path.endsWith('/discovery-batch')) {
-    const ids = route.request().postDataJSON().ids as string[];
+    const ids = new URL(route.request().url()).searchParams.getAll('id');
     await route.fulfill({json:{attractions:ids.flatMap(id=>entries.filter(p=>p.id===id))}});
     return true;
   }

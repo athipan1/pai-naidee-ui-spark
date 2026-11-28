@@ -14,7 +14,7 @@ function getApiBaseUrl(): string {
   return (configured || DEFAULT_API_BASE_URL).replace(/\/+$/, "").replace(/\/api$/i, "");
 }
 
-async function requestJson<T>(path: string, signal?: AbortSignal, body?: unknown): Promise<T> {
+async function requestJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   signal?.throwIfAborted();
   if (Date.now() < retryAt) throw new RateLimitError(retryAt);
   const controller = new AbortController();
@@ -26,8 +26,7 @@ async function requestJson<T>(path: string, signal?: AbortSignal, body?: unknown
   try {
     const response = await fetch(`${getApiBaseUrl()}${path}`, {
       cache: 'no-store',
-      headers: { Accept: "application/json", ...(body !== undefined ? { "Content-Type": "application/json" } : {}) },
-      ...(body !== undefined ? { method: "POST", body: JSON.stringify(body) } : {}),
+      headers: { Accept: "application/json" },
       signal: controller.signal,
     });
 
@@ -180,7 +179,9 @@ export async function getDiscoveryIndex(signal?: AbortSignal): Promise<Discovery
 }
 
 export async function getDiscoveryBatch(ids: string[], signal?: AbortSignal): Promise<SearchResult[]> {
-  const result = await requestJson<{ attractions: SearchResult[] }>("/api/places/discovery-batch", signal, { ids });
+  const params = new URLSearchParams();
+  for (const id of ids) params.append("id", id);
+  const result = await requestJson<{ attractions: SearchResult[] }>(`/api/places/discovery-batch?${params}`, signal);
   const byId = new Map(result.attractions.map(place => [place.id, withPublishedPlaceImages(place)]));
   return [...new Set(ids)].flatMap(id => {
     const place = byId.get(id);
